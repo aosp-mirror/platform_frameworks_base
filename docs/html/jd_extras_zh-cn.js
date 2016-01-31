@@ -228,7 +228,7 @@ METADATA['zh-cn'].extras = METADATA['zh-cn'].extras.concat([
     "tags": [],
     "url": "https://developers.google.com/edu/guidelines?hl=zh-Hans",
     "timestamp": null,
-    "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
+    "image": "https://developer.android.com/distribute/images/edu-guidelines.jpg",
     "title": "Education Guidelines",
     "summary": "These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.",
     "keywords": [],
@@ -283,9 +283,9 @@ METADATA['zh-cn'].collections = {
   "overview/carousel/zhcn": {
     "title": "",
     "resources": [
-      "http://www.youtube.com/watch?v=vGV7FHGzpFU",
-      "http://www.youtube.com/watch?v=aqc3ZOTzpdk",
-      "http://www.youtube.com/watch?v=jaNrJ8uyLSc"
+      "https://www.youtube.com/watch?v=vGV7FHGzpFU",
+      "https://www.youtube.com/watch?v=aqc3ZOTzpdk",
+      "https://www.youtube.com/watch?v=jaNrJ8uyLSc"
     ]
   },
 };

@@ -25,7 +25,7 @@ METADATA['ko'].extras = METADATA['ko'].extras.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/7X9Ue0Nfdh4/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/7X9Ue0Nfdh4/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -37,7 +37,7 @@ METADATA['ko'].extras = METADATA['ko'].extras.concat([
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://img.youtube.com/vi/83FpwuschCQ/hqdefault.jpg",
+    "image": "https://img.youtube.com/vi/83FpwuschCQ/hqdefault.jpg",
     "type": "youtube"
   },
   {
@@ -45,7 +45,7 @@ METADATA['ko'].extras = METADATA['ko'].extras.concat([
     "title": "안드로이드 5.0 롤리팝을 맞이하는 개발자를 위한 안내서",
     "category": "",
     "summary": "",
-    "url": "http://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
+    "url": "https://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
     "group": "",
     "keywords": [],
     "tags": [],
@@ -57,7 +57,7 @@ METADATA['ko'].extras = METADATA['ko'].extras.concat([
     "title": "안드로이드 앱을 위한 머티리얼 디자인 체크 리스트",
     "category": "",
     "summary": "",
-    "url": "http://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
+    "url": "https://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
     "group": "",
     "keywords": [],
     "tags": [],
@@ -69,11 +69,11 @@ METADATA['ko'].extras = METADATA['ko'].extras.concat([
     "title": "App Compat 라이브러리",
     "category": "",
     "summary": "",
-    "url": "http://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
+    "url": "https://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
     "group": "",
     "keywords": [],
     "tags": [],
-    "image": "http://2.bp.blogspot.com/-7fF9ayZ6PgI/U9iFpk5FNEI/AAAAAAAAAs0/4P4SCvdB_4M/s640/image00.png",
+    "image": "https://2.bp.blogspot.com/-7fF9ayZ6PgI/U9iFpk5FNEI/AAAAAAAAAs0/4P4SCvdB_4M/s640/image00.png",
     "type": "blog"
   },
   {
@@ -103,9 +103,9 @@ METADATA['ko'].collections = {
     "resources": [
       "https://www.youtube.com/watch?v=7X9Ue0Nfdh4&index=2&list=PL_WJkTbDHdBksDBRoqfeyLchEQqBAOlNl",
       "https://www.youtube.com/watch?v=83FpwuschCQ",
-      "http://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
-      "http://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
-      "http://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
+      "https://googledevkr.blogspot.com/2014/11/android50guidefordevelopers.html",
+      "https://googledevkr.blogspot.com/2014/10/material-design-on-android-checklist.html",
+      "https://googledevkr.blogspot.com/2014/10/appcompat-v21-material-design-for-pre.html",
       "distribute/googleplay/developer-console.html#alpha-beta",
       "distribute/googleplay/guide.html",
       "distribute/essentials/quality/core.html",

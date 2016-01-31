@@ -17,9 +17,9 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "https://www.youtube.com/watch?v=yJisuP94lHU",
-      "https://www.youtube.com/watch?v=rcU7VEs1hiE",
-      "https://www.youtube.com/watch?v=JFlX9rW7Epc",
-      "https://www.youtube.com/watch?v=4CqXCkcN_d4"
+      "http://www.youtube.com/watch?v=rcU7VEs1hiE",
+      "http://www.youtube.com/watch?v=JFlX9rW7Epc",
+      "http://www.youtube.com/watch?v=4CqXCkcN_d4"
     ]
   },
   "index/multiscreen": {

@@ -3845,21 +3845,21 @@ var CAROUSEL_OVERRIDE = {
     "type":"youtube",
     "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
   },
-  "https://www.youtube.com/watch?v=rcU7VEs1hiE": {
+  "http://www.youtube.com/watch?v=rcU7VEs1hiE": {
     "url":"https://www.youtube.com/watch?v=rcU7VEs1hiE&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-rogervoice-story.jpg",
     "title": "RogerVoice uses beta testing to launch on Android first",
     "type" : "youtube",
     "summary": "RogerVoice helps people who are hearing impaired make phone calls through voice recognition and text captions. Hear how they used material design and beta testing to create a UI that's accessible and intuitive to navigate.",
   },
-  "https://www.youtube.com/watch?v=JFlX9rW7Epc": {
+  "http://www.youtube.com/watch?v=JFlX9rW7Epc": {
     "url":"https://www.youtube.com/watch?v=JFlX9rW7Epc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-domain-story.jpg",
     "title": "Domain increases installs by 44% with Material Design",
     "type" : "youtube",
     "summary": "Learn how Domain, a premier real-estate portal in Australia, drastically improved their Google Play app reviews, ratings and downloads by investing in their Android app experience.",
   },
-  "https://www.youtube.com/watch?v=4CqXCkcN_d4": {
+  "http://www.youtube.com/watch?v=4CqXCkcN_d4": {
     "url":"https://www.youtube.com/watch?v=4CqXCkcN_d4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
     "image": "images/distribute/hero-dots-story.jpg",
     "title": "Dots increases installs with Store Listing Experiments",
