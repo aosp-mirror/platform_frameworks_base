@@ -568,6 +568,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_CONTEXT_CLICKABLE = 0x00020000;
 
+    private static final int BOOLEAN_PROPERTY_IMPORTANCE = 0x0040000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -2153,6 +2155,33 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setDismissable(boolean dismissable) {
         setBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE, dismissable);
+    }
+
+    /**
+     * Returns whether the node originates from a view considered important for accessibility.
+     *
+     * @return {@code true} if the node originates from a view considered important for
+     *         accessibility, {@code false} otherwise
+     *
+     * @see View#isImportantForAccessibility()
+     */
+    public boolean isImportantForAccessibility() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_IMPORTANCE);
+    }
+
+    /**
+     * Sets whether the node is considered important for accessibility.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param important {@code true} if the node is considered important for accessibility,
+     *                  {@code false} otherwise
+     */
+    public void setImportantForAccessibility(boolean important) {
+        setBooleanProperty(BOOLEAN_PROPERTY_IMPORTANCE, important);
     }
 
     /**

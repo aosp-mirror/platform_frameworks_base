@@ -6770,6 +6770,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         info.setVisibleToUser(isVisibleToUser());
 
+        if ((mAttachInfo != null) && ((mAttachInfo.mAccessibilityFetchFlags
+                & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0)) {
+            info.setImportantForAccessibility(isImportantForAccessibility());
+        } else {
+            info.setImportantForAccessibility(true);
+        }
+
         info.setPackageName(mContext.getPackageName());
         info.setClassName(getAccessibilityClassName());
         info.setContentDescription(getContentDescription());
