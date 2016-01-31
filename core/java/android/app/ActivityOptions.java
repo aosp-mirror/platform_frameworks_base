@@ -19,6 +19,7 @@ package android.app;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -203,7 +204,6 @@ public class ActivityOptions {
     public static final int ANIM_CLIP_REVEAL = 11;
 
     private String mPackageName;
-    private boolean mHasLaunchBounds;
     private Rect mLaunchBounds;
     private int mAnimationType = ANIM_NONE;
     private int mCustomEnterResId;
@@ -716,10 +716,7 @@ public class ActivityOptions {
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }
-        mHasLaunchBounds = opts.containsKey(KEY_LAUNCH_BOUNDS);
-        if (mHasLaunchBounds) {
-            mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS);
-        }
+        mLaunchBounds = opts.getParcelable(KEY_LAUNCH_BOUNDS);
         mAnimationType = opts.getInt(KEY_ANIM_TYPE);
         switch (mAnimationType) {
             case ANIM_CUSTOM:
@@ -779,14 +776,16 @@ public class ActivityOptions {
     }
 
     /**
-     * Sets the bounds (window size) that the activity should be launched in. Set to null explicitly
-     * for full screen.
-     * NOTE: This value is ignored on devices that don't have
-     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} enabled.
+     * Sets the bounds (window size) that the activity should be launched in.
+     * Set to null explicitly for fullscreen.
+     * <p>
+     * <strong>NOTE:<strong/> This value is ignored on devices that don't have
+     * {@link android.content.pm.PackageManager#FEATURE_FREEFORM_WINDOW_MANAGEMENT} or
+     * {@link android.content.pm.PackageManager#FEATURE_PICTURE_IN_PICTURE} enabled.
+     * @param launchBounds Launch bounds to use for the activity or null for fullscreen.
      */
-    public ActivityOptions setLaunchBounds(Rect launchBounds) {
-        mHasLaunchBounds = true;
-        mLaunchBounds = launchBounds;
+    public ActivityOptions setLaunchBounds(@Nullable Rect launchBounds) {
+        mLaunchBounds = launchBounds != null ? new Rect(launchBounds) : null;
         return this;
     }
 
@@ -795,11 +794,13 @@ public class ActivityOptions {
         return mPackageName;
     }
 
-    public boolean hasLaunchBounds() {
-        return mHasLaunchBounds;
-    }
-
-    public Rect getLaunchBounds(){
+    /**
+     * Returns the bounds that should be used to launch the activity.
+     * @see #setLaunchBounds(Rect)
+     * @return Bounds used to launch the activity.
+     */
+    @Nullable
+    public Rect getLaunchBounds() {
         return mLaunchBounds;
     }
 
@@ -1024,7 +1025,7 @@ public class ActivityOptions {
         if (mPackageName != null) {
             b.putString(KEY_PACKAGE_NAME, mPackageName);
         }
-        if (mHasLaunchBounds) {
+        if (mLaunchBounds != null) {
             b.putParcelable(KEY_LAUNCH_BOUNDS, mLaunchBounds);
         }
         b.putInt(KEY_ANIM_TYPE, mAnimationType);

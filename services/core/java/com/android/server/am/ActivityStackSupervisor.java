@@ -1754,7 +1754,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     boolean canUseActivityOptionsLaunchBounds(ActivityOptions options, int launchStackId) {
         // We use the launch bounds in the activity options is the device supports freeform
         // window management or is launching into the pinned stack.
-        if (!options.hasLaunchBounds()) {
+        if (options.getLaunchBounds() == null) {
             return false;
         }
         return (mService.mSupportsPictureInPicture && launchStackId == PINNED_STACK_ID)
