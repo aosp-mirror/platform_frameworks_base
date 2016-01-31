@@ -16,6 +16,7 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -3311,8 +3312,20 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </li>
      * <li><strong>Overriden standard actions</strong> - These are actions that override
      * standard actions to customize them. For example, an app may add a label to the
-     * standard click action to announce that this action clears browsing history.
+     * standard {@link #ACTION_CLICK} action to announce that this action clears browsing history.
      * </ul>
+     * </p>
+     * <p>
+     * Actions are typically added to an {@link AccessibilityNodeInfo} by using
+     * {@link AccessibilityNodeInfo#addAction(AccessibilityAction)} within
+     * {@link View#onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} and are performed
+     * within {@link View#performAccessibilityAction(int, Bundle)}.
+     * </p>
+     * <p class="note">
+     * <strong>Note:</strong> Views which support these actions should invoke
+     * {@link View#setImportantForAccessibility(int)} with
+     * {@link View#IMPORTANT_FOR_ACCESSIBILITY_YES} to ensure an {@link AccessibilityService}
+     * can discover the set of supported actions.
      * </p>
      */
     public static final class AccessibilityAction {
