@@ -8923,7 +8923,8 @@ public class Intent implements Parcelable, Cloneable {
             mClipData.prepareToLeaveProcess(leavingPackage);
         }
 
-        if (mData != null && StrictMode.vmFileUriExposureEnabled() && leavingPackage) {
+        if (mAction != null && mData != null && StrictMode.vmFileUriExposureEnabled()
+                && leavingPackage) {
             switch (mAction) {
                 case ACTION_MEDIA_REMOVED:
                 case ACTION_MEDIA_UNMOUNTED:
