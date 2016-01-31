@@ -48,6 +48,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAV
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
+import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
@@ -941,12 +942,8 @@ class ActivityStarter {
                 Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
-            if (!mMovedHome
-                    && (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
-                    == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-                // Caller wants to appear on home activity, so before starting
-                // their own activity we will bring home to the front.
-                mStartActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            if (!mMovedHome) {
+                updateTaskReturnToType(mStartActivity.task, mLaunchFlags, topStack);
             }
         } else if (mSourceRecord != null) {
             if (mSupervisor.isLockTaskModeViolation(mSourceRecord.task)) {
@@ -1280,11 +1277,7 @@ class ActivityStarter {
                             mOptions, mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
                     mMovedToFront = true;
                 }
-                if ((mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
-                        == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-                    // Caller wants to appear on home activity.
-                    intentActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
-                }
+                updateTaskReturnToType(intentActivity.task, mLaunchFlags, focusStack);
                 mOptions = null;
             }
         }
@@ -1299,6 +1292,23 @@ class ActivityStarter {
             return mTargetStack.resetTaskIfNeededLocked(intentActivity, mStartActivity);
         }
         return intentActivity;
+    }
+
+    private void updateTaskReturnToType(
+            TaskRecord task, int launchFlags, ActivityStack focusedStack) {
+        if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
+                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
+            // Caller wants to appear on home activity.
+            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            return;
+        } else if (focusedStack == null || focusedStack.mStackId == HOME_STACK_ID) {
+            // Task will be launched over the home stack, so return home.
+            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+            return;
+        }
+
+        // Else we are coming from an application stack so return to an application.
+        task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
     }
 
     private void setTaskFromIntentActivity(ActivityRecord intentActivity) {

@@ -128,8 +128,6 @@ final class TaskRecord {
 
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
-    static final boolean IGNORE_RETURN_TO_RECENTS = true;
-
     static final int INVALID_TASK_ID = -1;
 
     final int taskId;       // Unique identifier for this task.
@@ -459,8 +457,8 @@ final class TaskRecord {
     }
 
     void setTaskToReturnTo(int taskToReturnTo) {
-        mTaskToReturnTo = (IGNORE_RETURN_TO_RECENTS && taskToReturnTo == RECENTS_ACTIVITY_TYPE)
-            ? HOME_ACTIVITY_TYPE : taskToReturnTo;
+        mTaskToReturnTo = (taskToReturnTo == RECENTS_ACTIVITY_TYPE)
+                ? HOME_ACTIVITY_TYPE : taskToReturnTo;
     }
 
     int getTaskToReturnTo() {
