@@ -82,40 +82,49 @@ public abstract class Context {
      * File creation mode: the default mode, where the created file can only
      * be accessed by the calling application (or all applications sharing the
      * same user ID).
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      */
     public static final int MODE_PRIVATE = 0x0000;
+
     /**
+     * File creation mode: allow all other applications to have read access to
+     * the created file.
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#N} attempting to use this
+     * mode will throw a {@link SecurityException}.
+     *
      * @deprecated Creating world-readable files is very dangerous, and likely
-     * to cause security holes in applications.  It is strongly discouraged;
-     * instead, applications should use more formal mechanism for interactions
-     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
-     * {@link android.app.Service}.  There are no guarantees that this
-     * access mode will remain on a file, such as when it goes through a
-     * backup and restore.
-     * File creation mode: allow all other applications to have read access
-     * to the created file.
-     * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_WRITEABLE
+     *             to cause security holes in applications. It is strongly
+     *             discouraged; instead, applications should use more formal
+     *             mechanism for interactions such as {@link ContentProvider},
+     *             {@link BroadcastReceiver}, and {@link android.app.Service}.
+     *             There are no guarantees that this access mode will remain on
+     *             a file, such as when it goes through a backup and restore.
+     * @see android.support.v4.content.FileProvider
+     * @see Intent#FLAG_GRANT_WRITE_URI_PERMISSION
      */
     @Deprecated
     public static final int MODE_WORLD_READABLE = 0x0001;
+
     /**
+     * File creation mode: allow all other applications to have write access to
+     * the created file.
+     * <p>
+     * As of {@link android.os.Build.VERSION_CODES#N} attempting to use this
+     * mode will throw a {@link SecurityException}.
+     *
      * @deprecated Creating world-writable files is very dangerous, and likely
-     * to cause security holes in applications.  It is strongly discouraged;
-     * instead, applications should use more formal mechanism for interactions
-     * such as {@link ContentProvider}, {@link BroadcastReceiver}, and
-     * {@link android.app.Service}.  There are no guarantees that this
-     * access mode will remain on a file, such as when it goes through a
-     * backup and restore.
-     * File creation mode: allow all other applications to have write access
-     * to the created file.
-     * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
+     *             to cause security holes in applications. It is strongly
+     *             discouraged; instead, applications should use more formal
+     *             mechanism for interactions such as {@link ContentProvider},
+     *             {@link BroadcastReceiver}, and {@link android.app.Service}.
+     *             There are no guarantees that this access mode will remain on
+     *             a file, such as when it goes through a backup and restore.
+     * @see android.support.v4.content.FileProvider
+     * @see Intent#FLAG_GRANT_WRITE_URI_PERMISSION
      */
     @Deprecated
     public static final int MODE_WORLD_WRITEABLE = 0x0002;
+
     /**
      * File creation mode: for use with {@link #openFileOutput}, if the file
      * already exists then write data to the end of the existing file
@@ -657,15 +666,12 @@ public abstract class Context {
      * does not exist, it will be created when you retrieve an
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_WORLD_READABLE}
-     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * default operation.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
      *
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      */
     public abstract SharedPreferences getSharedPreferences(String name, int mode);
 
@@ -680,16 +686,13 @@ public abstract class Context {
      * does not exist, it will be created when you retrieve an
      * editor (SharedPreferences.edit()) and then commit changes (Editor.commit()).
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_WORLD_READABLE}
-     * and {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * default operation.
      *
      * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
      *
      * @see #getSharedPreferencesPath(String)
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      */
     public abstract SharedPreferences getSharedPreferences(File file, int mode);
 
@@ -747,14 +750,11 @@ public abstract class Context {
      * @param name The name of the file to open; can not contain path
      *            separators.
      * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
-     *            default operation, {@link #MODE_APPEND} to append to an
-     *            existing file, {@link #MODE_WORLD_READABLE} and
-     *            {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     *            default operation. Use {@link #MODE_APPEND} to append to an
+     *            existing file.
      * @return The resulting {@link FileOutputStream}.
      * @see #MODE_APPEND
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      * @see #openFileInput
      * @see #fileList
      * @see #deleteFile
@@ -1315,8 +1315,7 @@ public abstract class Context {
      * @param name Name of the directory to retrieve.  This is a directory
      * that is created as part of your application data.
      * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     * default operation, {@link #MODE_WORLD_READABLE} and
-     * {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     * default operation.
      *
      * @return A {@link File} object for the requested directory.  The directory
      * will have been created if it does not already exist.
@@ -1327,23 +1326,20 @@ public abstract class Context {
 
     /**
      * Open a new private SQLiteDatabase associated with this Context's
-     * application package.  Create the database file if it doesn't exist.
+     * application package. Create the database file if it doesn't exist.
      *
      * @param name The name (unique in the application package) of the database.
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     *     default operation, {@link #MODE_WORLD_READABLE}
-     *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
-     *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
-     *     Use {@link #MODE_NO_LOCALIZED_COLLATORS} to disable localized collators.
+     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
+     *            default operation. Use
+     *            {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead
+     *            logging by default. Use {@link #MODE_NO_LOCALIZED_COLLATORS}
+     *            to disable localized collators.
      * @param factory An optional factory class that is called to instantiate a
-     *     cursor when query is called.
-     *
+     *            cursor when query is called.
      * @return The contents of a newly created database with the given name.
-     * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
-     *
+     * @throws android.database.sqlite.SQLiteException if the database file
+     *             could not be opened.
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
      * @see #MODE_NO_LOCALIZED_COLLATORS
      * @see #deleteDatabase
@@ -1353,27 +1349,28 @@ public abstract class Context {
 
     /**
      * Open a new private SQLiteDatabase associated with this Context's
-     * application package.  Creates the database file if it doesn't exist.
-     *
-     * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
-     * used to handle corruption when sqlite reports database corruption.</p>
+     * application package. Creates the database file if it doesn't exist.
+     * <p>
+     * Accepts input param: a concrete instance of {@link DatabaseErrorHandler}
+     * to be used to handle corruption when sqlite reports database corruption.
+     * </p>
      *
      * @param name The name (unique in the application package) of the database.
-     * @param mode Operating mode.  Use 0 or {@link #MODE_PRIVATE} for the
-     *     default operation, {@link #MODE_WORLD_READABLE}
-     *     and {@link #MODE_WORLD_WRITEABLE} to control permissions.
-     *     Use {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead logging by default.
-     *     Use {@link #MODE_NO_LOCALIZED_COLLATORS} to disable localized collators.
+     * @param mode Operating mode. Use 0 or {@link #MODE_PRIVATE} for the
+     *            default operation. Use
+     *            {@link #MODE_ENABLE_WRITE_AHEAD_LOGGING} to enable write-ahead
+     *            logging by default. Use {@link #MODE_NO_LOCALIZED_COLLATORS}
+     *            to disable localized collators.
      * @param factory An optional factory class that is called to instantiate a
-     *     cursor when query is called.
-     * @param errorHandler the {@link DatabaseErrorHandler} to be used when sqlite reports database
-     * corruption. if null, {@link android.database.DefaultDatabaseErrorHandler} is assumed.
+     *            cursor when query is called.
+     * @param errorHandler the {@link DatabaseErrorHandler} to be used when
+     *            sqlite reports database corruption. if null,
+     *            {@link android.database.DefaultDatabaseErrorHandler} is
+     *            assumed.
      * @return The contents of a newly created database with the given name.
-     * @throws android.database.sqlite.SQLiteException if the database file could not be opened.
-     *
+     * @throws android.database.sqlite.SQLiteException if the database file
+     *             could not be opened.
      * @see #MODE_PRIVATE
-     * @see #MODE_WORLD_READABLE
-     * @see #MODE_WORLD_WRITEABLE
      * @see #MODE_ENABLE_WRITE_AHEAD_LOGGING
      * @see #MODE_NO_LOCALIZED_COLLATORS
      * @see #deleteDatabase

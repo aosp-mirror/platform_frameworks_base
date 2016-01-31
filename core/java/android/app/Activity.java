@@ -5501,8 +5501,7 @@ public class Activity extends ContextThemeWrapper
      * class name as the preferences name.
      *
      * @param mode Operating mode.  Use {@link #MODE_PRIVATE} for the default
-     *             operation, {@link #MODE_WORLD_READABLE} and
-     *             {@link #MODE_WORLD_WRITEABLE} to control permissions.
+     *             operation.
      *
      * @return Returns the single SharedPreferences instance that can be used
      *         to retrieve and modify the preference values.

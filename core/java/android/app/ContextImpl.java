@@ -340,6 +340,7 @@ class ContextImpl extends Context {
 
     @Override
     public SharedPreferences getSharedPreferences(File file, int mode) {
+        checkMode(mode);
         SharedPreferencesImpl sp;
         synchronized (ContextImpl.class) {
             final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
@@ -455,8 +456,8 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public FileOutputStream openFileOutput(String name, int mode)
-        throws FileNotFoundException {
+    public FileOutputStream openFileOutput(String name, int mode) throws FileNotFoundException {
+        checkMode(mode);
         final boolean append = (mode&MODE_APPEND) != 0;
         File f = makeFilename(getFilesDir(), name);
         try {
@@ -638,6 +639,7 @@ class ContextImpl extends Context {
     @Override
     public SQLiteDatabase openOrCreateDatabase(String name, int mode, CursorFactory factory,
             DatabaseErrorHandler errorHandler) {
+        checkMode(mode);
         File f = getDatabasePath(name);
         int flags = SQLiteDatabase.CREATE_IF_NECESSARY;
         if ((mode & MODE_ENABLE_WRITE_AHEAD_LOGGING) != 0) {
@@ -1917,6 +1919,7 @@ class ContextImpl extends Context {
 
     @Override
     public File getDir(String name, int mode) {
+        checkMode(mode);
         name = "app_" + name;
         File file = makeFilename(getDataDirFile(), name);
         if (!file.exists()) {
@@ -2067,6 +2070,17 @@ class ContextImpl extends Context {
 
     final IBinder getActivityToken() {
         return mActivityToken;
+    }
+
+    private void checkMode(int mode) {
+        if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.N) {
+            if ((mode & MODE_WORLD_READABLE) != 0) {
+                throw new SecurityException("MODE_WORLD_READABLE no longer supported");
+            }
+            if ((mode & MODE_WORLD_WRITEABLE) != 0) {
+                throw new SecurityException("MODE_WORLD_WRITEABLE no longer supported");
+            }
+        }
     }
 
     @SuppressWarnings("deprecation")
