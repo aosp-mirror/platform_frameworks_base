@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.car;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -29,8 +28,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.UserUtil;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
 public class UserGridView extends GridView {
@@ -88,7 +87,8 @@ public class UserGridView extends GridView {
                     return true;
                 }
 
-                new RemoveUserDialog(getContext(), record.info.id).show();
+                UserUtil.deleteUserWithPrompt(getContext(), record.info.id,
+                        mUserSwitcherController);
                 return true;
             }
         });
@@ -157,34 +157,6 @@ public class UserGridView extends GridView {
             }
 
             return convertView;
-        }
-    }
-
-    private final class RemoveUserDialog extends SystemUIDialog implements
-            DialogInterface.OnClickListener {
-
-        private final int mUserId;
-
-        public RemoveUserDialog(Context context, int userId) {
-            super(context);
-            setTitle(R.string.user_remove_user_title);
-            setMessage(context.getString(R.string.user_remove_user_message));
-            setButton(DialogInterface.BUTTON_NEGATIVE,
-                    context.getString(android.R.string.cancel), this);
-            setButton(DialogInterface.BUTTON_POSITIVE,
-                    context.getString(R.string.user_remove_user_remove), this);
-            setCanceledOnTouchOutside(false);
-            mUserId = userId;
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            if (which == BUTTON_NEGATIVE) {
-                cancel();
-            } else {
-                dismiss();
-                mUserSwitcherController.removeUserId(mUserId);
-            }
         }
     }
 }
