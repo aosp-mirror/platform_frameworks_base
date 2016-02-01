@@ -479,6 +479,11 @@ public class Environment {
     public static String DIRECTORY_DOCUMENTS = "Documents";
 
     /**
+     * Standard directory in which user managed files are stored.
+     */
+    public static String DIRECTORY_HOME = "Home";
+
+    /**
      * List of standard storage directories.
      * <p>
      * Each of its values have its own constant:
@@ -493,6 +498,7 @@ public class Environment {
      *   <li>{@link #DIRECTORY_DOWNLOADS}
      *   <li>{@link #DIRECTORY_DCIM}
      *   <li>{@link #DIRECTORY_DOCUMENTS}
+     *   <li>{@link #DIRECTORY_HOME}
      * </ul>
      * @hide
      */
@@ -506,7 +512,8 @@ public class Environment {
             DIRECTORY_MOVIES,
             DIRECTORY_DOWNLOADS,
             DIRECTORY_DCIM,
-            DIRECTORY_DOCUMENTS
+            DIRECTORY_DOCUMENTS,
+            DIRECTORY_HOME
     };
 
     /**
