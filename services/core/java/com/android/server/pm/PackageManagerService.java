@@ -6633,7 +6633,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkgs != null) {
                 for (String pkg : pkgs) {
                     performDexOpt(pkg, null /* instructionSet */, false /* useProfiles */,
-                            true /* extractOnly */);
+                            true /* extractOnly */, false /* force */);
                 }
             }
         }
@@ -6670,26 +6670,28 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean performDexOptIfNeeded(String packageName, String instructionSet) {
         return performDexOptTraced(packageName, instructionSet, false /* useProfiles */,
-                false /* extractOnly */);
+                false /* extractOnly */, false /* force */);
     }
 
+    @Override
     public boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles,
-            boolean extractOnly) {
-        return performDexOptTraced(packageName, instructionSet, useProfiles, extractOnly);
+            boolean extractOnly, boolean force) {
+        return performDexOptTraced(packageName, instructionSet, useProfiles, extractOnly, force);
     }
 
     private boolean performDexOptTraced(String packageName, String instructionSet,
-                boolean useProfiles, boolean extractOnly) {
+                boolean useProfiles, boolean extractOnly, boolean force) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
         try {
-            return performDexOptInternal(packageName, instructionSet, useProfiles, extractOnly);
+            return performDexOptInternal(packageName, instructionSet, useProfiles, extractOnly,
+                    force);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
     private boolean performDexOptInternal(String packageName, String instructionSet,
-                boolean useProfiles, boolean extractOnly) {
+                boolean useProfiles, boolean extractOnly, boolean force) {
         PackageParser.Package p;
         final String targetInstructionSet;
         synchronized (mPackages) {
@@ -6701,7 +6703,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             targetInstructionSet = instructionSet != null ? instructionSet :
                     getPrimaryInstructionSet(p.applicationInfo);
-            if (!useProfiles && p.mDexOptPerformed.contains(targetInstructionSet)) {
+            if (!force && !useProfiles && p.mDexOptPerformed.contains(targetInstructionSet)) {
                 // Skip only if we do not use profiles since they might trigger a recompilation.
                 return false;
             }
@@ -6711,7 +6713,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             synchronized (mInstallLock) {
                 final String[] instructionSets = new String[] { targetInstructionSet };
                 int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
-                        true /* inclDependencies */, useProfiles, extractOnly);
+                        true /* inclDependencies */, useProfiles, extractOnly, force);
                 return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
             }
         } finally {
@@ -6757,7 +6759,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Don't use profiles since that may cause compilation to be skipped.
             final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
                     true /* inclDependencies */, false /* useProfiles */,
-                    false /* extractOnly */);
+                    false /* extractOnly */, true /* force */);
 
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
@@ -13025,7 +13027,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // method because `pkg` is not in `mPackages` yet.
                 int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
                         false /* inclDependencies */, false /* useProfiles */,
-                        true /* extractOnly */);
+                        true /* extractOnly */, false /* force */);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                     String msg = "Extracking package failed for " + pkgName;

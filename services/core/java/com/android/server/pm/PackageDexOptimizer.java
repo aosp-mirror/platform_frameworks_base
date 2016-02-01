@@ -81,7 +81,7 @@ final class PackageDexOptimizer {
      * {@link PackageManagerService#mInstallLock}.
      */
     int performDexOpt(PackageParser.Package pkg, String[] instructionSets,
-            boolean inclDependencies, boolean useProfiles, boolean extractOnly) {
+            boolean inclDependencies, boolean useProfiles, boolean extractOnly, boolean force) {
         ArraySet<String> done;
         if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
             done = new ArraySet<String>();
@@ -97,7 +97,7 @@ final class PackageDexOptimizer {
             }
             try {
                 return performDexOptLI(pkg, instructionSets, done, useProfiles,
-                        extractOnly);
+                        extractOnly, force);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -107,7 +107,7 @@ final class PackageDexOptimizer {
     }
 
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            ArraySet<String> done, boolean useProfiles, boolean extractOnly) {
+            ArraySet<String> done, boolean useProfiles, boolean extractOnly, boolean force) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
 
@@ -128,34 +128,38 @@ final class PackageDexOptimizer {
         final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
+        if (useProfiles) {
+            // If we do a profile guided compilation then we might recompile
+            // the same package if more profile information is available.
+            force = true;
+        }
+
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            if (!useProfiles && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
-                // Skip only if we do not use profiles since they might trigger a recompilation.
+            if (!force && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
                 continue;
             }
 
             for (String path : paths) {
                 int dexoptNeeded;
-                try {
-                    dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
-                            dexCodeInstructionSet, /* defer */false);
-                } catch (IOException ioe) {
-                    Slog.w(TAG, "IOException reading apk: " + path, ioe);
-                    return DEX_OPT_FAILED;
+
+                if (force) {
+                    dexoptNeeded = DexFile.DEX2OAT_NEEDED;
+                } else {
+                    try {
+                        dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
+                                dexCodeInstructionSet, /* defer */false);
+                    } catch (IOException ioe) {
+                        Slog.w(TAG, "IOException reading apk: " + path, ioe);
+                        return DEX_OPT_FAILED;
+                    }
                 }
 
                 if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
-                    if (useProfiles) {
-                        // If we do a profile guided compilation then we might recompile the same
-                        // package if more profile information is available.
-                        dexoptNeeded = DexFile.DEX2OAT_NEEDED;
-                    } else {
-                        // No dexopt needed and we don't use profiles. Nothing to do.
-                        continue;
-                    }
+                    // No dexopt needed and we don't use profiles. Nothing to do.
+                    continue;
                 }
                 final String dexoptType;
                 String oatDir = null;
@@ -252,7 +256,7 @@ final class PackageDexOptimizer {
                 // TODO: Analyze and investigate if we (should) profile libraries.
                 // Currently this will do a full compilation of the library.
                 performDexOptLI(libPkg, instructionSets, done, /*useProfiles*/ false,
-                        /* extractOnly */ false);
+                        /* extractOnly */ false, /* force */ false);
             }
         }
     }
