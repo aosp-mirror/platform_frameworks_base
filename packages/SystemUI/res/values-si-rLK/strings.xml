@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM නැත."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"සෙලියුලර් දත්ත ක්‍රියාවිරහිතයි"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"බ්ලූටූත් ටෙදරින්."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"අහස්යානා ආකාරය."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM කාඩ්පත නැත."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"තිර ඇමිණීම"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"සෙවීම"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ආරම්භ කළ නොහැක."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"තවත්"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"තව <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"ඉතිහාසය"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"හිස් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"තිරස්ව වෙන් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"සිරස්ව වෙන් කරන්න"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"අභිමත ලෙස වෙන් කරන්න"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"සාමාන්‍ය වර්ණ"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"රාත්‍රී වර්ණ"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"අභිරුචි වර්ණ"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"ස්වයංක්‍රිය"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"නොදන්නා වර්ණ"</string>
     <string name="color_transform" msgid="6985460408079086090">"වර්ණ වෙනස් කිරීම"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"ඉක්මන් සැකසීම් ටයිලය පෙන්වන්න"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"හෙඩ්ෆෝන් සම්බන්ධ කළ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"හෙඩ්සෙට් සම්බන්ධ කළ"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"තත්ත්ව තීරුව මත අයිකන පෙන්වීම සබල හෝ අබල කරන්න."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"දත්ත සුරැකුම"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"දත්ත සුරැකුම ක්‍රියාත්මකයි"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"දත්ත සුරැකුම ක්‍රියාවිරහිතයි"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"ක්‍රියාත්මකයි"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"සංචලන තීරුව"</string>
+    <string name="start" msgid="6873794757232879664">"ආරම්භ කරන්න"</string>
+    <string name="center" msgid="4327473927066010960">"මධ්‍ය"</string>
+    <string name="end" msgid="125797972524818282">"අවසානයි"</string>
+    <string name="space" msgid="804232271282109749">"ඉඩ"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"මෙනු / යතුරු පුවරු මාරුව"</string>
+    <string name="select_button" msgid="1597989540662710653">"එක් කිරීමට බොත්තම තෝරන්න"</string>
+    <string name="add_button" msgid="4134946063432258161">"එක් කරන්න බොත්තම"</string>
+    <string name="save" msgid="2311877285724540644">"සුරකින්න"</string>
+    <string name="reset" msgid="2448168080964209908">"යළි පිහිටුවන්න"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"මුල් පිටු බොත්තමක් හමු නොවිණි"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"මෙම උපාංගය සංචලනය කිරීමට හැකි වීමට මුල් පිටු යතුරක් අවශ්‍යයි. කරුණාකර සුරැකීමට පෙර මුල් පිටු යතුරක් එක් කරන්න."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"බොත්තම් පළල සීරුමාරු කරන්න"</string>
+    <string name="clipboard" msgid="1313879395099896312">"පසුරු පුවරුව"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"අයිතම කෙලින්ම පසුරු පුවරුවට ඇද ගෙන ඒමට පසුරු පුවරුව ඉඩ දෙයි. අයිතම පසුරු පුවරුවෙහි ඇති විට කෙලින්ම ඉවතට ඇද ගෙන යාමටද හැකිය."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"අභිරුචි සංචලන බොත්තම"</string>
+    <string name="keycode" msgid="7335281375728356499">"යතුරු කේතය"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"යතුරු කේත බොත්තම් යතුරු පුවරු යතුරු සංචලන තීරුවට එක් කිරීමට ඉඩ දෙයි. එබූ විට ඒවා තෝරන ලද යතුරු පුවරු යතුර ලබා දෙයි. පළමුව යතුර, ඊට පසු බොත්තම මත පෙන්වන රූපයක් සමගින් බොත්තම සඳහා තේරිය යුතුය."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"යතුරු පුවරු බොත්තම තෝරන්න"</string>
+    <string name="preview" msgid="9077832302472282938">"පෙරදසුන"</string>
 </resources>

@@ -148,6 +148,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Žiadna SIM karta."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobilné dáta sú vypnuté"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pripojenie cez Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim v lietadle."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Žiadna SIM karta."</string>
@@ -302,8 +303,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pripnutie k obrazovke"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"hľadať"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikáciu <xliff:g id="APP">%s</xliff:g> sa nepodarilo spustiť"</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Viac"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"Ďalšie (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"História"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Vymazať"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Rozdeliť vodorovné"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Rozdeliť zvislé"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Rozdeliť vlastné"</string>
@@ -469,6 +470,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Normálne farby"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Nočné farby"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Vlastné farby"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Automatické"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Neznáme farby"</string>
     <string name="color_transform" msgid="6985460408079086090">"Úprava farieb"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Zobraziť dlaždicu Rýchle nastavenia"</string>
@@ -495,10 +497,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Slúchadlá pripojené"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Náhlavná súprava pripojená"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Umožňuje aktivovať alebo deaktivovať zobrazenie ikon v stavovom riadku."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Šetrič dát"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Šetrič dát je zapnutý"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Šetrič dát je vypnutý"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Zapnuté"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Navigačný panel"</string>
+    <string name="start" msgid="6873794757232879664">"Začiatok"</string>
+    <string name="center" msgid="4327473927066010960">"Stred"</string>
+    <string name="end" msgid="125797972524818282">"Koniec"</string>
+    <string name="space" msgid="804232271282109749">"Medzerník"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Prepínač – ponuka/klávesnica"</string>
+    <string name="select_button" msgid="1597989540662710653">"Výber tlačidla, ktoré sa má pridať"</string>
+    <string name="add_button" msgid="4134946063432258161">"Pridať tlačidlo"</string>
+    <string name="save" msgid="2311877285724540644">"Uložiť"</string>
+    <string name="reset" msgid="2448168080964209908">"Obnoviť"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Tlačidlo Plocha sa nenašlo"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Ak chcete používať navigáciu v tomto zariadení, musíte použiť tlačidlo Plocha. Pred uložením pridajte tlačidlo Plocha."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Upraviť šírku tlačidla"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Schránka"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Schránka umožňuje presunúť položky priamo do schránky. Ak ju máte k dispozícii, môžete ich z nej aj priamo vytiahnuť."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Vlastné tlačidlo navigácie"</string>
+    <string name="keycode" msgid="7335281375728356499">"Kód klávesnice"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Tlačidlá kódov klávesnice umožňujú pridanie klávesov na navigačný panel. Po stlačení simulujú funkcie vybraných klávesov. Najprv musíte pre tlačidlo vybrať kláves a následne musí byť na tlačidle obrázok."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Výber tlačidla klávesnice"</string>
+    <string name="preview" msgid="9077832302472282938">"Ukážka"</string>
 </resources>

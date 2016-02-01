@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"வைஃபை"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"சிம் இல்லை."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"செல்லுலார் தரவு முடக்கப்பட்டது"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"புளூடூத் டெதெரிங்."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"விமானப் பயன்முறை."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"சிம் கார்டு இல்லை."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"திரையை பின் செய்தல்"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"தேடு"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>ஐத் தொடங்க முடியவில்லை."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"மேலும்"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"மேலும் <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"வரலாறு"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"அழி"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"கிடைமட்டமாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"செங்குத்தாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"தனிவிருப்பத்தில் பிரி"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"இயல்பான வண்ணங்கள்"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"இரவுநேர வண்ணங்கள்"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"தனிப்பயன் வண்ணங்கள்"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"தானியங்கு"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"அறியப்படாத வண்ணங்கள்"</string>
     <string name="color_transform" msgid="6985460408079086090">"வண்ண மாற்றம்"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"விரைவு அமைப்புகள் டைலைக் காட்டு"</string>
@@ -485,7 +487,7 @@
     <string name="tuner_full_zen_title" msgid="5905081395132280054">"ஒலி உரையாடலில் தொந்தரவு செய்ய வேண்டாம் என்பதைக் காட்டு"</string>
     <string name="tuner_full_zen_summary" msgid="6883568374520596402">"ஒலி உரையாடலில் தொந்தரவு செய்ய வேண்டாம் என்பதன் முழுக் கட்டுப்பாட்டையும் அனுமதி."</string>
     <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"ஒலி மற்றும் தொந்தரவு செய்ய வேண்டாம்"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"ஒலியைக் குறைக்கும் போது தொந்தரவு செய்ய வேண்டாம் என்பதை இயக்கு"</string>
+    <string name="volume_down_silent" msgid="66962568467719591">"ஒலியைக் குறைக்கும்போது தொந்தரவு செய்ய வேண்டாம் என்பதை இயக்கு"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"ஒலியைக் கூட்டும் போது தொந்தரவு செய்ய வேண்டாம் என்பதை முடக்கு"</string>
     <string name="battery" msgid="7498329822413202973">"பேட்டரி"</string>
     <string name="clock" msgid="7416090374234785905">"கடிகாரம்"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ஹெட்ஃபோன்கள் இணைக்கப்பட்டன"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ஹெட்செட் இணைக்கப்பட்டது"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"நிலைப் பட்டியில் ஐகான்களைக் காட்டுவதை இயக்கும் அல்லது முடக்கும்."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"தரவுச் சேமிப்பான்"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"தரவுச் சேமிப்பான் இயக்கப்பட்டது"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"தரவுச் சேமிப்பான் முடக்கப்பட்டது"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"இயக்கு"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"வழிசெலுத்தல் பட்டி"</string>
+    <string name="start" msgid="6873794757232879664">"தொடங்கு"</string>
+    <string name="center" msgid="4327473927066010960">"மையம்"</string>
+    <string name="end" msgid="125797972524818282">"முடிவு"</string>
+    <string name="space" msgid="804232271282109749">"இடைவெளி"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"மெனு / விசைப்பலகை மாற்றி"</string>
+    <string name="select_button" msgid="1597989540662710653">"சேர்க்க, பொத்தானை தேர்வுசெய்க"</string>
+    <string name="add_button" msgid="4134946063432258161">"பொத்தானைச் சேர்"</string>
+    <string name="save" msgid="2311877285724540644">"சேமி"</string>
+    <string name="reset" msgid="2448168080964209908">"மீட்டமை"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"முகப்புப் பொத்தான் இல்லை"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"இந்தச் சாதனத்தில் வழிசெலுத்த, முகப்புப் பொத்தான் தேவை. சேமிக்கும் முன், முகப்புப் பொத்தானைச் சேர்க்கவும்."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"பொத்தானின் அகலத்தை மாற்று"</string>
+    <string name="clipboard" msgid="1313879395099896312">"கிளிப்போர்டு"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"கிளிப்ஃபோர்டில் உருப்படிகளை இழுத்து விடுவதற்கு கிளிப்போர்டு அனுமதிக்கும். கிளிப்போர்டிலிருந்து உருப்படிகளை வெளியேயும் இழுத்து விடலாம்."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"தனிப்பயன் வழிசெலுத்தல் பொத்தான்"</string>
+    <string name="keycode" msgid="7335281375728356499">"விசைக்குறியீடு"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"விசைக்குறியீட்டுப் பொத்தான்கள் மூலம் விசைப்பலகை விசைகளை வழிசெலுத்தல் பட்டியில் சேர்க்கலாம். அழுத்தும் போது, தேர்ந்தெடுத்த விசைப்பலகை விசையானது செயல்படும். பொத்தானுக்கான விசையை முதலில் தேர்ந்தெடுக்க வேண்டும், பிறகு பொத்தானில் காட்ட வேண்டிய படத்தைத் தேர்வுசெய்யவும்."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"விசைப்பலகைப் பொத்தானைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="preview" msgid="9077832302472282938">"மாதிரிக்காட்சி"</string>
 </resources>

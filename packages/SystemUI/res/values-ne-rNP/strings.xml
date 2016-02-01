@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाइफाइ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM छैन।"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"सेलुलर डेटा अफ छ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लुटुथ टेदर गर्दै।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाइजहाज मोड।"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM कार्ड छैन।"</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"स्क्रिन पिन गर्दै"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"खोजी गर्नुहोस्"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"सुरु गर्न सकिएन <xliff:g id="APP">%s</xliff:g>।"</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"थप"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> थप"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"इतिहास"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"मेटाउनुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"तेर्सो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ठाडो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"अनुकूलन विभाजन गर्नुहोस्"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"सामान्य रङहरू"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"रात्री रङहरू"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"अनुकूलन रङहरू"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"स्वतः"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"अज्ञात रङहरू"</string>
     <string name="color_transform" msgid="6985460408079086090">"रङ परिमार्जन"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"द्रुत सेटिङ टाइल देखाउनुहोस्"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफोनहरू जडान गरियो"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हेडसेट जडान गरियो"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"वस्तुस्थिति पट्टीमा देखाइनको लागि आइकनहरू सक्रिय वा निष्क्रिय गर्नुहोस्।"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"डेटा सेभर"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेभर अन छ"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा सेभर बन्द छ"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"सक्रिय गर्नुहोस्"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"नेभिगेसन पट्टी"</string>
+    <string name="start" msgid="6873794757232879664">"सुरु गर्नुहोस्"</string>
+    <string name="center" msgid="4327473927066010960">"केन्द्र"</string>
+    <string name="end" msgid="125797972524818282">"अन्त्य गर्नुहोस्"</string>
+    <string name="space" msgid="804232271282109749">"स्पेसर"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"मेनु / किबोर्ड स्विचर"</string>
+    <string name="select_button" msgid="1597989540662710653">"थप्नका लागि बटन चयन गर्नुहोस्"</string>
+    <string name="add_button" msgid="4134946063432258161">"बटन थप्नुहोस्"</string>
+    <string name="save" msgid="2311877285724540644">"सुरक्षित गर्नुहोस्"</string>
+    <string name="reset" msgid="2448168080964209908">"पुनःसेट गर्नु"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"गृह बटन फेला परेन"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"यस यन्त्रलाई नेभिगेट गर्न सक्षम हुन गृह बटन आवश्यक छ। कृपया सुरक्षित गर्नु पूर्व गृह बटन थप्नुहोस्।"</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"बटनको चौडाइ समायोजन गर्नुहोस्"</string>
+    <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"क्लिपबोर्डले वस्तुहरूलाई क्लिपबोर्डमा प्रत्यक्ष तान्न अनुमति दिन्छ। प्रस्तुत गर्दा वस्तुहरूलाई क्लिपबोर्डबाट प्रत्यक्ष रूपमा बाहिर तान्न पनि सकिन्छ।"</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"अनुकूलन नेभिगेशन बटन"</string>
+    <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Keycode बटनहरूले किबोर्ड कुञ्जीहरूलाई नेभिगेसन पट्टीमा थपिने अनुमति दिन्छ। थिच्दा तिनीहरूले चयन गरिएको किबोर्ड कुञ्जी अनुकरण गर्छन्। सुरुमा बटनका लागि कुञ्जी चयन गर्नुपर्छ, त्यसपछि बटनमा छवि देखिनुपर्छ।"</string>
+    <string name="select_keycode" msgid="7413765103381924584">"किबोर्ड बटन चयन गर्नुहोस्"</string>
+    <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
 </resources>

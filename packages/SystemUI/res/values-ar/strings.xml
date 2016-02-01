@@ -150,6 +150,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك شريحة SIM."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"تم تعطيل بيانات شبكة الجوّال"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏ليس هناك شريحة SIM."</string>
@@ -304,8 +305,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"تثبيت الشاشة"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"بحث"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"تعذر بدء <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"المزيد"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> أخرى"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"السجلّ"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"محو"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"تقسيم مخصص"</string>
@@ -471,6 +472,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"ألوان عادية"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"ألوان ليلية"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"ألوان مخصصة"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"تلقائي"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"ألوان غير معروفة"</string>
     <string name="color_transform" msgid="6985460408079086090">"إشعار الألوان"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"إظهار قسم الإعدادات السريعة"</string>
@@ -497,10 +499,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"تم توصيل سماعات رأس"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"تم توصيل سماعات رأس"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"يمكنك تمكين أو تعطيل الرموز بحيث لا تظهر في شريط الحالة."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"توفير البيانات"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"تم تشغيل توفير البيانات"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"تم تعطيل توفير البيانات"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"تشغيل"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"شريط التنقل"</string>
+    <string name="start" msgid="6873794757232879664">"البدء"</string>
+    <string name="center" msgid="4327473927066010960">"وسط"</string>
+    <string name="end" msgid="125797972524818282">"النهاية"</string>
+    <string name="space" msgid="804232271282109749">"أداة المباعدة"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"مبدِّل القوائم / لوحة المفاتيح"</string>
+    <string name="select_button" msgid="1597989540662710653">"تحديد الزر لإضافته"</string>
+    <string name="add_button" msgid="4134946063432258161">"إضافة زر"</string>
+    <string name="save" msgid="2311877285724540644">"حفظ"</string>
+    <string name="reset" msgid="2448168080964209908">"إعادة تعيين"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"لم يُعثر على زر صفحة رئيسية"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"زر الصفحة الرئيسية مطلوب لكي تتمكن من التنقل في هذا الجهاز، الرجاء إضافة زر صفحة رئيسية قبل الحفظ."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"ضبط عرض الزر"</string>
+    <string name="clipboard" msgid="1313879395099896312">"الحافظة"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"تتيح الحافظة إمكانية سحب العناصر مباشرة إلى الحافظة، وكذلك يمكن سحب العناصر مباشرة خارج الحافظة عند وجودها."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"زر التنقل المخصص"</string>
+    <string name="keycode" msgid="7335281375728356499">"رمز المفتاح"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"تتيح أزرار رموز المفاتيح إمكانية إضافة مفاتيح لوحة المفاتيح إلى شريط التنقل. وعند الضغط عليها، تحاكي الأزرار مفتاح لوحة المفاتيح المحدد. ويجب أولاً تحديد المفتاح للزر، وبعد ذلك تحديد صورة لكي يتم عرضها على الزر."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"تحديد زر لوحة المفاتيح"</string>
+    <string name="preview" msgid="9077832302472282938">"معاينة"</string>
 </resources>

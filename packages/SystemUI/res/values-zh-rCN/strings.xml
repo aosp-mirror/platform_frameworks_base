@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"移动数据网络已关闭"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"没有 SIM 卡。"</string>
@@ -300,8 +301,9 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"固定屏幕"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜索"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"无法启动<xliff:g id="APP">%s</xliff:g>。"</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"更多"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"还有 <xliff:g id="NUMBER">%d</xliff:g> 项"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"历史记录"</string>
+    <!-- no translation found for recents_history_clear_all_button_label (5905258334958006953) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自定义分割"</string>
@@ -467,6 +469,8 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"常规颜色"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"夜间颜色"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"自定义颜色"</string>
+    <!-- no translation found for color_matrix_auto (4896624757412029265) -->
+    <skip />
     <string name="color_matrix_unknown" msgid="2709202104256265107">"未知颜色"</string>
     <string name="color_transform" msgid="6985460408079086090">"颜色修改"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"显示“快捷设置”图块"</string>
@@ -493,10 +497,48 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"已连接到耳机"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"已连接到耳机"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"指定在状态栏中显示或隐藏图标。"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
+    <string name="data_saver" msgid="5037565123367048522">"流量节省程序"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"流量节省程序已开启"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"流量节省程序已关闭"</string>
+    <!-- no translation found for switch_bar_on (1142437840752794229) -->
     <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
+    <!-- no translation found for nav_bar (1993221402773877607) -->
     <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
+    <!-- no translation found for start (6873794757232879664) -->
+    <skip />
+    <!-- no translation found for center (4327473927066010960) -->
+    <skip />
+    <!-- no translation found for end (125797972524818282) -->
+    <skip />
+    <!-- no translation found for space (804232271282109749) -->
+    <skip />
+    <!-- no translation found for menu_ime (4943221416525250684) -->
+    <skip />
+    <!-- no translation found for select_button (1597989540662710653) -->
+    <skip />
+    <!-- no translation found for add_button (4134946063432258161) -->
+    <skip />
+    <!-- no translation found for save (2311877285724540644) -->
+    <skip />
+    <string name="reset" msgid="2448168080964209908">"重置"</string>
+    <!-- no translation found for no_home_title (1563808595146071549) -->
+    <skip />
+    <!-- no translation found for no_home_message (5408485011659260911) -->
+    <skip />
+    <!-- no translation found for adjust_button_width (6138616087197632947) -->
+    <skip />
+    <!-- no translation found for clipboard (1313879395099896312) -->
+    <skip />
+    <!-- no translation found for clipboard_description (3819919243940546364) -->
+    <skip />
+    <!-- no translation found for accessibility_key (5701989859305675896) -->
+    <skip />
+    <!-- no translation found for keycode (7335281375728356499) -->
+    <skip />
+    <!-- no translation found for keycode_description (1403795192716828949) -->
+    <skip />
+    <!-- no translation found for select_keycode (7413765103381924584) -->
+    <skip />
+    <!-- no translation found for preview (9077832302472282938) -->
     <skip />
 </resources>

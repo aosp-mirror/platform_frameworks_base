@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"വൈഫൈ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"സിം ഇല്ല."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"സെല്ലുലാർ ഡാറ്റ ഓഫാണ്"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ബ്ലൂടൂത്ത് ടെതറിംഗ്."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ഫ്ലൈറ്റ് മോഡ്."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM കാർഡൊന്നുമില്ല."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"സ്ക്രീൻ പിൻ ചെയ്യൽ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"തിരയുക"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ആരംഭിക്കാനായില്ല."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"കൂടുതൽ"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> എണ്ണം കൂടി"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"ചരിത്രം"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"മായ്‌ക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"തിരശ്ചീനമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ലംബമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ഇഷ്‌ടാനുസൃതമായി വേർതിരിക്കുക"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"സാധാരണ വര്‍ണ്ണങ്ങൾ"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"രാത്രി വര്‍ണ്ണങ്ങൾ"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"ഇഷ്ടാനുസൃത വര്‍ണ്ണങ്ങൾ"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"യാന്ത്രികം"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"തിരിച്ചറിയാനാകാത്ത വർണ്ണങ്ങൾ"</string>
     <string name="color_transform" msgid="6985460408079086090">"വർണ്ണ പരിഷ്കരണം"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"ദ്രുത ക്രമീകരണ ടൈൽ കാണിക്കുക"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ഹെഡ്ഫോണുകൾ കണക്റ്റുചെയ്തു"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ഹെഡ്‌സെറ്റ് കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"സ്റ്റാറ്റസ് ബാറിൽ കാണിക്കുന്നതിൽ നിന്ന് ഐക്കണുകളെ പ്രവർത്തനക്ഷമമാക്കുകയോ പ്രവർത്തനരഹിതമാക്കുകയോ ചെയ്യുക"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"ഡാറ്റ സേവർ"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ഡാറ്റാ സേവർ ഓണാണ്"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ഡാറ്റാ സേവർ ഓഫാണ്"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"ഓൺ"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"നാവിഗേഷൻ ബാർ"</string>
+    <string name="start" msgid="6873794757232879664">"ആരംഭിക്കൂ"</string>
+    <string name="center" msgid="4327473927066010960">"മധ്യം"</string>
+    <string name="end" msgid="125797972524818282">"അവസാനിപ്പിക്കുക"</string>
+    <string name="space" msgid="804232271282109749">"സ്പേസർ"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"മെനു / കീബോർഡ് സ്വിച്ചർ"</string>
+    <string name="select_button" msgid="1597989540662710653">"ചേർക്കാൻ, ബട്ടൺ തിരഞ്ഞെടുക്കൂ"</string>
+    <string name="add_button" msgid="4134946063432258161">"ബട്ടൺ ചേർക്കുക"</string>
+    <string name="save" msgid="2311877285724540644">"സംരക്ഷിക്കുക"</string>
+    <string name="reset" msgid="2448168080964209908">"പുനഃസജ്ജമാക്കുക"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"ഒരു ഹോം ബട്ടണും കണ്ടെത്തിയില്ല"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"ഈ ഉപകരണം നാവിഗേറ്റ് ചെയ്യുന്നതിന് ഒരു ഹോം ബട്ടൺ ആവശ്യമാണ്, സംരക്ഷിക്കുന്നതിന് മുമ്പ് ഒരു ഹോം ബട്ടൺ ചേർക്കുക."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"ബട്ടൺ വീതി ക്രമീകരിക്കുക"</string>
+    <string name="clipboard" msgid="1313879395099896312">"ക്ലിപ്പ്ബോർഡ്"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"ഇനങ്ങളെ ക്ലിപ്പ്‌ബോർഡിലേക്ക് നേരിട്ട് വലിച്ചിടാൻ ക്ലിപ്പ്‌ബോർഡ് അനുവദിക്കുന്നു. ഇനങ്ങളെ ക്ലിപ്പ്‌ബോർഡിന് പുറത്തേക്ക് നേരിട്ട് വലിച്ചിടുകയുമാകാം."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"ഇഷ്ടാനുസൃത നാവിഗേഷൻ ബട്ടൺ"</string>
+    <string name="keycode" msgid="7335281375728356499">"കീകോഡ്"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"നാവിഗേഷൻ ബാറിലേക്ക് കീബോർഡ് കീകൾ ചേർക്കുന്നതിനെ കീകോഡ് ബട്ടണുകൾ അനുവദിക്കുന്നു. അമർത്തുമ്പോൾ, തിരഞ്ഞെടുത്ത കീയെ അവ അനുകരിക്കുന്നു. ആദ്യം ബട്ടണിനായി കീ തിരഞ്ഞെടുക്കണം, തുടർന്ന് ബട്ടണിൽ കാണിക്കാനുള്ള ചിത്രം തിരഞ്ഞെടുക്കണം."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"കീബോർഡ് ബട്ടൺ തിരഞ്ഞെടുക്കൂ"</string>
+    <string name="preview" msgid="9077832302472282938">"പ്രിവ്യു നടത്തുക"</string>
 </resources>

@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"沒有 SIM 卡。"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"行動數據連線已關閉"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"藍牙網路共用"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飛行模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"沒有 SIM 卡。"</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"螢幕固定"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"無法啟動「<xliff:g id="APP">%s</xliff:g>」。"</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"更多"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"還有 <xliff:g id="NUMBER">%d</xliff:g> 項"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"紀錄"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"清除"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"一般顏色"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"夜間顏色"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"自訂顏色"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"自動"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"不明顏色"</string>
     <string name="color_transform" msgid="6985460408079086090">"顏色修改"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"顯示快速設定圖塊"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"已與耳機連線"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"已與耳機連線"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"指定在狀態列中顯示或隱藏圖示。"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Data Saver"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Data Saver 已開啟"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Data Saver 已關閉"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"開啟"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"導覽列"</string>
+    <string name="start" msgid="6873794757232879664">"畫面頂端"</string>
+    <string name="center" msgid="4327473927066010960">"畫面中央"</string>
+    <string name="end" msgid="125797972524818282">"畫面底部"</string>
+    <string name="space" msgid="804232271282109749">"空格字元"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"選單/鍵盤切換工具"</string>
+    <string name="select_button" msgid="1597989540662710653">"選取要新增的按鈕"</string>
+    <string name="add_button" msgid="4134946063432258161">"新增按鈕"</string>
+    <string name="save" msgid="2311877285724540644">"儲存"</string>
+    <string name="reset" msgid="2448168080964209908">"重設"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"找不到「主畫面」按鈕"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"您必須設定「主畫面」按鈕才能操作這部裝置。請先新增「主畫面」按鈕再儲存。"</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"調整按鈕寬度"</string>
+    <string name="clipboard" msgid="1313879395099896312">"剪貼簿"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"您可以利用「剪貼簿」按鈕將所需項目直接拖曳到剪貼簿中，或是將剪貼簿中的項目直接拖曳出來。"</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"自訂導覽按鈕"</string>
+    <string name="keycode" msgid="7335281375728356499">"按鍵碼"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"您可以利用「按鍵碼」按鈕將鍵盤按鍵加到導覽列。只要按下這些按鈕，即可執行與所選鍵盤按鍵對應的操作。如要使用這項功能，請先為按鈕選取要模擬的鍵盤按鍵，然後指定按鈕的顯示圖示。"</string>
+    <string name="select_keycode" msgid="7413765103381924584">"選取鍵盤按鍵"</string>
+    <string name="preview" msgid="9077832302472282938">"預覽"</string>
 </resources>

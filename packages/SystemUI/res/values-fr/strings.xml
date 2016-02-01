@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Aucune carte SIM"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Données mobiles désactivées"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Partage de connexion Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode Avion"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Aucune carte SIM"</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"épinglage d\'écran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Plus"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> autres"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"Historique"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Effacer"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Séparation horizontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Séparation verticale"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Séparation personnalisée"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Couleurs normales"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Couleurs nocturnes"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Couleurs personnalisées"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Automatique"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Couleurs inconnues"</string>
     <string name="color_transform" msgid="6985460408079086090">"Modification des couleurs"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Afficher la tuile de configuration rapide"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Casque connecté"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Casque connecté"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Activer ou désactiver l\'affichage des icônes dans la barre d\'état"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Économiseur de données"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"L\'économiseur de données est activé."</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"L\'économiseur de données est désactivé."</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Activé"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Barre de navigation"</string>
+    <string name="start" msgid="6873794757232879664">"Début"</string>
+    <string name="center" msgid="4327473927066010960">"Centre"</string>
+    <string name="end" msgid="125797972524818282">"Fin"</string>
+    <string name="space" msgid="804232271282109749">"Espace"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Sélecteur menu/clavier"</string>
+    <string name="select_button" msgid="1597989540662710653">"Sélectionner le bouton à ajouter"</string>
+    <string name="add_button" msgid="4134946063432258161">"Ajouter un bouton"</string>
+    <string name="save" msgid="2311877285724540644">"Enregistrer"</string>
+    <string name="reset" msgid="2448168080964209908">"Réinitialiser"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Aucun bouton d\'accueil trouvé"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Un bouton d\'accueil est nécessaire pour naviguer sur cet appareil. Veuillez ajouter un bouton d\'accueil avant d\'enregistrer."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Ajuster la largeur du bouton"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Presse-papiers"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Vous pouvez faire glisser des éléments directement dans le Presse-papiers et inversement."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Bouton de navigation personnalisé"</string>
+    <string name="keycode" msgid="7335281375728356499">"Code touche"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Les boutons de codes touche permettent d\'ajouter des touches du clavier à la barre de navigation. Lorsque vous appuyez sur l\'un de ces boutons, il reproduit la fonction de la touche du clavier correspondante. Vous devez d\'abord sélectionner la touche pour le bouton, puis l\'image à afficher sur celui-ci."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Sélectionner la touche du clavier"</string>
+    <string name="preview" msgid="9077832302472282938">"Aperçu"</string>
 </resources>

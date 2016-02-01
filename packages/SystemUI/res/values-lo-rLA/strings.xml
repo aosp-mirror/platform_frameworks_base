@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ບໍ່ມີຊິມ."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ຂໍ້ມູນເຄືອຂ່າຍມືຖືປິດຢູ່"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ການປ່ອຍສັນຍານ Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ໂໝດໃນຍົນ."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"ບໍ່ມີແຜ່ນ SIM."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"ບໍ່​ສາ​ມາດ​ເລີ່ມ <xliff:g id="APP">%s</xliff:g> ໄດ້."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"ເພີ່ມເຕີມ"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> ເພີ່ມເຕີມ"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"ປະຫວັດ"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ລຶບ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ການ​ແຍກ​ລວງ​ຂວາງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ການ​ແຍກ​ລວງ​ຕັ້ງ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ການ​ແຍກ​ກຳ​ນົດ​ເອງ"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"ສີ​ປົກ​ກະ​ຕິ"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"ສີ​ຕອນ​ກາງ​ຄືນ"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"ສີແບບກຳນົດເອງ"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"ອັດຕະໂນມັດ"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"ສີທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="color_transform" msgid="6985460408079086090">"ການ​ດັດ​ແປງສີ"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"ສະແດງໄທລ໌ການຕັ້ງຄ່າດ່ວນ"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"ເປີດ ຫຼື ປິດໄອຄອນຕ່າງໆຈາກການສະແດງໃນແຖບສະຖານະ."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"ຕົວປະຢັດຂໍ້ມູນ"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ຕົວປະຢັດຂໍ້ມູນເປີດຢູ່"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ຕົວປະຢັດຂໍ້ມູນປິດຢູ່"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"ເປີດ"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"ແຖບນຳທາງ"</string>
+    <string name="start" msgid="6873794757232879664">"ເລີ່ມຕົ້ນ"</string>
+    <string name="center" msgid="4327473927066010960">"ເຄິ່ງກາງ"</string>
+    <string name="end" msgid="125797972524818282">"ທ້າຍ"</string>
+    <string name="space" msgid="804232271282109749">"Spacer"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"ຕົວປ່ຽນເມນູ / ແປ້ນພິມ"</string>
+    <string name="select_button" msgid="1597989540662710653">"ເລືອກປຸ່ມເພື່ອເພີ່ມ"</string>
+    <string name="add_button" msgid="4134946063432258161">"ເພີ່ມປຸ່ມ"</string>
+    <string name="save" msgid="2311877285724540644">"ບັນທຶກ"</string>
+    <string name="reset" msgid="2448168080964209908">"ຣີເຊັດ"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"ບໍ່ພົບປຸ່ມໜ້າຫຼັກ"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"ຈຳເປັນຕ້ອງມີປຸ່ມໜ້າຫຼັກເພື່ອໃຫ້ສາມາດນຳທາງອຸປະກອນນີ້. ກະລຸນາເພີ່ມປຸ່ມໜ້າຫຼັກກ່ອນທີ່ຈະບັນທຶກ."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"ປັບຄວາມກວ້າງຂອງປຸ່ມ"</string>
+    <string name="clipboard" msgid="1313879395099896312">"​ຄລິບບອດ"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"ຄລິບບອດອະນຸຍາດໃຫ້ລາກລາຍການຕ່າງໆໂດຍກົງຫາຄລິບບອດ. ນອກນັ້ນ ຍັງສາມາດລາກລາຍການໂດຍກົງອອກຈາກຄລິບບອດໄດ້ ເມື່ອມີຢູ່."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"ປຸ່ມນຳທາງແບບກຳນົດເອງ"</string>
+    <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"ປຸ່ມ Keycode ອະນຸຍາດໃຫ້ເພີ່ມປຸ່ມແປ້ນພິມໃສ່ແຖບການນຳທາງ. ເມື່ອກົດແລ້ວພວກມັນຈະຮຽນແບບປຸ່ມແປ້ນພິມທີ່ເລືອກ. ທຳອິດຕ້ອງເລືອກປຸ່ມແປ້ນພິມສຳລັບປຸ່ມນັ້ນ, ຕາມດ້ວຍຮູບທີ່ຈະປາກົດຂຶ້ນເທິງປຸ່ມນັ້ນ."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"ເລືອກປຸ່ມແປ້ນພິມ"</string>
+    <string name="preview" msgid="9077832302472282938">"ສະແດງຕົວຢ່າງ"</string>
 </resources>

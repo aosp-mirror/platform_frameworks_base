@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Cạnh"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Không có SIM nào."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Dữ liệu di động bị tắt"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Truy cập Internet qua Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Chế độ trên máy bay."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Không có thẻ SIM nào."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"khóa màn hình"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"tìm kiếm"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Không thể khởi động <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Thêm"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> tác vụ khác"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"Lịch sử"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Xóa"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Phân tách ngang"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Phân tách dọc"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Tùy chỉnh phân tách"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Màu thông thường"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Màu tối"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Màu tùy chỉnh"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Tự động"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Màu không xác định"</string>
     <string name="color_transform" msgid="6985460408079086090">"Sửa đổi màu"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Hiển thị ô Cài đặt nhanh"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Đã kết nối tai nghe"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Đã kết nối tai nghe"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Bật hoặc tắt biểu tượng hiển thị trong thanh trạng thái."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Trình tiết kiệm dữ liệu"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Trình tiết kiệm dữ liệu đang bật"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Trình tiết kiệm dữ liệu đang tắt"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Bật"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Thanh điều hướng"</string>
+    <string name="start" msgid="6873794757232879664">"Đầu"</string>
+    <string name="center" msgid="4327473927066010960">"Căn giữa"</string>
+    <string name="end" msgid="125797972524818282">"Cuối"</string>
+    <string name="space" msgid="804232271282109749">"Ký tự cách"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Trình chuyển đổi bàn phím / menu"</string>
+    <string name="select_button" msgid="1597989540662710653">"Chọn nút để thêm"</string>
+    <string name="add_button" msgid="4134946063432258161">"Thêm nút"</string>
+    <string name="save" msgid="2311877285724540644">"Lưu"</string>
+    <string name="reset" msgid="2448168080964209908">"Đặt lại"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Không tìm thấy nút trang chủ"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Cần có nút trang chủ để có thể điều hướng thiết bị này. Vui lòng thêm nút trang chủ trước khi lưu."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Điều chỉnh chiều rộng nút"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Khay nhớ tạm"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Khay nhớ tạm cho phép kéo trực tiếp mục vào khay nhớ tạm. Bạn cũng có thể kéo trực tiếp mục ra khỏi khay nhớ tạm khi hiển thị."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Nút điều hướng tùy chỉnh"</string>
+    <string name="keycode" msgid="7335281375728356499">"Mã phím"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Các nút mã phím cho phép thêm các phím trên bàn phím vào Thanh điều hướng. Khi bạn nhấn, các nút này sẽ mô phỏng phím trên bàn phím được chọn. Trước tiên, bạn phải chọn phím cho nút, sau đó chọn một hình ảnh để hiển thị trên nút."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Chọn nút trên bàn phím"</string>
+    <string name="preview" msgid="9077832302472282938">"Xem trước"</string>
 </resources>

@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No SIM."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobile Data Off"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Aeroplane mode"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No SIM card."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Could not start <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"More"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> More"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"History"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Clear"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Customised"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Normal colours"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Night colours"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Customised colours"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Auto"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Unknown colours"</string>
     <string name="color_transform" msgid="6985460408079086090">"Colour modification"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Show Quick Settings tile"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Headphones connected"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Headset connected"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Enable or disable icons from being shown in the status bar."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Data Saver"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Data Saver is on"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Data Saver is off"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"On"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Navigation bar"</string>
+    <string name="start" msgid="6873794757232879664">"Start"</string>
+    <string name="center" msgid="4327473927066010960">"Centre"</string>
+    <string name="end" msgid="125797972524818282">"End"</string>
+    <string name="space" msgid="804232271282109749">"Spacer"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Menu / Keyboard Switcher"</string>
+    <string name="select_button" msgid="1597989540662710653">"Select button to add"</string>
+    <string name="add_button" msgid="4134946063432258161">"Add button"</string>
+    <string name="save" msgid="2311877285724540644">"Savings"</string>
+    <string name="reset" msgid="2448168080964209908">"Reset"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"No home button found"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"A home button is required to be able to navigate this device. Please add a home button before saving."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Adjust button width"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Clipboard"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"The Clipboard allows items to be dragged directly to the clipboard. Items can also be dragged directly out of the clipboard when present."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Customised navigation button"</string>
+    <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Keycode buttons allow keyboard keys to be added to the Navigation Bar. When pressed they emulate the selected keyboard key. First the key must be selected for the button, followed by an image to be shown on the button."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Select Keyboard Button"</string>
+    <string name="preview" msgid="9077832302472282938">"Preview"</string>
 </resources>

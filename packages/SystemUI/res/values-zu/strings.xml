@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ekucupheleni"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"I-Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Ayikho i-SIM"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Idatha yeselula ivaliwe"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Imodemu nge-Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Imodi yendiza."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Alikho ikhadi le-SIM."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ukuphina isikrini"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"sesha"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ayikwazanga ukuqala i-<xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Okuningi"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> Okuningi"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"Umlando"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Sula"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Hlukanisa okuvundlile"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Hlukanisa okumile"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Hlukanisa kwezifiso"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Imibala ejwayelekile"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Imibala yasebusuku"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Imibala yangokwezifiso"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Okuzenzakalelayo"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Imibala engaziwa"</string>
     <string name="color_transform" msgid="6985460408079086090">"Ukulungiswa kombala"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Bonisa ithayili lezilungiselelo ezisheshayo"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Amahedfoni axhunyiwe"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Ama-earphone axhunyiwe"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Nika amandla noma khubaza izithonjana kusukela ekubonisweni kubha yesimo."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Iseva yedatha"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Iseva yedatha ivuliwe"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Iseva yedatha ivaliwe"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Vuliwe"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Ibha yokuzula"</string>
+    <string name="start" msgid="6873794757232879664">"Qala"</string>
+    <string name="center" msgid="4327473927066010960">"Maphakathi"</string>
+    <string name="end" msgid="125797972524818282">"Phelisa"</string>
+    <string name="space" msgid="804232271282109749">"Okwenza isikhala"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Isishintshi semenyu / sekhibhodi"</string>
+    <string name="select_button" msgid="1597989540662710653">"Khetha inkinobho ongayengeza"</string>
+    <string name="add_button" msgid="4134946063432258161">"Inkinobho yokwengeza"</string>
+    <string name="save" msgid="2311877285724540644">"Londoloza"</string>
+    <string name="reset" msgid="2448168080964209908">"Setha kabusha"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Ayikho inkinobho yasekhaya etholakele"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Inkinobho yasekhaya iyadingeka ukuthi inikwe amandla ukuze uzule kule divayisi. Sicela ungeze inkinobho yasekhaya ngaphambi kokulondoloza."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Lungisa ububanzi benkinobho"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Ibhodi lokumanathisela"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Ibhodi lokunamathisela livumela izinto ukuthi zihudulelwe ngqo ebhodini lokunamathisela. Izinto zingahudulelwa ngqo ngaphandle kwebhodi lokunamathisela uma zikhona."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Inkinobho yokuzula yangokwezifiso"</string>
+    <string name="keycode" msgid="7335281375728356499">"Ikhodi yokhiye"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Izinkinobho zebhodi yokhiye zivumela okhiye bekhibhodi ukuthi bangezwe kwibha yokuzula. Uma zicindezelwa zusula ukhiye wekhibhodi okhethiwe. Kokuqala ukhiye kufanele akhethelwe inkinobho, ulandelwe isithombe esizoboniswa kwinkinobho."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Khetha inkinobho yekhibhodi"</string>
+    <string name="preview" msgid="9077832302472282938">"Hlola kuqala"</string>
 </resources>
