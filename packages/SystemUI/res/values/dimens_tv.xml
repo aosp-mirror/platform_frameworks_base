@@ -18,15 +18,21 @@
 -->
 <resources>
     <!-- Dimens for recents card in the recents view on tv -->
-    <dimen name="recents_tv_card_width">150dip</dimen>
-    <dimen name="recents_tv_card_height">85dip</dimen>
-    <dimen name="recents_tv_card_extra_badge_size">16dip</dimen>
+    <dimen name="recents_tv_card_width">268dip</dimen>
+    <dimen name="recents_tv_card_height">151dip</dimen>
+    <dimen name="recents_tv_card_extra_badge_size">20dip</dimen>
+    <dimen name="recents_tv_banner_width">114dip</dimen>
+    <dimen name="recents_tv_banner_height">64dip</dimen>
+    <dimen name="recents_tv_banner_margin_top">16dip</dimen>
+    <dimen name="recents_tv_icon_padding_bottom">8dip</dimen>
+    <dimen name="recents_tv_icon_padding_end">12dip</dimen>
+    <dimen name="recents_tv_text_padding_bottom">12dip</dimen>
 
     <!-- Padding for grid view in recents view on tv -->
     <dimen name="recents_tv_grid_row_padding">56dip</dimen>
     <dimen name="recents_tv_gird_row_top_padding">57dip</dimen>
-    <dimen name="recents_tv_grid_max_row_height">200dip</dimen>
-    <dimen name="recents_tv_gird_card_spacing">8dip</dimen>
+    <dimen name="recents_tv_grid_max_row_height">268dip</dimen>
+    <dimen name="recents_tv_gird_card_spacing">20dip</dimen>
 
     <!-- Values for focus animation -->
     <dimen name="recents_tv_unselected_item_z">6dp</dimen>
@@ -34,4 +40,7 @@
 
     <!-- Extra space around the PIP and its outline in PIP onboarding activity  -->
     <dimen name="tv_pip_bounds_space">3dp</dimen>
+
+    <!-- Values for text on recents cards on tv -->
+    <dimen name="recents_tv_title_text_size">12sp</dimen>
 </resources>

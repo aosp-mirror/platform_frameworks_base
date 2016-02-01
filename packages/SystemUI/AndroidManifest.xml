@@ -245,7 +245,7 @@
                   android:stateNotNeeded="true"
                   android:resumeWhilePausing="true"
                   android:screenOrientation="behind"
-                  android:theme="@style/RecentsTheme.Wallpaper">
+                  android:theme="@style/RecentsTvTheme.Wallpaper">
             <intent-filter>
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>

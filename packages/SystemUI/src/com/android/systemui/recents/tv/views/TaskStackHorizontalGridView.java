@@ -15,7 +15,6 @@
  */
 package com.android.systemui.recents.tv.views;
 
-
 import android.content.Context;
 import android.support.v17.leanback.widget.HorizontalGridView;
 import android.util.AttributeSet;
@@ -36,12 +35,16 @@ import java.util.List;
 /**
  * Horizontal Grid View Implementation to show the Task Stack for TV.
  */
-public class TaskStackHorizontalGridView extends HorizontalGridView implements TaskStackCallbacks{
+public class TaskStackHorizontalGridView extends HorizontalGridView implements TaskStackCallbacks {
 
     private TaskStack mStack;
     private ArrayList<TaskCardView> mTaskViews = new ArrayList<>();
     private Task mFocusedTask;
 
+
+    public TaskStackHorizontalGridView(Context context) {
+        this(context, null);
+    }
 
     public TaskStackHorizontalGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -64,8 +67,6 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
      * Resets this view for reuse.
      */
     public void reset() {
-        // Reset the focused task
-        resetFocusedTask(getFocusedTask());
         requestLayout();
     }
 
@@ -73,12 +74,6 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
      * @param task - Task to reset
      */
     private void resetFocusedTask(Task task) {
-        if (task != null) {
-            TaskCardView tv = getChildViewForTask(task);
-            if (tv != null) {
-                tv.requestFocus();
-            }
-        }
         mFocusedTask = null;
     }
 
@@ -107,6 +102,9 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
      * @return - The focused task.
      */
     public Task getFocusedTask() {
+        if (findFocus() != null) {
+            mFocusedTask = ((TaskCardView)findFocus()).getTask();
+        }
         return mFocusedTask;
     }
 
