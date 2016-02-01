@@ -231,12 +231,7 @@ public class NotificationManager
         if (notification.sound != null) {
             notification.sound = notification.sound.getCanonicalUri();
             if (StrictMode.vmFileUriExposureEnabled()) {
-                //notification.sound.checkFileUriExposed("Notification.sound");
-                if ("file".equals(notification.sound.getScheme())) {
-                    Log.w(TAG, "notify: warning: file:// Uri exposed through Notification.sound: "
-                                + notification.sound,
-                        new Throwable());
-                }
+                notification.sound.checkFileUriExposed("Notification.sound");
             }
         }
         fixLegacySmallIcon(notification, pkg);
