@@ -178,6 +178,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.Choreographer#scheduleVsyncLocked",
         "android.view.Display#updateDisplayInfoLocked",
         "android.view.Display#getWindowManager",
+        "android.view.HandlerActionQueue#postDelayed",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#getWindowToken",
