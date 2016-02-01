@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
+import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
 import com.android.systemui.statusbar.notification.HybridNotificationViewManager;
@@ -779,13 +780,16 @@ public class NotificationContentView extends FrameLayout {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT)
                 );
+                existing = riv;
+            }
+            if (hasRemoteInput) {
                 int color = entry.notification.getNotification().color;
                 if (color == Notification.COLOR_DEFAULT) {
                     color = mContext.getColor(R.color.default_remote_input_background);
                 }
-                riv.setBackgroundColor(color);
-
-                return riv;
+                existing.setBackgroundColor(NotificationColorUtil.ensureTextBackgroundColor(color,
+                        mContext.getColor(R.color.remote_input_text),
+                        mContext.getColor(R.color.remote_input_hint)));
             }
             return existing;
         }
