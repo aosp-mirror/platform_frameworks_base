@@ -2060,7 +2060,8 @@ public abstract class ContentResolver {
      * @param account the account to specify in the sync
      * @param authority the provider to specify in the sync request
      * @param extras extra parameters to go along with the sync request
-     * @param pollFrequency how frequently the sync should be performed, in seconds.
+     * @param pollFrequency how frequently the sync should be performed, in seconds. A minimum value
+     *                      of 1 hour is enforced.
      * @throws IllegalArgumentException if an illegal extra was set or if any of the parameters
      * are null.
      */

@@ -400,10 +400,10 @@ public final class ContentService extends IContentService.Stub {
                 SyncStorageEngine.EndPoint info;
                 info = new SyncStorageEngine.EndPoint(
                         request.getAccount(), request.getProvider(), userId);
-                if (runAtTime < 60) {
+                if (runAtTime < 3600) {
                     Slog.w(TAG, "Requested poll frequency of " + runAtTime
-                            + " seconds being rounded up to 60 seconds.");
-                    runAtTime = 60;
+                            + " seconds being rounded up to 1 hour.");
+                    runAtTime = 3600;
                 }
                 // Schedule periodic sync.
                 getSyncManager().updateOrAddPeriodicSync(info, runAtTime,
@@ -620,10 +620,10 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to write the sync settings");
 
         int userId = UserHandle.getCallingUserId();
-        if (pollFrequency < 60) {
+        if (pollFrequency < 3600) {
             Slog.w(TAG, "Requested poll frequency of " + pollFrequency
-                    + " seconds being rounded up to 60 seconds.");
-            pollFrequency = 60;
+                    + " seconds being rounded up to 1 hour.");
+            pollFrequency = 3600;
         }
         long defaultFlex = SyncStorageEngine.calculateDefaultFlexTime(pollFrequency);
 
