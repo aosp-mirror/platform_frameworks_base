@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.INotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -102,13 +103,10 @@ public abstract class ConditionProviderService extends Service {
     abstract public void onConnected();
 
     /**
-     * Called when the system wants to know the state of Conditions managed by this provider.
-     *
-     * Implementations should evaluate the state of all subscribed conditions, and provide updates
-     * by calling {@link #notifyCondition(Condition)} or {@link #notifyConditions(Condition...)}.
-     * @param relevance
+     * @removed
      */
-    abstract public void onRequestConditions(int relevance);
+    @SystemApi
+    public void onRequestConditions(int relevance) {}
 
     /**
      * Called by the system when there is a new {@link Condition} to be managed by this provider.
@@ -131,7 +129,11 @@ public abstract class ConditionProviderService extends Service {
     }
 
     /**
-     * Informs the notification manager that the state of a Condition has changed.
+     * Informs the notification manager that the state of a Condition has changed. Use this method
+     * to put the system into Do Not Disturb mode or request that it exits Do Not Disturb mode. This
+     * call will be ignored unless there is an enabled {@link android.app.AutomaticZenRule} owned by
+     * service that has an {@link android.app.AutomaticZenRule#getConditionId()} equal to this
+     * {@link Condition#id}.
      * @param condition the condition that has changed.
      */
     public final void notifyCondition(Condition condition) {
@@ -140,7 +142,8 @@ public abstract class ConditionProviderService extends Service {
     }
 
     /**
-     * Informs the notification manager that the state of one or more Conditions has changed.
+     * Informs the notification manager that the state of one or more Conditions has changed. See
+     * {@link #notifyCondition(Condition)} for restrictions.
      * @param conditions the changed conditions.
      */
     public final void notifyConditions(Condition... conditions) {

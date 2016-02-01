@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
@@ -24,7 +25,8 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 /**
- * Condition information from condition providers.
+ * Condition information from condition providers. Used to tell the system to enter Do Not Disturb
+ * mode and request that the system exit Do Not Disturb mode.
  */
 public class Condition implements Parcelable {
 
@@ -38,14 +40,47 @@ public class Condition implements Parcelable {
     public static final int FLAG_RELEVANT_NOW = 1 << 0;
     public static final int FLAG_RELEVANT_ALWAYS = 1 << 1;
 
+    /**
+     * The URI representing the condition being updated.
+     * See {@link android.app.AutomaticZenRule#getConditionId()}.
+     */
     public final Uri id;
-    public final String summary;
-    public final String line1;
-    public final String line2;
-    public final int icon;
-    public final int state;
-    public final int flags;
 
+    /**
+     * A summary of what the rule encoded in {@link #id} means when it is enabled. User visible
+     * if the state of the condition is {@link #STATE_TRUE}.
+     */
+    public final String summary;
+
+    /**
+     * Additional information about what the rule encoded in {@link #id} means when it is enabled.
+     * User visible if the state of the condition is {@link #STATE_TRUE}.
+     */
+    public final String line1;
+
+    /**
+     * Additional information about what the rule encoded in {@link #id} means when it is enabled.
+     * User visible if the state of the condition is {@link #STATE_TRUE}.
+     */
+    public final String line2;
+
+    /**
+     * The state of this condition. {@link #STATE_TRUE} will enable Do Not Disturb mode. Any other
+     * state will turn Do Not Disturb off for this rule. Note that Do Not Disturb might still be
+     * enabled globally if other conditions are in a {@link #STATE_TRUE} state.
+     */
+    public final int state;
+
+    @SystemApi
+    public final int flags;
+    @SystemApi
+    public final int icon;
+
+    public Condition(Uri id, String summary, String line1, String line2, int state) {
+        this(id, summary, line1, line2, -1, state, FLAG_RELEVANT_ALWAYS);
+    }
+
+    @SystemApi
     public Condition(Uri id, String summary, String line1, String line2, int icon,
             int state, int flags) {
         if (id == null) throw new IllegalArgumentException("id is required");
