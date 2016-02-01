@@ -38,6 +38,7 @@ import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -234,6 +235,25 @@ public class AppWidgetHostView extends FrameLayout {
         }
     }
 
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        try {
+            super.onLayout(changed, left, top, right, bottom);
+        } catch (final RuntimeException e) {
+            Log.e(TAG, "Remote provider threw runtime exception, using error view instead.", e);
+            removeViewInLayout(mView);
+            View child = getErrorView();
+            prepareView(child);
+            addViewInLayout(child, 0, child.getLayoutParams());
+            measureChild(child, MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
+            child.layout(0, 0, child.getMeasuredWidth() + mPaddingLeft + mPaddingRight,
+                    child.getMeasuredHeight() + mPaddingTop + mPaddingBottom);
+            mView = child;
+            mViewMode = VIEW_MODE_ERROR;
+        }
+    }
+
     /**
      * Provide guidance about the size of this widget to the AppWidgetManager. The widths and
      * heights should correspond to the full area the AppWidgetHostView is given. Padding added by
@@ -381,7 +401,7 @@ public class AppWidgetHostView extends FrameLayout {
                     remoteViews.reapply(mContext, mView, mOnClickHandler);
                     content = mView;
                     recycled = true;
-                    if (LOGD) Log.d(TAG, "was able to recycled existing layout");
+                    if (LOGD) Log.d(TAG, "was able to recycle existing layout");
                 } catch (RuntimeException e) {
                     exception = e;
                 }
