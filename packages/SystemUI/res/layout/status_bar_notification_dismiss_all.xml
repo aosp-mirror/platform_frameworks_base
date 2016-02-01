@@ -19,15 +19,16 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:clipChildren="false"
-        android:clipToPadding="false">
+        android:paddingEnd="8dp"
+        android:visibility="gone">
     <com.android.systemui.statusbar.DismissViewButton
+            style="@android:style/Widget.Material.Button.Borderless"
             android:id="@+id/dismiss_text"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:focusable="true"
-            android:background="@drawable/ripple_drawable"
-            android:contentDescription="@string/accessibility_clear_all"/>
+            android:contentDescription="@string/accessibility_clear_all"
+            android:text="@string/clear_all_notifications_text"
+            android:textAllCaps="true"/>
 </com.android.systemui.statusbar.DismissView>
