@@ -59,11 +59,14 @@ final class StandardMenuPopup extends MenuPopup implements OnDismissListener, On
     private final OnGlobalLayoutListener mGlobalLayoutListener = new OnGlobalLayoutListener() {
         @Override
         public void onGlobalLayout() {
-            if (isShowing()) {
+            // Only move the popup if it's showing and non-modal. We don't want
+            // to be moving around the only interactive window, since there's a
+            // good chance the user is interacting with it.
+            if (isShowing() && !mPopup.isModal()) {
                 final View anchor = mShownAnchorView;
                 if (anchor == null || !anchor.isShown()) {
                     dismiss();
-                } else if (isShowing()) {
+                } else {
                     // Recompute window size and position
                     mPopup.show();
                 }
