@@ -191,6 +191,13 @@ public class DpmMockContext extends MockContext {
 
         void settingsGlobalPutString(String name, String value) {
         }
+
+        int settingsGlobalGetInt(String name, int def) {
+            return 0;
+        }
+
+        void securityLogSetLoggingEnabledProperty(boolean enabled) {
+        }
     }
 
     public final Context realTestContext;

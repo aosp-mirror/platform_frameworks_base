@@ -1459,6 +1459,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         void settingsGlobalPutString(String name, String value) {
             Settings.Global.putString(mContext.getContentResolver(), name, value);
         }
+
+        void securityLogSetLoggingEnabledProperty(boolean enabled) {
+            SecurityLog.setLoggingEnabledProperty(enabled);
+        }
     }
 
     /**
@@ -8315,7 +8319,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void disableDeviceLoggingIfNotCompliant() {
         if (!isDeviceOwnerManagedSingleUserDevice()) {
-            SecurityLog.setLoggingEnabledProperty(false);
+            mInjector.securityLogSetLoggingEnabledProperty(false);
             Slog.w(LOG_TAG, "Device logging turned off as it's no longer a single user device.");
         }
     }
@@ -8326,7 +8330,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         ensureDeviceOwnerManagingSingleUser(admin);
 
         synchronized (this) {
-            SecurityLog.setLoggingEnabledProperty(enabled);
+            mInjector.securityLogSetLoggingEnabledProperty(enabled);
             if (enabled) {
                 mSecurityLogMonitor.start();
             } else {
