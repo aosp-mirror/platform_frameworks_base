@@ -3237,18 +3237,20 @@ public class PackageParser {
                     SCREEN_ORIENTATION_UNSPECIFIED);
 
             a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-            if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
-                final boolean appDefault = (owner.applicationInfo.privateFlags
-                        & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
-                if (sa.getBoolean(
-                        R.styleable.AndroidManifestActivity_resizeableActivity, appDefault)) {
-                    if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
-                            false)) {
-                        a.info.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
-                    } else {
-                        a.info.resizeMode = RESIZE_MODE_RESIZEABLE;
-                    }
+            final boolean appDefault = (owner.applicationInfo.privateFlags
+                    & PRIVATE_FLAG_RESIZEABLE_ACTIVITIES) != 0;
+            final boolean resizeable = sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_resizeableActivity, appDefault);
+
+            if (resizeable) {
+                if (sa.getBoolean(R.styleable.AndroidManifestActivity_supportsPictureInPicture,
+                        false)) {
+                    a.info.resizeMode = RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+                } else {
+                    a.info.resizeMode = RESIZE_MODE_RESIZEABLE;
                 }
+            } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
+                a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             } else if (a.info.screenOrientation == SCREEN_ORIENTATION_UNSPECIFIED
                     && (a.info.flags & FLAG_IMMERSIVE) == 0) {
                 a.info.resizeMode = RESIZE_MODE_CROP_WINDOWS;
