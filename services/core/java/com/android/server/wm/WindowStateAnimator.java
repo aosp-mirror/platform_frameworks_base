@@ -1225,10 +1225,11 @@ class WindowStateAnimator {
         calculateSurfaceBounds(w, w.getAttrs());
 
         mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, recoveringMemory);
+
+        mSurfaceController.setMatrixInTransaction(mDsDx * w.mHScale, mDtDx * w.mVScale,
+                mDsDy * w.mHScale, mDtDy * w.mVScale, recoveringMemory);
         mSurfaceResized = mSurfaceController.setSizeInTransaction(
                 mTmpSize.width(), mTmpSize.height(),
-                mDsDx * w.mHScale, mDtDx * w.mVScale,
-                mDsDy * w.mHScale, mDtDy * w.mVScale,
                 recoveringMemory);
 
         if (mSurfaceResized) {

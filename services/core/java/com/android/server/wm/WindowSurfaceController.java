@@ -190,8 +190,27 @@ class WindowSurfaceController {
         }
     }
 
-    boolean setSizeInTransaction(int width, int height, float dsdx, float dtdx, float dsdy, float dtdy,
+    void setMatrixInTransaction(float dsdx, float dtdx, float dsdy, float dtdy,
             boolean recoveringMemory) {
+        try {
+            if (SHOW_TRANSACTIONS) logSurface(
+                    "MATRIX [" + dsdx + "," + dtdx + "," + dsdy + "," + dtdy + "]", null);
+            mSurfaceControl.setMatrix(
+                    dsdx, dtdx, dsdy, dtdy);
+        } catch (RuntimeException e) {
+            // If something goes wrong with the surface (such
+            // as running out of memory), don't take down the
+            // entire system.
+            Slog.e(TAG, "Error setting matrix on surface surface" + title
+                    + " MATRIX [" + dsdx + "," + dtdx + "," + dsdy + "," + dtdy + "]", null);
+            if (!recoveringMemory) {
+                mAnimator.reclaimSomeSurfaceMemory("matrix", true);
+            }
+        }
+        return;
+    }
+
+    boolean setSizeInTransaction(int width, int height, boolean recoveringMemory) {
         final boolean surfaceResized = mSurfaceW != width || mSurfaceH != height;
         if (surfaceResized) {
             mSurfaceW = width;
@@ -201,8 +220,6 @@ class WindowSurfaceController {
                 if (SHOW_TRANSACTIONS) logSurface(
                         "SIZE " + width + "x" + height, null);
                 mSurfaceControl.setSize(width, height);
-                mSurfaceControl.setMatrix(
-                        dsdx, dtdx, dsdy, dtdy);
             } catch (RuntimeException e) {
                 // If something goes wrong with the surface (such
                 // as running out of memory), don't take down the
