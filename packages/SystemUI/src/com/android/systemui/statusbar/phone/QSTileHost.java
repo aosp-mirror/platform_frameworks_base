@@ -18,13 +18,17 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +36,7 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.tiles.AirplaneModeTile;
 import com.android.systemui.qs.tiles.BatteryTile;
@@ -334,6 +339,51 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         specs.remove(tileSpec);
         Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
                 TextUtils.join(",", specs), ActivityManager.getCurrentUser());
+    }
+
+    public void addTile(ComponentName tile) {
+        List<String> newSpecs = new ArrayList<>(mTileSpecs);
+        newSpecs.add(0, CustomTile.toSpec(tile));
+        changeTiles(mTileSpecs, newSpecs);
+    }
+
+    public void removeTile(ComponentName tile) {
+        List<String> newSpecs = new ArrayList<>(mTileSpecs);
+        newSpecs.remove(CustomTile.toSpec(tile));
+        changeTiles(mTileSpecs, newSpecs);
+    }
+
+    public void changeTiles(List<String> previousTiles, List<String> newTiles) {
+        final int NP = previousTiles.size();
+        final int NA = newTiles.size();
+        for (int i = 0; i < NP; i++) {
+            String tileSpec = previousTiles.get(i);
+            if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
+            if (!newTiles.contains(tileSpec)) {
+                Intent intent = new Intent().setComponent(
+                        CustomTile.getComponentFromSpec(tileSpec));
+                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
+                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
+                lifecycleManager.onStopListening();
+                lifecycleManager.onTileRemoved();
+                lifecycleManager.flushMessagesAndUnbind();
+            }
+        }
+        for (int i = 0; i < NA; i++) {
+            String tileSpec = newTiles.get(i);
+            if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
+            if (!previousTiles.contains(tileSpec)) {
+                Intent intent = new Intent().setComponent(
+                        CustomTile.getComponentFromSpec(tileSpec));
+                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
+                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
+                lifecycleManager.onTileAdded();
+                lifecycleManager.flushMessagesAndUnbind();
+            }
+        }
+        if (DEBUG) Log.d(TAG, "saveCurrentTiles " + newTiles);
+        Secure.putStringForUser(getContext().getContentResolver(), QSTileHost.TILES_SETTING,
+                TextUtils.join(",", newTiles), ActivityManager.getCurrentUser());
     }
 
     public QSTile<?> createTile(String tileSpec) {

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -66,6 +67,9 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_CAMERA_LAUNCH_GESTURE         = 24 << MSG_SHIFT;
     private static final int MSG_TOGGLE_KEYBOARD_SHORTCUTS     = 25 << MSG_SHIFT;
     private static final int MSG_REQUEST_TV_PICTURE_IN_PICTURE = 26 << MSG_SHIFT;
+    private static final int MSG_ADD_QS_TILE                   = 27 << MSG_SHIFT;
+    private static final int MSG_REMOVE_QS_TILE                = 28 << MSG_SHIFT;
+    private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -112,6 +116,10 @@ public class CommandQueue extends IStatusBar.Stub {
         public void startAssist(Bundle args);
         public void onCameraLaunchGestureDetected(int source);
         public void requestTvPictureInPicture();
+
+        void addQsTile(ComponentName tile);
+        void remQsTile(ComponentName tile);
+        void clickTile(ComponentName tile);
     }
 
     public CommandQueue(Callbacks callbacks) {
@@ -318,6 +326,27 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    @Override
+    public void addQsTile(ComponentName tile) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_ADD_QS_TILE, tile).sendToTarget();
+        }
+    }
+
+    @Override
+    public void remQsTile(ComponentName tile) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_REMOVE_QS_TILE, tile).sendToTarget();
+        }
+    }
+
+    @Override
+    public void clickQsTile(ComponentName tile) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_CLICK_QS_TILE, tile).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -411,6 +440,15 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_REQUEST_TV_PICTURE_IN_PICTURE:
                     mCallbacks.requestTvPictureInPicture();
+                    break;
+                case MSG_ADD_QS_TILE:
+                    mCallbacks.addQsTile((ComponentName) msg.obj);
+                    break;
+                case MSG_REMOVE_QS_TILE:
+                    mCallbacks.remQsTile((ComponentName) msg.obj);
+                    break;
+                case MSG_CLICK_QS_TILE:
+                    mCallbacks.clickTile((ComponentName) msg.obj);
                     break;
             }
         }

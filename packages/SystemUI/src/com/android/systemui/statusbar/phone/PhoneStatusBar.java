@@ -29,6 +29,7 @@ import android.app.StatusBarManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -1523,6 +1524,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (orderChanged) {
             mStackScroller.generateChildOrderChangedEvent();
         }
+    }
+
+    @Override
+    public void addQsTile(ComponentName tile) {
+        mQSPanel.getHost().addTile(tile);
+    }
+
+    @Override
+    public void remQsTile(ComponentName tile) {
+        mQSPanel.getHost().removeTile(tile);
+    }
+
+    @Override
+    public void clickTile(ComponentName tile) {
+        mQSPanel.clickTile(tile);
     }
 
     private boolean packageHasVisibilityOverride(String key) {

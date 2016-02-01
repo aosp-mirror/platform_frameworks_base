@@ -19,6 +19,7 @@ package com.android.systemui.qs;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -41,6 +42,7 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSlider;
 import com.android.systemui.statusbar.phone.QSTileHost;
@@ -536,6 +538,17 @@ public class QSPanel extends FrameLayout implements Tunable {
         final boolean scanState = mDetailRecord instanceof TileRecord
                 && ((TileRecord) mDetailRecord).scanState;
         fireScanStateChanged(scanState);
+    }
+
+    public void clickTile(ComponentName tile) {
+        final String spec = CustomTile.toSpec(tile);
+        final int N = mRecords.size();
+        for (int i = 0; i < N; i++) {
+            if (mRecords.get(i).tile.getTileSpec().equals(spec)) {
+                mRecords.get(i).tile.click();
+                break;
+            }
+        }
     }
 
     private class H extends Handler {

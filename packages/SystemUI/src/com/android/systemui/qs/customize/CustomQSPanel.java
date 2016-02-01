@@ -122,32 +122,7 @@ public class CustomQSPanel extends QSPanel {
     }
 
     public void saveCurrentTiles() {
-        for (int i = 0; i < mSavedTiles.size(); i++) {
-            String tileSpec = mSavedTiles.get(i);
-            if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
-            if (!mTiles.contains(tileSpec)) {
-                Intent intent = new Intent().setComponent(CustomTile.getComponentFromSpec(tileSpec));
-                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
-                lifecycleManager.onStopListening();
-                lifecycleManager.onTileRemoved();
-                lifecycleManager.flushMessagesAndUnbind();
-            }
-        }
-        for (int i = 0; i < mTiles.size(); i++) {
-            String tileSpec = mTiles.get(i);
-            if (!tileSpec.startsWith(CustomTile.PREFIX)) continue;
-            if (!mSavedTiles.contains(tileSpec)) {
-                Intent intent = new Intent().setComponent(CustomTile.getComponentFromSpec(tileSpec));
-                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, intent, new UserHandle(ActivityManager.getCurrentUser()));
-                lifecycleManager.onTileAdded();
-                lifecycleManager.flushMessagesAndUnbind();
-            }
-        }
-        if (DEBUG) Log.d(TAG, "saveCurrentTiles " + mTiles);
-        Secure.putStringForUser(getContext().getContentResolver(), QSTileHost.TILES_SETTING,
-                TextUtils.join(",", mTiles), ActivityManager.getCurrentUser());
+        mHost.changeTiles(mSavedTiles, mTiles);
     }
 
     public void stashCurrentTiles() {
