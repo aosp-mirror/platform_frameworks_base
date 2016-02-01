@@ -172,7 +172,7 @@ public class TileAdapter extends BaseAdapter {
         }
 
         private void addTile(String spec, Icon icon, CharSequence label, Context context) {
-            addTile(spec, icon.getDrawable(context), label);
+            addTile(spec, icon != null ? icon.getDrawable(context) : null, label);
         }
 
         private View getView(Context context, View convertView, ViewGroup parent,
