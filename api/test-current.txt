@@ -31685,6 +31685,7 @@ package android.provider {
 
   public abstract class DocumentsProvider extends android.content.ContentProvider {
     ctor public DocumentsProvider();
+    method public java.lang.String copyDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public java.lang.String createDocument(java.lang.String, java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public void deleteDocument(java.lang.String) throws java.io.FileNotFoundException;
@@ -31692,6 +31693,7 @@ package android.provider {
     method public final java.lang.String getType(android.net.Uri);
     method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
     method public boolean isChildDocument(java.lang.String, java.lang.String);
+    method public java.lang.String moveDocument(java.lang.String, java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public final android.content.res.AssetFileDescriptor openAssetFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
     method public final android.content.res.AssetFileDescriptor openAssetFile(android.net.Uri, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;
     method public abstract android.os.ParcelFileDescriptor openDocument(java.lang.String, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;

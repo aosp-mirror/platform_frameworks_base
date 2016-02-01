@@ -273,7 +273,6 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @param sourceDocumentId the document to copy.
      * @param targetParentDocumentId the target document to be copied into as a child.
-     * @hide
      */
     @SuppressWarnings("unused")
     public String copyDocument(String sourceDocumentId, String targetParentDocumentId)
@@ -283,17 +282,19 @@ public abstract class DocumentsProvider extends ContentProvider {
 
     /**
      * Move the requested document or a document tree.
-     * <p>
-     * Moves a document including all child documents to another location within
+     *
+     * <p>Moves a document including all child documents to another location within
      * the same document provider. Upon completion returns the document id of
      * the copied document at the target destination. {@code null} must never
      * be returned.
+     *
+     * <p>It's the responsibility of the provider to revoke grants if the document
+     * is no longer accessible using <code>sourceDocumentId</code>.
      *
      * @param sourceDocumentId the document to move.
      * @param sourceParentDocumentId the parent of the document to move.
      * @param targetParentDocumentId the target document to be a new parent of the
      *     source document.
-     * @hide
      */
     @SuppressWarnings("unused")
     public String moveDocument(String sourceDocumentId, String sourceParentDocumentId,
@@ -838,9 +839,6 @@ public abstract class DocumentsProvider extends ContentProvider {
 
                 out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
             }
-
-            // Original document no longer exists, clean up any grants.
-            revokeDocumentPermission(documentId);
 
         } else if (METHOD_REMOVE_DOCUMENT.equals(method)) {
             final Uri parentSourceUri = extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI);
