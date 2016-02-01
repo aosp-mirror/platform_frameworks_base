@@ -23,6 +23,7 @@ import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
+import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.os.Parcel;
 import android.os.ParcelUuid;
@@ -177,6 +178,11 @@ public class SoundTriggerService extends SystemService {
         @Override
         public void stopAllRecognitions() {
             mSoundTriggerHelper.stopAllRecognitions();
+        }
+
+        @Override
+        public ModuleProperties getModuleProperties() {
+            return mSoundTriggerHelper.getModuleProperties();
         }
 
         @Override

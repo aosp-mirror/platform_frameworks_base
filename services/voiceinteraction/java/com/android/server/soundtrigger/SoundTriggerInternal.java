@@ -44,9 +44,6 @@ public abstract class SoundTriggerInternal {
     public static final int STATUS_ERROR = SoundTrigger.STATUS_ERROR;
     public static final int STATUS_OK = SoundTrigger.STATUS_OK;
 
-    /** The {@link ModuleProperties} for the system, or null if none exists. */
-    private ModuleProperties moduleProperties;
-
     /**
      * Starts recognition for the given keyphraseId.
      *
@@ -76,9 +73,7 @@ public abstract class SoundTriggerInternal {
      */
     public abstract void stopAllRecognitions();
 
-    public ModuleProperties getModuleProperties() {
-        return moduleProperties;
-    }
+    public abstract ModuleProperties getModuleProperties();
 
     public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 }
