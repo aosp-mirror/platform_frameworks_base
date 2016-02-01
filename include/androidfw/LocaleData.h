@@ -29,6 +29,8 @@ int localeDataCompareRegions(
 
 void localeDataComputeScript(char out[4], const char* language, const char* region);
 
+bool localeDataIsCloseToUsEnglish(const char* region);
+
 } // namespace android
 
 #endif // _LIBS_UTILS_LOCALE_DATA_H

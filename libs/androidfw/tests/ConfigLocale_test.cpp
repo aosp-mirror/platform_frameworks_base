@@ -592,4 +592,52 @@ TEST(ConfigLocaleTest, isLocaleBetterThan_regionComparison) {
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
 }
 
+// Default resources are considered better matches for US English
+// and US-like English locales than International English locales
+TEST(ConfigLocaleTest, isLocaleBetterThan_UsEnglishIsSpecial) {
+    ResTable_config config1, config2, request;
+
+    fillIn("en", "US", NULL, NULL, &request);
+    fillIn(NULL, NULL, NULL, NULL, &config1);
+    fillIn("en", "001", NULL, NULL, &config2);
+    // default is better than International English
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("en", "US", NULL, NULL, &request);
+    fillIn(NULL, NULL, NULL, NULL, &config1);
+    fillIn("en", "GB", NULL, NULL, &config2);
+    // default is better than British English
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("en", "PR", NULL, NULL, &request);
+    fillIn(NULL, NULL, NULL, NULL, &config1);
+    fillIn("en", "001", NULL, NULL, &config2);
+    // Even for Puerto Rico, default is better than International English
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("en", "US", NULL, NULL, &request);
+    fillIn("en", NULL, NULL, NULL, &config1);
+    fillIn(NULL, NULL, NULL, NULL, &config2);
+    // "English" is better than default, since it's a parent of US English
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("en", "PR", NULL, NULL, &request);
+    fillIn("en", NULL, NULL, NULL, &config1);
+    fillIn(NULL, NULL, NULL, NULL, &config2);
+    // "English" is better than default, since it's a parent of Puerto Rico English
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("en", "US", NULL, NULL, &request);
+    fillIn(NULL, NULL, NULL, NULL, &config1);
+    fillIn("en", "PR", NULL, NULL, &config2);
+    // For US English itself, we prefer default to its siblings in the parent tree
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+}
+
 }  // namespace android
