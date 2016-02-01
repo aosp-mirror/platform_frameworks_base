@@ -2154,7 +2154,7 @@ public abstract class Window {
      * Called when the activity changes from fullscreen mode to multi-window mode and visa-versa.
      * @hide
      */
-    public abstract void onMultiWindowModeChanged();
+    public abstract void onMultiWindowChanged();
 
     /**
      * Called when the activity just relaunched.

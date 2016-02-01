@@ -675,7 +675,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
-    public void onMultiWindowModeChanged() {
+    public void onMultiWindowChanged() {
         if (mDecor != null) {
             mDecor.onConfigurationChanged(getContext().getResources().getConfiguration());
         }

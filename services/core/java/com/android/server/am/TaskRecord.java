@@ -1322,7 +1322,7 @@ final class TaskRecord {
         }
 
         if (mFullscreen != oldFullscreen) {
-            reportMultiWindowModeChange();
+            reportMultiWindowChange();
         }
 
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
@@ -1377,22 +1377,22 @@ final class TaskRecord {
         return bounds;
     }
 
-    private void reportMultiWindowModeChange() {
+    private void reportMultiWindowChange() {
         for (int i = mActivities.size() - 1; i >= 0; i--) {
             final ActivityRecord r = mActivities.get(i);
             if (r.app != null && r.app.thread != null) {
                 try {
                     // An activity is consider to be in multi-window mode if its task isn't
                     // fullscreen.
-                    r.app.thread.scheduleMultiWindowModeChanged(r.appToken, !mFullscreen);
+                    r.app.thread.scheduleMultiWindowChanged(r.appToken, !mFullscreen);
                 } catch (Exception e) {
-                    Slog.e(TAG, "TaskRecord.reportMultiWindowModeChange: ", e);
+                    Slog.e(TAG, "TaskRecord.reportMultiWindowChange: ", e);
                 }
             }
         }
     }
 
-    void reportPictureInPictureModeChangeIfNeeded(ActivityStack prevStack) {
+    void reportPictureInPictureChangeIfNeeded(ActivityStack prevStack) {
         if (prevStack == null || prevStack == stack
                 || (prevStack.mStackId != PINNED_STACK_ID && stack.mStackId != PINNED_STACK_ID)) {
             return;
@@ -1402,10 +1402,10 @@ final class TaskRecord {
             final ActivityRecord r = mActivities.get(i);
             if (r.app != null && r.app.thread != null) {
                 try {
-                    r.app.thread.schedulePictureInPictureModeChanged(
+                    r.app.thread.schedulePictureInPictureChanged(
                             r.appToken, stack.mStackId == PINNED_STACK_ID);
                 } catch (Exception e) {
-                    Slog.e(TAG, "TaskRecord.reportMultiWindowModeChange: ", e);
+                    Slog.e(TAG, "TaskRecord.reportPictureInPictureChangeIfNeeded: ", e);
                 }
             }
         }

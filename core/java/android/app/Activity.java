@@ -62,7 +62,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -72,7 +71,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
@@ -80,16 +78,12 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
-import android.transition.Scene;
-import android.transition.TransitionManager;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SuperNotCalledException;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -110,16 +104,11 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.ViewRootImpl;
 import android.view.Window;
-import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
-import android.widget.Toolbar;
 
-import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.app.ToolbarActionBar;
-import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.PhoneWindow;
 
 import java.io.FileDescriptor;
@@ -1842,14 +1831,14 @@ public class Activity extends ContextThemeWrapper
      * visa-versa.
      * @see android.R.attr#resizeableActivity
      *
-     * @param multiWindowMode True if the activity is in multi-window mode.
+     * @param inMultiWindow True if the activity is in multi-window mode.
      */
     @CallSuper
-    public void onMultiWindowModeChanged(boolean multiWindowMode) {
+    public void onMultiWindowChanged(boolean inMultiWindow) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "onMultiWindowModeChanged " + this + ": " + multiWindowMode);
+                "onMultiWindowChanged " + this + ": " + inMultiWindow);
         if (mWindow != null) {
-            mWindow.onMultiWindowModeChanged();
+            mWindow.onMultiWindowChanged();
         }
     }
 
@@ -1859,9 +1848,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if the activity is in multi-window mode.
      */
-    public boolean inMultiWindowMode() {
+    public boolean inMultiWindow() {
         try {
-            return ActivityManagerNative.getDefault().inMultiWindowMode(mToken);
+            return ActivityManagerNative.getDefault().inMultiWindow(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1871,11 +1860,11 @@ public class Activity extends ContextThemeWrapper
      * Called by the system when the activity changes to and from picture-in-picture mode.
      * @see android.R.attr#supportsPictureInPicture
      *
-     * @param pictureInPictureMode True if the activity is in picture-in-picture mode.
+     * @param inPictureInPicture True if the activity is in picture-in-picture mode.
      */
-    public void onPictureInPictureModeChanged(boolean pictureInPictureMode) {
+    public void onPictureInPictureChanged(boolean inPictureInPicture) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG,
-                "onPictureInPictureModeChanged " + this + ": " + pictureInPictureMode);
+                "onPictureInPictureChanged " + this + ": " + inPictureInPicture);
     }
 
     /**
@@ -1884,9 +1873,9 @@ public class Activity extends ContextThemeWrapper
      *
      * @return True if the activity is in picture-in-picture mode.
      */
-    public boolean inPictureInPictureMode() {
+    public boolean inPictureInPicture() {
         try {
-            return ActivityManagerNative.getDefault().inPictureInPictureMode(mToken);
+            return ActivityManagerNative.getDefault().inPictureInPicture(mToken);
         } catch (RemoteException e) {
         }
         return false;
@@ -1896,9 +1885,9 @@ public class Activity extends ContextThemeWrapper
      * Puts the activity in picture-in-picture mode.
      * @see android.R.attr#supportsPictureInPicture
      */
-    public void enterPictureInPictureMode() {
+    public void enterPictureInPicture() {
         try {
-            ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken);
+            ActivityManagerNative.getDefault().enterPictureInPicture(mToken);
         } catch (RemoteException e) {
         }
     }

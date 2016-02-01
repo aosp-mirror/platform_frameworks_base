@@ -532,9 +532,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
-    public void onMultiWindowModeChanged(boolean multiWindowMode) {
-        super.onMultiWindowModeChanged(multiWindowMode);
-        if (!multiWindowMode) {
+    public void onMultiWindowChanged(boolean inMultiWindow) {
+        super.onMultiWindowChanged(inMultiWindow);
+        if (!inMultiWindow) {
             RecentsTaskLoader loader = Recents.getTaskLoader();
             RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
             launchOpts.loadIcons = false;
