@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"New window"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copy"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Paste"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Show internal storage"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Show SD card"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Hide internal storage"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Hide SD card"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Show internal storage"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Hide internal storage"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Show file size"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Hide file size"</string>
     <string name="button_select" msgid="527196987259139214">"select"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">Couldn\'t delete <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Tap to view details"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Close"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"These files weren\'t copied: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"These files weren\'t moved: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"These files were converted to another format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Copied <xliff:g id="COUNT_1">%1$d</xliff:g> files to clipboard.</item>
       <item quantity="one">Copied <xliff:g id="COUNT_0">%1$d</xliff:g> file to clipboard.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Cannot paste the selected files in this location."</string>
     <string name="menu_rename" msgid="7678802479104285353">"rename"</string>
     <string name="rename_error" msgid="4203041674883412606">"Failed to rename document"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Some files were converted"</string>
+    <string name="allow" msgid="7225948811296386551">"Allow"</string>
+    <string name="deny" msgid="2081879885755434506">"Deny"</string>
 </resources>

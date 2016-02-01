@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Nueva ventana"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copiar"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Pegar"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Mostrar almac. interno"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostrar tarjeta SD"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ocultar almac. interno"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Ocultar tarjeta SD"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Mostrar almac. interno"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Ocultar almac. interno"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Mostrar tamaño del archivo"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ocultar tamaño del archivo"</string>
     <string name="button_select" msgid="527196987259139214">"Seleccionar"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">No se ha podido eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> archivo</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Toca para ver detalles"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Cerrar"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Archivos que no se han copiado: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Archivos que no se han movido: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Estos archivos se han convertido a otro formato: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Se han copiado <xliff:g id="COUNT_1">%1$d</xliff:g> archivos al portapapeles.</item>
       <item quantity="one">Se ha copiado <xliff:g id="COUNT_0">%1$d</xliff:g> archivo al portapapeles.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Los archivos seleccionados no se pueden pegar en esta ubicación."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Cambiar nombre"</string>
     <string name="rename_error" msgid="4203041674883412606">"Error al cambiar el nombre del documento"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Se han convertido algunos archivos"</string>
+    <string name="allow" msgid="7225948811296386551">"Permitir"</string>
+    <string name="deny" msgid="2081879885755434506">"Denegar"</string>
 </resources>

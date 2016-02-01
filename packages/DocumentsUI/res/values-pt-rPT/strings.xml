@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Nova janela"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copiar"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Colar"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Mostrar mem. armaz. int."</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostrar cartão SD"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ocultar mem. armaz. int."</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Ocultar cartão SD"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Mostrar mem. armaz. int."</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Ocultar mem. armaz. int."</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Mostrar tam. de fich."</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ocultar tam. de fich."</string>
     <string name="button_select" msgid="527196987259139214">"Selecionar"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">Não foi possível eliminar <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Toque para ver detalhes"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Fechar"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Os seguintes ficheiros não foram copiados: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Os seguintes ficheiros não foram movidos: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Estes ficheiros foram convertidos para outro formato: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Copiou <xliff:g id="COUNT_1">%1$d</xliff:g> ficheiros para a área de transferência.</item>
       <item quantity="one">Copiou <xliff:g id="COUNT_0">%1$d</xliff:g> ficheiro para a área de transferência.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Não é possível colar os ficheiros selecionados nesta localização."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Mudar o nome"</string>
     <string name="rename_error" msgid="4203041674883412606">"Falha ao mudar o nome do documento"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Alguns ficheiros foram convertidos"</string>
+    <string name="allow" msgid="7225948811296386551">"Permitir"</string>
+    <string name="deny" msgid="2081879885755434506">"Recusar"</string>
 </resources>

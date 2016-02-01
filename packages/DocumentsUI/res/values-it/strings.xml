@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Nuova finestra"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Copia"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Incolla"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Mostra memoria interna"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostra scheda SD"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Nascondi memoria interna"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Nascondi scheda SD"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Mostra memoria interna"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Nascondi memoria interna"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Mostra dimensioni file"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Nascondi dimensioni file"</string>
     <string name="button_select" msgid="527196987259139214">"Seleziona"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">Impossibile eliminare <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Tocca per vedere i dettagli"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Chiudi"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"I seguenti file non sono stati copiati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"I seguenti file non sono stati spostati: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"I file sono stati convertiti in un altro formato: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> file copiati negli appunti.</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> file copiato negli appunti.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Impossibile incollare i file selezionati in questa posizione."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Rinomina"</string>
     <string name="rename_error" msgid="4203041674883412606">"Ridenominazione documento non riuscita"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Alcuni file sono stati convertiti"</string>
+    <string name="allow" msgid="7225948811296386551">"Consenti"</string>
+    <string name="deny" msgid="2081879885755434506">"Nega"</string>
 </resources>

@@ -60,11 +60,7 @@
     <skip />
     <!-- no translation found for menu_advanced_show (4693652895715631401) -->
     <skip />
-    <!-- no translation found for menu_advanced_show (5792182900084144261) -->
-    <skip />
     <!-- no translation found for menu_advanced_hide (4218809952721972589) -->
-    <skip />
-    <!-- no translation found for menu_advanced_hide (4845869969015718848) -->
     <skip />
     <!-- no translation found for menu_file_size_show (3240323619260823076) -->
     <skip />
@@ -110,7 +106,7 @@
     <skip />
     <!-- no translation found for empty (7858882803708117596) -->
     <skip />
-    <string name="no_results" msgid="6622510343880730446">"Nema utakmica u %1$s"</string>
+    <string name="no_results" msgid="6622510343880730446">"Nema rezultata u %1$s"</string>
     <!-- no translation found for toast_no_application (1339885974067891667) -->
     <skip />
     <!-- no translation found for toast_failed_delete (2180678019407244069) -->
@@ -141,15 +137,20 @@
       <item quantity="other">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Dodirnite za prikaz detalja"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Zatvori"</string>
     <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
     <skip />
     <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
     <skip />
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su pretvorene u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
     <!-- no translation found for clipboard_files_cannot_paste (2878324825602325706) -->
     <skip />
     <string name="menu_rename" msgid="7678802479104285353">"Preimenuj"</string>
     <string name="rename_error" msgid="4203041674883412606">"Nije uspjelo preimenovanje dokumenta"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Neke od datoteka su pretvorene"</string>
+    <!-- no translation found for allow (7225948811296386551) -->
+    <skip />
+    <!-- no translation found for deny (2081879885755434506) -->
+    <skip />
 </resources>

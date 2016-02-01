@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"نافذة جديدة"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"نسخ"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"لصق"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"إظهار وحدة التخزين الداخلية"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"‏إظهار بطاقة SD"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"إخفاء وحدة التخزين الداخلية"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"‏إخفاء بطاقة SD"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"إظهار وحدة التخزين الداخلية"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"إخفاء وحدة التخزين الداخلية"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"إظهار حجم الملف"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"إخفاء حجم الملف"</string>
     <string name="button_select" msgid="527196987259139214">"تحديد"</string>
@@ -123,10 +121,10 @@
       <item quantity="one">تعذر حذف <xliff:g id="COUNT_0">%1$d</xliff:g> ملف</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"انقر لعرض التفاصيل."</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"إغلاق"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"لم يتم نسخ هذه الملفات: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"لم يتم نقل الملفات التالية: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"تم تحويل هذه الملفات إلى تنسيق آخر: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="zero">لم يتم نسخ أي ملف (<xliff:g id="COUNT_1">%1$d</xliff:g>) إلى الحافظة.</item>
       <item quantity="two">تم نسخ ملفين اثنين (<xliff:g id="COUNT_1">%1$d</xliff:g>) إلى الحافظة.</item>
@@ -138,4 +136,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"يتعذر لصق الملفات المحددة في هذا الموقع."</string>
     <string name="menu_rename" msgid="7678802479104285353">"إعادة تسمية"</string>
     <string name="rename_error" msgid="4203041674883412606">"أخفقت إعادة تسمية المستند."</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"تم تحويل بعض الملفات"</string>
+    <string name="allow" msgid="7225948811296386551">"السماح"</string>
+    <string name="deny" msgid="2081879885755434506">"رفض"</string>
 </resources>

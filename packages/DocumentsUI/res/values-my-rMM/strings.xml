@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"ဝင်းဒိုးသစ်"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ကူးယူရန်"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ကပ်ရန်"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"စက်ရှိစတိုရုံ ပြပါ"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD ကဒ် ပြပါ"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"စက်ရှိစတိုရုံ ဖျောက်ထားပါ"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD ကဒ် ဖျောက်ပါ"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"စက်ရှိစတိုရုံ ပြပါ"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"စက်ရှိစတိုရုံ ဖျောက်ထားပါ"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ဖိုင်အရွယ်အစား ပြပါ"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ဖိုင်အရွယ်အစား ဖျောက်ပါ"</string>
     <string name="button_select" msgid="527196987259139214">"ရွေးရန်"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">ဖိုင် <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်၍မရပါ</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"အသေးစိတ်ကြည့်ရန် တို့ပါ"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"ပိတ်ပါ"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ဤဖိုင်များ ကော်ပီကူးမထားပါ- <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ဤဖိုင်များကို မရွှေ့ခဲ့ပါ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"ဤဖိုင်များကို အခြားပုံစံစနစ်တစ်ခုသို့ ပြောင်းလဲခဲ့သည် − <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်ကိုအချက်အလက်သိမ်းတဲ့နေရာသို့ ကူးယူပါ။</item>
       <item quantity="one"> ဖိုင် <xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင်ကိုအချက်အလက်သိမ်းတဲ့နေရာသို့ ကူးယူပါ။</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ဤနေရာတွင် ရွေးချယ်ထားသည့် ဖိုင်များကို ကူးထည့်၍မရပါ။"</string>
     <string name="menu_rename" msgid="7678802479104285353">"အမည်ပြောင်းရန်"</string>
     <string name="rename_error" msgid="4203041674883412606">"စာရွက်စာတမ်းကို အမည်ပြောင်းခြင်း မအောင်မြင်ပါ"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"အချို့ဖိုင်များကို ပြောင်းလဲထားသည်"</string>
+    <string name="allow" msgid="7225948811296386551">"ခွင့်ပြုသည်"</string>
+    <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်သည်"</string>
 </resources>

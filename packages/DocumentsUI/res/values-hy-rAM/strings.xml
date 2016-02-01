@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Նոր պատուհան"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Պատճենել"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Տեղադրել"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ցույց տալ ներքին պահոցը"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Ցույց տալ SD քարտը"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Թաքցնել ներքին պահոցը"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Թաքցնել SD քարտը"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Ցույց տալ ներքին պահոցը"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Թաքցնել ներքին պահոցը"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Ցույց տալ ֆայլի չափը"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Թաքցնել ֆայլի չափը"</string>
     <string name="button_select" msgid="527196987259139214">"Ընտրել"</string>
@@ -99,10 +97,10 @@
       <item quantity="other">Չհաջողվեց ջնջել <xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Հպեք՝ մանրամասները դիտելու համար"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Փակել"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Հետևյալ ֆայլերը չեն պատճենվել՝ <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Հետևյալ ֆայլերը չեն տեղափոխվել՝ <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Այս ֆայլերը փոխարկվել են մեկ այլ ձևաչափի՝ <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ պատճենվեց սեղմատախտակին:</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ պատճենվեց սեղմատախտակին:</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Հնարավոր չէ տեղադրել ընտրված ֆայլերը այս տեղադրությունում:"</string>
     <string name="menu_rename" msgid="7678802479104285353">"Վերանվանել"</string>
     <string name="rename_error" msgid="4203041674883412606">"Չհաջողվեց վերանվանել փաստաթուղթը"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Որոշ ֆայլեր փոխարկվել են"</string>
+    <string name="allow" msgid="7225948811296386551">"Թույլատրել"</string>
+    <string name="deny" msgid="2081879885755434506">"Մերժել"</string>
 </resources>

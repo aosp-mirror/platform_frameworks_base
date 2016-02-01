@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"नई विंडो"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"कॉपी करें"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"चिपकाएं"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"आंतरिक मेमोरी दिखाएं"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD कार्ड दिखाएं"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"आंतरिक मेमोरी छिपाएं"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD कार्ड छिपाएं"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"आंतरिक मेमोरी दिखाएं"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"आंतरिक मेमोरी छिपाएं"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"फ़ाइल आकार दिखाएं"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"फ़ाइल आकार छिपाएं"</string>
     <string name="button_select" msgid="527196987259139214">"चुनें"</string>
@@ -99,10 +97,10 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलें हटाई नहीं जा सकीं</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"विवरणों को देखने के लिए टैप करें"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"बंद करें"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"इन फ़ाइलों की कॉपी नहीं बनाई गई: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ये फ़ाइलें नहीं ले जाई गईं: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"ये फ़ाइलें किसी अन्‍य प्रारूप में रूपांतरित हो गई थीं: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">क्‍लिपबोर्ड पर <xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी बनाई गई.</item>
       <item quantity="other">क्‍लिपबोर्ड पर <xliff:g id="COUNT_1">%1$d</xliff:g> फ़ाइलों की कॉपी बनाई गई.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"चयनित फ़ाइलों को इस स्‍थान में नहीं चिपकाया जा सकता."</string>
     <string name="menu_rename" msgid="7678802479104285353">"नाम बदलें"</string>
     <string name="rename_error" msgid="4203041674883412606">"दस्‍तावेज़ का नाम बदलना विफल रहा"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"कुछ फ़ाइलें रूपांतरित हो गई थीं"</string>
+    <string name="allow" msgid="7225948811296386551">"अनुमति दें"</string>
+    <string name="deny" msgid="2081879885755434506">"अस्वीकारें"</string>
 </resources>

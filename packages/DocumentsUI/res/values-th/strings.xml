@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"หน้าต่างใหม่"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"คัดลอก"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"วาง"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"แสดงที่จัดเก็บภายใน"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"แสดงการ์ด SD"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"ซ่อนที่จัดเก็บภายใน"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"ซ่อนการ์ด SD"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"แสดงที่จัดเก็บภายใน"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"ซ่อนที่จัดเก็บภายใน"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"แสดงขนาดไฟล์"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ซ่อนขนาดไฟล์"</string>
     <string name="button_select" msgid="527196987259139214">"เลือก"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">ไม่สามารถลบ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"แตะเพื่อดูรายละเอียด"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"ปิด"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ไม่มีการคัดลอกไฟล์เหล่านี้: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ไม่มีการย้ายไฟล์เหล่านี้: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"ไฟล์ต่อไปนี้แปลงเป็นอีกรูปแบบหนึ่งแล้ว: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">คัดลอก <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์ไปยังคลิปบอร์ดแล้ว</item>
       <item quantity="one">คัดลอก <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์ไปยังคลิปบอร์ดแล้ว</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ไม่สามารถวางไฟล์ที่เลือกในตำแหน่งนี้"</string>
     <string name="menu_rename" msgid="7678802479104285353">"เปลี่ยนชื่อ"</string>
     <string name="rename_error" msgid="4203041674883412606">"ไม่สามารถเปลี่ยนชื่อเอกสาร"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"แปลงบางไฟล์แล้ว"</string>
+    <string name="allow" msgid="7225948811296386551">"อนุญาต"</string>
+    <string name="deny" msgid="2081879885755434506">"ปฏิเสธ"</string>
 </resources>

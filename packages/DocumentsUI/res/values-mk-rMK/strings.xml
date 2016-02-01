@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Нов прозорец"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Копирај"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Залепи"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Прикажи внатрешна мемор."</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Прикажи СД-картичка"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Скриј внатрешна меморија"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Сoкриј СД-картичка"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Прикажи внатрешна мемор."</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Скриј внатрешна меморија"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Прикажи целосна големина"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Сокриј целосна големина"</string>
     <string name="button_select" msgid="527196987259139214">"Избери"</string>
@@ -99,10 +97,10 @@
       <item quantity="other">Не можеше да се избришат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Допрете за да ги погледнете деталите"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Затвори"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Датотекиве не се ископирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"Овие датотеки не се преместија: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"Овие датотеки беа конвертирани во друг формат: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Копирана е <xliff:g id="COUNT_1">%1$d</xliff:g> датотека на таблата со исечоци.</item>
       <item quantity="other">Копирани се <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки на таблата со исечоци.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Не може да ги залепи избраните датотеки на локацијава."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Преименувај"</string>
     <string name="rename_error" msgid="4203041674883412606">"Не успеа да се преименува документот"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Некои датотеки беа конвертирани"</string>
+    <string name="allow" msgid="7225948811296386551">"Дозволи"</string>
+    <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
 </resources>

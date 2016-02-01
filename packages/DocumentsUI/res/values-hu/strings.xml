@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"Új ablak"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Másolás"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Beillesztés"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Belső tárhely"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD-kártya megjelenítése"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Belső tárhely elrejtése"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD-kártya elrejtése"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Belső tárhely"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Belső tárhely elrejtése"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Fájlméret megjelenítése"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fájlméret elrejtése"</string>
     <string name="button_select" msgid="527196987259139214">"Kiválasztás"</string>
@@ -99,10 +97,10 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fájlt nem sikerült törölni</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Koppintson rá a részletek megtekintéséhez"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"Bezárás"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"A következő fájlokat nem sikerült átmásolni: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"A következő fájlok nem lettek áthelyezve: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"A következő fájlokat a rendszer más formátumba konvertálta: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> fájl vágólapra másolva.</item>
       <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> fájl vágólapra másolva.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"A kijelölt fájlokat nem lehet beilleszteni erre a helyre."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Átnevezés"</string>
     <string name="rename_error" msgid="4203041674883412606">"Nem sikerült átnevezni a dokumentumot"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Egyes fájlokat konvertált a rendszer"</string>
+    <string name="allow" msgid="7225948811296386551">"Engedélyezés"</string>
+    <string name="deny" msgid="2081879885755434506">"Elutasítás"</string>
 </resources>

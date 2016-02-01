@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"নতুন উইন্ডো"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"প্রতিলিপি করুন"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"আটকান"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"অভ্যন্তরীণ সঞ্চয়স্থান দেখান"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD কার্ড দেখান"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"অভ্যন্তরীণ সঞ্চয়স্থান লুকান"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD কার্ড লুকান"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"অভ্যন্তরীণ সঞ্চয়স্থান দেখান"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"অভ্যন্তরীণ সঞ্চয়স্থান লুকান"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ফাইলের আকার দেখান"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ফাইলের আকার লুকান"</string>
     <string name="button_select" msgid="527196987259139214">"নির্বাচন করুন"</string>
@@ -99,10 +97,10 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছা গেল না</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"বিশদ বিবরণ দেখতে আলতো চাপুন"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"বন্ধ করুন"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"এই ফাইলগুলির প্রতিলিপি করা হয় নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"এই ফাইলগুলি সরানো হয়নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"এই ফাইলগুলি অন্য ফরম্যাটে রূপান্তর করা হয়েছে: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল ক্লিপবোর্ডে প্রতিলিপি করা হয়েছে।</item>
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল ক্লিপবোর্ডে প্রতিলিপি করা হয়েছে।</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"এই স্থানে নির্বাচিত ফাইলগুলি আটকানো যাবে না।"</string>
     <string name="menu_rename" msgid="7678802479104285353">"পুনঃনামকরণ"</string>
     <string name="rename_error" msgid="4203041674883412606">"দস্তাবেজের পুনঃনামকরণ ব্যর্থ হয়েছে৷"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"কিছু ফাইল রূপান্তরিত হয়েছে"</string>
+    <string name="allow" msgid="7225948811296386551">"অনুমতি দিন"</string>
+    <string name="deny" msgid="2081879885755434506">"আস্বীকার করুন"</string>
 </resources>

@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"නව කවුළුව"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"පිටපත් කරන්න"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"අලවන්න"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"අභ්‍යන්තර ආචයනය පෙන්වන්න"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD කාඩ් පත පෙන්වන්න"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"අභ්‍යන්තර ආචයනය සඟවන්න"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD කාඩ් පත සඟවන්න"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"අභ්‍යන්තර ආචයනය පෙන්වන්න"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"අභ්‍යන්තර ආචයනය සඟවන්න"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ගොනු ප්‍රමණය පෙන්වන්න"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ගොනු ප්‍රමණය සඟවන්න"</string>
     <string name="button_select" msgid="527196987259139214">"තෝරන්න"</string>
@@ -99,10 +97,10 @@
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"විස්තර බැලීමට තට්ටු කරන්න"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"වසන්න"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"මෙම ගොනු ගෙන නොයන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"මෙම ගොනු වෙනත් ආකෘතියකට පරිවර්තනය කරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">පසුරු පුවරුවට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරන ලදි.</item>
       <item quantity="other">පසුරු පුවරුවට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරන ලදි.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"මෙම ස්ථානය තුළ තෝරාගත් ගොනු ඇලවිය නොහැක."</string>
     <string name="menu_rename" msgid="7678802479104285353">"යළි නම් කරන්න"</string>
     <string name="rename_error" msgid="4203041674883412606">"ලේඛනය යළි නම් කිරීම අසාර්ථක විය"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"සමහර ගොනු පරිවර්තනය කරන ලදී"</string>
+    <string name="allow" msgid="7225948811296386551">"අවසර දෙන්න"</string>
+    <string name="deny" msgid="2081879885755434506">"ප්‍රතික්ෂේප කරන්න"</string>
 </resources>

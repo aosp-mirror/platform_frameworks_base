@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"புதிய சாளரம்"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"நகலெடு"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ஒட்டு"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"அகச் சேமிப்பகத்தைக் காட்டு"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD கார்டைக் காட்டு"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"அகச் சேமிப்பகத்தை மறை"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD கார்டை மறை"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"அகச் சேமிப்பகத்தைக் காட்டு"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"அகச் சேமிப்பகத்தை மறை"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"கோப்பு அளவைக் காட்டு"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"கோப்பு அளவை மறை"</string>
     <string name="button_select" msgid="527196987259139214">"தேர்ந்தெடு"</string>
@@ -99,10 +97,10 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> கோப்பை நீக்க முடியவில்லை</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"விவரங்களைப் பார்க்க, தட்டவும்"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"மூடு"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"நகலெடுக்கப்படாத கோப்புகள்: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"இந்தக் கோப்புகள் நகர்த்தப்படவில்லை: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"இந்தக் கோப்புகள் வேறொரு வடிவத்திற்கு மாற்றப்பட்டன: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">கிளிப்போர்டிற்கு <xliff:g id="COUNT_1">%1$d</xliff:g> கோப்புகள் நகலெடுக்கப்பட்டன.</item>
       <item quantity="one">கிளிப்போர்டிற்கு <xliff:g id="COUNT_0">%1$d</xliff:g> கோப்பு நகலெடுக்கப்பட்டது.</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"தேர்ந்தெடுத்த கோப்புகளை இங்கு ஒட்ட முடியாது."</string>
     <string name="menu_rename" msgid="7678802479104285353">"மறுபெயரிடு"</string>
     <string name="rename_error" msgid="4203041674883412606">"ஆவணத்திற்கு மறுபெயரிடுவதில் தோல்வி"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"சில கோப்புகள் மாற்றப்பட்டன"</string>
+    <string name="allow" msgid="7225948811296386551">"அனுமதி"</string>
+    <string name="deny" msgid="2081879885755434506">"நிராகரி"</string>
 </resources>

@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"新視窗"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"複製"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"貼上"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"顯示內部儲存空間"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"顯示 SD 卡"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"隱藏內部儲存空間"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"隱藏 SD 卡"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"顯示內部儲存空間"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"隱藏內部儲存空間"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"顯示檔案大小"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"隱藏檔案大小"</string>
     <string name="button_select" msgid="527196987259139214">"選取"</string>
@@ -99,10 +97,10 @@
       <item quantity="one">無法刪除 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"輕按即可查看詳細資訊"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"關閉"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"以下檔案未能複製：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"這些檔案並未移動：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"這些檔案已轉換成其他格式：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">已複製 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案到剪貼簿。</item>
       <item quantity="one">已複製 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案到剪貼簿。</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"無法在此位置貼上選取檔案。"</string>
     <string name="menu_rename" msgid="7678802479104285353">"重新命名"</string>
     <string name="rename_error" msgid="4203041674883412606">"無法重新命名文件"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"部分檔案已轉換成其他格式"</string>
+    <string name="allow" msgid="7225948811296386551">"允許"</string>
+    <string name="deny" msgid="2081879885755434506">"拒絕"</string>
 </resources>

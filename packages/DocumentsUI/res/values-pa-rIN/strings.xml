@@ -37,10 +37,8 @@
     <string name="menu_new_window" msgid="1226032889278727538">"ਨਵੀਂ ਵਿੰਡੋ"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"ਕਾਪੀ ਕਰੋ"</string>
     <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"ਪੇਸਟ ਕਰੋ"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ਅੰਦਰੂਨੀ ਸਟੋਰੇਜ ਦਿਖਾਓ"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD ਕਾਰਡ ਦਿਖਾਓ"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"ਅੰਦਰੂਨੀ ਸਟੋਰੇਜ ਲੁਕਾਓ"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD ਕਾਰਡ ਲੁਕਾਓ"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"ਅੰਦਰੂਨੀ ਸਟੋਰੇਜ ਦਿਖਾਓ"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"ਅੰਦਰੂਨੀ ਸਟੋਰੇਜ ਲੁਕਾਓ"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ਫਾਈਲ ਆਕਾਰ ਦਿਖਾਓ"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ਫਾਈਲ ਆਕਾਰ ਲੁਕਾਓ"</string>
     <string name="button_select" msgid="527196987259139214">"ਚੁਣੋ"</string>
@@ -99,10 +97,10 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"ਵੇਰਵਿਆਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for close (3043722427445528732) -->
-    <skip />
+    <string name="close" msgid="3043722427445528732">"ਬੰਦ ਕਰੋ"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾਈ ਗਈ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕੀਤਾ ਗਿਆ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"ਇਹ ਫ਼ਾਈਲਾਂ ਕਿਸੇ ਹੋਰ ਫੌਰਮੈਟ ਵਿੱਚ ਤਬਦੀਲ ਕੀਤੀਆਂ ਗਈਆਂ ਸਨ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">ਕਲਿੱਪਬੋਰਡ ਵਿੱਚ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਬਣਾਈ ਗਈ।</item>
       <item quantity="other">ਕਲਿੱਪਬੋਰਡ ਵਿੱਚ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਬਣਾਈ ਗਈ।</item>
@@ -110,4 +108,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"ਇਸ ਸਥਾਨ ਵਿੱਚ ਚੁਣੀਆਂ ਗਈਆਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਪੇਸਟ ਨਹੀਂ ਕਰ ਸਕਦਾ ਹੈ।"</string>
     <string name="menu_rename" msgid="7678802479104285353">"ਮੁੜ-ਨਾਮਕਰਨ ਕਰੋ"</string>
     <string name="rename_error" msgid="4203041674883412606">"ਦਸਤਾਵੇਜ਼ ਦਾ ਮੁੜ-ਨਾਮਕਰਨ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"ਕੁਝ ਫ਼ਾਈਲਾਂ ਤਬਦੀਲ ਕੀਤੀਆਂ ਗਈਆਂ ਸਨ"</string>
+    <string name="allow" msgid="7225948811296386551">"ਆਗਿਆ ਦਿਓ"</string>
+    <string name="deny" msgid="2081879885755434506">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
 </resources>
