@@ -105,6 +105,19 @@ public class DocumentsProviderHelper {
         return createDocument(root.documentId, mimeType, name);
     }
 
+    public Uri createDocumentWithFlags(String documentId, String mimeType, String name, int flags)
+            throws RemoteException {
+        Bundle in = new Bundle();
+        in.putInt(StubProvider.EXTRA_FLAGS, flags);
+        in.putString(StubProvider.EXTRA_PARENT_ID, documentId);
+        in.putString(Document.COLUMN_MIME_TYPE, mimeType);
+        in.putString(Document.COLUMN_DISPLAY_NAME, name);
+
+        Bundle out = mClient.call("createDocumentWithFlags", null, in);
+        Uri uri = out.getParcelable(DocumentsContract.EXTRA_URI);
+        return uri;
+    }
+
     public Uri createFolder(Uri parentUri, String name) {
         return createDocument(parentUri, Document.MIME_TYPE_DIR, name);
     }
@@ -286,4 +299,5 @@ public class DocumentsProviderHelper {
 
         return DocumentsContract.buildDocumentUri(mAuthority, documentId);
     }
+
 }

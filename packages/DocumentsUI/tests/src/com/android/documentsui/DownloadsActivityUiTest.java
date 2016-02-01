@@ -85,7 +85,7 @@ public class DownloadsActivityUiTest extends InstrumentationTestCase {
         mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), TIMEOUT);
         mDevice.waitForIdle();
 
-        mBot = new UiBot(mDevice, TIMEOUT);
+        mBot = new UiBot(mDevice, mContext, TIMEOUT);
 
         resetStorage();  // Just in case a test failed and tearDown didn't happen.
     }
