@@ -584,13 +584,16 @@ final class ActivityRecord {
         haveState = true;
 
         if (aInfo != null) {
+            // If the class name in the intent doesn't match that of the target, this is
+            // probably an alias. We have to create a new ComponentName object to keep track
+            // of the real activity name, so that FLAG_ACTIVITY_CLEAR_TOP is handled properly.
             if (aInfo.targetActivity == null
-                    || aInfo.launchMode == ActivityInfo.LAUNCH_MULTIPLE
-                    || aInfo.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP) {
+                    || (aInfo.targetActivity.equals(_intent.getComponent().getClassName())
+                    && (aInfo.launchMode == ActivityInfo.LAUNCH_MULTIPLE
+                    || aInfo.launchMode == ActivityInfo.LAUNCH_SINGLE_TOP))) {
                 realActivity = _intent.getComponent();
             } else {
-                realActivity = new ComponentName(aInfo.packageName,
-                        aInfo.targetActivity);
+                realActivity = new ComponentName(aInfo.packageName, aInfo.targetActivity);
             }
             taskAffinity = aInfo.taskAffinity;
             stateNotNeeded = (aInfo.flags&
