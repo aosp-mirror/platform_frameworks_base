@@ -30,15 +30,16 @@ import static android.service.notification.NotificationAssistantService.REASON_L
 import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_BANNED;
 import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_CHANGED;
 import static android.service.notification.NotificationAssistantService.REASON_PACKAGE_SUSPENDED;
+import static android.service.notification.NotificationAssistantService.REASON_PROFILE_TURNED_OFF;
 import static android.service.notification.NotificationAssistantService.REASON_TOPIC_BANNED;
 import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -118,6 +119,7 @@ import android.util.Xml;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
+
 import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.FastXmlSerializer;
@@ -134,6 +136,7 @@ import com.android.server.vr.VrManagerInternal;
 import com.android.server.vr.VrStateListener;
 
 import libcore.io.IoUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -787,6 +790,13 @@ public class NotificationManagerService extends SystemService {
                     cancelAllNotificationsInt(MY_UID, MY_PID, null, 0, 0, true, userHandle,
                             REASON_USER_STOPPED, null, null);
                 }
+            } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED)) {
+                boolean inQuietMode = intent.getBooleanExtra(Intent.EXTRA_QUIET_MODE, false);
+                int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (inQuietMode && userHandle >= 0) {
+                    cancelAllNotificationsInt(MY_UID, MY_PID, null, 0, 0, true, userHandle,
+                            REASON_PROFILE_TURNED_OFF, null, null);
+                }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
                 mNotificationLight.turnOff();
@@ -984,6 +994,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
         getContext().registerReceiver(mIntentReceiver, filter);
 
         IntentFilter pkgFilter = new IntentFilter();
