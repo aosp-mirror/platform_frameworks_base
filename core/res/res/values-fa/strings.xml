@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"گزارش تعاملی"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"در بیشتر شرایط از این گزینه استفاده کنید. به شما امکان ردیابی پیشرفت گزارش و وارد کردن جزئیات بیشتری درباره مشکل را می‌دهد. ممکن است برخی از بخش‌هایی را که کمتر استفاده شده و باعث افزایش طول زمان گزارش می‌شود حذف کند."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"گزارش کامل"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"از این گزینه برای به‌حداقل رساندن تداخل سیستم هنگام پاسخ‌گو نبودن یا کند بودن دستگاه یا هنگام نیازداشتن به همه بخش‌های گزارش استفاده کنید. عکس صفحه‌نمایش نمی‌گیرد یا امکان وارد کردن جزئیات بیشتری به شما نمی‌دهد."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
       <item quantity="other">تا <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دیگر عکس صفحه‌نمایش برای گزارش اشکال گرفته می‌شود.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"بیشتر از 999"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"محتواها پنهان هستند"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"محتوا بر اساس خط‌مشی پنهان شده است"</string>
     <string name="safeMode" msgid="2788228061547930246">"حالت ایمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏سیستم Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"شخصی"</string>
@@ -909,15 +909,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"انتخاب عملکرد"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏انتخاب برنامه برای دستگاه USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"‏هیچ برنامه‌ای نمی‌‎تواند این کار را انجام دهد."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"متأسفانه، <xliff:g id="APPLICATION">%1$s</xliff:g> متوقف شده است."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"متأسفانه، پردازش <xliff:g id="PROCESS">%1$s</xliff:g> متوقف شده است."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"تا را‌ه‌اندازی مجدد، خرابی‌ها از <xliff:g id="PROCESS">%1$s</xliff:g> نادیده گرفته شوند."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> متوقف شده است"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> متوقف شده است"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> مرتب متوقف می‌شود"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> مرتب متوقف می‌شود"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"راه‌اندازی مجدد برنامه"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"بازنشانی و راه‌اندازی مجدد برنامه"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"ارسال بازخورد"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"بستن"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"بی‌صدا کردن"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"انتظار"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"بستن برنامه"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"‏<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‌‎دهد.\n\nآیا می‎خواهید آنرا ببندید؟"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"‏فعالیت <xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‌‎دهد.\n\nآیا می‎خواهید آن را ببندید؟"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"‏<xliff:g id="APPLICATION">%1$s</xliff:g> پاسخ نمی‌‎دهد. آیا می‎خواهید آن را ببندید؟"</string>
-    <string name="anr_process" msgid="6513209874880517125">"‏روند <xliff:g id="PROCESS">%1$s</xliff:g> پاسخ نمی‌‎دهد. \n\nآیا می‎خواهید آن را ببندید؟"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> پاسخ نمی‌دهد"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> پاسخ نمی‌دهد"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> پاسخ نمی‌دهد"</string>
+    <string name="anr_process" msgid="6156880875555921105">"فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> پاسخ نمی‌دهد"</string>
     <string name="force_close" msgid="8346072094521265605">"تأیید"</string>
     <string name="report" msgid="4060218260984795706">"گزارش"</string>
     <string name="wait" msgid="7147118217226317732">"منتظر بمانید"</string>
@@ -1455,7 +1462,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"درخواست کد پین قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"درخواست الگوی باز کردن قفل قبل از برداشتن پین"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"درخواست گذرواژه قبل از برداشتن پین"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"اندازه برنامه قابل تغییر نیست، با دو انگشت آن را پیمایش کنید."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"اندازه برنامه قابل تغییر نیست، با دو انگشت آن را پیمایش کنید."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"برنامه از تقسیم صفحه پشتیبانی نمی‌کند."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"توسط سرپرستتان نصب شد"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"توسط سرپرست شما به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"توسط سرپرستتان حذف شد"</string>
@@ -1527,14 +1535,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"متفرقه"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"به دلیل افراد درگیر مهم است."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی اضافه کند، اما در حال حاضر این اقدام ممنوع است."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی اضافه کند، اما تعداد کاربران به حداکثر مجاز رسیده است."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی اضافه کند، اما حساب "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" از قبل در این دستگاه وجود دارد. در هر صورت ادامه داده شود؟"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" در تلاش است کاربر جدیدی برای حساب "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" اضافه کند. ادامه می‌دهید؟"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> اضافه کند؟"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> ایجاد کند (کاربری با این حساب از قبل وجود دارد)؟"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"اولویت‌های زبان"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"اولویت‌های منطقه"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"نام زبان را تایپ کنید"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"پیشنهادشده"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"همه زبان‌ها"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"جستجو"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"حالت کاری خاموش است"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"به نمایه کاری اجازه فعالیت ( شامل استفاده از برنامه‌ها، همگام‌سازی در پس‌زمینه و قابلیت‌های مرتبط) داده شود."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"روشن کردن"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"‏%1$s غیرفعال است"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"‏سرپرست %1$s آن را غیرفعال کرده است. برای اطلاعات بیشتر با او تماس بگیرید."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"پیام‌های جدیدی دارید"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"برای مشاهده، برنامه پیامک را باز کنید"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"شاید برخی عملکردها دردسترس نباشند"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"برای ادامه لمس کنید"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"نمایه کاربر قفل است"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktív jelentés"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Ezt használja a legtöbb esetben. Segítségével nyomon követheti a jelentés folyamatát, és további információkat kaphat a problémáról. A folyamat során kimaradhatnak az olyan kevésbé használt részek, amelyek jelentése túl sok időt igényel."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Teljes jelentés"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Ezt a beállítást minimális rendszerzavar esetén használja, amikor eszköze nem válaszol, túl lassú, illetve ha minden jelentésrészre szüksége van. A rendszer nem készít képernyőképet, illetve nem engedélyezi a hozzáférést a további részletekhez."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_1">%d</xliff:g> másodpercen belül.</item>
       <item quantity="one">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_0">%d</xliff:g> másodpercen belül.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalom elrejtve"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"A tartalom irányelv miatt elrejtve"</string>
     <string name="safeMode" msgid="2788228061547930246">"Biztonsági üzemmód"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android rendszer"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Személyes"</string>
@@ -909,15 +909,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Válasszon egy műveletet"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Válasszon egy alkalmazást az USB-eszközhöz"</string>
     <string name="noApplications" msgid="2991814273936504689">"Egy alkalmazás sem tudja végrehajtani ezt a műveletet."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazás sajnos leállt."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Sajnos a <xliff:g id="PROCESS">%1$s</xliff:g> alkalmazás leállt."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"A(z) <xliff:g id="PROCESS">%1$s</xliff:g> összeomlásainak elnémítása az újraindításig."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> – az alkalmazás leállt"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> – az alkalmazás leállt"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazás állandóan leáll"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"A(z) <xliff:g id="PROCESS">%1$s</xliff:g> folyamat állandóan leáll"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"Alkalmazás újraindítása"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Alkalmazás alaphelyzetbe állítása és újraindítása"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Visszajelzés küldése"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Bezárás"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Némítás"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Várakozás"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Alkalmazás bezárása"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"A(z) <xliff:g id="APPLICATION">%2$s</xliff:g> nem válaszol.\n\nSzeretné bezárni?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> tevékenység nem válaszol.\n\nSzeretné bezárni?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazás nem válaszol. Szeretné bezárni?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"A(z) <xliff:g id="PROCESS">%1$s</xliff:g> folyamat nem válaszol. \n\nSzeretné bezárni?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"A(z) <xliff:g id="APPLICATION">%2$s</xliff:g> alkalmazás nem válaszol"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"A(z) <xliff:g id="ACTIVITY">%1$s</xliff:g> tevékenység nem válaszol"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"A(z) <xliff:g id="APPLICATION">%1$s</xliff:g> alkalmazás nem válaszol"</string>
+    <string name="anr_process" msgid="6156880875555921105">"A(z) <xliff:g id="PROCESS">%1$s</xliff:g> folyamat nem válaszol"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Jelentés"</string>
     <string name="wait" msgid="7147118217226317732">"Várakozás"</string>
@@ -1455,7 +1462,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kód kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Feloldási minta kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Jelszó kérése a rögzítés feloldásához"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Az alkalmazást nem lehet átméretezni – két ujjal görgessen."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Az alkalmazást nem lehet átméretezni – két ujjal görgessen."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"A rendszergazda telepítette"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Frissítette a rendszergazda"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"A rendszergazda törölte"</string>
@@ -1527,14 +1535,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Vegyes"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Ön állította be ezen értesítések fontossági szintjét."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ez az üzenet a résztvevők miatt fontos."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne megadni, ami jelenleg nem engedélyezett."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne megadni, azonban Ön elérte a felhasználók számára vonatkozó felső korlátot."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne megadni, de a(z) "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" fiók már létezik ezen az eszközön. Ettől függetlenül is folytatja?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392">"A(z) "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" alkalmazás egy új felhasználót szeretne hozzáadni a(z) "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" fiókhoz. Folytatja a műveletet?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Nyelvi beállítás"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Régió beállítása"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adja meg a nyelvet"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Javasolt"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Minden nyelv"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Keresés"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"A munka mód KI van kapcsolva"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Munkaprofil használatának engedélyezése, beleértve az alkalmazásokat, a háttérben való szinkronizálást és a kapcsolódó funkciókat."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Bekapcsolás"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s letiltva"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"A(z) %1$s szervezet rendszergazdája letiltotta. További információért vegye fel vele a kapcsolatot."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Új üzenetei érkeztek"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"SMS-alkalmazás megnyitása a megtekintéshez"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Néhány funkció nem használható"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Érintse meg a folytatáshoz"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Felhasználói profil zárolva"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

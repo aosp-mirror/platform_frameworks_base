@@ -216,8 +216,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Інтерактивний звіт"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Підходить для більшості випадків. Можна відстежувати, як створюється звіт, і вводити більше деталей про проблему. Можуть опускатися деякі розділи, які рідко використовуються, але довго створюються."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Повний звіт"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Підходить для мінімального втручання в систему, коли пристрій не відповідає, працює повільно або вам потрібні всі розділи звіту. Не можна робити знімки екрана та вводити більше деталей."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунду.</item>
       <item quantity="few">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
@@ -237,6 +236,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Вміст сховано"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Вміст сховано згідно з правилом"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Особисті дані"</string>
@@ -921,15 +921,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Виберіть дію"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Вибрати програму для пристрою USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Жодна програма не може виконати цю дію."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"На жаль, програма <xliff:g id="APPLICATION">%1$s</xliff:g> припинила роботу."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"На жаль, програма <xliff:g id="PROCESS">%1$s</xliff:g> припинила роботу."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Не показувати інформацію про збої додатка <xliff:g id="PROCESS">%1$s</xliff:g> до перезавантаження."</string>
+    <string name="aerr_application" msgid="250320989337856518">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> перестав працювати"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> перестав працювати"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> періодично перестає працювати"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"Процес \"<xliff:g id="PROCESS">%1$s</xliff:g>\" періодично перестає працювати"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"Перезапустити додаток"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Скинути та перезапустити додаток"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Надіслати відгук"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Закрити"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Вимкнути звук"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Чекати"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Закрити додаток"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Програма <xliff:g id="APPLICATION">%2$s</xliff:g> не відповідає.\n\nЗакрити її?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Дія <xliff:g id="ACTIVITY">%1$s</xliff:g> не відповідає.\n\nЗакінчити її?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> не відповідає. Закрити її?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не відповідає.\n\nЗавершити його?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"Додаток <xliff:g id="APPLICATION">%2$s</xliff:g> не відповідає"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"Дія \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\" не відповідає"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"Додаток <xliff:g id="APPLICATION">%1$s</xliff:g> не відповідає"</string>
+    <string name="anr_process" msgid="6156880875555921105">"Процес \"<xliff:g id="PROCESS">%1$s</xliff:g>\" не відповідає"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Відгук"</string>
     <string name="wait" msgid="7147118217226317732">"Чекати"</string>
@@ -1475,7 +1482,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-код для відкріплення"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запитувати ключ розблокування перед відкріпленням"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запитувати пароль перед відкріпленням"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Розмір додатка не можна змінити. Прокручуйте його двома пальцями."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Розмір додатка не можна змінити. Прокручуйте його двома пальцями."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Додаток не підтримує розділення екрана."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Установив адміністратор"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Видалив адміністратор"</string>
@@ -1565,14 +1573,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Інше"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Ви вказуєте пріоритет цих сповіщень."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Важливе з огляду на учасників."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" хоче додати нового користувача, але зараз це заборонено."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" хоче додати нового користувача, але вже додано максимальну кількість користувачів."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" хоче додати нового користувача, але обліковий запис "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" уже існує на цьому пристрої. Продовжити?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" хоче додати нового користувача облікового запису "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Продовжити?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> створити нового користувача з обліковим записом <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> створити нового користувача з обліковим записом <xliff:g id="ACCOUNT">%2$s</xliff:g> (користувач із таким обліковим записом уже існує)?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Вибір мови"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Вибір регіону"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Введіть назву мови"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Пропозиції"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Усі мови"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пошук"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Робочий профіль ВИМКНЕНО"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Увімкнути робочий профіль, зокрема додатки, фонову синхронізацію та пов’язані функції."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Увімкнути"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s вимкнено"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Вимкнув адміністратор %1$s. Зв’яжіться з ним, щоб дізнатися більше."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"У вас є нові повідомлення"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Щоб переглянути, відкрийте додаток для SMS"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Деякі функції можуть бути недоступні"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Торкніться, щоб продовжити"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Профіль користувача блокується"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

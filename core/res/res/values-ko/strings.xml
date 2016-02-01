@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"대화형 보고서"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"대부분의 경우 이 옵션을 사용합니다. 신고 진행 상황을 추적할 수 있고 문제에 대한 세부정보를 입력할 수 있습니다. 신고하기에 시간이 너무 오래 걸리고 사용 빈도가 낮은 일부 섹션을 생략할 수 있습니다."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"전체 보고서"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"기기가 응답하지 않거나 반응 속도가 너무 느린 경우 또는 모든 신고 섹션이 필요한 경우 이 최소 시스템 간섭 옵션을 사용합니다. 스크린샷을 찍지 않으며 세부정보 입력을 허용하지 않습니다."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">버그 신고 스크린샷을 <xliff:g id="NUMBER_1">%d</xliff:g>초 후에 찍습니다.</item>
       <item quantity="one">버그 신고 스크린샷을 <xliff:g id="NUMBER_0">%d</xliff:g>초 후에 찍습니다.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>개)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"숨겨진 콘텐츠"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"콘텐츠가 정책에 의해 숨겨졌습니다."</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"개인"</string>
@@ -909,15 +909,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"작업 선택"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB 기기에 대한 앱 선택"</string>
     <string name="noApplications" msgid="2991814273936504689">"작업을 수행할 수 있는 앱이 없습니다."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g>(이)가 중지되었습니다."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 중지되었습니다."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"재부팅할 때까지 <xliff:g id="PROCESS">%1$s</xliff:g>에서 소리 없이 다운됨"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g>이(가) 중지됨"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g>이(가) 중지됨"</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"앱 다시 시작"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"앱 재설정 및 다시 시작"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"의견 보내기"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"닫기"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"숨기기"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>이(가) 응답하지 않습니다.\n\n닫으시겠습니까?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g>이(가) 응답하지 않습니다.\n\n닫으시겠습니까?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g>이(가) 응답하지 않습니다. 닫으시겠습니까?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다.\n\n닫으시겠습니까?"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"확인"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
@@ -1455,7 +1470,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"앱에서 크기 조절이 불가능합니다. 두 손가락을 사용해 스크롤하세요."</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"관리자가 설치함"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"관리자가 삭제함"</string>
@@ -1527,14 +1545,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"기타"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"에서 새 사용자를 추가하려고 하지만 현재 금지되어 있습니다."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"에서 새 사용자를 추가하려고 하지만 사용자 한도에 도달했습니다."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"에서 새 사용자를 추가하려고 하지만 계정 "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"이(가) 이미 기기에 있습니다. 계속할까요?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"에서 계정 "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"에 새 사용자를 추가하려고 합니다. 계속할까요?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(이 계정의 사용자가 이미 있음)(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"언어 환경설정"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"지역 환경설정"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"언어 이름 입력"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"추천"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"모든 언어"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"검색"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"직장 모드가 사용 중지됨"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"앱, 백그라운드 동기화 및 관련 기능을 포함한 직장 프로필이 작동하도록 허용"</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"사용 설정"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s이(가) 사용 중지됨"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s 관리자에 의해 사용 중지되었습니다. 자세히 알아보려면 관리자에게 문의하세요."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"새 메시지 있음"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"SMS 앱을 열고 확인"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"일부 기능을 사용할 수 없음"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"계속하려면 터치하세요."</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"사용자 프로필이 잠겨 있습니다."</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

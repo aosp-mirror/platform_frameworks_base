@@ -397,8 +397,7 @@
     <skip />
     <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
     <skip />
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Ta opcija vam omogućava minimalno ometanje sustava kad uređaj ne reagira ili je prespor ili kada su vam potrebni svi odjeljci izvještaja. Ne izrađuje se snimka ekrana i ne možete unijeti više detalja."</string>
     <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <!-- no translation found for global_action_toggle_silent_mode (8219525344246810925) -->
     <skip />
@@ -426,6 +425,7 @@
     <skip />
     <!-- no translation found for notification_hidden_text (1135169301897151909) -->
     <skip />
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Sadržaj skriven u skladu sa pravilima"</string>
     <!-- no translation found for safeMode (2788228061547930246) -->
     <skip />
     <!-- no translation found for android_system_label (6577375335728551336) -->
@@ -1693,22 +1693,22 @@
     <skip />
     <!-- no translation found for noApplications (2991814273936504689) -->
     <skip />
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (932628488013092776) -->
-    <skip />
-    <!-- no translation found for aerr_process (4507058997035697579) -->
-    <skip />
-    <!-- no translation found for aerr_process_silence (4226685530196000222) -->
-    <skip />
+    <string name="aerr_application" msgid="250320989337856518">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> je zaustavljena"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"Aplikacija <xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljena"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> se stalno zaustavlja"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> se stalno zaustavlja"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"Ponovo pokreni aplikaciju"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Vrati aplikaciju na zadano i pokreni ponovo"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Pošalji povratne informacije"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Zatvori"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Zanemari"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Sačekaj"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Zatvori aplikaciju"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (1904477189057199066) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (5776209883299089767) -->
-    <skip />
-    <!-- no translation found for anr_application_process (8941757607340481057) -->
-    <skip />
-    <!-- no translation found for anr_process (6513209874880517125) -->
-    <skip />
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> ne reaguje"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ne reaguje"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> ne reaguje"</string>
+    <string name="anr_process" msgid="6156880875555921105">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> ne reaguje"</string>
     <!-- no translation found for force_close (8346072094521265605) -->
     <skip />
     <!-- no translation found for report (4060218260984795706) -->
@@ -2754,8 +2754,8 @@
     <skip />
     <!-- no translation found for lock_to_app_unlock_password (6380979775916974414) -->
     <skip />
-    <!-- no translation found for dock_non_resizeble_text (9156251681042762723) -->
-    <skip />
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Veličina aplikacije nije promjenjiva, pomičite je s dva prsta."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikacija ne podržava dijeljenje ekrana."</string>
     <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
     <skip />
     <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
@@ -2835,14 +2835,8 @@
     <skip />
     <!-- no translation found for importance_from_person (9160133597262938296) -->
     <skip />
-    <!-- no translation found for user_creation_cannot_add (7740333663230045315) -->
-    <skip />
-    <!-- no translation found for user_creation_cannot_add_any_more (6244197709981359266) -->
-    <skip />
-    <!-- no translation found for user_creation_account_exists (4880171855014489789) -->
-    <skip />
-    <!-- no translation found for user_creation_adding (3206420861363021392) -->
-    <skip />
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Da li dozvoljate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za nalog <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Da li dozvoljavate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (Korisnik sa ovim nalogom već postoji)?"</string>
     <!-- no translation found for language_selection_title (7181332986330337171) -->
     <skip />
     <!-- no translation found for country_selection_title (2954859441620215513) -->
@@ -2854,5 +2848,19 @@
     <!-- no translation found for language_picker_section_all (3097279199511617537) -->
     <skip />
     <!-- no translation found for locale_search_menu (2560710726687249178) -->
+    <skip />
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Radni način je ISKLJUČEN"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Omogućava radnom profilu da funkcioniše, uključujući aplikacije, sinhronizaciju u pozadini i povezane funkcije."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s – onemogućeno"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Onemogućio administrator (%1$s). Obratite mu se za više informacija."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Imate nove poruke"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Otvorite SMS aplikaciju da biste pregledali poruke"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Neke funkcije možda neće biti dostupne"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Dodirnite da biste nastavili"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil korisnika je zaključan"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
     <skip />
 </resources>

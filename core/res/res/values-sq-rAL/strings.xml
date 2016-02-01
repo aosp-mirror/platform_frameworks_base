@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktiv"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Përdore këtë në shumicën e rrethanave. Të lejon të gjurmosh progresin e raportit dhe të fusësh më shumë detaje rreth problemit. Mund të fshijë disa seksione që përdoren më pak të cilat kërkojnë shumë kohë për t\'u raportuar."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Raporti i plotë"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Përdore këtë opsion për interferencë minimale kur pajisja nuk përgjigjet ose është tepër e ngadaltë, ose kur të nevojiten të gjitha seksionet. Nuk regjistron pamje të ekranit ose nuk të lejon që të fusësh më shumë të dhëna."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Marrja e pamjes së ekranit për raportin e defektit në kod në <xliff:g id="NUMBER_1">%d</xliff:g> sekonda.</item>
       <item quantity="one">Marrja e pamjes së ekranit për raportin e defektit në kod në <xliff:g id="NUMBER_0">%d</xliff:g> sekondë.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Përmbajtjet janë të fshehura"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Përmbajtja është e fshehur për shkak të politikës"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modaliteti i sigurisë"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemi \"android\""</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
@@ -909,15 +909,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Zgjidh një veprim"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Zgjidh një aplikacion për pajisjen \"USB\""</string>
     <string name="noApplications" msgid="2991814273936504689">"Asnjë aplikacion nuk mund ta kryejë këtë veprim."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Fatkeqësisht, <xliff:g id="APPLICATION">%1$s</xliff:g> ka ndaluar."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Fatkeqësisht, procesi <xliff:g id="PROCESS">%1$s</xliff:g> ka ndaluar."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Ka një heshtje të <xliff:g id="PROCESS">%1$s</xliff:g> deri në rindezje."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> ka ndaluar"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ka ndaluar"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> vazhdon të ndalojë"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> vazhdon të ndalojë"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"Rinis aplikacionin"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Rivendos dhe rinis aplikacionin"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Dërgo komentin"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Mbyll"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Çaktivizo audion"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Prit!"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Mbyll aplikacionin"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> nuk po përgjigjet.\n\nDëshiron ta mbyllësh?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Aktiviteti <xliff:g id="ACTIVITY">%1$s</xliff:g> nuk përgjigjet.\n\nDëshiron ta mbyllësh?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> nuk po përgjigjet. Dëshiron ta mbyllësh?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> nuk po përgjigjet.\n\nDëshiron ta mbyllësh?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> nuk përgjigjet"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk përgjigjet"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> nuk përgjigjet"</string>
+    <string name="anr_process" msgid="6156880875555921105">"Përpunimi i <xliff:g id="PROCESS">%1$s</xliff:g> nuk përgjigjet"</string>
     <string name="force_close" msgid="8346072094521265605">"Në rregull"</string>
     <string name="report" msgid="4060218260984795706">"Raporto"</string>
     <string name="wait" msgid="7147118217226317732">"Prit!"</string>
@@ -1455,7 +1462,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zhgozhdimi kërkon PIN-in"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Kërko model shkyçjeje para heqjes së gozhdimit"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Kërko fjalëkalim para heqjes nga gozhdimi."</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Përmasa e apl. nuk mund të ndryshohet, lëvize atë me të dy gishtat."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Përmasa e apl. nuk mund të ndryshohet, lëvize atë me të dy gishtat."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikacioni nuk mbështet ekranin e ndarë."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"U instalua nga administratori yt"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Përditësuar nga administratori"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"U fshi nga administratori yt"</string>
@@ -1527,14 +1535,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Të ndryshme"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Ke caktuar rëndësinë e këtyre njoftimeve."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Është i rëndësishëm për shkak të personave të përfshirë."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po përpiqet të shtojë një përdorues të ri, por aktualisht nuk i lejohet."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po përpiqet të shtojë një përdorues të ri, por është arritur limiti i përdoruesve."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po provon të shtojë një përdorues të ri, por llogaria "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ekziston tashmë në këtë pajisje. Dëshiron të vazhdosh gjithsesi?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" po provon të shtojë një përdorues të ri për llogarinë "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Dëshiron të vazhdosh?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Dëshiron të lejosh <xliff:g id="APP">%1$s</xliff:g> që të krijojë një përdorues të ri me <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Dëshiron të lejosh <xliff:g id="APP">%1$s</xliff:g> që të krijojë një përdorues të ri me <xliff:g id="ACCOUNT">%2$s</xliff:g> (një përdorues me këtë llogari ekziston tashmë) ?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Preferenca për gjuhën"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferenca e rajonit"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Shkruaj emrin e gjuhës"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugjeruar"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Të gjitha gjuhët"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Kërko"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Modaliteti i punës është JOAKTIV"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Lejoje profilin e punës të funksionojë, duke përfshirë aplikacionet, sinkronizimin në sfond dhe funksionet e lidhura."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivizo"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s është çaktivizuar"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Çaktivizuar nga administratori i %1$s. Kontaktoje për të mësuar më shumë."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Ke mesazhe të reja"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Hap aplikacionin SMS për ta parë"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Disa funksione mund të mos jenë të disponueshme"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Preke për të vazhduar"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Profili i përdoruesit i kyçur"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

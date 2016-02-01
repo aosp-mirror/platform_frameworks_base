@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"बहुतांश प्रसंगांमध्‍ये याचा वापर करा. ते आपल्‍याला अहवालाच्या प्रगतीचा मागोवा घेण्‍याची आणि समस्येविषयी अधिक तपशील प्रविष्‍ट करण्‍याची अनुमती देतात. ते अहवाल देण्‍यासाठी बराच वेळ घेणार्‍या कमी वापरलेल्या विभागांना कदाचित वगळेल."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"संपूर्ण अहवाल"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"आपले डिव्‍हाइस प्रतिसाद देत नाही किंवा खूप धीमे होते किंवा आपल्‍याला सर्व अहवाल विभागांची आवश्‍यकता असते तेव्‍हा कमीत कमी सिस्टीम हस्तक्षेपासाठी या पर्यायाचा वापर करा. स्क्रीनशॉट घेत नाही किंवा आपल्‍याला अधिक तपशील प्रविष्‍ट करण्‍याची अनुमती देत नाही."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
       <item quantity="other">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"लपविलेली सामग्री"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"धोरणाद्वारे सामग्री लपविली"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"वैयक्तिक"</string>
@@ -909,15 +909,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"क्रिया निवडा"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB डिव्हाइससाठी अॅप निवडा"</string>
     <string name="noApplications" msgid="2991814273936504689">"कोणतेही अॅप्स ही क्रिया करू शकत नाहीत."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"दुर्दैवाने, <xliff:g id="APPLICATION">%1$s</xliff:g> थांबला."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"दुर्दैवाने, प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> थांबली."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"रीबूट होईपर्यंत <xliff:g id="PROCESS">%1$s</xliff:g> मधून असे क्रॅश जे लक्षात येत नाहीत"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबला आहे"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबली आहे"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> थांबतो"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> थांबते"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"अॅप रीस्टार्ट करा"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"अॅप रीसेट आणि रीस्टार्ट करा"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"अभिप्राय पाठवा"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"बंद करा"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"नि:शब्द करा"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"प्रतीक्षा करा"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"अॅप बंद करा"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> प्रतिसाद देत नाही. \n\nआपण तो बंद करू इच्छिता?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> क्रियाकलाप प्रतिसाद देत नाही.\n\nआपण ती बंद करू इच्छिता?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> प्रतिसाद देत नाही. आपण तो बंद करू इच्छिता?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> प्रक्रिया प्रतिसाद देत नाही.\n\nआपण ती बंद करू इच्छिता?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> प्रतिसाद देत नाही"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> प्रतिसाद देत नाही"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> प्रतिसाद देत नाही"</string>
+    <string name="anr_process" msgid="6156880875555921105">"<xliff:g id="PROCESS">%1$s</xliff:g> प्रक्रिया प्रतिसाद देत नाही"</string>
     <string name="force_close" msgid="8346072094521265605">"ठीक"</string>
     <string name="report" msgid="4060218260984795706">"अहवाल द्या"</string>
     <string name="wait" msgid="7147118217226317732">"प्रतीक्षा करा"</string>
@@ -1455,7 +1462,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"अॅपचा आकार बदलण्यायोग्य नाही, दोन बोटांनी तो स्क्रोल करा."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"अॅपचा आकार बदलण्यायोग्य नाही, दोन बोटांनी तो स्क्रोल करा."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"आपल्या प्रशासकाद्वारे स्थापित केले आहे"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपल्या प्रशासकाद्वारे अद्यतनित केले"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"आपल्या प्रशासकाद्वारे हटविले आहे"</string>
@@ -1527,14 +1535,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"संकीर्ण"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"आपण या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्याचा प्रयत्न करीत आहे परंतु तो सध्‍या प्रतिबंधित आहे."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्यासाठी प्रयत्न करीत आहे परंतु वापरकर्ता मर्यादा गाठली गेली आहे."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्‍याचा प्रयत्न करीत आहे परंतु या डिव्‍हाइसवर "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" खाते आधीपासून अस्तित्वात आहे. तरीही पुढे सुरु ठेवायचे?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" खात्यासाठी "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" नवीन वापरकर्ता जोडण्याचा प्रयत्न करीत आहे. पुढे सुरु ठेवायचे?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून विद्यमान आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"भाषा प्राधान्य"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"सूचित केलेले"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"सर्व भाषा"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"शोध"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"कार्य मोड बंद आहे"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"कार्य प्रोफाइलला अॅप्स, पार्श्वभूमी संकालन आणि संबंधित वैशिष्ट्यांच्या समावेशासह कार्य करण्याची परवानगी द्या."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"चालू करा"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s अक्षम केले"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s प्रशासकाद्वारे अक्षम केले. अधिक जाणून घेण्‍यासाठी त्यांच्याशी संपर्क साधा."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"आपल्याकडे नवीन संदेश आहेत"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"पाहण्‍यासाठी SMS अॅप उघडा"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"काही कार्ये कदाचित उपलब्ध नसू शकतात"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"सुरू ठेवण्यासाठी स्पर्श करा"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"वापरकर्ता प्रोफाईल लॉक केले"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

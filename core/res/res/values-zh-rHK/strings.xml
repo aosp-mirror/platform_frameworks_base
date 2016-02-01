@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互動報告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"在大部分情況下，建議您使用此選項，以便追蹤報告進度，以及輸入更多與問題相關的的資訊。系統可能會省略部分不常用的區段，藉此縮短產生報告的時間。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完整報告"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"如果裝置沒有反應或運作速度較慢，或您需要所有區段的報告時，建議使用此選項將系統的干擾程度降至最低。此選項不會擷取螢幕畫面，亦不允許您輸入更多資訊。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">系統將在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後擷取錯誤報告的螢幕畫面。</item>
       <item quantity="one">系統將在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒後擷取錯誤報告的螢幕畫面。</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"內容已隱藏"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"已根據政策隱藏內容"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"個人"</string>
@@ -909,15 +909,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"選擇操作"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"選取要以 USB 裝置存取的應用程式"</string>
     <string name="noApplications" msgid="2991814273936504689">"沒有應用程式可執行這項操作。"</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g>已停止操作。"</string>
-    <string name="aerr_process" msgid="4507058997035697579">"很抱歉，處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已停止。"</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"停止顯示「<xliff:g id="PROCESS">%1$s</xliff:g>」的當機資料 (除非重新啟動作業系統)。"</string>
+    <string name="aerr_application" msgid="250320989337856518">"「<xliff:g id="APPLICATION">%1$s</xliff:g>」已經停止運作"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"「<xliff:g id="PROCESS">%1$s</xliff:g>」已經停止運作"</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"重新啟動應用程式"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"重設並重新啟動應用程式"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"傳送意見反映"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"關閉"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"忽略"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"活動 <xliff:g id="ACTIVITY">%1$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> 沒有回應。您要結束嗎？"</string>
-    <string name="anr_process" msgid="6513209874880517125">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"確定"</string>
     <string name="report" msgid="4060218260984795706">"報告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
@@ -1455,7 +1470,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"不可更改應用程式尺寸，請使用兩隻手指捲動應用程式。"</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"已由您的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已由管理員刪除"</string>
@@ -1527,14 +1545,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"您可以為這些通知設定重要性。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及的人。"</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" 正在嘗試新增使用者，但系統目前禁止相關操作。"</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" 正在嘗試新增使用者，但使用者人數已達上限。"</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" 正在嘗試新增使用者，但此裝置上已有 "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" 這個帳戶。仍要繼續嗎？"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" 正在嘗試為 "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" 這個帳戶新增使用者。要繼續嗎？"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者 (此帳戶目前已有此使用者) 嗎？"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"語言偏好設定"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"地區偏好設定"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"輸入語言名稱"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"推薦"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已關閉"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"允許使用應用程式、背景同步及相關功能的工作設定檔。"</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"已停用「%1$s」"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"「%1$s」管理員已停用此套件。請與管理員聯絡以瞭解詳情。"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新的訊息"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"開啟短訊應用程式查看內容"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"部分功能可能無法使用"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"輕觸即可繼續"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"使用者個人檔案目前處於鎖定狀態"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

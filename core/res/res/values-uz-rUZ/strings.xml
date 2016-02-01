@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv hisobot"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Bundan maxsus vaziyatlarda foydalaning. Bu hisobot jarayonini kuzatish imkonini beradi va muammo haqida batafsil ma’lumotlarni ko‘rishingiz mumkin bo‘ladi. Hisobot uchun ko‘p vaqt oladigan kam ishlatiladigan bo‘limlar qoldirib ketilishi mumkin."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"To‘liq hisobot"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Qurilma javob bermaganda, juda sekinlashganda yoki barcha hisobot bo‘limlari zarur bo‘lganda kamroq tizim aralashuvlarisiz mazkur variantdan foydalaning. Skrinshot olinmaydi yoki batafsil ma’lumotlar ko‘rishingizga ruxsat berilmaydi."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng olinadi.</item>
       <item quantity="one">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_0">%d</xliff:g> soniyadan so‘ng olinadi.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Kontent yashirildi"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Qoidaga muvofiq kontent yashirilgan"</string>
     <string name="safeMode" msgid="2788228061547930246">"Xavfsiz usul"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android tizimi"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Shaxsiy"</string>
@@ -909,15 +909,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Amalni tanlash"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB qurilma uchun ilovani tanlang"</string>
     <string name="noApplications" msgid="2991814273936504689">"Hech qaysi ilova ushbu amalni bajara olmaydi."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Baxtga qarshi, <xliff:g id="APPLICATION">%1$s</xliff:g> to‘xtatildi."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Baxtga qarshi, <xliff:g id="PROCESS">%1$s</xliff:g> jarayoni to‘xtatildi."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"<xliff:g id="PROCESS">%1$s</xliff:g>: ilova ishlashdan to‘xtadi, qurilmani o‘chirib yoqing."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi ishdan chiqdi"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> jarayoni ishdan chiqdi"</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"Ilovani qayta ishga tushirish"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Ilovani qayta tiklash va qayta ishga tushirish"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"E’tiborsiz qoldirish"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> harakati javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> javob bermayapti. Uni yopishni xohlaysizmi?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> jarayoni javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Xabar berish"</string>
     <string name="wait" msgid="7147118217226317732">"Kuting"</string>
@@ -1455,7 +1470,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Yechishda PIN-kod so‘ralsin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bo‘shatishdan oldin chizmali parol so‘ralsin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bo‘shatishdan oldin parol so‘ralsin"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Oyna o‘lchamini o‘zgartirib bo‘lmaydi. Sahifani ikkita barmoq bilan aylantiring."</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratoringiz tomonidan o‘rnatilgan"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
@@ -1527,14 +1545,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Boshqa belgilar"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Siz ushbu bildirishnomalarning muhimligini belgilagansiz."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Bu odamlar siz uchun muhim."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ilovasi yangi foydalanuvchi qo‘shishga urinmoqda, lekin hozirda taqiqlangan."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ilovasi yangi foydalanuvchi qo‘shishga urinmqoda, lekin ortiq foydalanuvchi qo‘shib bo‘lmaydi."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ilovasi yangi foydalanuvchi qo‘shishga urinmoqda, lekin "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" hisobi allaqachon qurilmada mavjud. Baribir davom etilsinmi?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ilovasi "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" hisobi uchun yangi foydalanuvchi qo‘shishga urinmoqda. Davom etilsinmi?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Til sozlamalari"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Hudud sozlamalari"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Til nomini kiriting"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Taklif etiladi"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Barcha tillar"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Qidiruv"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Ish rejimi O‘CHIQ"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Ishchi profilini yoqish: ilovalar, fonda sinxronlash va bog‘liq funksiyalar."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Yoqish"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s o‘chirilgan"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"%1$s administratori tomonidan o‘chirilgan. Batafsil ma’lumot uchun bog‘laning."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Sizga yangi SMS keldi"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Ko‘rish uchun SMS ilovasini oching"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Ayrim funksiyalar mavjud bo‘lmasligi mumkin"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Davom etish uchun bosing"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Foydalanuvchi profili yopiq"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>
