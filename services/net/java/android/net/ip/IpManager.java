@@ -18,6 +18,7 @@ package android.net.ip;
 
 import android.content.Context;
 import android.net.DhcpResults;
+import android.net.InterfaceConfiguration;
 import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
@@ -86,8 +87,8 @@ public class IpManager extends StateMachine {
 
         // TODO: Kill with fire once DHCP and static configuration are moved
         // out of WifiStateMachine.
-        public void onIPv4ProvisioningSuccess(DhcpResults dhcpResults, int reason) {}
-        public void onIPv4ProvisioningFailure(int reason) {}
+        public void onIPv4ProvisioningSuccess(DhcpResults dhcpResults) {}
+        public void onIPv4ProvisioningFailure() {}
 
         public void onProvisioningSuccess(LinkProperties newLp) {}
         public void onProvisioningFailure(LinkProperties newLp) {}
@@ -216,8 +217,8 @@ public class IpManager extends StateMachine {
     }
 
     // TODO: Kill with fire once DHCPv4/static config is moved into IpManager.
-    public void updateWithDhcpResults(DhcpResults dhcpResults, int reason) {
-        sendMessage(CMD_UPDATE_DHCPV4_RESULTS, reason, 0, dhcpResults);
+    public void updateWithDhcpResults(DhcpResults dhcpResults) {
+        sendMessage(CMD_UPDATE_DHCPV4_RESULTS, dhcpResults);
     }
 
 
@@ -382,7 +383,15 @@ public class IpManager extends StateMachine {
                         }
                     });
 
-            // TODO: Check mStaticIpConfig and handle accordingly.
+            // If we have a StaticIpConfiguration attempt to apply it and
+            // handle the result accordingly.
+            if (mStaticIpConfig != null) {
+                if (applyStaticIpConfig()) {
+                    sendMessage(CMD_UPDATE_DHCPV4_RESULTS, new DhcpResults(mStaticIpConfig));
+                } else {
+                    sendMessage(CMD_UPDATE_DHCPV4_RESULTS);
+                }
+            }
         }
 
         @Override
@@ -415,15 +424,14 @@ public class IpManager extends StateMachine {
 
                 case CMD_UPDATE_DHCPV4_RESULTS:
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
-                    final int reason = msg.arg1;
                     if (dhcpResults != null) {
                         mDhcpResults = new DhcpResults(dhcpResults);
                         setLinkProperties(assembleLinkProperties());
-                        mCallback.onIPv4ProvisioningSuccess(dhcpResults, reason);
+                        mCallback.onIPv4ProvisioningSuccess(dhcpResults);
                     } else {
                         mDhcpResults = null;
                         setLinkProperties(assembleLinkProperties());
-                        mCallback.onIPv4ProvisioningFailure(reason);
+                        mCallback.onIPv4ProvisioningFailure();
                     }
                     break;
 
@@ -457,5 +465,19 @@ public class IpManager extends StateMachine {
             return HANDLED;
         }
 
+        private boolean applyStaticIpConfig() {
+            final InterfaceConfiguration ifcg = new InterfaceConfiguration();
+            ifcg.setLinkAddress(mStaticIpConfig.ipAddress);
+            ifcg.setInterfaceUp();
+            try {
+                mNwService.setInterfaceConfig(mInterfaceName, ifcg);
+                if (DBG) Log.d(TAG, "Static IP configuration succeeded");
+            } catch (IllegalStateException | RemoteException e) {
+                Log.e(TAG, "Static IP configuration failed: ", e);
+                return false;
+            }
+
+            return true;
+        }
     }
 }
