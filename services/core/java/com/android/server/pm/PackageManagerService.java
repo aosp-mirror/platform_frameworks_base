@@ -5369,9 +5369,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         int targetUserId = filter.getTargetUserId();
         List<ResolveInfo> resultTargetUser = mActivities.queryIntent(intent,
                 resolvedType, flags, targetUserId);
-        if (resultTargetUser != null && !resultTargetUser.isEmpty()
-                && isUserEnabled(targetUserId)) {
-            return createForwardingResolveInfoUnchecked(filter, sourceUserId, targetUserId);
+        if (resultTargetUser != null && isUserEnabled(targetUserId)) {
+            // If all the matches in the target profile are suspended, return null.
+            for (int i = resultTargetUser.size() - 1; i >= 0; i--) {
+                if ((resultTargetUser.get(i).activityInfo.applicationInfo.flags
+                        & ApplicationInfo.FLAG_SUSPENDED) == 0) {
+                    return createForwardingResolveInfoUnchecked(filter, sourceUserId,
+                            targetUserId);
+                }
+            }
         }
         return null;
     }
