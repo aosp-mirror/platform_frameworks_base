@@ -2442,6 +2442,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
 
             updateOptionsUi();
+            updateSummary();
         }
 
         private boolean capabilitiesChanged(PrinterCapabilitiesInfo oldCapabilities,
