@@ -29,6 +29,8 @@ import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import libcore.util.EmptyArray;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -658,8 +660,19 @@ public class FileUtils {
         }
     }
 
-    public static @NonNull File[] listFilesOrEmpty(File dir) {
-        File[] res = dir.listFiles();
+    public static @NonNull String[] listOrEmpty(@Nullable File dir) {
+        if (dir == null) return EmptyArray.STRING;
+        final String[] res = dir.list();
+        if (res != null) {
+            return res;
+        } else {
+            return EmptyArray.STRING;
+        }
+    }
+
+    public static @NonNull File[] listFilesOrEmpty(@Nullable File dir) {
+        if (dir == null) return EMPTY;
+        final File[] res = dir.listFiles();
         if (res != null) {
             return res;
         } else {
@@ -667,8 +680,9 @@ public class FileUtils {
         }
     }
 
-    public static @NonNull File[] listFilesOrEmpty(File dir, FilenameFilter filter) {
-        File[] res = dir.listFiles(filter);
+    public static @NonNull File[] listFilesOrEmpty(@Nullable File dir, FilenameFilter filter) {
+        if (dir == null) return EMPTY;
+        final File[] res = dir.listFiles(filter);
         if (res != null) {
             return res;
         } else {
