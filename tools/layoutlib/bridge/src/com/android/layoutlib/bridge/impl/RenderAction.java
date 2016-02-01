@@ -382,23 +382,17 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
             config.orientation = Configuration.ORIENTATION_UNDEFINED;
         }
 
-        try {
-            ScreenRound roundness = hardwareConfig.getScreenRoundness();
-            if (roundness != null) {
-                switch (roundness) {
-                    case ROUND:
-                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
-                        break;
-                    case NOTROUND:
-                        config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_NO;
-                }
-            } else {
-                config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
+        ScreenRound roundness = hardwareConfig.getScreenRoundness();
+        if (roundness != null) {
+            switch (roundness) {
+                case ROUND:
+                    config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_YES;
+                    break;
+                case NOTROUND:
+                    config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_NO;
             }
-        } catch (NoSuchMethodError ignored) {
-            // getScreenRoundness was added in later stages of API 15. So, it's not present on some
-            // preview releases of API 15.
-            // TODO: Remove the try catch around Oct 2015.
+        } else {
+            config.screenLayout |= Configuration.SCREENLAYOUT_ROUND_UNDEFINED;
         }
         String locale = getParams().getLocale();
         if (locale != null && !locale.isEmpty()) config.locale = new Locale(locale);
