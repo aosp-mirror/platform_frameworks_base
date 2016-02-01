@@ -138,18 +138,29 @@ public class RecentsTaskLoadPlan {
             lastStackActiveTime = 0;
         }
         long newLastStackActiveTime = -1;
+        long prevLastActiveTime = lastStackActiveTime;
         int taskCount = mRawTasks.size();
         for (int i = 0; i < taskCount; i++) {
             ActivityManager.RecentTaskInfo t = mRawTasks.get(i);
 
-            // Affiliated tasks are returned in a specific order from ActivityManager but without a
-            // lastActiveTime since it hasn't yet been started. However, we later sort the task list
-            // by lastActiveTime, which rearranges the tasks. For now, we need to workaround this
-            // by updating the lastActiveTime of this task to the lastActiveTime of the task it is
-            // affiliated with, in the same order that we encounter it in the original list (just
-            // its index in the task group for the task it is affiliated with).
+            /*
+             * Affiliated tasks are returned in a specific order from ActivityManager but without a
+             * lastActiveTime since it hasn't yet been started. However, we later sort the task list
+             * by lastActiveTime, which rearranges the tasks. For now, we need to workaround this
+             * by updating the lastActiveTime of this task to the lastActiveTime of the task it is
+             * affiliated with, in the same order that we encounter it in the original list (just
+             * its index in the task group for the task it is affiliated with).
+             *
+             * If the parent task is not available, then we will use the last active time of the
+             * previous task as a base point (since the task itself may not have an active time)
+             * for the entire affiliated group.
+             */
             if (t.persistentId != t.affiliatedTaskId) {
-                t.lastActiveTime = affiliatedTasks.get(t.affiliatedTaskId).lastActiveTime +
+                Task.TaskKey parentTask = affiliatedTasks.get(t.affiliatedTaskId);
+                long parentTaskLastActiveTime = parentTask != null
+                        ? parentTask.lastActiveTime
+                        : prevLastActiveTime;
+                t.lastActiveTime = parentTaskLastActiveTime +
                         affiliatedTaskCounts.get(t.affiliatedTaskId, 0) + 1;
             }
 
@@ -186,6 +197,8 @@ public class RecentsTaskLoadPlan {
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
             affiliatedTasks.put(taskKey.id, taskKey);
+
+            prevLastActiveTime = t.lastActiveTime;
         }
         if (newLastStackActiveTime != -1) {
             Prefs.putLong(mContext, Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME,
