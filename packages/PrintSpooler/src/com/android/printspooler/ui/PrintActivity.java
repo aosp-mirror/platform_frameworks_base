@@ -167,6 +167,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[]{PageRange.ALL_PAGES};
 
+    private boolean mIsOptionsUiBound = false;
+
     private final PrinterAvailabilityDetector mPrinterAvailabilityDetector =
             new PrinterAvailabilityDetector();
 
@@ -1214,6 +1216,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mPrintButton = (ImageView) findViewById(R.id.print_button);
         mPrintButton.setOnClickListener(clickListener);
 
+        // The UI is now initialized
+        mIsOptionsUiBound = true;
+
         // Special prompt instead of destination spinner for the first time the user printed
         if (!hasUserEverPrinted()) {
             mShowDestinationPrompt = true;
@@ -1390,6 +1395,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     void updateOptionsUi() {
+        if (!mIsOptionsUiBound) {
+            return;
+        }
+
         // Always update the summary.
         updateSummary();
 
@@ -1725,6 +1734,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void updateSummary() {
+        if (!mIsOptionsUiBound) {
+            return;
+        }
+
         CharSequence copiesText = null;
         CharSequence mediaSizeText = null;
 
