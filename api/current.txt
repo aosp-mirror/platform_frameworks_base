@@ -60025,6 +60025,7 @@ package javax.net.ssl {
     ctor public ExtendedSSLSession();
     method public abstract java.lang.String[] getLocalSupportedSignatureAlgorithms();
     method public abstract java.lang.String[] getPeerSupportedSignatureAlgorithms();
+    method public java.util.List<javax.net.ssl.SNIServerName> getRequestedServerNames();
   }
 
   public class HandshakeCompletedEvent extends java.util.EventObject {
@@ -60095,6 +60096,25 @@ package javax.net.ssl {
   }
 
   public abstract interface ManagerFactoryParameters {
+  }
+
+  public final class SNIHostName extends javax.net.ssl.SNIServerName {
+    ctor public SNIHostName(java.lang.String);
+    ctor public SNIHostName(byte[]);
+    method public static javax.net.ssl.SNIMatcher createSNIMatcher(java.lang.String);
+    method public java.lang.String getAsciiName();
+  }
+
+  public abstract class SNIMatcher {
+    ctor protected SNIMatcher(int);
+    method public final int getType();
+    method public abstract boolean matches(javax.net.ssl.SNIServerName);
+  }
+
+  public abstract class SNIServerName {
+    ctor protected SNIServerName(int, byte[]);
+    method public final byte[] getEncoded();
+    method public final int getType();
   }
 
   public class SSLContext {
@@ -60218,12 +60238,18 @@ package javax.net.ssl {
     method public java.lang.String getEndpointIdentificationAlgorithm();
     method public boolean getNeedClientAuth();
     method public java.lang.String[] getProtocols();
+    method public final java.util.Collection<javax.net.ssl.SNIMatcher> getSNIMatchers();
+    method public final java.util.List<javax.net.ssl.SNIServerName> getServerNames();
+    method public final boolean getUseCipherSuitesOrder();
     method public boolean getWantClientAuth();
     method public void setAlgorithmConstraints(java.security.AlgorithmConstraints);
     method public void setCipherSuites(java.lang.String[]);
     method public void setEndpointIdentificationAlgorithm(java.lang.String);
     method public void setNeedClientAuth(boolean);
     method public void setProtocols(java.lang.String[]);
+    method public final void setSNIMatchers(java.util.Collection<javax.net.ssl.SNIMatcher>);
+    method public final void setServerNames(java.util.List<javax.net.ssl.SNIServerName>);
+    method public final void setUseCipherSuitesOrder(boolean);
     method public void setWantClientAuth(boolean);
   }
 
@@ -60349,6 +60375,10 @@ package javax.net.ssl {
     method public static synchronized javax.net.SocketFactory getDefault();
     method public abstract java.lang.String[] getDefaultCipherSuites();
     method public abstract java.lang.String[] getSupportedCipherSuites();
+  }
+
+  public final class StandardConstants {
+    field public static final int SNI_HOST_NAME = 0; // 0x0
   }
 
   public abstract interface TrustManager {
