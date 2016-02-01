@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.PrintWriterPrinter;
@@ -96,6 +97,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runInstallCreate();
                 case "install-write":
                     return runInstallWrite();
+                case "compile":
+                    return runCompile();
                 case "list":
                     return runList();
                 case "uninstall":
@@ -225,6 +228,67 @@ class PackageManagerShellCommand extends ShellCommand {
         final String splitName = getNextArg();
         final String path = getNextArg();
         return doWriteSession(sessionId, path, sizeBytes, splitName, true /*logSuccess*/);
+    }
+
+    private int runCompile() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        boolean useJitProfiles = false;
+        boolean extractOnly = false;
+        boolean forceCompilation = false;
+        String compilationMode = "default";
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-m":
+                    compilationMode = getNextArgRequired();
+                    break;
+                case "-f":
+                    forceCompilation = true;
+                    break;
+                default:
+                    pw.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        switch (compilationMode) {
+            case "default":
+                useJitProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
+                extractOnly = false;
+                break;
+            case "all":
+                useJitProfiles = false;
+                extractOnly = false;
+                break;
+            case "profile":
+                useJitProfiles = true;
+                extractOnly = false;
+                break;
+            case "extract":
+                useJitProfiles = false;
+                extractOnly = true;
+                break;
+            default:
+                pw.println("Error: Unknown compilation mode: " + compilationMode);
+                return 1;
+        }
+
+        String packageName = getNextArg();
+        if (packageName == null) {
+            pw.println("Error: package name not specified");
+            return 1;
+        }
+
+        boolean success = mInterface.performDexOpt(packageName, null /* instructionSet */,
+                useJitProfiles, extractOnly, forceCompilation);
+        if (success) {
+            pw.println("Success");
+            return 0;
+        } else {
+            pw.println("Failure: package " + packageName + " could not be compiled");
+            return 1;
+        }
     }
 
     private int runList() throws RemoteException {
@@ -1069,6 +1133,12 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
+        pw.println("  compile [-m MODE] [-f] TARGET-PACKAGE");
+        pw.println("    Trigger compilation of TARGET-PACKAGE.");
+        pw.println("    Options:");
+        pw.println("      -m: select compilation mode");
+        pw.println("          MODE can be one of \"default\", \"all\", \"profile\", and \"extract\"");
+        pw.println("      -f: force compilation even if not needed");
         pw.println("  list features");
         pw.println("    Prints all features of the system.");
         pw.println("  list instrumentation [-f] [TARGET-PACKAGE]");

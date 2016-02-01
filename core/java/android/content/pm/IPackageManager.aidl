@@ -452,6 +452,9 @@ interface IPackageManager {
      */
     boolean performDexOptIfNeeded(String packageName, String instructionSet);
 
+    boolean performDexOpt(String packageName, String instructionSet, boolean useProfiles,
+            boolean extractOnly, boolean force);
+
     void forceDexOpt(String packageName);
 
     /**
