@@ -375,7 +375,7 @@ please see themes_device_defaults.xml.
         <item name="datePickerStyle">@style/Widget.Material.DatePicker</item>
 
         <!-- DatePicker dialog theme -->
-        <item name="datePickerDialogTheme">?attr/dialogTheme</item>
+        <item name="datePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.DatePicker</item>
 
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
@@ -738,7 +738,7 @@ please see themes_device_defaults.xml.
         <item name="datePickerStyle">@style/Widget.Material.Light.DatePicker</item>
 
         <!-- DatePicker dialog theme -->
-        <item name="datePickerDialogTheme">?attr/dialogTheme</item>
+        <item name="datePickerDialogTheme">@style/ThemeOverlay.Material.Dialog.DatePicker</item>
 
         <!-- TODO: This belongs in a FastScroll style -->
         <item name="fastScrollThumbDrawable">@drawable/fastscroll_thumb_material</item>
@@ -889,6 +889,11 @@ please see themes_device_defaults.xml.
         <item name="listDivider">@null</item>
 
         <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
+    </style>
+
+    <!-- Theme overlay that overrides window properties to display as a date picker dialog. -->
+    <style name="ThemeOverlay.Material.Dialog.DatePicker">
+        <item name="alertDialogStyle">@style/DatePickerDialog.Material</item>
     </style>
 
     <style name="ThemeOverlay.Material.Dialog.Alert">

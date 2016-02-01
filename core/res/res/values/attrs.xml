@@ -2039,6 +2039,8 @@ i
         <attr name="listItemLayout" format="reference" />
         <attr name="progressLayout" format="reference" />
         <attr name="horizontalProgressLayout" format="reference" />
+        <!-- @hide Not ready for public use. -->
+        <attr name="showTitle" format="boolean" />
         <!-- @hide Whether fullDark, etc. should use default values if null. -->
         <attr name="needsDefaultBackgrounds" format="boolean" />
     </declare-styleable>
