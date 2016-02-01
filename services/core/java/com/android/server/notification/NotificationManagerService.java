@@ -2840,17 +2840,20 @@ public class NotificationManagerService extends SystemService {
             final int N = mNotificationList.size();
             ArrayList<String> orderBefore = new ArrayList<String>(N);
             int[] visibilities = new int[N];
+            int [] importances = new int[N];
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
                 visibilities[i] = r.getPackageVisibilityOverride();
+                importances[i] = r.getImportance();
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 if (!orderBefore.get(i).equals(r.getKey())
-                        || visibilities[i] != r.getPackageVisibilityOverride()) {
+                        || visibilities[i] != r.getPackageVisibilityOverride()
+                        || importances[i] != r.getImportance()) {
                     scheduleSendRankingUpdate();
                     return;
                 }
