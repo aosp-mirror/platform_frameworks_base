@@ -2196,7 +2196,32 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
         // The languages of the two resources are not the same. We can only
         // assume that one of the two resources matched the request because one
         // doesn't have a language and the other has a matching language.
-        return (language[0] != 0);
+        //
+        // We consider the one that has the language specified a better match.
+        //
+        // The exception is that we consider no-language resources a better match
+        // for US English and similar locales than locales that are a descendant
+        // of Internatinal English (en-001), since no-language resources are
+        // where the US English resource have traditionally lived for most apps.
+        if (requested->language[0] == 'e' && requested->language[1] == 'n') {
+            if (requested->country[0] == 'U' && requested->country[1] == 'S') {
+                // For US English itself, we consider a no-locale resource a
+                // better match if the other resource has a country other than
+                // US specified.
+                if (language[0] != '\0') {
+                    return country[0] == '\0' || (country[0] == 'U' && country[1] == 'S');
+                } else {
+                    return !(o.country[0] == '\0' || (o.country[0] == 'U' && o.country[1] == 'S'));
+                }
+            } else if (localeDataIsCloseToUsEnglish(requested->country)) {
+                if (language[0] != '\0') {
+                    return localeDataIsCloseToUsEnglish(country);
+                } else {
+                    return !localeDataIsCloseToUsEnglish(o.country);
+                }
+            }
+        }
+        return (language[0] != '\0');
     }
 
     // If we are here, both the resources have the same non-empty language as

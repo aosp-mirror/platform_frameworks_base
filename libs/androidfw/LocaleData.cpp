@@ -70,13 +70,17 @@ uint32_t findParent(uint32_t packed_locale, const char* script) {
 //
 // Returns the number of ancestors written in the output, which is always
 // at least one.
+//
+// (If 'out' is nullptr, we do everything the same way but we simply don't write
+// any results in 'out'.)
 size_t findAncestors(uint32_t* out, ssize_t* stop_list_index,
                      uint32_t packed_locale, const char* script,
                      const uint32_t* stop_list, size_t stop_set_length) {
     uint32_t ancestor = packed_locale;
     size_t count = 0;
     do {
-        out[count++] = ancestor;
+        if (out != nullptr) out[count] = ancestor;
+        count++;
         for (size_t i = 0; i < stop_set_length; i++) {
             if (stop_list[i] == ancestor) {
                 *stop_list_index = (ssize_t) i;
@@ -93,10 +97,9 @@ size_t findDistance(uint32_t supported,
                     const char* script,
                     const uint32_t* request_ancestors,
                     size_t request_ancestors_count) {
-    uint32_t supported_ancestors[MAX_PARENT_DEPTH+1];
     ssize_t request_ancestors_index;
     const size_t supported_ancestor_count = findAncestors(
-            supported_ancestors, &request_ancestors_index,
+            nullptr, &request_ancestors_index,
             supported, script,
             request_ancestors, request_ancestors_count);
     // Since both locales share the same root, there will always be a shared
@@ -196,6 +199,21 @@ void localeDataComputeScript(char out[4], const char* language, const char* regi
         // We found the locale.
         memcpy(out, SCRIPT_CODES[lookup_result->second], SCRIPT_LENGTH);
     }
+}
+
+const uint32_t ENGLISH_STOP_LIST[2] = {
+    0x656E0000lu, // en
+    0x656E8400lu, // en-001
+};
+const char ENGLISH_CHARS[2] = {'e', 'n'};
+const char LATIN_CHARS[4] = {'L', 'a', 't', 'n'};
+
+bool localeDataIsCloseToUsEnglish(const char* region) {
+    const uint32_t locale = packLocale(ENGLISH_CHARS, region);
+    ssize_t stop_list_index;
+    findAncestors(nullptr, &stop_list_index, locale, LATIN_CHARS, ENGLISH_STOP_LIST, 2);
+    // A locale is like US English if we see "en" before "en-001" in its ancestor list.
+    return stop_list_index == 0; // 'en' is first in ENGLISH_STOP_LIST
 }
 
 } // namespace android
