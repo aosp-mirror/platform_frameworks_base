@@ -64,6 +64,7 @@ import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.recents.tv.views.TaskStackHorizontalGridView;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackView;
 import com.android.systemui.recents.views.TaskViewHeader;
@@ -98,6 +99,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     //Used to store tv or non-tv activty for use in creating intents.
     private final String mRecentsIntentActivityName;
+
     /**
      * An implementation of ITaskStackListener, that allows us to listen for changes to the system
      * task stacks and update recents accordingly.
