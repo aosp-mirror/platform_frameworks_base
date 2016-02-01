@@ -354,7 +354,7 @@ public final class Metrics {
      * a single ROOT_OTHER bucket.
      */
     private static @Root int sanitizeRoot(Uri uri) {
-        if (uri == null || LauncherActivity.isLaunchUri(uri)) {
+        if (uri == null || uri.getAuthority() == null || LauncherActivity.isLaunchUri(uri)) {
             return ROOT_NONE;
         }
 

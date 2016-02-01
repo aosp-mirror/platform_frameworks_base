@@ -104,10 +104,12 @@ public class FilesActivity extends BaseActivity {
             // loading or restoring the stack.
             //
             // When restoring from a stack, if a URI is present, it should only ever
-            // be a launch URI. Launch URIs support sensible activity management, but
-            // don't specify a real content target.
+            // be a launch URI, or a fake Uri from notifications.
+            // Launch URIs support sensible activity management, but don't specify a real
+            // content target.
             if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
-            checkState(uri == null || LauncherActivity.isLaunchUri(uri));
+            checkState(uri == null || uri.getAuthority() == null ||
+                    LauncherActivity.isLaunchUri(uri));
             refreshCurrentRootAndDirectory(ANIM_NONE);
         } else if (DocumentsContract.isRootUri(this, uri)) {
             if (DEBUG) Log.d(TAG, "Launching with root URI.");
