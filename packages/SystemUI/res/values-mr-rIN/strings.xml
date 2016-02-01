@@ -403,7 +403,7 @@
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टीम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"चार्ज होत नसताना स्टेटस बार चिन्हामध्‍ये बॅटरी पातळी टक्केवारी दर्शवा"</string>
-    <string name="quick_settings" msgid="10042998191725428">"दृत सेटिंग्ज"</string>
+    <string name="quick_settings" msgid="10042998191725428">"द्रुत सेटिंग्ज"</string>
     <string name="status_bar" msgid="4877645476959324760">"स्टेटस बार"</string>
     <string name="demo_mode" msgid="2389163018533514619">"डेमो मोड"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"डेमो मोड सक्षम करा"</string>

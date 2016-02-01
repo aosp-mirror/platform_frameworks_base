@@ -283,7 +283,7 @@
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Meldingen"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Zaklamp"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiele gegevens"</string>
-    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Gegevensgebruik"</string>
+    <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datagebruik"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Resterende gegevens"</string>
     <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Limiet overschreden"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> gebruikt"</string>
@@ -396,7 +396,7 @@
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Verbergen"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> wil het volumedialoogvenster zijn."</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Toestaan"</string>
-    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Afwijzen"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Weigeren"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is het volumedialoogvenster"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tik hierop om het origineel te herstellen."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"U gebruikt je werkprofiel"</string>
