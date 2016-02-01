@@ -416,7 +416,7 @@ public class MainActivity extends FragmentActivity {
          * Add the account and account type, no password or user data
          * If successful, return the Account object, otherwise report an error.
          */
-        if (accountManager.addAccountExplicitly(newAccount, null, null))) {
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
             /*
              * If you don't set android:syncable="true" in
              * in your &lt;provider&gt; element in the manifest,
