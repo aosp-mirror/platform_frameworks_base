@@ -129,9 +129,11 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
                     @Override
                     public void onChanged() {
-                        // TODO: This is causing b/22765812
-                        mSelection.clear();
                         mModelIds = mAdapter.getModelIds();
+
+                        // Update the selection to remove any disappeared IDs.
+                        mSelection.cancelProvisionalSelection();
+                        mSelection.intersect(mModelIds);
                     }
 
                     @Override
