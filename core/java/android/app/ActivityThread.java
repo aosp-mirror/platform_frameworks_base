@@ -5059,7 +5059,7 @@ public final class ActivityThread {
         }
 
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
-        if (!Process.isIsolated()) {
+        if (!Process.isIsolated() && !"android".equals(appContext.getPackageName())) {
             final File cacheDir = appContext.getCacheDir();
             if (cacheDir != null) {
                 // Provide a usable directory for temporary files
