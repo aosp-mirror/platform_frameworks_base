@@ -25,12 +25,15 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -40,6 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.HashMap;
@@ -49,6 +53,10 @@ import java.util.Set;
 public class TunerService extends SystemUI {
 
     public static final String ACTION_CLEAR = "com.android.systemui.action.CLEAR_TUNER";
+
+    private static final String TUNER_VERSION = "sysui_tuner_version";
+
+    private static final int CURRENT_TUNER_VERSION = 1;
 
     private final Observer mObserver = new Observer();
     // Map of Uris we listen on to their settings keys.
@@ -63,6 +71,13 @@ public class TunerService extends SystemUI {
     @Override
     public void start() {
         mContentResolver = mContext.getContentResolver();
+
+        for (UserInfo user : UserManager.get(mContext).getUsers()) {
+            mCurrentUser = user.getUserHandle().getIdentifier();
+            if (getValue(TUNER_VERSION, 0) != CURRENT_TUNER_VERSION) {
+                upgradeTuner(getValue(TUNER_VERSION, 0), CURRENT_TUNER_VERSION);
+            }
+        }
         putComponent(TunerService.class, this);
 
         mCurrentUser = ActivityManager.getCurrentUser();
@@ -75,6 +90,24 @@ public class TunerService extends SystemUI {
             }
         };
         mUserTracker.startTracking();
+    }
+
+    private void upgradeTuner(int oldVersion, int newVersion) {
+        if (oldVersion < 1) {
+            String blacklistStr = getValue(StatusBarIconController.ICON_BLACKLIST);
+            if (blacklistStr != null) {
+                ArraySet<String> iconBlacklist =
+                        StatusBarIconController.getIconBlacklist(blacklistStr);
+
+                iconBlacklist.add("rotate");
+                iconBlacklist.add("headset");
+
+                Settings.Secure.putStringForUser(mContentResolver,
+                        StatusBarIconController.ICON_BLACKLIST,
+                        TextUtils.join(",", iconBlacklist), mCurrentUser);
+            }
+        }
+        setValue(TUNER_VERSION, newVersion);
     }
 
     public String getValue(String setting) {
