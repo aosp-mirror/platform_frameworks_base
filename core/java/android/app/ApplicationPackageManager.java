@@ -326,8 +326,7 @@ public class ApplicationPackageManager extends PackageManager {
                 // This is a temporary hack. Callers must use
                 // createPackageContext(packageName).getApplicationInfo() to
                 // get the right paths.
-                maybeAdjustApplicationInfo(ai);
-                return ai;
+                return maybeAdjustApplicationInfo(ai);
             }
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
@@ -336,7 +335,7 @@ public class ApplicationPackageManager extends PackageManager {
         throw new NameNotFoundException(packageName);
     }
 
-    private static void maybeAdjustApplicationInfo(ApplicationInfo info) {
+    private static ApplicationInfo maybeAdjustApplicationInfo(ApplicationInfo info) {
         // If we're dealing with a multi-arch application that has both
         // 32 and 64 bit shared libraries, we might need to choose the secondary
         // depending on what the current runtime's instruction set is.
@@ -353,9 +352,12 @@ public class ApplicationPackageManager extends PackageManager {
             // Everything will be set up correctly because info.nativeLibraryDir will
             // correspond to the right ISA.
             if (runtimeIsa.equals(secondaryIsa)) {
-                info.nativeLibraryDir = info.secondaryNativeLibraryDir;
+                ApplicationInfo modified = new ApplicationInfo(info);
+                modified.nativeLibraryDir = info.secondaryNativeLibraryDir;
+                return modified;
             }
         }
+        return info;
     }
 
     @Override

@@ -7980,6 +7980,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         pkg.applicationInfo.primaryCpuAbi = abi;
                     }
                 }
+                if (cpuAbiOverride != null &&
+                        cpuAbiOverride.equals(pkg.applicationInfo.secondaryCpuAbi)) {
+                    pkg.applicationInfo.secondaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
+                    pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
+                }
             } else {
                 String[] abiList = (cpuAbiOverride != null) ?
                         new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;
@@ -12842,8 +12847,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-        // Mark that we have an install time CPU ABI override.
-        pkg.cpuAbiOverride = args.abiOverride;
+        // If package doesn't declare API override, mark that we have an install
+        // time CPU ABI override.
+        if (TextUtils.isEmpty(pkg.cpuAbiOverride)) {
+            pkg.cpuAbiOverride = args.abiOverride;
+        }
 
         String pkgName = res.name = pkg.packageName;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_TEST_ONLY) != 0) {
@@ -13016,7 +13024,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             scanFlags |= SCAN_NO_DEX;
 
             try {
-                derivePackageAbi(pkg, new File(pkg.codePath), args.abiOverride,
+                String abiOverride = (TextUtils.isEmpty(pkg.cpuAbiOverride) ?
+                    args.abiOverride : pkg.cpuAbiOverride);
+                derivePackageAbi(pkg, new File(pkg.codePath), abiOverride,
                         true /* extract libs */);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
