@@ -181,7 +181,7 @@
     <string name="adb_warning_title" msgid="6234463310896563253">"Permiteți depanarea USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Depanarea USB are exclusiv scopuri de dezvoltare. Utilizați-o pentru a copia date de pe computer pe dispozitiv, pentru a instala aplicații pe dispozitiv fără notificare și pentru a citi datele din jurnale."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Revocați accesul la remedierea erorilor prin USB de pe toate computerele pe care le-ați autorizat anterior?"</string>
-    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Permiteţi setările pentru dezvoltare?"</string>
+    <string name="dev_settings_warning_title" msgid="7244607768088540165">"Permiteți setările pentru dezvoltare?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aceste setări sunt destinate exclusiv utilizării pentru dezvoltare. Din cauza lor, este posibil ca dispozitivul dvs. și aplicațiile de pe acesta să nu mai funcţioneze sau să funcţioneze necorespunzător."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificați aplicațiile prin USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificaţi aplicațiile instalate utilizând ADB/ADT, pentru a detecta un comportament dăunător."</string>
@@ -308,4 +308,5 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nu se încarcă"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nu încarcă"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Complet"</string>
+    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Dezactivată de administrator"</string>
 </resources>

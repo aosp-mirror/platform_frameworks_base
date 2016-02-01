@@ -308,4 +308,5 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"충전 안함"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"충전 안함"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"충전 완료"</string>
+    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"관리자가 사용 중지함"</string>
 </resources>

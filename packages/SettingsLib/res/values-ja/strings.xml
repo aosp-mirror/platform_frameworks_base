@@ -310,4 +310,5 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for battery_info_status_full (2824614753861462808) -->
     <skip />
+    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"管理者によって無効にされています"</string>
 </resources>

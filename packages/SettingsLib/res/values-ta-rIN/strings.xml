@@ -308,4 +308,5 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"சார்ஜ் ஏறவில்லை"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"முழுமை"</string>
+    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"நிர்வாகி முடக்கியுள்ளார்"</string>
 </resources>
