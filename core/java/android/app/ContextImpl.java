@@ -182,8 +182,6 @@ class ContextImpl extends Context {
     @GuardedBy("mSync")
     private File[] mExternalMediaDirs;
 
-    private static final String[] EMPTY_STRING_ARRAY = {};
-
     // The system service cache for the system services that are cached per-ContextImpl.
     final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
 
@@ -627,8 +625,7 @@ class ContextImpl extends Context {
 
     @Override
     public String[] fileList() {
-        final String[] list = getFilesDir().list();
-        return (list != null) ? list : EMPTY_STRING_ARRAY;
+        return FileUtils.listOrEmpty(getFilesDir());
     }
 
     @Override
@@ -682,15 +679,15 @@ class ContextImpl extends Context {
             dir = new File(dirPath);
             name = name.substring(name.lastIndexOf(File.separatorChar));
             f = new File(dir, name);
+
+            if (!dir.isDirectory() && dir.mkdir()) {
+                FileUtils.setPermissions(dir.getPath(),
+                    FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
+                    -1, -1);
+            }
         } else {
             dir = getDatabasesDir();
             f = makeFilename(dir, name);
-        }
-
-        if (!dir.isDirectory() && dir.mkdir()) {
-            FileUtils.setPermissions(dir.getPath(),
-                FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                -1, -1);
         }
 
         return f;
@@ -698,8 +695,7 @@ class ContextImpl extends Context {
 
     @Override
     public String[] databaseList() {
-        final String[] list = getDatabasesDir().list();
-        return (list != null) ? list : EMPTY_STRING_ARRAY;
+        return FileUtils.listOrEmpty(getDatabasesDir());
     }
 
     private File getDatabasesDir() {
