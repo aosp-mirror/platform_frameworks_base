@@ -120,6 +120,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     static final int DRAG_RESIZE_MODE_FREEFORM = 0;
     static final int DRAG_RESIZE_MODE_DOCKED_DIVIDER = 1;
 
+    static final boolean DEBUG_DISABLE_SAVING_SURFACES = false;
+
     final WindowManagerService mService;
     final WindowManagerPolicy mPolicy;
     final Context mContext;
@@ -1795,10 +1797,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return false;
         }
 
-        if (isChildWindow()) {
-            return false;
-        }
-
         Task task = getTask();
         if (task == null || task.inHomeStack()) {
             // Don't save surfaces for home stack apps. These usually resume and draw
@@ -1809,6 +1807,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final AppWindowToken taskTop = task.getTopVisibleAppToken();
         if (taskTop != null && taskTop != mAppToken) {
             // Don't save if the window is not the topmost window.
+            return false;
+        }
+
+        if (DEBUG_DISABLE_SAVING_SURFACES) {
             return false;
         }
 
