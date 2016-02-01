@@ -270,7 +270,8 @@ public class RecentsTransitionHelper {
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
-                layoutAlgorithm.getStackTransform(task, stackScroll, mTmpTransform, null);
+                layoutAlgorithm.getStackTransformScreenCoordinates(task, stackScroll, mTmpTransform,
+                        null);
                 specs.add(composeAnimationSpec(taskView, mTmpTransform, true /* addHeaderBitmap */));
             }
             return specs;
@@ -290,7 +291,8 @@ public class RecentsTransitionHelper {
                     //       never happen)
                     specs.add(composeOffscreenAnimationSpec(t, offscreenTaskRect));
                 } else {
-                    layoutAlgorithm.getStackTransform(t, stackScroll, mTmpTransform, null);
+                    layoutAlgorithm.getStackTransformScreenCoordinates(t, stackScroll,
+                            mTmpTransform, null);
                     specs.add(composeAnimationSpec(tv, mTmpTransform, true /* addHeaderBitmap */));
                 }
             }

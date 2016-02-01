@@ -2232,8 +2232,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord topActivity = task.getTopActivity();
+        final int sourceStackId = task.stack != null ? task.stack.mStackId : INVALID_STACK_ID;
         final boolean mightReplaceWindow =
-                StackId.preserveWindowOnTaskMove(stackId) && topActivity != null;
+                StackId.replaceWindowsOnTaskMove(sourceStackId, stackId) && topActivity != null;
         if (mightReplaceWindow) {
             // We are about to relaunch the activity because its configuration changed due to
             // being maximized, i.e. size change. The activity will first remove the old window
@@ -2255,15 +2256,19 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         boolean kept = true;
+
+        // We might trigger a configuration change. Save the current task bounds for freezing.
+        mWindowManager.prepareFreezingTaskBounds(stack.mStackId);
+
         // Make sure the task has the appropriate bounds/size for the stack it is in.
         if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
         } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
                 && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
             kept = resizeTaskLocked(task, task.mLastNonFullscreenBounds,
-                    RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+                    RESIZE_MODE_SYSTEM, !mightReplaceWindow);
         } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !PRESERVE_WINDOWS);
+            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
         }
 
         if (mightReplaceWindow) {
@@ -2275,7 +2280,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
-        ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+        ensureActivitiesVisibleLocked(null, 0, !mightReplaceWindow);
         resumeFocusedStackTopActivityLocked();
 
         showNonResizeableDockToastIfNeeded(task, preferredLaunchStackId, stackId);

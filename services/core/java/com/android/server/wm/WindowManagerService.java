@@ -2980,9 +2980,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Rect frame = new Rect(0, 0, width, height);
             final Rect insets = new Rect();
             Rect surfaceInsets = null;
-            final boolean fullscreen = win != null && win.isFrameFullscreen(displayInfo);
             final boolean freeform = win != null && win.inFreeformWorkspace();
-            final boolean docked = win != null && win.inDockedWorkspace();
             if (win != null) {
                 // Containing frame will usually cover the whole screen, including dialog windows.
                 // For freeform workspace windows it will not cover the whole screen and it also
@@ -2994,12 +2992,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     frame.set(win.mContainingFrame);
                 }
                 surfaceInsets = win.getAttrs().surfaceInsets;
-                if (fullscreen || docked) {
-                    // For fullscreen windows use the window frames and insets to set the thumbnail
-                    // clip. For non-fullscreen windows we use the app display region so the clip
-                    // isn't affected by the window insets.
-                    insets.set(win.mContentInsets);
-                }
+                insets.set(win.mContentInsets);
             }
 
             if (atoken.mLaunchTaskBehind) {
@@ -3013,7 +3006,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter,
                     mCurConfiguration.orientation, frame, insets, surfaceInsets, isVoiceInteraction,
-                    !fullscreen, atoken.mTask.mTaskId);
+                    freeform, atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
@@ -10386,6 +10379,14 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             getFocusedWindow().mClient.requestAppKeyboardShortcuts(receiver);
         } catch (RemoteException e) {
+        }
+    }
+
+    @Override
+    public void getStableInsets(Rect outInsets) throws RemoteException {
+        synchronized (mWindowMap) {
+            final DisplayInfo di = getDefaultDisplayInfoLocked();
+            mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
         }
     }
 
