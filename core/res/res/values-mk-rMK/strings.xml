@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот и да внесете повеќе детали во врска со проблемот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Целосен извештај"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Користете ја опцијава за да имате минимално системско попречување кога уредот не реагира или е премногу бавен, или кога ви требаат сите делови на извештајот. Не прави слика од екранот, ниту ви дозволува да внесете повеќе детали."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунда.</item>
       <item quantity="other">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Содржините се скриени"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Содржините се скриени поради политиката"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безбеден режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Систем Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Лични"</string>
@@ -909,15 +909,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Избери дејство"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Изберете апликација за УСБ-уредот"</string>
     <string name="noApplications" msgid="2991814273936504689">"Нема апликации што можат да го извршат ова дејство."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"За жал, <xliff:g id="APPLICATION">%1$s</xliff:g> запре."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"За жал, процесот <xliff:g id="PROCESS">%1$s</xliff:g> запре."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Silence паѓа од <xliff:g id="PROCESS">%1$s</xliff:g> до рестартирањето."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> запре"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> запре"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> постојано запира"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> постојано запира"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"Рестартирај ја апликацијата"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Ресетирај ја и рестартирај ја апликацијата"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Испрати повратни информации"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Затвори"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Исклучи звук"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Почекај"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Затвори ја апликацијата"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> не реагира.\n\nДали сакате да ја затворите?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Активноста <xliff:g id="ACTIVITY">%1$s</xliff:g> не реагира.\n\nДали сакате да ја затворите?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"Апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> не реагира. Дали сакате да ја затворите?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Процесот <xliff:g id="PROCESS">%1$s</xliff:g> не реагира.\n\nДали сакате да го затворите?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> не реагира"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> не реагира"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> не реагира"</string>
+    <string name="anr_process" msgid="6156880875555921105">"Процесот <xliff:g id="PROCESS">%1$s</xliff:g> не реагира"</string>
     <string name="force_close" msgid="8346072094521265605">"Во ред"</string>
     <string name="report" msgid="4060218260984795706">"Извештај"</string>
     <string name="wait" msgid="7147118217226317732">"Почекај"</string>
@@ -1457,7 +1464,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за ПИН пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Прашај за шема за отклучување пред откачување"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Не може да се промени големината на апликацијата. Движете ја со два прста."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Не може да се промени големината на апликацијата, лизгајте ја со два прста."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Апликацијата не поддржува поделен екран."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Инсталирано од администраторот"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Избришано од администраторот"</string>
@@ -1529,14 +1537,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Разно"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Ја поставивте важноста на известувањава."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ова е важно заради луѓето кои се вклучени."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник, но во моментов е забрането."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник, но ограничувањето за корисници е достигнато."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник, но сметката "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" веќе постои на уредот. Сепак продолжете?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" се обидува да додаде нов корисник за сметката "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Продолжете?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g> (веќе постои корисник со оваа сметка)?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Претпочитувања за јазик"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Претпочитувања за регион"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Внеси име на јазик"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Предложени"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сите јазици"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пребарај"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Режимот на работа е ИСКЛУЧЕН"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Дозволете работниот профил да функционира, вклучувајќи ги апликациите, синхронизирањето во заднина и други поврзани функции."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Вклучи"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s е оневозможен"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Оневозможено од администраторот на %1$s. Контактирајте со него за да дознаете повеќе."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Имате нови пораки"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Отворете ја апликацијата за СМС за приказ"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Некои функции се недостапни"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Допрете за да продолжите"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Корисничкиот профил е заклучен"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"รายงานแบบอินเทอร์แอกทีฟ"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"ใช้ตัวเลือกนี้ได้เกือบทุกสถานการณ์ โดยจะอนุญาตให้คุณติดตามความคืบหน้าของรายงานและป้อนรายละเอียดเพิ่มเติมของปัญหา หัวข้อที่ใช้งานน้อยแต่ใช้เวลานานในการรายงานอาจถูกข้ามไป"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"รายงานฉบับเต็ม"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"ใช้ตัวเลือกนี้เพื่อให้มีการรบกวนระบบน้อยที่สุดเมื่ออุปกรณ์ของคุณไม่ตอบสนองหรือตอบสนองช้ามาก หรือเมื่อคุณต้องการทุกหัวข้อในรายงาน ตัวเลือกนี้จะไม่ถ่ายภาพหน้าจอหรืออนุญาตให้คุณป้อนรายละเอียดเพิ่มเติม"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที</item>
       <item quantity="one">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_0">%d</xliff:g> วินาที</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"เนื้อหาถูกซ่อนไว้"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"มีการซ่อนเนื้อหาโดยนโยบาย"</string>
     <string name="safeMode" msgid="2788228061547930246">"โหมดปลอดภัย"</string>
     <string name="android_system_label" msgid="6577375335728551336">"ระบบ Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"ส่วนตัว"</string>
@@ -909,15 +909,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"เลือกการทำงาน"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"เลือกแอปพลิเคชันสำหรับอุปกรณ์ USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ไม่มีแอปพลิเคชันใดทำงานนี้ได้"</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"ขออภัย <xliff:g id="APPLICATION">%1$s</xliff:g> หยุดการทำงานแล้ว"</string>
-    <string name="aerr_process" msgid="4507058997035697579">"ขออภัย กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> หยุดการทำงานแล้ว"</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"เกิดข้อขัดข้องกับ Silence จากขั้นตอน <xliff:g id="PROCESS">%1$s</xliff:g> จนกว่าจะเริ่มต้นใหม่"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> หยุดทำงาน"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> หยุดทำงาน"</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"เปิดแอปใหม่"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"รีเซ็ตแอปและเปิดใหม่"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"ส่งความคิดเห็น"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"ปิด"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"ปิด"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"กิจกรรม <xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ไม่ตอบสนอง คุณต้องการปิดหรือไม่"</string>
-    <string name="anr_process" msgid="6513209874880517125">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"ตกลง"</string>
     <string name="report" msgid="4060218260984795706">"รายงาน"</string>
     <string name="wait" msgid="7147118217226317732">"รอ"</string>
@@ -1455,7 +1470,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ขอ PIN ก่อนเลิกตรึง"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ขอรูปแบบการปลดล็อกก่อนเลิกตรึง"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ขอรหัสผ่านก่อนเลิกตรึง"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"แอปไม่สามารถปรับขนาดได้ เลื่อนแอปด้วยนิ้ว 2 นิ้ว"</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ติดตั้งโดยผู้ดูแลระบบของคุณ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ลบโดยผู้ดูแลระบบของคุณ"</string>
@@ -1527,14 +1545,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"เบ็ดเตล็ด"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"คุณตั้งค่าความสำคัญของการแจ้งเตือนเหล่านี้"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ข้อความนี้สำคัญเนื่องจากบุคคลที่เกี่ยวข้อง"</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่ แต่ระบบไม่อนุญาตในขณะนี้"</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่ แต่ถึงขีดจำกัดของผู้ใช้แล้ว"</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่ แต่มีบัญชี "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" อยู่แล้วบนอุปกรณ์เครื่องนี้ ดำเนินการต่อไหม"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" กำลังพยายามเพิ่มผู้ใช้ใหม่สำหรับบัญชี "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ดำเนินการต่อไหม"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> (มีผู้ใช้ที่มีบัญชีนี้อยู่แล้ว) ไหม"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"ค่ากำหนดภาษา"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ค่ากำหนดภูมิภาค"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"พิมพ์ชื่อภาษา"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"แนะนำ"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"ทุกภาษา"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"โหมดทำงานปิดอยู่"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"อนุญาตให้โปรไฟล์งานทำงานได้ ซึ่งรวมถึงแอป การซิงค์ในพื้นหลัง และคุณลักษณะอื่นที่เกี่ยวข้อง"</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"ปิดใช้ %1$s แล้ว"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"ผู้ดูแลระบบ %1$s ได้ปิดใช้แล้ว โปรดสอบถามข้อมูลเพิ่มเติมจากเขา"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"คุณมีข้อความใหม่"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"เปิดแอป SMS เพื่อดู"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"บางฟังก์ชันอาจไม่พร้อมใช้งาน"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"แตะเพื่อดำเนินการต่อ"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"โปรไฟล์ผู้ใช้ถูกล็อก"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

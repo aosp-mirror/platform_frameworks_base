@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiivinen"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Valitse tämä vaihtoehto useimmissa tapauksissa. Voit seurata raportin etenemistä ja antaa lisätietoja ongelmasta. Tämä vaihtoehto saattaa ohittaa joitakin harvoin käytettyjä osioita, joiden käsittely raportissa kestää kauan."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Koko raportti"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Valitse tämä, jos laitteesi ei ota komentoja vastaan tai toimii hitaasti, tai tarvitset kaikkia raportin osioita. Raporttiin ei tallenneta kuvakaappausta, etkä voi kirjoittaa siihen lisätietoja."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">Virheraporttiin otetaan kuvakaappaus <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua.</item>
       <item quantity="one">Virheraporttiin otetaan kuvakaappaus <xliff:g id="NUMBER_0">%d</xliff:g> sekunnin kuluttua.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Sisältö piilotettu"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Sisältö on piilotettu käytännön perusteella."</string>
     <string name="safeMode" msgid="2788228061547930246">"Suojattu tila"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Henkilökoht."</string>
@@ -909,15 +909,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Valitse toiminto"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Valitse USB-laitetta käyttävä sovellus"</string>
     <string name="noApplications" msgid="2991814273936504689">"Yksikään sovellus ei voi suorittaa tätä toimintoa."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g> on pysähtynyt."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Prosessi <xliff:g id="PROCESS">%1$s</xliff:g> on pysähtynyt."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Silencen kaatumiset prosessista <xliff:g id="PROCESS">%1$s</xliff:g> uudelleenkäynnistykseen asti."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> pysähtyi."</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> pysähtyi."</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"Käynnistä sovellus uudelleen"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Nollaa sovellus ja käynnistä uudelleen"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Lähetä palautetta"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Sulje"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Ohita"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ei vastaa.\n\nHaluatko sulkea sen?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Toiminto <xliff:g id="ACTIVITY">%1$s</xliff:g> ei vastaa.\n\nHaluatko sulkea sen?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ei vastaa. Haluatko sulkea sen?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Prosessi <xliff:g id="PROCESS">%1$s</xliff:g> ei vastaa.\n\nHaluatko sulkea sen?"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Ilmoita"</string>
     <string name="wait" msgid="7147118217226317732">"Odota"</string>
@@ -1455,7 +1470,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pyydä PIN ennen irrotusta"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pyydä lukituksenpoistokuvio ennen irrotusta"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pyydä salasana ennen irrotusta"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Sovelluksen koko ei muutu. Vieritä näkymää kahdella sormella."</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Järjestelmänvalvoja on asentanut paketin."</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Järjestelmänvalvojasi on päivittänyt paketin."</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Järjestelmänvalvoja on poistanut paketin."</string>
@@ -1527,14 +1545,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Muut"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Voit valita näiden ilmoitusten tärkeyden."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tämä on tärkeää siihen liittyvien ihmisten perusteella."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" yrittää lisätä uutta käyttäjää, mutta se on tällä hetkellä estetty."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" yrittää lisätä uutta käyttäjää, mutta käyttäjiä on jo enimmäismäärä."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" yrittää lisätä uutta käyttäjää, mutta tili "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" on jo tässä laitteessa. Jatketaanko silti?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" yrittää lisätä uutta käyttäjää tilille "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Jatketaanko?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g> (tilillä on jo käyttäjä)?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Kieliasetus"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Alueasetus"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Anna kielen nimi"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Ehdotukset"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Kaikki kielet"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Haku"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Työtila on pois käytöstä"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Sallii työprofiiliin toiminnan, esimerkiksi sovellukset ja taustasynkronoinnin."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Ota käyttöön"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s poisti tämän käytöstä"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Organisaation %1$s järjestelmänvalvojan käytöstä poistama. Kysy häneltä lisätietoja."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Sinulle on uusia viestejä"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Katso avaamalla tekstiviestisovellus."</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Osaa toiminnoista ei ehkä voi käyttää"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Jatka koskettamalla."</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Käyttäjäprofiili on lukittu."</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

@@ -216,8 +216,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. ataskaita"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Naudokite tai esant daugumai aplinkybių. Galite stebėti ataskaitos eigą ir įvesti daugiau išsamios informacijos apie problemą. Gali būti praleidžiamos kelios nelabai naudingos skiltys, kurių ataskaitų teikimas ilgai trunka."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Išsami ataskaita"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Naudokite šią parinktį, kad būtų minimalūs sistemos trukdžiai, kai įrenginys nereaguoja ar yra per lėtas arba kai jums reikia visų skilčių. Nefiksuojama ekrano kopija arba leidžiama įvesti daugiau išsamios informacijos."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="one">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundės.</item>
       <item quantity="few">Pranešimo apie riktą ekrano kopija bus užfiksuota po <xliff:g id="NUMBER_1">%d</xliff:g> sekundžių.</item>
@@ -237,6 +236,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Turinys paslėptas"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Turinys paslėptas vadovaujantis politika"</string>
     <string name="safeMode" msgid="2788228061547930246">"Saugos režimas"</string>
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Asmeninė"</string>
@@ -921,15 +921,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Pasirinkti veiksmą"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Pasirinkite USB įrenginio programą"</string>
     <string name="noApplications" msgid="2991814273936504689">"Jokios programos negali atlikti šio veiksmo."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Deja, <xliff:g id="APPLICATION">%1$s</xliff:g> sustojo."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Deja, <xliff:g id="PROCESS">%1$s</xliff:g> sustojo."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Nutildyti „<xliff:g id="PROCESS">%1$s</xliff:g>“ strigtis iki paleidimo iš naujo."</string>
+    <string name="aerr_application" msgid="250320989337856518">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ sustabdyta"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> sustabdytas"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ vis sustabdoma"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> vis sustabdomas"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"Paleisti programą iš naujo"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Nustatyti ir paleisti programą iš naujo"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Siųsti atsiliepimą"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Uždaryti"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Paslėpti"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"Laukti"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Uždaryti programą"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"„<xliff:g id="APPLICATION">%2$s</xliff:g>“ neatsako.\n\nAr norite ją uždaryti?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Veiksmas „<xliff:g id="ACTIVITY">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako. Ar norite ją uždaryti?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"„<xliff:g id="APPLICATION">%2$s</xliff:g>“ neatsako"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"„<xliff:g id="ACTIVITY">%1$s</xliff:g>“ neatsako"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako"</string>
+    <string name="anr_process" msgid="6156880875555921105">"Procesas <xliff:g id="PROCESS">%1$s</xliff:g> neatsako"</string>
     <string name="force_close" msgid="8346072094521265605">"Gerai"</string>
     <string name="report" msgid="4060218260984795706">"Pranešti"</string>
     <string name="wait" msgid="7147118217226317732">"Palaukti"</string>
@@ -1475,7 +1482,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prašyti PIN kodo prieš atsegant"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Prašyti atrakinimo piešinio prieš atsegant"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Prašyti slaptažodžio prieš atsegant"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Programos dydis nekeičiamas, slinkite dviem pirštais."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Programos dydis nekeičiamas, slinkite dviem pirštais."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Programoje nepalaikomas skaidytas ekranas."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Įdiegė administratorius"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atnaujino administratorius"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ištrynė administratorius"</string>
@@ -1565,14 +1573,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Įvairūs"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Galite nustatyti šių pranešimų svarbą."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau šiuo metu tai draudžiama."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau pasiektas naudotojų skaičiaus apribojimas."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują naudotoją, tačiau paskyra "<b>"„<xliff:g id="ACCOUNT">%2$s</xliff:g>“"</b>" jau yra šiame įrenginyje. Vis tiek tęsti?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"„<xliff:g id="APP">%1$s</xliff:g>“"</b>" bando pridėti naują paskyros "<b>"„<xliff:g id="ACCOUNT">%2$s</xliff:g>“"</b>" naudotoją. Tęsti?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją (šią paskyrą naudojantis naudotojas jau yra)?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Kalbos nuostata"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiono nuostata"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Įveskite kalbos pav."</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Siūloma"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Visos kalbos"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Paieška"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Darbo režimas išjungtas"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Leisti veikti darbo profiliui, įskaitant programas, sinchronizavimą fone ir susijusias funkcijas."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Įjungti"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s išjungtas"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Išjungė %1$s administratorius. Kad sužinotumėte daugiau, susisiekite su juo."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Turite naujų pranešimų"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Atidaryti SMS programą, norint peržiūrėti"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Kelios funkc. gali būti nepas."</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Jei norite tęsti, palieskite"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Naudotojo profilis užrakintas"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

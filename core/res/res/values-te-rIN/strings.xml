@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"చాలా సందర్భాల్లో ఇది ఉపయోగించబడుతుంది. ఇది మిమ్మల్ని నివేదిక ప్రోగ్రెస్ ట్రాక్ చేయడానికి మరియు సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి అనుమతిస్తుంది. ఇది నివేదించడానికి అధిక సమయం పట్టే తక్కువగా వినియోగించే విభాగాలను విడిచిపెట్టవచ్చు."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"పూర్తి నివేదిక"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"మీ పరికరం ప్రతిస్పందించనప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని నివేదిక విభాగాలు అవసరమైనప్పుడు ఏర్పడే కనీస స్థాయి సిస్టమ్ అంతరాయానికి ఈ ఎంపిక ఉపయోగించబడుతుంది. ఇది స్క్రీన్‌షాట్ తీయదు లేదా మరిన్ని వివరాలను నమోదు చేయడానికి మిమ్మల్ని అనుమతించదు."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
       <item quantity="one">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
@@ -233,6 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"కంటెంట్‌లు దాచబడ్డాయి"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"విధానం ద్వారా కంటెంట్‌లు దాచబడ్డాయి"</string>
     <string name="safeMode" msgid="2788228061547930246">"సురక్షిత మోడ్"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android సిస్టమ్"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"వ్యక్తిగతం"</string>
@@ -909,15 +909,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"చర్యను ఎంచుకోండి"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB పరికరం కోసం అనువర్తనాన్ని ఎంచుకోండి"</string>
     <string name="noApplications" msgid="2991814273936504689">"ఈ చర్యను అమలు చేయగల అనువర్తనాలు ఏవీ లేవు."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"దురదృష్టవశాత్తూ, <xliff:g id="APPLICATION">%1$s</xliff:g> ఆపివేయబడింది."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"దురదృష్టవశాత్తూ, ప్రక్రియ <xliff:g id="PROCESS">%1$s</xliff:g> ఆపివేయబడింది."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"రీబూట్ చేసే వరకు <xliff:g id="PROCESS">%1$s</xliff:g> నుండి నిశ్శబ్ద క్రాష్‌లు."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> ఆపివేయబడింది"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ఆపివేయబడింది"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"అనువర్తనాన్ని పునఃప్రారంభించు"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"రీసెట్ చేసి, అనువర్తనాన్ని పునఃప్రారంభించు"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"అభిప్రాయాన్ని పంపు"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"మూసివేయి"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"మ్యూట్ చేయి"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"వేచి ఉండండి"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"అనువర్తనాన్ని మూసివేయి"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ప్రతిస్పందించలేదు.\n\nమీరు దీన్ని మూసివేయాలనుకుంటున్నారా?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> కార్యాచరణ ప్రతిస్పందించలేదు.\n\nమీరు దీన్ని మూసివేయాలనుకుంటున్నారా?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ప్రతిస్పందించలేదు. మీరు దీన్ని మూసివేయాలనుకుంటున్నారా?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> ప్రాసెస్ ప్రతిస్పందించలేదు.\n\nమీరు దీన్ని మూసివేయాలనుకుంటున్నారా?"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
+    <string name="anr_process" msgid="6156880875555921105">"ప్రాసెస్ <xliff:g id="PROCESS">%1$s</xliff:g> ప్రతిస్పందించడం లేదు"</string>
     <string name="force_close" msgid="8346072094521265605">"సరే"</string>
     <string name="report" msgid="4060218260984795706">"నివేదించు"</string>
     <string name="wait" msgid="7147118217226317732">"వేచి ఉండు"</string>
@@ -1455,7 +1462,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"అనువర్తన పరిమాణాన్ని మార్చడం సాధ్యపడదు, రెండు వేళ్లతో దీన్ని స్క్రోల్ చేయండి."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"అనువర్తన పరిమాణాన్ని మార్చడం సాధ్యపడదు, రెండు వేళ్లతో దీన్ని స్క్రోల్ చేయండి."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"మీ నిర్వాహకులు తొలగించారు"</string>
@@ -1527,14 +1535,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"ఇతరాలు"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది, కానీ ప్రస్తుతం ఇది నిషిద్ధం."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది, కానీ వినియోగదారు పరిమితి చేరుకుంది."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది, కానీ ఖాతా "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" ఇప్పటికే ఈ పరికరంలో ఉంది. ఏదేమైనా కొనసాగించాలా?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" ఖాతా "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" కోసం కొత్త వినియోగదారుని జోడించడానికి ప్రయత్నిస్తోంది. కొనసాగించాలా?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా ?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"భాష ప్రాధాన్యత"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"సూచించినవి"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"శోధించు"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"కార్యాలయ మోడ్ ఆఫ్ చేయబడింది"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"అనువర్తనాలు, నేపథ్య సమకాలీకరణ మరియు సంబంధిత లక్షణాలతో సహా కార్యాలయ ప్రొఫైల్‌ను పని చేయడానికి అనుమతించండి."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"ఆన్ చేయి"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$sని నిలిపివేసారు"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"%1$sని నిర్వాహకుడు నిలిపివేసారు. మరింత తెలుసుకోవడానికి వారిని సంప్రదించండి."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"మీకు కొత్త సందేశాలు ఉన్నాయి"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"వీక్షించడానికి SMS అనువర్తనాన్ని తెరవండి"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"కొన్ని విధులు ఉండకపోవచ్చు"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"కొనసాగడానికి తాకండి"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"వినియోగ. ప్రొఫైల్ లాక్ అయింది"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

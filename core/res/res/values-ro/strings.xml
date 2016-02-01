@@ -215,8 +215,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interactiv"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"Folosiți această opțiune în majoritatea situațiilor. Astfel, puteți să urmăriți progresul raportului și să introduceți mai multe detalii în privința problemei. Pot fi omise unele secțiuni mai puțin folosite pentru care raportarea durează prea mult."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Raport complet"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Folosiți această opțiune pentru a reduce la minimum interferențele cu sistemul când dispozitivul nu răspunde, funcționează prea lent sau când aveți nevoie de toate secțiunile raportului. Nu se creează o captură de ecran și nu se pot introduce detalii suplimentare."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="few">Peste <xliff:g id="NUMBER_1">%d</xliff:g> secunde se va realiza o captură de ecran pentru raportul de eroare.</item>
       <item quantity="other">Peste <xliff:g id="NUMBER_1">%d</xliff:g> de secunde se va realiza o captură de ecran pentru raportul de eroare.</item>
@@ -235,6 +234,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Conținutul este ascuns"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Conținutul este ascuns conform politicii"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mod sigur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistemul Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Personal"</string>
@@ -915,15 +915,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Alegeți o acţiune"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Alegeți o aplicație pentru dispozitivul USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Această acţiune nu poate fi efectuată de nicio aplicație."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Din păcate, <xliff:g id="APPLICATION">%1$s</xliff:g> s-a oprit."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Din păcate, procesul <xliff:g id="PROCESS">%1$s</xliff:g> s-a oprit."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"Nu mai afișa blocările aplicației <xliff:g id="PROCESS">%1$s</xliff:g> până la repornire."</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> s-a oprit"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> s-a oprit"</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"Reporniți aplicația"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"Resetați și reporniți aplicația"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Trimiteți feedback"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"Închideți"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"Dezactivați"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Aplicaţia <xliff:g id="APPLICATION">%2$s</xliff:g> nu răspunde.\n\nDoriți să o închideţi?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Activitatea <xliff:g id="ACTIVITY">%1$s</xliff:g> nu răspunde.\n\nDoriți să o închideţi?"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> nu răspunde. Doriți să o închideţi?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> nu răspunde.\n\nDoriți să îl închideţi?"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Raportaţi"</string>
     <string name="wait" msgid="7147118217226317732">"Aşteptaţi"</string>
@@ -1465,7 +1480,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicită codul PIN înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicită modelul pentru deblocare înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicită parola înainte de a anula fixarea"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"Aplicația nu poate fi redimensionată. Derulați în ea cu două degete."</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalat de administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Șters de administrator"</string>
@@ -1546,14 +1564,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Dvs. setați importanța acestor notificări."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Notificarea este importantă având în vedere persoanele implicate."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator, dar momentan nu îi este permis."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator, dar a fost atinsă limita de utilizatori."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator, dar contul "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" există deja pe acest dispozitiv. Continuați oricum?"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" încearcă să adauge un nou utilizator pentru contul "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>". Continuați?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>? (există deja un utilizator cu acest cont)"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Limba preferată"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiunea preferată"</string>
-    <string name="search_language_hint" msgid="7042102592055108574">"Scrieți nume limbă"</string>
+    <string name="search_language_hint" msgid="7042102592055108574">"Numele limbii"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugerate"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toate limbile"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Căutați"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Modul de serviciu e DEZACTIVAT"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Permiteți profilului de serviciu să funcționeze, inclusiv aplicațiile, sincronizarea în fundal și funcțiile asociate."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"Activați"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"Dezactivat de %1$s"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"Dezactivat de administratorul companiei %1$s. Contactați-l pentru a afla mai multe."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"Aveți mesaje noi"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"Deschideți aplicația pentru SMS-uri ca să vizualizați"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"Este posibil ca unele funcții să nu fie disponibile"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"Atingeți pentru a continua"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil utilizator: blocat"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

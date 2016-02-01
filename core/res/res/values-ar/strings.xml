@@ -218,8 +218,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"تقرير تفاعلي"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"يمكنك استخدام هذا الخيار في معظم الأحيان، حيث يتيح لك إمكانية تتبع مستوى تقدم التقرير والحصول على مزيد من المعلومات حول المشكلة. وقد يتم إسقاط بعض الأقسام الأقل استخدامًا والتي تستغرق وقتًا طويلاً أثناء إعداد التقرير."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"تقرير كامل"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"يمكنك استخدام هذا الخيار للحصول على حد أدنى من تدخل النظام عند توقف استجابة الجهاز أو حدوث بطئ شديد أو عند الحاجة إلى جميع أقسام التقرير. لا يؤدي ذلك إلى التقاط لقطة شاشة أو السماح لك بالحصول على مزيد من التفاصيل."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="zero">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية.</item>
       <item quantity="two">سيتم التقاط لقطة شاشة لتقرير الخطأ خلال ثانيتين (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
@@ -241,6 +240,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"المحتويات مخفية"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"تم إخفاء المحتويات بواسطة السياسة"</string>
     <string name="safeMode" msgid="2788228061547930246">"الوضع الآمن"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏نظام Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"شخصي"</string>
@@ -933,15 +933,22 @@
     <string name="chooseActivity" msgid="7486876147751803333">"اختيار إجراء"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"‏اختيار أحد التطبيقات لجهاز USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"ليست هناك تطبيقات يمكنها تنفيذ هذا الإجراء."</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"للأسف، توقف <xliff:g id="APPLICATION">%1$s</xliff:g>."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"للأسف، توقفت العملية <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"‏يتعطل تطبيق \"Silence\" عند إجراء <xliff:g id="PROCESS">%1$s</xliff:g>، وذلك حتى إعادة التشغيل."</string>
+    <string name="aerr_application" msgid="250320989337856518">"توقف <xliff:g id="APPLICATION">%1$s</xliff:g> عن العمل"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"توقفت <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"يستمر التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> في التوقف."</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"تستمر عملية <xliff:g id="PROCESS">%1$s</xliff:g> في التوقف."</string>
+    <string name="aerr_restart" msgid="9001379185665886595">"إعادة تشغيل التطبيق"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"إعادة ضبط التطبيق وإعادة تشغيله"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"إرسال تعليقات"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"إغلاق"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"تجاهل"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"انتظار"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"إغلاق التطبيق"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> لا يستجيب.\n\nهل تريد إغلاقه؟"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"النشاط <xliff:g id="ACTIVITY">%1$s</xliff:g> لا يستجيب.\n\nهل تريد إغلاقه؟"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"تطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> لا يستجيب. هل تريد إغلاقه؟"</string>
-    <string name="anr_process" msgid="6513209874880517125">"العملية <xliff:g id="PROCESS">%1$s</xliff:g> لا تستجيب.\n\nهل تريد إغلاقها؟"</string>
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> لا يستجيب"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> لا يستجيب"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> لا يستجيب"</string>
+    <string name="anr_process" msgid="6156880875555921105">"العملية <xliff:g id="PROCESS">%1$s</xliff:g> لا تستجيب"</string>
     <string name="force_close" msgid="8346072094521265605">"موافق"</string>
     <string name="report" msgid="4060218260984795706">"إرسال تقرير"</string>
     <string name="wait" msgid="7147118217226317732">"انتظار"</string>
@@ -1495,7 +1502,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"التطبيق غير قابل لتغيير الحجم، يمكنك تمريره بإصبعين."</string>
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"التطبيق غير قابل لتغيير الحجم، يمكنك تمريره بإصبعين."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"التطبيق لا يتيح تقسيم الشاشة."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"تم تثبيت الحزمة عن طريق المشرف"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"تم حذف الحزمة عن طريق المشرف"</string>
@@ -1603,14 +1611,26 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"متنوعة"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"لقد عيَّنت أهمية هذه الإشعارات."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315">"هناك محاولة من "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" لإضافة مستخدم جديد لكنه محظور حاليًا."</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266">"هناك محاولة من "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" لإضافة مستخدم جديد إلا أنه قد تم الوصول إلى الحد الأقصى للمستخدمين."</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789">"هناك محاولة من "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" لإضافة مستخدم جديد إلا أن الحساب "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>" موجود مسبقًا على هذا الجهاز، فهل تريد المتابعة على أي حال؟"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392">"هناك محاولة من "<b>"<xliff:g id="APP">%1$s</xliff:g>"</b>" لإضافة مستخدم جديد إلى الحساب "<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"، فهل تريد المتابعة؟"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g>؟"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"تفضيل اللغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"المقترحة"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"وضع العمل معطَّل"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"السماح باستخدام الملف الشخصي للعمل، بما في ذلك التطبيقات ومزامنة الخلفية والميزات ذات الصلة."</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"تشغيل"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"‏تم تعطيل %1$s"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"‏تم التعطيل بواسطة مشرف %1$s. يمكنك الاتصال به لمعرفة المزيد."</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"لديك رسائل جديدة"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
+    <string name="user_encrypted_title" msgid="7664361246988454307">"قد لا تكون بعض الوظائف متاحة"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"المس للمتابعة"</string>
+    <string name="user_encrypted_detail" msgid="979981584766912935">"تم قفل الملف الشخصي للمستخدم"</string>
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>

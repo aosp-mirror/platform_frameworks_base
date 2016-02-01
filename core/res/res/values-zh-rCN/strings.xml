@@ -214,8 +214,7 @@
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"互动式报告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8180152634022797629">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，以及输入与相应问题相关的更多详细信息。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"完整报告"</string>
-    <!-- no translation found for bugreport_option_full_summary (6687306111256813257) -->
-    <skip />
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"如果您的设备无响应或运行速度缓慢，或者您需要查看所有区段的报告信息，则建议您使用此选项将系统干扰程度降到最低。系统不会截屏，也不支持您输入更多详细信息。"</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
       <item quantity="other">系统将在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后对错误报告进行截屏。</item>
       <item quantity="one">系统将在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒后对错误报告进行截屏。</item>
@@ -233,6 +232,8 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"（<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g> 条）"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"内容已隐藏"</string>
+    <!-- no translation found for notification_hidden_by_policy_text (9004631276932584600) -->
+    <skip />
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"个人"</string>
@@ -909,15 +910,30 @@
     <string name="chooseActivity" msgid="7486876147751803333">"选择操作"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"为USB设备选择一个应用"</string>
     <string name="noApplications" msgid="2991814273936504689">"没有应用可执行此操作。"</string>
-    <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"很抱歉，“<xliff:g id="APPLICATION">%1$s</xliff:g>”已停止运行。"</string>
-    <string name="aerr_process" msgid="4507058997035697579">"抱歉，进程“<xliff:g id="PROCESS">%1$s</xliff:g>”已停止运行。"</string>
-    <string name="aerr_process_silence" msgid="4226685530196000222">"关闭“<xliff:g id="PROCESS">%1$s</xliff:g>”的崩溃提醒，直到重新启动该应用。"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g>已停止运行"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g>已停止运行"</string>
+    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
+    <skip />
+    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
+    <skip />
+    <string name="aerr_restart" msgid="9001379185665886595">"重启应用"</string>
+    <string name="aerr_reset" msgid="7645427603514220451">"重置并重启应用"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"发送反馈"</string>
+    <string name="aerr_close" msgid="2991640326563991340">"关闭"</string>
+    <string name="aerr_mute" msgid="7698966346654789433">"忽略"</string>
+    <!-- no translation found for aerr_wait (3199956902437040261) -->
+    <skip />
+    <!-- no translation found for aerr_close_app (3269334853724920302) -->
+    <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>无响应。\n\n要将其关闭吗？"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g>活动无响应。\n\n要将其关闭吗？"</string>
-    <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g>无响应。要将其关闭吗？"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g>进程无响应。\n\n要将其关闭吗？"</string>
+    <!-- no translation found for anr_activity_application (8493290105678066167) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (1622382268908620314) -->
+    <skip />
+    <!-- no translation found for anr_application_process (6417199034861140083) -->
+    <skip />
+    <!-- no translation found for anr_process (6156880875555921105) -->
+    <skip />
     <string name="force_close" msgid="8346072094521265605">"确定"</string>
     <string name="report" msgid="4060218260984795706">"报告"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
@@ -1455,7 +1471,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消时要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消时要求输入密码"</string>
-    <string name="dock_non_resizeble_text" msgid="9156251681042762723">"无法调整这个应用的大小，请用双指滚动应用。"</string>
+    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
+    <skip />
+    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
+    <skip />
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理员安装"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"已被管理员删除"</string>
@@ -1527,14 +1546,31 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"这些通知的重要性由您来设置。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定的人，因此被归为重要通知。"</string>
-    <string name="user_creation_cannot_add" msgid="7740333663230045315"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但是系统目前禁止执行这项操作。"</string>
-    <string name="user_creation_cannot_add_any_more" msgid="6244197709981359266"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但已达到用户人数上限。"</string>
-    <string name="user_creation_account_exists" msgid="4880171855014489789"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试添加新用户，但这个设备上已经存在"<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"这个帐号。仍要继续吗？"</string>
-    <string name="user_creation_adding" msgid="3206420861363021392"><b>"<xliff:g id="APP">%1$s</xliff:g>"</b>"正尝试为"<b>"<xliff:g id="ACCOUNT">%2$s</xliff:g>"</b>"这个帐号添加新用户，要继续吗？"</string>
+    <!-- no translation found for user_creation_account_exists (1942606193570143289) -->
+    <skip />
+    <!-- no translation found for user_creation_adding (4482658054622099197) -->
+    <skip />
     <string name="language_selection_title" msgid="7181332986330337171">"语言偏好设置"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"建议语言"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有语言"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜索"</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"工作模式已关闭"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"启用工作资料，包括应用、后台同步和相关功能。"</string>
+    <string name="work_mode_turn_on" msgid="2062544985670564875">"开启"</string>
+    <string name="suspended_package_title" msgid="3408150347778524435">"%1$s已被禁用"</string>
+    <string name="suspended_package_message" msgid="6341091587106868601">"该软件包已被%1$s管理员禁用。请与管理员联系以了解详情。"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新消息"</string>
+    <string name="new_sms_notification_content" msgid="7002938807812083463">"打开短信应用查看"</string>
+    <!-- no translation found for user_encrypted_title (7664361246988454307) -->
+    <skip />
+    <!-- no translation found for user_encrypted_message (7504541494700807850) -->
+    <skip />
+    <!-- no translation found for user_encrypted_detail (979981584766912935) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
+    <skip />
+    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
+    <skip />
 </resources>
