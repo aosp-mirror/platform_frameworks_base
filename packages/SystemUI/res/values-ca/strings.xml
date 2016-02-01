@@ -150,9 +150,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"S\'està canviant la xarxa de l\'operador de telefonia mòbil."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> per cent de bateria."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Configuració del sistema."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificacions."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Esborra la notificació."</string>

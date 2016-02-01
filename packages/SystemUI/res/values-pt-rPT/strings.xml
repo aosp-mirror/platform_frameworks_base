@@ -414,7 +414,7 @@
     <string name="status_bar_airplane" msgid="7057575501472249002">"Modo de avião"</string>
     <string name="add_tile" msgid="2995389510240786221">"Adicionar mosaico"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Mosaico de transmissão"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Só vai ouvir o próximo alarme às <xliff:g id="WHEN">%1$s</xliff:g> se desativar esta funcionalidade antes dessa hora"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Só vai ouvir o próximo alarme (<xliff:g id="WHEN">%1$s</xliff:g>) se desativar esta funcionalidade antes dessa hora"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Não vai ouvir o próximo alarme às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"às <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"em <xliff:g id="WHEN">%1$s</xliff:g>"</string>

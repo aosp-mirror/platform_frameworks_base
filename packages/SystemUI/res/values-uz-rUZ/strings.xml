@@ -29,7 +29,7 @@
       <item quantity="other">Umumiy ma’lumot bo‘limida %d ta ekran bor</item>
       <item quantity="one">Umumiy ma’lumot bo‘limida 1 ta ekran bor</item>
     </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Eslatmalar - yo‘q"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirishnomalar yo‘q"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Joriy"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Eslatmalar"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batareya quvvati kam"</string>
@@ -145,10 +145,10 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rouming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth modem"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Parvoz rejimi"</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Hech qanday SIM-karta yo‘q."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Hech qanday SIM karta yo‘q."</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Tizim sozlamalari."</string>
@@ -227,10 +227,10 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Barcha eslatmalarni tozalash."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Bildirishnoma sozlamalari"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g> sozlamalari"</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran avtomatik ravishda aylanadi."</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekran avtomatik buriladi."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ekran eniga holatida qulflandi."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ekran bo‘yiga holatida qulflandi."</string>
-    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Ekran endi avtomatik ravishda aylanadi."</string>
+    <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Ekran endi avtomatik buriladi."</string>
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ekran yotiq holatda aylanmaydigan qilindi."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ekran tik holatda aylanmaydigan qilindi."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
@@ -245,7 +245,7 @@
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth o‘chirilgan"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Ulangan qurilmalar topilmadi"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Yorqinlik"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Auto-aylantirish"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtomatik burish"</string>
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Aylanmaydigan qilingan"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Bo‘yiga"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Eniga"</string>

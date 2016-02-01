@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Löschen"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Aus Liste entfernen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"App-Info"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Hier sehen Sie Ihre zuletzt geöffneten Apps."</string>
+    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Hier siehst du deine zuletzt geöffneten Apps."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Kürzlich geöffnete Apps schließen"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">%d Bildschirme in der Übersicht</item>
@@ -35,9 +35,9 @@
     <string name="battery_low_title" msgid="6456385927409742437">"Akku ist schwach"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> verbleibend. Der Energiesparmodus ist aktiviert."</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB-Aufladung wird nicht unterstützt.\nVerwenden Sie das mitgelieferte Aufladegerät."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB-Aufladung wird nicht unterstützt.\nVerwende das mitgelieferte Aufladegerät."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Laden per USB wird nicht unterstützt."</string>
-    <string name="invalid_charger_text" msgid="5474997287953892710">"Verwenden Sie nur das im Lieferumfang enthaltene Ladegerät."</string>
+    <string name="invalid_charger_text" msgid="5474997287953892710">"Verwende nur das im Lieferumfang enthaltene Ladegerät."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Einstellungen"</string>
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Energiesparmodus aktivieren?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Aktivieren"</string>
@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Der Fingerabdruck des RSA-Schlüssels für diesen Computer lautet: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Von diesem Computer immer zulassen"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-Debugging nicht zulässig"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Der momentan auf diesem Gerät angemeldete Nutzer kann das USB-Debugging nicht aktivieren. Um diese Funktion zu aktivieren, wechseln Sie zum primären Nutzer \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"Der momentan auf diesem Gerät angemeldete Nutzer kann das USB-Debugging nicht aktivieren. Um diese Funktion zu aktivieren, wechsle zum primären Nutzer \"<xliff:g id="NAME">%s</xliff:g>\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Auf Bildschirmgröße anpassen"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot wird gespeichert..."</string>
@@ -73,7 +73,7 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot aufgenommen"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Zum Ansehen berühren"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot konnte nicht aufgenommen werden."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Screenshot nicht möglich. Entweder zu wenig Speicher oder die App/Ihr Unternehmen lässt dies nicht zu."</string>
+    <string name="screenshot_failed_text" msgid="1260203058661337274">"Screenshot nicht möglich. Entweder zu wenig Speicher oder die App/dein Unternehmen lässt dies nicht zu."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Als Medienplayer (MTP) bereitstellen"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Als Kamera (PTP) bereitstellen"</string>
@@ -150,9 +150,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugmodus"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Keine SIM-Karte"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Netzwerk des Mobilfunkanbieters wird gewechselt"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Akku bei <xliff:g id="NUMBER">%d</xliff:g> Prozent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemeinstellungen"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Benachrichtigungen"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Benachrichtigung löschen"</string>
@@ -219,7 +217,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-Daten pausiert"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilfunkdaten pausiert"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Daten pausiert"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Da Ihr festgelegtes Datenlimit erreicht wurde, hat das Gerät die Datennutzung für den Rest dieses Zeitraums pausiert.\n\nWenn Sie diese fortsetzen, können möglicherweise Kosten bei Ihrem Mobilfunkanbieter entstehen."</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Da dein festgelegtes Datenlimit erreicht wurde, hat das Gerät die Datennutzung für den Rest dieses Zeitraums pausiert.\n\nWenn du die Nutzung fortsetzt, entstehen möglicherweise Kosten bei deinem Mobilfunkanbieter."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Fortsetzen"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Keine Internetverbindung"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN verbunden"</string>
@@ -291,7 +289,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> verwendet"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> Datenlimit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Warnung für <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"Hier sehen Sie Ihre zuletzt geöffneten Apps."</string>
+    <string name="recents_empty_message" msgid="8682129509540827999">"Hier siehst du deine zuletzt geöffneten Apps."</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"App-Info"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"Bildschirmfixierung"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
@@ -308,9 +306,9 @@
     <string name="description_target_search" msgid="3091587249776033139">"Suche"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach oben schieben"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Zum <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> nach links schieben"</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe, Erinnerungen, Termine sowie Anrufe von zuvor von Ihnen festgelegten Personen."</string>
+    <string name="zen_priority_introduction" msgid="3070506961866919502">"Klingeltöne und die Vibration werden deaktiviert, außer für Weckrufe, Erinnerungen, Termine sowie Anrufe von zuvor von dir festgelegten Personen."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Anpassen"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hierdurch werden alle Klingeltöne und Vibrationsalarme stummgeschaltet, auch für Weckrufe, Musik, Videos und Spiele. Anrufe können Sie jedoch weiterhin tätigen."</string>
+    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hierdurch werden alle Klingeltöne und Vibrationsalarme stummgeschaltet, auch für Weckrufe, Musik, Videos und Spiele. Anrufe kannst du jedoch weiterhin tätigen."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hierdurch werden alle Klingeltöne und Vibrationsalarme stummgeschaltet, auch für Weckrufe, Musik, Videos und Spiele."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Weniger dringende Benachrichtigungen unten"</string>
@@ -342,19 +340,19 @@
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Alle Apps und Daten in dieser Sitzung werden gelöscht."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Entfernen"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Willkommen zurück im Gastmodus"</string>
-    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Möchten Sie Ihre Sitzung fortsetzen?"</string>
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Möchtest du deine Sitzung fortsetzen?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Von vorn"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, weiter"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Gastnutzer"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"Zum Löschen von Apps und Daten Gastnutzer entfernen"</string>
     <string name="guest_notification_remove_action" msgid="8820670703892101990">"Gast entfernen"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Neuen Nutzer hinzufügen?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wenn Sie einen neuen Nutzer hinzufügen, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wenn du einen neuen Nutzer hinzufügst, muss dieser seinen Bereich einrichten.\n\nJeder Nutzer kann Apps für alle anderen Nutzer aktualisieren."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Energiesparmodus ist aktiviert"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduzierung der Leistung und Hintergrunddaten"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Energiesparmodus deaktivieren"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Inhalte ausgeblendet"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf Ihrem Bildschirm angezeigten Aktivitäten auf."</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> nimmt alle auf deinem Bildschirm angezeigten Aktivitäten auf."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nicht erneut anzeigen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Alle löschen"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
@@ -367,17 +365,17 @@
     <string name="monitoring_title" msgid="169206259253048106">"Netzwerküberwachung"</string>
     <string name="disable_vpn" msgid="4435534311510272506">"VPN deaktivieren"</string>
     <string name="disconnect_vpn" msgid="1324915059568548655">"VPN-Verbindung trennen"</string>
-    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Ihr Gerät wird verwaltet von <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nIhr Administrator kann die zu Ihrem Gerät gehörigen Einstellungen, Unternehmenszugriffsrechte, Apps und Daten überwachen und verwalten, einschließlich der Standortinformationen Ihres Geräts. Weitere Informationen erhalten Sie bei Ihrem Administrator."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Sie haben einer App gestattet, eine VPN-Verbindung einzurichten.\n\nDiese App kann Ihr Gerät und Ihre Netzwerkaktivitäten überwachen, einschließlich E-Mails, Apps und Websites."</string>
-    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Ihr Gerät wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet.\n\nIhr Administrator kann die zu Ihrem Gerät gehörigen Einstellungen, Unternehmenszugriffsrechte, Apps und Daten überwachen und verwalten, einschließlich der Standortinformationen Ihres Geräts.\n\nSie sind zudem mit einem VPN verbunden, das Ihre persönliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhalten Sie bei Ihrem Administrator."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Ihr Arbeitsprofil wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet.\n\nIhr Administrator kann Ihre Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhalten Sie bei Ihrem Administrator.\n\nSie sind zudem mit einem VPN verbunden, das Ihre persönliche Netzwerkaktivität überwachen kann."</string>
+    <string name="monitoring_description_device_owned" msgid="5780988291898461883">"Dein Gerät wird verwaltet von <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nDein Administrator kann die zu deinem Gerät gehörigen Einstellungen, Unternehmenszugriffsrechte, Apps und Daten überwachen und verwalten, einschließlich der Standortinformationen deines Geräts. Weitere Informationen erhältst du bei deinem Administrator."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"Du hast einer App gestattet, eine VPN-Verbindung einzurichten.\n\nDiese App kann dein Gerät und deine Netzwerkaktivitäten überwachen, einschließlich E-Mails, Apps und Websites."</string>
+    <string name="monitoring_description_vpn_device_owned" msgid="3090670777499161246">"Dein Gerät wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet.\n\nDein Administrator kann die zu deinem Gerät gehörigen Einstellungen, Unternehmenszugriffsrechte, Apps und Daten überwachen und verwalten, einschließlich der Standortinformationen deines Geräts.\n\nDu bist außerdem mit einem VPN verbunden, das deine persönliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhältst du bei deinem Administrator."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2054949132145039290">"Dein Arbeitsprofil wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet.\n\nDein Administrator kann deine Netzwerkaktivität überwachen, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhältst du bei deinem Administrator.\n\nDu bist außerdem mit einem VPN verbunden, das deine persönliche Netzwerkaktivität überwachen kann."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="6259179342284742878">"Sie sind mit der App <xliff:g id="APPLICATION">%1$s</xliff:g> verbunden, die Ihre Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites."</string>
-    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Sie sind mit der App <xliff:g id="APPLICATION">%1$s</xliff:g> verbunden, die Ihre persönliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites."</string>
-    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Ihr Arbeitsprofil wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet. Das Profil ist mit der App <xliff:g id="APPLICATION">%2$s</xliff:g> verbunden, die Ihre geschäftlichen Netzwerkaktivitäten überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhalten Sie von Ihrem Administrator."</string>
-    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Ihr Arbeitsprofil wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet. Das Profil ist mit der App <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> verbunden, die Ihre geschäftliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nSie sind außerdem mit der App <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> verbunden, die Ihre persönliche Netzwerkaktivität überwachen kann."</string>
-    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Ihr Gerät wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet.\n\nIhr Administrator kann die zu Ihrem Gerät gehörigen Einstellungen, Unternehmenszugriffsrechte, Apps und Daten überwachen und verwalten, einschließlich der Standortinformationen Ihres Geräts.\n\nSie sind mit der App <xliff:g id="APPLICATION">%2$s</xliff:g> verbunden, die Ihre persönlichen Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhalten Sie bei Ihrem Administrator."</string>
-    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Das Gerät bleibt gesperrt, bis Sie es manuell entsperren."</string>
+    <string name="monitoring_description_app" msgid="6259179342284742878">"Du bist mit der App <xliff:g id="APPLICATION">%1$s</xliff:g> verbunden, die deine Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"Du bist mit der App <xliff:g id="APPLICATION">%1$s</xliff:g> verbunden, die deine persönliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites."</string>
+    <string name="monitoring_description_app_work" msgid="1754325860918060897">"Dein Arbeitsprofil wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet. Das Profil ist mit der App <xliff:g id="APPLICATION">%2$s</xliff:g> verbunden, die deine geschäftlichen Netzwerkaktivitäten überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhältst du von deinem Administrator."</string>
+    <string name="monitoring_description_app_personal_work" msgid="4946600443852045903">"Dein Arbeitsprofil wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet. Das Profil ist mit der App <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> verbunden, die deine geschäftliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nDu bist außerdem mit der App <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> verbunden, die deine persönliche Netzwerkaktivität überwachen kann."</string>
+    <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"Dein Gerät wird von <xliff:g id="ORGANIZATION">%1$s</xliff:g> verwaltet.\n\nDein Administrator kann die zu deinem Gerät gehörigen Einstellungen, Unternehmenszugriffsrechte, Apps und Daten überwachen und verwalten, einschließlich der Standortinformationen deines Geräts.\n\nDu bist außerdem mit der App <xliff:g id="APPLICATION">%2$s</xliff:g> verbunden, die deine persönliche Netzwerkaktivität überwachen kann, einschließlich E-Mails, Apps und Websites.\n\nWeitere Informationen erhältst du bei deinem Administrator."</string>
+    <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"Das Gerät bleibt gesperrt, bis du es manuell entsperrst."</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"Benachrichtigungen schneller erhalten"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"Vor dem Entsperren anzeigen"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Nein danke"</string>
@@ -389,19 +387,19 @@
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Maximieren"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Minimieren"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Bildschirm ist fixiert"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"Der Bildschirm wird solange angezeigt, bis Sie die Fixierung aufheben. Berühren und halten Sie \"Zurück\" und \"Übersicht\" gleichzeitig, um die Fixierung aufzuheben."</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Der Bildschirm wird solange angezeigt, bis Sie die Fixierung aufheben. Berühren und halten Sie \"Übersicht\", wenn Sie die Fixierung aufheben möchten."</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte \"Zurück\" und \"Übersicht\" gleichzeitig, um die Fixierung aufzuheben."</string>
+    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte \"Übersicht\", wenn du die Fixierung aufheben möchtest."</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"OK"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Nein danke"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
-    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Sie wird wieder eingeblendet, wenn Sie sie in den Einstellungen erneut aktivieren."</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ausblenden"</string>
     <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> will die Lautstärke regeln."</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Zulassen"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ablehnen"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> regelt die Lautstärke."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Zum Wiederherstellen des Originals hier tippen"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Sie verwenden Ihr Arbeitsprofil."</string>
+    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du verwendest dein Arbeitsprofil."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Eingebettete Akku-Prozentzahl anzeigen"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prozentzahl für Akkustand in Statusleistensymbol anzeigen, wenn das Gerät nicht geladen wird"</string>
@@ -416,7 +414,7 @@
     <string name="status_bar_airplane" msgid="7057575501472249002">"Flugmodus"</string>
     <string name="add_tile" msgid="2995389510240786221">"Kachel hinzufügen"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Broadcast-Kachel"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Sie erhalten einen lautlosen Weckruf <xliff:g id="WHEN">%1$s</xliff:g>, wenn Sie ihn nicht vorher ausschalten."</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Du erhältst einen lautlosen Weckruf <xliff:g id="WHEN">%1$s</xliff:g>, wenn du ihn nicht vorher ausschaltest."</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"Lautloser Weckruf <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"um <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"am <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -424,7 +422,7 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Hotspot"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Arbeitsprofil"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Für einige ein Vergnügen, aber nicht für alle"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Mit System UI Tuner erhalten Sie zusätzliche Möglichkeiten, die Android-Benutzeroberfläche anzupassen. Achtung: Diese Testfunktionen können sich ändern, abstürzen oder in zukünftigen Versionen verschwinden."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Mit System UI Tuner erhältst du zusätzliche Möglichkeiten, die Android-Benutzeroberfläche anzupassen. Achtung: Diese Testfunktionen können sich ändern, abstürzen oder in zukünftigen Versionen verschwinden."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Achtung: Diese Testfunktionen können sich ändern, abstürzen oder in zukünftigen Versionen verschwinden."</string>
     <string name="got_it" msgid="2239653834387972602">"OK"</string>
     <string name="tuner_toast" msgid="603429811084428439">"Herzlichen Glückwunsch! System UI Tuner wurde \"Einstellungen\" hinzugefügt."</string>

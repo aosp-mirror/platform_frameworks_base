@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"这台计算机的 RSA 密钥指纹如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允许使用这台计算机进行调试"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"不允许使用 USB 调试功能"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户“<xliff:g id="NAME">%s</xliff:g>”的帐户。"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6011931347142270156">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户“<xliff:g id="NAME">%s</xliff:g>”的帐号。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"拉伸以填满屏幕"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在保存屏幕截图..."</string>
@@ -77,7 +77,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"USB文件传输选项"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"作为媒体播放器(MTP)装载"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"作为相机(PTP)装载"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"安装适用于Mac的Android文件传输应用"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"安装适用于 Mac 的 Android 文件传输应用"</string>
     <string name="accessibility_back" msgid="567011538994429120">"返回"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"主屏幕"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"菜单"</string>
@@ -150,9 +150,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"没有 SIM 卡。"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"运营商网络正在更改。"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"电池电量为百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"系统设置。"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"清除通知。"</string>
@@ -327,8 +325,8 @@
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"仅限\n优先打扰"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"仅限\n闹钟"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"正在充电（还需<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>充满）"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"正在快速充电（还需 <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>才能充满）"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"正在慢速充电（还需 <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>才能充满）"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"正在快速充电（还需<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>充满）"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"正在慢速充电（还需<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>充满）"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"切换用户"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"切换用户，当前用户为<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"当前用户为<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -405,7 +403,7 @@
     <string name="system_ui_tuner" msgid="708224127392452018">"系统界面调谐器"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"嵌入式显示电池电量百分比 显示嵌入的电池电量百分比"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"未充电时在状态栏图标内显示电池电量百分比"</string>
-    <string name="quick_settings" msgid="10042998191725428">"快速设置"</string>
+    <string name="quick_settings" msgid="10042998191725428">"快捷设置"</string>
     <string name="status_bar" msgid="4877645476959324760">"状态栏"</string>
     <string name="demo_mode" msgid="2389163018533514619">"演示模式"</string>
     <string name="enable_demo_mode" msgid="4844205668718636518">"启用演示模式"</string>
@@ -420,7 +418,7 @@
     <string name="zen_alarm_warning" msgid="444533119582244293">"您在<xliff:g id="WHEN">%1$s</xliff:g>将不会听到下次闹钟响铃"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快速设置，<xliff:g id="TITLE">%s</xliff:g>。"</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"快捷设置，<xliff:g id="TITLE">%s</xliff:g>。"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"热点"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"工作资料"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"是否有趣完全取决于个人感觉"</string>

@@ -42,7 +42,7 @@
     <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Дали да се вклучи штедачот на батерија?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Вклучи"</string>
     <string name="battery_saver_start_action" msgid="5576697451677486320">"Вклучете го штедачот на батерија"</string>
-    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Подесувања"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Поставки"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Автоматско ротирање на екранот"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ИСКЛ."</string>
@@ -150,10 +150,8 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим на работа во авион."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Нема СИМ-картичка"</string>
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Променување на мрежата на операторот."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
-    <string name="accessibility_settings_button" msgid="799583911231893380">"Подесувања на систем."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерија <xliff:g id="NUMBER">%d</xliff:g> проценти."</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Поставки на систем."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Известувања"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Избриши известување."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"ГПС е овозможен."</string>
@@ -257,7 +255,7 @@
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Медиумски уред"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Само итни повици"</string>
-    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Подесувања"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Поставки"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Време"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Јас"</string>
     <string name="quick_settings_user_title" msgid="4467690427642392403">"Корисник"</string>
