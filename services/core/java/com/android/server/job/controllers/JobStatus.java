@@ -255,10 +255,13 @@ public class JobStatus {
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
      */
     public synchronized boolean isReady() {
-        // Deadline constraint trumps other constraints
+        // Deadline constraint trumps other constraints (except for periodic jobs where deadline
+        // (is an implementation detail. A periodic job should only run if it's constraints are
+        // satisfied).
         // AppNotIdle implicit constraint trumps all!
         return (isConstraintsSatisfied()
-                    || (hasDeadlineConstraint() && deadlineConstraintSatisfied.get()))
+                    || (!job.isPeriodic()
+                            && hasDeadlineConstraint() && deadlineConstraintSatisfied.get()))
                 && appNotIdleConstraintSatisfied.get();
     }
 
