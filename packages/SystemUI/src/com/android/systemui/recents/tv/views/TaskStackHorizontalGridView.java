@@ -28,7 +28,7 @@ import com.android.systemui.recents.events.ui.AllTaskViewsDismissedEvent;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.TaskStack.TaskStackCallbacks;
-import com.android.systemui.recents.views.TaskViewAnimation;
+import com.android.systemui.recents.views.AnimationProps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,7 +137,7 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
 
     @Override
     public void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, TaskViewAnimation animation) {
+            Task newFrontMostTask, AnimationProps animation) {
         getAdapter().notifyItemRemoved(stack.getStackTasks().indexOf(removedTask));
         if (mFocusedTask == removedTask) {
             resetFocusedTask(removedTask);
@@ -152,7 +152,7 @@ public class TaskStackHorizontalGridView extends HorizontalGridView implements T
     }
 
     @Override
-    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask, TaskViewAnimation animation) {
+    public void onHistoryTaskRemoved(TaskStack stack, Task removedTask, AnimationProps animation) {
         //No history task on tv
     }
 }

@@ -43,7 +43,7 @@ import com.android.systemui.recents.misc.NamedCounter;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.views.DropTarget;
-import com.android.systemui.recents.views.TaskViewAnimation;
+import com.android.systemui.recents.views.AnimationProps;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -228,12 +228,12 @@ public class TaskStack {
          * Notifies when a task has been removed from the stack.
          */
         void onStackTaskRemoved(TaskStack stack, Task removedTask, boolean wasFrontMostTask,
-            Task newFrontMostTask, TaskViewAnimation animation);
+            Task newFrontMostTask, AnimationProps animation);
 
         /**
          * Notifies when a task has been removed from the history.
          */
-        void onHistoryTaskRemoved(TaskStack stack, Task removedTask, TaskViewAnimation animation);
+        void onHistoryTaskRemoved(TaskStack stack, Task removedTask, AnimationProps animation);
     }
 
     /**
@@ -531,7 +531,7 @@ public class TaskStack {
      * Removes a task from the stack, with an additional {@param animation} hint to the callbacks on
      * how they should update themselves.
      */
-    public void removeTask(Task t, TaskViewAnimation animation) {
+    public void removeTask(Task t, AnimationProps animation) {
         if (mStackTaskList.contains(t)) {
             boolean wasFrontMostTask = (getStackFrontMostTask(false /* includeFreeform */) == t);
             removeTaskImpl(mStackTaskList, t);
@@ -575,7 +575,7 @@ public class TaskStack {
             if (!newTasksMap.containsKey(task.key)) {
                 if (notifyStackChanges) {
                     mCb.onStackTaskRemoved(this, task, i == (taskCount - 1), null,
-                            TaskViewAnimation.IMMEDIATE);
+                            AnimationProps.IMMEDIATE);
                 }
             }
             task.setGroup(null);

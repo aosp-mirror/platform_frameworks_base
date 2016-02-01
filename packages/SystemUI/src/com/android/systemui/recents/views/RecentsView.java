@@ -497,8 +497,9 @@ public class RecentsView extends FrameLayout {
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
+    public void onDrawForeground(Canvas canvas) {
+        super.onDrawForeground(canvas);
+
         ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
             Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
@@ -588,7 +589,7 @@ public class RecentsView extends FrameLayout {
             tmpTransform.scale = 1f;
             tmpTransform.rect.set(taskViewRect);
             mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
-                    new TaskViewAnimation(125, Interpolators.ALPHA_OUT,
+                    new AnimationProps(125, Interpolators.ALPHA_OUT,
                             new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
@@ -598,7 +599,7 @@ public class RecentsView extends FrameLayout {
                                             event.task.key.id, dockState.createMode);
 
                                     // Animate the stack accordingly
-                                    TaskViewAnimation stackAnim = new TaskViewAnimation(
+                                    AnimationProps stackAnim = new AnimationProps(
                                             TaskStackView.DEFAULT_SYNC_STACK_DURATION,
                                             Interpolators.FAST_OUT_SLOW_IN);
                                     mTaskStackView.getStack().removeTask(event.task, stackAnim);

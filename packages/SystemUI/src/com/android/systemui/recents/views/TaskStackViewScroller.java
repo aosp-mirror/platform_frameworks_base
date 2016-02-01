@@ -38,7 +38,7 @@ public class TaskStackViewScroller {
     private static final boolean DEBUG = false;
 
     public interface TaskStackViewScrollerCallbacks {
-        void onScrollChanged(float prevScroll, float curScroll, TaskViewAnimation animation);
+        void onScrollChanged(float prevScroll, float curScroll, AnimationProps animation);
     }
 
     /**
@@ -93,14 +93,14 @@ public class TaskStackViewScroller {
      * Sets the current stack scroll immediately.
      */
     public void setStackScroll(float s) {
-        setStackScroll(s, TaskViewAnimation.IMMEDIATE);
+        setStackScroll(s, AnimationProps.IMMEDIATE);
     }
 
     /**
      * Sets the current stack scroll, but indicates to the callback the preferred animation to
      * update to this new scroll.
      */
-    public void setStackScroll(float s, TaskViewAnimation animation) {
+    public void setStackScroll(float s, AnimationProps animation) {
         float prevStackScroll = mStackScrollP;
         mStackScrollP = s;
         if (mCb != null) {

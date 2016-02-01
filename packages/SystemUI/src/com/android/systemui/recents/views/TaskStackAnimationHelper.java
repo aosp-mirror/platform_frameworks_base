@@ -186,7 +186,7 @@ public class TaskStackAnimationHelper {
                 } else {
                     // Animate the task up if it was occluding the launch target
                     if (currentTaskOccludesLaunchTarget) {
-                        TaskViewAnimation taskAnimation = new TaskViewAnimation(
+                        AnimationProps taskAnimation = new AnimationProps(
                                 taskViewEnterFromAffiliatedAppDuration, Interpolators.ALPHA_IN,
                                 new AnimatorListenerAdapter() {
                                     @Override
@@ -207,7 +207,7 @@ public class TaskStackAnimationHelper {
                 int duration = taskViewEnterFromHomeDuration +
                         frontIndex * taskViewEnterFromHomeStaggerDelay;
 
-                TaskViewAnimation taskAnimation = new TaskViewAnimation(delay,
+                AnimationProps taskAnimation = new AnimationProps(delay,
                         duration, Interpolators.DECELERATE_QUINT,
                         postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
@@ -241,7 +241,7 @@ public class TaskStackAnimationHelper {
         for (int i = 0; i < taskViewCount; i++) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            TaskViewAnimation taskAnimation = new TaskViewAnimation(
+            AnimationProps taskAnimation = new AnimationProps(
                     animated ? taskViewExitToHomeDuration : 0, Interpolators.FAST_OUT_LINEAR_IN,
                     postAnimationTrigger.decrementOnAnimationEnd());
             postAnimationTrigger.increment();
@@ -283,7 +283,7 @@ public class TaskStackAnimationHelper {
                         screenPinningRequested, postAnimationTrigger);
             } else if (currentTaskOccludesLaunchTarget) {
                 // Animate this task out of view
-                TaskViewAnimation taskAnimation = new TaskViewAnimation(
+                AnimationProps taskAnimation = new AnimationProps(
                         taskViewExitToAppDuration, Interpolators.ALPHA_OUT,
                         postAnimationTrigger.decrementOnAnimationEnd());
                 postAnimationTrigger.increment();
@@ -315,7 +315,7 @@ public class TaskStackAnimationHelper {
         deleteTaskView.setClipViewInStack(false);
 
         // Compose the new animation and transform and star the animation
-        TaskViewAnimation taskAnimation = new TaskViewAnimation(taskViewRemoveAnimDuration,
+        AnimationProps taskAnimation = new AnimationProps(taskViewRemoveAnimDuration,
                 Interpolators.ALPHA_OUT, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -352,7 +352,7 @@ public class TaskStackAnimationHelper {
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
-            TaskViewAnimation taskAnimation = new TaskViewAnimation(startDelayIncr * i,
+            AnimationProps taskAnimation = new AnimationProps(startDelayIncr * i,
                     historyTransitionDuration, Interpolators.FAST_OUT_SLOW_IN,
                     postAnimationTrigger.decrementOnAnimationEnd());
             postAnimationTrigger.increment();
@@ -381,7 +381,7 @@ public class TaskStackAnimationHelper {
         int taskViewCount = taskViews.size();
         for (int i = taskViewCount - 1; i >= 0; i--) {
             TaskView tv = taskViews.get(i);
-            TaskViewAnimation taskAnimation = new TaskViewAnimation(startDelayIncr * i,
+            AnimationProps taskAnimation = new AnimationProps(startDelayIncr * i,
                     historyTransitionDuration, Interpolators.FAST_OUT_SLOW_IN);
             stackLayout.getStackTransform(tv.getTask(), stackScroller.getStackScroll(),
                     mTmpTransform, null);
