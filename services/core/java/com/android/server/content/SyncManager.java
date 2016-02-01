@@ -295,7 +295,7 @@ public class SyncManager {
     private final BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateRunningAccounts();
+            updateRunningAccounts(true /* resync all targets */);
 
             // Kick off sync for everyone, since this was a radical account change
             scheduleSync(null, UserHandle.USER_ALL, SyncOperation.REASON_ACCOUNTS_UPDATED, null,
@@ -344,10 +344,12 @@ public class SyncManager {
         return found;
     }
 
-    public void updateRunningAccounts() {
+    private void updateRunningAccounts(boolean resyncAllTargets) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "sending MESSAGE_ACCOUNTS_UPDATED");
         // Update accounts in handler thread.
-        mSyncHandler.sendEmptyMessage(SyncHandler.MESSAGE_ACCOUNTS_UPDATED);
+        Message m = mSyncHandler.obtainMessage(SyncHandler.MESSAGE_ACCOUNTS_UPDATED);
+        m.arg1 = resyncAllTargets ? 1 : 0;
+        m.sendToTarget();
     }
 
     private void doDatabaseCleanup() {
@@ -1282,7 +1284,7 @@ public class SyncManager {
 
         mSyncAdapters.invalidateCache(userId);
 
-        updateRunningAccounts();
+        updateRunningAccounts(false);
 
         synchronized (mSyncQueue) {
             mSyncQueue.addPendingOperations(userId);
@@ -1301,7 +1303,7 @@ public class SyncManager {
     }
 
     private void onUserStopping(int userId) {
-        updateRunningAccounts();
+        updateRunningAccounts(false);
 
         cancelActiveSync(
                 new SyncStorageEngine.EndPoint(
@@ -1313,7 +1315,7 @@ public class SyncManager {
     }
 
     private void onUserRemoved(int userId) {
-        updateRunningAccounts();
+        updateRunningAccounts(false);
 
         // Clean up the storage engine database
         mSyncStorageEngine.doDatabaseCleanup(new Account[0], userId);
@@ -2285,7 +2287,8 @@ public class SyncManager {
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.v(TAG, "handleSyncHandlerMessage: MESSAGE_ACCOUNTS_UPDATED");
                         }
-                        updateRunningAccountsH();
+                        boolean resyncAllTargets = msg.arg1 == 0 ? false : true;
+                        updateRunningAccountsH(resyncAllTargets);
                         break;
 
                     case SyncHandler.MESSAGE_CANCEL:
@@ -2869,7 +2872,7 @@ public class SyncManager {
             }
         }
 
-        private void updateRunningAccountsH() {
+        private void updateRunningAccountsH(boolean resyncAll) {
             mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
 
             if (mBootCompleted) {
@@ -2886,9 +2889,14 @@ public class SyncManager {
                             null /* no result since this is a cancel */);
                 }
             }
-            // we must do this since we don't bother scheduling alarms when
-            // the accounts are not set yet
-            sendCheckAlarmsMessage();
+
+            if (resyncAll) {
+                // Kick off sync for everyone, since this was a radical account change
+                scheduleSync(null, UserHandle.USER_ALL, SyncOperation.REASON_ACCOUNTS_UPDATED, null,
+                        null, 0 /* no delay */, 0/* no delay */, false);
+            } else {
+                sendCheckAlarmsMessage();
+            }
         }
 
         private boolean isSyncNotUsingNetworkH(ActiveSyncContext activeSyncContext) {
