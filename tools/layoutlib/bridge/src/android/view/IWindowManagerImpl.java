@@ -557,4 +557,8 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver) throws RemoteException {
     }
+
+    @Override
+    public void getStableInsets(Rect outInsets) throws RemoteException {
+    }
 }
