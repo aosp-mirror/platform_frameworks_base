@@ -70,6 +70,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private Resources mResources;
     private MtpDatabase mDatabase;
     private AppFuse mAppFuse;
+    private ServiceIntentSender mIntentSender;
 
     /**
      * Provides singleton instance to MtpDocumentsService.
@@ -88,6 +89,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
+        mIntentSender = new ServiceIntentSender(getContext());
         // TODO: Mount AppFuse on demands.
         try {
             mAppFuse.mount(getContext().getSystemService(StorageManager.class));
@@ -105,7 +107,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             MtpManager mtpManager,
             ContentResolver resolver,
             MtpDatabase database,
-            StorageManager storageManager) {
+            StorageManager storageManager,
+            ServiceIntentSender intentSender) {
         mResources = resources;
         mMtpManager = mtpManager;
         mResolver = resolver;
@@ -113,6 +116,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mDatabase = database;
         mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
+        mIntentSender = intentSender;
         // TODO: Mount AppFuse on demands.
         try {
             mAppFuse.mount(storageManager);
@@ -152,6 +156,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         }
         Identifier parentIdentifier = mDatabase.createIdentifier(parentDocumentId);
         try {
+            openDevice(parentIdentifier.mDeviceId);
             if (parentIdentifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE) {
                 final Identifier singleStorageIdentifier =
                         mDatabase.getSingleStorageIdentifier(parentDocumentId);
@@ -176,11 +181,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     throws FileNotFoundException {
         final Identifier identifier = mDatabase.createIdentifier(documentId);
         try {
+            openDevice(identifier.mDeviceId);
             switch (mode) {
                 case "r":
                     final long fileSize = getFileSize(documentId);
-                    // MTP getPartialObject operation does not support files that are larger than 4GB.
-                    // Fallback to non-seekable file descriptor.
+                    // MTP getPartialObject operation does not support files that are larger than
+                    // 4GB. Fallback to non-seekable file descriptor.
                     // TODO: Use getPartialObject64 for MTP devices that support Android vendor
                     // extension.
                     if (fileSize <= 0xffffffffl) {
@@ -213,6 +219,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             CancellationSignal signal) throws FileNotFoundException {
         final Identifier identifier = mDatabase.createIdentifier(documentId);
         try {
+            openDevice(identifier.mDeviceId);
             return new AssetFileDescriptor(
                     getPipeManager(identifier).readThumbnail(mMtpManager, identifier),
                     0,  // Start offset.
@@ -227,6 +234,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public void deleteDocument(String documentId) throws FileNotFoundException {
         try {
             final Identifier identifier = mDatabase.createIdentifier(documentId);
+            openDevice(identifier.mDeviceId);
             final Identifier parentIdentifier = mDatabase.getParentIdentifier(documentId);
             mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
             mDatabase.deleteDocument(documentId);
@@ -259,6 +267,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             throws FileNotFoundException {
         try {
             final Identifier parentId = mDatabase.createIdentifier(parentDocumentId);
+            openDevice(parentId.mDeviceId);
             final ParcelFileDescriptor pipe[] = ParcelFileDescriptor.createReliablePipe();
             pipe[0].close();  // 0 bytes for a new document.
             final int formatCode = Document.MIME_TYPE_DIR.equals(mimeType) ?
@@ -286,11 +295,19 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     void openDevice(int deviceId) throws IOException {
         synchronized (mDeviceListLock) {
+            if (mDeviceToolkits.containsKey(deviceId)) {
+                return;
+            }
             mMtpManager.openDevice(deviceId);
             mDeviceToolkits.put(
                     deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
+            mIntentSender.sendUpdateNotificationIntent();
+            try {
+                mRootScanner.resume().await();
+            } catch (InterruptedException error) {
+                Log.e(TAG, "openDevice", error);
+            }
         }
-        mRootScanner.resume();
     }
 
     void closeDevice(int deviceId) throws IOException, InterruptedException {
@@ -298,6 +315,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             closeDeviceInternal(deviceId);
         }
         mRootScanner.resume();
+        mIntentSender.sendUpdateNotificationIntent();
     }
 
     int[] getOpenedDeviceIds() {
@@ -315,6 +333,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             }
             throw new IOException("Not found the device: " + Integer.toString(deviceId));
         }
+    }
+
+    /**
+     * Resumes root scanner to handle the update of device list.
+     */
+    void resumeRootScanner() {
+        mRootScanner.resume();
     }
 
     /**
@@ -356,6 +381,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
 
     private void closeDeviceInternal(int deviceId) throws IOException, InterruptedException {
         // TODO: Flush the device before closing (if not closed externally).
+        if (!mDeviceToolkits.containsKey(deviceId)) {
+            return;
+        }
         getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
         mDeviceToolkits.remove(deviceId);
         mMtpManager.closeDevice(deviceId);

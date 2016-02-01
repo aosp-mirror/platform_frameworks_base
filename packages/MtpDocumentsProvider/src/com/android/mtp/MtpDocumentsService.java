@@ -19,12 +19,11 @@ package com.android.mtp;
 import android.app.Notification;
 import android.app.Service;
 import android.app.NotificationManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.hardware.usb.UsbDevice;
 import android.os.IBinder;
 import android.util.Log;
-
-import com.android.internal.util.Preconditions;
 
 import java.io.IOException;
 
@@ -36,6 +35,7 @@ import java.io.IOException;
 public class MtpDocumentsService extends Service {
     static final String ACTION_OPEN_DEVICE = "com.android.mtp.OPEN_DEVICE";
     static final String ACTION_CLOSE_DEVICE = "com.android.mtp.CLOSE_DEVICE";
+    static final String ACTION_UPDATE_NOTIFICATION = "com.android.mtp.UPDATE_NOTIFICATION";
     static final String EXTRA_DEVICE = "device";
 
     NotificationManager mNotificationManager;
@@ -55,32 +55,10 @@ public class MtpDocumentsService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         // If intent is null, the service was restarted.
-        if (intent != null) {
-            final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
-            final UsbDevice device = intent.<UsbDevice>getParcelableExtra(EXTRA_DEVICE);
-            try {
-                Preconditions.checkNotNull(device);
-                switch (intent.getAction()) {
-                    case ACTION_OPEN_DEVICE:
-                        provider.openDevice(device.getDeviceId());
-                        break;
-
-                    case ACTION_CLOSE_DEVICE:
-                        mNotificationManager.cancel(device.getDeviceId());
-                        provider.closeDevice(device.getDeviceId());
-                        break;
-
-                    default:
-                        throw new IllegalArgumentException("Received unknown intent action.");
-                }
-            } catch (IOException | InterruptedException | IllegalArgumentException error) {
-                logErrorMessage(error);
-            }
-        } else {
-            // TODO: Fetch devices again.
+        if (intent == null || ACTION_UPDATE_NOTIFICATION.equals(intent.getAction())) {
+            return updateForegroundState() ? START_STICKY : START_NOT_STICKY;
         }
-
-        return updateForegroundState() ? START_STICKY : START_NOT_STICKY;
+        return START_NOT_STICKY;
     }
 
     /**
@@ -92,6 +70,7 @@ public class MtpDocumentsService extends Service {
         final int[] deviceIds = provider.getOpenedDeviceIds();
         int notificationId = 0;
         Notification notification = null;
+        // TODO: Hide notification if the device has already been removed.
         for (final int deviceId : deviceIds) {
             try {
                 final String title = getResources().getString(

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.mtp;
 
 import android.content.ContentResolver;
@@ -7,6 +23,7 @@ import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
@@ -64,9 +81,8 @@ final class RootScanner {
 
     /**
      * Starts to check new changes right away.
-     * If the background thread has already gone, it restarts another background thread.
      */
-    synchronized void resume() {
+    synchronized CountDownLatch resume() {
         if (mExecutor == null) {
             // Only single thread updates the database.
             mExecutor = Executors.newSingleThreadExecutor();
@@ -75,8 +91,10 @@ final class RootScanner {
             // Cancel previous task.
             mCurrentTask.cancel(true);
         }
-        mCurrentTask = new FutureTask<Void>(new UpdateRootsRunnable(), null);
+        final UpdateRootsRunnable runnable = new UpdateRootsRunnable();
+        mCurrentTask = new FutureTask<Void>(runnable, null);
         mExecutor.submit(mCurrentTask);
+        return runnable.mFirstScanCompleted;
     }
 
     /**
@@ -98,6 +116,8 @@ final class RootScanner {
      * Runnable to scan roots and update the database information.
      */
     private final class UpdateRootsRunnable implements Runnable {
+        final CountDownLatch mFirstScanCompleted = new CountDownLatch(1);
+
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
@@ -136,6 +156,7 @@ final class RootScanner {
                 if (changed) {
                     notifyChange();
                 }
+                mFirstScanCompleted.countDown();
                 pollingCount++;
                 try {
                     // Use SHORT_POLLING_PERIOD for the first SHORT_POLLING_TIMES because it is

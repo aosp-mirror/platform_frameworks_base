@@ -23,13 +23,11 @@ import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
 import android.provider.DocumentsContract.Root;
-import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
-import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -79,11 +77,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 null,
                 null));
 
-        mProvider.openDevice(0);
+        mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
 
-        mProvider.closeDevice(0);
+        mProvider.openDevice(0);
         mResolver.waitForNotification(ROOTS_URI, 2);
+
+        mProvider.closeDevice(0);
+        mResolver.waitForNotification(ROOTS_URI, 3);
     }
 
     public void testOpenAndCloseErrorDevice() throws Exception {
@@ -94,13 +95,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         } catch (Throwable error) {
             assertTrue(error instanceof IOException);
         }
-
-        try {
-            mProvider.closeDevice(1);
-            fail();
-        } catch (Throwable error) {
-            assertTrue(error instanceof IOException);
-        }
+        assertEquals(0, mProvider.getOpenedDeviceIds().length);
 
         // Check if the following notification is the first one or not.
         mMtpManager.addValidDevice(new MtpDeviceRecord(
@@ -119,8 +114,55 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 },
                 null,
                 null));
-        mProvider.openDevice(0);
+        mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
+        mProvider.openDevice(0);
+        mResolver.waitForNotification(ROOTS_URI, 2);
+    }
+
+    public void testOpenDeviceOnDemand() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mMtpManager.addValidDevice(new MtpDeviceRecord(
+                0,
+                "Device A",
+                false /* unopened */,
+                new MtpRoot[] {
+                    new MtpRoot(
+                            0 /* deviceId */,
+                            1 /* storageId */,
+                            "Device A" /* device model name */,
+                            "Storage A" /* volume description */,
+                            1024 /* free space */,
+                            2048 /* total space */,
+                            "" /* no volume identifier */)
+                },
+                null,
+                null));
+        mMtpManager.setObjectHandles(0, 1, -1, new int[0]);
+        mProvider.resumeRootScanner();
+        mResolver.waitForNotification(ROOTS_URI, 1);
+        final String[] columns = new String[] {
+                DocumentsContract.Root.COLUMN_TITLE,
+                DocumentsContract.Root.COLUMN_DOCUMENT_ID
+        };
+        try (final Cursor cursor = mProvider.queryRoots(columns)) {
+            assertEquals(1, cursor.getCount());
+            assertTrue(cursor.moveToNext());
+            assertEquals("Device A", cursor.getString(0));
+            assertEquals(1, cursor.getLong(1));
+        }
+        {
+            final int [] openedDevice = mProvider.getOpenedDeviceIds();
+            assertEquals(0, openedDevice.length);
+        }
+        // Device is opened automatically when querying its children.
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {}
+
+        {
+            final int [] openedDevice = mProvider.getOpenedDeviceIds();
+            assertEquals(1, openedDevice.length);
+            assertEquals(0, openedDevice[0]);
+        }
     }
 
     public void testQueryRoots() throws Exception {
@@ -194,7 +236,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 0, "Device A", false /* unopened */, new MtpRoot[0], null, null));
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
-                "Device",
+                "Device B",
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
@@ -210,8 +252,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 null));
         {
             mProvider.openDevice(0);
-            mProvider.openDevice(1);
+            mProvider.resumeRootScanner();
             mResolver.waitForNotification(ROOTS_URI, 1);
+
+            mProvider.openDevice(1);
+            mProvider.resumeRootScanner();
+            mResolver.waitForNotification(ROOTS_URI, 2);
 
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(2, cursor.getCount());
@@ -492,7 +538,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mProvider = new MtpDocumentsProvider();
         final StorageManager storageManager = getContext().getSystemService(StorageManager.class);
         assertTrue(mProvider.onCreateForTesting(
-                mResources, mMtpManager, mResolver, mDatabase, storageManager));
+                mResources,
+                mMtpManager,
+                mResolver,
+                mDatabase,
+                storageManager,
+                new TestServiceIntentSender()));
     }
 
     private String[] getStrings(Cursor cursor) {
