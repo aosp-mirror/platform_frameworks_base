@@ -342,5 +342,11 @@ message MetricsEvent {
 
     // QS Tile for Data Saver.
     QS_DATA_SAVER = 284;
+
+    // OPEN: Settings > Security > User credentials
+    // CATEGORY: Settings
+    // OS: 6.1
+    // GMS: 7.8.99
+    USER_CREDENTIALS = 285;
   }
 }
