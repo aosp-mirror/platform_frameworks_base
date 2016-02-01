@@ -308,4 +308,5 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nie podłączony"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nie podłączony"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Naładowana"</string>
+    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Wyłączone przez administratora"</string>
 </resources>
