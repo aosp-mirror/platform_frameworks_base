@@ -286,7 +286,7 @@ public class BugreportProgressService extends Service {
             // At this point it's handling onStartCommand(), with the intent passed as an Extra.
             if (!(msg.obj instanceof Intent)) {
                 // Sanity check.
-                Log.e(TAG, "Internal error: invalid msg.obj: " + msg.obj);
+                Log.wtf(TAG, "handleMessage(): invalid msg.obj type: " + msg.obj);
                 return;
             }
             final Parcelable parcel = ((Intent) msg.obj).getParcelableExtra(EXTRA_ORIGINAL_INTENT);
@@ -520,8 +520,14 @@ public class BugreportProgressService extends Service {
         }
         int activeProcesses = 0;
         for (int i = 0; i < total; i++) {
-            final int pid = mProcesses.keyAt(i);
             final BugreportInfo info = mProcesses.valueAt(i);
+            if (info == null) {
+                Log.wtf(TAG, "pollProgress(): null info at index " + i + "(pid = "
+                        + mProcesses.keyAt(i) + ")");
+                continue;
+            }
+
+            final int pid = info.pid;
             if (info.finished) {
                 if (DEBUG) Log.v(TAG, "Skipping finished process " + pid);
                 continue;
@@ -720,6 +726,12 @@ public class BugreportProgressService extends Service {
      * Handles the BUGREPORT_FINISHED intent sent by {@code dumpstate}.
      */
     private void onBugreportFinished(int pid, Intent intent) {
+        final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
+        if (bugreportFile == null) {
+            // Should never happen, dumpstate always set the file.
+            Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
+            return;
+        }
         mInfoDialog.onBugreportFinished(pid);
         BugreportInfo info = getInfo(pid);
         if (info == null) {
@@ -729,7 +741,8 @@ public class BugreportProgressService extends Service {
             mProcesses.put(pid, info);
         }
         info.renameScreenshots(mScreenshotsDir);
-        info.bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
+        info.bugreportFile = bugreportFile;
+
         final File screenshot = getFileExtra(intent, EXTRA_SCREENSHOT);
         if (screenshot != null) {
             info.addScreenshot(screenshot);
@@ -957,7 +970,7 @@ public class BugreportProgressService extends Service {
     private static void addDetailsToZipFile(Context context, BugreportInfo info) {
         if (info.bugreportFile == null) {
             // One possible reason is a bug in the Parcelization code.
-            Log.e(TAG, "INTERNAL ERROR: no bugreportFile on " + info);
+            Log.wtf(TAG, "addDetailsToZipFile(): no bugreportFile on " + info);
             return;
         }
         if (TextUtils.isEmpty(info.title) && TextUtils.isEmpty(info.description)) {
