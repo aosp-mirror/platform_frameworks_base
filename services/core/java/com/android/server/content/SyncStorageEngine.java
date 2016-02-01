@@ -27,7 +27,6 @@ import android.content.PeriodicSync;
 import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -40,13 +39,7 @@ import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.AtomicFile;
-import android.util.Log;
-import android.util.Pair;
-import android.util.Slog;
-import android.util.SparseArray;
-import android.util.ArrayMap;
-import android.util.Xml;
+import android.util.*;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -59,7 +52,6 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -90,7 +82,7 @@ public class SyncStorageEngine extends Handler {
     /** Default time for a periodic sync. */
     private static final long DEFAULT_POLL_FREQUENCY_SECONDS = 60 * 60 * 24; // One day
 
-    /** Percentage of period that is flex by default, if no flex is set. */
+    /** Percentage of period that is flex by default, if no flexMillis is set. */
     private static final double DEFAULT_FLEX_PERCENT_SYNC = 0.04;
 
     /** Lower bound on sync time from which we assign a default flex time. */
@@ -105,10 +97,6 @@ public class SyncStorageEngine extends Handler {
     /** Enum value for a sync stop event. */
     public static final int EVENT_STOP = 1;
 
-    // TODO: i18n -- grab these out of resources.
-    /** String names for the sync event types. */
-    public static final String[] EVENTS = { "START", "STOP" };
-
     /** Enum value for a server-initiated sync. */
     public static final int SOURCE_SERVER = 0;
 
@@ -122,20 +110,17 @@ public class SyncStorageEngine extends Handler {
 
     /** Enum value for a periodic sync. */
     public static final int SOURCE_PERIODIC = 4;
-    
-    /** Enum value for a sync started for a service. */
-    public static final int SOURCE_SERVICE = 5;
 
     public static final long NOT_IN_BACKOFF_MODE = -1;
 
     // TODO: i18n -- grab these out of resources.
     /** String names for the sync source types. */
     public static final String[] SOURCES = { "SERVER",
-                                             "LOCAL",
-                                             "POLL",
-                                             "USER",
-                                             "PERIODIC",
-                                             "SERVICE"};
+            "LOCAL",
+            "POLL",
+            "USER",
+            "PERIODIC",
+            "SERVICE"};
 
     // The MESG column will contain one of these or one of the Error types.
     public static final String MESG_SUCCESS = "success";
@@ -155,63 +140,12 @@ public class SyncStorageEngine extends Handler {
     private static final int ACCOUNTS_VERSION = 2;
 
     private static HashMap<String, String> sAuthorityRenames;
+    private static PeriodicSyncAddedListener mPeriodicSyncAddedListener;
 
     static {
         sAuthorityRenames = new HashMap<String, String>();
         sAuthorityRenames.put("contacts", "com.android.contacts");
         sAuthorityRenames.put("calendar", "com.android.calendar");
-    }
-
-    public static class PendingOperation {
-        final EndPoint target;
-        final int reason;
-        final int syncSource;
-        final Bundle extras;        // note: read-only.
-        final boolean expedited;
-
-        final int authorityId;
-        // No longer used.
-        // Keep around for sake up updating from pending.bin to pending.xml
-        byte[] flatExtras;
-
-        PendingOperation(AuthorityInfo authority, int reason, int source,
-                 Bundle extras, boolean expedited) {
-            this.target = authority.target;
-            this.syncSource = source;
-            this.reason = reason;
-            this.extras = extras != null ? new Bundle(extras) : extras;
-            this.expedited = expedited;
-            this.authorityId = authority.ident;
-        }
-
-        PendingOperation(PendingOperation other) {
-            this.reason = other.reason;
-            this.syncSource = other.syncSource;
-            this.target = other.target;
-            this.extras = other.extras;
-            this.authorityId = other.authorityId;
-            this.expedited = other.expedited;
-        }
-
-        /**
-         * Considered equal if they target the same sync adapter (A
-         * {@link android.content.SyncService}
-         * is considered an adapter), for the same userId.
-         * @param other PendingOperation to compare.
-         * @return true if the two pending ops are the same.
-         */
-        public boolean equals(PendingOperation other) {
-            return target.matchesSpec(other.target);
-        }
-
-        public String toString() {
-            return "service=" + target.service
-                        + " user=" + target.userId
-                        + " auth=" + target
-                        + " account=" + target.account
-                        + " src=" + syncSource
-                        + " extras=" + extras;
-        }
     }
 
     static class AccountInfo {
@@ -228,39 +162,21 @@ public class SyncStorageEngine extends Handler {
     public static class EndPoint {
         public final static EndPoint USER_ALL_PROVIDER_ALL_ACCOUNTS_ALL =
                 new EndPoint(null, null, UserHandle.USER_ALL);
-        final ComponentName service;
-        final int serviceUid;           // -1 for "any"
         final Account account;
         final int userId;
         final String provider;
-        final boolean target_service;
-        final boolean target_provider;
-
-        public EndPoint(ComponentName service, int userId, int uid) {
-            this.service = service;
-            this.serviceUid = uid;
-            this.userId = userId;
-            this.account = null;
-            this.provider = null;
-            this.target_service = true;
-            this.target_provider = false;
-        }
 
         public EndPoint(Account account, String provider, int userId) {
             this.account = account;
             this.provider = provider;
             this.userId = userId;
-            this.service = null;
-            this.serviceUid = -1;
-            this.target_service = false;
-            this.target_provider = true;
         }
 
         /**
          * An Endpoint for a sync matches if it targets the same sync adapter for the same user.
          *
          * @param spec the Endpoint to match. If the spec has null fields, they indicate a wildcard
-         * and match any. 
+         * and match any.
          */
         public boolean matchesSpec(EndPoint spec) {
             if (userId != spec.userId
@@ -268,44 +184,26 @@ public class SyncStorageEngine extends Handler {
                     && spec.userId != UserHandle.USER_ALL) {
                 return false;
             }
-            if (target_service && spec.target_service) {
-                if (serviceUid != spec.serviceUid
-                    && serviceUid >= 0
-                    && spec.serviceUid >= 0) {
-                    return false;
-                }
-                return service.equals(spec.service);
-            } else if (target_provider && spec.target_provider) {
-                boolean accountsMatch;
-                if (spec.account == null) {
-                    accountsMatch = true;
-                } else {
-                    accountsMatch = account.equals(spec.account);
-                }
-                boolean providersMatch;
-                if (spec.provider == null) {
-                    providersMatch = true;
-                } else {
-                    providersMatch = provider.equals(spec.provider);
-                }
-                return accountsMatch && providersMatch;
+            boolean accountsMatch;
+            if (spec.account == null) {
+                accountsMatch = true;
+            } else {
+                accountsMatch = account.equals(spec.account);
             }
-            return false;
+            boolean providersMatch;
+            if (spec.provider == null) {
+                providersMatch = true;
+            } else {
+                providersMatch = provider.equals(spec.provider);
+            }
+            return accountsMatch && providersMatch;
         }
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            if (target_provider) {
-                sb.append(account == null ? "ALL ACCS" : account.name)
+            sb.append(account == null ? "ALL ACCS" : account.name)
                     .append("/")
                     .append(provider == null ? "ALL PDRS" : provider);
-            } else if (target_service) {
-                service.appendShortString(sb);
-                sb.append(":");
-                UserHandle.formatUid(sb,serviceUid);
-            } else {
-                sb.append("invalid target");
-            }
             sb.append(":u" + userId);
             return sb.toString();
         }
@@ -373,12 +271,7 @@ public class SyncStorageEngine extends Handler {
         AuthorityInfo(EndPoint info, int id) {
             target = info;
             ident = id;
-            enabled = info.target_provider ?
-                    SYNC_ENABLED_DEFAULT : true;
-            // Service is active by default,
-            if (info.target_service) {
-                this.syncable = 1;
-            }
+            enabled = SYNC_ENABLED_DEFAULT;
             periodicSyncs = new ArrayList<PeriodicSync>();
             defaultInitialisation();
         }
@@ -387,15 +280,11 @@ public class SyncStorageEngine extends Handler {
             syncable = NOT_INITIALIZED; // default to "unknown"
             backoffTime = -1; // if < 0 then we aren't in backoff mode
             backoffDelay = -1; // if < 0 then we aren't in backoff mode
-            PeriodicSync defaultSync;
-            // Old version is one sync a day.
-            if (target.target_provider) {
-                defaultSync =
-                        new PeriodicSync(target.account, target.provider,
-                            new Bundle(),
-                            DEFAULT_POLL_FREQUENCY_SECONDS,
-                            calculateDefaultFlexTime(DEFAULT_POLL_FREQUENCY_SECONDS));
-                periodicSyncs.add(defaultSync);
+
+            if (mPeriodicSyncAddedListener != null) {
+                mPeriodicSyncAddedListener.onPeriodicSyncAdded(target, new Bundle(),
+                        DEFAULT_POLL_FREQUENCY_SECONDS,
+                        calculateDefaultFlexTime(DEFAULT_POLL_FREQUENCY_SECONDS));
             }
         }
 
@@ -439,15 +328,22 @@ public class SyncStorageEngine extends Handler {
         public void onSyncRequest(EndPoint info, int reason, Bundle extras);
     }
 
+    interface PeriodicSyncAddedListener {
+        /** Called when a periodic sync is added. */
+        void onPeriodicSyncAdded(EndPoint target, Bundle extras, long pollFrequency, long flex);
+    }
+
+    interface OnAuthorityRemovedListener {
+        /** Called when an authority is removed. */
+        void onAuthorityRemoved(EndPoint removedAuthority);
+    }
+
     // Primary list of all syncable authorities.  Also our global lock.
     private final SparseArray<AuthorityInfo> mAuthorities =
             new SparseArray<AuthorityInfo>();
 
     private final HashMap<AccountAndUser, AccountInfo> mAccounts
             = new HashMap<AccountAndUser, AccountInfo>();
-
-    private final ArrayList<PendingOperation> mPendingOperations =
-            new ArrayList<PendingOperation>();
 
     private final SparseArray<ArrayList<SyncInfo>> mCurrentSyncs
             = new SparseArray<ArrayList<SyncInfo>>();
@@ -499,20 +395,12 @@ public class SyncStorageEngine extends Handler {
      */
     private final AtomicFile mStatisticsFile;
 
-    /**
-     * This file contains the pending sync operations.  It is a binary file,
-     * which must be updated every time an operation is added or removed,
-     * so we have special handling of it.
-     */
-    private final AtomicFile mPendingFile;
-    private static final int PENDING_FINISH_TO_WRITE = 4;
-    private int mNumPendingFinished = 0;
-
     private int mNextHistoryId = 0;
     private SparseArray<Boolean> mMasterSyncAutomatically = new SparseArray<Boolean>();
     private boolean mDefaultMasterSyncAutomatically;
 
     private OnSyncRequestListener mSyncRequestListener;
+    private OnAuthorityRemovedListener mAuthorityRemovedListener;
 
     private SyncStorageEngine(Context context, File dataDir) {
         mContext = context;
@@ -521,7 +409,7 @@ public class SyncStorageEngine extends Handler {
         mCal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
 
         mDefaultMasterSyncAutomatically = mContext.getResources().getBoolean(
-               com.android.internal.R.bool.config_syncstorageengine_masterSyncAutomatically);
+                com.android.internal.R.bool.config_syncstorageengine_masterSyncAutomatically);
 
         File systemDir = new File(dataDir, "system");
         File syncDir = new File(systemDir, "sync");
@@ -531,17 +419,14 @@ public class SyncStorageEngine extends Handler {
 
         mAccountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
         mStatusFile = new AtomicFile(new File(syncDir, "status.bin"));
-        mPendingFile = new AtomicFile(new File(syncDir, "pending.xml"));
         mStatisticsFile = new AtomicFile(new File(syncDir, "stats.bin"));
 
         readAccountInfoLocked();
         readStatusLocked();
-        readPendingOperationsLocked();
         readStatisticsLocked();
         readAndDeleteLegacyAccountInfoLocked();
         writeAccountInfoLocked();
         writeStatusLocked();
-        writePendingOperationsLocked();
         writeStatisticsLocked();
     }
 
@@ -569,6 +454,18 @@ public class SyncStorageEngine extends Handler {
     protected void setOnSyncRequestListener(OnSyncRequestListener listener) {
         if (mSyncRequestListener == null) {
             mSyncRequestListener = listener;
+        }
+    }
+
+    protected void setOnAuthorityRemovedListener(OnAuthorityRemovedListener listener) {
+        if (mAuthorityRemovedListener == null) {
+            mAuthorityRemovedListener = listener;
+        }
+    }
+
+    protected void setPeriodicSyncAddedListener(PeriodicSyncAddedListener listener) {
+        if (mPeriodicSyncAddedListener == null) {
+            mPeriodicSyncAddedListener = listener;
         }
     }
 
@@ -622,7 +519,7 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    private void reportChange(int which) {
+    void reportChange(int which) {
         ArrayList<ISyncStatusObserver> reports = null;
         synchronized (mAuthorities) {
             int i = mChangeListeners.beginBroadcast();
@@ -641,7 +538,7 @@ public class SyncStorageEngine extends Handler {
         }
 
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "reportChange " + which + " to: " + reports);
+            Slog.v(TAG, "reportChange " + which + " to: " + reports);
         }
 
         if (reports != null) {
@@ -680,9 +577,9 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void setSyncAutomatically(Account account, int userId, String providerName,
-            boolean sync) {
+                                     boolean sync) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
+            Slog.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
                     + ", user " + userId + " -> " + sync);
         }
         synchronized (mAuthorities) {
@@ -693,7 +590,7 @@ public class SyncStorageEngine extends Handler {
                             false);
             if (authority.enabled == sync) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.d(TAG, "setSyncAutomatically: already set to " + sync + ", doing nothing");
+                    Slog.d(TAG, "setSyncAutomatically: already set to " + sync + ", doing nothing");
                 }
                 return;
             }
@@ -744,26 +641,6 @@ public class SyncStorageEngine extends Handler {
         setSyncableStateForEndPoint(new EndPoint(account, providerName, userId), syncable);
     }
 
-    public boolean getIsTargetServiceActive(ComponentName cname, int userId) {
-        synchronized (mAuthorities) {
-            if (cname != null) {
-                AuthorityInfo authority = getAuthorityLocked(
-                        new EndPoint(cname, userId, -1),
-                        "get service active");
-                if (authority == null) {
-                    return false;
-                }
-                return (authority.syncable == 1);
-            }
-            return false;
-        }
-    }
-
-    public void setIsTargetServiceActive(ComponentName cname, int userId, boolean active) {
-        setSyncableStateForEndPoint(new EndPoint(cname, userId, -1), active ?
-                AuthorityInfo.SYNCABLE : AuthorityInfo.NOT_SYNCABLE);
-    }
-
     /**
      * An enabled sync service and a syncable provider's adapter both get resolved to the same
      * persisted variable - namely the "syncable" attribute for an AuthorityInfo in accounts.xml.
@@ -778,11 +655,11 @@ public class SyncStorageEngine extends Handler {
                 syncable = AuthorityInfo.NOT_INITIALIZED;
             }
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.d(TAG, "setIsSyncable: " + aInfo.toString() + " -> " + syncable);
+                Slog.d(TAG, "setIsSyncable: " + aInfo.toString() + " -> " + syncable);
             }
             if (aInfo.syncable == syncable) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.d(TAG, "setIsSyncable: already set to " + syncable + ", doing nothing");
+                    Slog.d(TAG, "setIsSyncable: already set to " + syncable + ", doing nothing");
                 }
                 return;
             }
@@ -811,15 +688,14 @@ public class SyncStorageEngine extends Handler {
      */
     public void setBackoff(EndPoint info, long nextSyncTime, long nextDelay) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "setBackoff: " + info
+            Slog.v(TAG, "setBackoff: " + info
                     + " -> nextSyncTime " + nextSyncTime + ", nextDelay " + nextDelay);
         }
         boolean changed;
         synchronized (mAuthorities) {
-            if (info.target_provider
-                    && (info.account == null || info.provider == null)) {
+            if (info.account == null || info.provider == null) {
                 // Do more work for a provider sync if the provided info has specified all
-                // accounts/providers. 
+                // accounts/providers.
                 changed = setBackoffLocked(
                         info.account /* may be null */,
                         info.userId,
@@ -853,7 +729,7 @@ public class SyncStorageEngine extends Handler {
      * @return true if a change occured.
      */
     private boolean setBackoffLocked(Account account, int userId, String providerName,
-            long nextSyncTime, long nextDelay) {
+                                     long nextSyncTime, long nextDelay) {
         boolean changed = false;
         for (AccountInfo accountInfo : mAccounts.values()) {
             if (account != null && !account.equals(accountInfo.accountAndUser.account)
@@ -876,40 +752,27 @@ public class SyncStorageEngine extends Handler {
         return changed;
     }
 
-    public void clearAllBackoffsLocked(SyncQueue syncQueue) {
+    public void clearAllBackoffsLocked() {
         boolean changed = false;
         synchronized (mAuthorities) {
-                // Clear backoff for all sync adapters.
-                for (AccountInfo accountInfo : mAccounts.values()) {
-                    for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
-                        if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
-                                || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
-                            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                                Log.v(TAG, "clearAllBackoffsLocked:"
-                                        + " authority:" + authorityInfo.target
-                                        + " account:" + accountInfo.accountAndUser.account.name
-                                        + " user:" + accountInfo.accountAndUser.userId
-                                        + " backoffTime was: " + authorityInfo.backoffTime
-                                        + " backoffDelay was: " + authorityInfo.backoffDelay);
-                            }
-                            authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
-                            authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
-                            changed = true;
+            // Clear backoff for all sync adapters.
+            for (AccountInfo accountInfo : mAccounts.values()) {
+                for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
+                    if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
+                            || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
+                        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                            Slog.v(TAG, "clearAllBackoffsLocked:"
+                                    + " authority:" + authorityInfo.target
+                                    + " account:" + accountInfo.accountAndUser.account.name
+                                    + " user:" + accountInfo.accountAndUser.userId
+                                    + " backoffTime was: " + authorityInfo.backoffTime
+                                    + " backoffDelay was: " + authorityInfo.backoffDelay);
                         }
+                        authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
+                        authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
+                        changed = true;
                     }
                 }
-                // Clear backoff for all sync services.
-                for (ComponentName service : mServices.keySet()) {
-                    SparseArray<AuthorityInfo> aInfos = mServices.get(service);
-                    for (int i = 0; i < aInfos.size(); i++) {
-                        AuthorityInfo authorityInfo = aInfos.valueAt(i);
-                        if (authorityInfo.backoffTime != NOT_IN_BACKOFF_MODE
-                                || authorityInfo.backoffDelay != NOT_IN_BACKOFF_MODE) {
-                            authorityInfo.backoffTime = NOT_IN_BACKOFF_MODE;
-                            authorityInfo.backoffDelay = NOT_IN_BACKOFF_MODE;
-                        }
-                    }
-                syncQueue.clearBackoffs();
             }
         }
 
@@ -930,7 +793,7 @@ public class SyncStorageEngine extends Handler {
 
     public void setDelayUntilTime(EndPoint info, long delayUntil) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "setDelayUntil: " + info
+            Slog.v(TAG, "setDelayUntil: " + info
                     + " -> delayUntil " + delayUntil);
         }
         synchronized (mAuthorities) {
@@ -943,123 +806,26 @@ public class SyncStorageEngine extends Handler {
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
 
-    public void updateOrAddPeriodicSync(EndPoint info, long period, long flextime, Bundle extras) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "addPeriodicSync: " + info
-                    + " -> period " + period + ", flex " + flextime + ", extras "
-                    + extras.toString());
-        }
-        synchronized (mAuthorities) {
-            if (period <= 0) {
-                Log.e(TAG, "period < 0, should never happen in updateOrAddPeriodicSync");
-            }
-            if (extras == null) {
-                Log.e(TAG, "null extras, should never happen in updateOrAddPeriodicSync:");
-            }
-            try {
-                PeriodicSync toUpdate;
-                if (info.target_provider) {
-                    toUpdate = new PeriodicSync(info.account,
-                            info.provider,
-                            extras,
-                            period,
-                            flextime);
-                } else {
-                    return;
-                }
-                AuthorityInfo authority =
-                        getOrCreateAuthorityLocked(info, -1, false);
-                // add this periodic sync if an equivalent periodic doesn't already exist.
-                boolean alreadyPresent = false;
-                for (int i = 0, N = authority.periodicSyncs.size(); i < N; i++) {
-                    PeriodicSync syncInfo = authority.periodicSyncs.get(i);
-                    if (SyncManager.syncExtrasEquals(syncInfo.extras,
-                            extras,
-                            true /* includeSyncSettings*/)) {
-                        if (period == syncInfo.period &&
-                                flextime == syncInfo.flexTime) {
-                            // Absolutely the same.
-                            return;
-                        }
-                        authority.periodicSyncs.set(i, toUpdate);
-                        alreadyPresent = true;
-                        break;
-                    }
-                }
-                // If we added an entry to the periodicSyncs array also add an entry to
-                // the periodic syncs status to correspond to it.
-                if (!alreadyPresent) {
-                    authority.periodicSyncs.add(toUpdate);
-                    SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
-                    // A new periodic sync is initialised as already having been run.
-                    status.setPeriodicSyncTime(
-                            authority.periodicSyncs.size() - 1,
-                            System.currentTimeMillis());
-                }
-            } finally {
-                writeAccountInfoLocked();
-                writeStatusLocked();
-            }
-        }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
-    }
-
-    public void removePeriodicSync(EndPoint info, Bundle extras) {
-        synchronized(mAuthorities) {
-            try {
-                AuthorityInfo authority =
-                        getOrCreateAuthorityLocked(info, -1, false);
-                // Remove any periodic syncs that match the target and extras.
-                SyncStatusInfo status = mSyncStatus.get(authority.ident);
-                boolean changed = false;
-                Iterator<PeriodicSync> iterator = authority.periodicSyncs.iterator();
-                int i = 0;
-                while (iterator.hasNext()) {
-                    PeriodicSync syncInfo = iterator.next();
-                    if (SyncManager.syncExtrasEquals(syncInfo.extras,
-                            extras,
-                            true /* includeSyncSettings */)) {
-                        iterator.remove();
-                        changed = true;
-                        // If we removed an entry from the periodicSyncs array also
-                        // remove the corresponding entry from the status
-                        if (status != null) {
-                            status.removePeriodicSyncTime(i);
-                        } else {
-                            Log.e(TAG, "Tried removing sync status on remove periodic sync but"
-                                    + " did not find it.");
-                        }
-                    } else {
-                        i++;
-                    }
-                }
-                if (!changed) {
-                    return;
-                }
-            } finally {
-                writeAccountInfoLocked();
-                writeStatusLocked();
-            }
-        }
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
-    }
-
     /**
-     * @return list of periodic syncs for a target. Never null. If no such syncs exist, returns an
-     * empty list.
+     * Restore all periodic syncs read from persisted files. Used to restore periodic syncs
+     * after an OS update.
      */
-    public List<PeriodicSync> getPeriodicSyncs(EndPoint info) {
-        synchronized (mAuthorities) {
-            AuthorityInfo authorityInfo = getAuthorityLocked(info, "getPeriodicSyncs");
-            ArrayList<PeriodicSync> syncs = new ArrayList<PeriodicSync>();
-            if (authorityInfo != null) {
-                for (PeriodicSync item : authorityInfo.periodicSyncs) {
-                    // Copy and send out. Necessary for thread-safety although it's parceled.
-                    syncs.add(new PeriodicSync(item));
-                }
-            }
-            return syncs;
+    boolean restoreAllPeriodicSyncs() {
+        if (mPeriodicSyncAddedListener == null) {
+            return false;
         }
+        synchronized (mAuthorities) {
+            for (int i=0; i<mAuthorities.size(); i++) {
+                AuthorityInfo authority = mAuthorities.valueAt(i);
+                for (PeriodicSync periodicSync: authority.periodicSyncs) {
+                    mPeriodicSyncAddedListener.onPeriodicSyncAdded(authority.target,
+                            periodicSync.extras, periodicSync.period, periodicSync.flexTime);
+                }
+                authority.periodicSyncs.clear();
+            }
+            writeAccountInfoLocked();
+        }
+        return true;
     }
 
     public void setMasterSyncAutomatically(boolean flag, int userId) {
@@ -1109,101 +875,18 @@ public class SyncStorageEngine extends Handler {
         return false;
     }
 
-    public PendingOperation insertIntoPending(SyncOperation op) {
-        PendingOperation pop;
+    public void markPending(EndPoint info, boolean pendingValue) {
         synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "insertIntoPending: authority=" + op.target
-                        + " extras=" + op.extras);
-            }
-            final EndPoint info = op.target;
-            AuthorityInfo authority =
-                    getOrCreateAuthorityLocked(info,
-                            -1 /* desired identifier */,
-                            true /* write accounts to storage */);
+            AuthorityInfo authority = getOrCreateAuthorityLocked(info,
+                    -1 /* desired identifier */,
+                    true /* write accounts to storage */);
             if (authority == null) {
-                return null;
+                return;
             }
-
-            pop = new PendingOperation(authority, op.reason, op.syncSource, op.extras,
-                    op.isExpedited());
-            mPendingOperations.add(pop);
-            appendPendingOperationLocked(pop);
-
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
-            status.pending = true;
+            status.pending = pendingValue;
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
-        return pop;
-    }
-
-    /**
-     * Remove from list of pending operations. If successful, search through list for matching
-     * authorities. If there are no more pending syncs for the same target,
-     * update the SyncStatusInfo for that target.
-     * @param op Pending op to delete.
-     */
-    public boolean deleteFromPending(PendingOperation op) {
-        boolean res = false;
-        synchronized (mAuthorities) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "deleteFromPending: account=" + op.toString());
-            }
-            if (mPendingOperations.remove(op)) {
-                if (mPendingOperations.size() == 0
-                        || mNumPendingFinished >= PENDING_FINISH_TO_WRITE) {
-                    writePendingOperationsLocked();
-                    mNumPendingFinished = 0;
-                } else {
-                    mNumPendingFinished++;
-                }
-                AuthorityInfo authority = getAuthorityLocked(op.target, "deleteFromPending");
-                if (authority != null) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "removing - " + authority.toString());
-                    }
-                    final int N = mPendingOperations.size();
-                    boolean morePending = false;
-                    for (int i = 0; i < N; i++) {
-                        PendingOperation cur = mPendingOperations.get(i);
-                        if (cur.equals(op)) {
-                            morePending = true;
-                            break;
-                        }
-                    }
-
-                    if (!morePending) {
-                        if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "no more pending!");
-                        SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
-                        status.pending = false;
-                    }
-                }
-                res = true;
-            }
-        }
-
-        reportChange(ContentResolver.SYNC_OBSERVER_TYPE_PENDING);
-        return res;
-    }
-
-    /**
-     * Return a copy of the current array of pending operations.  The
-     * PendingOperation objects are the real objects stored inside, so that
-     * they can be used with deleteFromPending().
-     */
-    public ArrayList<PendingOperation> getPendingOperations() {
-        synchronized (mAuthorities) {
-            return new ArrayList<PendingOperation>(mPendingOperations);
-        }
-    }
-
-    /**
-     * Return the number of currently pending operations.
-     */
-    public int getPendingOperationCount() {
-        synchronized (mAuthorities) {
-            return mPendingOperations.size();
-        }
     }
 
     /**
@@ -1213,7 +896,7 @@ public class SyncStorageEngine extends Handler {
     public void doDatabaseCleanup(Account[] accounts, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "Updating for new accounts...");
+                Slog.v(TAG, "Updating for new accounts...");
             }
             SparseArray<AuthorityInfo> removing = new SparseArray<AuthorityInfo>();
             Iterator<AccountInfo> accIt = mAccounts.values().iterator();
@@ -1223,7 +906,7 @@ public class SyncStorageEngine extends Handler {
                         && acc.accountAndUser.userId == userId) {
                     // This account no longer exists...
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, "Account removed: " + acc.accountAndUser);
+                        Slog.v(TAG, "Account removed: " + acc.accountAndUser);
                     }
                     for (AuthorityInfo auth : acc.authorities.values()) {
                         removing.put(auth.ident, auth);
@@ -1238,6 +921,10 @@ public class SyncStorageEngine extends Handler {
                 while (i > 0) {
                     i--;
                     int ident = removing.keyAt(i);
+                    AuthorityInfo auth = removing.valueAt(i);
+                    if (mAuthorityRemovedListener != null) {
+                        mAuthorityRemovedListener.onAuthorityRemoved(auth.target);
+                    }
                     mAuthorities.remove(ident);
                     int j = mSyncStatus.size();
                     while (j > 0) {
@@ -1256,7 +943,6 @@ public class SyncStorageEngine extends Handler {
                 }
                 writeAccountInfoLocked();
                 writeStatusLocked();
-                writePendingOperationsLocked();
                 writeStatisticsLocked();
             }
         }
@@ -1270,10 +956,10 @@ public class SyncStorageEngine extends Handler {
         final SyncInfo syncInfo;
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "setActiveSync: account="
-                    + " auth=" + activeSyncContext.mSyncOperation.target
-                    + " src=" + activeSyncContext.mSyncOperation.syncSource
-                    + " extras=" + activeSyncContext.mSyncOperation.extras);
+                Slog.v(TAG, "setActiveSync: account="
+                        + " auth=" + activeSyncContext.mSyncOperation.target
+                        + " src=" + activeSyncContext.mSyncOperation.syncSource
+                        + " extras=" + activeSyncContext.mSyncOperation.extras);
             }
             final EndPoint info = activeSyncContext.mSyncOperation.target;
             AuthorityInfo authorityInfo = getOrCreateAuthorityLocked(
@@ -1297,7 +983,7 @@ public class SyncStorageEngine extends Handler {
     public void removeActiveSync(SyncInfo syncInfo, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "removeActiveSync: account=" + syncInfo.account
+                Slog.v(TAG, "removeActiveSync: account=" + syncInfo.account
                         + " user=" + userId
                         + " auth=" + syncInfo.authority);
             }
@@ -1321,7 +1007,7 @@ public class SyncStorageEngine extends Handler {
         long id;
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "insertStartSyncEvent: " + op);
+                Slog.v(TAG, "insertStartSyncEvent: " + op);
             }
             AuthorityInfo authority = getAuthorityLocked(op.target, "insertStartSyncEvent");
             if (authority == null) {
@@ -1342,7 +1028,7 @@ public class SyncStorageEngine extends Handler {
                 mSyncHistory.remove(mSyncHistory.size()-1);
             }
             id = item.historyId;
-            if (Log.isLoggable(TAG, Log.VERBOSE)) Log.v(TAG, "returning historyId " + id);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) Slog.v(TAG, "returning historyId " + id);
         }
 
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_STATUS);
@@ -1350,10 +1036,10 @@ public class SyncStorageEngine extends Handler {
     }
 
     public void stopSyncEvent(long historyId, long elapsedTime, String resultMessage,
-            long downstreamActivity, long upstreamActivity) {
+                              long downstreamActivity, long upstreamActivity) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Log.v(TAG, "stopSyncEvent: historyId=" + historyId);
+                Slog.v(TAG, "stopSyncEvent: historyId=" + historyId);
             }
             SyncHistoryItem item = null;
             int i = mSyncHistory.size();
@@ -1367,7 +1053,7 @@ public class SyncStorageEngine extends Handler {
             }
 
             if (item == null) {
-                Log.w(TAG, "stopSyncEvent: no history for id " + historyId);
+                Slog.w(TAG, "stopSyncEvent: no history for id " + historyId);
                 return;
             }
 
@@ -1501,22 +1187,6 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Return an array of the current sync status for all authorities.  Note
-     * that the objects inside the array are the real, live status objects,
-     * so be careful what you do with them.
-     */
-    public ArrayList<SyncStatusInfo> getSyncStatus() {
-        synchronized (mAuthorities) {
-            final int N = mSyncStatus.size();
-            ArrayList<SyncStatusInfo> ops = new ArrayList<SyncStatusInfo>(N);
-            for (int i=0; i<N; i++) {
-                ops.add(mSyncStatus.valueAt(i));
-            }
-            return ops;
-        }
-    }
-
-    /**
      * Return a copy of the specified target with the corresponding sync status
      */
     public Pair<AuthorityInfo, SyncStatusInfo> getCopyOfAuthorityWithSyncStatus(EndPoint info) {
@@ -1529,29 +1199,13 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Return a copy of all authorities with their corresponding sync status
-     */
-    public ArrayList<Pair<AuthorityInfo, SyncStatusInfo>> getCopyOfAllAuthoritiesWithSyncStatus() {
-        synchronized (mAuthorities) {
-            ArrayList<Pair<AuthorityInfo, SyncStatusInfo>> infos =
-                    new ArrayList<Pair<AuthorityInfo, SyncStatusInfo>>(mAuthorities.size());
-            for (int i = 0; i < mAuthorities.size(); i++) {
-                infos.add(createCopyPairOfAuthorityWithSyncStatusLocked(mAuthorities.valueAt(i)));
-            }
-            return infos;
-        }
-    }
-
-    /**
      * Returns the status that matches the target.
      *
      * @param info the endpoint target we are querying status info for.
      * @return the SyncStatusInfo for the endpoint.
      */
     public SyncStatusInfo getStatusByAuthority(EndPoint info) {
-        if (info.target_provider && (info.account == null || info.provider == null)) {
-            return null;
-        } else if (info.target_service && info.service == null) {
+        if (info.account == null || info.provider == null) {
             return null;
         }
         synchronized (mAuthorities) {
@@ -1561,7 +1215,7 @@ public class SyncStorageEngine extends Handler {
                 AuthorityInfo ainfo = mAuthorities.get(cur.authorityId);
                 if (ainfo != null
                         && ainfo.target.matchesSpec(info)) {
-                  return cur;
+                    return cur;
                 }
             }
             return null;
@@ -1644,47 +1298,26 @@ public class SyncStorageEngine extends Handler {
      * requested target does not exist.
      */
     private AuthorityInfo getAuthorityLocked(EndPoint info, String tag) {
-        if (info.target_service) {
-            SparseArray<AuthorityInfo> aInfo = mServices.get(info.service);
-            AuthorityInfo authority = null;
-            if (aInfo != null) {
-                authority = aInfo.get(info.userId);
-            }
-            if (authority == null) {
-                if (tag != null) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, tag + " No authority info found for " + info.service + " for"
-                                + " user " + info.userId);
-                    }
+        AccountAndUser au = new AccountAndUser(info.account, info.userId);
+        AccountInfo accountInfo = mAccounts.get(au);
+        if (accountInfo == null) {
+            if (tag != null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Slog.v(TAG, tag + ": unknown account " + au);
                 }
-                return null;
             }
-            return authority;
-        } else if (info.target_provider){
-            AccountAndUser au = new AccountAndUser(info.account, info.userId);
-            AccountInfo accountInfo = mAccounts.get(au);
-            if (accountInfo == null) {
-                if (tag != null) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, tag + ": unknown account " + au);
-                    }
-                }
-                return null;
-            }
-            AuthorityInfo authority = accountInfo.authorities.get(info.provider);
-            if (authority == null) {
-                if (tag != null) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.v(TAG, tag + ": unknown provider " + info.provider);
-                    }
-                }
-                return null;
-            }
-            return authority;
-        } else {
-            Log.e(TAG, tag + " Authority : " + info + ", invalid target");
             return null;
         }
+        AuthorityInfo authority = accountInfo.authorities.get(info.provider);
+        if (authority == null) {
+            if (tag != null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Slog.v(TAG, tag + ": unknown provider " + info.provider);
+                }
+            }
+            return null;
+        }
+        return authority;
     }
 
     /**
@@ -1696,29 +1329,16 @@ public class SyncStorageEngine extends Handler {
      */
     private AuthorityInfo getOrCreateAuthorityLocked(EndPoint info, int ident, boolean doWrite) {
         AuthorityInfo authority = null;
-        if (info.target_service) {
-            SparseArray<AuthorityInfo> aInfo = mServices.get(info.service);
-            if (aInfo == null) {
-                aInfo = new SparseArray<AuthorityInfo>();
-                mServices.put(info.service, aInfo);
-            }
-            authority = aInfo.get(info.userId);
-            if (authority == null) {
-                authority = createAuthorityLocked(info, ident, doWrite);
-                aInfo.put(info.userId, authority);
-            }
-        } else if (info.target_provider) {
-            AccountAndUser au = new AccountAndUser(info.account, info.userId);
-            AccountInfo account = mAccounts.get(au);
-            if (account == null) {
-                account = new AccountInfo(au);
-                mAccounts.put(au, account);
-            }
-            authority = account.authorities.get(info.provider);
-            if (authority == null) {
-                authority = createAuthorityLocked(info, ident, doWrite);
-                account.authorities.put(info.provider, authority);
-            }
+        AccountAndUser au = new AccountAndUser(info.account, info.userId);
+        AccountInfo account = mAccounts.get(au);
+        if (account == null) {
+            account = new AccountInfo(au);
+            mAccounts.put(au, account);
+        }
+        authority = account.authorities.get(info.provider);
+        if (authority == null) {
+            authority = createAuthorityLocked(info, ident, doWrite);
+            account.authorities.put(info.provider, authority);
         }
         return authority;
     }
@@ -1731,7 +1351,7 @@ public class SyncStorageEngine extends Handler {
             doWrite = true;
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "created a new AuthorityInfo for " + info);
+            Slog.v(TAG, "created a new AuthorityInfo for " + info);
         }
         authority = new AuthorityInfo(info, ident);
         mAuthorities.put(ident, authority);
@@ -1743,62 +1363,29 @@ public class SyncStorageEngine extends Handler {
 
     public void removeAuthority(EndPoint info) {
         synchronized (mAuthorities) {
-            if (info.target_provider) {
-                removeAuthorityLocked(info.account, info.userId, info.provider, true /* doWrite */);
-            } else {
-                SparseArray<AuthorityInfo> aInfos = mServices.get(info.service);
-                if (aInfos != null) {
-                    AuthorityInfo authorityInfo = aInfos.get(info.userId);
-                    if (authorityInfo != null) {
-                        mAuthorities.remove(authorityInfo.ident);
-                        aInfos.delete(info.userId);
-                        writeAccountInfoLocked();
-                    }
-                }
-
-            }
+            removeAuthorityLocked(info.account, info.userId, info.provider, true /* doWrite */);
         }
     }
+
 
     /**
      * Remove an authority associated with a provider. Needs to be a standalone function for
      * backward compatibility.
      */
     private void removeAuthorityLocked(Account account, int userId, String authorityName,
-            boolean doWrite) {
+                                       boolean doWrite) {
         AccountInfo accountInfo = mAccounts.get(new AccountAndUser(account, userId));
         if (accountInfo != null) {
             final AuthorityInfo authorityInfo = accountInfo.authorities.remove(authorityName);
             if (authorityInfo != null) {
+                if (mAuthorityRemovedListener != null) {
+                    mAuthorityRemovedListener.onAuthorityRemoved(authorityInfo.target);
+                }
                 mAuthorities.remove(authorityInfo.ident);
                 if (doWrite) {
                     writeAccountInfoLocked();
                 }
             }
-        }
-    }
-
-    /**
-     * Updates (in a synchronized way) the periodic sync time of the specified
-     * target id and target periodic sync
-     */
-    public void setPeriodicSyncTime(int authorityId, PeriodicSync targetPeriodicSync, long when) {
-        boolean found = false;
-        final AuthorityInfo authorityInfo;
-        synchronized (mAuthorities) {
-            authorityInfo = mAuthorities.get(authorityId);
-            for (int i = 0; i < authorityInfo.periodicSyncs.size(); i++) {
-                PeriodicSync periodicSync = authorityInfo.periodicSyncs.get(i);
-                if (targetPeriodicSync.equals(periodicSync)) {
-                    mSyncStatus.get(authorityId).setPeriodicSyncTime(i, when);
-                    found = true;
-                    break;
-                }
-            }
-        }
-        if (!found) {
-            Log.w(TAG, "Ignoring setPeriodicSyncTime request for a sync that does not exist. " +
-                    "Authority: " + authorityInfo.target);
         }
     }
 
@@ -1814,13 +1401,6 @@ public class SyncStorageEngine extends Handler {
     public void writeAllState() {
         synchronized (mAuthorities) {
             // Account info is always written so no need to do it here.
-
-            if (mNumPendingFinished > 0) {
-                // Only write these if they are out of date.
-                writePendingOperationsLocked();
-            }
-
-            // Just always write these...  they are likely out of date.
             writeStatusLocked();
             writeStatisticsLocked();
         }
@@ -1834,18 +1414,15 @@ public class SyncStorageEngine extends Handler {
             mAuthorities.clear();
             mAccounts.clear();
             mServices.clear();
-            mPendingOperations.clear();
             mSyncStatus.clear();
             mSyncHistory.clear();
 
             readAccountInfoLocked();
             readStatusLocked();
-            readPendingOperationsLocked();
             readStatisticsLocked();
             readAndDeleteLegacyAccountInfoLocked();
             writeAccountInfoLocked();
             writeStatusLocked();
-            writePendingOperationsLocked();
             writeStatisticsLocked();
         }
     }
@@ -1859,7 +1436,7 @@ public class SyncStorageEngine extends Handler {
         try {
             fis = mAccountInfoFile.openRead();
             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG_FILE, "Reading " + mAccountInfoFile.getBaseFile());
+                Slog.v(TAG_FILE, "Reading " + mAccountInfoFile.getBaseFile());
             }
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, StandardCharsets.UTF_8.name());
@@ -1869,7 +1446,7 @@ public class SyncStorageEngine extends Handler {
                 eventType = parser.next();
             }
             if (eventType == XmlPullParser.END_DOCUMENT) {
-                Log.i(TAG, "No initial accounts");
+                Slog.i(TAG, "No initial accounts");
                 return;
             }
 
@@ -1933,11 +1510,11 @@ public class SyncStorageEngine extends Handler {
                 } while (eventType != XmlPullParser.END_DOCUMENT);
             }
         } catch (XmlPullParserException e) {
-            Log.w(TAG, "Error reading accounts", e);
+            Slog.w(TAG, "Error reading accounts", e);
             return;
         } catch (java.io.IOException e) {
-            if (fis == null) Log.i(TAG, "No initial accounts");
-            else Log.w(TAG, "Error reading accounts", e);
+            if (fis == null) Slog.i(TAG, "No initial accounts");
+            else Slog.w(TAG, "Error reading accounts", e);
             return;
         } finally {
             mNextAuthorityId = Math.max(highestAuthorityId + 1, mNextAuthorityId);
@@ -1977,10 +1554,6 @@ public class SyncStorageEngine extends Handler {
         final int N = mAuthorities.size();
         for (int i = 0; i < N; i++) {
             AuthorityInfo authority = mAuthorities.valueAt(i);
-            // skip this authority if it doesn't target a provider
-            if (authority.target.target_service) {
-                continue;
-            }
             // skip this authority if it isn't one of the renamed ones
             final String newAuthorityName = sAuthorityRenames.get(authority.target.provider);
             if (newAuthorityName == null) {
@@ -2030,9 +1603,9 @@ public class SyncStorageEngine extends Handler {
         try {
             userId = Integer.parseInt(user);
         } catch (NumberFormatException e) {
-            Log.e(TAG, "error parsing the user for listen-for-tickles", e);
+            Slog.e(TAG, "error parsing the user for listen-for-tickles", e);
         } catch (NullPointerException e) {
-            Log.e(TAG, "the user in listen-for-tickles is null", e);
+            Slog.e(TAG, "the user in listen-for-tickles is null", e);
         }
         String enabled = parser.getAttributeValue(null, XML_ATTR_ENABLED);
         boolean listen = enabled == null || Boolean.parseBoolean(enabled);
@@ -2045,9 +1618,9 @@ public class SyncStorageEngine extends Handler {
         try {
             id = Integer.parseInt(parser.getAttributeValue(null, "id"));
         } catch (NumberFormatException e) {
-            Log.e(TAG, "error parsing the id of the authority", e);
+            Slog.e(TAG, "error parsing the id of the authority", e);
         } catch (NullPointerException e) {
-            Log.e(TAG, "the id of the authority is null", e);
+            Slog.e(TAG, "the id of the authority is null", e);
         }
         if (id >= 0) {
             String authorityName = parser.getAttributeValue(null, "authority");
@@ -2065,7 +1638,7 @@ public class SyncStorageEngine extends Handler {
             }
             authority = mAuthorities.get(id);
             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG_FILE, "Adding authority:"
+                Slog.v(TAG_FILE, "Adding authority:"
                         + " account=" + accountName
                         + " accountType=" + accountType
                         + " auth=" + authorityName
@@ -2077,27 +1650,13 @@ public class SyncStorageEngine extends Handler {
             }
             if (authority == null) {
                 if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                    Log.v(TAG_FILE, "Creating authority entry");
+                    Slog.v(TAG_FILE, "Creating authority entry");
                 }
-                EndPoint info;
+                EndPoint info = null;
                 if (accountName != null && authorityName != null) {
                     info = new EndPoint(
                             new Account(accountName, accountType),
                             authorityName, userId);
-                } else {
-                    final ComponentName cname = new ComponentName(packageName, className);
-                    android.content.pm.ServiceInfo sinfo = null;
-                    try {
-                        sinfo = mContext.getPackageManager().getServiceInfo(cname, userId);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        Slog.w(TAG, "Not restoring sync " + cname
-                                + " -- can't find service for user " + userId);
-                    }
-                    if (sinfo != null) {
-                        info = new EndPoint(cname, userId, sinfo.applicationInfo.uid);
-                    } else {
-                        info = null;
-                    }
                 }
                 if (info != null) {
                     authority = getOrCreateAuthorityLocked(info, id, false);
@@ -2128,7 +1687,7 @@ public class SyncStorageEngine extends Handler {
 
                 }
             } else {
-                Log.w(TAG, "Failure adding authority: account="
+                Slog.w(TAG, "Failure adding authority: account="
                         + accountName + " auth=" + authorityName
                         + " enabled=" + enabled
                         + " syncable=" + syncable);
@@ -2149,35 +1708,30 @@ public class SyncStorageEngine extends Handler {
         try {
             period = Long.parseLong(periodValue);
         } catch (NumberFormatException e) {
-            Log.e(TAG, "error parsing the period of a periodic sync", e);
+            Slog.e(TAG, "error parsing the period of a periodic sync", e);
             return null;
         } catch (NullPointerException e) {
-            Log.e(TAG, "the period of a periodic sync is null", e);
+            Slog.e(TAG, "the period of a periodic sync is null", e);
             return null;
         }
         try {
             flextime = Long.parseLong(flexValue);
         } catch (NumberFormatException e) {
             flextime = calculateDefaultFlexTime(period);
-            Log.e(TAG, "Error formatting value parsed for periodic sync flex: " + flexValue
+            Slog.e(TAG, "Error formatting value parsed for periodic sync flex: " + flexValue
                     + ", using default: "
                     + flextime);
         } catch (NullPointerException expected) {
             flextime = calculateDefaultFlexTime(period);
-            Log.d(TAG, "No flex time specified for this sync, using a default. period: "
-            + period + " flex: " + flextime);
+            Slog.d(TAG, "No flex time specified for this sync, using a default. period: "
+                    + period + " flex: " + flextime);
         }
         PeriodicSync periodicSync;
-        if (authorityInfo.target.target_provider) {
-            periodicSync =
+        periodicSync =
                 new PeriodicSync(authorityInfo.target.account,
                         authorityInfo.target.provider,
                         extras,
                         period, flextime);
-        } else {
-            Log.e(TAG, "Unknown target.");
-            return null;
-        }
         authorityInfo.periodicSyncs.add(periodicSync);
         return periodicSync;
     }
@@ -2205,9 +1759,9 @@ public class SyncStorageEngine extends Handler {
                 extras.putParcelable(name, new Account(value1, value2));
             }
         } catch (NumberFormatException e) {
-            Log.e(TAG, "error parsing bundle value", e);
+            Slog.e(TAG, "error parsing bundle value", e);
         } catch (NullPointerException e) {
-            Log.e(TAG, "error parsing bundle value", e);
+            Slog.e(TAG, "error parsing bundle value", e);
         }
     }
 
@@ -2216,7 +1770,7 @@ public class SyncStorageEngine extends Handler {
      */
     private void writeAccountInfoLocked() {
         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-            Log.v(TAG_FILE, "Writing new " + mAccountInfoFile.getBaseFile());
+            Slog.v(TAG_FILE, "Writing new " + mAccountInfoFile.getBaseFile());
         }
         FileOutputStream fos = null;
 
@@ -2251,30 +1805,17 @@ public class SyncStorageEngine extends Handler {
                 out.attribute(null, "id", Integer.toString(authority.ident));
                 out.attribute(null, XML_ATTR_USER, Integer.toString(info.userId));
                 out.attribute(null, XML_ATTR_ENABLED, Boolean.toString(authority.enabled));
-                if (info.service == null) {
-                    out.attribute(null, "account", info.account.name);
-                    out.attribute(null, "type", info.account.type);
-                    out.attribute(null, "authority", info.provider);
-                } else {
-                    out.attribute(null, "package", info.service.getPackageName());
-                    out.attribute(null, "class", info.service.getClassName());
-                }
+                out.attribute(null, "account", info.account.name);
+                out.attribute(null, "type", info.account.type);
+                out.attribute(null, "authority", info.provider);
                 out.attribute(null, "syncable", Integer.toString(authority.syncable));
-                for (PeriodicSync periodicSync : authority.periodicSyncs) {
-                    out.startTag(null, "periodicSync");
-                    out.attribute(null, "period", Long.toString(periodicSync.period));
-                    out.attribute(null, "flex", Long.toString(periodicSync.flexTime));
-                    final Bundle extras = periodicSync.extras;
-                    extrasToXml(out, extras);
-                    out.endTag(null, "periodicSync");
-                }
                 out.endTag(null, "authority");
             }
             out.endTag(null, "accounts");
             out.endDocument();
             mAccountInfoFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
-            Log.w(TAG, "Error writing accounts", e1);
+            Slog.w(TAG, "Error writing accounts", e1);
             if (fos != null) {
                 mAccountInfoFile.failWrite(fos);
             }
@@ -2313,7 +1854,7 @@ public class SyncStorageEngine extends Handler {
 
             // Copy in all of the status information, as well as accounts.
             if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG_FILE, "Reading legacy sync accounts db");
+                Slog.v(TAG_FILE, "Reading legacy sync accounts db");
             }
             SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
             qb.setTables("stats, status");
@@ -2429,7 +1970,7 @@ public class SyncStorageEngine extends Handler {
      */
     private void readStatusLocked() {
         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-            Log.v(TAG_FILE, "Reading " + mStatusFile.getBaseFile());
+            Slog.v(TAG_FILE, "Reading " + mStatusFile.getBaseFile());
         }
         try {
             byte[] data = mStatusFile.readFully();
@@ -2443,18 +1984,18 @@ public class SyncStorageEngine extends Handler {
                     if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
                         status.pending = false;
                         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                            Log.v(TAG_FILE, "Adding status for id " + status.authorityId);
+                            Slog.v(TAG_FILE, "Adding status for id " + status.authorityId);
                         }
                         mSyncStatus.put(status.authorityId, status);
                     }
                 } else {
                     // Ooops.
-                    Log.w(TAG, "Unknown status token: " + token);
+                    Slog.w(TAG, "Unknown status token: " + token);
                     break;
                 }
             }
         } catch (java.io.IOException e) {
-            Log.i(TAG, "No initial status");
+            Slog.i(TAG, "No initial status");
         }
     }
 
@@ -2463,7 +2004,7 @@ public class SyncStorageEngine extends Handler {
      */
     private void writeStatusLocked() {
         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-            Log.v(TAG_FILE, "Writing new " + mStatusFile.getBaseFile());
+            Slog.v(TAG_FILE, "Writing new " + mStatusFile.getBaseFile());
         }
 
         // The file is being written, so we don't need to have a scheduled
@@ -2486,263 +2027,10 @@ public class SyncStorageEngine extends Handler {
 
             mStatusFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
-            Log.w(TAG, "Error writing status", e1);
+            Slog.w(TAG, "Error writing status", e1);
             if (fos != null) {
                 mStatusFile.failWrite(fos);
             }
-        }
-    }
-
-    public static final int PENDING_OPERATION_VERSION = 3;
-
-    /** Read all pending operations back in to the initial engine state. */
-    private void readPendingOperationsLocked() {
-        FileInputStream fis = null;
-        if (!mPendingFile.getBaseFile().exists()) {
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG_FILE, "No pending operation file.");
-            }
-            return;
-        }
-        try {
-            fis = mPendingFile.openRead();
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG_FILE, "Reading " + mPendingFile.getBaseFile());
-            }
-            XmlPullParser parser;
-            parser = Xml.newPullParser();
-            parser.setInput(fis, StandardCharsets.UTF_8.name());
-
-            int eventType = parser.getEventType();
-            while (eventType != XmlPullParser.START_TAG &&
-                    eventType != XmlPullParser.END_DOCUMENT) {
-                eventType = parser.next();
-            }
-            if (eventType == XmlPullParser.END_DOCUMENT) return; // Nothing to read.
-
-            do {
-                PendingOperation pop = null;
-                if (eventType == XmlPullParser.START_TAG) {
-                    try {
-                        String tagName = parser.getName();
-                        if (parser.getDepth() == 1 && "op".equals(tagName)) {
-                            // Verify version.
-                            String versionString =
-                                    parser.getAttributeValue(null, XML_ATTR_VERSION);
-                            if (versionString == null ||
-                                    Integer.parseInt(versionString) != PENDING_OPERATION_VERSION) {
-                                Log.w(TAG, "Unknown pending operation version " + versionString);
-                                throw new java.io.IOException("Unknown version.");
-                            }
-                            int authorityId = Integer.valueOf(parser.getAttributeValue(
-                                    null, XML_ATTR_AUTHORITYID));
-                            boolean expedited = Boolean.valueOf(parser.getAttributeValue(
-                                    null, XML_ATTR_EXPEDITED));
-                            int syncSource = Integer.valueOf(parser.getAttributeValue(
-                                    null, XML_ATTR_SOURCE));
-                            int reason = Integer.valueOf(parser.getAttributeValue(
-                                    null, XML_ATTR_REASON));
-                            AuthorityInfo authority = mAuthorities.get(authorityId);
-                            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                                Log.v(TAG_FILE, authorityId + " " + expedited + " " + syncSource + " "
-                                        + reason);
-                            }
-                            if (authority != null) {
-                                pop = new PendingOperation(
-                                        authority, reason, syncSource, new Bundle(), expedited);
-                                pop.flatExtras = null; // No longer used.
-                                mPendingOperations.add(pop);
-                                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                                    Log.v(TAG_FILE, "Adding pending op: "
-                                            + pop.target
-                                            + " src=" + pop.syncSource
-                                            + " reason=" + pop.reason
-                                            + " expedited=" + pop.expedited);
-                                    }
-                            } else {
-                                // Skip non-existent authority.
-                                pop = null;
-                                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                                    Log.v(TAG_FILE, "No authority found for " + authorityId
-                                            + ", skipping");
-                                }
-                            }
-                        } else if (parser.getDepth() == 2 &&
-                                pop != null &&
-                                "extra".equals(tagName)) {
-                            parseExtra(parser, pop.extras);
-                        }
-                    } catch (NumberFormatException e) {
-                        Log.d(TAG, "Invalid data in xml file.", e);
-                    }
-                }
-                eventType = parser.next();
-            } while(eventType != XmlPullParser.END_DOCUMENT);
-        } catch (java.io.IOException e) {
-            Log.w(TAG_FILE, "Error reading pending data.", e);
-        } catch (XmlPullParserException e) {
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.w(TAG_FILE, "Error parsing pending ops xml.", e);
-            }
-        } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (java.io.IOException e1) {}
-            }
-        }
-    }
-
-    static private byte[] flattenBundle(Bundle bundle) {
-        byte[] flatData = null;
-        Parcel parcel = Parcel.obtain();
-        try {
-            bundle.writeToParcel(parcel, 0);
-            flatData = parcel.marshall();
-        } finally {
-            parcel.recycle();
-        }
-        return flatData;
-    }
-
-    static private Bundle unflattenBundle(byte[] flatData) {
-        Bundle bundle;
-        Parcel parcel = Parcel.obtain();
-        try {
-            parcel.unmarshall(flatData, 0, flatData.length);
-            parcel.setDataPosition(0);
-            bundle = parcel.readBundle();
-        } catch (RuntimeException e) {
-            // A RuntimeException is thrown if we were unable to parse the parcel.
-            // Create an empty parcel in this case.
-            bundle = new Bundle();
-        } finally {
-            parcel.recycle();
-        }
-        return bundle;
-    }
-
-    private static final String XML_ATTR_VERSION = "version";
-    private static final String XML_ATTR_AUTHORITYID = "authority_id";
-    private static final String XML_ATTR_SOURCE = "source";
-    private static final String XML_ATTR_EXPEDITED = "expedited";
-    private static final String XML_ATTR_REASON = "reason";
-
-    /**
-     * Write all currently pending ops to the pending ops file.
-     */
-    private void writePendingOperationsLocked() {
-        final int N = mPendingOperations.size();
-        FileOutputStream fos = null;
-        try {
-            if (N == 0) {
-                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)){
-                    Log.v(TAG, "Truncating " + mPendingFile.getBaseFile());
-                }
-                mPendingFile.truncate();
-                return;
-            }
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG, "Writing new " + mPendingFile.getBaseFile());
-            }
-            fos = mPendingFile.startWrite();
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
-
-            for (int i = 0; i < N; i++) {
-                PendingOperation pop = mPendingOperations.get(i);
-                writePendingOperationLocked(pop, out);
-             }
-             out.endDocument();
-             mPendingFile.finishWrite(fos);
-        } catch (java.io.IOException e1) {
-            Log.w(TAG, "Error writing pending operations", e1);
-            if (fos != null) {
-                mPendingFile.failWrite(fos);
-            }
-        }
-    }
-
-    /** Write all currently pending ops to the pending ops file. */
-     private void writePendingOperationLocked(PendingOperation pop, XmlSerializer out)
-             throws IOException {
-         // Pending operation.
-         out.startTag(null, "op");
-
-         out.attribute(null, XML_ATTR_VERSION, Integer.toString(PENDING_OPERATION_VERSION));
-         out.attribute(null, XML_ATTR_AUTHORITYID, Integer.toString(pop.authorityId));
-         out.attribute(null, XML_ATTR_SOURCE, Integer.toString(pop.syncSource));
-         out.attribute(null, XML_ATTR_EXPEDITED, Boolean.toString(pop.expedited));
-         out.attribute(null, XML_ATTR_REASON, Integer.toString(pop.reason));
-         extrasToXml(out, pop.extras);
-
-         out.endTag(null, "op");
-     }
-
-    /**
-     * Append the given operation to the pending ops file; if unable to,
-     * write all pending ops.
-     */
-    private void appendPendingOperationLocked(PendingOperation op) {
-        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-            Log.v(TAG, "Appending to " + mPendingFile.getBaseFile());
-        }
-        FileOutputStream fos = null;
-        try {
-            fos = mPendingFile.openAppend();
-        } catch (java.io.IOException e) {
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Log.v(TAG, "Failed append; writing full file");
-            }
-            writePendingOperationsLocked();
-            return;
-        }
-
-        try {
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, StandardCharsets.UTF_8.name());
-            writePendingOperationLocked(op, out);
-            out.endDocument();
-            mPendingFile.finishWrite(fos);
-        } catch (java.io.IOException e1) {
-            Log.w(TAG, "Error writing appending operation", e1);
-            mPendingFile.failWrite(fos);
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {}
-        }
-    }
-
-    private void extrasToXml(XmlSerializer out, Bundle extras) throws java.io.IOException {
-        for (String key : extras.keySet()) {
-            out.startTag(null, "extra");
-            out.attribute(null, "name", key);
-            final Object value = extras.get(key);
-            if (value instanceof Long) {
-                out.attribute(null, "type", "long");
-                out.attribute(null, "value1", value.toString());
-            } else if (value instanceof Integer) {
-                out.attribute(null, "type", "integer");
-                out.attribute(null, "value1", value.toString());
-            } else if (value instanceof Boolean) {
-                out.attribute(null, "type", "boolean");
-                out.attribute(null, "value1", value.toString());
-            } else if (value instanceof Float) {
-                out.attribute(null, "type", "float");
-                out.attribute(null, "value1", value.toString());
-            } else if (value instanceof Double) {
-                out.attribute(null, "type", "double");
-                out.attribute(null, "value1", value.toString());
-            } else if (value instanceof String) {
-                out.attribute(null, "type", "string");
-                out.attribute(null, "value1", value.toString());
-            } else if (value instanceof Account) {
-                out.attribute(null, "type", "account");
-                out.attribute(null, "value1", ((Account)value).name);
-                out.attribute(null, "value2", ((Account)value).type);
-            }
-            out.endTag(null, "extra");
         }
     }
 
@@ -2755,20 +2043,13 @@ public class SyncStorageEngine extends Handler {
                     new SyncRequest.Builder()
                             .syncOnce()
                             .setExtras(extras);
-            if (authorityInfo.target.target_provider) {
-                req.setSyncAdapter(authorityInfo.target.account, authorityInfo.target.provider);
-            } else {
-                if (Log.isLoggable(TAG, Log.DEBUG)) {
-                    Log.d(TAG, "Unknown target, skipping sync request.");
-                }
-                return;
-            }
+            req.setSyncAdapter(authorityInfo.target.account, authorityInfo.target.provider);
             ContentResolver.requestSync(req.build());
         }
     }
 
     private void requestSync(Account account, int userId, int reason, String authority,
-            Bundle extras) {
+                             Bundle extras) {
         // If this is happening in the system process, then call the syncrequest listener
         // to make a request back to the SyncManager directly.
         // If this is probably a test instance, then call back through the ContentResolver
@@ -2776,9 +2057,9 @@ public class SyncStorageEngine extends Handler {
         if (android.os.Process.myUid() == android.os.Process.SYSTEM_UID
                 && mSyncRequestListener != null) {
             mSyncRequestListener.onSyncRequest(
-                new EndPoint(account, authority, userId),
-                reason,
-                extras);
+                    new EndPoint(account, authority, userId),
+                    reason,
+                    extras);
         } else {
             ContentResolver.requestSync(account, authority, extras);
         }
@@ -2817,12 +2098,12 @@ public class SyncStorageEngine extends Handler {
                     }
                 } else {
                     // Ooops.
-                    Log.w(TAG, "Unknown stats token: " + token);
+                    Slog.w(TAG, "Unknown stats token: " + token);
                     break;
                 }
             }
         } catch (java.io.IOException e) {
-            Log.i(TAG, "No initial statistics");
+            Slog.i(TAG, "No initial statistics");
         }
     }
 
@@ -2831,7 +2112,7 @@ public class SyncStorageEngine extends Handler {
      */
     private void writeStatisticsLocked() {
         if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-            Log.v(TAG, "Writing new " + mStatisticsFile.getBaseFile());
+            Slog.v(TAG, "Writing new " + mStatisticsFile.getBaseFile());
         }
 
         // The file is being written, so we don't need to have a scheduled
@@ -2861,22 +2142,10 @@ public class SyncStorageEngine extends Handler {
 
             mStatisticsFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
-            Log.w(TAG, "Error writing stats", e1);
+            Slog.w(TAG, "Error writing stats", e1);
             if (fos != null) {
                 mStatisticsFile.failWrite(fos);
             }
-        }
-    }
-
-    /**
-     * Dump state of PendingOperations.
-     */
-    public void dumpPendingOperations(StringBuilder sb) {
-        sb.append("Pending Ops: ").append(mPendingOperations.size()).append(" operation(s)\n");
-        for (PendingOperation pop : mPendingOperations) {
-            sb.append("(info: " + pop.target.toString())
-                .append(", extras: " + pop.extras)
-                .append(")\n");
         }
     }
 

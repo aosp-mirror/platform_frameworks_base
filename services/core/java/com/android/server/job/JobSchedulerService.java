@@ -83,7 +83,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final boolean DEBUG = false;
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT
-            = ActivityManager.isLowRamDeviceStatic() ? 1 : 3;
+            = ActivityManager.isLowRamDeviceStatic() ? 3 : 6;
     static final String TAG = "JobSchedulerService";
     /** Master list of jobs. */
     final JobStore mJobs;
