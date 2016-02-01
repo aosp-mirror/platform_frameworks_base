@@ -362,6 +362,15 @@ public final class DocumentsContract {
         public static final int FLAG_VIRTUAL_DOCUMENT = 1 << 9;
 
         /**
+         * Flag indicating that a document can be removed from a parent.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#removeDocument(ContentProviderClient, Uri, Uri)
+         * @see DocumentsProvider#removeDocument(String, String)
+         */
+        public static final int FLAG_SUPPORTS_REMOVE = 1 << 10;
+
+        /**
          * Flag indicating that a document is an archive, and it's contents can be
          * obtained via {@link DocumentsProvider#queryChildDocuments}.
          * <p>
@@ -370,18 +379,10 @@ public final class DocumentsContract {
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsProvider#queryChildDocuments(String, String[], String)
+         * @hide
          */
-        public static final int FLAG_ARCHIVE = 1 << 10;
 
-        /**
-         * Flag indicating that a document can be removed from a parent.
-         *
-         * @see #COLUMN_FLAGS
-         * @see DocumentsContract#removeDocument(ContentProviderClient, Uri, Uri)
-         * @see DocumentsProvider#removeDocument(String, String)
-         */
-        public static final int FLAG_SUPPORTS_REMOVE = 1 << 11;
-
+        public static final int FLAG_ARCHIVE = 1 << 15;
         /**
          * Flag indicating that document titles should be hidden when viewing
          * this directory in a larger format grid. For example, a directory
