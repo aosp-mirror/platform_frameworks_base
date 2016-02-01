@@ -1673,11 +1673,37 @@ final class ActivityStack {
             TaskRecord task, ActivityRecord r) {
         if (r.fullscreen) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
-                    + " stackInvisible=" + stackInvisible
-                    + " behindFullscreenActivity=" + behindFullscreenActivity);
+                        + " stackInvisible=" + stackInvisible
+                        + " behindFullscreenActivity=" + behindFullscreenActivity);
             // At this point, nothing else needs to be shown in this task.
             behindFullscreenActivity = true;
-        } else if (!isHomeStack() && r.frontOfTask && task.isOverHomeStack()) {
+        } else if (isHomeStack()) {
+            if (r.isHomeActivity()) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Home activity: at " + r
+                        + " stackInvisible=" + stackInvisible
+                        + " behindFullscreenActivity=" + behindFullscreenActivity);
+                // No other activity in the home stack should be visible behind the home activity.
+                // Home activities is usually a translucent activity with the wallpaper behind them.
+                // However, when they don't have the wallpaper behind them, we want to show
+                // activities in the next application stack behind them vs. another activity in the
+                // home stack like recents.
+                behindFullscreenActivity = true;
+            } else if (r.isRecentsActivity()
+                    && task.getTaskToReturnTo() == APPLICATION_ACTIVITY_TYPE) {
+                if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
+                        "Recents activity returning to app: at " + r
+                        + " stackInvisible=" + stackInvisible
+                        + " behindFullscreenActivity=" + behindFullscreenActivity);
+                // We don't want any other activities in the home stack visible if the recents
+                // activity is going to be returning to an application activity type.
+                // We do this to preserve the visible order the user used to get into the recents
+                // activity. The recents activity is normally translucent and if it doesn't have
+                // the wallpaper behind it the next activity in the home stack shouldn't be visible
+                // when the home stack is brought to the front to display the recents activity from
+                // an app.
+                behindFullscreenActivity = true;
+            }
+        } else if (r.frontOfTask && task.isOverHomeStack()) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Showing home: at " + r
                     + " stackInvisible=" + stackInvisible
                     + " behindFullscreenActivity=" + behindFullscreenActivity);
