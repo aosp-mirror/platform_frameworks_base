@@ -101,6 +101,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /** Notification was canceled by the device administrator suspending the package. */
     public static final int REASON_PACKAGE_SUSPENDED = 15;
 
+    /** Notification was canceled by the owning managed profile being turned off. */
+    public static final int REASON_PROFILE_TURNED_OFF = 16;
+
     public class Adjustment {
         int mImportance;
         CharSequence mExplanation;
