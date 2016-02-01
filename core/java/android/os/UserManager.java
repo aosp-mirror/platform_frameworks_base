@@ -463,14 +463,29 @@ public class UserManager {
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
 
     /**
-     * Hidden user restriction to disallow access to wallpaper manager APIs. This user restriction
-     * is always set for managed profiles.
+     * Hidden user restriction to disallow access to wallpaper manager APIs. This restriction
+     * generally means that wallpapers are not supported for the particular user. This user
+     * restriction is always set for managed profiles, because such profiles don't have wallpapers.
      * @hide
+     * @see #DISALLOW_SET_WALLPAPER
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_WALLPAPER = "no_wallpaper";
+
+    /**
+     * User restriction to disallow setting a wallpaper. Profile owner and device owner
+     * are able to set wallpaper regardless of this restriction.
+     * The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SET_WALLPAPER = "no_set_wallpaper";
 
     /**
      * Specifies if the user is not allowed to reboot the device into safe boot mode.
@@ -535,9 +550,7 @@ public class UserManager {
      * affected. The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
-     *
      * <p>Type: Boolean
-     *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()

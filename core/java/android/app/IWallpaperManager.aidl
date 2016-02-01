@@ -113,4 +113,9 @@ interface IWallpaperManager {
      * Check whether wallpapers are supported for the calling user.
      */
     boolean isWallpaperSupported(in String callingPackage);
+    
+    /**
+     * Check whether setting of wallpapers are allowed for the calling user.
+     */
+    boolean isWallpaperSettingAllowed(in String callingPackage);
 }
