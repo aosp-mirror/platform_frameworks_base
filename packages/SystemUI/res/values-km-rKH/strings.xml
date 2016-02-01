@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"វ៉ាយហ្វាយ"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"គ្មាន​ស៊ីម​កាត។"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"ទិន្នន័យចល័តបានបិទ"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ការ​ភ្ជាប់​ប៊្លូធូស។"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"របៀប​​ពេលជិះ​យន្តហោះ"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"គ្មានស៊ីមកាតទេ។"</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ការ​ភ្ជាប់​អេក្រង់"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ស្វែងរក"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"មិន​អាច​ចាប់ផ្ដើម <xliff:g id="APP">%s</xliff:g> ទេ។"</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"ច្រើនទៀត"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> ទៀត"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"ប្រវត្តិ"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"សម្អាត"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"បំបែកផ្តេក"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"បំបែកបញ្ឈរ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"បំបែកផ្ទាល់ខ្លួន"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"ពណ៌ធម្មតា"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"ពណ៌ពេលយប់"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"ពណ៌ផ្ទាល់ខ្លួន"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"ស្វ័យប្រវត្តិ"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"ពណ៌មិនស្គាល់"</string>
     <string name="color_transform" msgid="6985460408079086090">"ការកែសម្រួលពណ៌"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"បង្ហាញផ្ទាំងប្រអប់ការកំណត់រហ័ស"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"បានភ្ជាប់កាស"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"បានភ្ជាប់កាស"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"បើក ឬបិទដំណើរការបង្ហាញរូបតំណាងនៅលើរបារស្ថានភាព"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"កម្មវិធីសន្សំសំចៃទិន្នន័យ"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបើក"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"កម្មវិធីសន្សំសំចៃទិន្នន័យបានបិទ"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"បើក"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"របាររុករក"</string>
+    <string name="start" msgid="6873794757232879664">"ចាប់ផ្ដើម"</string>
+    <string name="center" msgid="4327473927066010960">"កណ្តាល"</string>
+    <string name="end" msgid="125797972524818282">"បញ្ចប់"</string>
+    <string name="space" msgid="804232271282109749">"ចន្លោះ"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"កម្មវិធីប្តូរក្តារចុច / ម៉ឺនុយ"</string>
+    <string name="select_button" msgid="1597989540662710653">"ជ្រើសប៊ូតុងដែលត្រូវថែម"</string>
+    <string name="add_button" msgid="4134946063432258161">"បន្ថែមប៊ូតុង"</string>
+    <string name="save" msgid="2311877285724540644">"រក្សាទុក"</string>
+    <string name="reset" msgid="2448168080964209908">"កំណត់​ឡើងវិញ"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"រកមិនឃើញប៊ូតុងដើមទេ"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"តម្រូវឲ្យមានប៊ូតុងដើមដើម្បីអាចរុករកឧបករណ៍នេះបាន។ សូមបន្ថែមប៊ូតុងដើមមុនពេលរក្សាទុក។"</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"កែសម្រួលទទឹងប៊ូតុង"</string>
+    <string name="clipboard" msgid="1313879395099896312">"ក្ដារ​តម្បៀត​ខ្ទាស់"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"ក្តារតម្បៀតខ្ទាស់អនុញ្ញាតឲ្យមានការអូសធាតុដោយផ្ទាល់ទៅកាន់ក្តារតម្បៀតខ្ទាស់នោះ។ នៅពេលដែលមានធាតុស្រាប់ក្នុងក្តារតម្បៀតខ្ទាស់ ធាតុទាំងនោះក៏អាចអូសដោយផ្ទាល់ចេញពីក្តារតម្បៀតខ្ទាស់បានដែរ។"</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"ប៊ូតុងរុករកផ្ទាល់ខ្លួន"</string>
+    <string name="keycode" msgid="7335281375728356499">"លេខកូដគ្រាប់ចុច"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"ប៊ូតុងលេខកូដគ្រាប់ចុចអនុញ្ញាតឲ្យមានការបន្ថែមគ្រាប់ចុចនៃក្តារចុចទៅក្នុងរបាររុករក។ នៅពេលចុចប៊ូតុងទាំងនោះ ពួកវាបង្កើតមុខងារឲ្យគ្រាប់ចុចនៃក្តារចុចដែលបានជ្រើស។ សូមជ្រើសរើសគ្រាប់ចុចសម្រាប់ប៊ូតុងជាមុនសិន មុនពេលដែលរូបភាពត្រូវបានបង្ហាញនៅលើប៊ូតុង។"</string>
+    <string name="select_keycode" msgid="7413765103381924584">"ជ្រើសប៊ូតុងក្តារចុច"</string>
+    <string name="preview" msgid="9077832302472282938">"មើលជាមុន"</string>
 </resources>

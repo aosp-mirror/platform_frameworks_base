@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"किनारा"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"वाई-फ़ाई"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"कोई सिम नहीं."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"सेल्‍युलर डेटा बंद है"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ब्लूटूथ टेदरिंग."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"हवाई जहाज मोड."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"कोई सिम कार्ड नहीं है."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"स्क्रीन पिन करना"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"खोज"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ नहीं किया जा सका."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"अधिक"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> अधिक"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"इतिहास"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"साफ़ करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"लम्बवत रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"कस्‍टम रूप से विभाजित करें"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"सामान्य रंग"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"रात्रि के रंग"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"कस्टम रंग"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"स्वतः"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"अज्ञात रंग"</string>
     <string name="color_transform" msgid="6985460408079086090">"रंग परिवर्तन"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"त्‍वरित-सेटिंग टाइल दिखाएं"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफ़ोन कनेक्‍ट किए गए"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हैडसेट कनेक्‍ट किया गया"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"आइकन को स्‍थिति बार में दिखाए जाने से सक्षम या अक्षम करें."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"डेटा बचतकर्ता"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा बचतकर्ता चालू है"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा बचतकर्ता बंद है"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"चालू"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"नेविगेशन बार"</string>
+    <string name="start" msgid="6873794757232879664">"प्रारंभ करें"</string>
+    <string name="center" msgid="4327473927066010960">"मध्‍य"</string>
+    <string name="end" msgid="125797972524818282">"समाप्त"</string>
+    <string name="space" msgid="804232271282109749">"स्‍पेसर"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"मेनू / कीबोर्ड स्‍विचर"</string>
+    <string name="select_button" msgid="1597989540662710653">"जोड़ने के लिए बटन चुनें"</string>
+    <string name="add_button" msgid="4134946063432258161">"बटन जोड़ें"</string>
+    <string name="save" msgid="2311877285724540644">"सहेजें"</string>
+    <string name="reset" msgid="2448168080964209908">"रीसेट करें"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"कोई होम बटन नहीं मिला"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"इस डिवाइस को नेविगट करने के लिए होम बटन आवश्‍यक है. कृपया सहेजने के पहले होम बटन जोड़ें."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"बटन की चौड़ाई समायोजित करें"</string>
+    <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"क्‍लिपबोर्ड आइटम सीधे क्‍लिपबोर्ड में खींचने देता है. मौजूद होने पर आइटम क्‍लिपबोर्ड से सीधे बाहर भी खींचे जा सकते हैं."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"कस्‍टम मार्गदर्शक बटन"</string>
+    <string name="keycode" msgid="7335281375728356499">"कुंजी कोड"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"कुंजी कोड बटन कीबोर्ड कुंजियों को मार्गदर्शक बार में जोड़ने देती हैं. दबाए जाने पर वे चयनित कीबोर्ड कुंजी का अनुकरण करते हैं. सबसे पहले, बटन के लिए कुंजी का चयन करना चाहिए, उसके बाद बटन पर दिखाए जाने वाले चित्र का चयन करना चाहिए."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"कीबोर्ड बटन चुनें"</string>
+    <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
 </resources>

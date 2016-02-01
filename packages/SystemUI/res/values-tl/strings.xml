@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Walang SIM."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Naka-off ang Cellular Data"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Pag-tether ng Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode na eroplano."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Walang SIM card."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pagpi-pin sa screen"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"maghanap"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Hindi masimulan <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Higit pa"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> Pa"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"History"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"I-clear"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Custom"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Mga karaniwang kulay"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Madidilim na kulay"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Mga custom na kulay"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Auto"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Mga hindi kilalang kulay"</string>
     <string name="color_transform" msgid="6985460408079086090">"Pagbago sa kulay"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Ipakita ang tile ng Mga Mabilisang Setting"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Nakakonekta ang mga headphone"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Nakakonekta ang headset"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"I-enable o i-disable ang pagpapakita sa mga icon sa status bar."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Data Saver"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Naka-on ang Data Saver"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Naka-off ang Data Saver"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"I-on"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Navigation bar"</string>
+    <string name="start" msgid="6873794757232879664">"Simula"</string>
+    <string name="center" msgid="4327473927066010960">"Gitna"</string>
+    <string name="end" msgid="125797972524818282">"Dulo"</string>
+    <string name="space" msgid="804232271282109749">"Spacer"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Menu / Keyboard Switcher"</string>
+    <string name="select_button" msgid="1597989540662710653">"Pumili ng button na idaragdag"</string>
+    <string name="add_button" msgid="4134946063432258161">"Magdagdag ng button"</string>
+    <string name="save" msgid="2311877285724540644">"I-save"</string>
+    <string name="reset" msgid="2448168080964209908">"I-reset"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Walang nakitang home button"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Kailangan ng home button upang ma-navigate ang device na ito. Mangyaring magdagdag ng home button bago mag-save."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Isaayos ang lapad ng button"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Clipboard"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Nagbibigay-daan ang Clipboard na direktang ma-drag sa clipboard ang mga item. Maaari ding direktang i-drag ang mga item palabas sa clipboard."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Custom na button ng navigation"</string>
+    <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Nagbibigay-daan ang mga button na Keycode na maidagdag ang mga keyboard key sa Navigation Bar. Kapag pinindot, ginagaya ng mga ito ang napiling keyboard key. Una, dapat munang piliin ang key para sa button, kasunod ng larawan na ipapakita sa button."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Pumili ng Button na Keyboard"</string>
+    <string name="preview" msgid="9077832302472282938">"I-preview"</string>
 </resources>

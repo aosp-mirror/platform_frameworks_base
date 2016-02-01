@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nuk ka kartë SIM."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Të dhënat celulare joaktive"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Po lidhet me \"bluetooth\"."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"modaliteti i aeroplanit"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nuk ka kartë SIM."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"gozhdimi i ekranit"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"kërko"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> nuk mundi të nisej."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Më shumë"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> të tjera"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"Historiku"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Pastro"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Ndaje horizontalisht"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Ndaj vertikalisht"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Ndaj të personalizuarën"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Ngjyrat normale"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Ngjyrat e natës"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Ngjyrat e personalizuara"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Automatike"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Ngjyra të panjohura"</string>
     <string name="color_transform" msgid="6985460408079086090">"Modifikimi i ngjyrës"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Pllakëza Shfaq cilësimet e shpejta"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Kufjet u lidhën"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Kufjet me mikrofon u lidhën"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Aktivizo ose çaktivizo shfaqjen e ikonave në shiritin e statusit."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Kursyesi i të dhënave"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Kursyesi i të dhënave është aktiv"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Kursyesi i të dhënave është joaktiv"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Aktiv"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Shiriti i navigimit"</string>
+    <string name="start" msgid="6873794757232879664">"Nis"</string>
+    <string name="center" msgid="4327473927066010960">"Qendror"</string>
+    <string name="end" msgid="125797972524818282">"Fundi"</string>
+    <string name="space" msgid="804232271282109749">"Tasti i hapësirës"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Ndërruesi i menysë/tastierës"</string>
+    <string name="select_button" msgid="1597989540662710653">"Zgjidh butonin për ta shtuar"</string>
+    <string name="add_button" msgid="4134946063432258161">"Shto buton"</string>
+    <string name="save" msgid="2311877285724540644">"Ruaj"</string>
+    <string name="reset" msgid="2448168080964209908">"Rivendos"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Nuk u gjet asnjë buton \"Kreu\""</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Kërkohet një buton \"Kreu\" për të naviguar në këtë pajisje. Shto një buton \"Kreu\" përpara se ta ruash."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Rregullo gjerësinë e butonit"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Kujtesa e fragmenteve"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Kujtesa e fragmenteve lejon që artikujt të zvarriten direkt në kujtesën e fragmenteve. Artikujt mund të zvarriten gjithashtu direkt jashtë kujtesës së fragmenteve kur janë të pranishëm."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Butoni i personalizuar i navigimit"</string>
+    <string name="keycode" msgid="7335281375728356499">"Kodi i tasteve"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Butonat e kodit të tasteve lejojnë që të shtohen në shiritin e navigimit tastet e tastierës. Kur shtypen ato shfaqin tastin e zgjedhur të tastierës. Në fillim duhet të zgjidhet tasti për butonin, i ndjekur nga një imazh që do të tregohet në buton."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Zgjidh butonin e tastierës"</string>
+    <string name="preview" msgid="9077832302472282938">"Pamja paraprake"</string>
 </resources>

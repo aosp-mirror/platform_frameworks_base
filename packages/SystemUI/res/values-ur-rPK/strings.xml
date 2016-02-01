@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏کوئی SIM نہیں ہے۔"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"سیلولر ڈیٹا آف ہے"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"بلوٹوتھ مربوط کرنا۔"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"ہوائی جہاز وضع۔"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏کوئی SIM کارڈ نہیں ہے۔"</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"اسکرین کو پن کرنا"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"تلاش کریں"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> کو شروع نہیں کیا جا سکا۔"</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"مزید"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> مزید"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"سرگزشت"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"صاف کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"بلحاظ افقی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"بلحاظ عمودی الگ کریں"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"بلحاظ حسب ضرورت الگ کریں"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"عام رنگ"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"رات کے رنگ"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"حسب ضرورت رنگ"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"خودکار"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"نامعلوم رنگ"</string>
     <string name="color_transform" msgid="6985460408079086090">"رنگوں کی تبدیلی"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"فوری ترتیبات والی ٹائل دکھائیں"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ہیڈ فونز منسلک ہیں"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ہیڈ سیٹ منسلک ہے"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"اسٹیٹس بار میں دکھائے جانے کیلئے آئیکنز فعال یا غیر فعال کریں۔"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"ڈیٹا سیور"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ڈیٹا سیور آن ہے"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ڈیٹا سیور آف ہے"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"آن"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"نیویگیشن بار"</string>
+    <string name="start" msgid="6873794757232879664">"شروع کریں"</string>
+    <string name="center" msgid="4327473927066010960">"مرکز"</string>
+    <string name="end" msgid="125797972524818282">"اختتام"</string>
+    <string name="space" msgid="804232271282109749">"سپیسر"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"مینو/ کی بورڈ سوئچر"</string>
+    <string name="select_button" msgid="1597989540662710653">"شامل کرنے کیلئے بٹن منتخب کریں"</string>
+    <string name="add_button" msgid="4134946063432258161">"بٹن شامل کریں"</string>
+    <string name="save" msgid="2311877285724540644">"محفوظ کریں"</string>
+    <string name="reset" msgid="2448168080964209908">"دوبارہ ترتیب دیں"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"کوئی ہوم بٹن نہیں ملا"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"اس آلہ کو نیویگیٹ کرنے کیلئے ایک ہوم بٹن درکار ہے۔ براہ کرم محفوظ کرنے سے پہلے ایک ہوم بٹن شامل کریں۔"</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"بٹن کی چوڑائی ایڈجسٹ کریں"</string>
+    <string name="clipboard" msgid="1313879395099896312">"کلپ بورڈ"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"کلب بورڈ آئٹمز کو براہ راست کلپ بورڈ پر گھسیٹنے کی اجازت دیتا ہے۔ کلپ بورڈ پر آئٹمز موجود ہونے کی صورت میں انہیں بھی براہ راست باہر گھسیٹا جا سکتا ہے۔"</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"حسب ضرورت نیویگیشن بٹن"</string>
+    <string name="keycode" msgid="7335281375728356499">"کی کوڈ"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"کی کوڈ بٹنز نیویگیشن بار میں کی بورڈ کلیدوں کو شامل ہونے کی اجازت دیتے ہیں۔ دبائے جانے پر یہ منتخب کردہ کی بورڈ کلید کی نقل کرتے ہیں۔ بٹن کیلئے پہلے کلید منتخب ہونی چاہیئے، اس کے بعد بٹن پر دکھائے جانے کیلئے ایک تصویر۔"</string>
+    <string name="select_keycode" msgid="7413765103381924584">"کی بورڈ بٹن منتخب کریں"</string>
+    <string name="preview" msgid="9077832302472282938">"پیش منظر"</string>
 </resources>

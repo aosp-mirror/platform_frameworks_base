@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Няма SIM карта."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилните данни са изключени"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Тетъринг през Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Самолетен режим."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Няма SIM карта."</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"фиксиране на екрана"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"търсене"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> не можа да стартира."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Още"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"Още <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"История"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Изчистване"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хоризонтално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Вертикално разделяне"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Персонализирано разделяне"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Нормални цветове"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Нощни цветове"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Персонализирани цветове"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Автоматично"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Неизвестни цветове"</string>
     <string name="color_transform" msgid="6985460408079086090">"Промяна на цветовете"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Показване на плочката за бързи настройки"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Слушалките (без микрофон) са свързани"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Слушалките са свързани"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Активиране или деактивиране на показването на икони в лентата на състоянието."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Икономия на данни"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Функцията „Икономия на данни“ е включена"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Функцията „Икономия на данни“ е изключена"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Вкл."</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Лента за навигация"</string>
+    <string name="start" msgid="6873794757232879664">"Начало"</string>
+    <string name="center" msgid="4327473927066010960">"Център"</string>
+    <string name="end" msgid="125797972524818282">"Край"</string>
+    <string name="space" msgid="804232271282109749">"Разстояние между бутоните"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Превкл. на менюто/клавиатурата"</string>
+    <string name="select_button" msgid="1597989540662710653">"Избиране на бутон за добавяне"</string>
+    <string name="add_button" msgid="4134946063432258161">"Добавяне на бутон"</string>
+    <string name="save" msgid="2311877285724540644">"Запазване"</string>
+    <string name="reset" msgid="2448168080964209908">"Повторно задаване"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Няма намерен бутон „Начало“"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"За да се придвижвате в това устройство, е необходим бутон „Начало“. Моля, добавете такъв, преди да запазите."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Коригиране на ширината на бутона"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Буферна памет"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Този бутон ви дава възможност да премествате с плъзгане елементи директно в буферната памет, а също и извън нея."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Персонализиран бутон за навигация"</string>
+    <string name="keycode" msgid="7335281375728356499">"Клавишен код"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Бутоните с клавишни кодове ви дават възможност да добавяте клавиши от клавиатурата към лентата за навигация. При докосване на такъв бутон се симулира натискане на съответния клавиш. Първо, трябва да изберете клавиш за бутона, а след това – изображение, което да се показва върху него."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Избиране на клавиш от клавиатурата"</string>
+    <string name="preview" msgid="9077832302472282938">"Визуализация"</string>
 </resources>

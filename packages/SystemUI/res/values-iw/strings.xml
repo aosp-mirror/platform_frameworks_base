@@ -148,6 +148,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"קצה"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"‏אין כרטיס SIM."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"הנתונים הסלולריים כבויים"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"‏שיתוף אינטרנט דרך Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"מצב טיסה"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"‏אין כרטיס SIM."</string>
@@ -302,8 +303,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"הצמדת מסך"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"חפש"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"לא ניתן היה להפעיל את <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"עוד"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> נוספות"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"היסטוריה"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"נקה"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"פיצול אופקי"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"פיצול אנכי"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"פיצול מותאם אישית"</string>
@@ -469,6 +470,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"צבעים רגילים"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"צבעי לילה"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"צבעים מותאמים אישית"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"אוטומטי"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"צבעים לא ידועים"</string>
     <string name="color_transform" msgid="6985460408079086090">"שינוי צבע"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"הצגת אריח של הגדרות מהירות"</string>
@@ -495,10 +497,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"אוזניות מחוברות"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"אוזניות מחוברות"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"הפעלה או השבתה של סמלים המוצגים בשורת הסטטוס."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"‏חוסך הנתונים (Data Saver)"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"‏חוסך הנתונים (Data Saver) פועל"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"‏חוסך הנתונים (Data Saver) כבוי"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"פועל"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"סרגל ניווט"</string>
+    <string name="start" msgid="6873794757232879664">"התחלה"</string>
+    <string name="center" msgid="4327473927066010960">"מרכז"</string>
+    <string name="end" msgid="125797972524818282">"סיום"</string>
+    <string name="space" msgid="804232271282109749">"רווח"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"מחליף תפריט / מקלדת"</string>
+    <string name="select_button" msgid="1597989540662710653">"בחירת לחצן להוספה"</string>
+    <string name="add_button" msgid="4134946063432258161">"הוסף לחצן"</string>
+    <string name="save" msgid="2311877285724540644">"שמור"</string>
+    <string name="reset" msgid="2448168080964209908">"איפוס"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"לחצן הבית לא נמצא"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"לחצן הבית נדרש כדי לנווט במכשיר הזה. הוסף לחצן בית לפני השמירה."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"שינוי של רוחב לחצן"</string>
+    <string name="clipboard" msgid="1313879395099896312">"לוח"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"בעזרת האפשרות \'לוח\', ניתן לגרור פריטים ישירות ללוח. ניתן גם לגרור פריטים ישירות מהלוח, כשהוא זמין."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"לחצן לניווט מותאם אישית"</string>
+    <string name="keycode" msgid="7335281375728356499">"קוד מפתח"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"לחצנים של קוד מפתח מאפשרים להוסיף מקשי מקלדת לסרגל הניווט. בעת הלחיצה הם מדמים את מקש המקלדת שנבחר. תחילה יש לבחור את המקש ללחצן, ולאחר מכן יש לבחור תמונה שתוצג בלחצן."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"בחירת לחצן מקלדת"</string>
+    <string name="preview" msgid="9077832302472282938">"תצוגה מקדימה"</string>
 </resources>

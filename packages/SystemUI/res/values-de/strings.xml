@@ -146,6 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Keine SIM-Karte"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobile Datennutzung deaktiviert"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-Tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flugmodus"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Keine SIM-Karte"</string>
@@ -300,8 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"Bildschirmfixierung"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Suche"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> konnte nicht gestartet werden."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Mehr"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"<xliff:g id="NUMBER">%d</xliff:g> weitere"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"Verlauf"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Löschen"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Geteilte Schaltfläche – horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Geteilte Schaltfläche – vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Geteilte Schaltfläche – benutzerdefiniert"</string>
@@ -467,6 +468,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Standardfarben"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Nachtfarben"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Benutzerdefinierte Farben"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Automatisch"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Unbekannte Farben"</string>
     <string name="color_transform" msgid="6985460408079086090">"Farben ändern"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Kachel \"Schnelleinstellungen\" anzeigen"</string>
@@ -493,10 +495,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Mit Kopfhörer verbunden"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Mit Headset verbunden"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Symbole in der Statusleiste ein- bzw. ausblenden"</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Datenkomprimierung"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Datenkomprimierung aktiviert"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Datenkomprimierung deaktiviert"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"An"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Navigationsleiste"</string>
+    <string name="start" msgid="6873794757232879664">"Beim Start"</string>
+    <string name="center" msgid="4327473927066010960">"Mitte"</string>
+    <string name="end" msgid="125797972524818282">"Ende"</string>
+    <string name="space" msgid="804232271282109749">"Leerzeichen"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Menü-/Tastaturwechsler"</string>
+    <string name="select_button" msgid="1597989540662710653">"Schaltfläche auswählen"</string>
+    <string name="add_button" msgid="4134946063432258161">"Schaltfläche hinzufügen"</string>
+    <string name="save" msgid="2311877285724540644">"Speichern"</string>
+    <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Startbildschirm-Schaltfläche fehlt"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Zur Bedienung dieses Geräts wird eine Schaltfläche für den Startbildschirm benötigt. Bitte füge vor dem Speichern eine entsprechende Schaltfläche hinzu."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Schaltflächenbreite anpassen"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Zwischenablage"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Elemente können direkt in die Zwischenablage gezogen werden. Ebenso können sie direkt aus der Zwischenablage gezogen werden, sofern diese geöffnet ist."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Benutzerdefinierte Navigationsschaltfläche"</string>
+    <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Mit den Keycode-Schaltflächen können der Navigationsleiste Tasten hinzugefügt werden. Wird eine Keycode-Schaltfläche ausgewählt, führt sie die Aktion der entsprechenden Taste aus. Wählen Sie zuerst die Taste für die Schaltfläche aus und anschließend ein Bild, das auf der Schaltfläche erscheinen soll."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Taste auswählen"</string>
+    <string name="preview" msgid="9077832302472282938">"Vorschau"</string>
 </resources>

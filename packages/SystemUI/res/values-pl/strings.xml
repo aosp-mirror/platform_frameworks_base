@@ -148,6 +148,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Brak karty SIM."</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Komórkowa transmisja danych jest wyłączona"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Powiązanie Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Tryb samolotowy."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Brak karty SIM."</string>
@@ -302,8 +303,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"przypinanie ekranu"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"szukaj"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nie udało się uruchomić aplikacji <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_show_history_button_label" msgid="7062088196449747245">"Więcej"</string>
-    <string name="recents_history_label_format" msgid="6337155608055062429">"i jeszcze <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="recents_history_button_label" msgid="5153358867807604821">"Historia"</string>
+    <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Wyczyść"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podziel poziomo"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podziel pionowo"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podziel niestandardowo"</string>
@@ -469,6 +470,7 @@
     <string name="color_matrix_none" msgid="2121957926040543148">"Kolory standardowe"</string>
     <string name="color_matrix_night" msgid="5943817622105307072">"Kolory nocne"</string>
     <string name="color_matrix_custom" msgid="3655576492322298713">"Kolory niestandardowe"</string>
+    <string name="color_matrix_auto" msgid="4896624757412029265">"Automatycznie"</string>
     <string name="color_matrix_unknown" msgid="2709202104256265107">"Nieznane kolory"</string>
     <string name="color_transform" msgid="6985460408079086090">"Zmiana koloru"</string>
     <string name="color_matrix_show_qs" msgid="1763244354399276679">"Pokazuj kafelek szybkich ustawień"</string>
@@ -495,10 +497,28 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Słuchawki są podłączone"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Zestaw słuchawkowy jest podłączony"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Włącz lub wyłącz wyświetlanie ikon na pasku stanu."</string>
-    <!-- no translation found for data_saver (5037565123367048522) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_on (8454111686783887148) -->
-    <skip />
-    <!-- no translation found for accessibility_data_saver_off (8841582529453005337) -->
-    <skip />
+    <string name="data_saver" msgid="5037565123367048522">"Oszczędzanie danych"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Oszczędzanie danych jest włączone"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Oszczędzanie danych jest wyłączone"</string>
+    <string name="switch_bar_on" msgid="1142437840752794229">"Wł."</string>
+    <string name="nav_bar" msgid="1993221402773877607">"Pasek nawigacji"</string>
+    <string name="start" msgid="6873794757232879664">"Na początku"</string>
+    <string name="center" msgid="4327473927066010960">"Na środku"</string>
+    <string name="end" msgid="125797972524818282">"Na końcu"</string>
+    <string name="space" msgid="804232271282109749">"Spacja"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Menu / przełączanie klawiatury"</string>
+    <string name="select_button" msgid="1597989540662710653">"Wybierz przycisk do dodania"</string>
+    <string name="add_button" msgid="4134946063432258161">"Dodaj przycisk"</string>
+    <string name="save" msgid="2311877285724540644">"Zapisz"</string>
+    <string name="reset" msgid="2448168080964209908">"Resetuj"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Brak przycisku ekranu głównego"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Do prawidłowej obsługi urządzenia potrzebny jest przycisk ekranu głównego. Dodaj go, zanim zapiszesz zmiany."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Regulacja szerokości przycisku"</string>
+    <string name="clipboard" msgid="1313879395099896312">"Schowek"</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Możesz przeciągać elementy bezpośrednio do schowka. Możesz też przeciągać umieszczone tam wcześniej elementy poza schowek."</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Niestandardowy przycisk nawigacji"</string>
+    <string name="keycode" msgid="7335281375728356499">"Klawisz"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Na pasku nawigacji możesz umieszczać przyciski, które po naciśnięciu emulują funkcje klawiszy klawiatury. Najpierw musisz wybrać, jaki klawisz ma być przypisany do danego przycisku, a następnie wybrać dla niego grafikę."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Wybierz przycisk klawiatury"</string>
+    <string name="preview" msgid="9077832302472282938">"Podgląd"</string>
 </resources>
