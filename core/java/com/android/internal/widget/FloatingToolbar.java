@@ -90,6 +90,7 @@ public final class FloatingToolbar {
             };
 
     private final Context mContext;
+    private final Window mWindow;
     private final FloatingToolbarPopup mPopup;
 
     private final Rect mContentRect = new Rect();
@@ -102,26 +103,31 @@ public final class FloatingToolbar {
     private int mSuggestedWidth;
     private boolean mWidthChanged = true;
 
-    private final ComponentCallbacks mOrientationChangeHandler = new ComponentCallbacks() {
+    private final OnLayoutChangeListener mOrientationChangeHandler = new OnLayoutChangeListener() {
+
+        private final Rect mNewRect = new Rect();
+        private final Rect mOldRect = new Rect();
+
         @Override
-        public void onConfigurationChanged(Configuration newConfig) {
-            if (mPopup.isShowing() && mPopup.viewPortHasChanged()) {
+        public void onLayoutChange(
+                View view,
+                int newLeft, int newRight, int newTop, int newBottom,
+                int oldLeft, int oldRight, int oldTop, int oldBottom) {
+            mNewRect.set(newLeft, newRight, newTop, newBottom);
+            mOldRect.set(oldLeft, oldRight, oldTop, oldBottom);
+            if (mPopup.isShowing() && !mNewRect.equals(mOldRect)) {
                 mWidthChanged = true;
                 updateLayout();
             }
         }
-
-        @Override
-        public void onLowMemory() {}
     };
 
     /**
      * Initializes a floating toolbar.
      */
     public FloatingToolbar(Context context, Window window) {
-        Preconditions.checkNotNull(context);
-        Preconditions.checkNotNull(window);
-        mContext = applyDefaultTheme(context);
+        mContext = applyDefaultTheme(Preconditions.checkNotNull(context));
+        mWindow = Preconditions.checkNotNull(window);
         mPopup = new FloatingToolbarPopup(mContext, window.getDecorView());
     }
 
@@ -179,21 +185,8 @@ public final class FloatingToolbar {
      * Shows this floating toolbar.
      */
     public FloatingToolbar show() {
-        mContext.unregisterComponentCallbacks(mOrientationChangeHandler);
-        mContext.registerComponentCallbacks(mOrientationChangeHandler);
-        List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
-        if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
-            mPopup.dismiss();
-            mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
-            mShowingMenuItems = getShowingMenuItemsReferences(menuItems);
-        }
-        if (!mPopup.isShowing()) {
-            mPopup.show(mContentRect);
-        } else if (!mPreviousContentRect.equals(mContentRect)) {
-            mPopup.updateCoordinates(mContentRect);
-        }
-        mWidthChanged = false;
-        mPreviousContentRect.set(mContentRect);
+        registerOrientationHandler();
+        doShow();
         return this;
     }
 
@@ -203,8 +196,7 @@ public final class FloatingToolbar {
      */
     public FloatingToolbar updateLayout() {
         if (mPopup.isShowing()) {
-            // show() performs all the logic we need here.
-            show();
+            doShow();
         }
         return this;
     }
@@ -213,7 +205,7 @@ public final class FloatingToolbar {
      * Dismisses this floating toolbar.
      */
     public void dismiss() {
-        mContext.unregisterComponentCallbacks(mOrientationChangeHandler);
+        unregisterOrientationHandler();
         mPopup.dismiss();
     }
 
@@ -237,6 +229,22 @@ public final class FloatingToolbar {
      */
     public boolean isHidden() {
         return mPopup.isHidden();
+    }
+
+    private void doShow() {
+        List<MenuItem> menuItems = getVisibleAndEnabledMenuItems(mMenu);
+        if (!isCurrentlyShowing(menuItems) || mWidthChanged) {
+            mPopup.dismiss();
+            mPopup.layoutMenuItems(menuItems, mMenuItemClickListener, mSuggestedWidth);
+            mShowingMenuItems = getShowingMenuItemsReferences(menuItems);
+        }
+        if (!mPopup.isShowing()) {
+            mPopup.show(mContentRect);
+        } else if (!mPreviousContentRect.equals(mContentRect)) {
+            mPopup.updateCoordinates(mContentRect);
+        }
+        mWidthChanged = false;
+        mPreviousContentRect.set(mContentRect);
     }
 
     /**
@@ -276,6 +284,15 @@ public final class FloatingToolbar {
             }
         }
         return references;
+    }
+
+    private void registerOrientationHandler() {
+        unregisterOrientationHandler()
+        mWindow.getDecorView.addOnLayoutChangeListener(mOrientationChangeHandler);
+    }
+
+    private void unregisterOrientationHandler() {
+        mWindow.getDecorView.removeOnLayoutChangeListener(mOrientationChangeHandler);
     }
 
 
@@ -1010,11 +1027,6 @@ public final class FloatingToolbar {
 
         private void refreshViewPort() {
             mParent.getWindowVisibleDisplayFrame(mViewPortOnScreen);
-        }
-
-        private boolean viewPortHasChanged() {
-            mParent.getWindowVisibleDisplayFrame(mTmpRect);
-            return !mTmpRect.equals(mViewPortOnScreen);
         }
 
         private int getAdjustedToolbarWidth(int suggestedWidth) {
