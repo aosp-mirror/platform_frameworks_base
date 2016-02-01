@@ -339,7 +339,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onStart() {
         super.onStart();
-        if (mState != STATE_INITIALIZING && mCurrentPrinter != null) {
+        if (mPrinterRegistry != null && mCurrentPrinter != null) {
             mPrinterRegistry.setTrackedPrinter(mCurrentPrinter.getId());
         }
         MetricsLogger.count(this, "print_preview", 1);
@@ -386,7 +386,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     protected void onStop() {
         mPrinterAvailabilityDetector.cancel();
-        mPrinterRegistry.setTrackedPrinter(null);
+
+        if (mPrinterRegistry != null) {
+            mPrinterRegistry.setTrackedPrinter(null);
+        }
 
         super.onStop();
     }
@@ -1925,9 +1928,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void doFinish() {
+        if (mPrinterRegistry != null) {
+            mPrinterRegistry.setTrackedPrinter(null);
+        }
+
         if (mState != STATE_INITIALIZING) {
             mProgressMessageController.cancel();
-            mPrinterRegistry.setTrackedPrinter(null);
             mSpoolerProvider.destroy();
             mPrintedDocument.finish();
             mPrintedDocument.destroy();
