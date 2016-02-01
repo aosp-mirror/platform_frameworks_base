@@ -6847,8 +6847,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabledFromThisOwner) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        UserRestrictionsUtils.checkRestriction(key);
-
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             ActiveAdmin activeAdmin =
