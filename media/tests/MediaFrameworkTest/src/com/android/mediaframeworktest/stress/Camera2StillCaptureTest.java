@@ -59,7 +59,7 @@ import static com.android.mediaframeworktest.helpers.CameraTestUtils.makeImageRe
  *
  * adb shell am instrument \
  *    -e class com.android.mediaframeworktest.stress.Camera2StillCaptureTest#testTakePicture \
- *    -e repeat 200 \
+ *    -e iterations 200 \
  *    -e waitIntervalMs 1000 \
  *    -e resultToFile false \
  *    -r -w com.android.mediaframeworktest/.Camera2InstrumentationTestRunner
@@ -108,12 +108,12 @@ public class Camera2StillCaptureTest extends Camera2SurfaceViewTestCase {
                 }
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                    Log.v(TAG, String.format("Taking pictures: %d/%d", repeat + 1,
-                            getRepeatCount()));
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                    Log.v(TAG, String.format("Taking pictures: %d/%d", iteration + 1,
+                            getIterationCount()));
                     takePictureTestByCamera(/*aeRegions*/null, /*awbRegions*/null,
                             /*afRegions*/null);
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                     Thread.sleep(getTestWaitIntervalMs());
                 }
             } finally {
@@ -144,11 +144,12 @@ public class Camera2StillCaptureTest extends Camera2SurfaceViewTestCase {
                 }
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                    Log.v(TAG, String.format("Taking full RAW pictures: %d/%d", repeat + 1,
-                            getRepeatCount()));
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                    Log.v(TAG, String.format("Taking full RAW pictures: %d/%d", iteration + 1,
+                            getIterationCount()));
                     fullRawCaptureTestByCamera();
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, mCameraIds[i]);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1,
+                            mCameraIds[i]);
                     Thread.sleep(getTestWaitIntervalMs());
                 }
             } finally {
