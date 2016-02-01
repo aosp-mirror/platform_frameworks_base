@@ -34,7 +34,6 @@ import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -273,7 +272,7 @@ public abstract class Window {
     private Callback mCallback;
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
     private WindowControllerCallback mWindowControllerCallback;
-    private RestrictedCaptionAreaListener mRestrictedCaptionAreaListener;
+    private OnRestrictedCaptionAreaChangedListener mOnRestrictedCaptionAreaChangedListener;
     private Rect mRestrictedCaptionAreaRect;
     private WindowManager mWindowManager;
     private IBinder mAppToken;
@@ -596,7 +595,7 @@ public abstract class Window {
     /**
      * Callback for clients that want to be aware of where caption draws content.
      */
-    public interface RestrictedCaptionAreaListener {
+    public interface OnRestrictedCaptionAreaChangedListener {
         /**
          * Called when the area where caption draws content changes.
          *
@@ -856,8 +855,8 @@ public abstract class Window {
      *
      * @param listener Callback that will be called when the area changes.
      */
-    public final void setRestrictedCaptionAreaListener(RestrictedCaptionAreaListener listener) {
-        mRestrictedCaptionAreaListener = listener;
+    public final void setRestrictedCaptionAreaListener(OnRestrictedCaptionAreaChangedListener listener) {
+        mOnRestrictedCaptionAreaChangedListener = listener;
         mRestrictedCaptionAreaRect = listener != null ? new Rect() : null;
     }
 
@@ -2126,17 +2125,20 @@ public abstract class Window {
 
     /** @hide */
     public void notifyRestrictedCaptionAreaCallback(int left, int top, int right, int bottom) {
-        if (mRestrictedCaptionAreaListener != null) {
+        if (mOnRestrictedCaptionAreaChangedListener != null) {
             mRestrictedCaptionAreaRect.set(left, top, right, bottom);
-            mRestrictedCaptionAreaListener.onRestrictedCaptionAreaChanged(
+            mOnRestrictedCaptionAreaChangedListener.onRestrictedCaptionAreaChanged(
                     mRestrictedCaptionAreaRect);
         }
     }
 
     /**
      * Set what color should the caption controls be. By default the system will try to determine
-     * the color from the theme. You can overwrite this by using {@link #DECOR_CAPTION_SHADE_DARK}
-     * or {@link #DECOR_CAPTION_SHADE_DARK}.
+     * the color from the theme. You can overwrite this by using {@link #DECOR_CAPTION_SHADE_DARK},
+     * {@link #DECOR_CAPTION_SHADE_LIGHT}, or {@link #DECOR_CAPTION_SHADE_AUTO}.
+     * @see #DECOR_CAPTION_SHADE_DARK
+     * @see #DECOR_CAPTION_SHADE_LIGHT
+     * @see #DECOR_CAPTION_SHADE_AUTO
      */
     public abstract void setDecorCaptionShade(int decorCaptionShade);
 

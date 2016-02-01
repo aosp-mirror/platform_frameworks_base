@@ -43262,7 +43262,7 @@ package android.view {
     method public abstract void setNavigationBarColor(int);
     method public void setReenterTransition(android.transition.Transition);
     method public abstract void setResizingCaptionDrawable(android.graphics.drawable.Drawable);
-    method public final void setRestrictedCaptionAreaListener(android.view.Window.RestrictedCaptionAreaListener);
+    method public final void setRestrictedCaptionAreaListener(android.view.Window.OnRestrictedCaptionAreaChangedListener);
     method public void setReturnTransition(android.transition.Transition);
     method public void setSharedElementEnterTransition(android.transition.Transition);
     method public void setSharedElementExitTransition(android.transition.Transition);
@@ -43349,7 +43349,7 @@ package android.view {
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback, int);
   }
 
-  public static abstract interface Window.RestrictedCaptionAreaListener {
+  public static abstract interface Window.OnRestrictedCaptionAreaChangedListener {
     method public abstract void onRestrictedCaptionAreaChanged(android.graphics.Rect);
   }
 
