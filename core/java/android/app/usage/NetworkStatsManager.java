@@ -82,10 +82,11 @@ public class NetworkStatsManager {
     }
     /**
      * Query network usage statistics summaries. Result is summarised data usage for the whole
-     * device. Result is a single Bucket aggregated over time, state and uid. This means the
-     * bucket's start and end timestamp are going to be the same as the 'startTime' and 'endTime'
-     * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid
-     * {@link NetworkStats.Bucket#UID_ALL}, and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * device. Result is a single Bucket aggregated over time, state, uid, tag and roaming. This
+     * means the bucket's start and end timestamp are going to be the same as the 'startTime' and
+     * 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid
+     * {@link NetworkStats.Bucket#UID_ALL}, tag {@link NetworkStats.Bucket#TAG_ALL}
+     * and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -114,11 +115,22 @@ public class NetworkStatsManager {
     }
 
     /**
+     * Query network usage statistics summaries aggregated across tags.
+     *
+     * #see querySummaryForUser(int, String, long, long, boolean)
+     */
+    public Bucket querySummaryForUser(int networkType, String subscriberId, long startTime,
+            long endTime) throws SecurityException, RemoteException {
+        return querySummaryForUser(networkType, subscriberId, startTime, endTime,
+            false /* includeTags */);
+    }
+
+    /**
      * Query network usage statistics summaries. Result is summarised data usage for all uids
      * belonging to calling user. Result is a single Bucket aggregated over time, state and uid.
      * This means the bucket's start and end timestamp are going to be the same as the 'startTime'
-     * and 'endTime' parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid
-     * {@link NetworkStats.Bucket#UID_ALL}, and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * and 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid
+     * {@link NetworkStats.Bucket#UID_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -128,11 +140,13 @@ public class NetworkStatsManager {
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
+     * @param includeTags whether to include network tags. If {@code true}, tags will be returned
+     *            and history retention may be shorter.
      * @return Bucket object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
     public Bucket querySummaryForUser(int networkType, String subscriberId, long startTime,
-            long endTime) throws SecurityException, RemoteException {
+            long endTime, boolean includeTags) throws SecurityException, RemoteException {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (template == null) {
             return null;
@@ -140,18 +154,28 @@ public class NetworkStatsManager {
 
         NetworkStats stats;
         stats = new NetworkStats(mContext, template, startTime, endTime);
-        stats.startSummaryEnumeration();
+        stats.startSummaryEnumeration(includeTags);
 
         stats.close();
         return stats.getSummaryAggregate();
     }
 
     /**
+     * Query network usage statistics summaries aggregated across tags.
+     *
+     * #see querySummary(int, String, long, long, boolean)
+     */
+    public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
+            long endTime) throws SecurityException, RemoteException {
+        return querySummary(networkType, subscriberId, startTime, endTime, false /* includeTags */);
+    }
+
+    /**
      * Query network usage statistics summaries. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over time, hence all buckets will have the same start and
-     * end timestamps. Not aggregated over state, uid, or roaming. This means buckets' start and end
-     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters, state and
-     * uid are going to vary.
+     * end timestamps. Not aggregated over state or uid or tag. This means buckets' start and end
+     * timestamps are going to be the same as the 'startTime' and 'endTime' parameters. State,
+     * uid and tag are going to vary.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -161,11 +185,13 @@ public class NetworkStatsManager {
      *            {@link java.lang.System#currentTimeMillis}.
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
+     * @param includeTags whether to include network tags. If {@code true}, tags will be returned
+     *            and history retention may be shorter.
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
     public NetworkStats querySummary(int networkType, String subscriberId, long startTime,
-            long endTime) throws SecurityException, RemoteException {
+            long endTime, boolean includeTags) throws SecurityException, RemoteException {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (template == null) {
             return null;
@@ -173,17 +199,28 @@ public class NetworkStatsManager {
 
         NetworkStats result;
         result = new NetworkStats(mContext, template, startTime, endTime);
-        result.startSummaryEnumeration();
+        result.startSummaryEnumeration(includeTags);
 
         return result;
     }
 
     /**
-     * Query network usage statistics details. Only usable for uids belonging to calling user.
-     * Result is aggregated over state but not aggregated over time. This means buckets' start and
-     * end timestamps are going to be between 'startTime' and 'endTime' parameters, state is going
-     * to be {@link NetworkStats.Bucket#STATE_ALL} and uid the same as the 'uid' parameter. roaming
-     * is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * Query network usage statistics details for a given uid.
+     *
+     * #see queryDetailsForUidTag(int, String, long, long, int, int)
+     */
+    public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
+            long startTime, long endTime, int uid) throws SecurityException, RemoteException {
+        return queryDetailsForUidTag(networkType, subscriberId, startTime, endTime, uid,
+            NetworkStats.Bucket.TAG_ALL);
+    }
+
+    /**
+     * Query network usage statistics details for a given uid and tag. Only usable for uids
+     * belonging to calling user. Result is aggregated over state but not aggregated over time.
+     * This means buckets' start and end timestamps are going to be between 'startTime' and
+     * 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid the
+     * same as the 'uid' parameter and tag the same as 'tag' parameter.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
@@ -197,11 +234,14 @@ public class NetworkStatsManager {
      * @param endTime End of period. Defined in terms of "Unix time", see
      *            {@link java.lang.System#currentTimeMillis}.
      * @param uid UID of app
+     * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_ANY} for any tags, use
+     *            {@link NetworkStats.Bucket#TAG_ALL} to aggregate over tags.
      * @return Statistics object or null if permissions are insufficient or error happened during
      *         statistics collection.
      */
-    public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
-            long startTime, long endTime, int uid) throws SecurityException, RemoteException {
+    public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
+            long startTime, long endTime, int uid, int tag) throws SecurityException,
+            RemoteException {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (template == null) {
             return null;
@@ -209,7 +249,7 @@ public class NetworkStatsManager {
 
         NetworkStats result;
         result = new NetworkStats(mContext, template, startTime, endTime);
-        result.startHistoryEnumeration(uid);
+        result.startHistoryEnumeration(uid, tag);
 
         return result;
     }
@@ -218,8 +258,9 @@ public class NetworkStatsManager {
      * Query network usage statistics details. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over state but not aggregated over time or uid. This means
      * buckets' start and end timestamps are going to be between 'startTime' and 'endTime'
-     * parameters, state is going to be {@link NetworkStats.Bucket#STATE_ALL} and uid will vary.
-     * roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid will vary,
+     * tag {@link NetworkStats.Bucket#TAG_ALL} and roaming is going to be
+     * {@link NetworkStats.Bucket#ROAMING_ALL}.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.

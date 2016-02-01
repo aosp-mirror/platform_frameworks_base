@@ -6331,6 +6331,7 @@ package android.app.usage {
     method public long getRxPackets();
     method public long getStartTimeStamp();
     method public int getState();
+    method public int getTag();
     method public long getTxBytes();
     method public long getTxPackets();
     method public int getUid();
@@ -6340,6 +6341,8 @@ package android.app.usage {
     field public static final int STATE_ALL = -1; // 0xffffffff
     field public static final int STATE_DEFAULT = 1; // 0x1
     field public static final int STATE_FOREGROUND = 2; // 0x2
+    field public static final int TAG_ALL = 0; // 0x0
+    field public static final int TAG_ANY = -1; // 0xffffffff
     field public static final int UID_ALL = -1; // 0xffffffff
     field public static final int UID_REMOVED = -4; // 0xfffffffc
     field public static final int UID_TETHERING = -5; // 0xfffffffb
@@ -6348,9 +6351,12 @@ package android.app.usage {
   public class NetworkStatsManager {
     method public android.app.usage.NetworkStats queryDetails(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
     method public android.app.usage.NetworkStats queryDetailsForUid(int, java.lang.String, long, long, int) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats queryDetailsForUidTag(int, java.lang.String, long, long, int, int) throws android.os.RemoteException, java.lang.SecurityException;
     method public android.app.usage.NetworkStats querySummary(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats querySummary(int, java.lang.String, long, long, boolean) throws android.os.RemoteException, java.lang.SecurityException;
     method public android.app.usage.NetworkStats.Bucket querySummaryForDevice(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
     method public android.app.usage.NetworkStats.Bucket querySummaryForUser(int, java.lang.String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
+    method public android.app.usage.NetworkStats.Bucket querySummaryForUser(int, java.lang.String, long, long, boolean) throws android.os.RemoteException, java.lang.SecurityException;
   }
 
   public final class UsageEvents implements android.os.Parcelable {
