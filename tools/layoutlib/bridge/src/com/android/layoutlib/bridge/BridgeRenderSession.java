@@ -208,6 +208,9 @@ public class BridgeRenderSession extends RenderSession {
 
     @Override
     public void dispose() {
+        if (mSession != null) {
+            mSession.dispose();
+        }
     }
 
     /*package*/ BridgeRenderSession(RenderSessionImpl scene, Result lastResult) {
