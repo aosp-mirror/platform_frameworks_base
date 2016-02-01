@@ -16,4 +16,4 @@
 
 package android.location;
 
-parcelable GpsNavigationMessageEvent;
+parcelable GnssNavigationMessageEvent;

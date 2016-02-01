@@ -537,11 +537,11 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_reportMeasurementData = env->GetMethodID(
             clazz,
             "reportMeasurementData",
-            "(Landroid/location/GpsMeasurementsEvent;)V");
+            "(Landroid/location/GnssMeasurementsEvent;)V");
     method_reportNavigationMessages = env->GetMethodID(
             clazz,
             "reportNavigationMessage",
-            "(Landroid/location/GpsNavigationMessageEvent;)V");
+            "(Landroid/location/GnssNavigationMessageEvent;)V");
 
     err = hw_get_module(GPS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
     if (err == 0) {
@@ -974,7 +974,7 @@ static jobject translate_gps_clock(JNIEnv* env, void* data, size_t size) {
 
     GpsClock* clock = reinterpret_cast<GpsClock*>(data);
 
-    jclass gpsClockClass = env->FindClass("android/location/GpsClock");
+    jclass gpsClockClass = env->FindClass("android/location/GnssClock");
     jmethodID gpsClockCtor = env->GetMethodID(gpsClockClass, "<init>", "()V");
 
     jobject gpsClockObject = env->NewObject(gpsClockClass, gpsClockCtor);
@@ -1049,264 +1049,264 @@ static jobject translate_gps_measurement(JNIEnv* env, void* data, size_t size) {
     const char* floatSignature = "(F)V";
     const char* doubleSignature = "(D)V";
 
-    jclass gpsMeasurementClass = env->FindClass("android/location/GpsMeasurement");
-    jmethodID gpsMeasurementCtor = env->GetMethodID(gpsMeasurementClass, "<init>", "()V");
+    jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
+    jmethodID gnssMeasurementCtor = env->GetMethodID(gnssMeasurementClass, "<init>", "()V");
     GpsMeasurement* measurement = reinterpret_cast<GpsMeasurement*>(data);
 
-    jobject gpsMeasurementObject = env->NewObject(gpsMeasurementClass, gpsMeasurementCtor);
+    jobject gnssMeasurementObject = env->NewObject(gnssMeasurementClass, gnssMeasurementCtor);
     GpsMeasurementFlags flags = measurement->flags;
 
-    jmethodID prnSetterMethod = env->GetMethodID(gpsMeasurementClass, "setPrn", byteSignature);
-    env->CallVoidMethod(gpsMeasurementObject, prnSetterMethod, measurement->prn);
+    jmethodID prnSetterMethod = env->GetMethodID(gnssMeasurementClass, "setPrn", byteSignature);
+    env->CallVoidMethod(gnssMeasurementObject, prnSetterMethod, measurement->prn);
 
     jmethodID timeOffsetSetterMethod =
-            env->GetMethodID(gpsMeasurementClass, "setTimeOffsetInNs", doubleSignature);
+            env->GetMethodID(gnssMeasurementClass, "setTimeOffsetInNs", doubleSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             timeOffsetSetterMethod,
             measurement->time_offset_ns);
 
-    jmethodID stateSetterMethod = env->GetMethodID(gpsMeasurementClass, "setState", shortSignature);
-    env->CallVoidMethod(gpsMeasurementObject, stateSetterMethod, measurement->state);
+    jmethodID stateSetterMethod = env->GetMethodID(gnssMeasurementClass, "setState", shortSignature);
+    env->CallVoidMethod(gnssMeasurementObject, stateSetterMethod, measurement->state);
 
     jmethodID receivedGpsTowSetterMethod =
-            env->GetMethodID(gpsMeasurementClass, "setReceivedGpsTowInNs", longSignature);
+            env->GetMethodID(gnssMeasurementClass, "setReceivedGpsTowInNs", longSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             receivedGpsTowSetterMethod,
             measurement->received_gps_tow_ns);
 
     jmethodID receivedGpsTowUncertaintySetterMethod = env->GetMethodID(
-            gpsMeasurementClass,
+            gnssMeasurementClass,
             "setReceivedGpsTowUncertaintyInNs",
             longSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             receivedGpsTowUncertaintySetterMethod,
             measurement->received_gps_tow_uncertainty_ns);
 
     jmethodID cn0SetterMethod =
-            env->GetMethodID(gpsMeasurementClass, "setCn0InDbHz", doubleSignature);
-    env->CallVoidMethod(gpsMeasurementObject, cn0SetterMethod, measurement->c_n0_dbhz);
+            env->GetMethodID(gnssMeasurementClass, "setCn0InDbHz", doubleSignature);
+    env->CallVoidMethod(gnssMeasurementObject, cn0SetterMethod, measurement->c_n0_dbhz);
 
     jmethodID pseudorangeRateSetterMethod = env->GetMethodID(
-            gpsMeasurementClass,
+            gnssMeasurementClass,
             "setPseudorangeRateInMetersPerSec",
             doubleSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             pseudorangeRateSetterMethod,
             measurement->pseudorange_rate_mps);
 
     jmethodID pseudorangeRateUncertaintySetterMethod = env->GetMethodID(
-            gpsMeasurementClass,
+            gnssMeasurementClass,
             "setPseudorangeRateUncertaintyInMetersPerSec",
             doubleSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             pseudorangeRateUncertaintySetterMethod,
             measurement->pseudorange_rate_uncertainty_mps);
 
     jmethodID accumulatedDeltaRangeStateSetterMethod =
-            env->GetMethodID(gpsMeasurementClass, "setAccumulatedDeltaRangeState", shortSignature);
+            env->GetMethodID(gnssMeasurementClass, "setAccumulatedDeltaRangeState", shortSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             accumulatedDeltaRangeStateSetterMethod,
             measurement->accumulated_delta_range_state);
 
     jmethodID accumulatedDeltaRangeSetterMethod = env->GetMethodID(
-            gpsMeasurementClass,
+            gnssMeasurementClass,
             "setAccumulatedDeltaRangeInMeters",
             doubleSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             accumulatedDeltaRangeSetterMethod,
             measurement->accumulated_delta_range_m);
 
     jmethodID accumulatedDeltaRangeUncertaintySetterMethod = env->GetMethodID(
-            gpsMeasurementClass,
+            gnssMeasurementClass,
             "setAccumulatedDeltaRangeUncertaintyInMeters",
             doubleSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             accumulatedDeltaRangeUncertaintySetterMethod,
             measurement->accumulated_delta_range_uncertainty_m);
 
     if (flags & GPS_MEASUREMENT_HAS_PSEUDORANGE) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setPseudorangeInMeters", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->pseudorange_m);
+                env->GetMethodID(gnssMeasurementClass, "setPseudorangeInMeters", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->pseudorange_m);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_PSEUDORANGE_UNCERTAINTY) {
         jmethodID setterMethod = env->GetMethodID(
-                gpsMeasurementClass,
+                gnssMeasurementClass,
                 "setPseudorangeUncertaintyInMeters",
                 doubleSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->pseudorange_uncertainty_m);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_CODE_PHASE) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setCodePhaseInChips", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->code_phase_chips);
+                env->GetMethodID(gnssMeasurementClass, "setCodePhaseInChips", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->code_phase_chips);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_CODE_PHASE_UNCERTAINTY) {
         jmethodID setterMethod = env->GetMethodID(
-                gpsMeasurementClass,
+                gnssMeasurementClass,
                 "setCodePhaseUncertaintyInChips",
                 doubleSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->code_phase_uncertainty_chips);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_CARRIER_FREQUENCY) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setCarrierFrequencyInHz", floatSignature);
+                env->GetMethodID(gnssMeasurementClass, "setCarrierFrequencyInHz", floatSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->carrier_frequency_hz);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_CARRIER_CYCLES) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setCarrierCycles", longSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->carrier_cycles);
+                env->GetMethodID(gnssMeasurementClass, "setCarrierCycles", longSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->carrier_cycles);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_CARRIER_PHASE) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setCarrierPhase", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->carrier_phase);
+                env->GetMethodID(gnssMeasurementClass, "setCarrierPhase", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->carrier_phase);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY) {
         jmethodID setterMethod = env->GetMethodID(
-                gpsMeasurementClass,
+                gnssMeasurementClass,
                 "setCarrierPhaseUncertainty",
                 doubleSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->carrier_phase_uncertainty);
     }
 
     jmethodID lossOfLockSetterMethod =
-            env->GetMethodID(gpsMeasurementClass, "setLossOfLock", byteSignature);
-    env->CallVoidMethod(gpsMeasurementObject, lossOfLockSetterMethod, measurement->loss_of_lock);
+            env->GetMethodID(gnssMeasurementClass, "setLossOfLock", byteSignature);
+    env->CallVoidMethod(gnssMeasurementObject, lossOfLockSetterMethod, measurement->loss_of_lock);
 
     if (flags & GPS_MEASUREMENT_HAS_BIT_NUMBER) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setBitNumber", intSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->bit_number);
+                env->GetMethodID(gnssMeasurementClass, "setBitNumber", intSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->bit_number);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_TIME_FROM_LAST_BIT) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setTimeFromLastBitInMs", shortSignature);
+                env->GetMethodID(gnssMeasurementClass, "setTimeFromLastBitInMs", shortSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->time_from_last_bit_ms);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_DOPPLER_SHIFT) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setDopplerShiftInHz", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->doppler_shift_hz);
+                env->GetMethodID(gnssMeasurementClass, "setDopplerShiftInHz", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->doppler_shift_hz);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_DOPPLER_SHIFT_UNCERTAINTY) {
         jmethodID setterMethod = env->GetMethodID(
-                gpsMeasurementClass,
+                gnssMeasurementClass,
                 "setDopplerShiftUncertaintyInHz",
                 doubleSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->doppler_shift_uncertainty_hz);
     }
 
     jmethodID multipathIndicatorSetterMethod =
-            env->GetMethodID(gpsMeasurementClass, "setMultipathIndicator", byteSignature);
+            env->GetMethodID(gnssMeasurementClass, "setMultipathIndicator", byteSignature);
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             multipathIndicatorSetterMethod,
             measurement->multipath_indicator);
 
     if (flags & GPS_MEASUREMENT_HAS_SNR) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setSnrInDb", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->snr_db);
+                env->GetMethodID(gnssMeasurementClass, "setSnrInDb", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->snr_db);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_ELEVATION) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setElevationInDeg", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->elevation_deg);
+                env->GetMethodID(gnssMeasurementClass, "setElevationInDeg", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->elevation_deg);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_ELEVATION_UNCERTAINTY) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setElevationUncertaintyInDeg", doubleSignature);
+                env->GetMethodID(gnssMeasurementClass, "setElevationUncertaintyInDeg", doubleSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->elevation_uncertainty_deg);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_AZIMUTH) {
         jmethodID setterMethod =
-                env->GetMethodID(gpsMeasurementClass, "setAzimuthInDeg", doubleSignature);
-        env->CallVoidMethod(gpsMeasurementObject, setterMethod, measurement->azimuth_deg);
+                env->GetMethodID(gnssMeasurementClass, "setAzimuthInDeg", doubleSignature);
+        env->CallVoidMethod(gnssMeasurementObject, setterMethod, measurement->azimuth_deg);
     }
 
     if (flags & GPS_MEASUREMENT_HAS_AZIMUTH_UNCERTAINTY) {
         jmethodID setterMethod = env->GetMethodID(
-                gpsMeasurementClass,
+                gnssMeasurementClass,
                 "setAzimuthUncertaintyInDeg",
                 doubleSignature);
         env->CallVoidMethod(
-                gpsMeasurementObject,
+                gnssMeasurementObject,
                 setterMethod,
                 measurement->azimuth_uncertainty_deg);
     }
 
-    jmethodID usedInFixSetterMethod = env->GetMethodID(gpsMeasurementClass, "setUsedInFix", "(Z)V");
+    jmethodID usedInFixSetterMethod = env->GetMethodID(gnssMeasurementClass, "setUsedInFix", "(Z)V");
     env->CallVoidMethod(
-            gpsMeasurementObject,
+            gnssMeasurementObject,
             usedInFixSetterMethod,
             (flags & GPS_MEASUREMENT_HAS_USED_IN_FIX) && measurement->used_in_fix);
 
     if (size == sizeof(GpsMeasurement)) {
       jmethodID setterMethod =
-          env->GetMethodID(gpsMeasurementClass,
+          env->GetMethodID(gnssMeasurementClass,
                            "setPseudorangeRateCarrierInMetersPerSec",
                            doubleSignature);
       env->CallVoidMethod(
-          gpsMeasurementObject,
+          gnssMeasurementObject,
           setterMethod,
           measurement->pseudorange_rate_carrier_mps);
 
       setterMethod =
-          env->GetMethodID(gpsMeasurementClass,
+          env->GetMethodID(gnssMeasurementClass,
                            "setPseudorangeRateCarrierUncertaintyInMetersPerSec",
                            doubleSignature);
       env->CallVoidMethod(
-          gpsMeasurementObject,
+          gnssMeasurementObject,
           setterMethod,
           measurement->pseudorange_rate_carrier_uncertainty_mps);
     }
 
-    env->DeleteLocalRef(gpsMeasurementClass);
-    return gpsMeasurementObject;
+    env->DeleteLocalRef(gnssMeasurementClass);
+    return gnssMeasurementObject;
 }
 
 /**
@@ -1321,23 +1321,23 @@ static jobjectArray translate_gps_measurements(JNIEnv* env, void* data) {
         return NULL;
     }
 
-    jclass gpsMeasurementClass = env->FindClass("android/location/GpsMeasurement");
-    jobjectArray gpsMeasurementArray = env->NewObjectArray(
+    jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
+    jobjectArray gnssMeasurementArray = env->NewObjectArray(
             measurementCount,
-            gpsMeasurementClass,
+            gnssMeasurementClass,
             NULL /* initialElement */);
 
     for (uint16_t i = 0; i < measurementCount; ++i) {
-        jobject gpsMeasurement = translate_gps_measurement(
+        jobject gnssMeasurement = translate_gps_measurement(
             env,
             &(gps_data->measurements[i]),
             sizeof(gps_data->measurements[0]));
-        env->SetObjectArrayElement(gpsMeasurementArray, i, gpsMeasurement);
-        env->DeleteLocalRef(gpsMeasurement);
+        env->SetObjectArrayElement(gnssMeasurementArray, i, gnssMeasurement);
+        env->DeleteLocalRef(gnssMeasurement);
     }
 
-    env->DeleteLocalRef(gpsMeasurementClass);
-    return gpsMeasurementArray;
+    env->DeleteLocalRef(gnssMeasurementClass);
+    return gnssMeasurementArray;
 }
 
 static void measurement_callback(GpsData* data) {
@@ -1360,25 +1360,25 @@ static void measurement_callback(GpsData* data) {
         gpsClock = translate_gps_clock(env, &data->clock, sizeof(GpsClock_v1));
         measurementArray = translate_gps_measurements<GpsData_v1>(env, data);
     }
-    jclass gpsMeasurementsEventClass = env->FindClass("android/location/GpsMeasurementsEvent");
-    jmethodID gpsMeasurementsEventCtor = env->GetMethodID(
-        gpsMeasurementsEventClass,
+    jclass gnssMeasurementsEventClass = env->FindClass("android/location/GnssMeasurementsEvent");
+    jmethodID gnssMeasurementsEventCtor = env->GetMethodID(
+        gnssMeasurementsEventClass,
         "<init>",
-        "(Landroid/location/GpsClock;[Landroid/location/GpsMeasurement;)V");
+        "(Landroid/location/GnssClock;[Landroid/location/GnssMeasurement;)V");
 
-    jobject gpsMeasurementsEvent = env->NewObject(
-        gpsMeasurementsEventClass,
-        gpsMeasurementsEventCtor,
+    jobject gnssMeasurementsEvent = env->NewObject(
+        gnssMeasurementsEventClass,
+        gnssMeasurementsEventCtor,
         gpsClock,
         measurementArray);
 
-    env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData, gpsMeasurementsEvent);
+    env->CallVoidMethod(mCallbacksObj, method_reportMeasurementData, gnssMeasurementsEvent);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 
     env->DeleteLocalRef(gpsClock);
     env->DeleteLocalRef(measurementArray);
-    env->DeleteLocalRef(gpsMeasurementsEventClass);
-    env->DeleteLocalRef(gpsMeasurementsEvent);
+    env->DeleteLocalRef(gnssMeasurementsEventClass);
+    env->DeleteLocalRef(gnssMeasurementsEvent);
 }
 
 GpsMeasurementCallbacks sGpsMeasurementCallbacks = {
@@ -1432,7 +1432,7 @@ static jobject translate_gps_navigation_message(JNIEnv* env, GpsNavigationMessag
         return NULL;
     }
 
-    jclass navigationMessageClass = env->FindClass("android/location/GpsNavigationMessage");
+    jclass navigationMessageClass = env->FindClass("android/location/GnssNavigationMessage");
     jmethodID navigationMessageCtor = env->GetMethodID(navigationMessageClass, "<init>", "()V");
     jobject navigationMessageObject = env->NewObject(navigationMessageClass, navigationMessageCtor);
 
@@ -1470,11 +1470,11 @@ static void navigation_message_callback(GpsNavigationMessage* message) {
         jobject navigationMessage = translate_gps_navigation_message(env, message);
 
         jclass navigationMessageEventClass =
-                env->FindClass("android/location/GpsNavigationMessageEvent");
+                env->FindClass("android/location/GnssNavigationMessageEvent");
         jmethodID navigationMessageEventCtor = env->GetMethodID(
                 navigationMessageEventClass,
                 "<init>",
-                "(Landroid/location/GpsNavigationMessage;)V");
+                "(Landroid/location/GnssNavigationMessage;)V");
         jobject navigationMessageEvent = env->NewObject(
                 navigationMessageEventClass,
                 navigationMessageEventCtor,

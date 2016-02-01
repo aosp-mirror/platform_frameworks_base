@@ -16,12 +16,12 @@
 
 package android.location;
 
-import android.location.GpsMeasurementsEvent;
+import android.location.GnssNavigationMessageEvent;
 
 /**
  * {@hide}
  */
-oneway interface IGpsMeasurementsListener {
-    void onGpsMeasurementsReceived(in GpsMeasurementsEvent event);
+oneway interface IGnssNavigationMessageListener {
+    void onGnssNavigationMessageReceived(in GnssNavigationMessageEvent event);
     void onStatusChanged(in int status);
 }

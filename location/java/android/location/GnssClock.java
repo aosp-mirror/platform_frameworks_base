@@ -27,14 +27,14 @@ import java.lang.annotation.RetentionPolicy;
  * A class containing a GPS clock timestamp.
  * It represents a measurement of the GPS receiver's clock.
  */
-public final class GpsClock implements Parcelable {
+public final class GnssClock implements Parcelable {
 
     // The following enumerations must be in sync with the values declared in gps.h
 
     /** The type of the GPS Clock. */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({CLOCK_TYPE_UNKNOWN, CLOCK_TYPE_LOCAL_HW_TIME, CLOCK_TYPE_GPS_TIME})
-    public @interface GpsClockType {}
+    public @interface GnssClockType {}
 
     /**
      * The type of the time stored is not available or it is unknown.
@@ -75,14 +75,14 @@ public final class GpsClock implements Parcelable {
     private double mDriftUncertaintyInNsPerSec;
     private long mTimeOfLastHwClockDiscontinuityInNs;
 
-    GpsClock() {
+    GnssClock() {
         initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
      */
-    public void set(GpsClock clock) {
+    public void set(GnssClock clock) {
         mFlags = clock.mFlags;
         mLeapSecond = clock.mLeapSecond;
         mType = clock.mType;
@@ -106,7 +106,7 @@ public final class GpsClock implements Parcelable {
     /**
      * Gets the type of time reported by {@link #getTimeInNs()}.
      */
-    @GpsClockType
+    @GnssClockType
     public byte getType() {
         return mType;
     }
@@ -114,7 +114,7 @@ public final class GpsClock implements Parcelable {
     /**
      * Sets the type of time reported.
      */
-    public void setType(@GpsClockType byte value) {
+    public void setType(@GnssClockType byte value) {
         mType = value;
     }
 
@@ -416,10 +416,10 @@ public final class GpsClock implements Parcelable {
         mDriftUncertaintyInNsPerSec = Double.NaN;
     }
 
-    public static final Creator<GpsClock> CREATOR = new Creator<GpsClock>() {
+    public static final Creator<GnssClock> CREATOR = new Creator<GnssClock>() {
         @Override
-        public GpsClock createFromParcel(Parcel parcel) {
-            GpsClock gpsClock = new GpsClock();
+        public GnssClock createFromParcel(Parcel parcel) {
+            GnssClock gpsClock = new GnssClock();
 
             gpsClock.mFlags = (short) parcel.readInt();
             gpsClock.mLeapSecond = (short) parcel.readInt();
@@ -437,8 +437,8 @@ public final class GpsClock implements Parcelable {
         }
 
         @Override
-        public GpsClock[] newArray(int size) {
-            return new GpsClock[size];
+        public GnssClock[] newArray(int size) {
+            return new GnssClock[size];
         }
     };
 
@@ -465,7 +465,7 @@ public final class GpsClock implements Parcelable {
     public String toString() {
         final String format = "   %-15s = %s\n";
         final String formatWithUncertainty = "   %-15s = %-25s   %-26s = %s\n";
-        StringBuilder builder = new StringBuilder("GpsClock:\n");
+        StringBuilder builder = new StringBuilder("GnssClock:\n");
 
         builder.append(String.format(format, "Type", getTypeString()));
 

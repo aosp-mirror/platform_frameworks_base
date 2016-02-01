@@ -20,41 +20,42 @@ import android.content.Context;
 import android.os.RemoteException;
 
 /**
- * A handler class to manage transport callbacks for {@link GpsMeasurementsEvent.Callback}.
+ * A handler class to manage transport callbacks for {@link GnssMeasurementsEvent.Callback}.
  *
  * @hide
  */
-class GpsMeasurementCallbackTransport
-        extends LocalListenerHelper<GpsMeasurementsEvent.Callback> {
+class GnssMeasurementCallbackTransport
+        extends LocalListenerHelper<GnssMeasurementsEvent.Callback> {
     private final ILocationManager mLocationManager;
 
-    private final IGpsMeasurementsListener mListenerTransport = new ListenerTransport();
+    private final IGnssMeasurementsListener mListenerTransport = new ListenerTransport();
 
-    public GpsMeasurementCallbackTransport(Context context, ILocationManager locationManager) {
-        super(context, "GpsMeasurementListenerTransport");
+    public GnssMeasurementCallbackTransport(Context context, ILocationManager locationManager) {
+        super(context, "GnssMeasurementListenerTransport");
         mLocationManager = locationManager;
     }
 
     @Override
     protected boolean registerWithServer() throws RemoteException {
-        return mLocationManager.addGpsMeasurementsListener(
+        return mLocationManager.addGnssMeasurementsListener(
                 mListenerTransport,
                 getContext().getPackageName());
     }
 
     @Override
     protected void unregisterFromServer() throws RemoteException {
-        mLocationManager.removeGpsMeasurementsListener(mListenerTransport);
+        mLocationManager.removeGnssMeasurementsListener(mListenerTransport);
     }
 
-    private class ListenerTransport extends IGpsMeasurementsListener.Stub {
+    private class ListenerTransport extends IGnssMeasurementsListener.Stub {
         @Override
-        public void onGpsMeasurementsReceived(final GpsMeasurementsEvent event) {
-            ListenerOperation<GpsMeasurementsEvent.Callback> operation =
-                    new ListenerOperation<GpsMeasurementsEvent.Callback>() {
+        public void onGnssMeasurementsReceived(final GnssMeasurementsEvent event) {
+            ListenerOperation<GnssMeasurementsEvent.Callback> operation =
+                    new ListenerOperation<GnssMeasurementsEvent.Callback>() {
                 @Override
-                public void execute(GpsMeasurementsEvent.Callback callback) throws RemoteException {
-                    callback.onGpsMeasurementsReceived(event);
+                public void execute(GnssMeasurementsEvent.Callback callback)
+                        throws RemoteException {
+                    callback.onGnssMeasurementsReceived(event);
                 }
             };
             foreach(operation);
@@ -62,10 +63,11 @@ class GpsMeasurementCallbackTransport
 
         @Override
         public void onStatusChanged(final int status) {
-            ListenerOperation<GpsMeasurementsEvent.Callback> operation =
-                    new ListenerOperation<GpsMeasurementsEvent.Callback>() {
+            ListenerOperation<GnssMeasurementsEvent.Callback> operation =
+                    new ListenerOperation<GnssMeasurementsEvent.Callback>() {
                 @Override
-                public void execute(GpsMeasurementsEvent.Callback callback) throws RemoteException {
+                public void execute(GnssMeasurementsEvent.Callback callback)
+                        throws RemoteException {
                     callback.onStatusChanged(status);
                 }
             };

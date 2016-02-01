@@ -16,41 +16,40 @@
 
 package com.android.server.location;
 
-import android.location.GpsNavigationMessageEvent;
-import android.location.IGpsNavigationMessageListener;
+import android.location.GnssMeasurementsEvent;
+import android.location.IGnssMeasurementsListener;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
 /**
- * An base implementation for GPS navigation messages provider.
+ * An base implementation for GPS measurements provider.
  * It abstracts out the responsibility of handling listeners, while still allowing technology
  * specific implementations to be built.
  *
  * @hide
  */
-public abstract class GpsNavigationMessageProvider
-        extends RemoteListenerHelper<IGpsNavigationMessageListener> {
-    private static final String TAG = "GpsNavigationMessageProvider";
+public abstract class GnssMeasurementsProvider
+        extends RemoteListenerHelper<IGnssMeasurementsListener> {
+    private static final String TAG = "GnssMeasurementsProvider";
 
-    protected GpsNavigationMessageProvider(Handler handler) {
+    protected GnssMeasurementsProvider(Handler handler) {
         super(handler, TAG);
     }
 
-    public void onNavigationMessageAvailable(final GpsNavigationMessageEvent event) {
-        ListenerOperation<IGpsNavigationMessageListener> operation =
-                new ListenerOperation<IGpsNavigationMessageListener>() {
-                    @Override
-                    public void execute(IGpsNavigationMessageListener listener)
-                            throws RemoteException {
-                        listener.onGpsNavigationMessageReceived(event);
-                    }
-                };
+    public void onMeasurementsAvailable(final GnssMeasurementsEvent event) {
+        ListenerOperation<IGnssMeasurementsListener> operation =
+                new ListenerOperation<IGnssMeasurementsListener>() {
+            @Override
+            public void execute(IGnssMeasurementsListener listener) throws RemoteException {
+                listener.onGnssMeasurementsReceived(event);
+            }
+        };
         foreach(operation);
     }
 
-    public void onCapabilitiesUpdated(boolean isGpsNavigationMessageSupported) {
-        setSupported(isGpsNavigationMessageSupported);
+    public void onCapabilitiesUpdated(boolean isGnssMeasurementsSupported) {
+        setSupported(isGnssMeasurementsSupported);
         updateResult();
     }
 
@@ -61,19 +60,19 @@ public abstract class GpsNavigationMessageProvider
     }
 
     @Override
-    protected ListenerOperation<IGpsNavigationMessageListener> getHandlerOperation(int result) {
+    protected ListenerOperation<IGnssMeasurementsListener> getHandlerOperation(int result) {
         int status;
         switch (result) {
             case RESULT_SUCCESS:
-                status = GpsNavigationMessageEvent.STATUS_READY;
+                status = GnssMeasurementsEvent.STATUS_READY;
                 break;
             case RESULT_NOT_AVAILABLE:
             case RESULT_NOT_SUPPORTED:
             case RESULT_INTERNAL_ERROR:
-                status = GpsNavigationMessageEvent.STATUS_NOT_SUPPORTED;
+                status = GnssMeasurementsEvent.STATUS_NOT_SUPPORTED;
                 break;
             case RESULT_GPS_LOCATION_DISABLED:
-                status = GpsNavigationMessageEvent.STATUS_GPS_LOCATION_DISABLED;
+                status = GnssMeasurementsEvent.STATUS_GPS_LOCATION_DISABLED;
                 break;
             case RESULT_UNKNOWN:
                 return null;
@@ -85,7 +84,7 @@ public abstract class GpsNavigationMessageProvider
     }
 
     private static class StatusChangedOperation
-            implements ListenerOperation<IGpsNavigationMessageListener> {
+            implements ListenerOperation<IGnssMeasurementsListener> {
         private final int mStatus;
 
         public StatusChangedOperation(int status) {
@@ -93,7 +92,7 @@ public abstract class GpsNavigationMessageProvider
         }
 
         @Override
-        public void execute(IGpsNavigationMessageListener listener) throws RemoteException {
+        public void execute(IGnssMeasurementsListener listener) throws RemoteException {
             listener.onStatusChanged(mStatus);
         }
     }

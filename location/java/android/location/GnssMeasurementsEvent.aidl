@@ -16,4 +16,4 @@
 
 package android.location;
 
-parcelable GpsMeasurementsEvent;
+parcelable GnssMeasurementsEvent;

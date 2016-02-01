@@ -21,9 +21,9 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
-import android.location.IGpsMeasurementsListener;
-import android.location.IGpsNavigationMessageListener;
+import android.location.IGnssNavigationMessageListener;
 import android.location.ILocationListener;
 import android.location.Location;
 import android.location.LocationRequest;
@@ -61,13 +61,13 @@ interface ILocationManager
 
     boolean sendNiResponse(int notifId, int userResponse);
 
-    boolean addGpsMeasurementsListener(in IGpsMeasurementsListener listener, in String packageName);
-    void removeGpsMeasurementsListener(in IGpsMeasurementsListener listener);
+    boolean addGnssMeasurementsListener(in IGnssMeasurementsListener listener, in String packageName);
+    void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
 
-    boolean addGpsNavigationMessageListener(
-            in IGpsNavigationMessageListener listener,
+    boolean addGnssNavigationMessageListener(
+            in IGnssNavigationMessageListener listener,
             in String packageName);
-    void removeGpsNavigationMessageListener(in IGpsNavigationMessageListener listener);
+    void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGpsYearOfHardware();
 

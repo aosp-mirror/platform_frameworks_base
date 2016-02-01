@@ -28,7 +28,7 @@ import java.security.InvalidParameterException;
 /**
  * A class containing a GPS satellite Navigation Message.
  */
-public final class GpsNavigationMessage implements Parcelable {
+public final class GnssNavigationMessage implements Parcelable {
 
     private static final byte[] EMPTY_ARRAY = new byte[0];
 
@@ -36,7 +36,7 @@ public final class GpsNavigationMessage implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MESSAGE_TYPE_UNKNOWN, MESSAGE_TYPE_L1CA, MESSAGE_TYPE_L2CNAV, MESSAGE_TYPE_L5CNAV,
             MESSAGE_TYPE_CNAV2})
-    public @interface GpsNavigationMessageType {}
+    public @interface GnssNavigationMessageType {}
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -90,14 +90,14 @@ public final class GpsNavigationMessage implements Parcelable {
     private byte[] mData;
     private short mStatus;
 
-    GpsNavigationMessage() {
+    GnssNavigationMessage() {
         initialize();
     }
 
     /**
      * Sets all contents to the values stored in the provided object.
      */
-    public void set(GpsNavigationMessage navigationMessage) {
+    public void set(GnssNavigationMessage navigationMessage) {
         mType = navigationMessage.mType;
         mPrn = navigationMessage.mPrn;
         mMessageId = navigationMessage.mMessageId;
@@ -116,7 +116,7 @@ public final class GpsNavigationMessage implements Parcelable {
     /**
      * Gets the type of the navigation message contained in the object.
      */
-    @GpsNavigationMessageType
+    @GnssNavigationMessageType
     public byte getType() {
         return mType;
     }
@@ -124,7 +124,7 @@ public final class GpsNavigationMessage implements Parcelable {
     /**
      * Sets the type of the navigation message.
      */
-    public void setType(@GpsNavigationMessageType byte value) {
+    public void setType(@GnssNavigationMessageType byte value) {
         mType = value;
     }
 
@@ -249,11 +249,11 @@ public final class GpsNavigationMessage implements Parcelable {
         }
     }
 
-    public static final Creator<GpsNavigationMessage> CREATOR =
-            new Creator<GpsNavigationMessage>() {
+    public static final Creator<GnssNavigationMessage> CREATOR =
+            new Creator<GnssNavigationMessage>() {
         @Override
-        public GpsNavigationMessage createFromParcel(Parcel parcel) {
-            GpsNavigationMessage navigationMessage = new GpsNavigationMessage();
+        public GnssNavigationMessage createFromParcel(Parcel parcel) {
+            GnssNavigationMessage navigationMessage = new GnssNavigationMessage();
 
             navigationMessage.setType(parcel.readByte());
             navigationMessage.setPrn(parcel.readByte());
@@ -276,8 +276,8 @@ public final class GpsNavigationMessage implements Parcelable {
         }
 
         @Override
-        public GpsNavigationMessage[] newArray(int size) {
-            return new GpsNavigationMessage[size];
+        public GnssNavigationMessage[] newArray(int size) {
+            return new GnssNavigationMessage[size];
         }
     };
 
@@ -299,7 +299,7 @@ public final class GpsNavigationMessage implements Parcelable {
     @Override
     public String toString() {
         final String format = "   %-15s = %s\n";
-        StringBuilder builder = new StringBuilder("GpsNavigationMessage:\n");
+        StringBuilder builder = new StringBuilder("GnssNavigationMessage:\n");
 
         builder.append(String.format(format, "Type", getTypeString()));
         builder.append(String.format(format, "Prn", mPrn));

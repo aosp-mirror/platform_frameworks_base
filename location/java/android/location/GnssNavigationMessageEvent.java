@@ -29,11 +29,11 @@ import java.security.InvalidParameterException;
  * A class implementing a container for data associated with a navigation message event.
  * Events are delivered to registered instances of {@link Callback}.
  */
-public final class GpsNavigationMessageEvent implements Parcelable {
+public final class GnssNavigationMessageEvent implements Parcelable {
     /** The status of GPS measurements event. */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GPS_LOCATION_DISABLED})
-    public @interface GpsNavigationMessageStatus {}
+    public @interface GnssNavigationMessageStatus {}
 
     /**
      * The system does not support tracking of GPS Navigation Messages. This status will not change
@@ -52,27 +52,27 @@ public final class GpsNavigationMessageEvent implements Parcelable {
      */
     public static final int STATUS_GPS_LOCATION_DISABLED = 2;
 
-    private final GpsNavigationMessage mNavigationMessage;
+    private final GnssNavigationMessage mNavigationMessage;
 
     /**
      * Used for receiving GPS satellite Navigation Messages from the GPS engine.
      * You can implement this interface and call
-     * {@link LocationManager#registerGpsNavigationMessageCallback}.
+     * {@link LocationManager#registerGnssNavigationMessageCallback}.
      */
     public static abstract class Callback {
 
         /**
          * Returns the latest collected GPS Navigation Message.
          */
-        public void onGpsNavigationMessageReceived(GpsNavigationMessageEvent event) {}
+        public void onGnssNavigationMessageReceived(GnssNavigationMessageEvent event) {}
 
         /**
          * Returns the latest status of the GPS Navigation Messages sub-system.
          */
-        public void onStatusChanged(@GpsNavigationMessageStatus int status) {}
+        public void onStatusChanged(@GnssNavigationMessageStatus int status) {}
     }
 
-    public GpsNavigationMessageEvent(GpsNavigationMessage message) {
+    public GnssNavigationMessageEvent(GnssNavigationMessage message) {
         if (message == null) {
             throw new InvalidParameterException("Parameter 'message' must not be null.");
         }
@@ -80,22 +80,22 @@ public final class GpsNavigationMessageEvent implements Parcelable {
     }
 
     @NonNull
-    public GpsNavigationMessage getNavigationMessage() {
+    public GnssNavigationMessage getNavigationMessage() {
         return mNavigationMessage;
     }
 
-    public static final Creator<GpsNavigationMessageEvent> CREATOR =
-            new Creator<GpsNavigationMessageEvent>() {
+    public static final Creator<GnssNavigationMessageEvent> CREATOR =
+            new Creator<GnssNavigationMessageEvent>() {
                 @Override
-                public GpsNavigationMessageEvent createFromParcel(Parcel in) {
+                public GnssNavigationMessageEvent createFromParcel(Parcel in) {
                     ClassLoader classLoader = getClass().getClassLoader();
-                    GpsNavigationMessage navigationMessage = in.readParcelable(classLoader);
-                    return new GpsNavigationMessageEvent(navigationMessage);
+                    GnssNavigationMessage navigationMessage = in.readParcelable(classLoader);
+                    return new GnssNavigationMessageEvent(navigationMessage);
                 }
 
                 @Override
-                public GpsNavigationMessageEvent[] newArray(int size) {
-                    return new GpsNavigationMessageEvent[size];
+                public GnssNavigationMessageEvent[] newArray(int size) {
+                    return new GnssNavigationMessageEvent[size];
                 }
             };
 
@@ -111,7 +111,7 @@ public final class GpsNavigationMessageEvent implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("[ GpsNavigationMessageEvent:\n\n");
+        StringBuilder builder = new StringBuilder("[ GnssNavigationMessageEvent:\n\n");
         builder.append(mNavigationMessage.toString());
         builder.append("\n]");
         return builder.toString();

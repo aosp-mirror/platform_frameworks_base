@@ -24,12 +24,12 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.location.ActivityRecognitionProxy;
 import com.android.server.location.FlpHardwareProvider;
 import com.android.server.location.FusedProxy;
-import com.android.server.location.GnssLocationProvider;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceManager;
 import com.android.server.location.GeofenceProxy;
-import com.android.server.location.GpsMeasurementsProvider;
-import com.android.server.location.GpsNavigationMessageProvider;
+import com.android.server.location.GnssLocationProvider;
+import com.android.server.location.GnssMeasurementsProvider;
+import com.android.server.location.GnssNavigationMessageProvider;
 import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
 import com.android.server.location.LocationProviderInterface;
@@ -61,11 +61,11 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.IGnssMeasurementsListener;
 import android.location.IGnssStatusListener;
 import android.location.IGnssStatusProvider;
 import android.location.IGpsGeofenceHardware;
-import android.location.IGpsMeasurementsListener;
-import android.location.IGpsNavigationMessageListener;
+import android.location.IGnssNavigationMessageListener;
 import android.location.ILocationListener;
 import android.location.ILocationManager;
 import android.location.INetInitiatedListener;
@@ -162,8 +162,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     private LocationWorkerHandler mLocationHandler;
     private PassiveProvider mPassiveProvider;  // track passive provider for special cases
     private LocationBlacklist mBlacklist;
-    private GpsMeasurementsProvider mGpsMeasurementsProvider;
-    private GpsNavigationMessageProvider mGpsNavigationMessageProvider;
+    private GnssMeasurementsProvider mGnssMeasurementsProvider;
+    private GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     private IGpsGeofenceHardware mGpsGeofenceProxy;
 
     // --- fields below are protected by mLock ---
@@ -467,8 +467,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             mNetInitiatedListener = gnssProvider.getNetInitiatedListener();
             addProviderLocked(gnssProvider);
             mRealProviders.put(LocationManager.GPS_PROVIDER, gnssProvider);
-            mGpsMeasurementsProvider = gnssProvider.getGpsMeasurementsProvider();
-            mGpsNavigationMessageProvider = gnssProvider.getGpsNavigationMessageProvider();
+            mGnssMeasurementsProvider = gnssProvider.getGnssMeasurementsProvider();
+            mGnssNavigationMessageProvider = gnssProvider.getGnssNavigationMessageProvider();
             mGpsGeofenceProxy = gnssProvider.getGpsGeofenceProxy();
         }
 
@@ -994,7 +994,7 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     @Override
     public int getGpsYearOfHardware() {
-        if (mGpsNavigationMessageProvider != null) {
+        if (mGnssNavigationMessageProvider != null) {
             return mGpsSystemInfoProvider.getGpsYearOfHardware();
         } else {
             return 0;
@@ -1923,8 +1923,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean addGpsMeasurementsListener(
-            IGpsMeasurementsListener listener,
+    public boolean addGnssMeasurementsListener(
+            IGnssMeasurementsListener listener,
             String packageName) {
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         checkResolutionLevelIsSufficientForProviderUse(
@@ -1941,22 +1941,22 @@ public class LocationManagerService extends ILocationManager.Stub {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (!hasLocationAccess || mGpsMeasurementsProvider == null) {
+        if (!hasLocationAccess || mGnssMeasurementsProvider == null) {
             return false;
         }
-        return mGpsMeasurementsProvider.addListener(listener);
+        return mGnssMeasurementsProvider.addListener(listener);
     }
 
     @Override
-    public void removeGpsMeasurementsListener(IGpsMeasurementsListener listener) {
-        if (mGpsMeasurementsProvider != null) {
-            mGpsMeasurementsProvider.removeListener(listener);
+    public void removeGnssMeasurementsListener(IGnssMeasurementsListener listener) {
+        if (mGnssMeasurementsProvider != null) {
+            mGnssMeasurementsProvider.removeListener(listener);
         }
     }
 
     @Override
-    public boolean addGpsNavigationMessageListener(
-            IGpsNavigationMessageListener listener,
+    public boolean addGnssNavigationMessageListener(
+            IGnssNavigationMessageListener listener,
             String packageName) {
         int allowedResolutionLevel = getCallerAllowedResolutionLevel();
         checkResolutionLevelIsSufficientForProviderUse(
@@ -1973,16 +1973,16 @@ public class LocationManagerService extends ILocationManager.Stub {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (!hasLocationAccess || mGpsNavigationMessageProvider == null) {
+        if (!hasLocationAccess || mGnssNavigationMessageProvider == null) {
             return false;
         }
-        return mGpsNavigationMessageProvider.addListener(listener);
+        return mGnssNavigationMessageProvider.addListener(listener);
     }
 
     @Override
-    public void removeGpsNavigationMessageListener(IGpsNavigationMessageListener listener) {
-        if (mGpsNavigationMessageProvider != null) {
-            mGpsNavigationMessageProvider.removeListener(listener);
+    public void removeGnssNavigationMessageListener(IGnssNavigationMessageListener listener) {
+        if (mGnssNavigationMessageProvider != null) {
+            mGnssNavigationMessageProvider.removeListener(listener);
         }
     }
 
