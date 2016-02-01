@@ -248,7 +248,8 @@ LOCAL_SRC_FILES += \
     tests/unit/VectorDrawableTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/StringUtilsTests.cpp \
-    tests/unit/BufferPoolTests.cpp
+    tests/unit/BufferPoolTests.cpp \
+    tests/unit/TextDropShadowCacheTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \

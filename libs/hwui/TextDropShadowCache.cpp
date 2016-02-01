@@ -148,7 +148,7 @@ void TextDropShadowCache::setMaxSize(uint32_t maxSize) {
 
 void TextDropShadowCache::operator()(ShadowText&, ShadowTexture*& texture) {
     if (texture) {
-        mSize -= texture->bitmapSize;
+        mSize -= texture->objectSize();
 
         if (mDebugEnabled) {
             ALOGD("Shadow texture deleted, size = %d", texture->bitmapSize);
@@ -195,7 +195,9 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs
         // Don't even try to cache a bitmap that's bigger than the cache
         if (size < mMaxSize) {
             while (mSize + size > mMaxSize) {
-                mCache.removeOldest();
+                LOG_ALWAYS_FATAL_IF(!mCache.removeOldest(),
+                        "Failed to remove oldest from cache. mSize = %"
+                        PRIu32 ", mCache.size() = %zu", mSize, mCache.size());
             }
         }
 
@@ -212,7 +214,7 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs
 
             entry.copyTextLocally();
 
-            mSize += size;
+            mSize += texture->objectSize();
             mCache.put(entry, texture);
         } else {
             texture->cleanup = true;
