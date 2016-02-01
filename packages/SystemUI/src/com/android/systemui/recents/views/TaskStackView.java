@@ -16,6 +16,10 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.ComponentName;
@@ -34,6 +38,7 @@ import android.util.MutableBoolean;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Interpolator;
@@ -85,10 +90,6 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 
 /* The visual representation of a task stack view */
 public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCallbacks,
@@ -135,6 +136,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     boolean mTaskViewsClipDirty = true;
     boolean mAwaitingFirstLayout = true;
+    boolean mInMeasureLayout = false;
     boolean mEnterAnimationComplete = false;
     boolean mTouchExplorationEnabled;
     boolean mScreenPinningEnabled;
@@ -1137,6 +1139,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        mInMeasureLayout = true;
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -1159,22 +1162,29 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTmpTaskViews.addAll(mViewPool.getViews());
         int taskViewCount = mTmpTaskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
-            TaskView tv = mTmpTaskViews.get(i);
-            if (tv.getBackground() != null) {
-                tv.getBackground().getPadding(mTmpRect);
-            } else {
-                mTmpRect.setEmpty();
-            }
-            tv.measure(
-                    MeasureSpec.makeMeasureSpec(
-                            mLayoutAlgorithm.mTaskRect.width() + mTmpRect.left + mTmpRect.right,
-                            MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(
-                            mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom,
-                            MeasureSpec.EXACTLY));
+            measureTaskView(mTmpTaskViews.get(i));
         }
 
         setMeasuredDimension(width, height);
+        mInMeasureLayout = false;
+    }
+
+    /**
+     * Measures a TaskView.
+     */
+    private void measureTaskView(TaskView tv) {
+        if (tv.getBackground() != null) {
+            tv.getBackground().getPadding(mTmpRect);
+        } else {
+            mTmpRect.setEmpty();
+        }
+        tv.measure(
+                MeasureSpec.makeMeasureSpec(
+                        mLayoutAlgorithm.mTaskRect.width() + mTmpRect.left + mTmpRect.right,
+                        MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(
+                        mLayoutAlgorithm.mTaskRect.height() + mTmpRect.top + mTmpRect.bottom,
+                        MeasureSpec.EXACTLY));
     }
 
     /**
@@ -1190,15 +1200,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mTmpTaskViews.addAll(mViewPool.getViews());
         int taskViewCount = mTmpTaskViews.size();
         for (int i = 0; i < taskViewCount; i++) {
-            TaskView tv = mTmpTaskViews.get(i);
-            if (tv.getBackground() != null) {
-                tv.getBackground().getPadding(mTmpRect);
-            } else {
-                mTmpRect.setEmpty();
-            }
-            Rect taskRect = mLayoutAlgorithm.mTaskRect;
-            tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
-                    taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
+            layoutTaskView(mTmpTaskViews.get(i));
         }
 
         if (changed) {
@@ -1213,8 +1215,21 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mAwaitingFirstLayout || !mEnterAnimationComplete) {
             mAwaitingFirstLayout = false;
             onFirstLayout();
-            return;
         }
+    }
+
+    /**
+     * Lays out a TaskView.
+     */
+    private void layoutTaskView(TaskView tv) {
+        if (tv.getBackground() != null) {
+            tv.getBackground().getPadding(mTmpRect);
+        } else {
+            mTmpRect.setEmpty();
+        }
+        Rect taskRect = mLayoutAlgorithm.mTaskRect;
+        tv.layout(taskRect.left - mTmpRect.left, taskRect.top - mTmpRect.top,
+                taskRect.right + mTmpRect.right, taskRect.bottom + mTmpRect.bottom);
     }
 
     /** Handler for the first layout. */
@@ -1229,7 +1244,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Set the task focused state without requesting view focus, and leave the focus animations
         // until after the enter-animation
-        Task launchTask = mStack.getLaunchTarget();
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         int focusedTaskIndex = launchState.getInitialFocusTaskIndex(mStack.getTaskCount());
@@ -1404,7 +1418,21 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Add/attach the view to the hierarchy
         if (isNewView) {
-            addView(tv, insertIndex);
+            if (mInMeasureLayout) {
+                // If we are measuring the layout, then just add the view normally as it will be
+                // laid out during the layout pass
+                addView(tv, insertIndex);
+            } else {
+                // Otherwise, this is from a bindVisibleTaskViews() call outside the measure/layout
+                // pass, and we should layout the new child ourselves
+                ViewGroup.LayoutParams params = tv.getLayoutParams();
+                if (params == null) {
+                    params = generateDefaultLayoutParams();
+                }
+                addViewInLayout(tv, insertIndex, params, true /* preventRequestLayout */);
+                measureTaskView(tv);
+                layoutTaskView(tv);
+            }
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
         }
@@ -1587,6 +1615,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(DragStartEvent event) {
+        // Ensure that the drag task is not animated
+        addIgnoreTask(event.task);
+
         if (event.task.isFreeformTask()) {
             // Animate to the front of the stack
             mStackScroller.animateScroll(mLayoutAlgorithm.mInitialScrollP, null);
