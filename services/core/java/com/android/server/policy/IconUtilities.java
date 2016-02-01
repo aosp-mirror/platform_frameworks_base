@@ -37,7 +37,7 @@ import android.content.Context;
 /**
  * Various utilities shared amongst the Launcher's classes.
  */
-final class IconUtilities {
+public final class IconUtilities {
     private static final String TAG = "IconUtilities";
 
     private static final int sColors[] = { 0xffff0000, 0xff00ff00, 0xff0000ff };
@@ -102,7 +102,7 @@ final class IconUtilities {
      * Returns a bitmap suitable for the all apps view.  The bitmap will be a power
      * of two sized ARGB_8888 bitmap that can be used as a gl texture.
      */
-    private Bitmap createIconBitmap(Drawable icon) {
+    public Bitmap createIconBitmap(Drawable icon) {
         int width = mIconWidth;
         int height = mIconHeight;
 
