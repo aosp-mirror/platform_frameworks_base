@@ -298,6 +298,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
     }
 
+    public ModuleProperties getModuleProperties() {
+        return moduleProperties;
+    }
+
     //---- SoundTrigger.StatusListener methods
     @Override
     public void onRecognition(RecognitionEvent event) {
