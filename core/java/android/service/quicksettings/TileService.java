@@ -28,6 +28,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.WindowManager;
 
 /**
@@ -206,6 +208,20 @@ public class TileService extends Service {
     public final void showDialog(Dialog dialog) {
         dialog.getWindow().getAttributes().token = mToken;
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_QS_DIALOG);
+        dialog.getWindow().getDecorView().addOnAttachStateChangeListener(
+                new OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                try {
+                    mService.onDialogHidden(getQsTile());
+                } catch (RemoteException e) {
+                }
+            }
+        });
         dialog.show();
         try {
             mService.onShowDialog(mTile);

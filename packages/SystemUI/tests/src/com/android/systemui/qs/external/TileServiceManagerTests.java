@@ -91,7 +91,7 @@ public class TileServiceManagerTests extends SysuiTestCase {
         mTileServiceManager.calculateBindPriority(0);
         // Priority shouldn't disappear after the request goes away if we just bound, instead
         // it sticks around to avoid thrashing a bunch of processes.
-        assertEquals(Integer.MAX_VALUE - 1, mTileServiceManager.getBindPriority());
+        assertEquals(Integer.MAX_VALUE - 2, mTileServiceManager.getBindPriority());
 
         mTileServiceManager.setBindAllowed(false);
         captor = ArgumentCaptor.forClass(Boolean.class);
