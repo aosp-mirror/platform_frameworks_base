@@ -93,7 +93,7 @@ public class NotificationPanelView extends PanelView implements
     public static final long DOZE_ANIMATION_DURATION = 700;
 
     private KeyguardAffordanceHelper mAfforanceHelper;
-    private BaseStatusBarHeader mHeader;
+    protected BaseStatusBarHeader mHeader;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
     private QSContainer mQsContainer;
@@ -2404,7 +2404,7 @@ public class NotificationPanelView extends PanelView implements
         setVerticalPanelTranslation(0f);
     }
 
-    private void setVerticalPanelTranslation(float translation) {
+    protected void setVerticalPanelTranslation(float translation) {
         mNotificationStackScroller.setTranslationX(translation);
         mScrollView.setTranslationX(translation);
         mHeader.setTranslationX(translation);

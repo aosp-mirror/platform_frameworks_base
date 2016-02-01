@@ -795,7 +795,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
 
-        // set the inital view visibility
+        // set the initial view visibility
         setAreThereNotifications();
 
         mIconController = new StatusBarIconController(
@@ -2338,8 +2338,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
     }
-
-    Animator mScrollViewAnim, mClearButtonAnim;
 
     @Override
     public void animateExpandNotificationsPanel() {
