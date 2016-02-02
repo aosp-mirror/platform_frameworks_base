@@ -24,7 +24,7 @@
     <string name="label_paper_size" msgid="908654383827777759">"Laki ng papel"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Laki ng papel:"</string>
     <string name="label_color" msgid="1108690305218188969">"Kulay"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Duplex"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Two-sided"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Oryentasyon"</string>
     <string name="label_pages" msgid="7768589729282182230">"Mga Page"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Lahat ng <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>

@@ -21,10 +21,10 @@
     <string name="label_destination" msgid="9132510997381599275">"Destinazione"</string>
     <string name="label_copies" msgid="3634531042822968308">"Copie"</string>
     <string name="label_copies_summary" msgid="3861966063536529540">"Copie:"</string>
-    <string name="label_paper_size" msgid="908654383827777759">"Dimensioni carta"</string>
-    <string name="label_paper_size_summary" msgid="5668204981332138168">"Dimensioni carta:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Formato carta"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Formato carta:"</string>
     <string name="label_color" msgid="1108690305218188969">"A colori"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Due tonalità (Duplex)"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Con doppia funzione"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientamento"</string>
     <string name="label_pages" msgid="7768589729282182230">"Pagine"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Tutte e <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>

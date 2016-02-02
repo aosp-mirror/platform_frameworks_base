@@ -24,7 +24,7 @@
     <string name="label_paper_size" msgid="908654383827777759">"Tamaño del papel"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Tamaño del papel:"</string>
     <string name="label_color" msgid="1108690305218188969">"Color"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Doble cara"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Dos caras"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientación"</string>
     <string name="label_pages" msgid="7768589729282182230">"Páginas"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Todas (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -53,7 +53,7 @@
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Cuadro de búsqueda oculto"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Añadir impresora"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Seleccionar impresora"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"Borrar impresora"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Olvidar impresora"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="other">Se han encontrado <xliff:g id="COUNT_1">%1$s</xliff:g> impresoras</item>
       <item quantity="one">Se ha encontrado <xliff:g id="COUNT_0">%1$s</xliff:g> impresora</item>
