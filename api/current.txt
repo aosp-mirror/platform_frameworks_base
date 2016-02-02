@@ -4422,9 +4422,11 @@ package android.app {
     method public void onInflate(android.content.Context, android.util.AttributeSet, android.os.Bundle);
     method public deprecated void onInflate(android.app.Activity, android.util.AttributeSet, android.os.Bundle);
     method public void onLowMemory();
+    method public void onMultiWindowChanged(boolean);
     method public boolean onOptionsItemSelected(android.view.MenuItem);
     method public void onOptionsMenuClosed(android.view.Menu);
     method public void onPause();
+    method public void onPictureInPictureChanged(boolean);
     method public void onPrepareOptionsMenu(android.view.Menu);
     method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method public void onResume();
@@ -4505,9 +4507,11 @@ package android.app {
     method public void dispatchDestroy();
     method public void dispatchDestroyView();
     method public void dispatchLowMemory();
+    method public void dispatchMultiWindowChanged(boolean);
     method public boolean dispatchOptionsItemSelected(android.view.MenuItem);
     method public void dispatchOptionsMenuClosed(android.view.Menu);
     method public void dispatchPause();
+    method public void dispatchPictureInPictureChanged(boolean);
     method public boolean dispatchPrepareOptionsMenu(android.view.Menu);
     method public void dispatchResume();
     method public void dispatchStart();
