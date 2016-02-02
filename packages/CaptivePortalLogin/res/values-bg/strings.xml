@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Директно използване на тази мрежа"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Без използване на тази мрежа"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Вход в мрежата"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Мрежата, към която опитвате да се присъедините, има проблеми със сигурността."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Например страницата за вход може да не принадлежи на показаната организация."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Продължаване през браузър въпреки това"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Usar esta red como está"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"No usar esta red"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Acceder a la red"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"La red a la que intentas conectarte tiene problemas de seguridad."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Por ejemplo, es posible que la página de acceso no pertenezca a la organización que aparece."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Continuar de todos modos desde el navegador"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"यो सञ्जाल जस्तो छ प्रयोग गर्नुहोस्"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"यो सञ्जाल प्रयोग नगर्नुहोस्"</string>
     <string name="action_bar_label" msgid="917235635415966620">"सञ्जालमा साइन इन गर्नुहोस्"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"तपाईँले सामेल हुन प्रयास गरिरहनु भएको नेटवर्कमा सुरक्षा मुद्दाहरू छन्।"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"उदाहरणका लागि, लग इन पृष्ठ देखाइएको संस्थाको नहुन सक्छ।"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"जे भए पनि ब्राउजर मार्फत जारी राख्नुहोस्"</string>
 </resources>
