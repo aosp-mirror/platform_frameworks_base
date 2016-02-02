@@ -19,6 +19,7 @@ page.image=auto/images/assets/icons/media_app_playback.png
     <ol>
       <li><a href="#overview">Provide Audio Services</a></li>
       <li><a href="#config_manifest">Configure Your Manifest</a></li>
+      <li><a href="#isconnected">Determine if Your App is Connected</a></li>
       <li><a href="#implement_browser">Build a Browser Service</a></li>
       <li><a href="#implement_callback">Implement Play Controls</a></li>
       <li><a href="#support_voice">Support Voice Actions</a></li>
@@ -210,12 +211,12 @@ href="https://www.youtube.com/watch?v=Q96Sw6v4ULg">
 <p class="note"><strong>Note:</strong> The icon you provide should have transparency enabled, so the
 icon's background gets filled in with the app's primary color.</p>
 
-<h2 id=isconnected">Determine if Your App is Connected</h2>
+<h2 id="isconnected">Determine if Your App is Connected</h2>
 <p>
 It is possible to determine if your app is selected as the current media app.</p>
 <p>
-Android Auto broadcasts an intent with <code>com.google.android.gms.car.media.
-STATUS</code> action when a user connects or disconnects from a media app. The broadcast intent is
+Android Auto broadcasts an intent with <code>com.google.android.gms.car.media.STATUS</code>
+action when a user connects or disconnects from a media app. The broadcast intent is
 scoped to the package name of the media app selected. You can register a broadcast receiver in your
 app, preferably in your <a href="{@docRoot}reference/android/service/media/MediaBrowserService.html">
 MediaBrowserService</a> implementation and listen for this intent
