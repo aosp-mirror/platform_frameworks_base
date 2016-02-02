@@ -1989,7 +1989,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 // We get the bounds to use from window manager which has been adjusted for any
                 // screen controls and is also the same for all stacks.
                 mWindowManager.getStackDockedModeBounds(
-                        HOME_STACK_ID, tempRect, true /* ignoreVisibilityOnKeyguardShowing */);
+                        HOME_STACK_ID, tempRect, true /* ignoreVisibility */);
                 for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
                     if (StackId.isResizeableByDockedStack(i)) {
                         ActivityStack otherStack = getStack(i);
@@ -2256,29 +2256,34 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // during the relaunch. If we end up not doing any relaunch, we clear the flags later.
             mWindowManager.setReplacingWindow(topActivity.appToken, animate);
         }
+
+        mWindowManager.deferSurfaceLayout();
         final int preferredLaunchStackId = stackId;
-        final ActivityStack stack = moveTaskToStackUncheckedLocked(
-                task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
-        stackId = stack.mStackId;
-
-        if (!animate) {
-            stack.mNoAnimActivities.add(topActivity);
-        }
-
         boolean kept = true;
+        try {
+            final ActivityStack stack = moveTaskToStackUncheckedLocked(
+                    task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
+            stackId = stack.mStackId;
 
-        // We might trigger a configuration change. Save the current task bounds for freezing.
-        mWindowManager.prepareFreezingTaskBounds(stack.mStackId);
+            if (!animate) {
+                stack.mNoAnimActivities.add(topActivity);
+            }
 
-        // Make sure the task has the appropriate bounds/size for the stack it is in.
-        if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
-            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
-        } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
-                && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
-            kept = resizeTaskLocked(task, task.mLastNonFullscreenBounds,
-                    RESIZE_MODE_SYSTEM, !mightReplaceWindow);
-        } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
-            kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+            // We might trigger a configuration change. Save the current task bounds for freezing.
+            mWindowManager.prepareFreezingTaskBounds(stack.mStackId);
+
+            // Make sure the task has the appropriate bounds/size for the stack it is in.
+            if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
+                kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+            } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
+                    && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
+                kept = resizeTaskLocked(task, task.mLastNonFullscreenBounds,
+                        RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+            } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
+                kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+            }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
         }
 
         if (mightReplaceWindow) {
