@@ -200,10 +200,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    public MotionEventInjector getMotionEventInjector() {
-        return mMotionEventInjector;
-    }
-
     /**
      * Gets current event stream state associated with an input event.
      * @return The event stream state that should be used for the event. Null if the event should
