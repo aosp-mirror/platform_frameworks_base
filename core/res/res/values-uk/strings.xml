@@ -539,8 +539,8 @@
     <item msgid="9192514806975898961">"Указати"</item>
   </string-array>
   <string-array name="emailAddressTypes">
-    <item msgid="8073994352956129127">"Дом."</item>
-    <item msgid="7084237356602625604">"Роб."</item>
+    <item msgid="8073994352956129127">"Домашня"</item>
+    <item msgid="7084237356602625604">"Робоча"</item>
     <item msgid="1112044410659011023">"Інше"</item>
     <item msgid="2374913952870110618">"Указати"</item>
   </string-array>

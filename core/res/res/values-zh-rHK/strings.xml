@@ -237,7 +237,7 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"儲存空間"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"在您的裝置上存取相片、媒體和檔案"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
-    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"錄製語音訊息"</string>
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"錄音"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍照和錄製影片"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"電話"</string>
