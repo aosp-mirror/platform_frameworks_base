@@ -1198,7 +1198,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Ընտրել ծրագիր"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Չհաջողվեց գործարկել <xliff:g id="APPLICATION_NAME">%s</xliff:g> ծրագիրը"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Տարածել"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Համօգտագործել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Կիսվել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Սահող բռնակ: Հպել &amp; պահել:"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Սահեցրեք` ապակողպելու համար:"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Միացրեք ականջակալները` արտասանվող գաղտնաբառը լսելու համար:"</string>

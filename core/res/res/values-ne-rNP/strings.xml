@@ -146,7 +146,7 @@
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL भेटाउन सकेन।"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"साइटको आधिकारिकता योजना समर्थित छैन।"</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"प्रमाणीकरण गर्न सकेन।"</string>
-    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"प्रोक्सी सर्भरको माध्यमद्वारा प्रमाणिकरण असफल भएको छ।"</string>
+    <string name="httpErrorProxyAuth" msgid="1788207010559081331">"प्रोक्सी सर्भरको माध्यमद्वारा प्रमाणीकरण असफल भएको छ।"</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"सर्भरसँग जोड्न सकेन।"</string>
     <string name="httpErrorIO" msgid="2340558197489302188">"सर्भरसँग संचार गर्न सकेन। फेरि पछि कोसिस गर्नुहोस्।"</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्भर संगको सम्पर्क प्रक्रिया समय सकियो।"</string>
@@ -1460,7 +1460,7 @@
     <string name="package_installed_device_owner" msgid="8420696545959087545">"तपाईँको प्रशासकद्वारा स्थापना गरिएको"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"तपाईँको प्रशासकद्वारा अद्यावधिक गरिएको"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"तपाईँको प्रशासकद्वारा हटाइएको"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री रक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री रक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री संरक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री संरक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
       <item quantity="one">एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>
