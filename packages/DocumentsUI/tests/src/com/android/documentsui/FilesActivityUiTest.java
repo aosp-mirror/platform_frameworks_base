@@ -156,6 +156,8 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
 
         mBot.openRoot(ROOT_0_ID);
         mDocsHelper.createDocument(mRoot_0, "yummers/sandwich", "Ham & Cheese.sandwich");
+
+        mDevice.waitForIdle();
         mBot.assertHasDocuments("file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
     }
 
