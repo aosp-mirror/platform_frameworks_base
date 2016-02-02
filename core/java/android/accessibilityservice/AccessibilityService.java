@@ -624,8 +624,7 @@ public abstract class AccessibilityService extends Service {
                 gesture, 100);
         try {
             synchronized (mLock) {
-                connection.sendMotionEvents(++mGestureStatusCallbackSequence,
-                        new ParceledListSlice<>(events));
+                mGestureStatusCallbackSequence++;
                 if (callback != null) {
                     if (mGestureStatusCallbackInfos == null) {
                         mGestureStatusCallbackInfos = new SparseArray<>();
@@ -634,6 +633,8 @@ public abstract class AccessibilityService extends Service {
                             callback, handler);
                     mGestureStatusCallbackInfos.put(mGestureStatusCallbackSequence, callbackInfo);
                 }
+                connection.sendMotionEvents(mGestureStatusCallbackSequence,
+                        new ParceledListSlice<>(events));
             }
         } catch (RemoteException re) {
             throw new RuntimeException(re);
