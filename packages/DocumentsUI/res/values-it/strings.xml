@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Salva"</string>
     <string name="menu_share" msgid="3075149983979628146">"Condividi"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Elimina"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Seleziona \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Seleziona tutti"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Seleziona tutto"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Copia in…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Mostra memoria interna"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostra scheda SD"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Nascondi scheda SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Mostra dimensioni file"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Nascondi dimensioni file"</string>
+    <string name="button_select" msgid="527196987259139214">"Seleziona"</string>
     <string name="button_copy" msgid="8706475544635021302">"Copia"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> selezionati"</string>
     <string name="sort_name" msgid="9183560467917256779">"Per nome"</string>
     <string name="sort_date" msgid="586080032956151448">"Per data di modifica"</string>
     <string name="sort_size" msgid="3350681319735474741">"Per dimensioni"</string>
@@ -54,7 +53,7 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Scorciatoie"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivi"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Altre app"</string>
-    <string name="empty" msgid="7858882803708117596">"Nessun articolo"</string>
+    <string name="empty" msgid="7858882803708117596">"Nessun elemento"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Impossibile aprire il file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Impossibile eliminare alcuni documenti"</string>
     <string name="share_via" msgid="8966594246261344259">"Condividi via"</string>

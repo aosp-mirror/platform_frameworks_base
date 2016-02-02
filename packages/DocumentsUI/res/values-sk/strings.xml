@@ -29,17 +29,16 @@
     <string name="menu_save" msgid="2394743337684426338">"Uložiť"</string>
     <string name="menu_share" msgid="3075149983979628146">"Zdieľať"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Odstrániť"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Vyberte adresár <xliff:g id="DIRECTORY">^1</xliff:g>"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Vybrať všetko"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Vybrať všetko"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopírovať do…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Zobraziť interné úložisko"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Zobraziť kartu SD"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Zobraziť SD kartu"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Skryť interné úložisko"</string>
-    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skryť kartu SD"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skryť SD kartu"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Zobraziť veľkosť súboru"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Skryť veľkosť súboru"</string>
+    <string name="button_select" msgid="527196987259139214">"Vybrať"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopírovať"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Vybraté: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Podľa názvu"</string>
     <string name="sort_date" msgid="586080032956151448">"Podľa dátumu zmeny"</string>
     <string name="sort_size" msgid="3350681319735474741">"Podľa veľkosti"</string>
@@ -49,7 +48,7 @@
     <string name="create_error" msgid="3735649141335444215">"Priečinok sa nepodarilo vytvoriť"</string>
     <string name="query_error" msgid="1222448261663503501">"Zoznam dokumentov sa nepodarilo načítať"</string>
     <string name="root_recent" msgid="4470053704320518133">"Nedávne"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"Voľné: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"Voľné <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Služby úložiska"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Skratky"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Zariadenia"</string>
@@ -57,7 +56,7 @@
     <string name="empty" msgid="7858882803708117596">"Žiadne položky"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Súbor sa nepodarilo otvoriť"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Niektoré dokumenty sa nepodarilo odstrániť"</string>
-    <string name="share_via" msgid="8966594246261344259">"Zdieľať pomocou"</string>
+    <string name="share_via" msgid="8966594246261344259">"Zdieľať"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírovanie súborov"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Zostáva: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">

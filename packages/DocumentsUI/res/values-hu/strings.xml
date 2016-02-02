@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Mentés"</string>
     <string name="menu_share" msgid="3075149983979628146">"Megosztás"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Törlés"</string>
-    <string name="menu_select" msgid="8711270657353563424">"A(z) „<xliff:g id="DIRECTORY">^1</xliff:g>” mappa kiválasztása"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Az összes kijelölése"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Összes kijelölése"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Másolás ide…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Belső tárhely"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD-kártya megjelenítése"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD-kártya elrejtése"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Fájlméret megjelenítése"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Fájlméret elrejtése"</string>
+    <string name="button_select" msgid="527196987259139214">"Kiválasztás"</string>
     <string name="button_copy" msgid="8706475544635021302">"Másolás"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> kiválasztva"</string>
     <string name="sort_name" msgid="9183560467917256779">"Név szerint"</string>
     <string name="sort_date" msgid="586080032956151448">"Módosítás dátuma szerint"</string>
     <string name="sort_size" msgid="3350681319735474741">"Méret szerint"</string>

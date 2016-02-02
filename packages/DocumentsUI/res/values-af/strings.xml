@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumente"</string>
-    <string name="title_open" msgid="4353228937663917801">"Maak oop vanaf"</string>
+    <string name="title_open" msgid="4353228937663917801">"Maak oop vanuit"</string>
     <string name="title_save" msgid="2433679664882857999">"Stoor na"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Skep vouer"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Roosteraansig"</string>
@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Stoor"</string>
     <string name="menu_share" msgid="3075149983979628146">"Deel"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Vee uit"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Kies \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Kies almal"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Kies alles"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopieer na …"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Wys interne berging"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Wys SD-kaart"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Versteek SD-kaart"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Wys lêergrootte"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Versteek lêergrootte"</string>
+    <string name="button_select" msgid="527196987259139214">"Kies"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopieer"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> gekies"</string>
     <string name="sort_name" msgid="9183560467917256779">"Volgens naam"</string>
     <string name="sort_date" msgid="586080032956151448">"Volgens datum gewysig"</string>
     <string name="sort_size" msgid="3350681319735474741">"Volgens grootte"</string>

@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Salvați"</string>
     <string name="menu_share" msgid="3075149983979628146">"Distribuiți"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Ștergeți"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Selectați „<xliff:g id="DIRECTORY">^1</xliff:g>”"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Selectați-le pe toate"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Selectați tot"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Copiați în…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Afișați stocarea internă"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Afișați cardul SD"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Ascundeți cardul SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Afișați mărime fișiere"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Ascundeți mărime fișiere"</string>
+    <string name="button_select" msgid="527196987259139214">"Selectați"</string>
     <string name="button_copy" msgid="8706475544635021302">"Copiați"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> selectate"</string>
     <string name="sort_name" msgid="9183560467917256779">"După nume"</string>
     <string name="sort_date" msgid="586080032956151448">"După data modificării"</string>
     <string name="sort_size" msgid="3350681319735474741">"După dimensiune"</string>
@@ -57,7 +56,7 @@
     <string name="empty" msgid="7858882803708117596">"Nu există elemente"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Fișierul nu poate fi deschis"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unele documente nu au putut fi șterse"</string>
-    <string name="share_via" msgid="8966594246261344259">"Distribuiți prin"</string>
+    <string name="share_via" msgid="8966594246261344259">"Trimiteți prin"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Se copiază fișierele"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Timp rămas: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
