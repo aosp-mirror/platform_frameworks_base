@@ -150,7 +150,6 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-        final MenuItem settings = menu.findItem(R.id.menu_settings);
         final MenuItem search = menu.findItem(R.id.menu_search);
 
         // I'm thinkin' this isn't necesary here. If it is...'cuz of a bug....
@@ -167,7 +166,6 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         sortSize.setVisible(mState.showSize); // Only sort by size when visible
         fileSize.setVisible(!mState.forceSize);
         advanced.setVisible(!mState.forceAdvanced);
-        settings.setVisible((root.flags & Root.FLAG_HAS_SETTINGS) != 0);
         search.setVisible(canSearchRoot());
 
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)

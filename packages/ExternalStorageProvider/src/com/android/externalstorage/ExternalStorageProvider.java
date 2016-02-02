@@ -134,9 +134,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
             final String rootId;
             final String title;
             if (volume.getType() == VolumeInfo.TYPE_EMULATED) {
-                // save off the primary volume for subsequent "Home" dir initialization.
-                primaryVolume = volume;
-
                 // We currently only support a single emulated volume mounted at
                 // a time, and it's always considered the primary
                 rootId = ROOT_ID_PRIMARY_EMULATED;
@@ -167,9 +164,14 @@ public class ExternalStorageProvider extends DocumentsProvider {
             mRoots.put(rootId, root);
 
             root.rootId = rootId;
-            root.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
+            root.flags = Root.FLAG_LOCAL_ONLY
                     | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
 
+            if (volume.isPrimary()) {
+                // save off the primary volume for subsequent "Home" dir initialization.
+                primaryVolume = volume;
+                root.flags |= Root.FLAG_ADVANCED;
+            }
             // Dunno when this would NOT be the case, but never hurts to be correct.
             if (volume.isMountedWritable()) {
                 root.flags |= Root.FLAG_SUPPORTS_CREATE;

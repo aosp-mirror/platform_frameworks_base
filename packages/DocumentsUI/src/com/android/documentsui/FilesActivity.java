@@ -245,16 +245,21 @@ public class FilesActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        final RootInfo root = getCurrentRoot();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
+        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         createDir.setVisible(true);
         createDir.setEnabled(canCreateDirectory());
-
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
+        settings.setVisible(root.hasSettings());
+
+        // TODO: For some reason menu is ignoring this being set
+        // to never in activity.xml. File a bug.
+        settings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
 
         Menus.disableHiddenItems(menu, pasteFromCb);
         return true;
