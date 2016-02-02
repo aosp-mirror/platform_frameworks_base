@@ -150,11 +150,22 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
-        final Identifier parentIdentifier = mDatabase.createIdentifier(parentDocumentId);
+        Identifier parentIdentifier = mDatabase.createIdentifier(parentDocumentId);
         try {
+            if (parentIdentifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE) {
+                final Identifier singleStorageIdentifier =
+                        mDatabase.getSingleStorageIdentifier(parentDocumentId);
+                if (singleStorageIdentifier == null) {
+                    // Returns storage list from database.
+                    return mDatabase.queryChildDocuments(projection, parentDocumentId);
+                }
+                parentIdentifier = singleStorageIdentifier;
+            }
+            // Returns object list from document loader.
             return getDocumentLoader(parentIdentifier).queryChildDocuments(
                     projection, parentIdentifier);
         } catch (IOException exception) {
+            Log.e(MtpDocumentsProvider.TAG, "queryChildDocuments", exception);
             throw new FileNotFoundException(exception.getMessage());
         }
     }
@@ -190,6 +201,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     throw new IllegalArgumentException("Unknown mode for openDocument: " + mode);
             }
         } catch (IOException error) {
+            Log.e(MtpDocumentsProvider.TAG, "openDocument", error);
             throw new FileNotFoundException(error.getMessage());
         }
     }
@@ -206,6 +218,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     0,  // Start offset.
                     AssetFileDescriptor.UNKNOWN_LENGTH);
         } catch (IOException error) {
+            Log.e(MtpDocumentsProvider.TAG, "openDocumentThumbnail", error);
             throw new FileNotFoundException(error.getMessage());
         }
     }
@@ -214,13 +227,20 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public void deleteDocument(String documentId) throws FileNotFoundException {
         try {
             final Identifier identifier = mDatabase.createIdentifier(documentId);
-            final Identifier parentIdentifier =
-                    mDatabase.createIdentifier(mDatabase.getParentId(documentId));
+            final Identifier parentIdentifier = mDatabase.getParentIdentifier(documentId);
             mMtpManager.deleteDocument(identifier.mDeviceId, identifier.mObjectHandle);
             mDatabase.deleteDocument(documentId);
             getDocumentLoader(parentIdentifier).clearTask(parentIdentifier);
             notifyChildDocumentsChange(parentIdentifier.mDocumentId);
+            if (parentIdentifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
+                // If the parent is storage, the object might be appeared as child of device because
+                // we skip storage when the device has only one storage.
+                final Identifier deviceIdentifier = mDatabase.getParentIdentifier(
+                        parentIdentifier.mDocumentId);
+                notifyChildDocumentsChange(deviceIdentifier.mDocumentId);
+            }
         } catch (IOException error) {
+            Log.e(MtpDocumentsProvider.TAG, "deleteDocument", error);
             throw new FileNotFoundException(error.getMessage());
         }
     }
@@ -259,7 +279,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;
         } catch (IOException error) {
-            Log.e(TAG, error.getMessage());
+            Log.e(TAG, "createDocument", error);
             throw new FileNotFoundException(error.getMessage());
         }
     }

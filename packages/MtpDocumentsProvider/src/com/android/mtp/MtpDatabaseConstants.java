@@ -16,10 +16,13 @@
 
 package com.android.mtp;
 
+import android.annotation.IntDef;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,6 +94,10 @@ class MtpDatabaseConstants {
      * Mapping mode that uses name to find corresponding rows.
      */
     static final int MAP_BY_NAME = 1;
+
+    @IntDef(value = { DOCUMENT_TYPE_DEVICE, DOCUMENT_TYPE_STORAGE, DOCUMENT_TYPE_OBJECT })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DocumentType {}
 
     /**
      * Document that represents a MTP device.

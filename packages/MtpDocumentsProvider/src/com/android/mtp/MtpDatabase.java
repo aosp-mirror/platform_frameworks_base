@@ -143,49 +143,50 @@ class MtpDatabase {
                         null);
                 try {
                     values.clear();
-                    if (storageCursor.getCount() == 1) {
-                        storageCursor.moveToNext();
-                        DatabaseUtils.cursorRowToContentValues(storageCursor, values);
-                    } else {
-                        final Cursor cursor = builder.query(
-                                mDatabase,
-                                columnNames,
-                                selection + " AND " + COLUMN_DEVICE_ID + " = ?",
-                                strings(ROW_STATE_VALID,
-                                        ROW_STATE_INVALIDATED,
-                                        DOCUMENT_TYPE_DEVICE,
-                                        deviceId),
-                                null,
-                                null,
-                                null);
-                        try {
-                            cursor.moveToNext();
-                            DatabaseUtils.cursorRowToContentValues(cursor, values);
-                        } finally {
-                            cursor.close();
-                        }
+                    try (final Cursor deviceRoot = builder.query(
+                            mDatabase,
+                            columnNames,
+                            selection + " AND " + COLUMN_DEVICE_ID + " = ?",
+                            strings(ROW_STATE_VALID,
+                                    ROW_STATE_INVALIDATED,
+                                    DOCUMENT_TYPE_DEVICE,
+                                    deviceId),
+                            null,
+                            null,
+                            null)) {
+                        deviceRoot.moveToNext();
+                        DatabaseUtils.cursorRowToContentValues(deviceRoot, values);
+                    }
 
-                        if (storageCursor.getCount() != 0) {
-                            long capacityBytes = 0;
-                            long availableBytes = 0;
-                            int capacityIndex = cursor.getColumnIndex(Root.COLUMN_CAPACITY_BYTES);
-                            int availableIndex = cursor.getColumnIndex(Root.COLUMN_AVAILABLE_BYTES);
-                            while (storageCursor.moveToNext()) {
-                                // If requested columnNames does not include COLUMN_XXX_BYTES, we
-                                // don't calculate corresponding values.
-                                if (capacityIndex != -1) {
-                                    capacityBytes += cursor.getLong(capacityIndex);
-                                }
-                                if (availableIndex != -1) {
-                                    availableBytes += cursor.getLong(availableIndex);
-                                }
+                    if (storageCursor.getCount() != 0) {
+                        long capacityBytes = 0;
+                        long availableBytes = 0;
+                        final int capacityIndex =
+                                storageCursor.getColumnIndex(Root.COLUMN_CAPACITY_BYTES);
+                        final int availableIndex =
+                                storageCursor.getColumnIndex(Root.COLUMN_AVAILABLE_BYTES);
+                        while (storageCursor.moveToNext()) {
+                            // If requested columnNames does not include COLUMN_XXX_BYTES, we
+                            // don't calculate corresponding values.
+                            if (capacityIndex != -1) {
+                                capacityBytes += storageCursor.getLong(capacityIndex);
                             }
-                            values.put(Root.COLUMN_CAPACITY_BYTES, capacityBytes);
-                            values.put(Root.COLUMN_AVAILABLE_BYTES, availableBytes);
-                        } else {
-                            values.putNull(Root.COLUMN_CAPACITY_BYTES);
-                            values.putNull(Root.COLUMN_AVAILABLE_BYTES);
+                            if (availableIndex != -1) {
+                                availableBytes += storageCursor.getLong(availableIndex);
+                            }
                         }
+                        values.put(Root.COLUMN_CAPACITY_BYTES, capacityBytes);
+                        values.put(Root.COLUMN_AVAILABLE_BYTES, availableBytes);
+                    } else {
+                        values.putNull(Root.COLUMN_CAPACITY_BYTES);
+                        values.putNull(Root.COLUMN_AVAILABLE_BYTES);
+                    }
+                    if (storageCursor.getCount() == 1 && values.containsKey(Root.COLUMN_TITLE)) {
+                        storageCursor.moveToFirst();
+                        values.put(
+                                Root.COLUMN_TITLE,
+                                storageCursor.getString(
+                                        storageCursor.getColumnIndex(Root.COLUMN_TITLE)));
                     }
                 } finally {
                     storageCursor.close();
@@ -239,12 +240,45 @@ class MtpDatabase {
     }
 
     /**
+     * Returns identifier of single storage if given document points device and it has only one
+     * storage. Otherwise null.
+     *
+     * @param documentId Document ID that may point a device.
+     * @return Identifier for single storage or null.
+     * @throws FileNotFoundException The given document ID is not registered in database.
+     */
+    @Nullable Identifier getSingleStorageIdentifier(String documentId)
+            throws FileNotFoundException {
+        // Check if the parent document is device that has single storage.
+        try (final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(Document.COLUMN_DOCUMENT_ID),
+                COLUMN_ROW_STATE + " IN (?, ?) AND " +
+                COLUMN_PARENT_DOCUMENT_ID + " = ? AND " +
+                COLUMN_DOCUMENT_TYPE + " = ?",
+                strings(ROW_STATE_VALID,
+                        ROW_STATE_INVALIDATED,
+                        documentId,
+                        DOCUMENT_TYPE_STORAGE),
+                null,
+                null,
+                null)) {
+            if (cursor.getCount() == 1) {
+                cursor.moveToNext();
+                return createIdentifier(cursor.getString(0));
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
      * Queries a single document.
      * @param documentId
      * @param projection
      * @return Database cursor.
      */
-    public Cursor queryDocument(String documentId, String[] projection) {
+    Cursor queryDocument(String documentId, String[] projection) {
         return mDatabase.query(
                 TABLE_DOCUMENTS,
                 projection,
@@ -287,12 +321,12 @@ class MtpDatabase {
     }
 
     /**
-     * Obtains parent document ID.
+     * Obtains parent identifier.
      * @param documentId
-     * @return parent document ID.
+     * @return parent identifier.
      * @throws FileNotFoundException
      */
-    String getParentId(String documentId) throws FileNotFoundException {
+    Identifier getParentIdentifier(String documentId) throws FileNotFoundException {
         final Cursor cursor = mDatabase.query(
                 TABLE_DOCUMENTS,
                 strings(COLUMN_PARENT_DOCUMENT_ID),
@@ -304,7 +338,7 @@ class MtpDatabase {
                 "1");
         try {
             if (cursor.moveToNext()) {
-                return cursor.getString(0);
+                return createIdentifier(cursor.getString(0));
             } else {
                 throw new FileNotFoundException("Cannot find a row having ID=" + documentId);
             }
@@ -352,7 +386,10 @@ class MtpDatabase {
         // Currently documentId is old format.
         final Cursor cursor = mDatabase.query(
                 TABLE_DOCUMENTS,
-                strings(COLUMN_DEVICE_ID, COLUMN_STORAGE_ID, COLUMN_OBJECT_HANDLE),
+                strings(COLUMN_DEVICE_ID,
+                        COLUMN_STORAGE_ID,
+                        COLUMN_OBJECT_HANDLE,
+                        COLUMN_DOCUMENT_TYPE),
                 SELECTION_DOCUMENT_ID,
                 strings(documentId),
                 null,
@@ -367,8 +404,9 @@ class MtpDatabase {
                 return new Identifier(
                         cursor.getInt(0),
                         cursor.getInt(1),
-                        cursor.isNull(2) ? Identifier.DUMMY_HANDLE_FOR_ROOT : cursor.getInt(2),
-                        documentId);
+                        cursor.getInt(2),
+                        documentId,
+                        cursor.getInt(3));
             }
         } finally {
             cursor.close();

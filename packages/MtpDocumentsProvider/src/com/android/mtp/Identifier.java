@@ -17,32 +17,34 @@
 package com.android.mtp;
 
 import java.util.Objects;
+import static com.android.mtp.MtpDatabaseConstants.DocumentType;
 
 /**
  * Static utilities for ID.
  */
 class Identifier {
-    final static int DUMMY_HANDLE_FOR_ROOT = 0;
-
     final int mDeviceId;
     final int mStorageId;
     final int mObjectHandle;
     final String mDocumentId;
+    final @DocumentType int mDocumentType;
 
-    Identifier(int deviceId, int storageId, int objectHandle, String documentId) {
+    Identifier(int deviceId, int storageId, int objectHandle, String documentId,
+            @DocumentType int documentType) {
         mDeviceId = deviceId;
         mStorageId = storageId;
         mObjectHandle = objectHandle;
         mDocumentId = documentId;
+        mDocumentType = documentType;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Identifier))
             return false;
-        final Identifier other = (Identifier)obj;
+        final Identifier other = (Identifier) obj;
         return mDeviceId == other.mDeviceId && mStorageId == other.mStorageId &&
-                mObjectHandle == other.mObjectHandle;
+                mObjectHandle == other.mObjectHandle && mDocumentId == other.mDocumentId;
     }
 
     @Override
