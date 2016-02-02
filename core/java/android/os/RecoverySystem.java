@@ -67,6 +67,7 @@ public class RecoverySystem {
 
     /** Used to communicate with recovery.  See bootable/recovery/recovery.cpp. */
     private static File RECOVERY_DIR = new File("/cache/recovery");
+    private static File BLOCK_MAP_FILE = new File(RECOVERY_DIR, "block.map");
     private static File COMMAND_FILE = new File(RECOVERY_DIR, "command");
     private static File UNCRYPT_FILE = new File(RECOVERY_DIR, "uncrypt_file");
     private static File LOG_FILE = new File(RECOVERY_DIR, "log");
@@ -473,7 +474,9 @@ public class RecoverySystem {
             Log.e(TAG, "Error reading recovery log", e);
         }
 
-        if (UNCRYPT_FILE.exists()) {
+        // Only remove the OTA package if it's partially processed (uncrypt'd).
+        boolean reservePackage = BLOCK_MAP_FILE.exists();
+        if (!reservePackage && UNCRYPT_FILE.exists()) {
             String filename = null;
             try {
                 filename = FileUtils.readTextFile(UNCRYPT_FILE, 0, null);
@@ -492,11 +495,18 @@ public class RecoverySystem {
             }
         }
 
-        // Delete everything in RECOVERY_DIR except those beginning
-        // with LAST_PREFIX
+        // We keep the update logs (beginning with LAST_PREFIX), and optionally
+        // the block map file (BLOCK_MAP_FILE) for a package. BLOCK_MAP_FILE
+        // will be created at the end of a successful uncrypt. If seeing this
+        // file, we keep the block map file and the file that contains the
+        // package name (UNCRYPT_FILE). This is to reduce the work for GmsCore
+        // to avoid re-downloading everything again.
         String[] names = RECOVERY_DIR.list();
         for (int i = 0; names != null && i < names.length; i++) {
             if (names[i].startsWith(LAST_PREFIX)) continue;
+            if (reservePackage && names[i].equals(BLOCK_MAP_FILE.getName())) continue;
+            if (reservePackage && names[i].equals(UNCRYPT_FILE.getName())) continue;
+
             recursiveDelete(new File(RECOVERY_DIR, names[i]));
         }
 
