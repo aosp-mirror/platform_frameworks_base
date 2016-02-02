@@ -27,6 +27,8 @@ import android.gesture.Prediction;
 import android.util.Slog;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
+import android.view.ViewConfiguration;
 
 import com.android.internal.R;
 
@@ -46,7 +48,9 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     public interface Listener {
         public void onDoubleTapAndHold(MotionEvent event, int policyFlags);
         public boolean onDoubleTap(MotionEvent event, int policyFlags);
-        public boolean onGesture(int gestureId);
+        public boolean onGestureCompleted(int gestureId);
+        public void onGestureStarted();
+        public void onGestureCancelled(MotionEvent event, int policyFlags);
     }
 
     private final Listener mListener;
@@ -63,6 +67,10 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
 
     // Indicates that motion events are being collected to match a gesture.
     private boolean mRecognizingGesture;
+
+    // Indicates that we've collected enough data to be sure it could be a
+    // gesture.
+    private boolean mGestureConfirmed;
 
     // Indicates that motion events from the second pointer are being checked
     // for a double tap.
@@ -81,8 +89,23 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // The Y of the previous event.
     private float mPreviousY;
 
+    // The X of the down event.
+    private float mBaseX;
+
+    // The Y of the down event.
+    private float mBaseY;
+
+    // Slop between the first and second tap to be a double tap.
+    private final int mDoubleTapSlop;
+
+    // The scaled velocity above which we detect gestures.
+    private final int mScaledGestureDetectionVelocity;
+
     // Buffer for storing points for gesture detection.
     private final ArrayList<GesturePoint> mStrokeBuffer = new ArrayList<GesturePoint>(100);
+
+    // Helper to track gesture velocity.
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
 
     // The minimal delta between moves to add a gesture point.
     private static final int TOUCH_TOLERANCE = 3;
@@ -90,8 +113,16 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // The minimal score for accepting a predicted gesture.
     private static final float MIN_PREDICTION_SCORE = 2.0f;
 
+    // The velocity above which we detect gestures.  Expressed in DIPs/Second.
+    private static final int GESTURE_DETECTION_VELOCITY_DIP = 1000;
+
+    // Constant used to calculate velocity in seconds.
+    private static final int VELOCITY_UNITS_SECONDS = 1000;
+
     AccessibilityGestureDetector(Context context, Listener listener) {
         mListener = listener;
+
+        mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
 
         mGestureDetector = new GestureDetector(context, this);
         mGestureDetector.setOnDoubleTapListener(this);
@@ -100,9 +131,14 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mGestureLibrary.setOrientationStyle(8 /* GestureStore.ORIENTATION_SENSITIVE_8 */);
         mGestureLibrary.setSequenceType(GestureStore.SEQUENCE_SENSITIVE);
         mGestureLibrary.load();
+
+        final float density = context.getResources().getDisplayMetrics().density;
+        mScaledGestureDetectionVelocity = (int) (GESTURE_DETECTION_VELOCITY_DIP * density);
     }
 
     public boolean onMotionEvent(MotionEvent event, int policyFlags) {
+        mVelocityTracker.addMovement(event);
+
         final float x = event.getX();
         final float y = event.getY();
 
@@ -112,14 +148,48 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 mDoubleTapDetected = false;
                 mSecondFingerDoubleTap = false;
                 mRecognizingGesture = true;
+                mGestureConfirmed = false;
+                mBaseX = x;
+                mBaseY = y;
                 mPreviousX = x;
                 mPreviousY = y;
                 mStrokeBuffer.clear();
                 mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
+                mVelocityTracker.clear();
+                mVelocityTracker.addMovement(event);
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 if (mRecognizingGesture) {
+                    if (!mGestureConfirmed) {
+                        mVelocityTracker.addMovement(event);
+                        // It is *important* to use the distance traveled by the pointers
+                        // on the screen which may or may not be magnified.
+                        final float deltaX = mBaseX - event.getX(0);
+                        final float deltaY = mBaseY - event.getY(0);
+                        final double moveDelta = Math.hypot(deltaX, deltaY);
+                        // The user has moved enough for us to decide.
+                        if (moveDelta > mDoubleTapSlop) {
+                            // Check whether the user is performing a gesture. We
+                            // detect gestures if the pointer is moving above a
+                            // given velocity.
+                            mVelocityTracker.computeCurrentVelocity(VELOCITY_UNITS_SECONDS);
+                            final float maxAbsVelocity = Math.max(
+                                    Math.abs(mVelocityTracker.getXVelocity(0)),
+                                    Math.abs(mVelocityTracker.getYVelocity(0)));
+                            if (maxAbsVelocity > mScaledGestureDetectionVelocity) {
+                                // We have to perform gesture detection, so
+                                // notify the listener.
+                                mGestureConfirmed = true;
+                                mListener.onGestureStarted();
+                            } else {
+                                // This won't match any gesture, so notify the
+                                // listener.
+                                cancelGesture();
+                                mListener.onGestureCancelled(event, policyFlags);
+                            }
+                        }
+                    }
                     final float dX = Math.abs(x - mPreviousX);
                     final float dY = Math.abs(y - mPreviousY);
                     if (dX >= TOUCH_TOLERANCE || dY >= TOUCH_TOLERANCE) {
@@ -134,12 +204,13 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 if (maybeFinishDoubleTap(event, policyFlags)) {
                     return true;
                 }
-                if (mRecognizingGesture) {
+                if (mGestureConfirmed) {
                     mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
 
-                    if (recognizeGesture()) {
-                        return true;
+                    if (!recognizeGesture()) {
+                        mListener.onGestureCancelled(event, policyFlags);
                     }
+                    return true;
                 }
                 break;
 
@@ -166,6 +237,10 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 if (mSecondFingerDoubleTap && maybeFinishDoubleTap(event, policyFlags)) {
                     return true;
                 }
+                break;
+
+            case MotionEvent.ACTION_CANCEL:
+                clear();
                 break;
         }
 
@@ -194,16 +269,11 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mDoubleTapDetected = false;
         mSecondFingerDoubleTap = false;
         cancelGesture();
-        mStrokeBuffer.clear();
+        mVelocityTracker.clear();
     }
 
     public boolean firstTapDetected() {
         return mFirstTapDetected;
-    }
-
-    public void cancelGesture() {
-        mRecognizingGesture = false;
-        mStrokeBuffer.clear();
     }
 
     @Override
@@ -251,6 +321,12 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         return mListener.onDoubleTap(event, policyFlags);
     }
 
+    private void cancelGesture() {
+        mRecognizingGesture = false;
+        mGestureConfirmed = false;
+        mStrokeBuffer.clear();
+    }
+
     private boolean recognizeGesture() {
         Gesture gesture = new Gesture();
         gesture.addStroke(new GestureStroke(mStrokeBuffer));
@@ -265,7 +341,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 }
                 try {
                     final int gestureId = Integer.parseInt(bestPrediction.name);
-                    if (mListener.onGesture(gestureId)) {
+                    if (mListener.onGestureCompleted(gestureId)) {
                         return true;
                     }
                 } catch (NumberFormatException nfe) {
