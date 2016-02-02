@@ -1648,6 +1648,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
                 bottom = Math.min(bottom, getHeight());
             }
+        } else if (mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+            top = mTopPadding;
+            bottom = top;
         }
         mBackgroundBounds.top = Math.max(0, top);
         mBackgroundBounds.bottom = Math.min(getHeight(), bottom);
