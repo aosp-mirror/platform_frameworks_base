@@ -883,6 +883,15 @@ public class LockPatternUtils {
     }
 
     /**
+     * Determine if the device is file encrypted
+     * @return true if device is file encrypted
+     */
+    public static boolean isFileEncryptionEnabled() {
+        final String status = SystemProperties.get("ro.crypto.type", "");
+        return "file".equalsIgnoreCase(status);
+    }
+
+    /**
      * Clears the encryption password.
      */
     public void clearEncryptionPassword() {
