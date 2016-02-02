@@ -4266,6 +4266,21 @@ public class AccountManagerService
         }
     }
 
+    private boolean isPermitted(String opPackageName, int callingUid, String... permissions) {
+        for (String perm : permissions) {
+            if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "  caller uid " + callingUid + " has " + perm);
+                }
+                final int opCode = AppOpsManager.permissionToOpCode(perm);
+                if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOp(
+                        opCode, callingUid, opPackageName) == AppOpsManager.MODE_ALLOWED) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     private int handleIncomingUser(int userId) {
         try {
@@ -4340,51 +4355,10 @@ public class AccountManagerService
 
     private List<String> getTypesVisibleToCaller(int callingUid, int userId,
             String opPackageName) {
-        List<String> permissionsToCheck = new ArrayList<String>(2);
-        permissionsToCheck.add(Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
-        long id = Binder.clearCallingIdentity();
-        try {
-            ApplicationInfo appInfo = mPackageManager.getApplicationInfo(
-                    opPackageName, 0 /* flags */);
-            /*
-             * At or before SDK 23, clients discover all the accounts in their
-             * user profile (via AccountManager.getAccounts(...)) by declaring
-             * the GET_ACCOUNTS permission.
-             *
-             * After SDK 23 the GET_ACCOUNTS permission is deprecated.  Instead
-             * apps will be able to retrieve those accounts managed by
-             * authenticators sharing a package signature without any special
-             * permissions. The only clients able to discover all the accounts
-             * on the device will be those with the GET_ACCOUNTS_PRVILEGED
-             * system permission.
-             */
-            if (23 >= appInfo.targetSdkVersion) {
-                permissionsToCheck.add(Manifest.permission.GET_ACCOUNTS);
-            }
-        } catch (NameNotFoundException e) {
-            // No application associated with the specified package.
-            Log.w(TAG, "No application associated with package: " + opPackageName);
-        } finally {
-            Binder.restoreCallingIdentity(id);
-        }
-        boolean isPermitted = isPermitted(opPackageName, callingUid, permissionsToCheck);
+        boolean isPermitted =
+                isPermitted(opPackageName, callingUid, Manifest.permission.GET_ACCOUNTS,
+                        Manifest.permission.GET_ACCOUNTS_PRIVILEGED);
         return getTypesForCaller(callingUid, userId, isPermitted);
-    }
-
-    private boolean isPermitted(String opPackageName, int callingUid, List<String> permissions) {
-        for (String perm : permissions) {
-            if (mContext.checkCallingOrSelfPermission(perm) == PackageManager.PERMISSION_GRANTED) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "  caller uid " + callingUid + " has " + perm);
-                }
-                final int opCode = AppOpsManager.permissionToOpCode(perm);
-                if (opCode == AppOpsManager.OP_NONE || mAppOpsManager.noteOp(
-                        opCode, callingUid, opPackageName) == AppOpsManager.MODE_ALLOWED) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private List<String> getTypesManagedByCaller(int callingUid, int userId) {
