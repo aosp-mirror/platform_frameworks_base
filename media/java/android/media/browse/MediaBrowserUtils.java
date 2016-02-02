@@ -40,10 +40,10 @@ public class MediaBrowserUtils {
     }
 
     public static boolean hasDuplicatedItems(Bundle options1, Bundle options2) {
-        int page1 = options1.getInt(MediaBrowser.EXTRA_PAGE, -1);
-        int page2 = options2.getInt(MediaBrowser.EXTRA_PAGE, -1);
-        int pageSize1 = options1.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
-        int pageSize2 = options2.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
+        int page1 = options1 == null ? -1 : options1.getInt(MediaBrowser.EXTRA_PAGE, -1);
+        int page2 = options2 == null ? -1 : options2.getInt(MediaBrowser.EXTRA_PAGE, -1);
+        int pageSize1 = options1 == null ? -1 : options1.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
+        int pageSize2 = options2 == null ? -1 : options2.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
 
         int startIndex1, startIndex2, endIndex1, endIndex2;
         if (page1 == -1 || pageSize1 == -1) {
