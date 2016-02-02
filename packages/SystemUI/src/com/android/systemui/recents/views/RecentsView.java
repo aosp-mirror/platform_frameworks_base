@@ -531,8 +531,7 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         // Hide the history button
-        int taskViewExitToHomeDuration = getResources().getInteger(
-                R.integer.recents_task_exit_to_home_duration);
+        int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
         hideHistoryButton(taskViewExitToHomeDuration, false /* translate */);
         animateBackgroundScrim(0f, taskViewExitToHomeDuration);
     }
@@ -647,9 +646,8 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (!launchState.launchedFromAppWithThumbnail && mStack.getTaskCount() > 0) {
-            int taskViewEnterFromHomeDuration = getResources().getInteger(
-                    R.integer.recents_task_enter_from_home_duration);
-            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, taskViewEnterFromHomeDuration);
+            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA,
+                    TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
         }
     }
 

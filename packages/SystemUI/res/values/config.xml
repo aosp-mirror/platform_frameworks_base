@@ -159,18 +159,6 @@
          in from the bottom of the screen. -->
     <integer name="recents_enter_from_home_transition_duration">100</integer>
 
-    <!-- The duration for animating the task from the bottom of the screen when transitioning
-     from home. -->
-    <integer name="recents_task_enter_from_home_duration">225</integer>
-
-    <!-- The stagger for each task when animating the task from the bottom of the screen when 
-     transitioning from home. -->
-    <integer name="recents_task_enter_from_home_stagger_delay">12</integer>
-
-    <!-- The duration of the animation of the tasks to the bottom of the screen when leaving
-     Recents to go back to the Launcher. -->
-    <integer name="recents_task_exit_to_home_duration">225</integer>
-
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
 

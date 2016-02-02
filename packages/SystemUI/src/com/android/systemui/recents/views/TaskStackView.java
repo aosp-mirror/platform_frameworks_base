@@ -1558,8 +1558,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mAnimationHelper.startExitToHomeAnimation(event.animated, event.getAnimationTrigger());
 
         // Dismiss the freeform workspace background
-        int taskViewExitToHomeDuration = getResources().getInteger(
-                R.integer.recents_task_exit_to_home_duration);
+        int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
         animateFreeformWorkspaceBackgroundAlpha(0, new AnimationProps(taskViewExitToHomeDuration,
                 Interpolators.FAST_OUT_SLOW_IN));
     }
