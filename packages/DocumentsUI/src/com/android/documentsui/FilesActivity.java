@@ -245,20 +245,20 @@ public class FilesActivity extends BaseActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+
         final RootInfo root = getCurrentRoot();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        createDir.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         createDir.setVisible(true);
         createDir.setEnabled(canCreateDirectory());
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
         settings.setVisible(root.hasSettings());
 
-        // TODO: For some reason menu is ignoring this being set
-        // to never in activity.xml. File a bug.
+        // TODO: For some reason settings menu item is not
+        // honoring the "showAsAction=never" setting in activity.xml.
         settings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
 
         Menus.disableHiddenItems(menu, pasteFromCb);
@@ -276,9 +276,10 @@ public class FilesActivity extends BaseActivity {
                 createNewWindow();
                 return true;
             case R.id.menu_paste_from_clipboard:
-                DirectoryFragment dir = DirectoryFragment.get(getFragmentManager());
-                dir = DirectoryFragment.get(getFragmentManager());
-                dir.pasteFromClipboard();
+                DirectoryFragment dir = getDirectoryFragment();
+                if (dir != null) {
+                    dir.pasteFromClipboard();
+                }
                 return true;
         }
 
@@ -381,20 +382,26 @@ public class FilesActivity extends BaseActivity {
     @Override
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
         DirectoryFragment dir;
+        // TODO: All key events should be statically bound using alphabeticShortcut.
+        // But not working.
         switch (keyCode) {
             case KeyEvent.KEYCODE_A:
-                dir = DirectoryFragment.get(getFragmentManager());
-                dir.selectAllFiles();
+                dir = getDirectoryFragment();
+                if (dir != null) {
+                    dir.selectAllFiles();
+                }
                 return true;
             case KeyEvent.KEYCODE_C:
-                // TODO: Should be statically bound using alphabeticShortcut. See b/21330356.
-                dir = DirectoryFragment.get(getFragmentManager());
-                dir.copySelectedToClipboard();
+                dir = getDirectoryFragment();
+                if (dir != null) {
+                    dir.copySelectedToClipboard();
+                }
                 return true;
             case KeyEvent.KEYCODE_V:
-                // TODO: Should be statically bound using alphabeticShortcut. See b/21330356.
-                dir = DirectoryFragment.get(getFragmentManager());
-                dir.pasteFromClipboard();
+                dir = getDirectoryFragment();
+                if (dir != null) {
+                    dir.pasteFromClipboard();
+                }
                 return true;
             default:
                 return super.onKeyShortcut(keyCode, event);

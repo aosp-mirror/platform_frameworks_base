@@ -38,6 +38,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Root;
+import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -138,10 +139,12 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     }
 
     @Override
+    @CallSuper
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        final RootInfo root = getCurrentRoot();
+        mSearchManager.showMenu(canSearchRoot());
+
         final boolean inRecents = getCurrentDirectory() == null;
 
         final MenuItem sort = menu.findItem(R.id.menu_sort);
@@ -150,24 +153,17 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-        final MenuItem search = menu.findItem(R.id.menu_search);
 
-        // I'm thinkin' this isn't necesary here. If it is...'cuz of a bug....
-        // then uncomment the linke and let's get a proper bug reference here.
-        // mSearchManager.update(root);
-
-        // Search uses backend ranking; no sorting
+        // Search uses backend ranking; no sorting, recents doesn't support sort.
         sort.setVisible(!inRecents && !mSearchManager.isSearching());
+        sortSize.setVisible(mState.showSize); // Only sort by size when file sizes are visible
+        fileSize.setVisible(!mState.forceSize);
 
         // grid/list is effectively a toggle.
         grid.setVisible(mState.derivedMode != State.MODE_GRID);
         list.setVisible(mState.derivedMode != State.MODE_LIST);
 
-        sortSize.setVisible(mState.showSize); // Only sort by size when visible
-        fileSize.setVisible(!mState.forceSize);
         advanced.setVisible(!mState.forceAdvanced);
-        search.setVisible(canSearchRoot());
-
         advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
                 ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
@@ -271,8 +267,10 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
                 return true;
 
             case R.id.menu_paste_from_clipboard:
-                DirectoryFragment.get(getFragmentManager())
-                    .pasteFromClipboard();
+                DirectoryFragment dir = getDirectoryFragment();
+                if (dir != null) {
+                    dir.pasteFromClipboard();
+                }
               return true;
 
             case R.id.menu_advanced:
@@ -293,6 +291,10 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    final @Nullable DirectoryFragment getDirectoryFragment() {
+        return DirectoryFragment.get(getFragmentManager());
     }
 
     void showCreateDirectoryDialog() {
@@ -423,7 +425,10 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     void setDisplayFileSize(boolean display) {
         LocalPreferences.setDisplayFileSize(this, display);
         mState.showSize = display;
-        DirectoryFragment.get(getFragmentManager()).onDisplayStateChanged();
+        DirectoryFragment dir = getDirectoryFragment();
+        if (dir != null) {
+            dir.onDisplayStateChanged();
+        }
         invalidateOptionsMenu();
     }
 
@@ -432,7 +437,10 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
      */
     void setUserSortOrder(int sortOrder) {
         mState.userSortOrder = sortOrder;
-        DirectoryFragment.get(getFragmentManager()).onSortOrderChanged();
+        DirectoryFragment dir = getDirectoryFragment();
+        if (dir != null) {
+            dir.onSortOrderChanged();
+        };
     }
 
     /**
@@ -447,7 +455,10 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         // in onOptionsItemSelected, and not do the full invalidation
         // But! That's a larger refactoring we'll save for another day.
         invalidateOptionsMenu();
-        DirectoryFragment.get(getFragmentManager()).onViewModeChanged();
+        DirectoryFragment dir = getDirectoryFragment();
+        if (dir != null) {
+            dir.onViewModeChanged();
+        };
     }
 
     public void setPending(boolean pending) {
@@ -496,7 +507,8 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             return;
         }
 
-        if (DirectoryFragment.get(getFragmentManager()).onBackPressed()) {
+        DirectoryFragment dir = getDirectoryFragment();
+        if (dir != null && dir.onBackPressed()) {
             return;
         }
 
