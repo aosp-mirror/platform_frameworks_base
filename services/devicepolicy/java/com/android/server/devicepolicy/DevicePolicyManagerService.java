@@ -2013,9 +2013,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void removeActiveAdminLocked(final ComponentName adminReceiver, final int userHandle) {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
         if (admin != null) {
-            synchronized (this) {
-                getUserData(userHandle).mRemovingAdmins.add(adminReceiver);
-            }
+            getUserData(userHandle).mRemovingAdmins.add(adminReceiver);
+
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED,
                     new BroadcastReceiver() {
@@ -2821,14 +2820,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (admin == null) {
                 return;
             }
+            // Active device/profile owners must remain active admins.
+            if (isDeviceOwner(adminReceiver, userHandle)
+                    || isProfileOwner(adminReceiver, userHandle)) {
+                Slog.e(LOG_TAG, "Device/profile owner cannot be removed: component=" +
+                        adminReceiver);
+                return;
+            }
             if (admin.getUid() != mInjector.binderGetCallingUid()) {
-                // Active device/profile owners must remain active admins.
-                if (isDeviceOwner(adminReceiver, userHandle)
-                        || isProfileOwner(adminReceiver, userHandle)) {
-                    Slog.e(LOG_TAG, "Device/profile owner cannot be removed: component=" +
-                            adminReceiver);
-                    return;
-                }
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
             }
@@ -5481,9 +5480,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new SecurityException(e);
         }
         synchronized (this) {
+            final ComponentName deviceOwnerComponent = mOwners.getDeviceOwnerComponent();
+            final int deviceOwnerUserId = mOwners.getDeviceOwnerUserId();
             if (!mOwners.hasDeviceOwner()
-                    || !mOwners.getDeviceOwnerComponent().getPackageName().equals(packageName)
-                    || (mOwners.getDeviceOwnerUserId() != UserHandle.getUserId(callingUid))) {
+                    || !deviceOwnerComponent.getPackageName().equals(packageName)
+                    || (deviceOwnerUserId != UserHandle.getUserId(callingUid))) {
                 throw new SecurityException(
                         "clearDeviceOwner can only be called by the device owner");
             }
@@ -5495,8 +5496,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 admin.forceEphemeralUsers = false;
                 mUserManagerInternal.setForceEphemeralUsers(admin.forceEphemeralUsers);
             }
-
-            clearUserPoliciesLocked(new UserHandle(UserHandle.USER_SYSTEM));
+            clearUserPoliciesLocked(deviceOwnerUserId);
 
             mOwners.clearDeviceOwner();
             mOwners.writeDeviceOwner();
@@ -5506,6 +5506,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long ident = mInjector.binderClearCallingIdentity();
             try {
                 mInjector.getIBackupManager().setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+
+                removeActiveAdminLocked(deviceOwnerComponent, deviceOwnerUserId);
             } catch (RemoteException e) {
                 throw new IllegalStateException("Failed reactivating backup service.", e);
             } finally {
@@ -5546,9 +5548,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             admin.disableCamera = false;
             admin.userRestrictions = null;
-            clearUserPoliciesLocked(callingUser);
+            clearUserPoliciesLocked(userId);
             mOwners.removeProfileOwner(userId);
             mOwners.writeProfileOwner(userId);
+
+            final long ident = mInjector.binderClearCallingIdentity();
+            try {
+                removeActiveAdminLocked(who, userId);
+            } finally {
+                mInjector.binderRestoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -5576,8 +5585,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return mLockPatternUtils.getDeviceOwnerInfo();
     }
 
-    private void clearUserPoliciesLocked(UserHandle userHandle) {
-        int userId = userHandle.getIdentifier();
+    private void clearUserPoliciesLocked(int userId) {
         // Reset some of the user-specific policies
         DevicePolicyData policy = getUserData(userId);
         policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
@@ -5591,8 +5599,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         try {
             mIPackageManager.updatePermissionFlagsForAllApps(
                     PackageManager.FLAG_PERMISSION_POLICY_FIXED,
-                    0  /* flagValues */, userHandle.getIdentifier());
-            pushUserRestrictions(userHandle.getIdentifier());
+                    0  /* flagValues */, userId);
+            pushUserRestrictions(userId);
         } catch (RemoteException re) {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
