@@ -389,6 +389,17 @@ public class RankingHelper implements RankingConfig {
         return topics;
     }
 
+    @Override
+    public boolean hasBannedTopics(String packageName, int uid) {
+        final Record r = getOrCreateRecord(packageName, uid);
+        for (Topic t : r.topics.values()) {
+            if (t.importance == Ranking.IMPORTANCE_NONE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Gets priority. If a topic is given, returns the priority of that topic. Otherwise, the
      * priority of the app.

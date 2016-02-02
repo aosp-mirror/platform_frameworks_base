@@ -37,4 +37,6 @@ public interface RankingConfig {
     int getImportance(String packageName, int uid, Notification.Topic topic);
 
     boolean doesAppUseTopics(String packageName, int uid);
+
+    boolean hasBannedTopics(String packageName, int uid);
 }

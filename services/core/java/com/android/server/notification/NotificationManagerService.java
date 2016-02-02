@@ -1265,6 +1265,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean hasBannedTopics(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mRankingHelper.hasBannedTopics(pkg, uid);
+        }
+
+        @Override
         public ParceledListSlice<Notification.Topic> getTopics(String pkg, int uid) {
             checkCallerIsSystem();
             return new ParceledListSlice<Notification.Topic>(mRankingHelper.getTopics(pkg, uid));
