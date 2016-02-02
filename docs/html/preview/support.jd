@@ -160,21 +160,20 @@ page.image=images/cards/card-support_16-9_2x.png
         still perform BTLE and WiFi scans, but only when they are in the foreground. While in the background, those apps will get no results from BTLE and WiFi scans.</li>
     </ul>
   </li>
-  <li>Accessing accounts
+  <li>Permission changes
     <ul>
-      <li>Updated the behavior of {@link android.accounts.AccountManager} account
-        discovery methods.
+      <li>Updated the user interface for permissions and enhanced some of the permissions
+        behaviors.</li>
+      <li>The {@link android.Manifest.permission#GET_ACCOUNTS} permission is now a member of the
+        {@link android.Manifest.permission_group#CONTACTS} permission group and it has a
+        {@code android:protectionLevel} of {@code dangerous}. This change means that when
+        targeting Android 6.0 (API level 23), you must check for and request this permission if
+        your app requires it.
       </li>
-      <li>The GET_ACCOUNTS permission has been deprecated.
-      </li>
-      <li>Apps targeting API level 24 should start the intent returned by
-        newChooseAccountIntent(...) and await the result to acquire a reference
-        to the user's selected account. AccountManager methods like getAccounts and
-        related methods will only return those accounts managed by
-        authenticators that match the signatures of the calling app.
-      </li>
-      <li>Apps targeting API level 23 or earlier will continue to behave as
-        before.
+
+      <li>The {@code android.permission.READ_PROFILE} and {@code android.permission.WRITE_PROFILE}
+       permissions have been removed from the {@link android.Manifest.permission_group#CONTACTS}
+       permission group.
       </li>
     </ul>
   </li>
