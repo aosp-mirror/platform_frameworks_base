@@ -241,6 +241,48 @@ public class DevicePolicyManager {
 
     /**
      * Activity action: Starts the provisioning flow which sets up a managed device.
+     *
+     * <p>During device owner provisioning, a device admin app is downloaded and set as the owner of
+     * the device. A device owner has full control over the device. The device owner can not be
+     * modified by the user and the only way of resetting the device is via factory reset.
+     *
+     * <p>A typical use case would be a device that is owned by a company, but used by either an
+     * employee or client.
+     *
+     * <p>The provisioning message should be sent to an unprovisioned device.
+     *
+     * <p>Unlike {@link #ACTION_PROVISION_MANAGED_DEVICE}, the provisioning message can only be sent
+     * by a privileged app with the permission
+     * {@link android.Manifest.permission#DISPATCH_PROVISIONING_MESSAGE}.
+     *
+     * <p>The provisioning intent contains the following properties:
+     * <ul>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOCAL_TIME} (convert to String), optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_TIME_ZONE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_LOCALE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_SSID}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_HIDDEN} (convert to String), optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_SECURITY_TYPE}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PASSWORD}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT} (convert to String), optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li></ul>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE =
+            "android.app.action.PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE";
+
+    /**
+     * Activity action: Starts the provisioning flow which sets up a managed device.
      * Must be started with {@link android.app.Activity#startActivityForResult(Intent, int)}.
      *
      * <p>NOTE: This is only supported on split system user devices, and puts the device into a
