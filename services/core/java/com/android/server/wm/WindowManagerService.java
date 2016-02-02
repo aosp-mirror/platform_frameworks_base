@@ -7267,8 +7267,18 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskPositioner = new TaskPositioner(this);
         mTaskPositioner.register(display);
         mInputMonitor.updateInputWindowsLw(true /*force*/);
+
+        // We need to grab the touch focus so that the touch events during the
+        // resizing/scrolling are not sent to the app. 'win' is the main window
+        // of the app, it may not have focus since there might be other windows
+        // on top (eg. a dialog window).
+        WindowState transferFocusFromWin = win;
+        if (mCurrentFocus != null && mCurrentFocus != win
+                && mCurrentFocus.mAppToken == win.mAppToken) {
+            transferFocusFromWin = mCurrentFocus;
+        }
         if (!mInputManager.transferTouchFocus(
-                win.mInputChannel, mTaskPositioner.mServerChannel)) {
+                transferFocusFromWin.mInputChannel, mTaskPositioner.mServerChannel)) {
             Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
             mTaskPositioner.unregister();
             mTaskPositioner = null;
