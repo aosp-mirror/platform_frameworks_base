@@ -1284,7 +1284,7 @@ public interface IMountService extends IInterface {
 
             @Override
             public void prepareUserStorage(
-                    String volumeUuid, int userId, int serialNumber, boolean ephemeral)
+                    String volumeUuid, int userId, int serialNumber, int flags)
                     throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
@@ -1293,7 +1293,7 @@ public interface IMountService extends IInterface {
                     _data.writeString(volumeUuid);
                     _data.writeInt(userId);
                     _data.writeInt(serialNumber);
-                    _data.writeInt(ephemeral ? 1 : 0);
+                    _data.writeInt(flags);
                     mRemote.transact(Stub.TRANSACTION_prepareUserStorage, _data, _reply, 0);
                     _reply.readException();
                 } finally {
@@ -2055,8 +2055,8 @@ public interface IMountService extends IInterface {
                     String volumeUuid = data.readString();
                     int userId = data.readInt();
                     int serialNumber = data.readInt();
-                    boolean ephemeral = data.readInt() != 0;
-                    prepareUserStorage(volumeUuid, userId, serialNumber, ephemeral);
+                    int _flags = data.readInt();
+                    prepareUserStorage(volumeUuid, userId, serialNumber, _flags);
                     reply.writeNoException();
                     return true;
                 }
@@ -2389,7 +2389,7 @@ public interface IMountService extends IInterface {
     public boolean isUserKeyUnlocked(int userId) throws RemoteException;
 
     public void prepareUserStorage(String volumeUuid, int userId, int serialNumber,
-            boolean ephemeral) throws RemoteException;
+            int flags) throws RemoteException;
 
     public ParcelFileDescriptor mountAppFuse(String name) throws RemoteException;
 }

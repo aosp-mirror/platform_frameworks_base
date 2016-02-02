@@ -25,7 +25,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
-import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -78,7 +77,9 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
-import com.android.server.pm.Installer.StorageFlags;
+
+import libcore.io.IoUtils;
+import libcore.util.Objects;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -95,9 +96,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import libcore.io.IoUtils;
-import libcore.util.Objects;
 
 /**
  * Service for {@link UserManager}.
@@ -1893,17 +1891,8 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final StorageManager storage = mContext.getSystemService(StorageManager.class);
             storage.createUserKey(userId, userInfo.serialNumber, userInfo.isEphemeral());
-            for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
-                final String volumeUuid = vol.getFsUuid();
-                try {
-                    final File userDir = Environment.getDataUserDirectory(volumeUuid, userId);
-                    storage.prepareUserStorage(
-                            volumeUuid, userId, userInfo.serialNumber, userInfo.isEphemeral());
-                    enforceSerialNumber(userDir, userInfo.serialNumber);
-                } catch (IOException e) {
-                    Log.wtf(LOG_TAG, "Failed to create user directory on " + volumeUuid, e);
-                }
-            }
+            prepareUserStorage(userId, userInfo.serialNumber,
+                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
             mPm.createNewUser(userId);
             userInfo.partial = false;
             synchronized (mPackagesLock) {
@@ -2466,11 +2455,24 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * Prepare storage areas for given user on all mounted devices.
+     */
+    private void prepareUserStorage(int userId, int userSerial, int flags) {
+        final StorageManager storage = mContext.getSystemService(StorageManager.class);
+        for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
+            final String volumeUuid = vol.getFsUuid();
+            storage.prepareUserStorage(volumeUuid, userId, userSerial, flags);
+        }
+    }
+
+    /**
      * Called right before a user is started. This gives us a chance to prepare
      * app storage and apply any user restrictions.
      */
     public void onBeforeStartUser(int userId) {
-        mPm.reconcileAppsData(userId, Installer.FLAG_DE_STORAGE);
+        final int userSerial = getUserSerialNumber(userId);
+        prepareUserStorage(userId, userSerial, StorageManager.FLAG_STORAGE_DE);
+        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_DE);
 
         if (userId != UserHandle.USER_SYSTEM) {
             synchronized (mRestrictionsLock) {
@@ -2484,7 +2486,9 @@ public class UserManagerService extends IUserManager.Stub {
      * app storage.
      */
     public void onBeforeUnlockUser(int userId) {
-        mPm.reconcileAppsData(userId, Installer.FLAG_CE_STORAGE);
+        final int userSerial = getUserSerialNumber(userId);
+        prepareUserStorage(userId, userSerial, StorageManager.FLAG_STORAGE_CE);
+        mPm.reconcileAppsData(userId, StorageManager.FLAG_STORAGE_CE);
     }
 
     /**

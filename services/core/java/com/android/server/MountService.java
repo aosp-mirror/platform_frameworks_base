@@ -2800,14 +2800,13 @@ class MountService extends IMountService.Stub
     }
 
     @Override
-    public void prepareUserStorage(
-            String volumeUuid, int userId, int serialNumber, boolean ephemeral) {
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
         try {
             mCryptConnector.execute("cryptfs", "prepare_user_storage", escapeNull(volumeUuid),
-                    userId, serialNumber, ephemeral ? 1 : 0);
+                    userId, serialNumber, flags);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
