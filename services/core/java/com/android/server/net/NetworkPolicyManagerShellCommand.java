@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 
 import android.content.Intent;
 import android.net.INetworkPolicyManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
@@ -86,7 +87,7 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         switch(type) {
             case "restrict-background":
-                return getRestrictBackgroundWhitelist();
+                return getRestrictBackground();
         }
         pw.println("Error: unknown get type '" + type + "'");
         return -1;
@@ -101,7 +102,7 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         switch(type) {
             case "restrict-background":
-                return setRestrictBackgroundWhitelist();
+                return setRestrictBackground();
         }
         pw.println("Error: unknown set type '" + type + "'");
         return -1;
@@ -169,19 +170,24 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int getRestrictBackgroundWhitelist() throws RemoteException {
+    private int getRestrictBackground() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         pw.print("Restrict background status: ");
         pw.println(mInterface.getRestrictBackground() ? "enabled" : "disabled");
         return 0;
     }
 
-    private int setRestrictBackgroundWhitelist() throws RemoteException {
+    private int setRestrictBackground() throws RemoteException {
         final int enabled = getNextBooleanArg();
         if (enabled < 0) {
             return enabled;
         }
-        mInterface.setRestrictBackground(enabled > 0);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mInterface.setRestrictBackground(enabled > 0);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         return 0;
     }
 

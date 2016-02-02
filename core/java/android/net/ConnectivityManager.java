@@ -3215,10 +3215,23 @@ public class ConnectivityManager {
 
     /**
      * Device is restricting metered network activity while application is running on background.
+     * <p>
      * In this state, application should not try to use the network while running on background,
      * because it would be denied.
      */
     public static final int RESTRICT_BACKGROUND_STATUS_ENABLED = 3;
+
+    /**
+     * A change in the background metered network activity restriction has occurred.
+     * <p>
+     * Applications should call {@link #getRestrictBackgroundStatus()} to check if the restriction
+     * applies to them.
+     * <p>
+     * This is only sent to registered receivers, not manifest receivers.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_RESTRICT_BACKGROUND_CHANGED =
+            "android.net.conn.RESTRICT_BACKGROUND_CHANGED";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
