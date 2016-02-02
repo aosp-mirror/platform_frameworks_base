@@ -289,12 +289,17 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
         final Drawable drawable = mUserCaptionBackgroundDrawable != null
                 ? mUserCaptionBackgroundDrawable : mCaptionBackgroundDrawable;
-        drawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
-        drawable.draw(canvas);
+
+        if (drawable != null) {
+            drawable.setBounds(0, 0, left + width, top + mLastCaptionHeight);
+            drawable.draw(canvas);
+        }
 
         // The backdrop: clear everything with the background. Clipping is done elsewhere.
-        mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
-        mResizingBackgroundDrawable.draw(canvas);
+        if (mResizingBackgroundDrawable != null) {
+            mResizingBackgroundDrawable.setBounds(0, mLastCaptionHeight, left + width, top + height);
+            mResizingBackgroundDrawable.draw(canvas);
+        }
         mFrameAndBackdropNode.end(canvas);
 
         if (mSystemBarBackgroundNode != null && mStatusBarColor != null) {
