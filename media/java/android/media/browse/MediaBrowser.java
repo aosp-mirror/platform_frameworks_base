@@ -115,7 +115,7 @@ public final class MediaBrowser {
      * @param callback The connection callback.
      * @param rootHints An optional bundle of service-specific arguments to send
      * to the media browse service when connecting and retrieving the root id
-     * for browsing, or null if none.  The contents of this bundle may affect
+     * for browsing, or null if none. The contents of this bundle may affect
      * the information returned when browsing.
      */
     public MediaBrowser(Context context, ComponentName serviceComponent,
@@ -178,9 +178,9 @@ public final class MediaBrowser {
         }
 
         if (!bound) {
-            // Tell them that it didn't work.  We are already on the main thread,
-            // but we don't want to do callbacks inside of connect().  So post it,
-            // and then check that we are on the same ServiceConnection.  We know
+            // Tell them that it didn't work. We are already on the main thread,
+            // but we don't want to do callbacks inside of connect(). So post it,
+            // and then check that we are on the same ServiceConnection. We know
             // we won't also get an onServiceConnected or onServiceDisconnected,
             // so we won't be doing double callbacks.
             mHandler.post(new Runnable() {
@@ -207,13 +207,13 @@ public final class MediaBrowser {
      */
     public void disconnect() {
         // It's ok to call this any state, because allowing this lets apps not have
-        // to check isConnected() unnecessarily.  They won't appreciate the extra
-        // assertions for this.  We do everything we can here to go back to a sane state.
+        // to check isConnected() unnecessarily. They won't appreciate the extra
+        // assertions for this. We do everything we can here to go back to a sane state.
         if (mServiceCallbacks != null) {
             try {
                 mServiceBinder.disconnect(mServiceCallbacks);
             } catch (RemoteException ex) {
-                // We are disconnecting anyway.  Log, just for posterity but it's not
+                // We are disconnecting anyway. Log, just for posterity but it's not
                 // a big problem.
                 Log.w(TAG, "RemoteException during connect for " + mServiceComponent);
             }
@@ -227,12 +227,12 @@ public final class MediaBrowser {
     }
 
     /**
-     * Null out the variables and unbind from the service.  This doesn't include
+     * Null out the variables and unbind from the service. This doesn't include
      * calling disconnect on the service, because we only try to do that in the
      * clean shutdown cases.
      * <p>
      * Everywhere that calls this EXCEPT for disconnect() should follow it with
-     * a call to mCallback.onConnectionFailed().  Disconnect doesn't do that callback
+     * a call to mCallback.onConnectionFailed(). Disconnect doesn't do that callback
      * for a clean shutdown, but everywhere else is a dirty shutdown and should
      * notify the app.
      */
@@ -455,8 +455,8 @@ public final class MediaBrowser {
 
     private void subscribeInternal(String parentId, Bundle options, SubscriptionCallback callback) {
         // Check arguments.
-        if (parentId == null) {
-            throw new IllegalArgumentException("parentId is null");
+        if (TextUtils.isEmpty(parentId)) {
+            throw new IllegalArgumentException("parentId is empty.");
         }
         if (callback == null) {
             throw new IllegalArgumentException("callback is null");
@@ -659,7 +659,7 @@ public final class MediaBrowser {
     }
 
     /**
-     * Return true if {@code callback} is the current ServiceCallbacks.  Also logs if it's not.
+     * Return true if {@code callback} is the current ServiceCallbacks. Also logs if it's not.
      */
     private boolean isCurrent(IMediaBrowserServiceCallbacks callback, String funcName) {
         if (mServiceCallbacks != callback) {
@@ -955,8 +955,8 @@ public final class MediaBrowser {
                                 mServiceCallbacks);
                     } catch (RemoteException ex) {
                         // Connect failed, which isn't good. But the auto-reconnect on the service
-                        // will take over and we will come back.  We will also get the
-                        // onServiceDisconnected, which has all the cleanup code.  So let that do
+                        // will take over and we will come back. We will also get the
+                        // onServiceDisconnected, which has all the cleanup code. So let that do
                         // it.
                         Log.w(TAG, "RemoteException during connect for " + mServiceComponent);
                         if (DBG) {
@@ -1005,7 +1005,7 @@ public final class MediaBrowser {
         }
 
         /**
-         * Return true if this is the current ServiceConnection.  Also logs if it's not.
+         * Return true if this is the current ServiceConnection. Also logs if it's not.
          */
         private boolean isCurrent(String funcName) {
             if (mServiceConnection != this) {
@@ -1031,7 +1031,7 @@ public final class MediaBrowser {
         }
 
         /**
-         * The other side has acknowledged our connection.  The parameters to this function
+         * The other side has acknowledged our connection. The parameters to this function
          * are the initial data as requested.
          */
         @Override
@@ -1044,7 +1044,7 @@ public final class MediaBrowser {
         }
 
         /**
-         * The other side does not like us.  Tell the app via onConnectionFailed.
+         * The other side does not like us. Tell the app via onConnectionFailed.
          */
         @Override
         public void onConnectFailed() {

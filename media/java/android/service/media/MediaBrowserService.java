@@ -16,6 +16,7 @@
 
 package android.service.media;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -41,6 +42,8 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +52,7 @@ import java.util.List;
  * Base class for media browse services.
  * <p>
  * Media browse services enable applications to browse media content provided by an application
- * and ask the application to start playing it.  They may also be used to control content that
+ * and ask the application to start playing it. They may also be used to control content that
  * is already playing by way of a {@link MediaSession}.
  * </p>
  *
@@ -86,6 +89,11 @@ public abstract class MediaBrowserService extends Service {
 
     private static final int RESULT_FLAG_OPTION_NOT_HANDLED = 0x00000001;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag=true, value = { RESULT_FLAG_OPTION_NOT_HANDLED })
+    private @interface ResultFlags { }
+
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap<>();
     private final Handler mHandler = new Handler();
     private ServiceBinder mBinder;
@@ -106,10 +114,10 @@ public abstract class MediaBrowserService extends Service {
      * Completion handler for asynchronous callback methods in {@link MediaBrowserService}.
      * <p>
      * Each of the methods that takes one of these to send the result must call
-     * {@link #sendResult} to respond to the caller with the given results.  If those
+     * {@link #sendResult} to respond to the caller with the given results. If those
      * functions return without calling {@link #sendResult}, they must instead call
      * {@link #detach} before returning, and then may call {@link #sendResult} when
-     * they are done.  If more than one of those methods is called, an exception will
+     * they are done. If more than one of those methods is called, an exception will
      * be thrown.
      *
      * @see MediaBrowserService#onLoadChildren
@@ -119,7 +127,7 @@ public abstract class MediaBrowserService extends Service {
         private Object mDebug;
         private boolean mDetachCalled;
         private boolean mSendResultCalled;
-        private int mFlag;
+        private int mFlags;
 
         Result(Object debug) {
             mDebug = debug;
@@ -133,7 +141,7 @@ public abstract class MediaBrowserService extends Service {
                 throw new IllegalStateException("sendResult() called twice for: " + mDebug);
             }
             mSendResultCalled = true;
-            onResultSent(result, mFlag);
+            onResultSent(result, mFlags);
         }
 
         /**
@@ -156,15 +164,15 @@ public abstract class MediaBrowserService extends Service {
             return mDetachCalled || mSendResultCalled;
         }
 
-        void setFlag(int flag) {
-            mFlag = flag;
+        void setFlags(@ResultFlags int flags) {
+            mFlags = flags;
         }
 
         /**
          * Called when the result is sent, after assertions about not being called twice
          * have happened.
          */
-        void onResultSent(T result, int flag) {
+        void onResultSent(T result, @ResultFlags int flags) {
         }
     }
 
@@ -184,7 +192,7 @@ public abstract class MediaBrowserService extends Service {
                     public void run() {
                         final IBinder b = callbacks.asBinder();
 
-                        // Clear out the old subscriptions.  We are getting new ones.
+                        // Clear out the old subscriptions. We are getting new ones.
                         mConnections.remove(b);
 
                         final ConnectionRecord connection = new ConnectionRecord();
@@ -228,7 +236,7 @@ public abstract class MediaBrowserService extends Service {
                     public void run() {
                         final IBinder b = callbacks.asBinder();
 
-                        // Clear out the old subscriptions.  We are getting new ones.
+                        // Clear out the old subscriptions. We are getting new ones.
                         final ConnectionRecord old = mConnections.remove(b);
                         if (old != null) {
                             // TODO
@@ -388,7 +396,7 @@ public abstract class MediaBrowserService extends Service {
         // To support backward compatibility, when the implementation of MediaBrowserService doesn't
         // override onLoadChildren() with options, onLoadChildren() without options will be used
         // instead, and the options will be applied in the implementation of result.onResultSent().
-        result.setFlag(RESULT_FLAG_OPTION_NOT_HANDLED);
+        result.setFlags(RESULT_FLAG_OPTION_NOT_HANDLED);
         onLoadChildren(parentId, result);
     }
 
@@ -574,7 +582,7 @@ public abstract class MediaBrowserService extends Service {
         final Result<List<MediaBrowser.MediaItem>> result
                 = new Result<List<MediaBrowser.MediaItem>>(parentId) {
             @Override
-            void onResultSent(List<MediaBrowser.MediaItem> list, int flag) {
+            void onResultSent(List<MediaBrowser.MediaItem> list, @ResultFlags int flag) {
                 if (mConnections.get(connection.callbacks.asBinder()) != connection) {
                     if (DBG) {
                         Log.d(TAG, "Not sending onLoadChildren result for connection that has"
@@ -639,7 +647,7 @@ public abstract class MediaBrowserService extends Service {
         final Result<MediaBrowser.MediaItem> result =
                 new Result<MediaBrowser.MediaItem>(itemId) {
             @Override
-            void onResultSent(MediaBrowser.MediaItem item, int flag) {
+            void onResultSent(MediaBrowser.MediaItem item, @ResultFlags int flag) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable(KEY_MEDIA_ITEM, item);
                 receiver.send(0, bundle);
