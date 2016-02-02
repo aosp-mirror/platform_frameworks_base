@@ -18,28 +18,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="@dimen/dialog_list_padding_vertical_material"
+        android:paddingTop="@dimen/aerr_padding_list_top"
         android:paddingBottom="@dimen/dialog_list_padding_vertical_material">
 
-    <TextView
+    <Button
             android:id="@+id/aerr_close"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_close_app"
+            android:drawableStart="@drawable/ic_close"
             style="@style/aerr_list_item" />
 
-    <TextView
+    <Button
             android:id="@+id/aerr_wait"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_wait"
+            android:drawableStart="@drawable/ic_schedule"
             style="@style/aerr_list_item" />
 
-    <TextView
+    <Button
             android:id="@+id/aerr_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_report"
+            android:drawableStart="@drawable/ic_feedback"
             style="@style/aerr_list_item" />
 
 </LinearLayout>

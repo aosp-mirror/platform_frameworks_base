@@ -21,9 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="@dimen/dialog_list_padding_vertical_material"
-        android:paddingBottom="@dimen/dialog_list_padding_vertical_material"
->
+        android:paddingTop="@dimen/aerr_padding_list_top"
+        android:paddingBottom="@dimen/dialog_list_padding_vertical_material">
 
 
     <Button
@@ -31,6 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_restart"
+            android:drawableStart="@drawable/ic_refresh"
             style="@style/aerr_list_item"
     />
 
@@ -39,6 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_reset"
+            android:drawableStart="@drawable/ic_refresh"
             style="@style/aerr_list_item"
     />
 
@@ -47,6 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_report"
+            android:drawableStart="@drawable/ic_feedback"
             style="@style/aerr_list_item"
     />
 
@@ -55,6 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_close"
+            android:drawableStart="@drawable/ic_close"
             style="@style/aerr_list_item"
     />
 
@@ -63,6 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_mute"
+            android:drawableStart="@drawable/ic_close"
             style="@style/aerr_list_item"
     />
 

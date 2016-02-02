@@ -1403,8 +1403,12 @@ please see styles_device_defaults.xml.
         <item name="textAppearance">?attr/textAppearanceListItemSmall</item>
         <item name="textColor">?attr/textColorAlertDialogListItem</item>
         <item name="gravity">center_vertical</item>
-        <item name="paddingStart">?attr/listPreferredItemPaddingStart</item>
-        <item name="paddingEnd">?attr/listPreferredItemPaddingEnd</item>
+        <item name="paddingStart">?attr/dialogPreferredPadding</item>
+        <item name="paddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="background">?attr/selectableItemBackground</item>
+        <item name="drawablePadding">32dp</item>
+        <item name="drawableTint">@color/accent_material_light</item>
+        <item name="drawableTintMode">src_atop</item>
     </style>
 
     <!-- Wifi dialog styles -->
