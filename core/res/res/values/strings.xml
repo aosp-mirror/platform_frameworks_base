@@ -4206,4 +4206,15 @@
     <string name="usb_mtp_launch_notification_title">Connected to <xliff:g id="product_name">%1$s</xliff:g></string>
     <!-- Description of notification shown after a MTP device is connected to Android. -->
     <string name="usb_mtp_launch_notification_description">Tap to view files</string>
+
+    <!-- Resolver target actions strings -->
+
+    <!-- Pin (as in to a bulletin board with a pushpin) a resolver
+         target to the front of the list. -->
+    <string name="pin_target">Pin</string>
+    <!-- Unpin a resolver target such that it sorts normally. -->
+    <string name="unpin_target">Unpin</string>
+    <!-- View application info for a target. -->
+    <string name="app_info">App info</string>
+
 </resources>
