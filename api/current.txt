@@ -34044,6 +34044,7 @@ package android.security.keystore {
 
   public final class KeyGenParameterSpec implements java.security.spec.AlgorithmParameterSpec {
     method public java.security.spec.AlgorithmParameterSpec getAlgorithmParameterSpec();
+    method public byte[] getAttestationChallenge();
     method public java.lang.String[] getBlockModes();
     method public java.util.Date getCertificateNotAfter();
     method public java.util.Date getCertificateNotBefore();
@@ -34068,6 +34069,7 @@ package android.security.keystore {
     ctor public KeyGenParameterSpec.Builder(java.lang.String, int);
     method public android.security.keystore.KeyGenParameterSpec build();
     method public android.security.keystore.KeyGenParameterSpec.Builder setAlgorithmParameterSpec(java.security.spec.AlgorithmParameterSpec);
+    method public android.security.keystore.KeyGenParameterSpec.Builder setAttestationChallenge(byte[]);
     method public android.security.keystore.KeyGenParameterSpec.Builder setBlockModes(java.lang.String...);
     method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateNotAfter(java.util.Date);
     method public android.security.keystore.KeyGenParameterSpec.Builder setCertificateNotBefore(java.util.Date);

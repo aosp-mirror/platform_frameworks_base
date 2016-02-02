@@ -19,7 +19,6 @@ package android.security;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
-
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Binder;
@@ -32,6 +31,7 @@ import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterBlob;
+import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keymaster.OperationResult;
 import android.security.keystore.KeyExpiredException;
@@ -614,6 +614,17 @@ public class KeyStore {
     public boolean onUserPasswordChanged(String newPassword) {
         return onUserPasswordChanged(UserHandle.getUserId(Process.myUid()), newPassword);
     }
+
+    public int attestKey(
+            String alias, KeymasterArguments params, KeymasterCertificateChain outChain) {
+        try {
+            return mBinder.attestKey(alias, params, outChain);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
 
     /**
      * Returns a {@link KeyStoreException} corresponding to the provided keystore/keymaster error

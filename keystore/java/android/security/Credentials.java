@@ -20,9 +20,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
 import com.android.org.bouncycastle.util.io.pem.PemObject;
 import com.android.org.bouncycastle.util.io.pem.PemReader;
 import com.android.org.bouncycastle.util.io.pem.PemWriter;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -147,20 +149,23 @@ public class Credentials {
         Reader reader = new InputStreamReader(bai, StandardCharsets.US_ASCII);
         PemReader pr = new PemReader(reader);
 
-        CertificateFactory cf = CertificateFactory.getInstance("X509");
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
 
-        List<X509Certificate> result = new ArrayList<X509Certificate>();
-        PemObject o;
-        while ((o = pr.readPemObject()) != null) {
-            if (o.getType().equals("CERTIFICATE")) {
-                Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
-                result.add((X509Certificate) c);
-            } else {
-                throw new IllegalArgumentException("Unknown type " + o.getType());
+            List<X509Certificate> result = new ArrayList<X509Certificate>();
+            PemObject o;
+            while ((o = pr.readPemObject()) != null) {
+                if (o.getType().equals("CERTIFICATE")) {
+                    Certificate c = cf.generateCertificate(new ByteArrayInputStream(o.getContent()));
+                    result.add((X509Certificate) c);
+                } else {
+                    throw new IllegalArgumentException("Unknown type " + o.getType());
+                }
             }
+            return result;
+        } finally {
+            pr.close();
         }
-        pr.close();
-        return result;
     }
 
     private static Credentials singleton;

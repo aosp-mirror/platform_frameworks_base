@@ -250,6 +250,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
+    private final byte[] mAttestationChallenge;
+    private final boolean mUniqueIdIncluded;
 
     /**
      * @hide should be built with Builder
@@ -273,7 +275,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
-            int userAuthenticationValidityDurationSeconds) {
+            int userAuthenticationValidityDurationSeconds,
+            byte[] attestationChallenge,
+            boolean uniqueIdIncluded) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -315,6 +319,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
+        mUniqueIdIncluded = uniqueIdIncluded;
     }
 
     /**
@@ -539,6 +545,48 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns the attestation challenge value that will be placed in attestation certificate for
+     * this key pair.
+     *
+     * <p>If this method returns non-{@code null}, the public key certificate for this key pair will
+     * contain an extension that describes the details of the key's configuration and
+     * authorizations, including the content of the attestation challenge value. If the key is in
+     * secure hardware, and if the secure hardware supports attestation, the certificate will be
+     * signed by a chain of certificates rooted at a trustworthy CA key. Otherwise the chain will
+     * be rooted at an untrusted certificate.
+     *
+     * <p>If this method returns {@code null}, and the spec is used to generate an asymmetric (RSA
+     * or EC) key pair, the public key will have a self-signed certificate if it has purpose {@link
+     * KeyProperties#PURPOSE_SIGN} (see {@link #KeyGenParameterSpec(String, int)). If does not have
+     * purpose {@link KeyProperties#PURPOSE_SIGN}, it will have a fake certificate.
+     *
+     * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
+     * {@link KeyGenParameterSpec} with {@link #hasAttestationCertificate()} returning
+     * non-{@code null} is used to generate a symmetric (AES or HMAC) key,
+     * {@link KeyGenerator#generateKey())} will throw
+     * {@link java.security.InvalidAlgorithmParameterException}.
+     *
+     * @see Builder#setAttestationChallenge(byte[])
+     */
+    /*
+     * TODO(swillden): Update this documentation to describe the hardware and software root keys,
+     * including information about CRL/OCSP services for discovering revocations, and to link to
+     * documentation of the extension format and content.
+     */
+    public byte[] getAttestationChallenge() {
+        return Utils.cloneIfNotNull(mAttestationChallenge);
+    }
+
+    /**
+     * @hide This is a system-only API
+     *
+     * Returns {@code true} if the attestation certificate will contain a unique ID field.
+     */
+    public boolean isUniqueIdIncluded() {
+        return mUniqueIdIncluded;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -562,6 +610,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
+        private byte[] mAttestationChallenge = null;
+        private boolean mUniqueIdIncluded = false;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -957,6 +1007,59 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             return this;
         }
 
+        /*
+         * TODO(swillden): Update this documentation to describe the hardware and software root
+         * keys, including information about CRL/OCSP services for discovering revocations, and to
+         * link to documentation of the extension format and content.
+         */
+        /**
+         * Sets whether an attestation certificate will be generated for this key pair, and what
+         * challenge value will be placed in the certificate.  The attestation certificate chain
+         * can be retrieved with with {@link java.security.KeyStore#getCertificateChain(String)}.
+         *
+         * <p>If {@code attestationChallenge} is not {@code null}, the public key certificate for
+         * this key pair will contain an extension that describes the details of the key's
+         * configuration and authorizations, including the {@code attestationChallenge} value. If
+         * the key is in secure hardware, and if the secure hardware supports attestation, the
+         * certificate will be signed by a chain of certificates rooted at a trustworthy CA key.
+         * Otherwise the chain will be rooted at an untrusted certificate.
+         *
+         * <p>The purpose of the challenge value is to enable relying parties to verify that the key
+         * was created in response to a specific request. If attestation is desired but no
+         * challenged is needed, any non-{@code null} value may be used, including an empty byte
+         * array.
+         *
+         * <p>If {@code attestationChallenge} is {@code null}, and this spec is used to generate an
+         * asymmetric (RSA or EC) key pair, the public key certificate will be self-signed if the
+         * key has purpose {@link KeyProperties#PURPOSE_SIGN} (see
+         * {@link #KeyGenParameterSpec(String, int)). If the key does not have purpose
+         * {@link KeyProperties#PURPOSE_SIGN}, it is not possible to use the key to sign a
+         * certificate, so the public key certificate will contain a dummy signature.
+         *
+         * <p>Symmetric keys, such as AES and HMAC keys, do not have public key certificates. If a
+         * {@code getAttestationChallenge} returns non-{@code null} and the spec is used to
+         * generate a symmetric (AES or HMAC) key, {@link KeyGenerator#generateKey()} will throw
+         * {@link java.security.InvalidAlgorithmParameterException}.
+         *
+         * @see Builder#setAttestationChallenge(String attestationChallenge)
+         */
+        @NonNull
+        public Builder setAttestationChallenge(byte[] attestationChallenge) {
+            mAttestationChallenge = attestationChallenge;
+            return this;
+        }
+
+        /**
+         * @hide Only system apps can use this method.
+         *
+         * Sets whether to include a temporary unique ID field in the attestation certificate.
+         */
+        @NonNull
+        public Builder setUniqueIdIncluded(boolean uniqueIdIncluded) {
+            mUniqueIdIncluded = uniqueIdIncluded;
+            return this;
+        }
+
         /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
@@ -981,7 +1084,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mBlockModes,
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
-                    mUserAuthenticationValidityDurationSeconds);
+                    mUserAuthenticationValidityDurationSeconds,
+                    mAttestationChallenge,
+                    mUniqueIdIncluded);
         }
     }
 }
