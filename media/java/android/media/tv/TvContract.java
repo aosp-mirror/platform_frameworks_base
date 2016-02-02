@@ -30,6 +30,7 @@ import android.util.ArraySet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * The contract between the TV provider and applications. Contains definitions for the supported
@@ -1318,7 +1319,13 @@ public final class TvContract {
              * @return canonical genre strings.
              */
             public static String[] decode(String genres) {
-                return genres.split("\\s*,\\s*");
+                StringTokenizer st = new StringTokenizer(genres, "\\s*,\\s*");
+                String[] result = new String[st.countTokens()];
+                int i = 0;
+                while (st.hasMoreTokens()){
+                    result[i++] = st.nextToken();
+                }
+                return result;
             }
 
             /**
