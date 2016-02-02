@@ -40,6 +40,8 @@
 #include <linux/android_alarm.h>
 #include <linux/rtc.h>
 
+#include <memory>
+
 namespace android {
 
 static const size_t N_ANDROID_TIMERFDS = ANDROID_ALARM_TYPE_COUNT + 1;
@@ -323,14 +325,14 @@ static bool rtc_is_hctosys(unsigned int rtc_id)
 
 static int wall_clock_rtc()
 {
-    DIR *dir = opendir(rtc_sysfs);
-    if (!dir) {
+    std::unique_ptr<DIR, int(*)(DIR*)> dir(opendir(rtc_sysfs), closedir);
+    if (!dir.get()) {
         ALOGE("failed to open %s: %s", rtc_sysfs, strerror(errno));
         return -1;
     }
 
     struct dirent *dirent;
-    while (errno = 0, dirent = readdir(dir)) {
+    while (errno = 0, dirent = readdir(dir.get())) {
         unsigned int rtc_id;
         int matched = sscanf(dirent->d_name, "rtc%u", &rtc_id);
 
