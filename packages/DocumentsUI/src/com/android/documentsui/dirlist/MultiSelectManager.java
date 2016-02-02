@@ -34,7 +34,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -57,7 +56,7 @@ import java.util.Set;
  * Additionally it can be configured to restrict selection to a single element, @see
  * #setSelectMode.
  */
-public final class MultiSelectManager implements View.OnKeyListener {
+public final class MultiSelectManager {
 
     /** Selection mode for multiple select. **/
     public static final int MODE_MULTIPLE = 0;
@@ -239,7 +238,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
     }
 
     /**
-     * Clears the selection, without notifying anyone.
+     * Clears the selection, without notifying selection listeners. UI elements still need to be
+     * notified about state changes so that they can update their appearance.
      */
     private void clearSelectionQuietly() {
         mRanger = null;
@@ -248,10 +248,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
             return;
         }
 
-        Selection intermediateSelection = getSelection(new Selection());
+        Selection oldSelection = getSelection(new Selection());
         mSelection.clear();
 
-        for (String id: intermediateSelection.getAll()) {
+        for (String id: oldSelection.getAll()) {
             notifyItemStateChanged(id, false);
         }
     }
@@ -334,21 +334,7 @@ public final class MultiSelectManager implements View.OnKeyListener {
         if (mSelection.contains(modelId)) {
             changed = attemptDeselect(modelId);
         } else {
-            boolean canSelect = notifyBeforeItemStateChange(modelId, true);
-            if (!canSelect) {
-                return;
-            }
-            if (mSingleSelect && hasSelection()) {
-                clearSelectionQuietly();
-            }
-
-            // Here we're already in selection mode. In that case
-            // When a simple click/tap (without SHIFT) creates causes
-            // an item to be selected.
-            // By recreating Ranger at this point, we allow the user to create
-            // multiple separate contiguous ranges with SHIFT+Click & Click.
-            selectAndNotify(modelId);
-            changed = true;
+            changed = attemptSelect(modelId);
         }
 
         if (changed) {
@@ -357,9 +343,46 @@ public final class MultiSelectManager implements View.OnKeyListener {
     }
 
     /**
-     * Sets the magic location at which a selection range begins. This
-     * value is consulted when determining how to extend, and modify
-     * selection ranges.
+     * Handle a range selection event.
+     * <li> If the MSM is currently in single-select mode, only the last item in the range will
+     * actually be selected.
+     * <li>If a range selection is not already active, one will be started, and the given range of
+     * items will be selected.  The given startPos becomes the anchor for the range selection.
+     * <li>If a range selection is already active, the anchor is not changed. The range is extended
+     * from its current anchor to endPos.
+     *
+     * @param startPos
+     * @param endPos
+     */
+    public void selectRange(int startPos, int endPos) {
+        // In single-select mode, just select the last item in the range.
+        if (mSingleSelect) {
+            attemptSelect(mAdapter.getModelId(endPos));
+            return;
+        }
+
+        // In regular (i.e. multi-select) mode
+        if (!isRangeSelectionActive()) {
+            // If a range selection isn't active, start one up
+            attemptSelect(mAdapter.getModelId(startPos));
+            setSelectionRangeBegin(startPos);
+        }
+        // Extend the range selection
+        mRanger.snapSelection(endPos);
+        notifySelectionChanged();
+    }
+
+    /**
+     * @return Whether or not there is a current range selection active.
+     */
+    private boolean isRangeSelectionActive() {
+        return mRanger != null;
+    }
+
+    /**
+     * Sets the magic location at which a selection range begins (the selection anchor). This value
+     * is consulted when determining how to extend, and modify selection ranges. Calling this when a
+     * range selection is active will reset the range selection.
      *
      * @throws IllegalStateException if {@code position} is not already be selected
      * @param position
@@ -432,6 +455,24 @@ public final class MultiSelectManager implements View.OnKeyListener {
             if (DEBUG) Log.d(TAG, "Select cancelled by listener.");
             return false;
         }
+    }
+
+    /**
+     * @param id
+     * @return True if the update was applied.
+     */
+    private boolean attemptSelect(String id) {
+        checkArgument(id != null);
+        boolean canSelect = notifyBeforeItemStateChange(id, true);
+        if (!canSelect) {
+            return false;
+        }
+        if (mSingleSelect && hasSelection()) {
+            clearSelectionQuietly();
+        }
+
+        selectAndNotify(id);
+        return true;
     }
 
     private boolean notifyBeforeItemStateChange(String id, boolean nextState) {
@@ -786,12 +827,10 @@ public final class MultiSelectManager implements View.OnKeyListener {
         Point createAbsolutePoint(Point relativePoint);
         Rect getAbsoluteRectForChildViewAt(int index);
         int getAdapterPositionAt(int index);
-        int getAdapterPositionForChildView(View view);
         int getColumnCount();
         int getRowCount();
         int getChildCount();
         int getVisibleChildCount();
-        void focusItem(int position);
         /**
          * Layout items are excluded from the GridModel.
          */
@@ -812,17 +851,8 @@ public final class MultiSelectManager implements View.OnKeyListener {
         }
 
         @Override
-        public int getAdapterPositionForChildView(View view) {
-            if (view.getParent() == mView) {
-                return mView.getChildAdapterPosition(view);
-            } else {
-                return RecyclerView.NO_POSITION;
-            }
-        }
-
-        @Override
         public int getAdapterPositionAt(int index) {
-            return getAdapterPositionForChildView(mView.getChildAt(index));
+            return mView.getChildAdapterPosition(mView.getChildAt(index));
         }
 
         @Override
@@ -918,39 +948,6 @@ public final class MultiSelectManager implements View.OnKeyListener {
         @Override
         public void hideBand() {
             mView.getOverlay().remove(mBand);
-        }
-
-        @Override
-        public void focusItem(final int pos) {
-            // If the item is already in view, focus it; otherwise, scroll to it and focus it.
-            RecyclerView.ViewHolder vh = mView.findViewHolderForAdapterPosition(pos);
-            if (vh != null) {
-                vh.itemView.requestFocus();
-            } else {
-                mView.smoothScrollToPosition(pos);
-                // Set a one-time listener to request focus when the scroll has completed.
-                mView.addOnScrollListener(
-                    new RecyclerView.OnScrollListener() {
-                        @Override
-                        public void onScrollStateChanged (RecyclerView view, int newState) {
-                            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                                // When scrolling stops, find the item and focus it.
-                                RecyclerView.ViewHolder vh =
-                                        view.findViewHolderForAdapterPosition(pos);
-                                if (vh != null) {
-                                    vh.itemView.requestFocus();
-                                } else {
-                                    // This might happen in weird corner cases, e.g. if the user is
-                                    // scrolling while a delete operation is in progress.  In that
-                                    // case, just don't attempt to focus the missing item.
-                                    Log.w(
-                                        TAG, "Unable to focus position " + pos + " after a scroll");
-                                }
-                                view.removeOnScrollListener(this);
-                            }
-                        }
-                    });
-            }
         }
 
         @Override
@@ -1906,100 +1903,5 @@ public final class MultiSelectManager implements View.OnKeyListener {
 
             return true;
         }
-    }
-
-    // TODO: Might have to move this to a more global level.  e.g. What should happen if the
-    // user taps a file and then presses shift-down?  Currently the RecyclerView never even sees
-    // the key event.  Perhaps install a global key handler to catch those events while in
-    // selection mode?
-    @Override
-    public boolean onKey(View view, int keyCode, KeyEvent event) {
-        // Listen for key-down events.  This allows the handler to respond appropriately when
-        // the user holds down the arrow keys for navigation.
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
-            return false;
-        }
-
-        // Here we unpack information from the event and pass it to an more
-        // easily tested method....basically eliminating the need to synthesize
-        // events and views and so on in our tests.
-        int endPos = findTargetPosition(view, keyCode);
-        if (endPos == RecyclerView.NO_POSITION) {
-            // If there is no valid navigation target, don't handle the keypress.
-            return false;
-        }
-
-        int startPos = mEnvironment.getAdapterPositionForChildView(view);
-
-        return changeFocus(startPos, endPos, event.isShiftPressed());
-    }
-
-    /**
-     * @param startPosition The current focus position.
-     * @param targetPosition The adapter position to focus.
-     * @param extendSelection
-     */
-    @VisibleForTesting
-    boolean changeFocus(int startPosition, int targetPosition, boolean extendSelection) {
-        // Focus the new file.
-        mEnvironment.focusItem(targetPosition);
-
-        if (extendSelection) {
-            if (mSingleSelect) {
-                // We're in single select and have an existing selection.
-                // Our best guess as to what the user would expect is to advance the selection.
-                clearSelection();
-                toggleSelection(targetPosition);
-            } else {
-                if (!hasSelection()) {
-                    // No selection - start a selection when the user presses shift-arrow.
-                    toggleSelection(startPosition);
-                    setSelectionRangeBegin(startPosition);
-                }
-                mRanger.snapSelection(targetPosition);
-                notifySelectionChanged();
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Returns the adapter position that the key combo is targeted at.
-     */
-    private int findTargetPosition(View view, int keyCode) {
-        int position = RecyclerView.NO_POSITION;
-        if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
-            position = 0;
-        } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
-            position = mAdapter.getItemCount() - 1;
-        } else {
-            // Find a navigation target based on the arrow key that the user pressed.  Ignore
-            // navigation targets that aren't items in the recycler view.
-            int searchDir = -1;
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_DPAD_UP:
-                    searchDir = View.FOCUS_UP;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    searchDir = View.FOCUS_DOWN;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    searchDir = View.FOCUS_LEFT;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    searchDir = View.FOCUS_RIGHT;
-                    break;
-            }
-            if (searchDir != -1) {
-                View targetView = view.focusSearch(searchDir);
-                // TargetView can be null, for example, if the user pressed <down> at the bottom of
-                // the list.
-                if (targetView != null) {
-                    position = mEnvironment.getAdapterPositionForChildView(targetView);
-                }
-            }
-        }
-        return position;
     }
 }

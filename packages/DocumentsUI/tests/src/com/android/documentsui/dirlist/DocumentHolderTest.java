@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -128,6 +129,11 @@ public class DocumentHolderTest extends AndroidTestCase {
         public boolean onSelect(DocumentHolder doc) {
             mSelected = true;
             return true;
+        }
+
+        @Override
+        public boolean onKey(DocumentHolder doc, int keyCode, KeyEvent event) {
+            return false;
         }
 
     }

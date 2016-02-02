@@ -23,7 +23,6 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.view.View;
 
 import com.android.documentsui.dirlist.MultiSelectManager.GridModel;
 
@@ -322,16 +321,6 @@ public class MultiSelectManager_GridModelTest extends AndroidTestCase {
 
         @Override
         public void removeCallback(Runnable r) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int getAdapterPositionForChildView(View view) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void focusItem(int i) {
             throw new UnsupportedOperationException();
         }
 

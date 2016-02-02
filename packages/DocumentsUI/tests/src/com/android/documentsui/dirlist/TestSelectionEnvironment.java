@@ -19,7 +19,6 @@ package com.android.documentsui.dirlist;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
-import android.view.View;
 
 import com.android.documentsui.dirlist.MultiSelectManager.SelectionEnvironment;
 
@@ -83,11 +82,6 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     }
 
     @Override
-    public int getAdapterPositionForChildView(View view) {
-        return 0;
-    }
-
-    @Override
     public int getColumnCount() {
         return 0;
     }
@@ -105,10 +99,6 @@ public class TestSelectionEnvironment implements SelectionEnvironment {
     @Override
     public int getVisibleChildCount() {
         return 0;
-    }
-
-    @Override
-    public void focusItem(int position) {
     }
 
     @Override
