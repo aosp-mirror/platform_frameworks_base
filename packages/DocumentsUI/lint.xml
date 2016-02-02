@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- min-sdk doesn't apply to platform apps -->
+    <issue id="UsesMinSdkAttributes" severity="ignore" />
+
+    <!-- Protected permissions don't apply to system apps -->
+    <issue id="ProtectedPermissions" severity="ignore" />
+</lint>
