@@ -1049,7 +1049,6 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/tools/localization-checklist.html",
       "https://support.google.com/googleplay/android-developer/table/3541286",
-      "distribute/stories/localization.html",
       "https://play.google.com/intl/en_us/badges/",
       "distribute/tools/promote/device-art.html",
       "https://www.youtube.com/watch?v=SkHHPf3EdzE"
@@ -1171,12 +1170,6 @@ var RESOURCE_COLLECTIONS = {
       "https://en.wikipedia.org/wiki/XLIFF"
     ]
   },
-  "distribute/toolsreference/localizationchecklist/translatestrings": {
-    "title": "",
-    "resources": [
-      "distribute/stories/localization.html",
-    ]
-  },
   "distribute/toolsreference/localizationchecklist/preplaunch": {
     "title": "",
     "resources": [
@@ -1278,8 +1271,7 @@ var RESOURCE_COLLECTIONS = {
   "distribute/toolsreference/launchchecklist/localization": {
     "title": "",
     "resources": [
-      "distribute/tools/localization-checklist.html",
-      "guide/topics/resources/localization.html",
+      "distribute/tools/localization-checklist.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/graphics": {
@@ -1385,11 +1377,18 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer/answer/138000?hl=zh-Hans"
     ]
   },
+  "distribute/stories/localization": {
+    "title": "",
+    "resources": [
+      "distribute/stories/games/rvappstudios-zombie.html",
+      "distribute/stories/games/g4a-indian-rummy.html",
+      "distribute/stories/apps/sayhi.html"
+    ]
+  },
   "distribute/toolsreference/launchchecklist/localization/zhcn": {
     "title": "",
     "resources": [
       "intl/zh-cn/distribute/tools/localization-checklist.html",
-      "guide/topics/resources/localization.html"
     ]
   },
   "distribute/toolsreference/launchchecklist/graphics/zhcn": {
