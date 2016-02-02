@@ -2166,7 +2166,8 @@ public class BackupManagerService {
             try {
                 ApplicationInfo app = pkg.applicationInfo;
                 if (((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0)
-                        || app.backupAgentName == null) {
+                        || app.backupAgentName == null
+                        || (app.flags&ApplicationInfo.FLAG_FULL_BACKUP_ONLY) != 0) {
                     packages.remove(a);
                 }
                 else {
