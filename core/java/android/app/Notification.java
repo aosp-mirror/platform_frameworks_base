@@ -2623,9 +2623,6 @@ public class Notification implements Parcelable
             if (onMs != 0 || offMs != 0) {
                 mN.flags |= FLAG_SHOW_LIGHTS;
             }
-            if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
-                mN.flags |= FLAG_SHOW_LIGHTS;
-            }
             return this;
         }
 
@@ -3601,6 +3598,10 @@ public class Notification implements Parcelable
 
             if (mStyle != null) {
                 mStyle.buildStyled(mN);
+            }
+
+            if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
+                mN.flags |= FLAG_SHOW_LIGHTS;
             }
 
             return mN;
