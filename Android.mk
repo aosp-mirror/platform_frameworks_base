@@ -136,6 +136,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/ISyncStatusObserver.aidl \
 	core/java/android/content/pm/ILauncherApps.aidl \
 	core/java/android/content/pm/IOnAppsChangedListener.aidl \
+	core/java/android/content/pm/IOtaDexopt.aidl \
 	core/java/android/content/pm/IPackageDataObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver.aidl \
 	core/java/android/content/pm/IPackageDeleteObserver2.aidl \

@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.Package;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -48,7 +49,7 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 /**
  * Helper class for running dexopt command on packages.
  */
-final class PackageDexOptimizer {
+class PackageDexOptimizer {
     private static final String TAG = "PackageManager.DexOptimizer";
     static final String OAT_DIR_NAME = "oat";
     // TODO b/19550105 Remove error codes and use exceptions
@@ -57,16 +58,28 @@ final class PackageDexOptimizer {
     static final int DEX_OPT_DEFERRED = 2;
     static final int DEX_OPT_FAILED = -1;
 
-    private final PackageManagerService mPackageManagerService;
+    private static final boolean DEBUG_DEXOPT = PackageManagerService.DEBUG_DEXOPT;
+
+    private final Installer mInstaller;
+    private final Object mInstallLock;
 
     private final PowerManager.WakeLock mDexoptWakeLock;
     private volatile boolean mSystemReady;
 
-    PackageDexOptimizer(PackageManagerService packageManagerService) {
-        this.mPackageManagerService = packageManagerService;
-        PowerManager powerManager = (PowerManager)packageManagerService.mContext.getSystemService(
-                Context.POWER_SERVICE);
-        mDexoptWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*dexopt*");
+    PackageDexOptimizer(Installer installer, Object installLock, Context context,
+            String wakeLockTag) {
+        this.mInstaller = installer;
+        this.mInstallLock = installLock;
+
+        PowerManager powerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mDexoptWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockTag);
+    }
+
+    protected PackageDexOptimizer(PackageDexOptimizer from) {
+        this.mInstaller = from.mInstaller;
+        this.mInstallLock = from.mInstallLock;
+        this.mDexoptWakeLock = from.mDexoptWakeLock;
+        this.mSystemReady = from.mSystemReady;
     }
 
     static boolean canOptimizePackage(PackageParser.Package pkg) {
@@ -77,27 +90,19 @@ final class PackageDexOptimizer {
      * Performs dexopt on all code paths and libraries of the specified package for specified
      * instruction sets.
      *
-     * <p>Calls to {@link com.android.server.pm.Installer#dexopt} are synchronized on
-     * {@link PackageManagerService#mInstallLock}.
+     * <p>Calls to {@link com.android.server.pm.Installer#dexopt} on {@link #mInstaller} are
+     * synchronized on {@link #mInstallLock}.
      */
-    int performDexOpt(PackageParser.Package pkg, String[] instructionSets,
-            boolean inclDependencies, boolean useProfiles, boolean extractOnly, boolean force) {
-        ArraySet<String> done;
-        if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
-            done = new ArraySet<String>();
-            done.add(pkg.packageName);
-        } else {
-            done = null;
-        }
-        synchronized (mPackageManagerService.mInstallLock) {
+    int performDexOpt(PackageParser.Package pkg, String[] instructionSets, boolean useProfiles,
+            boolean extractOnly) {
+        synchronized (mInstallLock) {
             final boolean useLock = mSystemReady;
             if (useLock) {
                 mDexoptWakeLock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
                 mDexoptWakeLock.acquire();
             }
             try {
-                return performDexOptLI(pkg, instructionSets, done, useProfiles,
-                        extractOnly, force);
+                return performDexOptLI(pkg, instructionSets, useProfiles, extractOnly);
             } finally {
                 if (useLock) {
                     mDexoptWakeLock.release();
@@ -106,20 +111,41 @@ final class PackageDexOptimizer {
         }
     }
 
+    /**
+     * Determine whether the package should be skipped for the given instruction set. A return
+     * value of true means the package will be skipped. A return value of false means that the
+     * package will be further investigated, and potentially compiled.
+     */
+    protected boolean shouldSkipBasedOnISA(PackageParser.Package pkg, String instructionSet) {
+        return pkg.mDexOptPerformed.contains(instructionSet);
+    }
+
+    /**
+     * Adjust the given dexopt-needed value. Can be overridden to influence the decision to
+     * optimize or not (and in what way).
+     */
+    protected int adjustDexoptNeeded(int dexoptNeeded) {
+        return dexoptNeeded;
+    }
+
+    /**
+     * Adjust the given dexopt flags that will be passed to the installer.
+     */
+    protected int adjustDexoptFlags(int dexoptFlags) {
+        return dexoptFlags;
+    }
+
+    /**
+     * Update the package status after a successful compilation.
+     */
+    protected void recordSuccessfulDexopt(PackageParser.Package pkg, String instructionSet) {
+        pkg.mDexOptPerformed.add(instructionSet);
+    }
+
     private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            ArraySet<String> done, boolean useProfiles, boolean extractOnly, boolean force) {
+            boolean useProfiles, boolean extractOnly) {
         final String[] instructionSets = targetInstructionSets != null ?
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
-
-        if (done != null) {
-            done.add(pkg.packageName);
-            if (pkg.usesLibraries != null) {
-                performDexOptLibsLI(pkg.usesLibraries, instructionSets, done);
-            }
-            if (pkg.usesOptionalLibraries != null) {
-                performDexOptLibsLI(pkg.usesOptionalLibraries, instructionSets, done);
-            }
-        }
 
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
@@ -128,34 +154,26 @@ final class PackageDexOptimizer {
         final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
         final boolean debuggable = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
-        if (useProfiles) {
-            // If we do a profile guided compilation then we might recompile
-            // the same package if more profile information is available.
-            force = true;
-        }
-
         final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
         boolean performedDexOpt = false;
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            if (!force && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
+            if (!useProfiles && shouldSkipBasedOnISA(pkg, dexCodeInstructionSet)) {
+                // Skip only if we do not use profiles since they might trigger a recompilation.
                 continue;
             }
 
             for (String path : paths) {
                 int dexoptNeeded;
 
-                if (force) {
-                    dexoptNeeded = DexFile.DEX2OAT_NEEDED;
-                } else {
-                    try {
-                        dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
-                                dexCodeInstructionSet, /* defer */false);
-                    } catch (IOException ioe) {
-                        Slog.w(TAG, "IOException reading apk: " + path, ioe);
-                        return DEX_OPT_FAILED;
-                    }
+                try {
+                    dexoptNeeded = DexFile.getDexOptNeeded(path, pkg.packageName,
+                            dexCodeInstructionSet, /* defer */false);
+                } catch (IOException ioe) {
+                    Slog.w(TAG, "IOException reading apk: " + path, ioe);
+                    return DEX_OPT_FAILED;
                 }
+                dexoptNeeded = adjustDexoptNeeded(dexoptNeeded);
 
                 if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
                     // No dexopt needed and we don't use profiles. Nothing to do.
@@ -174,21 +192,22 @@ final class PackageDexOptimizer {
                     throw new IllegalStateException("Invalid dexopt needed: " + dexoptNeeded);
                 }
 
+
                 Log.i(TAG, "Running dexopt (" + dexoptType + ") on: " + path + " pkg="
                         + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
                         + " extractOnly=" + extractOnly + " oatDir = " + oatDir);
                 final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                final int dexFlags =
+                final int dexFlags = adjustDexoptFlags(
                         (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
                         | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                         | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                         | (extractOnly ? DEXOPT_EXTRACTONLY : 0)
-                        | DEXOPT_BOOTCOMPLETE;
+                        | DEXOPT_BOOTCOMPLETE);
+
                 try {
-                    mPackageManagerService.mInstaller.dexopt(path, sharedGid,
-                            pkg.packageName, dexCodeInstructionSet, dexoptNeeded, oatDir,
-                            dexFlags, pkg.volumeUuid, useProfiles);
+                    mInstaller.dexopt(path, sharedGid, pkg.packageName, dexCodeInstructionSet,
+                            dexoptNeeded, oatDir, dexFlags, pkg.volumeUuid, useProfiles);
                     performedDexOpt = true;
                 } catch (InstallerException e) {
                     Slog.w(TAG, "Failed to dexopt", e);
@@ -201,7 +220,7 @@ final class PackageDexOptimizer {
                 // it isn't required. We therefore mark that this package doesn't need dexopt unless
                 // it's forced. performedDexOpt will tell us whether we performed dex-opt or skipped
                 // it.
-                pkg.mDexOptPerformed.add(dexCodeInstructionSet);
+                recordSuccessfulDexopt(pkg, dexCodeInstructionSet);
             }
         }
 
@@ -232,8 +251,7 @@ final class PackageDexOptimizer {
         if (codePath.isDirectory()) {
             File oatDir = getOatDir(codePath);
             try {
-                mPackageManagerService.mInstaller.createOatDir(oatDir.getAbsolutePath(),
-                        dexInstructionSet);
+                mInstaller.createOatDir(oatDir.getAbsolutePath(), dexInstructionSet);
             } catch (InstallerException e) {
                 Slog.w(TAG, "Failed to create oat dir", e);
                 return null;
@@ -247,21 +265,36 @@ final class PackageDexOptimizer {
         return new File(codePath, OAT_DIR_NAME);
     }
 
-    private void performDexOptLibsLI(ArrayList<String> libs, String[] instructionSets,
-            ArraySet<String> done) {
-        for (String libName : libs) {
-            PackageParser.Package libPkg = mPackageManagerService.findSharedNonSystemLibrary(
-                    libName);
-            if (libPkg != null && !done.contains(libName)) {
-                // TODO: Analyze and investigate if we (should) profile libraries.
-                // Currently this will do a full compilation of the library.
-                performDexOptLI(libPkg, instructionSets, done, /*useProfiles*/ false,
-                        /* extractOnly */ false, /* force */ false);
-            }
-        }
-    }
-
     void systemReady() {
         mSystemReady = true;
+    }
+
+    /**
+     * A specialized PackageDexOptimizer that overrides already-installed checks, forcing a
+     * dexopt path.
+     */
+    public static class ForcedUpdatePackageDexOptimizer extends PackageDexOptimizer {
+
+        public ForcedUpdatePackageDexOptimizer(Installer installer, Object installLock,
+                Context context, String wakeLockTag) {
+            super(installer, installLock, context, wakeLockTag);
+        }
+
+        public ForcedUpdatePackageDexOptimizer(PackageDexOptimizer from) {
+            super(from);
+        }
+
+        @Override
+        protected boolean shouldSkipBasedOnISA(Package pkg, String instructionSet) {
+            // Forced compilation, never skip.
+            return false;
+        }
+
+        @Override
+        protected int adjustDexoptNeeded(int dexoptNeeded) {
+            // Ensure compilation, no matter the current state.
+            // TODO: The return value is wrong when patchoat is needed.
+            return DexFile.DEX2OAT_NEEDED;
+        }
     }
 }

@@ -49,6 +49,8 @@ public final class Installer extends SystemService {
     public static final int DEXOPT_BOOTCOMPLETE = 1 << 4;
     /** Do not compile, only extract bytecode into an OAT file */
     public static final int DEXOPT_EXTRACTONLY  = 1 << 5;
+    /** This is an OTA update dexopt */
+    public static final int DEXOPT_OTA          = 1 << 6;
 
     /** @hide */
     @IntDef(flag = true, value = {

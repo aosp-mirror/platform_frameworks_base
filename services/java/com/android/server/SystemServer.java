@@ -80,6 +80,7 @@ import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pm.BackgroundDexOptService;
 import com.android.server.pm.Installer;
 import com.android.server.pm.LauncherAppsService;
+import com.android.server.pm.OtaDexoptService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
@@ -1097,6 +1098,18 @@ public final class SystemServer {
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
+                // Manages A/B OTA dexopting.
+                boolean disableOtaDexopt = SystemProperties.getBoolean("config.disable_otadexopt",
+                        false);
+                if (!disableOtaDexopt) {
+                    traceBeginAndSlog("StartOtaDexOptService");
+                    try {
+                        OtaDexoptService.main(mSystemContext, mPackageManagerService);
+                    } catch (Throwable e) {
+                        reportWtf("starting BackgroundDexOptService", e);
+                    }
+                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                }
             }
 
             mSystemServiceManager.startService(LauncherAppsService.class);
