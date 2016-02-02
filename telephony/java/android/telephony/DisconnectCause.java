@@ -187,6 +187,13 @@ public class DisconnectCause {
      */
     public static final int CDMA_ALREADY_ACTIVATED         = 49;
 
+    /**
+     * The call was terminated because it is not possible to place a video call while TTY is
+     * enabled.
+     * {@hide}
+     */
+    public static final int VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED = 50;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Please assign the new type the next id value below.
@@ -202,7 +209,7 @@ public class DisconnectCause {
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = CDMA_ALREADY_ACTIVATED;
+    public static final int MAXIMUM_VALID_VALUE = VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -310,6 +317,8 @@ public class DisconnectCause {
             return "IMS_MERGED_SUCCESSFULLY";
         case CDMA_ALREADY_ACTIVATED:
             return "CDMA_ALREADY_ACTIVATED";
+        case VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED:
+                return "VIDEO_CALL_NOT_ALLOWED_WHILE_TTY_ENABLED";
         default:
             return "INVALID: " + cause;
         }
