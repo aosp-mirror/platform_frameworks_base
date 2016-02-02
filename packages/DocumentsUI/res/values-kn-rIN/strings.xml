@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"ಡಾಕ್ಯುಮೆಂಟ್‌ಗಳು"</string>
     <string name="title_open" msgid="4353228937663917801">"ಇದರ ಮೂಲಕ ತೆರೆಯಿರಿ"</string>
-    <string name="title_save" msgid="2433679664882857999">"ಇದಕ್ಕೆ ಉಳಿಸಿ"</string>
+    <string name="title_save" msgid="2433679664882857999">"ಇವುಗಳಲ್ಲಿ ಉಳಿಸಿ"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"ಫೋಲ್ಡರ್ ರಚಿಸು"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ಗ್ರಿಡ್ ವೀಕ್ಷಣೆ"</string>
     <string name="menu_list" msgid="7279285939892417279">"ಪಟ್ಟಿ ವೀಕ್ಷಣೆ"</string>
@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"ಉಳಿಸು"</string>
     <string name="menu_share" msgid="3075149983979628146">"ಹಂಚು"</string>
     <string name="menu_delete" msgid="8138799623850614177">"ಅಳಿಸು"</string>
-    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"ಎಲ್ಲವನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="menu_copy" msgid="3612326052677229148">"ಇದಕ್ಕೆ ನಕಲಿಸಿ…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"ಆಂತರಿಕ ಸಂಗ್ರಹಣೆಯನ್ನು ತೋರಿಸು"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD ಕಾಡ್‌ ಅನ್ನು ತೋರಿಸು"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD ಕಾರ್ಡ್‌ ಅನ್ನು ಮರೆಮಾಡಿ"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ಫೈಲ್‌ ಗಾತ್ರವನ್ನು ತೋರಿಸು"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ಫೈಲ್‌ ಗಾತ್ರವನ್ನು ಮರೆಮಾಡಿ"</string>
+    <string name="button_select" msgid="527196987259139214">"ಆಯ್ಕೆಮಾಡು"</string>
     <string name="button_copy" msgid="8706475544635021302">"ನಕಲಿಸು"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="sort_name" msgid="9183560467917256779">"ಹೆಸರಿನ ಪ್ರಕಾರ"</string>
     <string name="sort_date" msgid="586080032956151448">"ಮಾರ್ಪಡಿಸಿರುವ ದಿನಾಂಕದ ಪ್ರಕಾರ"</string>
     <string name="sort_size" msgid="3350681319735474741">"ಗಾತ್ರದ ಪ್ರಕಾರ"</string>

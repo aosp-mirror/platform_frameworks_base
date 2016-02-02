@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Документи"</string>
     <string name="title_open" msgid="4353228937663917801">"Отваряне от"</string>
-    <string name="title_save" msgid="2433679664882857999">"Запазване в/ъв"</string>
+    <string name="title_save" msgid="2433679664882857999">"Запазване във:"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Създаване на папка"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Изглед в мрежа"</string>
     <string name="menu_list" msgid="7279285939892417279">"Списъчен изглед"</string>
@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Запазване"</string>
     <string name="menu_share" msgid="3075149983979628146">"Споделяне"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Изтриване"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Избиране на „<xliff:g id="DIRECTORY">^1</xliff:g>“"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Избиране на всички"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Избиране на всичко"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Копиране във…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Вътр. хранилище: Показв."</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD карта: Показване"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD карта: Скриване"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Размер на файла: Показв."</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Размер на файла: Скрив."</string>
+    <string name="button_select" msgid="527196987259139214">"Избиране"</string>
     <string name="button_copy" msgid="8706475544635021302">"Копиране"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Избрахте <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"По име"</string>
     <string name="sort_date" msgid="586080032956151448">"По дата на промяната"</string>
     <string name="sort_size" msgid="3350681319735474741">"По размер"</string>
@@ -48,7 +47,7 @@
     <string name="save_error" msgid="6167009778003223664">"Запазването на документа не бе успешно"</string>
     <string name="create_error" msgid="3735649141335444215">"Създаването на папката не бе успешно"</string>
     <string name="query_error" msgid="1222448261663503501">"Заявката за документи не бе успешна"</string>
-    <string name="root_recent" msgid="4470053704320518133">"Скорошно"</string>
+    <string name="root_recent" msgid="4470053704320518133">"Скорошни"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Свободно: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Услуги за съхранение"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Преки пътища"</string>

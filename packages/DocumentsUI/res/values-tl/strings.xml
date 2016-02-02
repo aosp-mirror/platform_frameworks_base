@@ -20,17 +20,16 @@
     <string name="title_open" msgid="4353228937663917801">"Buksan mula sa"</string>
     <string name="title_save" msgid="2433679664882857999">"I-save sa"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Gumawa ng folder"</string>
-    <string name="menu_grid" msgid="6878021334497835259">"View ng grid"</string>
-    <string name="menu_list" msgid="7279285939892417279">"View ng listahan"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"Pag-uri-uriin ayon sa"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"View na grid"</string>
+    <string name="menu_list" msgid="7279285939892417279">"View na listahan"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Uriin ayon sa"</string>
     <string name="menu_search" msgid="3816712084502856974">"Maghanap"</string>
     <string name="menu_settings" msgid="6008033148948428823">"Mga Setting"</string>
     <string name="menu_open" msgid="432922957274920903">"Buksan"</string>
     <string name="menu_save" msgid="2394743337684426338">"I-save"</string>
     <string name="menu_share" msgid="3075149983979628146">"Ibahagi"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Tanggalin"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Piliin ang \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Piliin Lahat"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Piliin lahat"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopyahin sa..."</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ipakita internal storage"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Ipakita ang SD card"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Itago ang SD card"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Ipakita ang laki ng file"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Itago ang laki ng file"</string>
+    <string name="button_select" msgid="527196987259139214">"Pumili"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopyahin"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ang pinili"</string>
     <string name="sort_name" msgid="9183560467917256779">"Ayon sa pangalan"</string>
     <string name="sort_date" msgid="586080032956151448">"Ayon sa petsa ng pagbago"</string>
     <string name="sort_size" msgid="3350681319735474741">"Ayon sa laki"</string>

@@ -29,17 +29,16 @@
     <string name="menu_save" msgid="2394743337684426338">"محفوظ کریں"</string>
     <string name="menu_share" msgid="3075149983979628146">"اشتراک کریں"</string>
     <string name="menu_delete" msgid="8138799623850614177">"حذف کریں"</string>
-    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" منتخب کریں"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"سبھی منتخب کریں"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"اس پر کاپی ہو رہی ہے…"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"سبھی کو منتخب کریں"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"اس میں کاپی کریں…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"داخلی اسٹوریج دکھائیں"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"‏SD کارڈ دکھائیں"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"داخلی اسٹوریج چھپائیں"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"‏SD کارڈ چھپائیں"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"فائل سائز دکھائیں"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"فائل سائز چھپائیں"</string>
+    <string name="button_select" msgid="527196987259139214">"منتخب کریں"</string>
     <string name="button_copy" msgid="8706475544635021302">"کاپی کریں"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> کو منتخب کیا گیا"</string>
     <string name="sort_name" msgid="9183560467917256779">"نام کے لحاظ سے"</string>
     <string name="sort_date" msgid="586080032956151448">"ترمیم کی تاریخ کے لحاظ سے"</string>
     <string name="sort_size" msgid="3350681319735474741">"سائز کے لحاظ سے"</string>
