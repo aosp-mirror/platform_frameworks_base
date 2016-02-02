@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Lagre"</string>
     <string name="menu_share" msgid="3075149983979628146">"Del"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Slett"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Velg «<xliff:g id="DIRECTORY">^1</xliff:g>»"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Velg alle"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Markér alt"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopiér til …"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Vis den interne lagringen"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Vis SD-kortet"</string>
@@ -38,10 +37,10 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Skjul SD-kortet"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Vis filstørrelsen"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Skjul filstørrelsen"</string>
+    <string name="button_select" msgid="527196987259139214">"Velg"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiér"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> valgt"</string>
     <string name="sort_name" msgid="9183560467917256779">"Etter navn"</string>
-    <string name="sort_date" msgid="586080032956151448">"«Etter dato» endret"</string>
+    <string name="sort_date" msgid="586080032956151448">"Etter endringsdato"</string>
     <string name="sort_size" msgid="3350681319735474741">"Etter størrelse"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Vis røtter"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Skjul røtter"</string>
@@ -49,7 +48,7 @@
     <string name="create_error" msgid="3735649141335444215">"Kunne ikke opprette mappen"</string>
     <string name="query_error" msgid="1222448261663503501">"Kunne ikke undersøke dokumenter"</string>
     <string name="root_recent" msgid="4470053704320518133">"Siste"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> gratis"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ledig"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Lagringstjenester"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Snarveier"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Enheter"</string>

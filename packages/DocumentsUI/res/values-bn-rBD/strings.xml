@@ -22,15 +22,14 @@
     <string name="menu_create_dir" msgid="5947289605844398389">"ফোল্ডার তৈরি করুন"</string>
     <string name="menu_grid" msgid="6878021334497835259">"গ্রিড দৃশ্য"</string>
     <string name="menu_list" msgid="7279285939892417279">"তালিকা দৃশ্য"</string>
-    <string name="menu_sort" msgid="7677740407158414452">"এর দ্বারা সাজান"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"এই অনুসারে বাছুন"</string>
     <string name="menu_search" msgid="3816712084502856974">"অনুসন্ধান করুন"</string>
     <string name="menu_settings" msgid="6008033148948428823">"সেটিংস"</string>
     <string name="menu_open" msgid="432922957274920903">"খুলুন"</string>
     <string name="menu_save" msgid="2394743337684426338">"সংরক্ষণ করুন"</string>
     <string name="menu_share" msgid="3075149983979628146">"ভাগ করুন"</string>
     <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
-    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" নির্বাচন করুন"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"সমস্ত নির্বাচন করুন"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"সবগুলি নির্বাচন করুন"</string>
     <string name="menu_copy" msgid="3612326052677229148">"এতে অনুলিপি করুন…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"অভ্যন্তরীণ সঞ্চয়স্থান দেখান"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD কার্ড দেখান"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD কার্ড লুকান"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"ফাইলের আকার দেখান"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ফাইলের আকার লুকান"</string>
+    <string name="button_select" msgid="527196987259139214">"নির্বাচন করুন"</string>
     <string name="button_copy" msgid="8706475544635021302">"অনুলিপি করুন"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> নির্বাচন করা হয়েছে"</string>
     <string name="sort_name" msgid="9183560467917256779">"নামের দ্বারা"</string>
     <string name="sort_date" msgid="586080032956151448">"পরিবর্তনের তারিখ দ্বারা"</string>
     <string name="sort_size" msgid="3350681319735474741">"আকার অনুযায়ী"</string>
