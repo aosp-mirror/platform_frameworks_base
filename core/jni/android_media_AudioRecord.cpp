@@ -180,9 +180,13 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jobject jaa, jint sampleRateInHertz, jint channelMask, jint channelIndexMask,
+        jobject jaa, jintArray jSampleRate, jint channelMask, jint channelIndexMask,
         jint audioFormat, jint buffSizeInBytes, jintArray jSession, jstring opPackageName)
 {
+    jint elements[1];
+    env->GetIntArrayRegion(jSampleRate, 0, 1, elements);
+    int sampleRateInHertz = elements[0];
+
     //ALOGV(">> Entering android_media_AudioRecord_setup");
     //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d",
     //     sampleRateInHertz, audioFormat, channelMask, buffSizeInBytes);
@@ -303,6 +307,11 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     nSession[0] = lpRecorder->getSessionId();
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     nSession = NULL;
+
+    {
+        const jint elements[1] = { (jint) lpRecorder->getSampleRate() };
+        env->SetIntArrayRegion(jSampleRate, 0, 1, elements);
+    }
 
     {   // scope for the lock
         Mutex::Autolock l(sLock);
@@ -717,7 +726,7 @@ static const JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
     {"native_start",         "(II)I",    (void *)android_media_AudioRecord_start},
     {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
-    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;IIIII[ILjava/lang/String;)I",
+    {"native_setup",         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILjava/lang/String;)I",
                                        (void *)android_media_AudioRecord_setup},
     {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
     {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
