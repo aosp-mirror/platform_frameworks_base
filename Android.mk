@@ -1193,6 +1193,11 @@ LOCAL_MODULE := ext
 
 LOCAL_DX_FLAGS := --core-library
 
+ifneq ($(INCREMENTAL_BUILDS),)
+    LOCAL_PROGUARD_ENABLED := disabled
+    LOCAL_JACK_ENABLED := incremental
+endif
+
 include $(BUILD_JAVA_LIBRARY)
 
 
