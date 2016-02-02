@@ -67,7 +67,9 @@ public class LegacyResultMapper {
         /*
          * Attempt to look up the result from the cache if the parameters haven't changed
          */
-        if (mCachedRequest != null && legacyRequest.parameters.same(mCachedRequest.parameters)) {
+        if (mCachedRequest != null &&
+                legacyRequest.parameters.same(mCachedRequest.parameters) &&
+                legacyRequest.captureRequest.equals(mCachedRequest.captureRequest)) {
             result = new CameraMetadataNative(mCachedResult);
             cached = true;
         } else {
@@ -124,8 +126,8 @@ public class LegacyResultMapper {
          */
         // colorCorrection.aberrationMode
         {
-            // Always hardcoded to FAST
-            result.set(COLOR_CORRECTION_ABERRATION_MODE, COLOR_CORRECTION_ABERRATION_MODE_FAST);
+            result.set(COLOR_CORRECTION_ABERRATION_MODE,
+                    request.get(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE));
         }
 
         /*
@@ -282,7 +284,7 @@ public class LegacyResultMapper {
          * noiseReduction.*
          */
         // noiseReduction.mode
-        result.set(NOISE_REDUCTION_MODE, NOISE_REDUCTION_MODE_FAST);
+        result.set(NOISE_REDUCTION_MODE, request.get(CaptureRequest.NOISE_REDUCTION_MODE));
 
         return result;
     }
