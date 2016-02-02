@@ -868,6 +868,38 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             }
         }
 
+        public void prepare() {
+            try {
+                mCb.onPrepare();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in prepare.", e);
+            }
+        }
+
+        public void prepareFromMediaId(String mediaId, Bundle extras) {
+            try {
+                mCb.onPrepareFromMediaId(mediaId, extras);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in prepareFromMediaId.", e);
+            }
+        }
+
+        public void prepareFromSearch(String query, Bundle extras) {
+            try {
+                mCb.onPrepareFromSearch(query, extras);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in prepareFromSearch.", e);
+            }
+        }
+
+        public void prepareFromUri(Uri uri, Bundle extras) {
+            try {
+                mCb.onPrepareFromUri(uri, extras);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote failure in prepareFromUri.", e);
+            }
+        }
+
         public void play() {
             try {
                 mCb.onPlay();
@@ -880,7 +912,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             try {
                 mCb.onPlayFromMediaId(mediaId, extras);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Remote failure in playUri.", e);
+                Slog.e(TAG, "Remote failure in playFromMediaId.", e);
             }
         }
 
@@ -1097,6 +1129,27 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void prepare() throws RemoteException {
+            mSessionCb.prepare();
+        }
+
+        @Override
+        public void prepareFromMediaId(String mediaId, Bundle extras)
+                throws RemoteException {
+            mSessionCb.prepareFromMediaId(mediaId, extras);
+        }
+
+        @Override
+        public void prepareFromSearch(String query, Bundle extras) throws RemoteException {
+            mSessionCb.prepareFromSearch(query, extras);
+        }
+
+        @Override
+        public void prepareFromUri(Uri uri, Bundle extras) throws RemoteException {
+            mSessionCb.prepareFromUri(uri, extras);
         }
 
         @Override
