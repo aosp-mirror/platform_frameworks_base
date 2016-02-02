@@ -77,6 +77,21 @@ public interface RILConstants {
     int SIM_SAP_MSG_SIZE_TOO_SMALL = 34;
     int SIM_SAP_CONNECT_OK_CALL_ONGOING = 35;
     int LCE_NOT_SUPPORTED = 36;               /* Link Capacity Estimation (LCE) not supported */
+    int NO_MEMORY = 37;                       /* Not sufficient memory to process the request */
+    int INTERNAL_ERR = 38;                    /* Hit unexpected vendor internal error scenario */
+    int SYSTEM_ERR = 39;                      /* Hit platform or system error */
+    int MODEM_ERR = 40;                       /* Hit unexpected modem error */
+    int INVALID_STATE = 41;                   /* Can not process the request as vendor RIL is in
+                                                   invalid state. */
+    int NO_RESOURCES = 42;                    /* Not sufficient resource to process the request */
+    int SIM_ERR = 43;                         /* Received error from SIM card */
+    int INVALID_ARGUMENTS = 44;               /* Received invalid arguments in request */
+    int INVALID_SIM_STATE = 45;               /* Can not process the request in current SIM state */
+    int INVALID_MODEM_STATE = 46;             /* Can not process the request in current Modem state */
+    int INVALID_CALL_ID = 47;                 /* Received invalid call id in request */
+    int NO_SMS_TO_ACK = 48;                   /* ACK received when there is no SMS to ack */
+    int NETWORK_ERR = 49;                     /* Received error from network */
+    int REQUEST_RATE_LIMITED = 50;            /* Operation denied due to overly-frequent requests */
 
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
