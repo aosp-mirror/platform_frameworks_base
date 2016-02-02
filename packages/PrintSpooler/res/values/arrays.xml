@@ -121,38 +121,4 @@
         <!-- Everything else is ISO -->
     </string-array>
 
-    <string-array name="pdf_printer_media_sizes" translatable="false">
-        <item>ISO_A0</item>
-        <item>ISO_A1</item>
-        <item>ISO_A2</item>
-        <item>ISO_A3</item>
-        <item>ISO_A4</item>
-        <item>ISO_A5</item>
-        <item>ISO_A6</item>
-        <item>ISO_A7</item>
-        <item>ISO_A8</item>
-        <item>ISO_A9</item>
-        <item>ISO_A10</item>
-        <item>ISO_B1</item>
-        <item>ISO_B2</item>
-        <item>ISO_B3</item>
-        <item>ISO_B4</item>
-        <item>ISO_B5</item>
-        <item>ISO_B6</item>
-        <item>ISO_B7</item>
-        <item>ISO_B8</item>
-        <item>ISO_B9</item>
-        <item>ISO_B10</item>
-        <item>ISO_C1</item>
-        <item>ISO_C2</item>
-        <item>ISO_C3</item>
-        <item>ISO_C4</item>
-        <item>ISO_C5</item>
-        <item>ISO_C6</item>
-        <item>ISO_C7</item>
-        <item>ISO_C8</item>
-        <item>ISO_C9</item>
-        <item>ISO_C10</item>
-    </string-array>
-
 </resources>
