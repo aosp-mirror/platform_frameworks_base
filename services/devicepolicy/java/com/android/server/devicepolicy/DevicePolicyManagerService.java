@@ -7244,7 +7244,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (managedUserId < 0) {
                     return;
                 }
-                if (getCrossProfileCallerIdDisabledForUser(managedUserId)) {
+                if (isCrossProfileQuickContactDisabled(managedUserId)) {
                     if (VERBOSE_LOG) {
                         Log.v(LOG_TAG,
                                 "Cross-profile contacts access disabled for user " + managedUserId);
@@ -7257,6 +7257,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
+    }
+
+    /**
+     * @return true if cross-profile QuickContact is disabled
+     */
+    private boolean isCrossProfileQuickContactDisabled(int userId) {
+        return getCrossProfileCallerIdDisabledForUser(userId)
+                && getCrossProfileContactsSearchDisabledForUser(userId);
     }
 
     /**
