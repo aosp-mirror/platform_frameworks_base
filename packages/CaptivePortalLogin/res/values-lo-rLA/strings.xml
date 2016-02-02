@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"​ໃຊ້​ເຄືອ​ຂ່າຍ​ນີ້​ຕາມ​ທີ່​ມັນ​ເປັນ"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"ບໍ່​ໃຊ້​ເຄືອ​ຂ່າຍ​ນີ້"</string>
     <string name="action_bar_label" msgid="917235635415966620">"ລົງຊື່ເຂົ້າເຄືອຂ່າຍ"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"ເຄືອ​ຂ່າຍ​ທີ່​ທ່ານ​ກຳ​ລັງ​ເຂົ້າ​ຮ່ວມ​ມີ​ບັນ​ຫາ​ຄວາມ​ປອດ​ໄພ."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"ຕົວ​ຢ່າງ, ໜ້າ​ລົງ​ຊື່​ເຂົ້າ​ໃຊ້​ອາດ​ຈະ​ບໍ່​ເປັນ​ຂອງ​ອົງ​ການ​ທີ່​ສະ​ແດງ​ຂຶ້ນ."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"ແນວ​ໃດ​ກໍ່​ສືບ​ຕໍ່​ຜ່ານບ​ຣາວ​ເຊີ"</string>
 </resources>

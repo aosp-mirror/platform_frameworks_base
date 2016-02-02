@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Dit netwerk in de huidige staat gebruiken"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Dit netwerk niet gebruiken"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Inloggen bij netwerk"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Het netwerk waarmee u verbinding probeert te maken, heeft beveiligingsproblemen."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Zo hoort de weergegeven inlogpagina misschien niet bij de weergegeven organisatie."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Toch doorgaan via browser"</string>
 </resources>
