@@ -2817,8 +2817,9 @@ class MountService extends IMountService.Stub
     public ParcelFileDescriptor mountAppFuse(final String name) throws RemoteException {
         try {
             final int uid = Binder.getCallingUid();
+            final int pid = Binder.getCallingPid();
             final NativeDaemonEvent event =
-                    mConnector.execute("appfuse", "mount", uid, name);
+                    mConnector.execute("appfuse", "mount", uid, pid, name);
             if (event.getFileDescriptors() == null) {
                 throw new RemoteException("AppFuse FD from vold is null.");
             }
@@ -2830,7 +2831,7 @@ class MountService extends IMountService.Stub
                         public void onClose(IOException e) {
                             try {
                                 final NativeDaemonEvent event = mConnector.execute(
-                                        "appfuse", "unmount", uid, name);
+                                        "appfuse", "unmount", uid, pid, name);
                             } catch (NativeDaemonConnectorException unmountException) {
                                 Log.e(TAG, "Failed to unmount appfuse.");
                             }
