@@ -265,7 +265,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 new Runnable() {
             @Override
             public void run() {
-                onConnectedToPrintSpooler(adapter);
+                if (isFinishing()) {
+                    // onPause might have not been able to cancel the job, see PrintActivity#onPause
+                    // To be sure, cancel the job again. Double canceling does no harm.
+                    mSpoolerProvider.getSpooler().setPrintJobState(mPrintJob.getId(),
+                            PrintJobInfo.STATE_CANCELED, null);
+                } else {
+                    onConnectedToPrintSpooler(adapter);
+                }
             }
         });
     }
@@ -353,7 +360,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         if (mState == STATE_INITIALIZING) {
             if (isFinishing()) {
-                spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_CANCELED, null);
+                if (spooler != null) {
+                    spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_CANCELED, null);
+                }
             }
             super.onPause();
             return;
