@@ -853,7 +853,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Midnat"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Vælg alle"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Markér alt"</string>
     <string name="cut" msgid="3092569408438626261">"Klip"</string>
     <string name="copy" msgid="2681946229533511987">"Kopier"</string>
     <string name="paste" msgid="5629880836805036433">"Indsæt"</string>
@@ -996,11 +996,11 @@
     <string name="sms_control_no" msgid="625438561395534982">"Afvis"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vil sende en besked til &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Dette "<b>"kan medføre gebyrer"</b>" på din mobilkonto."</string>
-    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Dette vil medføre gebyrer på din mobilkonto."</b></string>
+    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Dette kan koste mere end almindelig sms-takst."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Send"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Annuller"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Husk mit valg"</string>
-    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Du kan ændre dette senere i Indstillinger &gt; Apps"</string>
+    <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Du kan altid ændre dette i Indstillinger &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="3241181154869493368">"Tillad altid"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="446992765774269673">"Tillad aldrig"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort blev fjernet"</string>
