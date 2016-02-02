@@ -142,7 +142,7 @@ public class SettingsDrawerActivity extends Activity {
     }
 
     public void setIsDrawerPresent(boolean isPresent) {
-        if (isVisible) {
+        if (isPresent) {
             mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
             updateDrawer();
         } else {
