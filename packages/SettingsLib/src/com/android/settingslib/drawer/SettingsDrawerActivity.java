@@ -141,6 +141,16 @@ public class SettingsDrawerActivity extends Activity {
         mCategoryListeners.remove(listener);
     }
 
+    public void setIsDrawerPresent(boolean isPresent) {
+        if (isVisible) {
+            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            updateDrawer();
+        } else {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerLayout = null;
+        }
+    }
+
     public void openDrawer() {
         if (mDrawerLayout != null) {
             mDrawerLayout.openDrawer(Gravity.START);
