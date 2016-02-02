@@ -24,7 +24,6 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.util.Log;
-import android.util.Rational;
 import android.util.Size;
 
 import java.util.Arrays;
@@ -47,7 +46,7 @@ import static com.android.mediaframeworktest.helpers.CameraTestUtils.getValueNot
  *
  * adb shell am instrument \
  *    -e class com.android.mediaframeworktest.stress.Camera2CaptureRequestTest#testAeModeAndLock \
- *    -e repeat 10 \
+ *    -e iterations 10 \
  *    -e waitIntervalMs 1000 \
  *    -e resultToFile false \
  *    -r -w com.android.mediaframeworktest/.Camera2InstrumentationTestRunner
@@ -100,16 +99,16 @@ public class Camera2CaptureRequestTest extends Camera2SurfaceViewTestCase {
                 updatePreviewSurface(maxPreviewSz);
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                    Log.v(TAG, String.format("AE mode and lock: %d/%d", repeat + 1,
-                            getRepeatCount()));
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                    Log.v(TAG, String.format("AE mode and lock: %d/%d", iteration + 1,
+                            getIterationCount()));
 
                     // Test aeMode and lock
                     int[] aeModes = mStaticInfo.getAeAvailableModesChecked();
                     for (int mode : aeModes) {
                         aeModeAndLockTestByMode(mode);
                     }
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, mCameraIds[i]);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1, mCameraIds[i]);
                     Thread.sleep(getTestWaitIntervalMs());
                 }
             } finally {

@@ -67,7 +67,7 @@ import static com.android.mediaframeworktest.helpers.CameraTestUtils.getValueNot
  *
  * adb shell am instrument \
  *    -e class com.android.mediaframeworktest.stress.Camera2RecordingTest#testBasicRecording \
- *    -e repeat 10 \
+ *    -e iterations 10 \
  *    -e waitIntervalMs 1000 \
  *    -e resultToFile false \
  *    -r -w com.android.mediaframeworktest/.Camera2InstrumentationTestRunner
@@ -142,11 +142,12 @@ public class Camera2RecordingTest extends Camera2SurfaceViewTestCase {
                 initSupportedVideoSize(mCameraIds[i]);
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                    Log.v(TAG, String.format("Recording video: %d/%d", repeat + 1,
-                            getRepeatCount()));
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                    Log.v(TAG, String.format("Recording video: %d/%d", iteration + 1,
+                            getIterationCount()));
                     basicRecordingTestByCamera(mCamcorderProfileList, useVideoStab);
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, mCameraIds[i]);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1,
+                            mCameraIds[i]);
                     Thread.sleep(getTestWaitIntervalMs());
                 }
             } finally {
@@ -206,9 +207,9 @@ public class Camera2RecordingTest extends Camera2SurfaceViewTestCase {
                 }
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                    Log.v(TAG, String.format("Constrained high speed recording: %d/%d", repeat + 1,
-                            getRepeatCount()));
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                    Log.v(TAG, String.format("Constrained high speed recording: %d/%d",
+                            iteration + 1, getIterationCount()));
 
                     StreamConfigurationMap config =
                             mStaticInfo.getValueFromKeyNonNull(
@@ -257,7 +258,7 @@ public class Camera2RecordingTest extends Camera2SurfaceViewTestCase {
                             validateRecording(size, durationMs);
                         }
 
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                     Thread.sleep(getTestWaitIntervalMs());
                     }
                 }
@@ -481,11 +482,11 @@ public class Camera2RecordingTest extends Camera2SurfaceViewTestCase {
                     initSupportedVideoSize(id);
 
                     // Test iteration starts...
-                    for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                        Log.v(TAG, String.format("Video snapshot: %d/%d", repeat + 1,
-                                getRepeatCount()));
+                    for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                        Log.v(TAG, String.format("Video snapshot: %d/%d", iteration + 1,
+                                getIterationCount()));
                         videoSnapshotTestByCamera(burstTest);
-                        getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                        getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                         Thread.sleep(getTestWaitIntervalMs());
                     }
                 } finally {

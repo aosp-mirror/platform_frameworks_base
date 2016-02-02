@@ -90,7 +90,7 @@ public class Camera2SurfaceViewTestCase extends
     private static final int WAIT_FOR_SURFACE_CHANGE_TIMEOUT_MS = 1000;
 
     // Instrumentation arguments
-    protected static final String ARG_KEY_REPEAT = "repeat";
+    protected static final String ARG_KEY_ITERATIONS = "iterations";
     protected static final String ARG_KEY_WAIT_INTERVAL_MS = "waitIntervalMs";
     protected static final String ARG_KEY_RESULT_TO_FILE = "resultToFile";
 
@@ -126,8 +126,8 @@ public class Camera2SurfaceViewTestCase extends
 
     protected WindowManager mWindowManager;
 
-    // Repeat tests a given times. Default to 1.
-    protected int mRepeat = 1;
+    // Set the number of iterations to run stress testing. Default to 1.
+    protected int mIterations = 1;
     // The interval between test iterations used for stress test.
     protected long mTestWaitIntervalMs = 1 * 1000;  // 1 sec
     protected boolean mWriteToFile = true;
@@ -165,10 +165,10 @@ public class Camera2SurfaceViewTestCase extends
 
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
-        mRepeat = getArgumentsAsNumber(ARG_KEY_REPEAT, 1).intValue();
+        mIterations = getArgumentsAsNumber(ARG_KEY_ITERATIONS, 1).intValue();
         mTestWaitIntervalMs = getArgumentsAsNumber(ARG_KEY_WAIT_INTERVAL_MS, 1000).longValue();
         mWriteToFile = getArgumentsAsBoolean(ARG_KEY_RESULT_TO_FILE, true);
-        Log.i(TAG, "Argument: repeat count=" + mRepeat);
+        Log.i(TAG, "Argument: iteration count=" + mIterations);
         Log.i(TAG, "Argument: interval (ms)=" + mTestWaitIntervalMs);
         Log.i(TAG, "Argument: result to file=" + (mWriteToFile ? "true" : "false"));
         mResultPrinter = new CameraTestResultPrinter(getInstrumentation(), mWriteToFile);
@@ -790,8 +790,8 @@ public class Camera2SurfaceViewTestCase extends
         return defaultValue;
     }
 
-    protected int getRepeatCount() {
-        return mRepeat;
+    protected int getIterationCount() {
+        return mIterations;
     }
 
     protected long getTestWaitIntervalMs() {

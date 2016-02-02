@@ -58,7 +58,7 @@ import static com.android.mediaframeworktest.helpers.CameraTestUtils.verifyJpegK
  * adb shell am instrument \
  *    -e class \
  *    com.android.mediaframeworktest.stress.Camera2StillCaptureTest#Camera2ReprocessCaptureTest \
- *    -e repeat 1 \
+ *    -e iterations 1 \
  *    -e waitIntervalMs 1000 \
  *    -e resultToFile false \
  *    -r -w com.android.mediaframeworktest/.Camera2InstrumentationTestRunner
@@ -110,12 +110,12 @@ public class Camera2ReprocessCaptureTest extends Camera2SurfaceViewTestCase  {
             }
 
             // Test iteration starts...
-            for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                Log.v(TAG, String.format("Reprocessing YUV to JPEG: %d/%d", repeat + 1,
-                        getRepeatCount()));
+            for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                Log.v(TAG, String.format("Reprocessing YUV to JPEG: %d/%d", iteration + 1,
+                        getIterationCount()));
                 // YUV_420_888 -> JPEG must be supported.
                 testBasicReprocessing(id, ImageFormat.YUV_420_888, ImageFormat.JPEG);
-                getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                 Thread.sleep(getTestWaitIntervalMs());
             }
         }
@@ -131,12 +131,12 @@ public class Camera2ReprocessCaptureTest extends Camera2SurfaceViewTestCase  {
             }
 
             // Test iteration starts...
-            for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
-                Log.v(TAG, String.format("Reprocessing OPAQUE to JPEG: %d/%d", repeat + 1,
-                        getRepeatCount()));
+            for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
+                Log.v(TAG, String.format("Reprocessing OPAQUE to JPEG: %d/%d", iteration + 1,
+                        getIterationCount()));
                 // OPAQUE -> JPEG must be supported.
                 testBasicReprocessing(id, ImageFormat.PRIVATE, ImageFormat.JPEG);
-                getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                 Thread.sleep(getTestWaitIntervalMs());
             }
 
@@ -157,12 +157,12 @@ public class Camera2ReprocessCaptureTest extends Camera2SurfaceViewTestCase  {
                 openDevice(id);
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
                     Log.v(TAG, String.format("Reprocessing size format with preview: %d/%d",
-                            repeat + 1, getRepeatCount()));
+                            iteration + 1, getIterationCount()));
                     testReprocessingAllCombinations(id, mOrderedPreviewSizes.get(0),
                             CaptureTestCase.SINGLE_SHOT);
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                     Thread.sleep(getTestWaitIntervalMs());
                 }
             } finally {
@@ -185,16 +185,16 @@ public class Camera2ReprocessCaptureTest extends Camera2SurfaceViewTestCase  {
                 openDevice(id);
 
                 // Test iteration starts...
-                for (int repeat = 0; repeat < getRepeatCount(); ++repeat) {
+                for (int iteration = 0; iteration < getIterationCount(); ++iteration) {
                     Log.v(TAG, String.format("Reprocessing mixed burst with or without preview: "
-                            + "%d/%d", repeat + 1, getRepeatCount()));
+                            + "%d/%d", iteration + 1, getIterationCount()));
                     // no preview
                     testReprocessingAllCombinations(id, /*previewSize*/null,
                             CaptureTestCase.MIXED_BURST);
                     // with preview
                     testReprocessingAllCombinations(id, mOrderedPreviewSizes.get(0),
                             CaptureTestCase.MIXED_BURST);
-                    getResultPrinter().printStatus(getRepeatCount(), repeat + 1, id);
+                    getResultPrinter().printStatus(getIterationCount(), iteration + 1, id);
                     Thread.sleep(getTestWaitIntervalMs());
                 }
             } finally {
