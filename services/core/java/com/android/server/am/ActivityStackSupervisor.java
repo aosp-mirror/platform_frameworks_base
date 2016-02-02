@@ -1913,7 +1913,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     task.updateOverrideConfiguration(tempRect2);
                 } else {
                     task.updateOverrideConfiguration(
-                            tempTaskBounds != null ? tempTaskBounds : bounds);
+                            tempTaskBounds != null ? tempTaskBounds : bounds,
+                            tempTaskInsetBounds != null ? tempTaskInsetBounds : bounds);
                 }
             }
 
