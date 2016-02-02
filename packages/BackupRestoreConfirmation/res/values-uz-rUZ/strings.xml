@@ -19,7 +19,7 @@
     <string name="backup_confirm_title" msgid="827563724209303345">"To‘liq zahira"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"To‘liq tiklash"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"Barcha ma’lumotlarni ulangan kompyuterga to‘liq zahiralash so‘raldi. Bunga ruxsat berasizmi?\n\nZahiralashni o‘zingiz so‘ramagan bo‘lsangiz, jarayonni davom etishiga ruxsat bermang."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"Ma’lumotlarimni zahiralash"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Ma’lumotlarni zaxiralash"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Zahiralamang"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Barcha ma’lumotlarni ulangan kompyuterdan to‘liq tiklash so‘raldi. Bunga ruxsat berasizmi?\n\nTiklashni o‘zingiz so‘ramagan bo‘lsangiz, jarayonni davom etishiga ruxsat bermang. U qurilmadagi hozirda mavjud bo‘lgan barcha ma’lumotlarni almashtirib tashlaydi!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Ma’lumotlarimni tiklash"</string>
