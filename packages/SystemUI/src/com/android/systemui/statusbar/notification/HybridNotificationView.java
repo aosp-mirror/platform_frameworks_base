@@ -107,12 +107,13 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
     public void bind(CharSequence title, CharSequence text) {
         mTitleView.setText(title);
-        if (TextUtils.isEmpty(title)) {
-            mTitleView.setVisibility(GONE);
-        }
-        mTextView.setText(text);
+        mTitleView.setVisibility(TextUtils.isEmpty(title) ? GONE : VISIBLE);
         if (TextUtils.isEmpty(text)) {
             mTextView.setVisibility(GONE);
+            mTextView.setText(null);
+        } else {
+            mTextView.setVisibility(VISIBLE);
+            mTextView.setText(text.toString());
         }
         requestLayout();
     }

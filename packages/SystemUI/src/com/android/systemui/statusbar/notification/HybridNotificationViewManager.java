@@ -18,8 +18,13 @@ package com.android.systemui.statusbar.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.text.BidiFormatter;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.TextAppearanceSpan;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
@@ -34,12 +39,12 @@ public class HybridNotificationViewManager {
 
     private final Context mContext;
     private ViewGroup mParent;
-    private String mConcadenationString;
+    private String mDivider;
 
     public HybridNotificationViewManager(Context ctx, ViewGroup parent) {
         mContext = ctx;
         mParent = parent;
-        mConcadenationString = mContext.getString(R.string.group_summary_concadenation);
+        mDivider = " • ";
     }
 
     private HybridNotificationView inflateHybridView() {
@@ -83,7 +88,7 @@ public class HybridNotificationViewManager {
         if (reusableView == null) {
             reusableView = inflateHybridView();
         }
-        CharSequence summary = null;
+        SpannableStringBuilder summary = new SpannableStringBuilder();
         int childCount = group.size();
         for (int i = startIndex; i < childCount; i++) {
             ExpandableNotificationRow child = group.get(i);
@@ -92,15 +97,18 @@ public class HybridNotificationViewManager {
             if (titleText == null) {
                 continue;
             }
-            if (TextUtils.isEmpty(summary)) {
-                summary = titleText;
-            } else if (reusableView.isLayoutRtl()) {
-                summary = titleText + mConcadenationString + summary;
-            } else {
-                summary = summary + mConcadenationString + titleText;
+            if (!TextUtils.isEmpty(summary)) {
+                summary.append(mDivider,
+                        new TextAppearanceSpan(mContext, R.style.
+                                TextAppearance_Material_Notification_HybridNotificationDivider),
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
+            summary.append(BidiFormatter.getInstance().unicodeWrap(titleText));
         }
-        reusableView.bind(summary);
+        // We want to force the same orientation as the layout RTL mode
+        BidiFormatter formater = BidiFormatter.getInstance(
+                reusableView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
+        reusableView.bind(formater.unicodeWrap(summary));
         return reusableView;
     }
 }

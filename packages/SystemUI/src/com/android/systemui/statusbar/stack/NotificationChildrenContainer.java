@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.stack;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,6 +59,7 @@ public class NotificationChildrenContainer extends ViewGroup {
     private HybridNotificationView mGroupOverflowContainer;
     private ViewState mGroupOverFlowState;
     private int mRealHeight;
+    private int mLayoutDirection = LAYOUT_DIRECTION_UNDEFINED;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -206,6 +208,16 @@ public class NotificationChildrenContainer extends ViewGroup {
             mGroupOverflowContainer = null;
             mOverflowInvertHelper = null;
             mGroupOverFlowState = null;
+        }
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int layoutDirection = getLayoutDirection();
+        if (layoutDirection != mLayoutDirection) {
+            updateGroupOverflow();
+            mLayoutDirection = layoutDirection;
         }
     }
 
