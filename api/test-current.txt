@@ -43706,6 +43706,7 @@ package android.view.accessibility {
     method public boolean isEnabled();
     method public boolean isFocusable();
     method public boolean isFocused();
+    method public boolean isImportantForAccessibility();
     method public boolean isLongClickable();
     method public boolean isMultiLine();
     method public boolean isPassword();
@@ -43744,6 +43745,7 @@ package android.view.accessibility {
     method public void setError(java.lang.CharSequence);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
+    method public void setImportantForAccessibility(boolean);
     method public void setInputType(int);
     method public void setLabelFor(android.view.View);
     method public void setLabelFor(android.view.View, int);
