@@ -497,8 +497,9 @@ public class RecentsView extends FrameLayout {
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
+    public void onDrawForeground(Canvas canvas) {
+        super.onDrawForeground(canvas);
+
         ArrayList<TaskStack.DockState> visDockStates = mTouchHandler.getVisibleDockStates();
         for (int i = visDockStates.size() - 1; i >= 0; i--) {
             Drawable d = visDockStates.get(i).viewState.dockAreaOverlay;
@@ -530,8 +531,7 @@ public class RecentsView extends FrameLayout {
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
         // Hide the history button
-        int taskViewExitToHomeDuration = getResources().getInteger(
-                R.integer.recents_task_exit_to_home_duration);
+        int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
         hideHistoryButton(taskViewExitToHomeDuration, false /* translate */);
         animateBackgroundScrim(0f, taskViewExitToHomeDuration);
     }
@@ -588,7 +588,7 @@ public class RecentsView extends FrameLayout {
             tmpTransform.scale = 1f;
             tmpTransform.rect.set(taskViewRect);
             mTaskStackView.updateTaskViewToTransform(event.taskView, tmpTransform,
-                    new TaskViewAnimation(125, Interpolators.ALPHA_OUT,
+                    new AnimationProps(125, Interpolators.ALPHA_OUT,
                             new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animation) {
@@ -598,7 +598,7 @@ public class RecentsView extends FrameLayout {
                                             event.task.key.id, dockState.createMode);
 
                                     // Animate the stack accordingly
-                                    TaskViewAnimation stackAnim = new TaskViewAnimation(
+                                    AnimationProps stackAnim = new AnimationProps(
                                             TaskStackView.DEFAULT_SYNC_STACK_DURATION,
                                             Interpolators.FAST_OUT_SLOW_IN);
                                     mTaskStackView.getStack().removeTask(event.task, stackAnim);
@@ -646,9 +646,8 @@ public class RecentsView extends FrameLayout {
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (!launchState.launchedFromAppWithThumbnail && mStack.getTaskCount() > 0) {
-            int taskViewEnterFromHomeDuration = getResources().getInteger(
-                    R.integer.recents_task_enter_from_home_duration);
-            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA, taskViewEnterFromHomeDuration);
+            animateBackgroundScrim(DEFAULT_SCRIM_ALPHA,
+                    TaskStackAnimationHelper.ENTER_FROM_HOME_TRANSLATION_DURATION);
         }
     }
 

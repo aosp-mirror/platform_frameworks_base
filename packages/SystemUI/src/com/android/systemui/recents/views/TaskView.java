@@ -29,7 +29,6 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.IntProperty;
@@ -243,9 +242,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform,
-            TaskViewAnimation toAnimation, ValueAnimator.AnimatorUpdateListener updateCallback) {
+                                             AnimationProps toAnimation, ValueAnimator.AnimatorUpdateListener updateCallback) {
         RecentsConfiguration config = Recents.getConfiguration();
-        Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
+        cancelTransformAnimation();
 
         // Compose the animations for the transform
         mTmpAnimators.clear();
@@ -255,8 +254,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
                 setTaskProgress(toTransform.p);
             }
             // Manually call back to the animator listener and update callback
-            if (toAnimation.listener != null) {
-                toAnimation.listener.onAnimationEnd(null);
+            if (toAnimation.getListener() != null) {
+                toAnimation.getListener().onAnimationEnd(null);
             }
             if (updateCallback != null) {
                 updateCallback.onAnimationUpdate(null);
@@ -280,7 +279,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     /** Resets this view's properties */
     void resetViewProperties() {
-        Utilities.cancelAnimationWithoutCallbacks(mTransformAnimation);
+        cancelTransformAnimation();
         setDim(0);
         setVisibility(View.VISIBLE);
         getViewBounds().reset();

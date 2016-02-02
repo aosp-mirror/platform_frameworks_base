@@ -154,13 +154,13 @@ public class TaskViewTransform {
      * Applies this transform to a view.
      */
     public void applyToTaskView(TaskView v, ArrayList<Animator> animators,
-            TaskViewAnimation taskAnimation, boolean allowShadows) {
+            AnimationProps animation, boolean allowShadows) {
         // Return early if not visible
         if (!visible) {
             return;
         }
 
-        if (taskAnimation.isImmediate()) {
+        if (animation.isImmediate()) {
             if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
                 v.setTranslationZ(translationZ);
             }
@@ -177,23 +177,27 @@ public class TaskViewTransform {
             }
         } else {
             if (allowShadows && hasTranslationZChangedFrom(v.getTranslationZ())) {
-                animators.add(ObjectAnimator.ofFloat(v, View.TRANSLATION_Z, v.getTranslationZ(),
-                        translationZ));
+                ObjectAnimator anim = ObjectAnimator.ofFloat(v, View.TRANSLATION_Z,
+                        v.getTranslationZ(), translationZ);
+                animators.add(animation.apply(AnimationProps.TRANSLATION_Z, anim));
             }
             if (hasScaleChangedFrom(v.getScaleX())) {
-                animators.add(ObjectAnimator.ofPropertyValuesHolder(v,
+                ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(v,
                         PropertyValuesHolder.ofFloat(View.SCALE_X, v.getScaleX(), scale),
-                        PropertyValuesHolder.ofFloat(View.SCALE_Y, v.getScaleX(), scale)));
+                        PropertyValuesHolder.ofFloat(View.SCALE_Y, v.getScaleX(), scale));
+                animators.add(animation.apply(AnimationProps.SCALE, anim));
             }
             if (hasAlphaChangedFrom(v.getAlpha())) {
-                animators.add(ObjectAnimator.ofFloat(v, View.ALPHA, v.getAlpha(), alpha));
+                ObjectAnimator anim = ObjectAnimator.ofFloat(v, View.ALPHA, v.getAlpha(), alpha);
+                animators.add(animation.apply(AnimationProps.ALPHA, anim));
             }
             if (hasRectChangedFrom(v)) {
-                animators.add(ObjectAnimator.ofPropertyValuesHolder(v,
+                ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(v,
                         PropertyValuesHolder.ofInt(LEFT, v.getLeft(), (int) rect.left),
                         PropertyValuesHolder.ofInt(TOP, v.getTop(), (int) rect.top),
                         PropertyValuesHolder.ofInt(RIGHT, v.getRight(), (int) rect.right),
-                        PropertyValuesHolder.ofInt(BOTTOM, v.getBottom(), (int) rect.bottom)));
+                        PropertyValuesHolder.ofInt(BOTTOM, v.getBottom(), (int) rect.bottom));
+                animators.add(animation.apply(AnimationProps.BOUNDS, anim));
             }
         }
     }

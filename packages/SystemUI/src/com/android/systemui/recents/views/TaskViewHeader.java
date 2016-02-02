@@ -274,8 +274,8 @@ public class TaskViewHeader extends FrameLayout
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
+    public void onDrawForeground(Canvas canvas) {
+        super.onDrawForeground(canvas);
 
         // Draw the dim layer with the rounded corners
         canvas.drawRoundRect(0, 0, mTaskViewRect.width(), getHeight() + mCornerRadius,

@@ -546,7 +546,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             mTmpTransform.translationZ = fromTransform.translationZ +
                     (toTransform.translationZ - fromTransform.translationZ) * dismissFraction;
 
-            mSv.updateTaskViewToTransform(tv, mTmpTransform, TaskViewAnimation.IMMEDIATE);
+            mSv.updateTaskViewToTransform(tv, mTmpTransform, AnimationProps.IMMEDIATE);
         }
     }
 
