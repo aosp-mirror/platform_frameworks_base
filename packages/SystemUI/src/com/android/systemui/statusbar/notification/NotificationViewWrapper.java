@@ -37,6 +37,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
             if ("bigPicture".equals(v.getTag())) {
                 return new NotificationBigPictureTemplateViewWrapper(ctx, v);
+            } else if ("bigText".equals(v.getTag())) {
+                return new NotificationBigTextTemplateViewWrapper(ctx, v);
             }
             return new NotificationTemplateViewWrapper(ctx, v);
         } else if (v instanceof NotificationHeaderView) {
