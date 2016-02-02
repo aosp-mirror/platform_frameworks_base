@@ -52556,7 +52556,6 @@ package java.net {
     method public static void setURLStreamHandlerFactory(java.net.URLStreamHandlerFactory);
     method public java.lang.String toExternalForm();
     method public java.net.URI toURI() throws java.net.URISyntaxException;
-    method public java.net.URI toURILenient() throws java.net.URISyntaxException;
   }
 
   public class URLClassLoader extends java.security.SecureClassLoader implements java.io.Closeable {
