@@ -92,7 +92,6 @@ public class RootsFragment extends Fragment {
         mList = (ListView) view.findViewById(android.R.id.list);
         mList.setOnItemClickListener(mItemListener);
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
         return view;
     }
 
@@ -161,6 +160,7 @@ public class RootsFragment extends Fragment {
                 final RootInfo testRoot = ((RootItem) item).root;
                 if (Objects.equals(testRoot, root)) {
                     mList.setItemChecked(i, true);
+                    mList.setSelection(i);
                     return;
                 }
             }
