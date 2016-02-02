@@ -1688,7 +1688,8 @@ public class Activity extends ContextThemeWrapper
             final char alphaShortcut = item.getAlphabeticShortcut();
             if (title != null && alphaShortcut != MIN_VALUE) {
                 if (group == null) {
-                    group = new KeyboardShortcutGroup(null /* no label */);
+                    final int resource = mApplication.getApplicationInfo().labelRes;
+                    group = new KeyboardShortcutGroup(resource != 0 ? getString(resource) : null);
                 }
                 group.addItem(new KeyboardShortcutInfo(
                     title, alphaShortcut, KeyEvent.META_CTRL_ON));
