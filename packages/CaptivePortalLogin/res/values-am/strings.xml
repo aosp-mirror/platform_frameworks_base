@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"ይህን አውታረ መረብ እንዳለ ተጠቀምበት"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"ይህን አውታረ መረብ አትጠቀምበት"</string>
     <string name="action_bar_label" msgid="917235635415966620">"ወደ አውታረ መረብ በመለያ ይግቡ"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"ለመቀላቀል እየሞከሩ ያሉት አውታረ መረብ የደህንነት ችግሮች አሉበት።"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"ለምሳሌ፣ የመግቢያ ገጹ የሚታየው ድርጅት ላይሆን ይችላል።"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"ለማንኛውም በአሳሽ በኩል ይቀጥሉ"</string>
 </resources>

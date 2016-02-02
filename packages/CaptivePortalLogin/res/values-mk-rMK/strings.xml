@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Користи ја мрежата во оваа состојба"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Не ја користи мрежата"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Најавете се на мрежа"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Мрежата на која се обидувате да се придружите има проблеми со безбедноста."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"На пример, страницата за најавување може да не припаѓа на организацијата што е прикажана."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Сепак продолжи преку прелистувач"</string>
 </resources>
