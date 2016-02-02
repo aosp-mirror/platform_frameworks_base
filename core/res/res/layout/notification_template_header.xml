@@ -22,8 +22,6 @@
     android:layout_width="wrap_content"
     android:layout_height="48dp"
     android:clipChildren="false"
-    android:layout_gravity="start|top"
-    android:gravity="center_vertical"
     android:paddingTop="5dp"
     android:paddingBottom="16dp"
     android:paddingStart="@dimen/notification_content_margin_start"

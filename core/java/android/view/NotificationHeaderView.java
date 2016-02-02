@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * @hide
  */
 @RemoteViews.RemoteView
-public class NotificationHeaderView extends LinearLayout {
+public class NotificationHeaderView extends ViewGroup {
     public static final int NO_COLOR = -1;
     private final int mHeaderMinWidth;
     private final int mExpandTopPadding;
@@ -134,25 +134,44 @@ public class NotificationHeaderView extends LinearLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        if (mProfileBadge.getVisibility() != View.GONE) {
-            int paddingEnd = getPaddingEnd();
-            if (mShowWorkBadgeAtEnd) {
-                paddingEnd = mContentEndMargin;
+        int left = getPaddingStart();
+        int childCount = getChildCount();
+        int ownHeight = getHeight() - getPaddingTop() - getPaddingBottom();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
+            int childHeight = child.getMeasuredHeight();
+            MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
+            left += params.getMarginStart();
+            int right = left + child.getMeasuredWidth();
+            int top = (int) (getPaddingTop() + (ownHeight - childHeight) / 2.0f);
+            int bottom = top + childHeight;
+            int layoutLeft = left;
+            int layoutRight = right;
+            if (child == mProfileBadge) {
+                int paddingEnd = getPaddingEnd();
+                if (mShowWorkBadgeAtEnd) {
+                    paddingEnd = mContentEndMargin;
+                }
+                layoutRight = getWidth() - paddingEnd;
+                layoutLeft = layoutRight - child.getMeasuredWidth();
             }
             if (getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                mProfileBadge.layout(paddingEnd,
-                        mProfileBadge.getTop(),
-                        paddingEnd + mProfileBadge.getMeasuredWidth(),
-                        mProfileBadge.getBottom());
-            } else {
-                mProfileBadge.layout(getWidth() - paddingEnd - mProfileBadge.getMeasuredWidth(),
-                        mProfileBadge.getTop(),
-                        getWidth() - paddingEnd,
-                        mProfileBadge.getBottom());
+                int ltrLeft = layoutLeft;
+                layoutLeft = getWidth() - layoutRight;
+                layoutRight = getWidth() - ltrLeft;
             }
+            child.layout(layoutLeft, top, layoutRight, bottom);
+            left = right + params.getMarginEnd();
         }
         updateTouchListener();
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new ViewGroup.MarginLayoutParams(getContext(), attrs);
     }
 
     private void updateTouchListener() {

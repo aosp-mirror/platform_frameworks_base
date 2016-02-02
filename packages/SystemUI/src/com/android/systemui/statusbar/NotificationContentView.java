@@ -197,9 +197,13 @@ public class NotificationContentView extends FrameLayout {
                 if (expandedSize != collapsedSize) {
                     int paddingEnd = contractedHeader.getMeasuredWidth() - expandedSize;
                     contractedHeader.setPadding(
-                            isLayoutRtl() ? paddingEnd : contractedHeader.getPaddingLeft(),
+                            contractedHeader.isLayoutRtl()
+                                    ? paddingEnd
+                                    : contractedHeader.getPaddingLeft(),
                             contractedHeader.getPaddingTop(),
-                            isLayoutRtl() ? contractedHeader.getPaddingLeft() : paddingEnd,
+                            contractedHeader.isLayoutRtl()
+                                    ? contractedHeader.getPaddingLeft()
+                                    : paddingEnd,
                             contractedHeader.getPaddingBottom());
                     contractedHeader.setShowWorkBadgeAtEnd(true);
                     return true;
@@ -208,9 +212,13 @@ public class NotificationContentView extends FrameLayout {
                 int paddingEnd = mNotificationContentMarginEnd;
                 if (contractedHeader.getPaddingEnd() != paddingEnd) {
                     contractedHeader.setPadding(
-                            isLayoutRtl() ? paddingEnd : contractedHeader.getPaddingLeft(),
+                            contractedHeader.isLayoutRtl()
+                                    ? paddingEnd
+                                    : contractedHeader.getPaddingLeft(),
                             contractedHeader.getPaddingTop(),
-                            isLayoutRtl() ? contractedHeader.getPaddingLeft() : paddingEnd,
+                            contractedHeader.isLayoutRtl()
+                                    ? contractedHeader.getPaddingLeft()
+                                    : paddingEnd,
                             contractedHeader.getPaddingBottom());
                     contractedHeader.setShowWorkBadgeAtEnd(false);
                     return true;
