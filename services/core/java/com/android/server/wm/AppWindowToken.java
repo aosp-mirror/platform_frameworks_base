@@ -302,7 +302,12 @@ class AppWindowToken extends WindowToken {
     void setWindowsExiting(boolean exiting) {
         for (int i = allAppWindows.size() - 1; i >= 0; i--) {
             WindowState win = allAppWindows.get(i);
-            win.mExiting = exiting;
+            // If the app already requested to remove its window, we don't modify
+            // its exiting state. Otherwise the stale window won't get removed on
+            // exit and could cause focus to be given to the wrong window.
+            if (!(win.mRemoveOnExit && win.mExiting)) {
+                win.mExiting = exiting;
+            }
         }
     }
 
