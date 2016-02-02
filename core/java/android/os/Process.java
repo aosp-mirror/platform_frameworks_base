@@ -373,6 +373,12 @@ public class Process {
      **/
     public static final int THREAD_GROUP_AUDIO_SYS = 4;
 
+    /**
+     * Thread group for top foreground app.
+     * @hide
+     **/
+    public static final int THREAD_GROUP_TOP_APP = 5;
+
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
     public static final int SIGNAL_USR1 = 10;
