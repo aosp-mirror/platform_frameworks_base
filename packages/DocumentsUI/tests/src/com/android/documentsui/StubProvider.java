@@ -130,6 +130,11 @@ public class StubProvider extends DocumentsProvider {
                 Log.i(TAG, "Created new root directory @ " + file.getPath());
             }
             final RootInfo rootInfo = new RootInfo(file, getSize(rootId));
+
+            if(rootId.equals(ROOT_1_ID)) {
+                rootInfo.setSearchEnabled(false);
+            }
+
             mStorage.put(rootInfo.document.documentId, rootInfo.document);
             mRoots.put(rootId, rootInfo);
         }
@@ -152,8 +157,7 @@ public class StubProvider extends DocumentsProvider {
             final RootInfo info = entry.getValue();
             final RowBuilder row = result.newRow();
             row.add(Root.COLUMN_ROOT_ID, id);
-            row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD
-                    | Root.FLAG_SUPPORTS_SEARCH);
+            row.add(Root.COLUMN_FLAGS, info.flags);
             row.add(Root.COLUMN_TITLE, id);
             row.add(Root.COLUMN_DOCUMENT_ID, info.document.documentId);
             row.add(Root.COLUMN_AVAILABLE_BYTES, info.getRemainingCapacity());
@@ -705,22 +709,33 @@ public class StubProvider extends DocumentsProvider {
     }
 
     final static class RootInfo {
+        private static final int DEFAULT_ROOTS_FLAGS = Root.FLAG_SUPPORTS_SEARCH
+                | Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_IS_CHILD;
+
         public final String name;
         public final StubDocument document;
         public long capacity;
         public long size;
+        public int flags;
 
         RootInfo(File file, long capacity) {
             this.name = file.getName();
             this.capacity = 1024 * 1024;
-            this.document = StubDocument.createRootDocument(file, this);
+            this.flags = DEFAULT_ROOTS_FLAGS;
             this.capacity = capacity;
             this.size = 0;
+            this.document = StubDocument.createRootDocument(file, this);
         }
 
         public long getRemainingCapacity() {
             return capacity - size;
         }
+
+        public void setSearchEnabled(boolean enabled) {
+            flags = enabled ? (flags | Root.FLAG_SUPPORTS_SEARCH)
+                    : (flags & ~Root.FLAG_SUPPORTS_SEARCH);
+        }
+
     }
 
     final static class StubDocument {

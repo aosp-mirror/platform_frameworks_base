@@ -20,7 +20,6 @@ import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -30,9 +29,6 @@ public class SearchViewUiTest extends InstrumentationTestCase {
     private static final String TAG = "SearchViewUiTest";
 
     private UiTestEnvironment mEnv;
-
-    private UiObject mDocsList;
-    private UiObject mMessageTextView;
 
     @Override
     public void setUp() throws Exception {
@@ -151,4 +147,15 @@ public class SearchViewUiTest extends InstrumentationTestCase {
         mEnv.bot().openRoot(ROOT_0_ID);
         mEnv.assertDefaultContentOfTestDir0();
     }
+
+    public void testSearchIconVisible_RootWithSearchSupport() throws Exception {
+        mEnv.bot().openRoot(ROOT_0_ID);
+        mEnv.bot().assertSearchTextFiledAndIcon(false, true);
+    }
+
+    public void testSearchIconHidden_RootNoSearchSupport() throws Exception {
+        mEnv.bot().openRoot(ROOT_1_ID);
+        mEnv.bot().assertSearchTextFiledAndIcon(false, false);
+    }
+
 }

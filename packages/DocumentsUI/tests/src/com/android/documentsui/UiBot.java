@@ -150,7 +150,6 @@ class UiBot {
     void assertSearchTextFiledAndIcon(boolean searchTextFieldExists, boolean searchIconExists) {
         assertEquals(searchTextFieldExists, findSearchViewTextField().exists());
         assertEquals(searchIconExists, findSearchViewIcon().exists());
-
     }
 
     void assertHasDocuments(String... labels) throws UiObjectNotFoundException {
