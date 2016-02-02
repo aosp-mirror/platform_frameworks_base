@@ -1842,13 +1842,10 @@ public class Instrumentation {
      * @see UiAutomation
      */
     public UiAutomation getUiAutomation() {
-        if (mUiAutomationConnection != null) {
-            if (mUiAutomation == null) {
-                return getUiAutomation(0);
-            }
-            return mUiAutomation;
+        if ((mUiAutomation == null) || (mUiAutomation.isDestroyed())) {
+            return getUiAutomation(0);
         }
-        return null;
+        return mUiAutomation;
     }
 
     /**
