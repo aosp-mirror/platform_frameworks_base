@@ -5452,15 +5452,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return (int) Math.max(0, mShadowDy + mShadowRadius);
     }
 
-    private int getFudgedPaddingRight() {
-        // Add sufficient space for cursor and tone marks
-        int cursorWidth = 2 + (int)mTextPaint.density; // adequate for Material cursors
-        return Math.max(0, getCompoundPaddingRight() - (cursorWidth - 1));
-    }
-
     @Override
     protected int getRightPaddingOffset() {
-        return -(getFudgedPaddingRight() - mPaddingRight) +
+        return -(getCompoundPaddingRight() - mPaddingRight) +
                 (int) Math.max(0, mShadowDx + mShadowRadius);
     }
 
@@ -5805,7 +5799,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         float clipLeft = compoundPaddingLeft + scrollX;
         float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
-        float clipRight = right - left - getFudgedPaddingRight() + scrollX;
+        float clipRight = right - left - getCompoundPaddingRight() + scrollX;
         float clipBottom = bottom - top + scrollY -
                 ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
 
