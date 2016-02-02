@@ -5078,11 +5078,11 @@ public final class ActivityThread {
                 Log.e(TAG, "Unable to setupGraphicsSupport and setupJitProfileSupport " +
                         "due to missing code-cache directory");
             }
-        }
 
-        // Add the lib dir path to hardware renderer so that vulkan layers
-        // can be searched for within that directory.
-        ThreadedRenderer.setLibDir(data.info.getLibDir());
+            // Add the lib dir path to hardware renderer so that vulkan layers
+            // can be searched for within that directory.
+            ThreadedRenderer.setLibDir(data.info.getLibDir());
+        }
 
         // Install the Network Security Config Provider. This must happen before the application
         // code is loaded to prevent issues with instances of TLS objects being created before
