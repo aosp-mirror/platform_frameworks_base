@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Utilizați această rețea în starea actuală"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Nu utilizați această rețea"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Conectați-vă la rețea"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Rețeaua la care încercați să vă conectați are probleme de securitate."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"De exemplu, este posibil ca pagina de conectare să nu aparțină organizației afișate."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Continuați oricum prin browser"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Använd det här nätverket som det är"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Använd inte det här nätverket"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Logga in på nätverket"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Nätverket du försöker ansluta till har säkerhetsproblem."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Det kan t.ex. hända att inloggningssidan inte tillhör den organisation som visas."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Fortsätt ändå via webbläsaren"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"हे नेटवर्क जसेच्या तसे वापरा"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"हे नेटवर्क वापरू नका"</string>
     <string name="action_bar_label" msgid="917235635415966620">"नेटवर्क मध्‍ये साइन इन करा"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"ज्या नेटवर्कमध्‍ये आपण सामील होण्याचा प्रयत्न करीत आहात त्यात सुरक्षितता समस्या आहेत."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"उदाहरणार्थ, लॉगिन पृष्‍ठ कदाचित दर्शविलेल्या संस्थेच्या मालकीचे नसावे."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"ब्राउझरद्वारे तरीही सुरु ठेवा"</string>
 </resources>

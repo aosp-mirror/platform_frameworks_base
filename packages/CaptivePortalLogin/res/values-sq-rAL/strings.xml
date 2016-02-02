@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Përdore këtë rrjet siç është"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Mos e përdor këtë rrjet"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Identifikohu në rrjet"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Rrjeti në të cilin po përpiqesh të bashkohesh ka probleme sigurie."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"për shembull, faqja e identifikimit mund të mos i përkasë organizatës së shfaqur."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Vazhdo gjithsesi nëpërmjet shfletuesit"</string>
 </resources>
