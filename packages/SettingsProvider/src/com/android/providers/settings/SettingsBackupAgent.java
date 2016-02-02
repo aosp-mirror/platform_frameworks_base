@@ -730,6 +730,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
         try {
             int stateVersion = dataInput.readInt();
+            if (stateVersion > STATE_VERSION) {
+                // Constrain the maximum state version this backup agent
+                // can handle in case a newer or corrupt backup set existed
+                stateVersion = STATE_VERSION;
+            }
             for (int i = 0; i < STATE_SIZES[stateVersion]; i++) {
                 stateChecksums[i] = dataInput.readLong();
             }
