@@ -22,85 +22,53 @@
     android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/notification_header_bg">
+        android:paddingTop="28dp"
+        android:paddingEnd="8dp">
 
-        <LinearLayout
-            android:id="@+id/drag_buttons"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:orientation="horizontal">
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:layout_weight="1">
-                <com.android.systemui.qs.customize.DropButton
-                    android:id="@+id/info_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:drawableStart="@drawable/ic_info"
-                    android:drawablePadding="10dp"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@android:color/white"
-                    android:text="@string/qs_customize_info" />
-            </FrameLayout>
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="fill_parent"
-                android:layout_weight="1">
-                <com.android.systemui.qs.customize.DropButton
-                    android:id="@+id/remove_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:drawableStart="@drawable/ic_close_white"
-                    android:drawablePadding="10dp"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@android:color/white"
-                    android:text="@string/qs_customize_remove" />
-            </FrameLayout>
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/close"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:padding="16dp"
+            android:src="@drawable/ic_close_white" />
 
-        <Toolbar
-            android:id="@*android:id/action_bar"
-            android:layout_width="match_parent"
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/save"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:navigationContentDescription="@*android:string/action_bar_up_description"
-            android:background="@drawable/notification_header_bg"
-            style="?android:attr/toolbarStyle" />
-    </FrameLayout>
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button.Inverse"
+            android:textColor="?android:attr/colorAccent"
+            android:text="@string/save" />
 
-    <com.android.systemui.tuner.AutoScrollView
+        <Button
+            android:id="@+id/reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button.Inverse"
+            android:textColor="?android:attr/colorAccent"
+            android:text="@*android:string/reset" />
+
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@android:id/list"
         android:layout_width="@dimen/notification_panel_width"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp"
-        android:elevation="2dp">
-
-        <com.android.systemui.qs.customize.CustomQSPanel
-            android:id="@+id/quick_settings_panel"
-            android:background="#0000"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </com.android.systemui.tuner.AutoScrollView>
-
-    <com.android.systemui.qs.customize.FloatingActionButton
-        android:id="@+id/fab"
-        android:clickable="true"
-        android:layout_width="@dimen/fab_size"
-        android:layout_height="@dimen/fab_size"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:elevation="@dimen/fab_elevation"
-        android:background="@drawable/fab_background" />
+        android:layout_weight="1" />
 
     <View
         android:layout_width="match_parent"

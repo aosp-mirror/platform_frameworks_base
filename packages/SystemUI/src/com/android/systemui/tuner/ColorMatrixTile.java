@@ -56,7 +56,7 @@ public class ColorMatrixTile extends QSTile<QSTile.State> implements DisplayCont
     }
 
     @Override
-    protected State newTileState() {
+    public State newTileState() {
         return new State();
     }
 

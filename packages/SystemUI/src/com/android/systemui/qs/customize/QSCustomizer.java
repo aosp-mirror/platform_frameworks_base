@@ -16,38 +16,25 @@
 package com.android.systemui.qs.customize;
 
 import android.animation.Animator;
-import android.content.ClipData;
+import android.animation.Animator.AnimatorListener;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
-import android.view.DragEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Toolbar;
-import android.widget.Toolbar.OnMenuItemClickListener;
-
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailClipper;
-import com.android.systemui.qs.QSTile.Host.Callback;
-import com.android.systemui.qs.customize.DropButton.OnDropListener;
-import com.android.systemui.qs.customize.TileAdapter.TileSelectedListener;
+import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.QSTileHost;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Allows full-screen customization of QS, through show() and hide().
@@ -55,26 +42,19 @@ import java.util.ArrayList;
  * This adds itself to the status bar window, so it can appear on top of quick settings and
  * *someday* do fancy animations to get into/out of it.
  */
-public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener, Callback,
-        OnDropListener, OnClickListener, Animator.AnimatorListener, TileSelectedListener,
-        OnCancelListener, OnDismissListener {
+public class QSCustomizer extends LinearLayout implements AnimatorListener, OnClickListener {
 
-    private static final int MENU_SAVE = Menu.FIRST;
-    private static final int MENU_RESET = Menu.FIRST + 1;
     private final QSDetailClipper mClipper;
 
     private PhoneStatusBar mPhoneStatusBar;
 
-    private Toolbar mToolbar;
-    private ViewGroup mDragButtons;
-    private CustomQSPanel mQsPanel;
-
     private boolean isShown;
-    private DropButton mInfoButton;
-    private DropButton mRemoveButton;
-    private FloatingActionButton mFab;
-    private SystemUIDialog mDialog;
     private QSTileHost mHost;
+    private RecyclerView mRecyclerView;
+    private TileAdapter mTileAdapter;
+    private View mClose;
+    private View mSave;
+    private View mReset;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
@@ -83,59 +63,42 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public void setHost(QSTileHost host) {
         mHost = host;
-        mHost.addCallback(this);
         mPhoneStatusBar = host.getPhoneStatusBar();
-        mQsPanel.setTiles(mHost.getTiles());
-        mQsPanel.setHost(mHost);
-        mQsPanel.setSavedTiles();
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mToolbar = (Toolbar) findViewById(com.android.internal.R.id.action_bar);
-        TypedValue value = new TypedValue();
-        mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
-        mToolbar.setNavigationIcon(
-                getResources().getDrawable(R.drawable.ic_close_white, mContext.getTheme()));
-        mToolbar.setNavigationOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hide(0, 0);
-            }
-        });
-        mToolbar.setOnMenuItemClickListener(this);
-        mToolbar.getMenu().add(Menu.NONE, MENU_SAVE, 0, mContext.getString(R.string.save))
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
-                mContext.getString(com.android.internal.R.string.reset));
+        mClose = findViewById(R.id.close);
+        mSave = findViewById(R.id.save);
+        mReset = findViewById(R.id.reset);
+        mClose.setOnClickListener(this);
+        mSave.setOnClickListener(this);
+        mReset.setOnClickListener(this);
 
-        mQsPanel = (CustomQSPanel) findViewById(R.id.quick_settings_panel);
-
-        mDragButtons = (ViewGroup) findViewById(R.id.drag_buttons);
-        setDragging(false);
-
-        mInfoButton = (DropButton) findViewById(R.id.info_button);
-        mInfoButton.setOnDropListener(this);
-        mRemoveButton = (DropButton) findViewById(R.id.remove_button);
-        mRemoveButton.setOnDropListener(this);
-
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
-        mFab.setImageResource(R.drawable.ic_add);
-        mFab.setOnClickListener(this);
+        mRecyclerView = (RecyclerView) findViewById(android.R.id.list);
+        mTileAdapter = new TileAdapter(getContext());
+        mRecyclerView.setAdapter(mTileAdapter);
+        new ItemTouchHelper(mTileAdapter.getCallback()).attachToRecyclerView(mRecyclerView);
+        GridLayoutManager layout = new GridLayoutManager(getContext(), 3);
+        layout.setSpanSizeLookup(mTileAdapter.getSizeLookup());
+        mRecyclerView.setLayoutManager(layout);
+        mRecyclerView.addItemDecoration(mTileAdapter.getItemDecoration());
+        DefaultItemAnimator animator = new DefaultItemAnimator();
+        animator.setMoveDuration(TileAdapter.MOVE_DURATION);
+        mRecyclerView.setItemAnimator(animator);
     }
 
     public void show(int x, int y) {
         isShown = true;
-        mQsPanel.setSavedTiles();
         mPhoneStatusBar.getStatusBarWindow().addView(this);
-        mQsPanel.setListening(true);
+        setTileSpecs();
         mClipper.animateCircularClip(x, y, true, this);
+        new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
     }
 
     public void hide(int x, int y) {
         isShown = false;
-        mQsPanel.setListening(false);
         mClipper.animateCircularClip(x, y, false, this);
     }
 
@@ -149,106 +112,32 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         for (String tile : defTiles.split(",")) {
             tiles.add(tile);
         }
-        mQsPanel.setTiles(tiles);
+        mTileAdapter.setTileSpecs(tiles);
     }
 
-    private void setDragging(boolean dragging) {
-        mToolbar.setVisibility(!dragging ? View.VISIBLE : View.INVISIBLE);
+    private void setTileSpecs() {
+        List<String> specs = new ArrayList<>();
+        for (QSTile tile : mHost.getTiles()) {
+            specs.add(tile.getTileSpec());
+        }
+        mTileAdapter.setTileSpecs(specs);
     }
 
     private void save() {
-        Log.d("CustomQSPanel", "Save!");
-        mQsPanel.saveCurrentTiles();
-        // TODO: At save button.
-        hide(0, 0);
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case MENU_SAVE:
-                Log.d("CustomQSPanel", "Save...");
-                save();
-                break;
-            case MENU_RESET:
-                reset();
-                break;
-        }
-        return true;
-    }
-
-    @Override
-    public void onTileSelected(String spec) {
-        if (mDialog != null) {
-            mQsPanel.addTile(spec);
-            mDialog.dismiss();
-        }
-    }
-
-    @Override
-    public void onTilesChanged() {
-        mQsPanel.setTiles(mHost.getTiles());
-    }
-
-    public boolean onDragEvent(DragEvent event) {
-        switch (event.getAction()) {
-            case DragEvent.ACTION_DRAG_STARTED:
-                setDragging(true);
-                break;
-            case DragEvent.ACTION_DRAG_ENDED:
-                setDragging(false);
-                break;
-        }
-        return true;
-    }
-
-    public void onDrop(View v, ClipData data) {
-        if (v == mRemoveButton) {
-            mQsPanel.remove(mQsPanel.getSpec(data));
-        } else if (v == mInfoButton) {
-            mQsPanel.unstashTiles();
-            SystemUIDialog dialog = new SystemUIDialog(mContext);
-            dialog.setTitle(mQsPanel.getSpec(data));
-            dialog.setPositiveButton(R.string.ok, null);
-            dialog.show();
-        }
+        mTileAdapter.saveSpecs(mHost);
+        hide((int) mSave.getX() + mSave.getWidth() / 2, (int) mSave.getY() + mSave.getHeight() / 2);
     }
 
     @Override
     public void onClick(View v) {
-        if (mFab == v) {
-            mDialog = new SystemUIDialog(mContext,
-                    android.R.style.Theme_Material_Dialog);
-            View view = LayoutInflater.from(mContext).inflate(R.layout.qs_add_tiles_list, null);
-            ListView listView = (ListView) view.findViewById(android.R.id.list);
-            TileAdapter adapter = new TileAdapter(mContext, mQsPanel.getTiles(), mHost);
-            adapter.setListener(this);
-            listView.setDivider(null);
-            listView.setDividerHeight(0);
-            listView.setAdapter(adapter);
-            listView.setEmptyView(view.findViewById(R.id.empty_text));
-            mDialog.setView(view);
-            mDialog.setOnDismissListener(this);
-            mDialog.setOnCancelListener(this);
-            mDialog.show();
-            // Too lazy to figure out what this will be now, but it should probably be something
-            // besides just a dialog.
-            // For now, just make it big.
-            WindowManager.LayoutParams params = mDialog.getWindow().getAttributes();
-            params.width = WindowManager.LayoutParams.MATCH_PARENT;
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            mDialog.getWindow().setAttributes(params);
+        if (v == mClose) {
+            hide((int) mClose.getX() + mClose.getWidth() / 2,
+                    (int) mClose.getY() + mClose.getHeight() / 2);
+        } else if (v == mSave) {
+            save();
+        } else if (v == mReset) {
+            reset();
         }
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        mDialog = null;
-    }
-
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        mDialog = null;
     }
 
     @Override

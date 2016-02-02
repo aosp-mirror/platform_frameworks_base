@@ -76,7 +76,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     private String mTileSpec;
 
-    abstract protected TState newTileState();
+    public abstract TState newTileState();
     abstract protected void handleClick();
     abstract protected void handleUpdateState(TState state, Object arg);
 

@@ -54,7 +54,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    protected SignalState newTileState() {
+    public SignalState newTileState() {
         return new SignalState();
     }
 

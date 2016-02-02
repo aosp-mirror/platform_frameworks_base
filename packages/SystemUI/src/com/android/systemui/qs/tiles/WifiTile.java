@@ -60,7 +60,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
-    protected SignalState newTileState() {
+    public SignalState newTileState() {
         return new SignalState();
     }
 

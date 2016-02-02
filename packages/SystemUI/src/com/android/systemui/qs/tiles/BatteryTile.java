@@ -54,7 +54,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     }
 
     @Override
-    protected State newTileState() {
+    public State newTileState() {
         return new QSTile.State();
     }
 
