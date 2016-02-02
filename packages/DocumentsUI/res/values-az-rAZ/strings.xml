@@ -29,25 +29,46 @@
     <string name="menu_save" msgid="2394743337684426338">"Yadda saxlayın"</string>
     <string name="menu_share" msgid="3075149983979628146">"Paylaşın"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Sil"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> seçilmiş"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Hamısını seçin"</string>
+    <string name="menu_copy" msgid="3612326052677229148">"Buraya kopyalayın:"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Daxili yaddaşı göstərin"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD kartı göstərin"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Daxili yaddaşı gizlədin"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD kartı gizlədin"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Fayl ölçüsünü göstərin"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Fayl ölçüsünü gizlədin"</string>
+    <string name="button_select" msgid="527196987259139214">"Seçin"</string>
+    <string name="button_copy" msgid="8706475544635021302">"Kopyala"</string>
     <string name="sort_name" msgid="9183560467917256779">"Ad üzrə"</string>
     <string name="sort_date" msgid="586080032956151448">"Tarix üzrə dəyişmiş"</string>
     <string name="sort_size" msgid="3350681319735474741">"Ölçü üzrə"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Kökləri göstərin"</string>
     <string name="drawer_close" msgid="7602734368552123318">"Kökləri gizlədin"</string>
     <string name="save_error" msgid="6167009778003223664">"Sənədi yadda saxlaya bilmədi"</string>
+    <string name="create_error" msgid="3735649141335444215">"Qovluq yaradıla bilmədi"</string>
+    <string name="query_error" msgid="1222448261663503501">"Sənəd sorğusu alınmadı"</string>
     <string name="root_recent" msgid="4470053704320518133">"Son"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ödənişsiz"</string>
-    <!-- no translation found for root_type_service (2178854894416775409) -->
-    <skip />
+    <string name="root_type_service" msgid="2178854894416775409">"Saxlama xidmətləri"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Qısa yollar"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Cihazlar"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Daha çox tətbiq"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Qabaqcıl cihazları görüntüləyin"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"Fayl ölçüsünü görüntüləyin"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"Cihaz ölçüsünü görüntüləyin"</string>
     <string name="empty" msgid="7858882803708117596">"Element yoxdur"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Faylı aça bilmir"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Bəzi sənədləri silə bilmir"</string>
     <string name="share_via" msgid="8966594246261344259">"Bunun vasitəsilə paylaş:"</string>
+    <string name="copy_notification_title" msgid="6374299806748219777">"Fayllar kopyalanır"</string>
+    <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> qalıb"</string>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> fayl kopyalanır.</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fayl kopyalanır.</item>
+    </plurals>
+    <string name="copy_preparing" msgid="3896202461003039386">"Kopyalanmaq üçün hazırlanır ..."</string>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> fayl kopyalanmadı</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fayl kopyalanmadı</item>
+    </plurals>
+    <string name="notification_touch_for_details" msgid="4483108577842961665">"Detallara baxmaq üçün toxunun"</string>
+    <string name="retry" msgid="7564024179122207376">"Yenidən cəhd edin"</string>
+    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Bu fayllar kopyalanmadı: <xliff:g id="LIST">%1$s</xliff:g>"</string>
 </resources>

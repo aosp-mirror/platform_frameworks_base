@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"दस्तावेज़"</string>
     <string name="title_open" msgid="4353228937663917801">"यहां से खोलें"</string>
-    <string name="title_save" msgid="2433679664882857999">"यहां जोड़ें"</string>
+    <string name="title_save" msgid="2433679664882857999">"यहां सहेजें"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"फ़ोल्डर बनाएं"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ग्रिड दृश्य"</string>
     <string name="menu_list" msgid="7279285939892417279">"सूची दृश्य"</string>
@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"जोड़ें"</string>
     <string name="menu_share" msgid="3075149983979628146">"साझा करें"</string>
     <string name="menu_delete" msgid="8138799623850614177">"हटाएं"</string>
-    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" चुनें"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"सभी चुनें"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"सभी चुनें"</string>
     <string name="menu_copy" msgid="3612326052677229148">"इनकी कॉपी बनाएं..."</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"आंतरिक मेमोरी दिखाएं"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD कार्ड दिखाएं"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD कार्ड छिपाएं"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"फ़ाइल आकार दिखाएं"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"फ़ाइल आकार छिपाएं"</string>
+    <string name="button_select" msgid="527196987259139214">"चुनें"</string>
     <string name="button_copy" msgid="8706475544635021302">"कॉपी करें"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> चयनित"</string>
     <string name="sort_name" msgid="9183560467917256779">"नाम के अनुसार"</string>
     <string name="sort_date" msgid="586080032956151448">"बदलाव के दिनांक के अनुसार"</string>
     <string name="sort_size" msgid="3350681319735474741">"आकार के अनुसार"</string>

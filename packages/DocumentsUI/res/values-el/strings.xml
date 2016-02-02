@@ -29,8 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Αποθήκευση"</string>
     <string name="menu_share" msgid="3075149983979628146">"Κοινή χρήση"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Διαγραφή"</string>
-    <string name="menu_select" msgid="8711270657353563424">"Επιλογή \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"Επιλογή όλων"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Επιλογή όλων"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Αντιγραφή σε…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Εμφ.εσωτ.χώρου αποθήκ."</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Εμφάνιση κάρτας SD"</string>
@@ -38,8 +37,8 @@
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Απόκρυψη κάρτας SD"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"Εμφ. μεγέθους αρχείου"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"Απόκρ. μεγέθους αρχείου"</string>
+    <string name="button_select" msgid="527196987259139214">"Επιλογή"</string>
     <string name="button_copy" msgid="8706475544635021302">"Αντιγραφή"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"Επιλέχθηκαν <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Κατά όνομα"</string>
     <string name="sort_date" msgid="586080032956151448">"Κατά ημερομηνία τροποποίησης"</string>
     <string name="sort_size" msgid="3350681319735474741">"Κατά μέγεθος"</string>
