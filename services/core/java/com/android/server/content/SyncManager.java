@@ -600,9 +600,18 @@ public class SyncManager {
                     null, null);
         }
 
-        Intent startServiceIntent = new Intent(mContext, SyncJobService.class);
+        // Set up the communication channel between the scheduled job and the sync manager.
+        // This is posted to the *main* looper intentionally, to defer calling startService()
+        // until after the lengthy primary boot sequence completes on that thread, to avoid
+        // spurious ANR triggering.
+        final Intent startServiceIntent = new Intent(mContext, SyncJobService.class);
         startServiceIntent.putExtra(SyncJobService.EXTRA_MESSENGER, new Messenger(mSyncHandler));
-        mContext.startService(startServiceIntent);
+        new Handler(mContext.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                mContext.startService(startServiceIntent);
+            }
+        });
     }
 
     private boolean isDeviceProvisioned() {
