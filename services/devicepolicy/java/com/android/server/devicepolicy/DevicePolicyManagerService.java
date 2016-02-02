@@ -1463,6 +1463,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
             SecurityLog.setLoggingEnabledProperty(enabled);
         }
+
+        boolean securityLogGetLoggingEnabledProperty() {
+            return SecurityLog.getLoggingEnabledProperty();
+        }
+
+        boolean securityLogIsLoggingEnabled() {
+            return SecurityLog.isLoggingEnabled();
+        }
     }
 
     /**
@@ -1607,7 +1615,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mOwners.hasDeviceOwner()) {
                 mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, "true");
                 disableDeviceLoggingIfNotCompliant();
-                if (SecurityLog.getLoggingEnabledProperty()) {
+                if (mInjector.securityLogGetLoggingEnabledProperty()) {
                     mSecurityLogMonitor.start();
                 }
             } else {
@@ -4472,7 +4480,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mInjector.binderRestoreCallingIdentity(ident);
         }
 
-        if (SecurityLog.isLoggingEnabled()) {
+        if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 0);
         }
     }
@@ -4502,7 +4510,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
 
-        if (SecurityLog.isLoggingEnabled()) {
+        if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 1);
         }
     }
@@ -4511,7 +4519,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void reportKeyguardDismissed() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        if (SecurityLog.isLoggingEnabled()) {
+        if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISSED);
         }
     }
@@ -4520,7 +4528,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void reportKeyguardSecured() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
-        if (SecurityLog.isLoggingEnabled()) {
+        if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_SECURED);
         }
     }
@@ -8352,7 +8360,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(admin);
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            return SecurityLog.getLoggingEnabledProperty();
+            return mInjector.securityLogGetLoggingEnabledProperty();
         }
     }
 

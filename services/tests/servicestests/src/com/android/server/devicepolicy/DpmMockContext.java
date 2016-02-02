@@ -198,6 +198,14 @@ public class DpmMockContext extends MockContext {
 
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
         }
+
+        public boolean securityLogGetLoggingEnabledProperty() {
+            return false;
+        }
+
+        public boolean securityLogIsLoggingEnabled() {
+            return false;
+        }
     }
 
     public final Context realTestContext;

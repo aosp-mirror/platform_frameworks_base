@@ -291,5 +291,15 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
             context.settings.securityLogSetLoggingEnabledProperty(enabled);
         }
+
+        @Override
+        boolean securityLogGetLoggingEnabledProperty() {
+            return context.settings.securityLogGetLoggingEnabledProperty();
+        }
+
+        @Override
+        boolean securityLogIsLoggingEnabled() {
+            return context.settings.securityLogIsLoggingEnabled();
+        }
     }
 }
