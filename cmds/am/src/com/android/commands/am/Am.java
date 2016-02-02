@@ -21,10 +21,12 @@ package com.android.commands.am;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.IActivityContainer;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -106,6 +108,7 @@ public class Am extends BaseCommand {
     private String mProfileFile;
     private int mSamplingInterval;
     private boolean mAutoStop;
+    private int mStackId;
 
     /**
      * Command-line entry point.
@@ -191,6 +194,7 @@ public class Am extends BaseCommand {
                 "    --track-allocation: enable tracking of object allocations\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
+                "    --stack <STACK_ID>: Specify into which stack should the activity be put." +
                 "\n" +
                 "am startservice: start a Service.  Options are:\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
@@ -467,6 +471,7 @@ public class Am extends BaseCommand {
         mSamplingInterval = 0;
         mAutoStop = false;
         mUserId = defUser;
+        mStackId = FULLSCREEN_WORKSPACE_STACK_ID;
 
         return Intent.parseCommandArgs(mArgs, new Intent.CommandOptionHandler() {
             @Override
@@ -493,6 +498,8 @@ public class Am extends BaseCommand {
                     mUserId = parseUserArg(nextArgRequired());
                 } else if (opt.equals("--receiver-permission")) {
                     mReceiverPermission = nextArgRequired();
+                } else if (opt.equals("--stack")) {
+                    mStackId = Integer.parseInt(nextArgRequired());
                 } else {
                     return false;
                 }
@@ -550,6 +557,7 @@ public class Am extends BaseCommand {
             mimeType = mAm.getProviderMimeType(intent.getData(), mUserId);
         }
 
+
         do {
             if (mStopOption) {
                 String packageName;
@@ -604,13 +612,20 @@ public class Am extends BaseCommand {
             IActivityManager.WaitResult result = null;
             int res;
             final long startTime = SystemClock.uptimeMillis();
+            ActivityOptions options = null;
+            if (mStackId != FULLSCREEN_WORKSPACE_STACK_ID) {
+                options = ActivityOptions.makeBasic();
+                options.setLaunchStackId(mStackId);
+            }
             if (mWaitOption) {
                 result = mAm.startActivityAndWait(null, null, intent, mimeType,
-                            null, null, 0, mStartFlags, profilerInfo, null, mUserId);
+                        null, null, 0, mStartFlags, profilerInfo,
+                        options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
                 res = mAm.startActivityAsUser(null, null, intent, mimeType,
-                        null, null, 0, mStartFlags, profilerInfo, null, mUserId);
+                        null, null, 0, mStartFlags, profilerInfo,
+                        options != null ? options.toBundle() : null, mUserId);
             }
             final long endTime = SystemClock.uptimeMillis();
             PrintStream out = mWaitOption ? System.out : System.err;
