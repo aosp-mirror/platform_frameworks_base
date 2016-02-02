@@ -429,10 +429,7 @@
          sets. -->
     <attr name="multiArch" format ="boolean" />
 
-    <!-- Specify abiOverride for multiArch application.
-         @hide
-         @SystemApi
-     -->
+    <!-- Specify abiOverride for multiArch application. -->
     <attr name="abiOverride" />
 
     <!-- Specify whether a component is allowed to have multiple instances
