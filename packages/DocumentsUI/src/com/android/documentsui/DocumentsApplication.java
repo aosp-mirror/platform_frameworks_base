@@ -63,6 +63,8 @@ public class DocumentsApplication extends Application {
 
     @Override
     public void onCreate() {
+        super.onCreate();
+
         final ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         final int memoryClassBytes = am.getMemoryClass() * 1024 * 1024;
 

@@ -20,7 +20,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.View;
 import android.widget.LinearLayout;
 
 /**
@@ -39,14 +38,11 @@ public class ListItem extends LinearLayout
 
     @Override
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
-        View indicator = findViewById(R.id.focus_indicator);
-        if (gainFocus) {
-            TypedValue color = new TypedValue();
-            getContext().getTheme().resolveAttribute(android.R.attr.colorAccent, color, true);
-            indicator.setBackgroundColor(color.data);
-        } else {
-            indicator.setBackgroundColor(android.R.color.transparent);
-        }
+        TypedValue color = new TypedValue();
+        int colorId = gainFocus ? android.R.attr.colorAccent : android.R.color.transparent;
+        getContext().getTheme().resolveAttribute(colorId, color, true);
+
+        findViewById(R.id.focus_indicator).setBackgroundColor(color.data);
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
     }
 }

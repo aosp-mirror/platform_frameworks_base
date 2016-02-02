@@ -29,7 +29,6 @@ import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.State;
-
 import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ import java.util.Set;
  */
 final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
 
-    private static final String TAG = "ModelBackedDocumentsAdapter";
+    private static final String TAG = "ModelBackedDocuments";
     public static final int ITEM_TYPE_DOCUMENT = 1;
     public static final int ITEM_TYPE_DIRECTORY = 2;
 
