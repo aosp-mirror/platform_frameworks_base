@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Lütfən, aşağıda cihaz şifrələmə parolunuzu daxil edin. Bu yedək arxivini şifrələmək üçün də istifadə olunacaq."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Tam yedək data şifrələmədən istifadə üçün şifrə daxil edin. Əgər boş buraxılsa, cari yedək şifrə istifadə olunacaq:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Bütün yedək datanı şifrələmək istəyirsinizsə, aşağıda parol daxil edin:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Cihazınız şifrələndiyi üçün yedəyinizi şifrələmək tələb olunur. Aşağıda parolu daxil etməyiniz xahiş olunur:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Bərpa məlumatları şifrələnibsə, şifrəni aşağıda daxil edin:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Rezerv edilir ..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Yedəkləmə sona çatdı"</string>
