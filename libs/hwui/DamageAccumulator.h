@@ -57,7 +57,7 @@ public:
     // Returns the current dirty area, *NOT* transformed by pushed transforms
     void peekAtDirty(SkRect* dest) const;
 
-    void computeCurrentTransform(Matrix4* outMatrix) const;
+    ANDROID_API void computeCurrentTransform(Matrix4* outMatrix) const;
 
     void finish(SkRect* totalDirty);
 

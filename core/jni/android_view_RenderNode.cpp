@@ -15,6 +15,7 @@
  */
 
 #define LOG_TAG "OpenGLRenderer"
+#define ATRACE_TAG ATRACE_TAG_VIEW
 
 #include <EGL/egl.h>
 
@@ -24,7 +25,10 @@
 #include <android_runtime/AndroidRuntime.h>
 
 #include <Animator.h>
+#include <DamageAccumulator.h>
+#include <Matrix.h>
 #include <RenderNode.h>
+#include <TreeInfo.h>
 #include <Paint.h>
 
 #include "core_jni_helpers.h"
@@ -462,6 +466,69 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 }
 
 // ----------------------------------------------------------------------------
+// SurfaceView position callback
+// ----------------------------------------------------------------------------
+
+jmethodID gSurfaceViewPositionUpdateMethod;
+
+static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
+        jlong renderNodePtr, jobject surfaceview) {
+    class SurfaceViewPositionUpdater : public RenderNode::PositionListener {
+    public:
+        SurfaceViewPositionUpdater(JNIEnv* env, jobject surfaceview) {
+            env->GetJavaVM(&mVm);
+            mWeakRef = env->NewWeakGlobalRef(surfaceview);
+        }
+
+        virtual ~SurfaceViewPositionUpdater() {
+            jnienv()->DeleteWeakGlobalRef(mWeakRef);
+            mWeakRef = nullptr;
+        }
+
+        virtual void onPositionUpdated(RenderNode& node, const TreeInfo& info) override {
+            if (CC_UNLIKELY(!mWeakRef || !info.updateWindowPositions)) return;
+            ATRACE_NAME("Update SurfaceView position");
+
+            JNIEnv* env = jnienv();
+            jobject localref = env->NewLocalRef(mWeakRef);
+            if (CC_UNLIKELY(!localref)) {
+                jnienv()->DeleteWeakGlobalRef(mWeakRef);
+                mWeakRef = nullptr;
+                return;
+            }
+            Matrix4 transform;
+            info.damageAccumulator->computeCurrentTransform(&transform);
+            const RenderProperties& props = node.properties();
+            uirenderer::Rect bounds(props.getWidth(), props.getHeight());
+            transform.mapRect(bounds);
+            bounds.left -= info.windowInsetLeft;
+            bounds.right -= info.windowInsetLeft;
+            bounds.top -= info.windowInsetTop;
+            bounds.bottom -= info.windowInsetTop;
+            env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
+                    (jlong) info.frameNumber, (jint) bounds.left, (jint) bounds.top,
+                    (jint) bounds.right, (jint) bounds.bottom);
+            env->DeleteLocalRef(localref);
+        }
+
+    private:
+        JNIEnv* jnienv() {
+            JNIEnv* env;
+            if (mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+                LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", mVm);
+            }
+            return env;
+        }
+
+        JavaVM* mVm;
+        jobject mWeakRef;
+    };
+
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->setPositionListener(new SurfaceViewPositionUpdater(env, surfaceview));
+}
+
+// ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
 
@@ -539,9 +606,14 @@ static const JNINativeMethod gMethods[] = {
 
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
+
+    { "nRequestPositionUpdates",   "(JLandroid/view/SurfaceView;)V", (void*) android_view_RenderNode_requestPositionUpdates },
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {
+    jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
+    gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
+            "updateWindowPositionRT", "(JIIII)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

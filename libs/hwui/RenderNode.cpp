@@ -381,6 +381,10 @@ void RenderNode::prepareTreeImpl(TreeInfo& info, bool functorsNeedLayer) {
     bool childFunctorsNeedLayer = mProperties.prepareForFunctorPresence(
             willHaveFunctor, functorsNeedLayer);
 
+    if (CC_UNLIKELY(mPositionListener.get())) {
+        mPositionListener->onPositionUpdated(*this, info);
+    }
+
     prepareLayer(info, animatorDirtyMask);
     if (info.mode == TreeInfo::MODE_FULL) {
         pushStagingDisplayListChanges(info);

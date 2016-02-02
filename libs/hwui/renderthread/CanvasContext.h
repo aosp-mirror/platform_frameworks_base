@@ -38,6 +38,7 @@
 #include <SkBitmap.h>
 #include <SkRect.h>
 #include <utils/Functor.h>
+#include <gui/Surface.h>
 
 #include <set>
 #include <string>
@@ -74,10 +75,10 @@ public:
     // Won't take effect until next EGLSurface creation
     void setSwapBehavior(SwapBehavior swapBehavior);
 
-    void initialize(ANativeWindow* window);
-    void updateSurface(ANativeWindow* window);
-    bool pauseSurface(ANativeWindow* window);
-    bool hasSurface() { return mNativeWindow.get(); }
+    void initialize(Surface* surface);
+    void updateSurface(Surface* surface);
+    bool pauseSurface(Surface* surface);
+    bool hasSurface() { return mNativeSurface.get(); }
 
     void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
@@ -171,7 +172,7 @@ private:
     // lifecycle tracking
     friend class android::uirenderer::RenderState;
 
-    void setSurface(ANativeWindow* window);
+    void setSurface(Surface* window);
     void requireSurface();
 
     void freePrefetechedLayers();
@@ -181,7 +182,7 @@ private:
 
     RenderThread& mRenderThread;
     EglManager& mEglManager;
-    sp<ANativeWindow> mNativeWindow;
+    sp<Surface> mNativeSurface;
     EGLSurface mEglSurface = EGL_NO_SURFACE;
     bool mBufferPreserved = false;
     SwapBehavior mSwapBehavior = kSwap_default;

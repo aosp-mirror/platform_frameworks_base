@@ -86,6 +86,12 @@ public:
 #endif
     ErrorHandler* errorHandler = nullptr;
 
+    // Frame number for use with synchronized surfaceview position updating
+    int64_t frameNumber = -1;
+    int32_t windowInsetLeft = 0;
+    int32_t windowInsetTop = 0;
+    bool updateWindowPositions = false;
+
     struct Out {
         bool hasFunctors = false;
         // This is only updated if evaluateAnimations is true

@@ -139,38 +139,38 @@ void RenderProxy::setName(const char* name) {
     postAndWait(task); // block since name/value pointers owned by caller
 }
 
-CREATE_BRIDGE2(initialize, CanvasContext* context, ANativeWindow* window) {
-    args->context->initialize(args->window);
+CREATE_BRIDGE2(initialize, CanvasContext* context, Surface* surface) {
+    args->context->initialize(args->surface);
     return nullptr;
 }
 
-void RenderProxy::initialize(const sp<ANativeWindow>& window) {
+void RenderProxy::initialize(const sp<Surface>& surface) {
     SETUP_TASK(initialize);
     args->context = mContext;
-    args->window = window.get();
+    args->surface = surface.get();
     post(task);
 }
 
-CREATE_BRIDGE2(updateSurface, CanvasContext* context, ANativeWindow* window) {
-    args->context->updateSurface(args->window);
+CREATE_BRIDGE2(updateSurface, CanvasContext* context, Surface* surface) {
+    args->context->updateSurface(args->surface);
     return nullptr;
 }
 
-void RenderProxy::updateSurface(const sp<ANativeWindow>& window) {
+void RenderProxy::updateSurface(const sp<Surface>& surface) {
     SETUP_TASK(updateSurface);
     args->context = mContext;
-    args->window = window.get();
+    args->surface = surface.get();
     postAndWait(task);
 }
 
-CREATE_BRIDGE2(pauseSurface, CanvasContext* context, ANativeWindow* window) {
-    return (void*) args->context->pauseSurface(args->window);
+CREATE_BRIDGE2(pauseSurface, CanvasContext* context, Surface* surface) {
+    return (void*) args->context->pauseSurface(args->surface);
 }
 
-bool RenderProxy::pauseSurface(const sp<ANativeWindow>& window) {
+bool RenderProxy::pauseSurface(const sp<Surface>& surface) {
     SETUP_TASK(pauseSurface);
     args->context = mContext;
-    args->window = window.get();
+    args->surface = surface.get();
     return (bool) postAndWait(task);
 }
 

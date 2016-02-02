@@ -135,12 +135,23 @@ public class SurfaceView extends View {
         }
     };
 
-    final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener
+    private final ViewTreeObserver.OnScrollChangedListener mScrollChangedListener
             = new ViewTreeObserver.OnScrollChangedListener() {
                     @Override
                     public void onScrollChanged() {
                         updateWindow(false, false);
                     }
+            };
+
+    private final ViewTreeObserver.OnPreDrawListener mDrawListener =
+            new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    // reposition ourselves where the surface is
+                    mHaveFrame = getWidth() > 0 && getHeight() > 0;
+                    updateWindow(false, false);
+                    return true;
+                }
             };
 
     boolean mRequestedVisible = false;
@@ -168,17 +179,9 @@ public class SurfaceView extends View {
     boolean mUpdateWindowNeeded;
     boolean mReportDrawNeeded;
     private Translator mTranslator;
+    private int mWindowInsetLeft;
+    private int mWindowInsetTop;
 
-    private final ViewTreeObserver.OnPreDrawListener mDrawListener =
-            new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    // reposition ourselves where the surface is
-                    mHaveFrame = getWidth() > 0 && getHeight() > 0;
-                    updateWindow(false, false);
-                    return true;
-                }
-            };
     private boolean mGlobalListenersAdded;
 
     public SurfaceView(Context context) {
@@ -443,17 +446,17 @@ public class SurfaceView extends View {
         int myHeight = mRequestedHeight;
         if (myHeight <= 0) myHeight = getHeight();
 
-        getLocationInWindow(mLocation);
         final boolean creating = mWindow == null;
         final boolean formatChanged = mFormat != mRequestedFormat;
         final boolean sizeChanged = mWindowSpaceWidth != myWidth || mWindowSpaceHeight != myHeight;
         final boolean visibleChanged = mVisible != mRequestedVisible;
         final boolean layoutSizeChanged = getWidth() != mLayout.width
                 || getHeight() != mLayout.height;
-        final boolean positionChanged = mWindowSpaceLeft != mLocation[0] || mWindowSpaceTop != mLocation[1];
 
         if (force || creating || formatChanged || sizeChanged || visibleChanged
             || mUpdateWindowNeeded || mReportDrawNeeded || redrawNeeded) {
+            getLocationInWindow(mLocation);
+
             if (DEBUG) Log.i(TAG, "Changes: creating=" + creating
                     + " format=" + formatChanged + " size=" + sizeChanged
                     + " visible=" + visibleChanged
@@ -643,24 +646,66 @@ public class SurfaceView extends View {
                 TAG, "Layout: x=" + mLayout.x + " y=" + mLayout.y +
                 " w=" + mLayout.width + " h=" + mLayout.height +
                 ", frame=" + mSurfaceFrame);
-        } else if (positionChanged || layoutSizeChanged) { // Only the position has changed
-            mWindowSpaceLeft = mLocation[0];
-            mWindowSpaceTop = mLocation[1];
-            // For our size changed check, we keep mLayout.width and mLayout.height
-            // in view local space.
-            mLocation[0] = mLayout.width = getWidth();
-            mLocation[1] = mLayout.height = getHeight();
+        } else if (!isHardwareAccelerated()) {
+            getLocationInWindow(mLocation);
+            final boolean positionChanged = mWindowSpaceLeft != mLocation[0]
+                    || mWindowSpaceTop != mLocation[1];
+            if (positionChanged || layoutSizeChanged) { // Only the position has changed
+                mWindowSpaceLeft = mLocation[0];
+                mWindowSpaceTop = mLocation[1];
+                // For our size changed check, we keep mLayout.width and mLayout.height
+                // in view local space.
+                mLocation[0] = mLayout.width = getWidth();
+                mLocation[1] = mLayout.height = getHeight();
 
-            transformFromViewToWindowSpace(mLocation);
+                transformFromViewToWindowSpace(mLocation);
 
-            try {
-                mSession.repositionChild(mWindow, mWindowSpaceLeft, mWindowSpaceTop,
-                        mLocation[0], mLocation[1],
-                        viewRoot != null ? viewRoot.getNextFrameNumber() : -1,
-                        mWinFrame);
-            } catch (RemoteException ex) {
-                Log.e(TAG, "Exception from relayout", ex);
+                try {
+                    Log.d(TAG, String.format("updateWindowPosition UI, " +
+                            "postion = [%d, %d, %d, %d]", mWindowSpaceLeft, mWindowSpaceTop,
+                            mLocation[0], mLocation[1]));
+                    mSession.repositionChild(mWindow, mWindowSpaceLeft, mWindowSpaceTop,
+                            mLocation[0], mLocation[1], -1, mWinFrame);
+                } catch (RemoteException ex) {
+                    Log.e(TAG, "Exception from relayout", ex);
+                }
             }
+        }
+    }
+
+    private Rect mRTLastReportedPosition = new Rect();
+
+    /**
+     * Called by native on RenderThread to update the window position
+     * @hide
+     */
+    public final void updateWindowPositionRT(long frameNumber,
+            int left, int top, int right, int bottom) {
+        IWindowSession session = mSession;
+        MyWindow window = mWindow;
+        if (session == null || window == null) {
+            // Guess we got detached, that sucks
+            return;
+        }
+        if (mRTLastReportedPosition.left == left
+                && mRTLastReportedPosition.top == top
+                && mRTLastReportedPosition.right == right
+                && mRTLastReportedPosition.bottom == bottom) {
+            return;
+        }
+        try {
+            if (DEBUG) {
+                Log.d(TAG, String.format("updateWindowPosition RT, frameNr = %d, " +
+                        "postion = [%d, %d, %d, %d]", frameNumber, left, top,
+                        right, bottom));
+            }
+            // Just using mRTLastReportedPosition as a dummy rect here
+            session.repositionChild(window, left, top, right, bottom, frameNumber,
+                    mRTLastReportedPosition);
+            // Now overwrite mRTLastReportedPosition with our values
+            mRTLastReportedPosition.set(left, top, right, bottom);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Exception from repositionChild", ex);
         }
     }
 
