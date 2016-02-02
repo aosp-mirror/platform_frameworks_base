@@ -4403,7 +4403,6 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
         } catch (NullPointerException e) {
         }
-        Log.d(TAG, "getDataEnabled: retVal=" + retVal);
         return retVal;
     }
 
