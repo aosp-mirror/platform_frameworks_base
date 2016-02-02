@@ -243,4 +243,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#setDefaultDialer
      */
     boolean setDefaultDialer(in String packageName);
+
+    /**
+    * @see TelecomServiceImpl#launchManageBlockedNumbersActivity
+    **/
+    void launchManageBlockedNumbersActivity(in String callingPackageName);
 }
