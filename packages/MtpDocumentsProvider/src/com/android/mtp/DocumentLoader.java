@@ -74,7 +74,7 @@ class DocumentLoader {
             int parentHandle = parent.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
             // getObjectHandles if we would like to obtain children under the root.
-            if (parentHandle == Identifier.DUMMY_HANDLE_FOR_ROOT) {
+            if (parent.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
                 parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
             }
             // TODO: Handle nit race around here.

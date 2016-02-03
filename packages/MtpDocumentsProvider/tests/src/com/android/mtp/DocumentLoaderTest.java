@@ -35,7 +35,8 @@ public class DocumentLoaderTest extends AndroidTestCase {
     private BlockableTestMtpManager mManager;
     private TestContentResolver mResolver;
     private DocumentLoader mLoader;
-    final private Identifier mParentIdentifier = new Identifier(0, 0, 0, "1");
+    final private Identifier mParentIdentifier = new Identifier(
+            0, 0, 0, "1", MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE);
 
     @Override
     public void setUp() {

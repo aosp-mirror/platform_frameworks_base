@@ -164,11 +164,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             final Cursor cursor = mProvider.queryRoots(null);
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
-            assertEquals("3", cursor.getString(0));
+            assertEquals("1", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device A Storage A", cursor.getString(3));
-            assertEquals("3", cursor.getString(4));
+            assertEquals("1", cursor.getString(4));
             assertEquals(1024, cursor.getInt(5));
         }
 
@@ -179,11 +179,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
             cursor.moveToNext();
-            assertEquals("4", cursor.getString(0));
+            assertEquals("2", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
-            assertEquals("4", cursor.getString(4));
+            assertEquals("2", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
     }
@@ -225,11 +225,11 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(0, cursor.getInt(5));
 
             cursor.moveToNext();
-            assertEquals("3", cursor.getString(0));
+            assertEquals("2", cursor.getString(0));
             assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
-            assertEquals("3", cursor.getString(4));
+            assertEquals("2", cursor.getString(4));
             assertEquals(2048, cursor.getInt(5));
         }
     }
