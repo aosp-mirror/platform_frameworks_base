@@ -515,9 +515,9 @@
     <string name="pointer_location_summary">Screen overlay showing current touch data</string>
 
     <!-- UI debug setting: show touches? [CHAR LIMIT=25] -->
-    <string name="show_touches">Show touches</string>
+    <string name="show_touches">Show taps</string>
     <!-- UI debug setting: show touches location summary [CHAR LIMIT=50] -->
-    <string name="show_touches_summary">Show visual feedback for touches</string>
+    <string name="show_touches_summary">Show visual feedback for taps</string>
 
     <!-- UI debug setting: show where surface updates happen? [CHAR LIMIT=25] -->
     <string name="show_screen_updates">Show surface updates</string>
@@ -634,7 +634,7 @@
     <!-- Summary text of the "local backup password" setting when the user has not supplied a password -->
     <string name="local_backup_password_summary_none">Desktop full backups aren\u2019t currently protected</string>
     <!-- Summary text of the "local backup password" setting when the user has already supplied a password -->
-    <string name="local_backup_password_summary_change">Touch to change or remove the password for desktop full backups</string>
+    <string name="local_backup_password_summary_change">Tap to change or remove the password for desktop full backups</string>
 
     <!-- Toast message shown when the user successfully sets a new local backup password [CHAR LIMIT=80] -->
     <string name="local_backup_password_toast_success">New backup password set</string>
@@ -660,9 +660,9 @@
     <!-- Settings item title for inactive apps [CHAR LIMIT=35] -->
     <string name="inactive_apps_title">Inactive apps</string>
     <!-- Settings item summary for inactive app [CHAR LIMIT=100] -->
-    <string name="inactive_app_inactive_summary">Inactive. Touch to toggle.</string>
+    <string name="inactive_app_inactive_summary">Inactive. Tap to toggle.</string>
     <!-- Settings item summary for active app [CHAR LIMIT=100] -->
-    <string name="inactive_app_active_summary">Active. Touch to toggle.</string>
+    <string name="inactive_app_active_summary">Active. Tap to toggle.</string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
