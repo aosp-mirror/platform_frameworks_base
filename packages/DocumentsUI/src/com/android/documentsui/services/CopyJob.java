@@ -186,7 +186,7 @@ class CopyJob extends Job {
 
     @Override
     Notification getWarningNotification() {
-        final Intent navigateIntent = buildNavigateIntent();
+        final Intent navigateIntent = buildNavigateIntent(INTENT_TAG_WARNING);
         navigateIntent.putExtra(EXTRA_DIALOG_TYPE, DIALOG_TYPE_CONVERTED);
         navigateIntent.putExtra(EXTRA_OPERATION, operationType);
 

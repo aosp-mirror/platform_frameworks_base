@@ -35,6 +35,7 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
@@ -60,6 +61,12 @@ import java.util.Map;
  */
 abstract public class Job implements Runnable {
     private static final String TAG = "Job";
+
+    static final String INTENT_TAG_WARNING = "warning";
+    static final String INTENT_TAG_FAILURE = "failure";
+    static final String INTENT_TAG_PROGRESS = "progress";
+    static final String INTENT_TAG_CANCEL = "cancel";
+
     final Context service;
     final Context appContext;
     final Listener listener;
@@ -130,6 +137,10 @@ abstract public class Job implements Runnable {
 
     abstract Notification getWarningNotification();
 
+    Uri getDataUriForIntent(String tag) {
+        return Uri.parse(String.format("data,%s-%s", tag, id));
+    }
+
     ContentProviderClient getClient(DocumentInfo doc) throws RemoteException {
         ContentProviderClient client = mClients.get(doc.authority);
         if (client == null) {
@@ -193,10 +204,9 @@ abstract public class Job implements Runnable {
     }
 
     Notification getFailureNotification(@PluralsRes int titleId, @DrawableRes int icon) {
-        final Intent navigateIntent = buildNavigateIntent();
+        final Intent navigateIntent = buildNavigateIntent(INTENT_TAG_FAILURE);
         navigateIntent.putExtra(EXTRA_DIALOG_TYPE, OperationDialogFragment.DIALOG_TYPE_FAILURE);
         navigateIntent.putExtra(EXTRA_OPERATION, operationType);
-
         navigateIntent.putParcelableArrayListExtra(EXTRA_SRC_LIST, failedFiles);
 
         final Notification.Builder errorBuilder = new Notification.Builder(service)
@@ -219,7 +229,8 @@ abstract public class Job implements Runnable {
         Notification.Builder progressBuilder = new Notification.Builder(service)
                 .setContentTitle(title)
                 .setContentIntent(
-                        PendingIntent.getActivity(appContext, 0, buildNavigateIntent(), 0))
+                        PendingIntent.getActivity(appContext, 0,
+                                buildNavigateIntent(INTENT_TAG_PROGRESS), 0))
                 .setCategory(Notification.CATEGORY_PROGRESS)
                 .setSmallIcon(icon)
                 .setOngoing(true);
@@ -241,15 +252,18 @@ abstract public class Job implements Runnable {
     /**
      * Creates an intent for navigating back to the destination directory.
      */
-    Intent buildNavigateIntent() {
+    Intent buildNavigateIntent(String tag) {
         Intent intent = new Intent(service, FilesActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(DocumentsContract.ACTION_BROWSE);
+        intent.setData(getDataUriForIntent(tag));
         intent.putExtra(Shared.EXTRA_STACK, (Parcelable) stack);
         return intent;
     }
 
     Intent createCancelIntent() {
         final Intent cancelIntent = new Intent(service, FileOperationService.class);
+        cancelIntent.setData(getDataUriForIntent(INTENT_TAG_CANCEL));
         cancelIntent.putExtra(EXTRA_CANCEL, true);
         cancelIntent.putExtra(EXTRA_JOB_ID, id);
         return cancelIntent;
