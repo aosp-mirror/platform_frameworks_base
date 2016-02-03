@@ -127,6 +127,8 @@ class AppWindowToken extends WindowToken {
 
     boolean mAlwaysFocusable;
 
+    boolean mAppStopped;
+
     ArrayDeque<Rect> mFrozenBounds = new ArrayDeque<>();
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token,
@@ -309,6 +311,47 @@ class AppWindowToken extends WindowToken {
                 win.mExiting = exiting;
             }
         }
+    }
+
+    // Here we destroy surfaces which have been marked as eligible by the animator, taking care
+    // to ensure the client has finished with them. If the client could still be using them
+    // we will skip destruction and try again when the client has stopped.
+    void destroySurfaces() {
+        final ArrayList<WindowState> allWindows = (ArrayList<WindowState>) allAppWindows.clone();
+        final DisplayContentList displayList = new DisplayContentList();
+        for (int i = allWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = allWindows.get(i);
+            if (!win.mDestroying) {
+                continue;
+            }
+
+            if (!mAppStopped && !win.mClientRemoveRequested) {
+                return;
+            }
+
+            win.destroyOrSaveSurface();
+            if (win.mRemoveOnExit) {
+                win.mExiting = false;
+                service.removeWindowInnerLocked(win);
+            }
+            final DisplayContent displayContent = win.getDisplayContent();
+            if (displayContent != null && !displayList.contains(displayContent)) {
+                displayList.add(displayContent);
+            }
+            win.mDestroying = false;
+        }
+        for (int i = 0; i < displayList.size(); i++) {
+            final DisplayContent displayContent = displayList.get(i);
+            service.mLayersController.assignLayersLocked(displayContent.getWindowList());
+            displayContent.layoutNeeded = true;
+        }
+    }
+
+    // The application has stopped, so destroy any surfaces which were keeping alive
+    // in case they were still being used.
+    void notifyAppStopped() {
+        mAppStopped = true;
+        destroySurfaces();
     }
 
     /**
