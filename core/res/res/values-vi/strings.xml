@@ -1031,6 +1031,16 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Đã thêm thẻ SIM"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Khởi động lại thiết bị của bạn để truy cập mạng di động."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Khởi động lại"</string>
+    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Đặt giờ"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Đặt ngày"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Đặt"</string>
@@ -1557,4 +1567,7 @@
     <skip />
     <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
     <skip />
+    <string name="pin_target" msgid="3052256031352291362">"Ghim"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Bỏ ghim"</string>
+    <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
 </resources>

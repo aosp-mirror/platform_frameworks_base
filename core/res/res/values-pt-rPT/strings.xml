@@ -232,7 +232,7 @@
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_children_count_bracketed" msgid="1769425473168347839">"(<xliff:g id="NOTIFICATIONCOUNT">%d</xliff:g>)"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Conteúdo oculto"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Conteúdo oculto pela política"</string>
+    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Conteúdo ocultado pela política"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="user_owner_label" msgid="2804351898001038951">"Pessoal"</string>
@@ -909,8 +909,8 @@
     <string name="chooseActivity" msgid="7486876147751803333">"Escolha uma ação"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Escolher uma aplicação para o dispositivo USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Nenhuma aplicação pode efetuar esta ação."</string>
-    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> parou"</string>
-    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> parou"</string>
+    <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> sofreu uma falha de sistema."</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> sofreu uma falha de sistema."</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> continua a parar"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> continua a parar"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Reiniciar aplicação"</string>
@@ -1031,6 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Cartão SIM adicionado"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Reinicie o dispositivo para aceder à rede móvel."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Para que o novo SIM funcione corretamente, tem de instalar e abrir uma aplicação do seu operador."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"OBTER A APLICAÇÃO"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"AGORA NÃO"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Novo SIM inserido"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Toque para configurar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Definir hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Definir data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Definir"</string>
@@ -1535,8 +1540,8 @@
     <string name="default_notification_topic_label" msgid="227586145791870829">"Diversos"</string>
     <string name="importance_from_topic" msgid="3572280439880023233">"Definiu a importância destas notificações."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"É importante devido às pessoas envolvidas."</string>
-    <string name="user_creation_account_exists" msgid="1942606193570143289">"Permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
-    <string name="user_creation_adding" msgid="4482658054622099197">"Permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
+    <string name="user_creation_account_exists" msgid="1942606193570143289">"Pretende permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
+    <string name="user_creation_adding" msgid="4482658054622099197">"Pretende permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
     <string name="language_selection_title" msgid="7181332986330337171">"Preferência de idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Intr. nome do idioma"</string>
@@ -1553,8 +1558,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"Algumas funções podem não estar disp."</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"Toque para continuar"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"Perfil de utilizador bloqueado"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Ligado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tocar para ver ficheiros"</string>
+    <string name="pin_target" msgid="3052256031352291362">"Fixar"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Soltar"</string>
+    <string name="app_info" msgid="6856026610594615344">"Informações da aplicação"</string>
 </resources>
