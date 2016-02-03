@@ -180,9 +180,9 @@ public class RootsFragment extends Fragment {
             Item item = mAdapter.getItem(position);
             if (item instanceof RootItem) {
                 BaseActivity activity = BaseActivity.get(RootsFragment.this);
-                RootInfo info = ((RootItem) item).root;
-                Metrics.logRootVisited(getActivity(), info);
-                activity.onRootPicked(info);
+                RootInfo newRoot = ((RootItem) item).root;
+                Metrics.logRootVisited(getActivity(), newRoot);
+                activity.onRootPicked(newRoot);
             } else if (item instanceof AppItem) {
                 DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
                 ResolveInfo info = ((AppItem) item).info;
