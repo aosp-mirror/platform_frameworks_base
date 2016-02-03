@@ -852,8 +852,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                         (VectorDrawable.VectorDrawableState) target, startTime);
             } else {
                 // Should never get here
-                throw new UnsupportedOperationException("Target should be either VGroup, VPath, " +
-                        "or ConstantState, " + target.getClass() + " is not supported");
+                throw new UnsupportedOperationException("Target should be group, path or vector. " +
+                        target == null ? "Null target" : target.getClass() + " is not supported");
             }
         }
 
