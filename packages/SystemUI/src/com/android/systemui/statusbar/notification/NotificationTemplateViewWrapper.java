@@ -55,11 +55,12 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                         }
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeOut(mText, endRunnable);
+                        final View text = ownState.getTransformedView();
+                        CrossFadeHelper.fadeOut(text, endRunnable);
                         if (otherState != null) {
                             int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
                             int[] ownPosition = ownState.getLaidOutLocationOnScreen();
-                            mText.animate()
+                            text.animate()
                                     .translationY((otherStablePosition[1]
                                             + otherState.getTransformedView().getHeight()
                                             - ownPosition[1]) * 0.33f)
@@ -72,11 +73,11 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                                             if (endRunnable != null) {
                                                 endRunnable.run();
                                             }
-                                            TransformState.setClippingDeactivated(mText,
+                                            TransformState.setClippingDeactivated(text,
                                                     false);
                                         }
                                     });
-                            TransformState.setClippingDeactivated(mText, true);
+                            TransformState.setClippingDeactivated(text, true);
                             otherState.recycle();
                         }
                         return true;
@@ -90,17 +91,18 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                         }
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
-                        boolean isVisible = mText.getVisibility() == View.VISIBLE;
-                        CrossFadeHelper.fadeIn(mText);
+                        final View text = ownState.getTransformedView();
+                        boolean isVisible = text.getVisibility() == View.VISIBLE;
+                        CrossFadeHelper.fadeIn(text);
                         if (otherState != null) {
                             int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
                             int[] ownStablePosition = ownState.getLaidOutLocationOnScreen();
                             if (!isVisible) {
-                                mText.setTranslationY((otherStablePosition[1]
+                                text.setTranslationY((otherStablePosition[1]
                                         + otherState.getTransformedView().getHeight()
                                         - ownStablePosition[1]) * 0.33f);
                             }
-                            mText.animate()
+                            text.animate()
                                     .translationY(0)
                                     .setDuration(
                                             StackStateAnimator.ANIMATION_DURATION_STANDARD)
@@ -108,11 +110,11 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                                     .withEndAction(new Runnable() {
                                         @Override
                                         public void run() {
-                                            TransformState.setClippingDeactivated(mText,
+                                            TransformState.setClippingDeactivated(text,
                                                     false);
                                         }
                                     });
-                            TransformState.setClippingDeactivated(mText, true);
+                            TransformState.setClippingDeactivated(text, true);
                             otherState.recycle();
                         }
                         return true;
