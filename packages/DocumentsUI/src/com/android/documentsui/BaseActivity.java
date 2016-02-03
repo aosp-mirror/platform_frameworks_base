@@ -205,6 +205,11 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     void onStackRestored(boolean restored, boolean external) {}
 
     void onRootPicked(RootInfo root) {
+        // Skip refreshing if root didn't change
+        if(root.equals(getCurrentRoot())) {
+            return;
+        }
+
         mState.derivedMode = LocalPreferences.getViewMode(this, root, MODE_GRID);
 
         // Clear entire backstack and start in new root
