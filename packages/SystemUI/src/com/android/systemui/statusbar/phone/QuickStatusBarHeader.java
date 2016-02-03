@@ -31,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
@@ -74,6 +73,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private float mDateTimeTranslation;
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
+    private View mQsDetailHeaderBack;
+
+    private final int[] mTmpInt2 = new int[2];
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,6 +89,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateTimeTranslation = mContext.getResources().getDimension(
                 R.dimen.qs_date_anim_translation);
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
+        mDateTimeGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
         mExpandedGroup = (ViewGroup) findViewById(R.id.expanded_group);
 
         mHeaderQsPanel = (QuickQSPanel) findViewById(R.id.quick_qs_panel);
@@ -100,6 +103,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         mQsDetailHeader = findViewById(R.id.qs_detail_header);
         mQsDetailHeader.setAlpha(0);
+        mQsDetailHeaderBack = mQsDetailHeader.findViewById(com.android.internal.R.id.up);
         mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
         mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
         mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
@@ -367,6 +371,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                         }
                     });
                 }
+                mQsDetailHeaderBack.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        v.getLocationInWindow(mTmpInt2);
+                        mTmpInt2[0] += v.getWidth() / 2;
+                        mTmpInt2[1] += v.getHeight() / 2;
+                        mQsPanel.showDetailAdapter(false, null, mTmpInt2);
+                    }
+                });
             } else {
                 mQsDetailHeader.setClickable(false);
             }

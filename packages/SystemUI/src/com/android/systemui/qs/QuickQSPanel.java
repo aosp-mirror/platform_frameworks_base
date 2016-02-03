@@ -23,7 +23,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
+import android.widget.Space;
 import com.android.systemui.R;
 
 import java.util.ArrayList;
@@ -123,11 +123,14 @@ public class QuickQSPanel extends QSPanel {
 
         @Override
         public void addTile(TileRecord tile) {
-            tile.tileView.setLayoutParams(generateLayoutParams());
-            addView(tile.tileView, getChildCount() - 1 /* Leave icon at end */);
+            addView(tile.tileView, getChildCount() - 1 /* Leave icon at end */,
+                    generateLayoutParams());
+            // Add a spacer.
+            addView(new Space(mContext), getChildCount() - 1 /* Leave icon at end */,
+                    generateSpaceParams());
         }
 
-        private LayoutParams generateLayoutParams() {
+        private LayoutParams generateSpaceParams() {
             int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
             LayoutParams lp = new LayoutParams(0, size);
             lp.weight = 1;
@@ -135,9 +138,30 @@ public class QuickQSPanel extends QSPanel {
             return lp;
         }
 
+        private LayoutParams generateLayoutParams() {
+            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+            LayoutParams lp = new LayoutParams(size, size);
+            lp.gravity = Gravity.CENTER;
+            return lp;
+        }
+
         @Override
         public void removeTile(TileRecord tile) {
-            removeView(tile.tileView);
+            int childIndex = getChildIndex(tile.tileView);
+            // Remove the tile.
+            removeViewAt(childIndex);
+            // Remove its spacer as well.
+            removeViewAt(childIndex);
+        }
+
+        private int getChildIndex(QSTileBaseView tileView) {
+            final int N = getChildCount();
+            for (int i = 0; i < N; i++) {
+                if (getChildAt(i) == tileView) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         @Override
