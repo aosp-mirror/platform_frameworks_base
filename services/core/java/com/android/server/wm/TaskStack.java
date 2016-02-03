@@ -586,7 +586,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
     }
 
-    void getStackDockedModeBoundsLocked(Rect outBounds, boolean ignoreVisibilityOnKeyguardShowing) {
+    void getStackDockedModeBoundsLocked(Rect outBounds, boolean ignoreVisibility) {
         if (!StackId.isResizeableByDockedStack(mStackId) || mDisplayContent == null) {
             outBounds.set(mBounds);
             return;
@@ -598,7 +598,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
             throw new IllegalStateException(
                     "Calling getStackDockedModeBoundsLocked() when there is no docked stack.");
         }
-        if (!dockedStack.isVisibleLocked(ignoreVisibilityOnKeyguardShowing)) {
+        if (!ignoreVisibility && !dockedStack.isVisibleLocked()) {
             // The docked stack is being dismissed, but we caught before it finished being
             // dismissed. In that case we want to treat it as if it is not occupying any space and
             // let others occupy the whole display.
@@ -883,17 +883,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     boolean isVisibleLocked() {
-        return isVisibleLocked(false);
-    }
-
-    boolean isVisibleLocked(boolean ignoreVisibilityOnKeyguardShowing) {
         final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded();
         if (keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
             // The keyguard is showing and the stack shouldn't show on top of the keyguard.
-            // We return false for visibility except in cases where the caller wants us to return
-            // true for visibility when the keyguard is showing. One example, is if the docked
-            // is being resized due to orientation while the keyguard is on.
-            return ignoreVisibilityOnKeyguardShowing;
+            return false;
         }
 
         for (int i = mTasks.size() - 1; i >= 0; i--) {

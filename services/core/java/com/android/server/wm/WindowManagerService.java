@@ -4695,11 +4695,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     stack.attachDisplayContent(displayContent);
                     displayContent.attachStack(stack, onTop);
-                    moveStackWindowsLocked(displayContent);
-                    final WindowList windows = displayContent.getWindowList();
-                    for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
-                        windows.get(winNdx).reportResized();
-                    }
                     if (stack.getRawFullscreen()) {
                         return null;
                     }
@@ -4814,12 +4809,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void getStackDockedModeBounds(
-            int stackId, Rect bounds, boolean ignoreVisibilityOnKeyguardShowing) {
+    public void getStackDockedModeBounds(int stackId, Rect bounds, boolean ignoreVisibility) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);
             if (stack != null) {
-                stack.getStackDockedModeBoundsLocked(bounds, ignoreVisibilityOnKeyguardShowing);
+                stack.getStackDockedModeBoundsLocked(bounds, ignoreVisibility);
                 return;
             }
             bounds.setEmpty();

@@ -395,6 +395,13 @@ final class ActivityStack {
             mTaskPositioner.setDisplay(activityDisplay.mDisplay);
             mTaskPositioner.configure(mBounds);
         }
+
+        if (mStackId == DOCKED_STACK_ID) {
+            // If we created a docked stack we want to resize it so it resizes all other stacks
+            // in the system.
+            mStackSupervisor.resizeDockedStackLocked(
+                    mBounds, null, null, null, null, PRESERVE_WINDOWS);
+        }
     }
 
     void detachDisplay() {
