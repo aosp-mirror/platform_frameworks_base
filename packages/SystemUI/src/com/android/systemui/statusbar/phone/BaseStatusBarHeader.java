@@ -35,6 +35,7 @@ public abstract class BaseStatusBarHeader extends RelativeLayout implements
 
     public abstract int getCollapsedHeight();
     public abstract int getExpandedHeight();
+
     public abstract void setExpanded(boolean b);
     public abstract void setExpansion(float headerExpansionFraction);
     public abstract void setListening(boolean listening);

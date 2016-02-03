@@ -106,7 +106,7 @@
     <LinearLayout
         android:id="@+id/date_time_group"
         android:layout_width="wrap_content"
-        android:layout_height="28dp"
+        android:layout_height="25dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:orientation="horizontal">
@@ -115,7 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
             android:id="@+id/clock" />
 
         <com.android.systemui.statusbar.policy.DateView
@@ -123,7 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="6dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:drawableStart="@drawable/header_dot"
             android:drawablePadding="6dp"
             android:singleLine="true"
@@ -136,7 +136,7 @@
             android:id="@+id/alarm_status"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:drawablePadding="6dp"
             android:drawableStart="@drawable/ic_access_alarms_small"
             android:textColor="#64ffffff"
@@ -152,9 +152,9 @@
         android:background="#0000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
         android:layout_alignParentEnd="true"
         android:clipChildren="false"
         android:clipToPadding="false" />
@@ -164,7 +164,7 @@
         layout="@layout/qs_detail_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_marginTop="28dp"
         />
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
