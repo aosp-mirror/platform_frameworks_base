@@ -504,16 +504,16 @@
     <string name="center" msgid="4327473927066010960">"Centre"</string>
     <string name="end" msgid="125797972524818282">"Final"</string>
     <string name="space" msgid="804232271282109749">"Separador"</string>
-    <string name="menu_ime" msgid="4943221416525250684">"Menú / Commutador del teclat"</string>
+    <string name="menu_ime" msgid="4943221416525250684">"Commutador del teclat/menú"</string>
     <string name="select_button" msgid="1597989540662710653">"Tria un botó per afegir-lo"</string>
     <string name="add_button" msgid="4134946063432258161">"Afegeix un botó"</string>
     <string name="save" msgid="2311877285724540644">"Desa"</string>
     <string name="reset" msgid="2448168080964209908">"Reinicia"</string>
-    <string name="no_home_title" msgid="1563808595146071549">"Cap botó de pàgina d\'inici"</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Per poder navegar per aquest dispositiu, cal un botó de pàgina d\'inici. Afegeix-ne un abans de desar."</string>
+    <string name="no_home_title" msgid="1563808595146071549">"No s\'ha trobat cap botó d\'inici"</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Per poder navegar per aquest dispositiu, cal un botó d\'inici. Afegeix-ne un abans de desar."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Ajusta l\'amplada del botó"</string>
     <string name="clipboard" msgid="1313879395099896312">"Porta-retalls"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Pots arrossegar elements al porta-retalls directament. Per treure\'n elements, també els pots arrossegar directament cap a fora."</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Pots arrossegar elements al porta-retalls directament. Si conté elements, també els pots treure directament arrossegant-los."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Botó de navegació personalitzat"</string>
     <string name="keycode" msgid="7335281375728356499">"Codi de tecla"</string>
     <string name="keycode_description" msgid="1403795192716828949">"Amb els botons de codi de tecla es poden afegir tecles del teclat a la barra de navegació. En prémer aquests botons es duen a terme les mateixes accions que quan es prem la tecla corresponent. Primer cal seleccionar la tecla del botó i, a continuació, triar la imatge que es mostrarà."</string>

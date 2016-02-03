@@ -146,7 +146,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM карта жок."</string>
-    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Уюлдук дайындар өчүк"</string>
+    <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Мобилдик дайындарды өткөрүү өчүрүлгөн"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth аркылуу интернет бөлүшүү."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Учак тартиби."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIM-карта жок"</string>
@@ -501,7 +501,7 @@
     <string name="switch_bar_on" msgid="1142437840752794229">"Күйүк"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Чабыттоо тилкеси"</string>
     <string name="start" msgid="6873794757232879664">"Баштоо"</string>
-    <string name="center" msgid="4327473927066010960">"Борбор"</string>
+    <string name="center" msgid="4327473927066010960">"Экрандын ортосунда"</string>
     <string name="end" msgid="125797972524818282">"Бүтүрүү"</string>
     <string name="space" msgid="804232271282109749">"Боштук калтыргыч"</string>
     <string name="menu_ime" msgid="4943221416525250684">"Меню / Баскычтоп которуштургуч"</string>
@@ -513,10 +513,10 @@
     <string name="no_home_message" msgid="5408485011659260911">"Бул түзмөктө чабыттоо үчүн башкы бет баскычы керек. Сактаардан мурун, башкы бет баскычын кошуңуз."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Баскычтын жазылыгын тууралоо"</string>
     <string name="clipboard" msgid="1313879395099896312">"Алмашуу буфери"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Алмашуу буфери нерселерди түздөн-түз буферге сүйрөө мүмкүнчүлүгүн берет. Нерселерди буферден түздөн-түз сүйрөп чыкса да болот."</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Бул баскычтын жардамы менен файлдарды алмашуу буферине көчүрүп, анын ичинен сүйрөп чыгууга болот."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Ыңгайлаштырылган чабыттоо баскычы"</string>
     <string name="keycode" msgid="7335281375728356499">"Баскыч коду"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Баскыч коддору баскычтоптун баскычтарын Чабыттоо тилкесине кошуу мүмкүнчүлүгүн берет. Алар басылганда, баскычтоптогу тандалган баскычтын функциясын аткарат. Адегенде баскыч, андан соң баскычта көрсөтүлө турган сүрөт тандалат."</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Бул баскычтын жардамы менен баскычтоптогу баскычтарды чабыттоо тилкесине кошууга болот. Ал үчүн баскычты жана тийиштүү баскычтын көрүнүшүн тандаңыз."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Баскычтоптогу баскычты тандоо"</string>
     <string name="preview" msgid="9077832302472282938">"Алдын ала көрүү"</string>
 </resources>

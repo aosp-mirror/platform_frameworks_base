@@ -505,7 +505,7 @@
     <string name="end" msgid="125797972524818282">"Vége"</string>
     <string name="space" msgid="804232271282109749">"Távtartó"</string>
     <string name="menu_ime" msgid="4943221416525250684">"Menü/Billentyűzetváltó"</string>
-    <string name="select_button" msgid="1597989540662710653">"Gomb kiválasztása hozzáadáshoz"</string>
+    <string name="select_button" msgid="1597989540662710653">"Hozzáadni kívánt gomb kiválasztása"</string>
     <string name="add_button" msgid="4134946063432258161">"Gomb hozzáadása"</string>
     <string name="save" msgid="2311877285724540644">"Mentés"</string>
     <string name="reset" msgid="2448168080964209908">"Alaphelyzet"</string>
