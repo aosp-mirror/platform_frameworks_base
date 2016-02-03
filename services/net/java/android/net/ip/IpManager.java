@@ -17,16 +17,21 @@
 package android.net.ip;
 
 import android.content.Context;
+import android.net.BaseDhcpStateMachine;
 import android.net.DhcpResults;
+import android.net.DhcpStateMachine;
 import android.net.InterfaceConfiguration;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
+import android.net.dhcp.DhcpClient;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -85,6 +90,10 @@ public class IpManager extends StateMachine {
          * as IpManager invokes them.
          */
 
+        // Implementations must call IpManager#completedPreDhcpAction().
+        public void onPreDhcpAction() {}
+        public void onPostDhcpAction() {}
+
         // TODO: Kill with fire once DHCP and static configuration are moved
         // out of WifiStateMachine.
         public void onIPv4ProvisioningSuccess(DhcpResults dhcpResults) {}
@@ -105,8 +114,9 @@ public class IpManager extends StateMachine {
     private static final int CMD_START = 2;
     private static final int CMD_CONFIRM = 3;
     private static final int CMD_UPDATE_DHCPV4_RESULTS = 4;
+    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE = 5;
     // Sent by NetlinkTracker to communicate netlink events.
-    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 5;
+    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 6;
 
     private static final int MAX_LOG_RECORDS = 1000;
 
@@ -127,6 +137,7 @@ public class IpManager extends StateMachine {
      * Non-final member variables accessed only from within our StateMachine.
      */
     private IpReachabilityMonitor mIpReachabilityMonitor;
+    private BaseDhcpStateMachine mDhcpStateMachine;
     private DhcpResults mDhcpResults;
     private StaticIpConfiguration mStaticIpConfig;
 
@@ -210,15 +221,14 @@ public class IpManager extends StateMachine {
         sendMessage(CMD_CONFIRM);
     }
 
+    public void completedPreDhcpAction() {
+        sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
+    }
+
     public LinkProperties getLinkProperties() {
         synchronized (mLock) {
             return new LinkProperties(mLinkProperties);
         }
-    }
-
-    // TODO: Kill with fire once DHCPv4/static config is moved into IpManager.
-    public void updateWithDhcpResults(DhcpResults dhcpResults) {
-        sendMessage(CMD_UPDATE_DHCPV4_RESULTS, dhcpResults);
     }
 
 
@@ -323,6 +333,16 @@ public class IpManager extends StateMachine {
         return newLp;
     }
 
+    private void clearIPv4Address() {
+        try {
+            final InterfaceConfiguration ifcg = new InterfaceConfiguration();
+            ifcg.setLinkAddress(new LinkAddress("0.0.0.0/0"));
+            mNwService.setInterfaceConfig(mInterfaceName, ifcg);
+        } catch (RemoteException e) {
+            Log.e(TAG, "ALERT: Failed to clear IPv4 address on interface " + mInterfaceName, e);
+        }
+    }
+
     class StoppedState extends State {
         @Override
         public void enter() {
@@ -351,6 +371,16 @@ public class IpManager extends StateMachine {
                     setLinkProperties(assembleLinkProperties());
                     break;
 
+                case DhcpStateMachine.CMD_ON_QUIT:
+                    // CMD_ON_QUIT is really more like "EVENT_ON_QUIT".
+                    // Shutting down DHCPv4 progresses simultaneously with
+                    // transitioning to StoppedState, so we can receive this
+                    // message after we've already transitioned here.
+                    //
+                    // TODO: Figure out if this is actually useful and if not
+                    // expunge it.
+                    break;
+
                 default:
                     return NOT_HANDLED;
             }
@@ -365,6 +395,7 @@ public class IpManager extends StateMachine {
             try {
                 mNwService.setInterfaceIpv6PrivacyExtensions(mInterfaceName, true);
                 mNwService.enableIpv6(mInterfaceName);
+                // TODO: Perhaps clearIPv4Address() as well.
             } catch (RemoteException re) {
                 Log.e(TAG, "Unable to change interface settings: " + re);
             } catch (IllegalStateException ie) {
@@ -391,6 +422,11 @@ public class IpManager extends StateMachine {
                 } else {
                     sendMessage(CMD_UPDATE_DHCPV4_RESULTS);
                 }
+            } else {
+                // Start DHCPv4.
+                makeDhcpStateMachine();
+                mDhcpStateMachine.registerForPreDhcpNotification();
+                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
             }
         }
 
@@ -398,6 +434,12 @@ public class IpManager extends StateMachine {
         public void exit() {
             mIpReachabilityMonitor.stop();
             mIpReachabilityMonitor = null;
+
+            if (mDhcpStateMachine != null) {
+                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
+                mDhcpStateMachine.doQuit();
+                mDhcpStateMachine = null;
+            }
 
             resetLinkProperties();
         }
@@ -410,32 +452,45 @@ public class IpManager extends StateMachine {
                     break;
 
                 case CMD_START:
-                    // TODO: Defer this message to be delivered after a state transition
-                    // to StoppedState.  That way, receiving CMD_START in StartedState
-                    // effects a restart.
-                    Log.e(TAG, "ALERT: START received in StartedState.");
+                    Log.e(TAG, "ALERT: START received in StartedState. Please fix caller.");
                     break;
 
                 case CMD_CONFIRM:
+                    // TODO: Possibly introduce a second type of confirmation
+                    // that both probes (a) on-link neighbors and (b) does
+                    // a DHCPv4 RENEW.  We used to do this on Wi-Fi framework
+                    // roams.
                     if (mCallback.usingIpReachabilityMonitor()) {
                         mIpReachabilityMonitor.probeAll();
                     }
                     break;
 
-                case CMD_UPDATE_DHCPV4_RESULTS:
+                case CMD_UPDATE_DHCPV4_RESULTS: {
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
                     if (dhcpResults != null) {
                         mDhcpResults = new DhcpResults(dhcpResults);
                         setLinkProperties(assembleLinkProperties());
                         mCallback.onIPv4ProvisioningSuccess(dhcpResults);
                     } else {
+                        clearIPv4Address();
                         mDhcpResults = null;
                         setLinkProperties(assembleLinkProperties());
                         mCallback.onIPv4ProvisioningFailure();
                     }
                     break;
+                }
 
-                case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
+                case EVENT_PRE_DHCP_ACTION_COMPLETE:
+                    // It's possible to reach here if, for example, someone
+                    // calls completedPreDhcpAction() after provisioning with
+                    // a static IP configuration.
+                    if (mDhcpStateMachine != null) {
+                        mDhcpStateMachine.sendMessage(
+                                DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
+                    }
+                    break;
+
+                case EVENT_NETLINK_LINKPROPERTIES_CHANGED: {
                     final LinkProperties newLp = assembleLinkProperties();
                     final ProvisioningChange delta = setLinkProperties(newLp);
 
@@ -456,7 +511,44 @@ public class IpManager extends StateMachine {
                             mCallback.onLinkPropertiesChange(newLp);
                             break;
                     }
+                    break;
+                }
 
+                case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
+                    mCallback.onPreDhcpAction();
+                    break;
+
+                case DhcpStateMachine.CMD_POST_DHCP_ACTION: {
+                    // Note that onPostDhcpAction() is likely to be
+                    // asynchronous, and thus there is no guarantee that we
+                    // will be able to observe any of its effects here.
+                    mCallback.onPostDhcpAction();
+
+                    final DhcpResults dhcpResults = (DhcpResults) msg.obj;
+                    switch (msg.arg1) {
+                        case DhcpStateMachine.DHCP_SUCCESS:
+                            mDhcpResults = new DhcpResults(dhcpResults);
+                            setLinkProperties(assembleLinkProperties());
+                            mCallback.onIPv4ProvisioningSuccess(dhcpResults);
+                            break;
+                        case DhcpStateMachine.DHCP_FAILURE:
+                            clearIPv4Address();
+                            mDhcpResults = null;
+                            setLinkProperties(assembleLinkProperties());
+                            mCallback.onIPv4ProvisioningFailure();
+                            break;
+                        default:
+                            Log.e(TAG, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
+                    }
+                    break;
+                }
+
+                case DhcpStateMachine.CMD_ON_QUIT:
+                    // CMD_ON_QUIT is really more like "EVENT_ON_QUIT".
+                    // Regardless, we ignore it.
+                    //
+                    // TODO: Figure out if this is actually useful and if not
+                    // expunge it.
                     break;
 
                 default:
@@ -478,6 +570,24 @@ public class IpManager extends StateMachine {
             }
 
             return true;
+        }
+
+        private void makeDhcpStateMachine() {
+            final boolean usingLegacyDhcp = (Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.LEGACY_DHCP_CLIENT, 0) == 1);
+
+            if (usingLegacyDhcp) {
+                mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
+                        mContext,
+                        IpManager.this,
+                        mInterfaceName);
+            } else {
+                mDhcpStateMachine = DhcpClient.makeDhcpStateMachine(
+                        mContext,
+                        IpManager.this,
+                        mInterfaceName);
+            }
         }
     }
 }
