@@ -22,8 +22,8 @@ import android.app.Activity;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
-import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toolbar;
 
 /**
  * A facade over the various pieces comprising "roots fragment in a Drawer".
@@ -33,13 +33,10 @@ import android.view.View;
 abstract class DrawerController implements DrawerListener {
 
     abstract void setOpen(boolean open);
-    abstract void lockOpen();
-    abstract void lockClosed();
     abstract boolean isPresent();
     abstract boolean isOpen();
-    abstract boolean isUnlocked();
-    abstract void syncState();
-    abstract boolean onOptionsItemSelected(MenuItem item);
+    abstract void setTitle(String title);
+    abstract void update();
 
     /**
      * Returns a controller suitable for {@code Layout}.
@@ -53,6 +50,8 @@ abstract class DrawerController implements DrawerListener {
         }
 
         View drawer = activity.findViewById(R.id.drawer_roots);
+        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.roots_toolbar);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 activity,
                 layout,
@@ -60,7 +59,7 @@ abstract class DrawerController implements DrawerListener {
                 R.string.drawer_open,
                 R.string.drawer_close);
 
-        return new RuntimeDrawerController(layout, drawer, toggle);
+        return new RuntimeDrawerController(layout, drawer, toggle, toolbar);
     }
 
     /**
@@ -78,9 +77,12 @@ abstract class DrawerController implements DrawerListener {
         private final ActionBarDrawerToggle mToggle;
         private DrawerLayout mLayout;
         private View mDrawer;
+        private Toolbar mToolbar;
 
         public RuntimeDrawerController(
-                DrawerLayout layout, View drawer, ActionBarDrawerToggle toggle) {
+                DrawerLayout layout, View drawer, ActionBarDrawerToggle toggle,
+                Toolbar drawerToolbar) {
+            mToolbar = drawerToolbar;
             checkArgument(layout != null);
 
             mLayout = layout;
@@ -110,28 +112,13 @@ abstract class DrawerController implements DrawerListener {
         }
 
         @Override
-        void syncState() {
+        void setTitle(String title) {
+            mToolbar.setTitle(title);
+        }
+
+        @Override
+        void update() {
             mToggle.syncState();
-        }
-
-        @Override
-        boolean isUnlocked() {
-            return mLayout.getDrawerLockMode(mDrawer) == DrawerLayout.LOCK_MODE_UNLOCKED;
-        }
-
-        @Override
-        void lockOpen() {
-            mLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-        }
-
-        @Override
-        void lockClosed() {
-            mLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        }
-
-        @Override
-        boolean onOptionsItemSelected(MenuItem item) {
-            return false;
         }
 
         @Override
@@ -163,23 +150,10 @@ abstract class DrawerController implements DrawerListener {
         @Override
         void setOpen(boolean open) {}
 
-        @Override
-        void syncState() {}
-
-        @Override
-        void lockOpen() {}
-
-        @Override
-        void lockClosed() {}
 
         @Override
         boolean isOpen() {
             return false;
-        }
-
-        @Override
-        boolean isUnlocked() {
-            return true;
         }
 
         @Override
@@ -188,9 +162,10 @@ abstract class DrawerController implements DrawerListener {
         }
 
         @Override
-        boolean onOptionsItemSelected(MenuItem item) {
-            return false;
-        }
+        void setTitle(String title) {}
+
+        @Override
+        void update() {}
 
         @Override
         public void onDrawerSlide(View drawerView, float slideOffset) {}

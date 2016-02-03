@@ -43,10 +43,6 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.BaseAdapter;
-import android.widget.Spinner;
-import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
@@ -63,16 +59,8 @@ public class DocumentsActivity extends BaseActivity {
     private static final int CODE_FORWARD = 42;
     private static final String TAG = "DocumentsActivity";
 
-    private Toolbar mToolbar;
-    private Spinner mToolbarStack;
-
-    private Toolbar mRootsToolbar;
-
-    private ItemSelectedListener mStackListener;
-    private BaseAdapter mStackAdapter;
-
     public DocumentsActivity() {
-        super(R.layout.docs_activity, TAG);
+        super(R.layout.documents_activity, TAG);
     }
 
     @Override
@@ -80,18 +68,6 @@ public class DocumentsActivity extends BaseActivity {
         super.onCreate(icicle);
 
         final Resources res = getResources();
-
-        mDrawer = DrawerController.create(this);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        mStackAdapter = new StackAdapter();
-        mStackListener = new ItemSelectedListener();
-        mToolbarStack = (Spinner) findViewById(R.id.stack);
-        mToolbarStack.setOnItemSelectedListener(mStackListener);
-
-        mRootsToolbar = (Toolbar) findViewById(R.id.roots_toolbar);
-
-        setActionBar(mToolbar);
 
         if (mState.action == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
@@ -180,7 +156,7 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (showDrawer) {
-            setRootsDrawerOpen(true);
+            mNavigator.revealRootsDrawer(true);
         }
     }
 
@@ -217,66 +193,28 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mDrawer.syncState();
-        updateActionBar();
-    }
-
-    public void setRootsDrawerOpen(boolean open) {
-        mDrawer.setOpen(open);
+        mDrawer.update();
+        mNavigator.update();
     }
 
     @Override
-    public void updateActionBar() {
-        if (mRootsToolbar != null) {
-            final String prompt = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
-            if (prompt != null) {
-                mRootsToolbar.setTitle(prompt);
+    public String getDrawerTitle() {
+        String title = getIntent().getStringExtra(DocumentsContract.EXTRA_PROMPT);
+        if (title == null) {
+            if (mState.action == ACTION_OPEN ||
+                mState.action == ACTION_GET_CONTENT ||
+                mState.action == ACTION_OPEN_TREE) {
+                title = getResources().getString(R.string.title_open);
+            } else if (mState.action == ACTION_CREATE ||
+                       mState.action == ACTION_PICK_COPY_DESTINATION) {
+                title = getResources().getString(R.string.title_save);
             } else {
-                if (mState.action == ACTION_OPEN ||
-                    mState.action == ACTION_GET_CONTENT ||
-                    mState.action == ACTION_OPEN_TREE) {
-                    mRootsToolbar.setTitle(R.string.title_open);
-                } else if (mState.action == ACTION_CREATE ||
-                           mState.action == ACTION_PICK_COPY_DESTINATION) {
-                    mRootsToolbar.setTitle(R.string.title_save);
-                }
+                // If all else fails, just call it "Files".
+                title = getResources().getString(R.string.files_label);
             }
         }
 
-        if (mDrawer.isUnlocked()) {
-            mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            setRootsDrawerOpen(true);
-                        }
-                    });
-        } else {
-            mToolbar.setNavigationIcon(null);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(null);
-        }
-
-        if (mSearchManager.isExpanded()) {
-            mToolbar.setTitle(null);
-            mToolbarStack.setVisibility(View.GONE);
-            mToolbarStack.setAdapter(null);
-        } else {
-            if (mState.stack.size() <= 1) {
-                mToolbar.setTitle(getCurrentRoot().title);
-                mToolbarStack.setVisibility(View.GONE);
-                mToolbarStack.setAdapter(null);
-            } else {
-                mToolbar.setTitle(null);
-                mToolbarStack.setVisibility(View.VISIBLE);
-                mToolbarStack.setAdapter(mStackAdapter);
-
-                mStackListener.mIgnoreNextNavigation = true;
-                mToolbarStack.setSelection(mStackAdapter.getCount() - 1);
-            }
-        }
+        return title;
     }
 
     @Override
@@ -328,11 +266,6 @@ public class DocumentsActivity extends BaseActivity {
         Menus.disableHiddenItems(menu);
 
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return mDrawer.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -396,7 +329,11 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     void onRootPicked(RootInfo root) {
         super.onRootPicked(root);
-        setRootsDrawerOpen(false);
+        mNavigator.revealRootsDrawer(false);
+    }
+
+    public void setRootsDrawerOpen(boolean open) {
+        mNavigator.revealRootsDrawer(open);
     }
 
     @Override

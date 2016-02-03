@@ -32,7 +32,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.android.documentsui.DocumentsToolBar
+            <com.android.documentsui.DocumentsToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize"
@@ -48,7 +48,7 @@
                     android:layout_marginStart="4dp"
                     android:overlapAnchor="true" />
 
-            </com.android.documentsui.DocumentsToolBar>
+            </com.android.documentsui.DocumentsToolbar>
 
             <include layout="@layout/directory_cluster"/>
 
