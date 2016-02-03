@@ -293,18 +293,24 @@ public class DocumentsActivity extends BaseActivity {
 
         final DocumentInfo cwd = getCurrentDirectory();
 
+        boolean picking = mState.action == ACTION_CREATE
+                || mState.action == ACTION_OPEN_TREE
+                || mState.action == ACTION_PICK_COPY_DESTINATION;
+
+        if (picking) {
+            // May already be hidden because the root
+            // doesn't support search.
+            mSearchManager.showMenu(false);
+        }
+
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
         boolean recents = cwd == null;
-        boolean picking = mState.action == ACTION_CREATE
-                || mState.action == ACTION_OPEN_TREE
-                || mState.action == ACTION_PICK_COPY_DESTINATION;
 
         createDir.setVisible(picking && !recents && cwd.isCreateSupported());
-        mSearchManager.showMenu(!picking);
 
         // No display options in recent directories
         if (picking && recents) {

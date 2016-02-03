@@ -302,8 +302,10 @@ public class RootsFragment extends Fragment {
             for (final RootInfo root : roots) {
                 final RootItem item = new RootItem(root);
                 if (root.isLibrary()) {
+                    if (DEBUG) Log.d(TAG, "Adding " + root + " as library.");
                     libraries.add(item);
                 } else {
+                    if (DEBUG) Log.d(TAG, "Adding " + root + " as non-library.");
                     others.add(item);
                 }
             }

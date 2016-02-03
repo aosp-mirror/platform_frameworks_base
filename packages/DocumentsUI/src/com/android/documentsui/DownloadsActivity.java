@@ -150,14 +150,12 @@ public class DownloadsActivity extends BaseActivity {
         final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
-        final MenuItem search = menu.findItem(R.id.menu_search);
 
         advanced.setVisible(false);
         createDir.setVisible(false);
         pasteFromCb.setEnabled(false);
         newWindow.setEnabled(false);
         fileSize.setVisible(false);
-        search.setVisible(false);
 
         Menus.disableHiddenItems(menu);
         return true;
