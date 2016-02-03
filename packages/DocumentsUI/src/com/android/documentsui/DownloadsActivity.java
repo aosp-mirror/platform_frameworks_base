@@ -182,29 +182,25 @@ public class DownloadsActivity extends BaseActivity {
 
     @Override
     public void onDocumentPicked(DocumentInfo doc, SiblingProvider siblings) {
-        final FragmentManager fm = getFragmentManager();
-        if (doc.isContainer()) {
-            openContainerDocument(doc);
-        } else {
-            // First try managing the document; we expect manager to filter
-            // based on authority, so we don't grant.
-            final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
-            manage.setData(doc.derivedUri);
+        Preconditions.checkArgument(!doc.isDirectory());
+        // First try managing the document; we expect manager to filter
+        // based on authority, so we don't grant.
+        final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
+        manage.setData(doc.derivedUri);
+
+        try {
+            startActivity(manage);
+        } catch (ActivityNotFoundException ex) {
+            // Fall back to viewing.
+            final Intent view = new Intent(Intent.ACTION_VIEW);
+            view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            view.setData(doc.derivedUri);
 
             try {
-                startActivity(manage);
-            } catch (ActivityNotFoundException ex) {
-                // Fall back to viewing
-                final Intent view = new Intent(Intent.ACTION_VIEW);
-                view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                view.setData(doc.derivedUri);
-
-                try {
-                    startActivity(view);
-                } catch (ActivityNotFoundException ex2) {
-                    Snackbars.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT)
-                            .show();
-                }
+                startActivity(view);
+            } catch (ActivityNotFoundException ex2) {
+                Snackbars.makeSnackbar(this, R.string.toast_no_application, Snackbar.LENGTH_SHORT)
+                        .show();
             }
         }
     }

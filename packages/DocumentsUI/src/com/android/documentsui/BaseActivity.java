@@ -541,7 +541,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         }
     }
 
-    private DocumentInfo getRootDocumentBlocking(RootInfo root) {
+    DocumentInfo getRootDocumentBlocking(RootInfo root) {
         try {
             final Uri uri = DocumentsContract.buildDocumentUri(
                     root.authority, root.documentId);
