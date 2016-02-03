@@ -138,12 +138,6 @@
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
 
-    <!-- The duration of the window transition when coming to Recents from an app.
-         In order to defer the in-app animations until after the transition is complete,
-         we also need to use this value as the starting delay when animating the first
-         task decorations in. -->
-    <integer name="recents_enter_from_app_transition_duration">325</integer>
-
     <!-- The duration for animating the task decorations in after transitioning from an app. -->
     <integer name="recents_task_enter_from_app_duration">200</integer>
 
@@ -152,12 +146,6 @@
 
     <!-- The duration for animating the task decorations out before transitioning to an app. -->
     <integer name="recents_task_exit_to_app_duration">125</integer>
-
-    <!-- The duration of the window transition when coming to Recents from the Launcher.
-         In order to defer the in-app animations until after the transition is complete,
-         we also need to use this value as the starting delay when animating the task views
-         in from the bottom of the screen. -->
-    <integer name="recents_enter_from_home_transition_duration">100</integer>
 
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>

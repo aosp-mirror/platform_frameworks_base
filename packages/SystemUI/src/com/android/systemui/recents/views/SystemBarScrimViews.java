@@ -83,13 +83,11 @@ public class SystemBarScrimViews {
      * going home).
      */
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
-        int taskViewExitToAppDuration = mContext.getResources().getInteger(
-                R.integer.recents_task_exit_to_app_duration);
         if (mHasNavBarScrim && mShouldAnimateNavBarScrim) {
             mNavBarScrimView.animate()
                     .translationY(mNavBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
-                    .setDuration(taskViewExitToAppDuration)
+                    .setDuration(TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .start();
         }

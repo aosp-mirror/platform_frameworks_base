@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-** Copyright 2012, The Android Open Source Project
+** Copyright 2014, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -16,15 +16,8 @@
 ** limitations under the License.
 */
 -->
-
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-     android:shareInterpolator="false"
-     android:zAdjustment="normal">
-  <!--scale android:fromXScale="2.0" android:toXScale="1.0"
-         android:fromYScale="2.0" android:toYScale="1.0"
-         android:interpolator="@android:interpolator/decelerate_cubic"
-         android:fillEnabled="true"
-         android:fillBefore="true" android:fillAfter="true"
-         android:pivotX="50%p" android:pivotY="50%p"
-         android:duration="250" /-->
-</set>
+<pathInterpolator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:controlX1="0.4"
+    android:controlY1="0"
+    android:controlX2="1"
+    android:controlY2="1" />

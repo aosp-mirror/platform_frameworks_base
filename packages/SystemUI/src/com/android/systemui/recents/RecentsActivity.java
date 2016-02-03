@@ -130,6 +130,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
          */
         public FinishRecentsRunnable(Intent launchIntent, ActivityOptions opts) {
             mLaunchIntent = launchIntent;
+            mOpts = opts;
         }
 
         @Override
