@@ -2856,6 +2856,9 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowStateAnimator winAnimator, int attrChanges, int oldVisibility) {
         result |= !win.isVisibleLw() ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0;
         if (win.mExiting) {
+            Slog.d(TAG, "relayoutVisibleWindow: " + win + " mExiting=true, mRemoveOnExit="
+                    + win.mRemoveOnExit + ", mDestroying=" + win.mDestroying);
+
             winAnimator.cancelExitAnimationForNextAnimationLocked();
             win.mExiting = false;
         }
