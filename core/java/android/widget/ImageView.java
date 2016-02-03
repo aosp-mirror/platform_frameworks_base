@@ -392,6 +392,26 @@ public class ImageView extends View {
         return mDrawable;
     }
 
+    private class ImageDrawableCallback implements Runnable {
+
+        private final Drawable drawable;
+        private final Uri uri;
+        private final int resource;
+
+        ImageDrawableCallback(Drawable drawable, Uri uri, int resource) {
+            this.drawable = drawable;
+            this.uri = uri;
+            this.resource = resource;
+        }
+
+        @Override
+        public void run() {
+            setImageDrawable(drawable);
+            mUri = uri;
+            mResource = resource;
+        }
+    }
+
     /**
      * Sets a drawable as the content of this ImageView.
      *
@@ -405,7 +425,7 @@ public class ImageView extends View {
      *
      * @attr ref android.R.styleable#ImageView_src
      */
-    @android.view.RemotableViewMethod
+    @android.view.RemotableViewMethod(asyncImpl="setImageResourceAsync")
     public void setImageResource(@DrawableRes int resId) {
         // The resource configuration may have changed, so we should always
         // try to load the resource even if the resId hasn't changed.
@@ -424,6 +444,11 @@ public class ImageView extends View {
         invalidate();
     }
 
+    /** @hide **/
+    public Runnable setImageResourceAsync(@DrawableRes int resId) {
+        return new ImageDrawableCallback(getContext().getDrawable(resId), null, resId);
+    }
+
     /**
      * Sets the content of this ImageView to the specified Uri.
      *
@@ -435,7 +460,7 @@ public class ImageView extends View {
      *
      * @param uri the Uri of an image, or {@code null} to clear the content
      */
-    @android.view.RemotableViewMethod
+    @android.view.RemotableViewMethod(asyncImpl="setImageURIAsync")
     public void setImageURI(@Nullable Uri uri) {
         if (mResource != 0 || (mUri != uri && (uri == null || mUri == null || !uri.equals(mUri)))) {
             updateDrawable(null);
@@ -452,6 +477,19 @@ public class ImageView extends View {
             }
             invalidate();
         }
+    }
+
+    /** @hide **/
+    public Runnable setImageURIAsync(@Nullable Uri uri) {
+        if (mResource != 0 || (mUri != uri && (uri == null || mUri == null || !uri.equals(mUri)))) {
+            Drawable d = uri == null ? null : getDrawableFromUri(uri);
+            if (d == null) {
+                // Do not set the URI if the drawable couldn't be loaded.
+                uri = null;
+            }
+            return new ImageDrawableCallback(d, uri, 0);
+        }
+        return null;
     }
 
     /**
@@ -490,9 +528,14 @@ public class ImageView extends View {
      * @param icon an Icon holding the desired image, or {@code null} to clear
      *             the content
      */
-    @android.view.RemotableViewMethod
+    @android.view.RemotableViewMethod(asyncImpl="setImageIconAsync")
     public void setImageIcon(@Nullable Icon icon) {
         setImageDrawable(icon == null ? null : icon.loadDrawable(mContext));
+    }
+
+    /** @hide **/
+    public Runnable setImageIconAsync(@Nullable Icon icon) {
+        return new ImageDrawableCallback(icon == null ? null : icon.loadDrawable(mContext), null, 0);
     }
 
     /**
@@ -786,8 +829,7 @@ public class ImageView extends View {
             return;
         }
 
-        final Resources res = getResources();
-        if (res == null) {
+        if (getResources() == null) {
             return;
         }
 
@@ -802,37 +844,7 @@ public class ImageView extends View {
                 mUri = null;
             }
         } else if (mUri != null) {
-            final String scheme = mUri.getScheme();
-            if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
-                try {
-                    // Load drawable through Resources, to get the source density information
-                    ContentResolver.OpenResourceIdResult r =
-                            mContext.getContentResolver().getResourceId(mUri);
-                    d = r.r.getDrawable(r.id, mContext.getTheme());
-                } catch (Exception e) {
-                    Log.w(LOG_TAG, "Unable to open content: " + mUri, e);
-                }
-            } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                    || ContentResolver.SCHEME_FILE.equals(scheme)) {
-                InputStream stream = null;
-                try {
-                    stream = mContext.getContentResolver().openInputStream(mUri);
-                    d = Drawable.createFromResourceStream(
-                            mUseCorrectStreamDensity ? res : null, null, stream, null);
-                } catch (Exception e) {
-                    Log.w(LOG_TAG, "Unable to open content: " + mUri, e);
-                } finally {
-                    if (stream != null) {
-                        try {
-                            stream.close();
-                        } catch (IOException e) {
-                            Log.w(LOG_TAG, "Unable to close content: " + mUri, e);
-                        }
-                    }
-                }
-            } else {
-                d = Drawable.createFromPath(mUri.toString());
-            }
+            d = getDrawableFromUri(mUri);
 
             if (d == null) {
                 Log.w(LOG_TAG, "resolveUri failed on bad bitmap uri: " + mUri);
@@ -844,6 +856,41 @@ public class ImageView extends View {
         }
 
         updateDrawable(d);
+    }
+
+    private Drawable getDrawableFromUri(Uri uri) {
+        final String scheme = uri.getScheme();
+        if (ContentResolver.SCHEME_ANDROID_RESOURCE.equals(scheme)) {
+            try {
+                // Load drawable through Resources, to get the source density information
+                ContentResolver.OpenResourceIdResult r =
+                        mContext.getContentResolver().getResourceId(uri);
+                return r.r.getDrawable(r.id, mContext.getTheme());
+            } catch (Exception e) {
+                Log.w(LOG_TAG, "Unable to open content: " + uri, e);
+            }
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+                || ContentResolver.SCHEME_FILE.equals(scheme)) {
+            InputStream stream = null;
+            try {
+                stream = mContext.getContentResolver().openInputStream(uri);
+                return Drawable.createFromResourceStream(
+                        mUseCorrectStreamDensity ? getResources() : null, null, stream, null);
+            } catch (Exception e) {
+                Log.w(LOG_TAG, "Unable to open content: " + uri, e);
+            } finally {
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e) {
+                        Log.w(LOG_TAG, "Unable to close content: " + uri, e);
+                    }
+                }
+            }
+        } else {
+            return Drawable.createFromPath(uri.toString());
+        }
+        return null;
     }
 
     @Override
