@@ -29,6 +29,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
+import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -497,6 +498,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // onBeginDrag().
         mSv.removeIgnoreTask(tv.getTask());
         mSv.updateLayoutAlgorithm(false /* boundScroll */);
+        mSv.relayoutTaskViews(AnimationProps.IMMEDIATE);
         mSwipeHelperAnimations.remove(v);
     }
 

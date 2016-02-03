@@ -654,7 +654,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 transform.fillIn(tv);
             } else {
                 mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(),
-                        transform, null);
+                        transform, null, true /* forceUpdate */);
             }
             transform.visible = true;
         }
