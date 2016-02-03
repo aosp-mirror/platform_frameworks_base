@@ -117,8 +117,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     public static final int ANIM_NONE = 1;
     public static final int ANIM_SIDE = 2;
-    public static final int ANIM_DOWN = 3;
-    public static final int ANIM_UP = 4;
+    public static final int ANIM_LEAVE = 3;
+    public static final int ANIM_ENTER = 4;
 
     public static final int REQUEST_COPY_DESTINATION = 1;
 
@@ -1533,12 +1533,12 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             case ANIM_SIDE:
                 args.putBoolean(EXTRA_IGNORE_STATE, true);
                 break;
-            case ANIM_DOWN:
+            case ANIM_ENTER:
                 args.putBoolean(EXTRA_IGNORE_STATE, true);
-                ft.setCustomAnimations(R.animator.dir_down, R.animator.dir_frozen);
+                ft.setCustomAnimations(R.animator.dir_enter, R.animator.dir_frozen);
                 break;
-            case ANIM_UP:
-                ft.setCustomAnimations(R.animator.dir_frozen, R.animator.dir_up);
+            case ANIM_LEAVE:
+                ft.setCustomAnimations(R.animator.dir_frozen, R.animator.dir_leave);
                 break;
         }
 

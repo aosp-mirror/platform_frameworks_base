@@ -18,10 +18,10 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.MODE_GRID;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_DOWN;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_ENTER;
+import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_LEAVE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
-import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_UP;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkState;
 
@@ -327,7 +327,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         // previous directory. Especially after opening a root document, pressing
         // back, wouldn't go to the previous root, but close the activity.
         final int anim = (mState.hasLocationChanged() && mState.stack.size() > 1)
-                ? ANIM_DOWN : ANIM_NONE;
+                ? ANIM_ENTER : ANIM_NONE;
         refreshCurrentRootAndDirectory(anim);
     }
 
@@ -339,7 +339,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     final void refreshCurrentRootAndDirectory(int anim) {
         mSearchManager.cancelSearch();
 
-        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_DOWN);
+        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_ENTER);
         refreshDirectory(anim);
 
         final RootsFragment roots = RootsFragment.get(getFragmentManager());
@@ -528,7 +528,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             mDrawer.setOpen(false);
         } else if (size > 1) {
             mState.stack.pop();
-            refreshCurrentRootAndDirectory(ANIM_UP);
+            refreshCurrentRootAndDirectory(ANIM_LEAVE);
         } else {
             super.onBackPressed();
         }
@@ -706,7 +706,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             while (mState.stack.size() > position + 1) {
                 mState.popDocument();
             }
-            refreshCurrentRootAndDirectory(ANIM_UP);
+            refreshCurrentRootAndDirectory(ANIM_LEAVE);
         }
 
         @Override
