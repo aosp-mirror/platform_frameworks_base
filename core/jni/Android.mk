@@ -253,7 +253,8 @@ LOCAL_SHARED_LIBRARIES := \
     libprocessgroup \
     libnativebridge \
     libradio_metadata \
-    libnativeloader
+    libnativeloader \
+    libmemunreachable \
 
 LOCAL_SHARED_LIBRARIES += \
     libhwui \
