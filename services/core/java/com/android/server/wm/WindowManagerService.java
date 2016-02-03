@@ -8109,7 +8109,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         final WindowState imeWin = mInputMethodWindow;
                         final TaskStack focusedStack =
                                 mCurrentFocus != null ? mCurrentFocus.getStack() : null;
-                        if (imeWin != null && focusedStack != null && imeWin.isVisibleNow()
+                        if (imeWin != null && imeWin.isVisibleNow()
+                                && isStackVisibleLocked(DOCKED_STACK_ID)
+                                && focusedStack != null
                                 && focusedStack.getDockSide() == DOCKED_BOTTOM){
                             final ArrayList<TaskStack> stacks = displayContent.getStacks();
                             for (int i = stacks.size() - 1; i >= 0; --i) {
