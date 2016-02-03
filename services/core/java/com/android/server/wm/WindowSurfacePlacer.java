@@ -647,14 +647,6 @@ class WindowSurfacePlacer {
 
             for (int i = windows.size() - 1; i >= 0; i--) {
                 WindowState w = windows.get(i);
-                Task task = w.getTask();
-                if (task == null && w.getDisplayContent().getHomeStack() == null
-                        && w.getAttrs().type != TYPE_PRIVATE_PRESENTATION) {
-                    // TODO: Understand what the use case is here and see if the conditions can be
-                    // simplified.
-                    continue;
-                }
-
                 final boolean obscuredChanged = w.mObscured != mObscured;
 
                 // Update effect.
