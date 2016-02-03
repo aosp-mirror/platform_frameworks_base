@@ -43,6 +43,7 @@ import com.android.server.net.NetlinkTracker;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.Objects;
 
 
 /**
@@ -284,6 +285,12 @@ public class IpManager extends StateMachine {
         return delta;
     }
 
+    private boolean linkPropertiesUnchanged(LinkProperties newLp) {
+        synchronized (mLock) {
+            return Objects.equals(newLp, mLinkProperties);
+        }
+    }
+
     private LinkProperties assembleLinkProperties() {
         // [1] Create a new LinkProperties object to populate.
         LinkProperties newLp = new LinkProperties();
@@ -489,6 +496,9 @@ public class IpManager extends StateMachine {
 
                 case EVENT_NETLINK_LINKPROPERTIES_CHANGED: {
                     final LinkProperties newLp = assembleLinkProperties();
+                    if (linkPropertiesUnchanged(newLp)) {
+                        break;
+                    }
                     final ProvisioningChange delta = setLinkProperties(newLp);
 
                     // NOTE: The only receiver of these callbacks currently
