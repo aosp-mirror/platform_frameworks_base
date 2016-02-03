@@ -36,6 +36,9 @@ public class VrManagerService extends SystemService {
 
     public static final String TAG = "VrManagerService";
 
+    private static native void initializeNative();
+    private static native void setVrModeNative(boolean enabled);
+
     private final Object mLock = new Object();
     private boolean mVrModeEnabled = false;
     private ArraySet<VrStateListener> mListeners = new ArraySet<>();
@@ -68,6 +71,10 @@ public class VrManagerService extends SystemService {
 
     @Override
     public void onStart() {
+        synchronized(mLock) {
+            initializeNative();
+        }
+
         publishLocalService(VrManagerInternal.class, new LocalService());
     }
 
@@ -89,6 +96,7 @@ public class VrManagerService extends SystemService {
                 mVrModeEnabled = enabled;
                 // Log mode change event.
                 Slog.i(TAG, "VR mode " + ((mVrModeEnabled) ? "enabled" : "disabled"));
+                setVrModeNative(mVrModeEnabled);
                 onVrModeChangedLocked();
             }
         }
