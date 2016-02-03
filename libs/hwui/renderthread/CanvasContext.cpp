@@ -507,8 +507,8 @@ void CanvasContext::draw() {
 
     mJankTracker.addFrame(*mCurrentFrameInfo);
     mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
-    if (CC_UNLIKELY(mFrameStatsReporter.get() != nullptr)) {
-        mFrameStatsReporter->reportFrameStats(mCurrentFrameInfo->data());
+    if (CC_UNLIKELY(mFrameMetricsReporter.get() != nullptr)) {
+        mFrameMetricsReporter->reportFrameMetrics(mCurrentFrameInfo->data());
     }
 
     GpuMemoryTracker::onFrameCompleted();

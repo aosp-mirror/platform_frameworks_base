@@ -40677,6 +40677,21 @@ package android.view {
     method public static android.view.FocusFinder getInstance();
   }
 
+  public final class FrameMetrics {
+    ctor public FrameMetrics(android.view.FrameMetrics);
+    method public long getMetric(int);
+    field public static final int ANIMATION_DURATION = 2; // 0x2
+    field public static final int COMMAND_ISSUE_DURATION = 6; // 0x6
+    field public static final int DRAW_DURATION = 4; // 0x4
+    field public static final int FIRST_DRAW_FRAME = 9; // 0x9
+    field public static final int INPUT_HANDLING_DURATION = 1; // 0x1
+    field public static final int LAYOUT_MEASURE_DURATION = 3; // 0x3
+    field public static final int SWAP_BUFFERS_DURATION = 7; // 0x7
+    field public static final int SYNC_DURATION = 5; // 0x5
+    field public static final int TOTAL_DURATION = 8; // 0x8
+    field public static final int UNKNOWN_DELAY_DURATION = 0; // 0x0
+  }
+
   public abstract class FrameStats {
     ctor public FrameStats();
     method public final long getEndTimeNano();
@@ -43180,6 +43195,7 @@ package android.view {
     ctor public Window(android.content.Context);
     method public abstract void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void addFlags(int);
+    method public final void addFrameMetricsListener(android.view.Window.FrameMetricsListener, android.os.Handler);
     method public void clearFlags(int);
     method public abstract void closeAllPanels();
     method public abstract void closePanel(int);
@@ -43231,6 +43247,7 @@ package android.view {
     method public abstract boolean performContextMenuIdentifierAction(int, int);
     method public abstract boolean performPanelIdentifierAction(int, int, int);
     method public abstract boolean performPanelShortcut(int, int, android.view.KeyEvent, int);
+    method public final void removeFrameMetricsListener(android.view.Window.FrameMetricsListener);
     method public boolean requestFeature(int);
     method public abstract void restoreHierarchyState(android.os.Bundle);
     method public abstract android.os.Bundle saveHierarchyState();
@@ -43354,6 +43371,10 @@ package android.view {
     method public abstract void onWindowFocusChanged(boolean);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback);
     method public abstract android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback, int);
+  }
+
+  public static abstract interface Window.FrameMetricsListener {
+    method public abstract void onMetricsAvailable(android.view.Window, android.view.FrameMetrics, int);
   }
 
   public static abstract interface Window.OnRestrictedCaptionAreaChangedListener {
