@@ -19,17 +19,12 @@ package com.android.documentsui;
 import static android.os.Environment.isStandardDirectory;
 import static com.android.documentsui.Shared.DEBUG;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.ContentProvider;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -48,11 +43,15 @@ import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 /**
  * Activity responsible for handling {@link Intent#ACTION_OPEN_EXTERNAL_DOCUMENT}.
  */
 public class OpenExternalDirectoryActivity extends Activity {
-    private static final String TAG = "OpenExternalDirectoryActivity";
+    private static final String TAG = "OpenExternalDirectory";
     private static final String FM_TAG = "open_external_directory";
     private static final String EXTERNAL_STORAGE_AUTH = "com.android.externalstorage.documents";
     private static final String EXTRA_FILE = "com.android.documentsui.FILE";
@@ -209,7 +208,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         return intent;
     }
 
-    private static class OpenExternalDirectoryDialogFragment extends DialogFragment {
+    public static class OpenExternalDirectoryDialogFragment extends DialogFragment {
 
         private File mFile;
         private String mVolumeLabel;

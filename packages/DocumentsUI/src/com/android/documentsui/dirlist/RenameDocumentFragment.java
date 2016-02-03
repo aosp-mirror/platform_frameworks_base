@@ -44,13 +44,13 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DocumentsApplication;
-import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.R;
 import com.android.documentsui.Snackbars;
+import com.android.documentsui.model.DocumentInfo;
 /**
  * Dialog to rename file or directory.
  */
-class RenameDocumentFragment extends DialogFragment {
+public class RenameDocumentFragment extends DialogFragment {
     private static final String TAG_RENAME_DOCUMENT = "rename_document";
     private DocumentInfo mDocument;
 
