@@ -203,6 +203,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
     static final int CONTAINER_CALLBACK_TASK_LIST_EMPTY = FIRST_SUPERVISOR_STACK_MSG + 11;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int SHOW_LOCK_TASK_ESCAPE_MESSAGE_MSG = FIRST_SUPERVISOR_STACK_MSG + 13;
+    static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
+    static final int REPORT_PIP_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 15;
 
     private static final String VIRTUAL_DISPLAY_BASE_NAME = "ActivityViewVirtualDisplay";
 
@@ -321,6 +323,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** List of activities that are in the process of going to sleep. */
     final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<>();
+
+    /** List of activities whose multi-window mode changed that we need to report to the
+     * application */
+    final ArrayList<ActivityRecord> mMultiWindowModeChangedActivities = new ArrayList<>();
+
+    /** List of activities whose picture-in-picture mode changed that we need to report to the
+     * application */
+    final ArrayList<ActivityRecord> mPipModeChangedActivities = new ArrayList<>();
 
     /** Used on user changes */
     final ArrayList<UserState> mStartingUsers = new ArrayList<>();
@@ -3390,6 +3400,38 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mActivityMetricsLogger.logWindowState();
     }
 
+    void scheduleReportMultiWindowChanged(TaskRecord task) {
+        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.mActivities.get(i);
+            if (r.app != null && r.app.thread != null) {
+                mMultiWindowModeChangedActivities.add(r);
+            }
+        }
+
+        if (!mHandler.hasMessages(REPORT_MULTI_WINDOW_MODE_CHANGED_MSG)) {
+            mHandler.sendEmptyMessage(REPORT_MULTI_WINDOW_MODE_CHANGED_MSG);
+        }
+    }
+
+    void scheduleReportPictureInPictureChangedIfNeeded(TaskRecord task, ActivityStack prevStack) {
+        final ActivityStack stack = task.stack;
+        if (prevStack == null || prevStack == stack
+                || (prevStack.mStackId != PINNED_STACK_ID && stack.mStackId != PINNED_STACK_ID)) {
+            return;
+        }
+
+        for (int i = task.mActivities.size() - 1; i >= 0; i--) {
+            final ActivityRecord r = task.mActivities.get(i);
+            if (r.app != null && r.app.thread != null) {
+                mPipModeChangedActivities.add(r);
+            }
+        }
+
+        if (!mHandler.hasMessages(REPORT_PIP_MODE_CHANGED_MSG)) {
+            mHandler.sendEmptyMessage(REPORT_PIP_MODE_CHANGED_MSG);
+        }
+    }
+
     private final class ActivityStackSupervisorHandler extends Handler {
 
         public ActivityStackSupervisorHandler(Looper looper) {
@@ -3405,6 +3447,22 @@ public final class ActivityStackSupervisor implements DisplayListener {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
+                case REPORT_MULTI_WINDOW_MODE_CHANGED_MSG: {
+                    synchronized (mService) {
+                        for (int i = mMultiWindowModeChangedActivities.size() - 1; i >= 0; i--) {
+                            final ActivityRecord r = mMultiWindowModeChangedActivities.remove(i);
+                            r.scheduleMultiWindowChanged();
+                        }
+                    }
+                } break;
+                case REPORT_PIP_MODE_CHANGED_MSG: {
+                    synchronized (mService) {
+                        for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
+                            final ActivityRecord r = mPipModeChangedActivities.remove(i);
+                            r.schedulePictureInPictureChanged();
+                        }
+                    }
+                } break;
                 case IDLE_TIMEOUT_MSG: {
                     if (DEBUG_IDLE) Slog.d(TAG_IDLE,
                             "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);

@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.StackId;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
@@ -409,15 +410,40 @@ final class ActivityRecord {
     }
 
     void scheduleConfigurationChanged(Configuration config, boolean reportToActivity) {
-        if (app != null && app.thread != null) {
-            try {
-                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + " " +
-                        "reportToActivity=" + reportToActivity + " and config: " + config);
-                app.thread.scheduleActivityConfigurationChanged(
-                        appToken, new Configuration(config), reportToActivity);
-            } catch (RemoteException e) {
-                // If process died, whatever.
-            }
+        if (app == null || app.thread == null) {
+            return;
+        }
+        try {
+            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + this + " " +
+                    "reportToActivity=" + reportToActivity + " and config: " + config);
+            app.thread.scheduleActivityConfigurationChanged(
+                    appToken, new Configuration(config), reportToActivity);
+        } catch (RemoteException e) {
+            // If process died, whatever.
+        }
+    }
+
+    void scheduleMultiWindowChanged() {
+        if (task == null || task.stack == null || app == null || app.thread == null) {
+            return;
+        }
+        try {
+            // An activity is considered to be in multi-window mode if its task isn't fullscreen.
+            app.thread.scheduleMultiWindowChanged(appToken, !task.mFullscreen);
+        } catch (Exception e) {
+            // If process died, I don't care.
+        }
+    }
+
+    void schedulePictureInPictureChanged() {
+        if (task == null || task.stack == null || app == null || app.thread == null) {
+            return;
+        }
+        try {
+            app.thread.schedulePictureInPictureChanged(
+                    appToken, task.stack.mStackId == PINNED_STACK_ID);
+        } catch (Exception e) {
+            // If process died, no one cares.
         }
     }
 
