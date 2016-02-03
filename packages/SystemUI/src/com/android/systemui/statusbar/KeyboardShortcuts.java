@@ -23,17 +23,15 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.DisplayMetrics;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager.KeyboardShortcutsReceiver;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -65,7 +63,7 @@ public class KeyboardShortcuts {
     private Dialog mKeyboardShortcutsDialog;
 
     public KeyboardShortcuts(Context context) {
-        this.mContext = context;
+        this.mContext = new ContextThemeWrapper(context, android.R.style.Theme_Material_Light);
     }
 
     public void toggleKeyboardShortcuts() {
@@ -108,38 +106,26 @@ public class KeyboardShortcuts {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                // TODO: break all this code out into a handleShowKeyboard...
-                // Might add more things posted; should consider adding a custom handler so
-                // you can send the keyboardShortcutsGroups as part of the message.
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
-                LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                        LAYOUT_INFLATER_SERVICE);
-                final View keyboardShortcutsView = inflater.inflate(
-                        R.layout.keyboard_shortcuts_view, null);
-                DisplayMetrics dm = mContext.getResources().getDisplayMetrics();
-                ScrollView scrollView = (ScrollView) keyboardShortcutsView.findViewById(
-                        R.id.keyboard_shortcuts_scroll_view);
-                // TODO: find a better way to set the height.
-                scrollView.setLayoutParams(new LinearLayout.LayoutParams(
-                        LayoutParams.WRAP_CONTENT,
-                        (int) (dm.heightPixels * dm.density)));
-
-                populateKeyboardShortcuts((LinearLayout) keyboardShortcutsView.findViewById(
-                        R.id.keyboard_shortcuts_container), keyboardShortcutGroups);
-                dialogBuilder.setView(keyboardShortcutsView);
-                dialogBuilder.setPositiveButton(R.string.quick_settings_done, dialogCloseListener);
-                mKeyboardShortcutsDialog = dialogBuilder.create();
-                mKeyboardShortcutsDialog.setCanceledOnTouchOutside(true);
-
-                // Setup window.
-                Window keyboardShortcutsWindow = mKeyboardShortcutsDialog.getWindow();
-                keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
-                keyboardShortcutsWindow.setBackgroundDrawable(
-                        mContext.getDrawable(R.color.ksh_dialog_background_color));
-                keyboardShortcutsWindow.setGravity(TOP);
-                mKeyboardShortcutsDialog.show();
+                handleShowKeyboardShortcuts(keyboardShortcutGroups);
             }
         });
+    }
+
+    private void handleShowKeyboardShortcuts(List<KeyboardShortcutGroup> keyboardShortcutGroups) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mContext);
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+        final View keyboardShortcutsView = inflater.inflate(
+                R.layout.keyboard_shortcuts_view, null);
+        populateKeyboardShortcuts((LinearLayout) keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_container), keyboardShortcutGroups);
+        dialogBuilder.setView(keyboardShortcutsView);
+        dialogBuilder.setPositiveButton(R.string.quick_settings_done, dialogCloseListener);
+        mKeyboardShortcutsDialog = dialogBuilder.create();
+        mKeyboardShortcutsDialog.setCanceledOnTouchOutside(true);
+        Window keyboardShortcutsWindow = mKeyboardShortcutsDialog.getWindow();
+        keyboardShortcutsWindow.setType(TYPE_SYSTEM_DIALOG);
+        mKeyboardShortcutsDialog.show();
     }
 
     private void populateKeyboardShortcuts(LinearLayout keyboardShortcutsLayout,
@@ -156,36 +142,37 @@ public class KeyboardShortcuts {
                     : mContext.getColor(R.color.ksh_application_group_color));
             keyboardShortcutsLayout.addView(categoryTitle);
 
-            LinearLayout shortcutWrapper = (LinearLayout) inflater.inflate(
-                    R.layout.keyboard_shortcuts_wrapper, null);
+            LinearLayout shortcutContainer = (LinearLayout) inflater.inflate(
+                    R.layout.keyboard_shortcuts_container, keyboardShortcutsLayout, false);
             final int itemsSize = group.getItems().size();
             for (int j = 0; j < itemsSize; j++) {
                 KeyboardShortcutInfo info = group.getItems().get(j);
-                View shortcutView = inflater.inflate(R.layout.keyboard_shortcut_app_item, null);
+                View shortcutView = inflater.inflate(R.layout.keyboard_shortcut_app_item,
+                        shortcutContainer, false);
                 TextView textView = (TextView) shortcutView
                         .findViewById(R.id.keyboard_shortcuts_keyword);
                 textView.setText(info.getLabel());
 
+                LinearLayout shortcutItemsContainer = (LinearLayout) shortcutView
+                        .findViewById(R.id.keyboard_shortcuts_item_container);
                 List<String> shortcutKeys = getHumanReadableShortcutKeys(info);
                 final int shortcutKeysSize = shortcutKeys.size();
                 for (int k = 0; k < shortcutKeysSize; k++) {
                     String shortcutKey = shortcutKeys.get(k);
                     TextView shortcutKeyView = (TextView) inflater.inflate(
-                            R.layout.keyboard_shortcuts_key_view, null);
+                            R.layout.keyboard_shortcuts_key_view, shortcutItemsContainer, false);
                     shortcutKeyView.setText(shortcutKey);
-                    LinearLayout shortcutItemsContainer = (LinearLayout) shortcutView
-                            .findViewById(R.id.keyboard_shortcuts_item_container);
                     shortcutItemsContainer.addView(shortcutKeyView);
                 }
-                shortcutWrapper.addView(shortcutView);
+                shortcutContainer.addView(shortcutView);
             }
-
-            // TODO: merge container and wrapper into one xml file - wrapper is always a child of
-            // container.
-            LinearLayout shortcutsContainer = (LinearLayout) inflater.inflate(
-                    R.layout.keyboard_shortcuts_container, null);
-            shortcutsContainer.addView(shortcutWrapper);
-            keyboardShortcutsLayout.addView(shortcutsContainer);
+            keyboardShortcutsLayout.addView(shortcutContainer);
+            if (i < keyboardShortcutGroupsSize - 1) {
+                View separator = inflater.inflate(
+                        R.layout.keyboard_shortcuts_category_separator, keyboardShortcutsLayout,
+                        false);
+                keyboardShortcutsLayout.addView(separator);
+            }
         }
     }
 

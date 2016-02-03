@@ -158,5 +158,4 @@
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_system_group_color">#ff00bcd4</color>
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_dialog_background_color">#ffffffff</color>
 </resources>

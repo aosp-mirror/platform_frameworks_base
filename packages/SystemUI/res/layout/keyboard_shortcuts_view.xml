@@ -14,25 +14,35 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/keyboard_shortcuts_wrapper"
-        android:layout_width="488dp"
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="488dp"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:focusable="true">
-    <ScrollView
+        android:orientation="vertical">
+        <ScrollView
             android:id="@+id/keyboard_shortcuts_scroll_view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
                 android:id="@+id/keyboard_shortcuts_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"/>
-    </ScrollView>
-    <View
+        </ScrollView>
+        <!-- Required for stretching to full available height when the items in the scroll view
+             occupy less space then the full height -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"/>
-</LinearLayout>
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
+    <View
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/dividerHorizontal"/>
+</FrameLayout>
