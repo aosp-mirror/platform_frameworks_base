@@ -115,7 +115,6 @@ import android.view.ContextMenu;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
-import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -392,6 +391,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mIsRtlCompatibilityMode = (targetSdkVersion < JELLY_BEAN_MR1 ||
                 !context.getApplicationInfo().hasRtlSupport());
             mOverride = false;
+        }
+
+        /**
+         * @return {@code true} if this object contains metadata that needs to
+         *         be retained, {@code false} otherwise
+         */
+        public boolean hasMetadata() {
+            return mDrawablePadding != 0 || mHasTintMode || mHasTint;
         }
 
         /**
@@ -2174,7 +2181,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!drawables) {
             // Clearing drawables...  can we free the data structure?
             if (dr != null) {
-                if (dr.mDrawablePadding == 0) {
+                if (!dr.hasMetadata()) {
                     mDrawables = null;
                 } else {
                     // We need to retain the last set padding, so just clear
@@ -2377,7 +2384,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (!drawables) {
             // Clearing drawables...  can we free the data structure?
             if (dr != null) {
-                if (dr.mDrawablePadding == 0) {
+                if (!dr.hasMetadata()) {
                     mDrawables = null;
                 } else {
                     // We need to retain the last set padding, so just clear
