@@ -209,6 +209,8 @@ public:
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) override;
 
+    virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
+
     // Text
     virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
@@ -216,7 +218,6 @@ public:
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) override;
     virtual bool drawTextAbsolutePos() const override { return false; }
-
 
 private:
 
