@@ -911,28 +911,20 @@
     <string name="noApplications" msgid="2991814273936504689">"ບໍ່ມີແອັບຯໃດສາມາດເຮັດວຽກນີ້ໄດ້."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> ໄດ້ຢຸດແລ້ວ"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> ໄດ້ຢຸດແລ້ວ"</string>
-    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
-    <skip />
-    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
-    <skip />
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> ຢຸດເລື້ອຍໆ"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> ຢຸດເລື້ອຍໆ"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"ເລີ່ມແອັບໃໝ່"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"ຣີເຊັດ ແລະ ເລີ່ມແອັບໃໝ່"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ສົ່ງຄຳຕິຊົມ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ປິດ"</string>
     <string name="aerr_mute" msgid="7698966346654789433">"ປິດສຽງ"</string>
-    <!-- no translation found for aerr_wait (3199956902437040261) -->
-    <skip />
-    <!-- no translation found for aerr_close_app (3269334853724920302) -->
-    <skip />
+    <string name="aerr_wait" msgid="3199956902437040261">"ລໍຖ້າ"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"ປິດແອັບ"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8493290105678066167) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (1622382268908620314) -->
-    <skip />
-    <!-- no translation found for anr_application_process (6417199034861140083) -->
-    <skip />
-    <!-- no translation found for anr_process (6156880875555921105) -->
-    <skip />
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> ບໍ່ຕອບສະໜອງ"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ບໍ່ຕອບສະໜອງ"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> ບໍ່ຕອບສະໜອງ"</string>
+    <string name="anr_process" msgid="6156880875555921105">"ຂະບວນການ <xliff:g id="PROCESS">%1$s</xliff:g> ບໍ່ຕອບສະໜອງ"</string>
     <string name="force_close" msgid="8346072094521265605">"ຕົກລົງ"</string>
     <string name="report" msgid="4060218260984795706">"ລາຍງານ"</string>
     <string name="wait" msgid="7147118217226317732">"ລໍ​ຖ້າ"</string>
@@ -1039,6 +1031,16 @@
     <string name="sim_added_title" msgid="3719670512889674693">"ເພີ່ມຊິມກາດແລ້ວ"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"​ຣີ​ສະ​ຕາດ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ເພື່ອ​ເຂົ້າ​ເຖິງ​ເຄືອ​ຂ່າຍ​ມື​ຖື."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ຣີສະຕາດ"</string>
+    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ຕັ້ງເວລາ"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ກໍານົດວັນທີ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ຕັ້ງຄ່າ"</string>
@@ -1470,10 +1472,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
-    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
-    <skip />
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"ບໍ່ສາມາດປັບຂະໜາດແອັບໄດ້, ໃຫ້ເລື່ອນມັນໂດຍໃຊ້ນິ້ວມືສອງນິ້ວ."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ແອັບບໍ່ຮອງຮັບໜ້າຈໍແບບແຍກກັນ."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ຕິດ​ຕັ້ງ​ໃສ່​ແລ້ວ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"ຖືກ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ລຶບ​ໄປ​ແລ້ວ"</string>
@@ -1563,8 +1563,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"ບາງຟັງຊັນອາດບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"ແຕະເພື່ອສືບຕໍ່"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"ໂປຣໄຟລ໌ຜູ້ໃຊ້ຖືກລັອກໄວ້ແລ້ວ"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"ເຊື່ອມຕໍ່ກັບ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ແຕະເພື່ອເບິ່ງໄຟລ໌"</string>
+    <string name="pin_target" msgid="3052256031352291362">"ປັກໝຸດ"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"ຖອນປັກໝຸດ"</string>
+    <string name="app_info" msgid="6856026610594615344">"ຂໍ້ມູນແອັບ"</string>
 </resources>

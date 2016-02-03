@@ -1031,6 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Engadiuse unha tarxeta SIM"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Reinicia o teu dispositivo para acceder á rede móbil."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Para conseguir que a túa SIM nova funcione correctamente, deberás instalar e abrir unha aplicación do teu operador."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"DESCARGAR A APLICACIÓN"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"AGORA NON"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Introduciuse unha nova SIM"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Tocar para configurar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Configurar hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Establecer data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Configurar"</string>
@@ -1553,8 +1558,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"Quizais haxa funcións non dispoñibles"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"Toca para continuar"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"Bloqueouse o perfil do usuario"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toca para ver os ficheiros"</string>
+    <string name="pin_target" msgid="3052256031352291362">"Fixar"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Soltar"</string>
+    <string name="app_info" msgid="6856026610594615344">"Información da aplicación"</string>
 </resources>

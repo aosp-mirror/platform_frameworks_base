@@ -191,7 +191,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Aktualisierung wird vorbereitet…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Updatepaket wird verarbeitet…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Neustart…"</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Auf Werkszustand zurück"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Auf Werkszustand zurücksetzen"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Neustart…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Wird heruntergefahren..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Dein Tablet wird heruntergefahren."</string>
@@ -926,7 +926,7 @@
     <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> reagiert nicht"</string>
     <string name="anr_process" msgid="6156880875555921105">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> reagiert nicht"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
-    <string name="report" msgid="4060218260984795706">"Bericht"</string>
+    <string name="report" msgid="4060218260984795706">"Melden"</string>
     <string name="wait" msgid="7147118217226317732">"Warten"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Die Seite reagiert nicht mehr.\n\nMöchtest du die Seite schließen?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"App umgeleitet"</string>
@@ -1031,6 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-Karte hinzugefügt"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Starte zur Nutzung des Mobilfunknetzes dein Gerät neu."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Neu starten"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Damit deine neue SIM-Karte ordnungsgemäß funktioniert, musst du zuerst eine App deines Mobilfunkanbieters installieren und öffnen."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"APP HERUNTERLADEN"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"JETZT NICHT"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Neue SIM-Karte eingelegt"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Zum Einrichten tippen"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Uhrzeit festlegen"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum festlegen"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
@@ -1553,8 +1558,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"Einige Funktionen sind evtl. nicht verfügbar"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"Zum Fortfahren tippen"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"Nutzerprofil gesperrt"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Verbunden mit <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Zum Ansehen der Dateien tippen"</string>
+    <string name="pin_target" msgid="3052256031352291362">"Markieren"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Markierung entfernen"</string>
+    <string name="app_info" msgid="6856026610594615344">"App-Informationen"</string>
 </resources>

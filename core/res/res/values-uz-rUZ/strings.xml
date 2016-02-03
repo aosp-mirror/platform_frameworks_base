@@ -313,7 +313,7 @@
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Ilovaga o‘zining komponentlarini xotirada doimiy saqlashga ruxsat beradi. Bu mavjud xotirani cheklashi va telefonni sekin ishlashiga sabab bo‘lishi mumkin."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"ilovalar egallagan xotira joyini hisoblash"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Ilova o‘zining kodi, ma’lumotlari va kesh o‘lchami to‘g‘risidagi ma’lumotlarni olishi mumkin"</string>
-    <string name="permlab_writeSettings" msgid="2226195290955224730">"tizim moslamalarini o‘zgartirish"</string>
+    <string name="permlab_writeSettings" msgid="2226195290955224730">"tizim sozlamalarini o‘zgartirish"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Ilova tizim sozlamalarini o‘zgartirishi mumkin. Zararli dasturlar uning yordamida tizimni ishdan chiqarishi mumkin."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"tizim ishga tushganda bajarish"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Ilova tizim qayta yoqilganidan so‘ng o‘zini ishga tushirishi mumkin. Bu planshetning yonish vaqtini uzaytirishi va doimiy ishlab turivchi ilova tufayli uning tezkor ishlashini kamaytirishi mumkin."</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Ilovaga telefoningizda o‘zgartirishingiz mumkin bo‘lgan, shuningdek, do‘stlaringiz va hamkasblaringizning tadbirlarini qo‘shish, o‘chirish va o‘zgartirish uchun ruxsat beradi. Bu ilovaga go‘yoki taqvim egalari nomidan kelgan xabarlarni jo‘natishga yoki egasiga bildirmasdan tadbirlarni o‘zgartirishga ruxsat berishi mumkin."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"aniq joylashuv (GPS va tarmoqqa asoslanib) ma’lumotlaridan foydalanishga ruxsat"</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"aniq joylashuv ma’lumotiga kirish (GPS va tarmoq asosida)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Ilovaga global joylashuvni aniqlash tizimi (GPS) yoki Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydalanib, aniq joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning joylashuvingizni aniqlaydi. Bu batareya quvvatini ko‘proq sarflaydi."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"taxminiy joylashuv (tarmoq asosida) ma’lumotlaridan foydalanishga ruxsat"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Ilovaga sizning taxminiy joylashuvingizni topishga ruxsat beradi. Ushbu joylashuv Wi-Fi va uyali tarmoq antennalari kabi tarmoq joylashuv manbalaridan foydlanuvchi joylashuv xizmatlari orqali aniqlanadi. Ushbu joylashuv xizmatlari yoqib qo‘yilgan bo‘lishi va qurilmangizdagi ilovaga ulardan foydalanish uchun mavjud bo‘lishi kerak. Ilovalar bundan foydalanib, sizning taxminiy joylashuvingizni aniqlaydi."</string>
@@ -389,7 +389,7 @@
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Iloba planshetdagi vaqt zonasini o‘zgartirishi mumkin."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Ilovaga televizorning vaqt zonasini o‘zgartirish huquqini beradi."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Ilova telefondagi vaqt zonasini o‘zgartirishi mumkin."</string>
-    <string name="permlab_getAccounts" msgid="1086795467760122114">"qurilmadagi hisoblarni topish"</string>
+    <string name="permlab_getAccounts" msgid="1086795467760122114">"qurilmadagi hisoblarni qidirish"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Ilovaga planshetdagi hisoblar ro‘yxatini olishga ruxsat beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kirishi mumkin."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Ilovaga televizor tomonidan aniqlangan hisoblar ro‘yxatini olish huquqini beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kiradi."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Ilovaga telefondagi hisoblar ro‘yxatini olishga ruxsat beradi. Bunga siz o‘rnatgan ilovalar tomonidan yaratilgan har qanday hisoblar kirishi mumkin."</string>
@@ -454,7 +454,7 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Ilovaga hisobning sinxronlash sozlamalarini o‘zgartirish uchun ruxsat beradi. Masalan, bundan \"Odamlar\" ilovasini hisob bilan sinxronlanlash uchun foydalanish mumkin."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"sinxronlash statistikasini o‘qish"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Ilovaga hisobning sinxronlash statistikasini, shu jumladan, sinxronlangan hodisalar tarixi va qancha ma’lumot sinxronlanganligi haqidagi ma’lumotni o‘qishga ruxsat beradi."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB xotirasi tarkibidagilarni o‘qish"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB xotiradagi ma’lumotlarni ko‘rish"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD xotira kartasi tarkibidagilarni o‘qish"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Dasturga USB xotiradagi ma’lumotlarini ko‘rib chiqish uchun ruxsat beradi."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Dasturga SD kartadagi ma’lumotlarni ko‘rib chiqishga ruxsat berish."</string>
@@ -911,28 +911,20 @@
     <string name="noApplications" msgid="2991814273936504689">"Hech qaysi ilova ushbu amalni bajara olmaydi."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasi ishdan chiqdi"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> jarayoni ishdan chiqdi"</string>
-    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
-    <skip />
-    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
-    <skip />
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> yana ishdan chiqdi"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> yana ishdan chiqdi"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Ilovani qayta ishga tushirish"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Ilovani qayta tiklash va qayta ishga tushirish"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
     <string name="aerr_mute" msgid="7698966346654789433">"E’tiborsiz qoldirish"</string>
-    <!-- no translation found for aerr_wait (3199956902437040261) -->
-    <skip />
-    <!-- no translation found for aerr_close_app (3269334853724920302) -->
-    <skip />
+    <string name="aerr_wait" msgid="3199956902437040261">"Kuting"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Ilovani yopish"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8493290105678066167) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (1622382268908620314) -->
-    <skip />
-    <!-- no translation found for anr_application_process (6417199034861140083) -->
-    <skip />
-    <!-- no translation found for anr_process (6156880875555921105) -->
-    <skip />
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> javob bermayapti"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> javob bermayapti"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> javob bermayapti"</string>
+    <string name="anr_process" msgid="6156880875555921105">"<xliff:g id="PROCESS">%1$s</xliff:g> ilovasi javob bermayapti"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Xabar berish"</string>
     <string name="wait" msgid="7147118217226317732">"Kuting"</string>
@@ -1039,6 +1031,16 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM karta qo‘shildi"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Mobil tarmoqqa ulanish uchun qurilmangizni o‘chirib yoqing."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"O‘chirib-yoqish"</string>
+    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Vaqtni o‘rnatish"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Sanani kiritish"</string>
     <string name="date_time_set" msgid="5777075614321087758">"O‘rnatish"</string>
@@ -1470,10 +1472,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Yechishda PIN-kod so‘ralsin"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bo‘shatishdan oldin chizmali parol so‘ralsin"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bo‘shatishdan oldin parol so‘ralsin"</string>
-    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
-    <skip />
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Oyna o‘lchamini o‘zgartirib bo‘lmaydi. Sahifani ikkita barmoq bilan aylantiring."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Bu ilova ekranni bo‘lish xususiyatini qo‘llab-quvvatlamaydi."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratoringiz tomonidan o‘rnatilgan"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratoringiz tomonidan yangilandi"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratoringiz tomonidan o‘chirilgan"</string>
@@ -1563,8 +1563,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"Ayrim funksiyalar mavjud bo‘lmasligi mumkin"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"Davom etish uchun bosing"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"Foydalanuvchi profili yopiq"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> mahsulotiga ulandi"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Fayllarni ko‘rish uchun bosing"</string>
+    <string name="pin_target" msgid="3052256031352291362">"Qadash"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Olib tashlash"</string>
+    <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
 </resources>

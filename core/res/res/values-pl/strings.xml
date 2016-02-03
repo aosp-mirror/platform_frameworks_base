@@ -1047,6 +1047,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"Dodano kartę SIM"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Uruchom urządzenie ponownie, by uzyskać dostęp do sieci komórkowej."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Uruchom ponownie"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Aby nowa karta SIM działała prawidłowo, musisz zainstalować i otworzyć aplikację udostępnioną przez operatora."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"POBIERZ APLIKACJĘ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"NIE TERAZ"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Włożono nową kartę SIM"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Kliknij, by skonfigurować"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Ustaw godzinę"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Ustaw datę"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Ustaw"</string>
@@ -1591,8 +1596,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"Niektóre funkcje mogą być niedostępne"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"Kliknij, by kontynuować"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"Profil użytkownika zablokowany"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Połączono z: <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dotknij, by wyświetlić pliki"</string>
+    <string name="pin_target" msgid="3052256031352291362">"Przypnij"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Odepnij"</string>
+    <string name="app_info" msgid="6856026610594615344">"O aplikacji"</string>
 </resources>

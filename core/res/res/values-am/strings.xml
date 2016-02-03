@@ -1031,6 +1031,16 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ካርድ አክል"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"የተንቀሳቃሽ ስልክ አውታረ መረብ ለመድረስ መሣሪያዎን ዳግም ያስጀምሩት።"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ዳግም ጀምር"</string>
+    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ጊዜ አዘጋጅ"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ውሂብ አዘጋጅ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"አዘጋጅ"</string>
@@ -1553,8 +1563,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"አንዳንድ ተግባሮች ላይገኙ ይችላሉ"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"ለመቀጠል ይንኩ"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"የተጠቃሚ መገለጫ ተቆልፏል"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"ከ<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ፋይሎችን ለመመልከት መታ ያድርጉ"</string>
+    <string name="pin_target" msgid="3052256031352291362">"ፒን"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"ንቀል"</string>
+    <string name="app_info" msgid="6856026610594615344">"የመተግበሪያ መረጃ"</string>
 </resources>

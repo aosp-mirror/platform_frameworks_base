@@ -1031,6 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"সিম কার্ড যোগ করা হয়েছে"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"সেলুলার নেটওয়ার্ক অ্যাক্সেস করতে আপনার ডিভাইস পুনর্সূচনা করুন"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"পুনর্সূচনা"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"যাতে আপনার নতুন SIM সঠিকভাবে কাজ করে, তার জন্য আপনাকে আপনার পরিষেবা প্রদানকারীর থেকে একটি অ্যাপ্লিকেশান ইনস্টল করতে এবং খুলতে হবে৷"</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"অ্যাপ্লিকেশানটি পান"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"এখনই নয়"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"নতুন SIM ঢোকানো হয়েছে"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"এটিকে সেট আপ করতে আলতো চাপুন"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"সময় সেট করুন"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"তারিখ সেট করুন"</string>
     <string name="date_time_set" msgid="5777075614321087758">"সেট করুন"</string>
@@ -1551,10 +1556,11 @@
     <string name="new_sms_notification_title" msgid="8442817549127555977">"আপনার নতুন বার্তা আছে"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"দেখার জন্য SMS অ্যাপ্লিকেশান খুলুন"</string>
     <string name="user_encrypted_title" msgid="7664361246988454307">"কিছু ক্রিয়াকলাপ উপলব্ধ নাও হতে পারে"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"অবিরততে স্পর্শ করুন"</string>
+    <string name="user_encrypted_message" msgid="7504541494700807850">"অবিরত রাখতে স্পর্শ করুন"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"ব্যবহারকারীর প্রোফাইল লক করা আছে"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> এর সাথে সংযুক্ত হয়েছে"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ফাইলগুলি দেখতে আলতো চাপ দিন"</string>
+    <string name="pin_target" msgid="3052256031352291362">"পিন করুন"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"আনপিন করুন"</string>
+    <string name="app_info" msgid="6856026610594615344">"অ্যাপ্লিকেশানের তথ্য"</string>
 </resources>

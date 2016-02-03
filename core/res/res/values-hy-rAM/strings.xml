@@ -911,28 +911,20 @@
     <string name="noApplications" msgid="2991814273936504689">"Ոչ մի հավելված չի կարող կատարել այս գործողությունը:"</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի աշխատանքն ընդհատվել է"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացն ընդհատվել է"</string>
-    <!-- no translation found for aerr_application_repeated (3146328699537439573) -->
-    <skip />
-    <!-- no translation found for aerr_process_repeated (6235302956890402259) -->
-    <skip />
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի աշխատանքը շարունակաբար ընդհատվում է"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը շարունակաբար ընդհատվում է"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Վերագործարկել հավելվածը"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Վերակայել և վերագործարկել հավելվածը"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Ուղարկել կարծիք"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Փակել"</string>
     <string name="aerr_mute" msgid="7698966346654789433">"Անջատել ձայնը"</string>
-    <!-- no translation found for aerr_wait (3199956902437040261) -->
-    <skip />
-    <!-- no translation found for aerr_close_app (3269334853724920302) -->
-    <skip />
+    <string name="aerr_wait" msgid="3199956902437040261">"Սպասել"</string>
+    <string name="aerr_close_app" msgid="3269334853724920302">"Փակել հավելվածը"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8493290105678066167) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (1622382268908620314) -->
-    <skip />
-    <!-- no translation found for anr_application_process (6417199034861140083) -->
-    <skip />
-    <!-- no translation found for anr_process (6156880875555921105) -->
-    <skip />
+    <string name="anr_activity_application" msgid="8493290105678066167">"<xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածը չի արձագանքում"</string>
+    <string name="anr_activity_process" msgid="1622382268908620314">"<xliff:g id="ACTIVITY">%1$s</xliff:g> գործունեությունը չի արձագանքում"</string>
+    <string name="anr_application_process" msgid="6417199034861140083">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը չի արձագանքում"</string>
+    <string name="anr_process" msgid="6156880875555921105">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը չի արձագանքում"</string>
     <string name="force_close" msgid="8346072094521265605">"Լավ"</string>
     <string name="report" msgid="4060218260984795706">"Զեկույց"</string>
     <string name="wait" msgid="7147118217226317732">"Սպասեք"</string>
@@ -1039,6 +1031,16 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM քարտը ավելացվել է"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Վերագործարկեք ձեր սարքը` բջջային ցանց մուտք ունենալու համար:"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Վերագործարկել"</string>
+    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
+    <skip />
+    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
+    <skip />
+    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Սահմանել ժամը"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Սահմանել ամսաթիվը"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Սահմանել"</string>
@@ -1216,7 +1218,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Ընտրել ծրագիր"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Չհաջողվեց գործարկել <xliff:g id="APPLICATION_NAME">%s</xliff:g> ծրագիրը"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Տարածել"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Համօգտագործել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Կիսվել <xliff:g id="APPLICATION_NAME">%s</xliff:g>-ի հետ"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Սահող բռնակ: Հպել &amp; պահել:"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Սահեցրեք` ապակողպելու համար:"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Միացրեք ականջակալները` արտասանվող գաղտնաբառը լսելու համար:"</string>
@@ -1470,10 +1472,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ապաամրացնելուց առաջ հարցնել PIN-կոդը"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Ապաամրացնելուց առաջ հարցնել ապակողպող նախշը"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Ապաամրացնելուց առաջ հարցնել գաղտնաբառը"</string>
-    <!-- no translation found for dock_cropped_windows_text (6378424064779004428) -->
-    <skip />
-    <!-- no translation found for dock_non_resizeble_failed_to_dock_text (3871617304250207291) -->
-    <skip />
+    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Հավելվածի չափը հնարավոր չէ փոխել, ոլորեք այն երկու մատի օգնությամբ:"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Հավելվածը չի աջակցում էկրանի տրոհումը:"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Ադմինիստրատորը տեղադրել է այն"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ադմինիստրատորը թարմացրել է այն"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Ադմինիստրատորը ջնջել է այն"</string>
@@ -1563,8 +1563,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"Հնարավոր է՝ որոշ գործառույթներ հասանելի չլինեն"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"Հպեք՝ շարունակելու համար"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"Օգտվողի պրոֆիլը կողպված է"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Միացված է <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-ին"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Հպեք՝ ֆայլերը տեսնելու համար"</string>
+    <string name="pin_target" msgid="3052256031352291362">"Ամրացնել"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Ապամրացնել"</string>
+    <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
 </resources>

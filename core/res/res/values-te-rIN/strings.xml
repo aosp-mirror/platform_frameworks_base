@@ -1031,6 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"సిమ్ కార్డు జోడించబడింది"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"సెల్యులార్ నెట్‌వర్క్‌ను ప్రాప్యత చేయడానికి మీ పరికరాన్ని పునఃప్రారంభించండి."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"పునఃప్రారంభించు"</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"మీ SIM సక్రమంగా పని చేస్తుండటానికి, మీరు మీ క్యారియర్ నుండి ఒక అనువర్తనాన్ని ఇన్‌స్టాల్ చేసుకొని, తెరవాలి."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"అనువర్తనాన్ని పొందండి"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ఇప్పుడు కాదు"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"కొత్త SIM చొప్పించారు"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"దీన్ని సెటప్ చేయడానికి నొక్కండి"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"సమయాన్ని సెట్ చేయండి"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"తేదీని సెట్ చేయండి"</string>
     <string name="date_time_set" msgid="5777075614321087758">"సెట్ చేయి"</string>
@@ -1553,8 +1558,9 @@
     <string name="user_encrypted_title" msgid="7664361246988454307">"కొన్ని విధులు ఉండకపోవచ్చు"</string>
     <string name="user_encrypted_message" msgid="7504541494700807850">"కొనసాగడానికి తాకండి"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"వినియోగ. ప్రొఫైల్ లాక్ అయింది"</string>
-    <!-- no translation found for usb_mtp_launch_notification_title (8359219638312208932) -->
-    <skip />
-    <!-- no translation found for usb_mtp_launch_notification_description (8541876176425411358) -->
-    <skip />
+    <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ఫైల్‌లను వీక్షించడానికి నొక్కండి"</string>
+    <string name="pin_target" msgid="3052256031352291362">"పిన్ చేయి"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"అన్‌‌పిన్‌ ‌చేయి"</string>
+    <string name="app_info" msgid="6856026610594615344">"అనువర్తన సమాచారం"</string>
 </resources>
