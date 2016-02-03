@@ -26,7 +26,8 @@
     <string name="menu_list" msgid="7279285939892417279">"列表视图"</string>
     <string name="menu_sort" msgid="7677740407158414452">"排序依据"</string>
     <string name="menu_search" msgid="3816712084502856974">"搜索"</string>
-    <string name="menu_settings" msgid="6008033148948428823">"设置"</string>
+    <!-- no translation found for menu_settings (8239065133341597825) -->
+    <skip />
     <string name="menu_open" msgid="432922957274920903">"打开"</string>
     <string name="menu_save" msgid="2394743337684426338">"保存"</string>
     <string name="menu_share" msgid="3075149983979628146">"分享"</string>
@@ -100,8 +101,7 @@
     <string name="close" msgid="3043722427445528732">"关闭"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"以下文件无法复制：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="7151140279020481180">"以下文件无法移动：<xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for copy_converted_warning_content (5753861488218674361) -->
-    <skip />
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"下列文件已转换成其他格式：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">已将 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件复制到剪贴板。</item>
       <item quantity="one">已将 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件复制到剪贴板。</item>
@@ -109,8 +109,7 @@
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"无法将所选文件粘贴到此位置。"</string>
     <string name="menu_rename" msgid="7678802479104285353">"重命名"</string>
     <string name="rename_error" msgid="4203041674883412606">"无法重命名文档"</string>
-    <!-- no translation found for notification_copy_files_converted_title (3153573223054275181) -->
-    <skip />
+    <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"部分文件已转换成其他格式"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
 </resources>
