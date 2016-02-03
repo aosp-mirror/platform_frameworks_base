@@ -114,7 +114,8 @@ public:
                 layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
                 GL_CHECKPOINT(MODERATE);
                 renderer.endLayer();
-            } else if (!layer.empty()) { // save layer - skip entire layer if empty
+            } else if (!layer.empty()) {
+                // save layer - skip entire layer if empty (in which case, LayerOp has null layer).
                 layer.offscreenBuffer = renderer.startTemporaryLayer(layer.width, layer.height);
                 GL_CHECKPOINT(MODERATE);
                 layer.replayBakedOpsImpl((void*)&renderer, unmergedReceivers, mergedReceivers);
