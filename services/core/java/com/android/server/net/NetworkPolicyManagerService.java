@@ -192,7 +192,7 @@ import java.util.List;
  * enforcement.
  */
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
-    private static final String TAG = "NetworkPolicy";
+    static final String TAG = "NetworkPolicy";
     private static final boolean LOGD = false;
     private static final boolean LOGV = false;
 
