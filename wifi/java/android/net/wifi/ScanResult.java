@@ -569,6 +569,9 @@ public class ScanResult implements Parcelable {
                 dest.writeString(anqpLines.get(i));
             }
         }
+        else {
+            dest.writeInt(0);
+        }
         if (anqpElements != null) {
             dest.writeInt(anqpElements.length);
             for (AnqpInformationElement element : anqpElements) {
@@ -647,7 +650,7 @@ public class ScanResult implements Parcelable {
                         int len = in.readInt();
                         byte[] payload = new byte[len];
                         in.readByteArray(payload);
-                        sr.anqpElements[n] =
+                        sr.anqpElements[i] =
                                 new AnqpInformationElement(vendorId, elementId, payload);
                     }
                 }
