@@ -43,6 +43,19 @@ public class ScanResult implements Parcelable {
      * The address of the access point.
      */
     public String BSSID;
+
+    /**
+     * The HESSID from the beacon.
+     * @hide
+     */
+    public long hessid;
+
+    /**
+     * The ANQP Domain ID from the Hotspot 2.0 Indication element, if present.
+     * @hide
+     */
+    public int anqpDomainId;
+
     /**
      * Describes the authentication, key management, and encryption schemes
      * supported by the access point.
@@ -341,14 +354,27 @@ public class ScanResult implements Parcelable {
     /** information elements found in the beacon
      * @hide
      */
-    public InformationElement informationElements[];
+    public InformationElement[] informationElements;
+
+    /** ANQP response elements.
+     * @hide
+     */
+    public AnqpInformationElement[] anqpElements;
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
-            long tsf) {
+    public ScanResult(WifiSsid wifiSsid, String BSSID, long hessid, int anqpDomainId,
+            byte[] osuProviders, String caps, int level, int frequency, long tsf) {
         this.wifiSsid = wifiSsid;
         this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
         this.BSSID = BSSID;
+        this.hessid = hessid;
+        this.anqpDomainId = anqpDomainId;
+        if (osuProviders != null) {
+            this.anqpElements = new AnqpInformationElement[1];
+            this.anqpElements[0] =
+                    new AnqpInformationElement(AnqpInformationElement.HOTSPOT20_VENDOR_ID,
+                            AnqpInformationElement.HS_OSU_PROVIDERS, osuProviders);
+        }
         this.capabilities = caps;
         this.level = level;
         this.frequency = frequency;
@@ -380,11 +406,14 @@ public class ScanResult implements Parcelable {
     }
 
     /** {@hide} */
-    public ScanResult(String Ssid, String BSSID, String caps, int level, int frequency,
+    public ScanResult(String Ssid, String BSSID, long hessid, int anqpDomainId, String caps,
+            int level, int frequency,
             long tsf, int distCm, int distSdCm, int channelWidth, int centerFreq0, int centerFreq1,
             boolean is80211McRTTResponder) {
         this.SSID = Ssid;
         this.BSSID = BSSID;
+        this.hessid = hessid;
+        this.anqpDomainId = anqpDomainId;
         this.capabilities = caps;
         this.level = level;
         this.frequency = frequency;
@@ -402,11 +431,12 @@ public class ScanResult implements Parcelable {
     }
 
     /** {@hide} */
-    public ScanResult(WifiSsid wifiSsid, String Ssid, String BSSID, String caps, int level,
+    public ScanResult(WifiSsid wifiSsid, String Ssid, String BSSID, long hessid, int anqpDomainId,
+                  String caps, int level,
                   int frequency, long tsf, int distCm, int distSdCm, int channelWidth,
                   int centerFreq0, int centerFreq1, boolean is80211McRTTResponder) {
-        this(Ssid, BSSID, caps,level, frequency, tsf, distCm, distSdCm, channelWidth, centerFreq0,
-                centerFreq1, is80211McRTTResponder);
+        this(Ssid, BSSID, hessid, anqpDomainId, caps, level, frequency, tsf, distCm,
+                distSdCm, channelWidth, centerFreq0, centerFreq1, is80211McRTTResponder);
         this.wifiSsid = wifiSsid;
     }
 
@@ -416,6 +446,10 @@ public class ScanResult implements Parcelable {
             wifiSsid = source.wifiSsid;
             SSID = source.SSID;
             BSSID = source.BSSID;
+            hessid = source.hessid;
+            anqpDomainId = source.anqpDomainId;
+            informationElements = source.informationElements;
+            anqpElements = source.anqpElements;
             capabilities = source.capabilities;
             level = source.level;
             frequency = source.frequency;
@@ -496,6 +530,8 @@ public class ScanResult implements Parcelable {
         }
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeLong(hessid);
+        dest.writeInt(anqpDomainId);
         dest.writeString(capabilities);
         dest.writeInt(level);
         dest.writeInt(frequency);
@@ -532,6 +568,15 @@ public class ScanResult implements Parcelable {
             for (int i = 0; i < anqpLines.size(); i++) {
                 dest.writeString(anqpLines.get(i));
             }
+        }
+        if (anqpElements != null) {
+            dest.writeInt(anqpElements.length);
+            for (AnqpInformationElement element : anqpElements) {
+                dest.writeInt(element.getVendorId());
+                dest.writeInt(element.getElementId());
+                dest.writeInt(element.getPayload().length);
+                dest.writeByteArray(element.getPayload());
+            }
         } else {
             dest.writeInt(0);
         }
@@ -546,19 +591,22 @@ public class ScanResult implements Parcelable {
                     wifiSsid = WifiSsid.CREATOR.createFromParcel(in);
                 }
                 ScanResult sr = new ScanResult(
-                    wifiSsid,
-                    in.readString(),                    /* SSID  */
-                    in.readString(),                    /* BSSID */
-                    in.readString(),                    /* capabilities */
-                    in.readInt(),                       /* level */
-                    in.readInt(),                       /* frequency */
-                    in.readLong(),                      /* timestamp */
-                    in.readInt(),                       /* distanceCm */
-                    in.readInt(),                       /* distanceSdCm */
-                    in.readInt(),                       /* channelWidth */
-                    in.readInt(),                       /* centerFreq0 */
-                    in.readInt(),                       /* centerFreq1 */
-                    false                               /* rtt responder, fixed with flags below */
+                        wifiSsid,
+                        in.readString(),                    /* SSID  */
+                        in.readString(),                    /* BSSID */
+                        in.readLong(),                      /* HESSID */
+                        in.readInt(),                       /* ANQP Domain ID */
+                        in.readString(),                    /* capabilities */
+                        in.readInt(),                       /* level */
+                        in.readInt(),                       /* frequency */
+                        in.readLong(),                      /* timestamp */
+                        in.readInt(),                       /* distanceCm */
+                        in.readInt(),                       /* distanceSdCm */
+                        in.readInt(),                       /* channelWidth */
+                        in.readInt(),                       /* centerFreq0 */
+                        in.readInt(),                       /* centerFreq1 */
+                        false                               /* rtt responder,
+                                                               fixed with flags below */
                 );
 
                 sr.seen = in.readLong();
@@ -588,6 +636,19 @@ public class ScanResult implements Parcelable {
                     sr.anqpLines = new ArrayList<String>();
                     for (int i = 0; i < n; i++) {
                         sr.anqpLines.add(in.readString());
+                    }
+                }
+                n = in.readInt();
+                if (n != 0) {
+                    sr.anqpElements = new AnqpInformationElement[n];
+                    for (int i = 0; i < n; i++) {
+                        int vendorId = in.readInt();
+                        int elementId = in.readInt();
+                        int len = in.readInt();
+                        byte[] payload = new byte[len];
+                        in.readByteArray(payload);
+                        sr.anqpElements[n] =
+                                new AnqpInformationElement(vendorId, elementId, payload);
                     }
                 }
                 return sr;

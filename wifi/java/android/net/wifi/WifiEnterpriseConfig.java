@@ -273,8 +273,11 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int AKA     = 5;
         /** EAP-Authentication and Key Agreement Prime */
         public static final int AKA_PRIME = 6;
+        /** Hotspot 2.0 r2 OSEN */
+        public static final int UNAUTH_TLS = 7;
         /** @hide */
-        public static final String[] strings = { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'" };
+        public static final String[] strings =
+                { "PEAP", "TLS", "TTLS", "PWD", "SIM", "AKA", "AKA'", "WFA-UNAUTH-TLS" };
 
         /** Prevent initialization */
         private Eap() {}
