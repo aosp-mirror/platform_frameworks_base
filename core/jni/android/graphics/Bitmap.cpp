@@ -1087,6 +1087,8 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
     p->writeInt32(density);
 
     if (bitmap.colorType() == kIndex_8_SkColorType) {
+        // The bitmap needs to be locked to access its color table.
+        SkAutoLockPixels alp(bitmap);
         SkColorTable* ctable = bitmap.getColorTable();
         if (ctable != NULL) {
             int count = ctable->count();
