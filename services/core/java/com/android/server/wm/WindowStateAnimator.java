@@ -471,16 +471,31 @@ class WindowStateAnimator {
         if (WindowManagerService.localLOGV) Slog.v(
                 TAG, "Exit animation finished in " + this
                 + ": remove=" + mWin.mRemoveOnExit);
-        if (hasSurface()) {
-            mService.mDestroySurface.add(mWin);
-            mWin.mDestroying = true;
-            hide("finishExit");
+
+
+        mWin.mDestroying = true;
+
+        // If we have an app token, we ask it to destroy the surface for us,
+        // so that it can take care to ensure the activity has actually stopped
+        // and the surface is not still in use. Otherwise we add the service to
+        // mDestroySurface and allow it to be processed in our next transaction.
+        if (mWin.mAppToken != null) {
+            if (hasSurface()) {
+                hide("finishExit");
+            }
+            mWin.mAppToken.destroySurfaces();
+        } else {
+            if (hasSurface()) {
+                mService.mDestroySurface.add(mWin);
+                hide("finishExit");
+            }
+            mWin.mExiting = false;
+            if (mWin.mRemoveOnExit) {
+                mService.mPendingRemove.add(mWin);
+                mWin.mRemoveOnExit = false;
+            }
         }
-        mWin.mExiting = false;
-        if (mWin.mRemoveOnExit) {
-            mService.mPendingRemove.add(mWin);
-            mWin.mRemoveOnExit = false;
-        }
+
         mWallpaperControllerLocked.hideWallpapers(mWin);
     }
 
