@@ -2697,6 +2697,9 @@
     <public type="attr" name="endY" />
     <public type="attr" name="offset" />
     <public type="attr" name="abiOverride" />
+    <public type="attr" name="bitmap" />
+    <public type="attr" name="hotSpotX" />
+    <public type="attr" name="hotSpotY" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />

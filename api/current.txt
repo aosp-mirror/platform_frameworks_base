@@ -305,6 +305,7 @@ package android {
     field public static final int baselineAlignBottom = 16843042; // 0x1010122
     field public static final int baselineAligned = 16843046; // 0x1010126
     field public static final int baselineAlignedChildIndex = 16843047; // 0x1010127
+    field public static final int bitmap = 16844055; // 0x1010517
     field public static final int borderlessButtonStyle = 16843563; // 0x101032b
     field public static final int bottom = 16843184; // 0x10101b0
     field public static final int bottomBright = 16842957; // 0x10100cd
@@ -646,6 +647,8 @@ package android {
     field public static final int horizontalScrollViewStyle = 16843603; // 0x1010353
     field public static final int horizontalSpacing = 16843028; // 0x1010114
     field public static final int host = 16842792; // 0x1010028
+    field public static final int hotSpotX = 16844056; // 0x1010518
+    field public static final int hotSpotY = 16844057; // 0x1010519
     field public static final int hyphenationFrequency = 16843998; // 0x10104de
     field public static final int icon = 16842754; // 0x1010002
     field public static final int iconPreview = 16843337; // 0x1010249
