@@ -17,8 +17,10 @@
 #include "AppInfo.h"
 #include "Debug.h"
 #include "Flags.h"
+#include "Locale.h"
 #include "NameMangler.h"
 #include "compile/IdAssigner.h"
+#include "filter/ConfigFilter.h"
 #include "flatten/Archive.h"
 #include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
@@ -64,7 +66,7 @@ struct LinkOptions {
     std::vector<std::string> extensionsToNotCompress;
     Maybe<std::u16string> privateSymbols;
     ManifestFixerOptions manifestFixerOptions;
-
+    IConfigFilter* configFilter = nullptr;
 };
 
 struct LinkContext : public IAaptContext {
@@ -97,8 +99,8 @@ struct LinkContext : public IAaptContext {
 
 class LinkCommand {
 public:
-    LinkCommand(const LinkOptions& options) :
-            mOptions(options), mContext(), mFinalTable(), mFileCollection(nullptr) {
+    LinkCommand(LinkContext* context, const LinkOptions& options) :
+            mOptions(options), mContext(context), mFinalTable(), mFileCollection(nullptr) {
         std::unique_ptr<io::FileCollection> fileCollection =
                 util::make_unique<io::FileCollection>();
 
@@ -117,14 +119,14 @@ public:
         AssetManagerSymbolTableBuilder builder;
         for (const std::string& path : mOptions.includePaths) {
             if (mOptions.verbose) {
-                mContext.getDiagnostics()->note(DiagMessage(path) << "loading include path");
+                mContext->getDiagnostics()->note(DiagMessage(path) << "loading include path");
             }
 
             std::unique_ptr<android::AssetManager> assetManager =
                     util::make_unique<android::AssetManager>();
             int32_t cookie = 0;
             if (!assetManager->addAssetPath(android::String8(path.data(), path.size()), &cookie)) {
-                mContext.getDiagnostics()->error(
+                mContext->getDiagnostics()->error(
                         DiagMessage(path) << "failed to load include path");
                 return {};
             }
@@ -135,7 +137,7 @@ public:
 
     std::unique_ptr<ResourceTable> loadTable(const Source& source, const void* data, size_t len) {
         std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-        BinaryResourceParser parser(&mContext, table.get(), source, data, len);
+        BinaryResourceParser parser(mContext, table.get(), source, data, len);
         if (!parser.parse()) {
             return {};
         }
@@ -207,7 +209,7 @@ public:
                            IArchiveWriter* writer) {
         std::unique_ptr<io::IData> data = file->openAsData();
         if (!data) {
-            mContext.getDiagnostics()->error(DiagMessage(file->getSource())
+            mContext->getDiagnostics()->error(DiagMessage(file->getSource())
                                              << "failed to open file");
             return false;
         }
@@ -215,7 +217,7 @@ public:
         std::string errorStr;
         ssize_t offset = getWrappedDataOffset(data->data(), data->size(), &errorStr);
         if (offset < 0) {
-            mContext.getDiagnostics()->error(DiagMessage(file->getSource()) << errorStr);
+            mContext->getDiagnostics()->error(DiagMessage(file->getSource()) << errorStr);
             return false;
         }
 
@@ -228,7 +230,7 @@ public:
             }
         }
 
-        mContext.getDiagnostics()->error(
+        mContext->getDiagnostics()->error(
                 DiagMessage(mOptions.outputPath) << "failed to write file " << outPath);
         return false;
     }
@@ -252,9 +254,9 @@ public:
      */
     bool verifyNoExternalPackages() {
         auto isExtPackageFunc = [&](const std::unique_ptr<ResourceTablePackage>& pkg) -> bool {
-            return mContext.getCompilationPackage() != pkg->name ||
+            return mContext->getCompilationPackage() != pkg->name ||
                     !pkg->id ||
-                    pkg->id.value() != mContext.getPackageId();
+                    pkg->id.value() != mContext->getPackageId();
         };
 
         bool error = false;
@@ -270,13 +272,13 @@ public:
                             // 'android' package. This is due to legacy reasons.
                             if (valueCast<Id>(configValue.value.get()) &&
                                     package->name == u"android") {
-                                mContext.getDiagnostics()->warn(
+                                mContext->getDiagnostics()->warn(
                                         DiagMessage(configValue.value->getSource())
                                         << "generated id '" << resName
                                         << "' for external package '" << package->name
                                         << "'");
                             } else {
-                                mContext.getDiagnostics()->error(
+                                mContext->getDiagnostics()->error(
                                         DiagMessage(configValue.value->getSource())
                                         << "defined resource '" << resName
                                         << "' for external package '" << package->name
@@ -297,9 +299,9 @@ public:
 
     std::unique_ptr<IArchiveWriter> makeArchiveWriter() {
         if (mOptions.outputToDirectory) {
-            return createDirectoryArchiveWriter(mContext.getDiagnostics(), mOptions.outputPath);
+            return createDirectoryArchiveWriter(mContext->getDiagnostics(), mOptions.outputPath);
         } else {
-            return createZipFileArchiveWriter(mContext.getDiagnostics(), mOptions.outputPath);
+            return createZipFileArchiveWriter(mContext->getDiagnostics(), mOptions.outputPath);
         }
     }
 
@@ -308,7 +310,7 @@ public:
         TableFlattenerOptions options = {};
         options.useExtendedChunks = mOptions.staticLib;
         TableFlattener flattener(&buffer, options);
-        if (!flattener.consume(&mContext, table)) {
+        if (!flattener.consume(mContext, table)) {
             return false;
         }
 
@@ -320,7 +322,7 @@ public:
             }
         }
 
-        mContext.getDiagnostics()->error(
+        mContext->getDiagnostics()->error(
                 DiagMessage() << "failed to write resources.arsc to archive");
         return false;
     }
@@ -332,7 +334,7 @@ public:
         options.keepRawValues = mOptions.staticLib;
         options.maxSdkLevel = maxSdkLevel;
         XmlFlattener flattener(&buffer, options);
-        if (!flattener.consume(&mContext, xmlRes)) {
+        if (!flattener.consume(mContext, xmlRes)) {
             return false;
         }
 
@@ -343,7 +345,7 @@ public:
                 }
             }
         }
-        mContext.getDiagnostics()->error(
+        mContext->getDiagnostics()->error(
                 DiagMessage() << "failed to write " << path << " to archive");
         return false;
     }
@@ -361,13 +363,13 @@ public:
 
         std::ofstream fout(outPath, std::ofstream::binary);
         if (!fout) {
-            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
             return false;
         }
 
         JavaClassGenerator generator(table, javaOptions);
         if (!generator.generate(packageNameToGenerate, outPackage, &fout)) {
-            mContext.getDiagnostics()->error(DiagMessage(outPath) << generator.getError());
+            mContext->getDiagnostics()->error(DiagMessage(outPath) << generator.getError());
             return false;
         }
         return true;
@@ -380,24 +382,24 @@ public:
 
         std::string outPath = mOptions.generateJavaClassPath.value();
         file::appendPath(&outPath,
-                         file::packageToPath(util::utf16ToUtf8(mContext.getCompilationPackage())));
+                         file::packageToPath(util::utf16ToUtf8(mContext->getCompilationPackage())));
         file::mkdirs(outPath);
         file::appendPath(&outPath, "Manifest.java");
 
         std::ofstream fout(outPath, std::ofstream::binary);
         if (!fout) {
-            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
             return false;
         }
 
         ManifestClassGenerator generator;
-        if (!generator.generate(mContext.getDiagnostics(), mContext.getCompilationPackage(),
+        if (!generator.generate(mContext->getDiagnostics(), mContext->getCompilationPackage(),
                                 manifestXml, &fout)) {
             return false;
         }
 
         if (!fout) {
-            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
             return false;
         }
         return true;
@@ -410,13 +412,13 @@ public:
 
         std::ofstream fout(mOptions.generateProguardRulesPath.value(), std::ofstream::binary);
         if (!fout) {
-            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
             return false;
         }
 
         proguard::writeKeepSet(&fout, keepSet);
         if (!fout) {
-            mContext.getDiagnostics()->error(DiagMessage() << strerror(errno));
+            mContext->getDiagnostics()->error(DiagMessage() << strerror(errno));
             return false;
         }
         return true;
@@ -425,7 +427,7 @@ public:
     bool mergeStaticLibrary(const std::string& input) {
         // TODO(adamlesinski): Load resources from a static library APK and merge the table into
         // TableMerger.
-        mContext.getDiagnostics()->warn(DiagMessage()
+        mContext->getDiagnostics()->warn(DiagMessage()
                                         << "linking static libraries not supported yet: "
                                         << input);
         return true;
@@ -433,12 +435,12 @@ public:
 
     bool mergeResourceTable(io::IFile* file, bool override) {
         if (mOptions.verbose) {
-            mContext.getDiagnostics()->note(DiagMessage() << "linking " << file->getSource());
+            mContext->getDiagnostics()->note(DiagMessage() << "linking " << file->getSource());
         }
 
         std::unique_ptr<io::IData> data = file->openAsData();
         if (!data) {
-            mContext.getDiagnostics()->error(DiagMessage(file->getSource())
+            mContext->getDiagnostics()->error(DiagMessage(file->getSource())
                                              << "failed to open file");
             return false;
         }
@@ -460,7 +462,7 @@ public:
 
     bool mergeCompiledFile(io::IFile* file, std::unique_ptr<ResourceFile> fileDesc, bool overlay) {
         if (mOptions.verbose) {
-            mContext.getDiagnostics()->note(DiagMessage() << "adding " << file->getSource());
+            mContext->getDiagnostics()->note(DiagMessage() << "adding " << file->getSource());
         }
 
         bool result = false;
@@ -477,12 +479,12 @@ public:
         // Add the exports of this file to the table.
         for (SourcedResourceName& exportedSymbol : fileDesc->exportedSymbols) {
             if (exportedSymbol.name.package.empty()) {
-                exportedSymbol.name.package = mContext.getCompilationPackage().toString();
+                exportedSymbol.name.package = mContext->getCompilationPackage().toString();
             }
 
             ResourceNameRef resName = exportedSymbol.name;
 
-            Maybe<ResourceName> mangledName = mContext.getNameMangler()->mangleName(
+            Maybe<ResourceName> mangledName = mContext->getNameMangler()->mangleName(
                     exportedSymbol.name);
             if (mangledName) {
                 resName = mangledName.value();
@@ -491,7 +493,7 @@ public:
             std::unique_ptr<Id> id = util::make_unique<Id>();
             id->setSource(fileDesc->source.withLine(exportedSymbol.line));
             bool result = mFinalTable.addResourceAllowMangled(resName, {}, std::move(id),
-                                                              mContext.getDiagnostics());
+                                                              mContext->getDiagnostics());
             if (!result) {
                 return false;
             }
@@ -507,7 +509,7 @@ public:
         std::unique_ptr<io::ZipFileCollection> collection = io::ZipFileCollection::create(
                 input, &errorStr);
         if (!collection) {
-            mContext.getDiagnostics()->error(DiagMessage(input) << errorStr);
+            mContext->getDiagnostics()->error(DiagMessage(input) << errorStr);
             return false;
         }
 
@@ -543,12 +545,12 @@ public:
             // Try opening the file and looking for an Export header.
             std::unique_ptr<io::IData> data = file->openAsData();
             if (!data) {
-                mContext.getDiagnostics()->error(DiagMessage(src) << "failed to open");
+                mContext->getDiagnostics()->error(DiagMessage(src) << "failed to open");
                 return false;
             }
 
             std::unique_ptr<ResourceFile> resourceFile = loadFileExportHeader(
-                    src, data->data(), data->size(), mContext.getDiagnostics());
+                    src, data->data(), data->size(), mContext->getDiagnostics());
             if (resourceFile) {
                 return mergeCompiledFile(file, std::move(resourceFile), override);
             }
@@ -564,62 +566,63 @@ public:
     int run(const std::vector<std::string>& inputFiles) {
         // Load the AndroidManifest.xml
         std::unique_ptr<xml::XmlResource> manifestXml = loadXml(mOptions.manifestPath,
-                                                                mContext.getDiagnostics());
+                                                                mContext->getDiagnostics());
         if (!manifestXml) {
             return 1;
         }
 
         if (Maybe<AppInfo> maybeAppInfo = extractAppInfoFromManifest(manifestXml.get())) {
-            mContext.mCompilationPackage = maybeAppInfo.value().package;
+            mContext->mCompilationPackage = maybeAppInfo.value().package;
         } else {
-            mContext.getDiagnostics()->error(DiagMessage(mOptions.manifestPath)
+            mContext->getDiagnostics()->error(DiagMessage(mOptions.manifestPath)
                                              << "no package specified in <manifest> tag");
             return 1;
         }
 
-        if (!util::isJavaPackageName(mContext.mCompilationPackage)) {
-            mContext.getDiagnostics()->error(DiagMessage(mOptions.manifestPath)
+        if (!util::isJavaPackageName(mContext->mCompilationPackage)) {
+            mContext->getDiagnostics()->error(DiagMessage(mOptions.manifestPath)
                                              << "invalid package name '"
-                                             << mContext.mCompilationPackage
+                                             << mContext->mCompilationPackage
                                              << "'");
             return 1;
         }
 
-        mContext.mNameMangler = util::make_unique<NameMangler>(
-                NameManglerPolicy{ mContext.mCompilationPackage });
+        mContext->mNameMangler = util::make_unique<NameMangler>(
+                NameManglerPolicy{ mContext->mCompilationPackage });
 
-        if (mContext.mCompilationPackage == u"android") {
-            mContext.mPackageId = 0x01;
+        if (mContext->mCompilationPackage == u"android") {
+            mContext->mPackageId = 0x01;
         } else {
-            mContext.mPackageId = 0x7f;
+            mContext->mPackageId = 0x7f;
         }
 
-        mContext.mSymbols = createSymbolTableFromIncludePaths();
-        if (!mContext.mSymbols) {
+        mContext->mSymbols = createSymbolTableFromIncludePaths();
+        if (!mContext->mSymbols) {
             return 1;
         }
 
         TableMergerOptions tableMergerOptions;
         tableMergerOptions.autoAddOverlay = mOptions.autoAddOverlay;
-        mTableMerger = util::make_unique<TableMerger>(&mContext, &mFinalTable, tableMergerOptions);
+        tableMergerOptions.filter = mOptions.configFilter;
+        mTableMerger = util::make_unique<TableMerger>(mContext, &mFinalTable, tableMergerOptions);
 
         if (mOptions.verbose) {
-            mContext.getDiagnostics()->note(
-                    DiagMessage() << "linking package '" << mContext.mCompilationPackage << "' "
-                                  << "with package ID " << std::hex << (int) mContext.mPackageId);
+            mContext->getDiagnostics()->note(
+                    DiagMessage() << "linking package '" << mContext->mCompilationPackage << "' "
+                                  << "with package ID " << std::hex << (int) mContext->mPackageId);
         }
 
 
         for (const std::string& input : inputFiles) {
             if (!processFile(input, false)) {
-                mContext.getDiagnostics()->error(DiagMessage() << "failed parsing input");
+                mContext->getDiagnostics()->error(DiagMessage() << "failed parsing input");
                 return 1;
             }
         }
 
         for (const std::string& input : mOptions.overlayFiles) {
             if (!processFile(input, true)) {
-                mContext.getDiagnostics()->error(DiagMessage() << "failed parsing overlays");
+                mContext->getDiagnostics()->error(DiagMessage() << "failed parsing overlays");
                 return 1;
             }
         }
@@ -630,8 +633,8 @@ public:
 
         if (!mOptions.staticLib) {
             PrivateAttributeMover mover;
-            if (!mover.consume(&mContext, &mFinalTable)) {
-                mContext.getDiagnostics()->error(
+            if (!mover.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(
                         DiagMessage() << "failed moving private attributes");
                 return 1;
             }
@@ -639,23 +642,23 @@ public:
 
         {
             IdAssigner idAssigner;
-            if (!idAssigner.consume(&mContext, &mFinalTable)) {
-                mContext.getDiagnostics()->error(DiagMessage() << "failed assigning IDs");
+            if (!idAssigner.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed assigning IDs");
                 return 1;
             }
         }
 
-        mContext.mNameMangler = util::make_unique<NameMangler>(NameManglerPolicy{
-                mContext.mCompilationPackage, mTableMerger->getMergedPackages() });
-        mContext.mSymbols = JoinedSymbolTableBuilder()
+        mContext->mNameMangler = util::make_unique<NameMangler>(NameManglerPolicy{
+                mContext->mCompilationPackage, mTableMerger->getMergedPackages() });
+        mContext->mSymbols = JoinedSymbolTableBuilder()
                 .addSymbolTable(util::make_unique<SymbolTableWrapper>(&mFinalTable))
-                .addSymbolTable(std::move(mContext.mSymbols))
+                .addSymbolTable(std::move(mContext->mSymbols))
                 .build();
 
         {
             ReferenceLinker linker;
-            if (!linker.consume(&mContext, &mFinalTable)) {
-                mContext.getDiagnostics()->error(DiagMessage() << "failed linking references");
+            if (!linker.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed linking references");
                 return 1;
             }
         }
@@ -664,24 +667,24 @@ public:
 
         std::unique_ptr<IArchiveWriter> archiveWriter = makeArchiveWriter();
         if (!archiveWriter) {
-            mContext.getDiagnostics()->error(DiagMessage() << "failed to create archive");
+            mContext->getDiagnostics()->error(DiagMessage() << "failed to create archive");
             return 1;
         }
 
         bool error = false;
         {
             ManifestFixer manifestFixer(mOptions.manifestFixerOptions);
-            if (!manifestFixer.consume(&mContext, manifestXml.get())) {
+            if (!manifestFixer.consume(mContext, manifestXml.get())) {
                 error = true;
             }
 
             // AndroidManifest.xml has no resource name, but the CallSite is built from the name
             // (aka, which package the AndroidManifest.xml is coming from).
             // So we give it a package name so it can see local resources.
-            manifestXml->file.name.package = mContext.getCompilationPackage().toString();
+            manifestXml->file.name.package = mContext->getCompilationPackage().toString();
 
             XmlReferenceLinker manifestLinker;
-            if (manifestLinker.consume(&mContext, manifestXml.get())) {
+            if (manifestLinker.consume(mContext, manifestXml.get())) {
                 if (!proguard::collectProguardRulesForManifest(Source(mOptions.manifestPath),
                                                                manifestXml.get(),
                                                                &proguardKeepSet)) {
@@ -704,7 +707,7 @@ public:
         }
 
         if (error) {
-            mContext.getDiagnostics()->error(DiagMessage() << "failed processing manifest");
+            mContext->getDiagnostics()->error(DiagMessage() << "failed processing manifest");
             return 1;
         }
 
@@ -718,13 +721,13 @@ public:
                     (util::stringEndsWith<char>(path, ".xml.flat") ||
                     util::stringEndsWith<char>(path, ".xml"))) {
                 if (mOptions.verbose) {
-                    mContext.getDiagnostics()->note(DiagMessage() << "linking " << path);
+                    mContext->getDiagnostics()->note(DiagMessage() << "linking " << path);
                 }
 
                 io::IFile* file = fileToMerge.file;
                 std::unique_ptr<io::IData> data = file->openAsData();
                 if (!data) {
-                    mContext.getDiagnostics()->error(DiagMessage(file->getSource())
+                    mContext->getDiagnostics()->error(DiagMessage(file->getSource())
                                                      << "failed to open file");
                     return 1;
                 }
@@ -733,9 +736,9 @@ public:
                 if (util::stringEndsWith<char>(path, ".flat")) {
                     xmlRes = loadBinaryXmlSkipFileExport(file->getSource(),
                                                          data->data(), data->size(),
-                                                         mContext.getDiagnostics());
+                                                         mContext->getDiagnostics());
                 } else {
-                    xmlRes = xml::inflate(data->data(), data->size(), mContext.getDiagnostics(),
+                    xmlRes = xml::inflate(data->data(), data->size(), mContext->getDiagnostics(),
                                           file->getSource());
                 }
 
@@ -751,7 +754,7 @@ public:
                 };
 
                 XmlReferenceLinker xmlLinker;
-                if (xmlLinker.consume(&mContext, xmlRes.get())) {
+                if (xmlLinker.consume(mContext, xmlRes.get())) {
                     if (!proguard::collectProguardRules(xmlRes->file.source, xmlRes.get(),
                                                         &proguardKeepSet)) {
                         error = true;
@@ -778,14 +781,14 @@ public:
                                 xmlRes->file.config.sdkVersion = sdkLevel;
 
                                 std::string genResourcePath = ResourceUtils::buildResourceFileName(
-                                        xmlRes->file, mContext.getNameMangler());
+                                        xmlRes->file, mContext->getNameMangler());
 
                                 bool added = mFinalTable.addFileReference(
                                         xmlRes->file.name,
                                         xmlRes->file.config,
                                         xmlRes->file.source,
                                         util::utf8ToUtf16(genResourcePath),
-                                        mContext.getDiagnostics());
+                                        mContext->getDiagnostics());
                                 if (!added) {
                                     error = true;
                                     continue;
@@ -804,7 +807,7 @@ public:
                 }
             } else {
                 if (mOptions.verbose) {
-                    mContext.getDiagnostics()->note(DiagMessage() << "copying " << path);
+                    mContext->getDiagnostics()->note(DiagMessage() << "copying " << path);
                 }
 
                 if (!copyFileToArchive(fileToMerge.file, fileToMerge.dstPath,
@@ -815,20 +818,20 @@ public:
         }
 
         if (error) {
-            mContext.getDiagnostics()->error(DiagMessage() << "failed linking file resources");
+            mContext->getDiagnostics()->error(DiagMessage() << "failed linking file resources");
             return 1;
         }
 
         if (!mOptions.noAutoVersion) {
             AutoVersioner versioner;
-            if (!versioner.consume(&mContext, &mFinalTable)) {
-                mContext.getDiagnostics()->error(DiagMessage() << "failed versioning styles");
+            if (!versioner.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed versioning styles");
                 return 1;
             }
         }
 
         if (!flattenTable(&mFinalTable, archiveWriter.get())) {
-            mContext.getDiagnostics()->error(DiagMessage() << "failed to write resources.arsc");
+            mContext->getDiagnostics()->error(DiagMessage() << "failed to write resources.arsc");
             return 1;
         }
 
@@ -840,8 +843,8 @@ public:
                 options.useFinal = false;
             }
 
-            const StringPiece16 actualPackage = mContext.getCompilationPackage();
-            StringPiece16 outputPackage = mContext.getCompilationPackage();
+            const StringPiece16 actualPackage = mContext->getCompilationPackage();
+            StringPiece16 outputPackage = mContext->getCompilationPackage();
             if (mOptions.customJavaPackage) {
                 // Override the output java package to the custom one.
                 outputPackage = mOptions.customJavaPackage.value();
@@ -852,7 +855,7 @@ public:
                 // to the original package, and private and public symbols to the private package.
 
                 options.types = JavaClassGeneratorOptions::SymbolTypes::kPublic;
-                if (!writeJavaFile(&mFinalTable, mContext.getCompilationPackage(),
+                if (!writeJavaFile(&mFinalTable, mContext->getCompilationPackage(),
                                    outputPackage, options)) {
                     return 1;
                 }
@@ -886,7 +889,7 @@ public:
 
 private:
     LinkOptions mOptions;
-    LinkContext mContext;
+    LinkContext* mContext;
     ResourceTable mFinalTable;
 
     ResourceTable mLocalFileTable;
@@ -907,6 +910,7 @@ int link(const std::vector<StringPiece>& args) {
     Maybe<std::string> versionCode, versionName;
     Maybe<std::string> customJavaPackage;
     std::vector<std::string> extraJavaPackages;
+    Maybe<std::string> configs;
     bool legacyXFlag = false;
     bool requireLocalization = false;
     Flags flags = Flags()
@@ -928,6 +932,8 @@ int link(const std::vector<StringPiece>& args) {
                             &legacyXFlag)
             .optionalSwitch("-z", "Require localization of strings marked 'suggested'",
                             &requireLocalization)
+            .optionalFlag("-c", "Comma separated list of configurations to include. The default\n"
+                                "is all configurations", &configs)
             .optionalSwitch("--output-to-dir", "Outputs the APK contents to a directory specified "
                             "by -o",
                             &options.outputToDirectory)
@@ -966,6 +972,8 @@ int link(const std::vector<StringPiece>& args) {
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
         return 1;
     }
+
+    LinkContext context;
 
     if (privateSymbolsPackage) {
         options.privateSymbols = util::utf8ToUtf16(privateSymbolsPackage.value());
@@ -1011,7 +1019,31 @@ int link(const std::vector<StringPiece>& args) {
         }
     }
 
-    LinkCommand cmd(options);
+    AxisConfigFilter filter;
+    if (configs) {
+        for (const StringPiece& configStr : util::tokenize<char>(configs.value(), ',')) {
+            ConfigDescription config;
+            LocaleValue lv;
+            if (lv.initFromFilterString(configStr)) {
+                lv.writeTo(&config);
+            } else if (!ConfigDescription::parse(configStr, &config)) {
+                context.getDiagnostics()->error(
+                        DiagMessage() << "invalid config '" << configStr << "' for -c option");
+                return 1;
+            }
+
+            if (config.density != 0) {
+                context.getDiagnostics()->warn(
+                        DiagMessage() << "ignoring density '" << config << "' for -c option");
+            } else {
+                filter.addConfig(config);
+            }
+        }
+
+        options.configFilter = &filter;
+    }
+
+    LinkCommand cmd(&context, options);
     return cmd.run(flags.getArgs());
 }
 

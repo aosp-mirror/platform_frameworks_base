@@ -84,6 +84,11 @@ public:
                         util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
     }
 
+    ResourceTableBuilder& addFileReference(const StringPiece16& name, const StringPiece16& path,
+                                           const ConfigDescription& config) {
+        return addValue(name, {}, config,
+                        util::make_unique<FileReference>(mTable->stringPool.makeRef(path)));
+    }
 
     ResourceTableBuilder& addValue(const StringPiece16& name,
                                    std::unique_ptr<Value> value) {

@@ -30,6 +30,7 @@ sources := \
 	compile/PseudolocaleGenerator.cpp \
 	compile/Pseudolocalizer.cpp \
 	compile/XmlIdCollector.cpp \
+	filter/ConfigFilter.cpp \
 	flatten/Archive.cpp \
 	flatten/TableFlattener.cpp \
 	flatten/XmlFlattener.cpp \
@@ -71,6 +72,7 @@ testSources := \
 	compile/PseudolocaleGenerator_test.cpp \
 	compile/Pseudolocalizer_test.cpp \
 	compile/XmlIdCollector_test.cpp \
+	filter/ConfigFilter_test.cpp \
 	flatten/FileExportWriter_test.cpp \
 	flatten/TableFlattener_test.cpp \
 	flatten/XmlFlattener_test.cpp \

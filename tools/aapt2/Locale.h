@@ -17,6 +17,8 @@
 #ifndef AAPT_LOCALE_VALUE_H
 #define AAPT_LOCALE_VALUE_H
 
+#include "util/StringPiece.h"
+
 #include <androidfw/ResourceTypes.h>
 #include <string>
 #include <vector>
@@ -37,7 +39,7 @@ struct LocaleValue {
     /**
      * Initialize this LocaleValue from a config string.
      */
-    bool initFromFilterString(const std::string& config);
+    bool initFromFilterString(const StringPiece& config);
 
     /**
      * Initialize this LocaleValue from parts of a vector.
