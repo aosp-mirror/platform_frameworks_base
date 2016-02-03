@@ -17,7 +17,6 @@
 package com.android.server.usage;
 
 import android.app.usage.TimeSparseArray;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.Build;
 import android.util.AtomicFile;
@@ -45,7 +44,7 @@ class UsageStatsDatabase {
     private static final int CURRENT_VERSION = 3;
 
     // Current version of the backup schema
-    static final int BACKUP_STATE_VERSION = 1;
+    static final int BACKUP_VERSION = 1;
 
     // Key under which the payload blob is stored
     // same as UsageStatsBackupHelper.KEY_USAGE_STATS
@@ -536,6 +535,7 @@ class UsageStatsDatabase {
      * Update the stats in the database. They may not be written to disk immediately.
      */
     public void putUsageStats(int intervalType, IntervalStats stats) throws IOException {
+        if (stats == null) return;
         synchronized (mLock) {
             if (intervalType < 0 || intervalType >= mIntervalDirs.length) {
                 throw new IllegalArgumentException("Bad interval type " + intervalType);
@@ -555,36 +555,44 @@ class UsageStatsDatabase {
 
 
     /* Backup/Restore Code */
-    protected byte[] getBackupPayload(String key){
+    byte[] getBackupPayload(String key) {
         synchronized (mLock) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             if (KEY_USAGE_STATS.equals(key)) {
                 prune(System.currentTimeMillis());
                 DataOutputStream out = new DataOutputStream(baos);
                 try {
-                    out.writeInt(BACKUP_STATE_VERSION);
+                    out.writeInt(BACKUP_VERSION);
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size());
-                    for(int i = 0; i<mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size(); i++){
-                        writeIntervalStatsToStream(out, mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].valueAt(i));
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY].valueAt(i));
                     }
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size());
-                    for(int i = 0; i<mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size(); i++){
-                        writeIntervalStatsToStream(out, mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].valueAt(i));
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_WEEKLY].valueAt(i));
                     }
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size());
-                    for(int i = 0; i<mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size(); i++){
-                        writeIntervalStatsToStream(out, mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].valueAt(i));
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_MONTHLY].valueAt(i));
                     }
 
                     out.writeInt(mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size());
-                    for(int i = 0; i<mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size(); i++){
-                        writeIntervalStatsToStream(out, mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].valueAt(i));
+                    for (int i = 0; i < mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].size();
+                            i++) {
+                        writeIntervalStatsToStream(out,
+                                mSortedStatFiles[UsageStatsManager.INTERVAL_YEARLY].valueAt(i));
                     }
                     if (DEBUG) Slog.i(TAG, "Written " + baos.size() + " bytes of data");
-                } catch (IOException ioe){
+                } catch (IOException ioe) {
                     Slog.d(TAG, "Failed to write data to output stream", ioe);
                     baos.reset();
                 }
@@ -594,55 +602,63 @@ class UsageStatsDatabase {
 
     }
 
-    protected void applyRestoredPayload(String key, byte[] payload){
+    void applyRestoredPayload(String key, byte[] payload) {
         synchronized (mLock) {
             if (KEY_USAGE_STATS.equals(key)) {
                 // Read stats files for the current device configs
-                IntervalStats dailyConfigSource = getLatestUsageStats(UsageStatsManager.INTERVAL_DAILY);
-                IntervalStats weeklyConfigSource = getLatestUsageStats(UsageStatsManager.INTERVAL_WEEKLY);
-                IntervalStats monthlyConfigSource = getLatestUsageStats(UsageStatsManager.INTERVAL_MONTHLY);
-                IntervalStats yearlyConfigSource = getLatestUsageStats(UsageStatsManager.INTERVAL_YEARLY);
+                IntervalStats dailyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_DAILY);
+                IntervalStats weeklyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_WEEKLY);
+                IntervalStats monthlyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_MONTHLY);
+                IntervalStats yearlyConfigSource =
+                        getLatestUsageStats(UsageStatsManager.INTERVAL_YEARLY);
 
-                // Delete all stats files
-                for(int i = 0; i<mIntervalDirs.length; i++){
-                    deleteDirectoryContents(mIntervalDirs[i]);
-                }
                 try {
                     DataInputStream in = new DataInputStream(new ByteArrayInputStream(payload));
-                    int stateVersion = in.readInt();
+                    int backupDataVersion = in.readInt();
+
+                    // Can't handle this backup set
+                    if (backupDataVersion < 1 || backupDataVersion > BACKUP_VERSION) return;
+
+                    // Delete all stats files
+                    // Do this after reading version and before actually restoring
+                    for (int i = 0; i < mIntervalDirs.length; i++) {
+                        deleteDirectoryContents(mIntervalDirs[i]);
+                    }
 
                     int fileCount = in.readInt();
-                    for(int i = 0; i<fileCount; i++){
+                    for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
                         stats = mergeStats(stats, dailyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_DAILY, stats);
                     }
 
                     fileCount = in.readInt();
-                    for(int i = 0; i<fileCount; i++){
+                    for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
                         stats = mergeStats(stats, weeklyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_WEEKLY, stats);
                     }
 
                     fileCount = in.readInt();
-                    for(int i = 0; i<fileCount; i++){
+                    for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
                         stats = mergeStats(stats, monthlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_MONTHLY, stats);
                     }
 
                     fileCount = in.readInt();
-                    for(int i = 0; i<fileCount; i++){
+                    for (int i = 0; i < fileCount; i++) {
                         IntervalStats stats = deserializeIntervalStats(getIntervalStatsBytes(in));
                         stats = mergeStats(stats, yearlyConfigSource);
                         putUsageStats(UsageStatsManager.INTERVAL_YEARLY, stats);
                     }
                     if (DEBUG) Slog.i(TAG, "Completed Restoring UsageStats");
-                } catch (IOException ioe){
+                } catch (IOException ioe) {
                     Slog.d(TAG, "Failed to read data from input stream", ioe);
-                }
-                finally {
+                } finally {
                     indexFilesLocked();
                 }
             }
@@ -654,13 +670,16 @@ class UsageStatsDatabase {
      * with the backed up usage statistics.
      */
     private IntervalStats mergeStats(IntervalStats beingRestored, IntervalStats onDevice) {
+        if (onDevice == null) return beingRestored;
+        if (beingRestored == null) return null;
         beingRestored.activeConfiguration = onDevice.activeConfiguration;
         beingRestored.configurations.putAll(onDevice.configurations);
         beingRestored.events = onDevice.events;
         return beingRestored;
     }
 
-    private void writeIntervalStatsToStream(DataOutputStream out, AtomicFile statsFile) throws IOException{
+    private void writeIntervalStatsToStream(DataOutputStream out, AtomicFile statsFile)
+            throws IOException {
         IntervalStats stats = new IntervalStats();
         try {
             UsageStatsXml.read(statsFile, stats);
@@ -716,7 +735,7 @@ class UsageStatsDatabase {
         return stats;
     }
 
-    private static void deleteDirectoryContents(File directory){
+    private static void deleteDirectoryContents(File directory) {
         File[] files = directory.listFiles();
         for (File file : files) {
             deleteDirectory(file);
@@ -725,11 +744,13 @@ class UsageStatsDatabase {
 
     private static void deleteDirectory(File directory) {
         File[] files = directory.listFiles();
-        for (File file : files) {
-            if (!file.isDirectory()) {
-                file.delete();
-            } else {
-                deleteDirectory(file);
+        if (files != null) {
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                } else {
+                    deleteDirectory(file);
+                }
             }
         }
         directory.delete();
