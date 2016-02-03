@@ -1817,6 +1817,18 @@ public class LocationManager {
     }
 
     /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #registerGnssMeasurementCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+        return false;
+    }
+
+    /**
      * Registers a GPS Measurement callback.
      *
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
@@ -1841,12 +1853,35 @@ public class LocationManager {
     }
 
     /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #unregisterGnssMeasurementCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+    }
+
+    /**
      * Unregisters a GPS Measurement callback.
      *
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to remove.
      */
     public void unregisterGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback) {
         mGnssMeasurementCallbackTransport.remove(callback);
+    }
+
+    /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #registerGnssNavigationMessageCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
+        return false;
     }
 
     /**
@@ -1883,7 +1918,18 @@ public class LocationManager {
         mGnssNavigationMessageCallbackTransport.remove(callback);
     }
 
-     /**
+    /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #unregisterGnssNavigationMessageCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public void removeGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
+    }
+
+    /**
      * Retrieves information about the current status of the GPS engine.
      * This should only be called from the {@link GpsStatus.Listener#onGpsStatusChanged}
      * callback to ensure that the data is copied atomically.
