@@ -26,7 +26,8 @@
     <string name="menu_list" msgid="7279285939892417279">"အစဉ်လိုက်မြင်ကွင်း"</string>
     <string name="menu_sort" msgid="7677740407158414452">"အစဉ်အလိုက် စီခြင်း"</string>
     <string name="menu_search" msgid="3816712084502856974">"ရှာဖွေရန်"</string>
-    <string name="menu_settings" msgid="6008033148948428823">"ဆက်တင်များ"</string>
+    <!-- no translation found for menu_settings (8239065133341597825) -->
+    <skip />
     <string name="menu_open" msgid="432922957274920903">"ဖွင့်ရန်"</string>
     <string name="menu_save" msgid="2394743337684426338">"သိမ်းပါ"</string>
     <string name="menu_share" msgid="3075149983979628146">"မျှဝေခြင်း"</string>

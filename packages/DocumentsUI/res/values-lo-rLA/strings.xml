@@ -26,7 +26,8 @@
     <string name="menu_list" msgid="7279285939892417279">"ມຸມມອງແບບລາຍຊື່"</string>
     <string name="menu_sort" msgid="7677740407158414452">"ຮຽງລຳດັບຕາມ"</string>
     <string name="menu_search" msgid="3816712084502856974">"ຊອກຫາ"</string>
-    <string name="menu_settings" msgid="6008033148948428823">"ການຕັ້ງຄ່າ"</string>
+    <!-- no translation found for menu_settings (8239065133341597825) -->
+    <skip />
     <string name="menu_open" msgid="432922957274920903">"ເປີດ"</string>
     <string name="menu_save" msgid="2394743337684426338">"ບັນທຶກ"</string>
     <string name="menu_share" msgid="3075149983979628146">"ແບ່ງປັນ"</string>
