@@ -3656,7 +3656,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!(isProfileOwner(adminComponent, userHandle)
                     || isDeviceOwner(adminComponent, userHandle))) {
                 final boolean preN = getTargetSdk(admin.info.getPackageName(), userHandle)
-                        < android.os.Build.VERSION_CODES.N;
+                        <= android.os.Build.VERSION_CODES.M;
                 // As of N, password resetting to empty/null is not allowed anymore.
                 // TODO Should we allow DO/PO to set an empty password?
                 if (TextUtils.isEmpty(password)) {
