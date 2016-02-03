@@ -19,6 +19,8 @@ package com.android.server.notification;
 import static android.media.AudioAttributes.USAGE_ALARM;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
+import static android.media.AudioAttributes.USAGE_UNKNOWN;
+import static android.media.AudioAttributes.USAGE_VIRTUAL_SOURCE;
 
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -34,6 +36,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
@@ -705,15 +708,20 @@ public class ZenModeHelper {
 
         // notification restrictions
         final boolean muteNotifications = mEffectsSuppressed;
-        applyRestrictions(muteNotifications, USAGE_NOTIFICATION);
-
         // call restrictions
         final boolean muteCalls = zen && !mConfig.allowCalls && !mConfig.allowRepeatCallers;
-        applyRestrictions(muteCalls, USAGE_NOTIFICATION_RINGTONE);
+        // total silence restrictions
+        final boolean muteEverything = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
 
-        // alarm restrictions
-        final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        applyRestrictions(muteAlarms, USAGE_ALARM);
+        for (int i = USAGE_UNKNOWN; i <= USAGE_VIRTUAL_SOURCE; i++) {
+            if (i == USAGE_NOTIFICATION) {
+                applyRestrictions(muteNotifications || muteEverything, i);
+            } else if (i == USAGE_NOTIFICATION_RINGTONE) {
+                applyRestrictions(muteCalls || muteEverything, i);
+            } else {
+                applyRestrictions(muteEverything, i);
+            }
+        }
     }
 
     private void applyRestrictions(boolean mute, int usage) {
