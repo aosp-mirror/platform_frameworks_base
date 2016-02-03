@@ -53,9 +53,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.OnItemTouchListener;
 import android.support.v7.widget.RecyclerView.RecyclerListener;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -94,11 +92,13 @@ import com.android.documentsui.RootsCache;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.State;
+import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
+import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
 import com.google.common.collect.Lists;
 
@@ -155,9 +155,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private LoaderCallbacks<DirectoryResult> mCallbacks;
     private FragmentTuner mTuner;
     private DocumentClipper mClipper;
-    // These are lazily initialized.
-    private LinearLayoutManager mListLayout;
-    private GridLayoutManager mGridLayout;
+    private GridLayoutManager mLayout;
     private int mColumnCount = 1;  // This will get updated when layout changes.
 
     private MessageBar mMessageBar;
@@ -179,22 +177,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                     @Override
                     public void onViewRecycled(ViewHolder holder) {
                         cancelThumbnailTask(holder.itemView);
-                    }
-                });
-
-        // TODO: Rather than update columns on layout changes, push this
-        // code (or something like it) into GridLayoutManager.
-        mRecView.addOnLayoutChangeListener(
-                new View.OnLayoutChangeListener() {
-
-                    @Override
-                    public void onLayoutChange(
-                            View v, int left, int top, int right, int bottom, int oldLeft,
-                            int oldTop, int oldRight, int oldBottom) {
-                        mColumnCount = calculateColumnCount();
-                        if (mGridLayout != null) {
-                            mGridLayout.setSpanCount(mColumnCount);
-                        }
                     }
                 });
 
@@ -239,6 +221,13 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 this, new ModelBackedDocumentsAdapter(this, mIconHelper));
 
         mRecView.setAdapter(mAdapter);
+
+        mLayout = new GridLayoutManager(getContext(), mColumnCount);
+        SpanSizeLookup lookup = mAdapter.createSpanSizeLookup();
+        if (lookup != null) {
+            mLayout.setSpanSizeLookup(lookup);
+        }
+        mRecView.setLayoutManager(mLayout);
 
         mGestureDetector = new ListeningGestureDetector(this.getContext(), new GestureListener());
 
@@ -432,41 +421,28 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     }
 
     /**
-     * Returns a {@code LayoutManager} for {@code mode}, lazily initializing
-     * classes as needed.
+     * Updates the layout after the view mode switches.
+     * @param mode The new view mode.
      */
-    private void updateLayout(int mode) {
-        final LayoutManager layout;
-        switch (mode) {
-            case MODE_GRID:
-                if (mGridLayout == null) {
-                    mGridLayout = new GridLayoutManager(getContext(), mColumnCount);
-                    SpanSizeLookup lookup = mAdapter.createSpanSizeLookup();
-                    if (lookup != null) {
-                        mGridLayout.setSpanSizeLookup(lookup);
-                    }
-                }
-                layout = mGridLayout;
-                break;
-            case MODE_LIST:
-                if (mListLayout == null) {
-                    mListLayout = new LinearLayoutManager(getContext());
-                }
-                layout = mListLayout;
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported layout mode: " + mode);
+    private void updateLayout(@ViewMode int mode) {
+        mColumnCount = calculateColumnCount(mode);
+        if (mLayout != null) {
+            mLayout.setSpanCount(mColumnCount);
         }
 
         int pad = getDirectoryPadding(mode);
         mRecView.setPadding(pad, pad, pad, pad);
-        // setting layout manager automatically invalidates existing ViewHolders.
-        mRecView.setLayoutManager(layout);
+        mRecView.requestLayout();
         mSelectionManager.handleLayoutChanged();  // RecyclerView doesn't do this for us
         mIconHelper.setViewMode(mode);
     }
 
-    private int calculateColumnCount() {
+    private int calculateColumnCount(@ViewMode int mode) {
+        if (mode == MODE_LIST) {
+            // List mode is a "grid" with 1 column.
+            return 1;
+        }
+
         int cellWidth = getResources().getDimensionPixelSize(R.dimen.grid_width);
         int cellMargin = 2 * getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
         int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
@@ -478,14 +454,12 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         return columnCount;
     }
 
-    private int getDirectoryPadding(int mode) {
+    private int getDirectoryPadding(@ViewMode int mode) {
         switch (mode) {
             case MODE_GRID:
-                return getResources().getDimensionPixelSize(
-                        R.dimen.grid_container_padding);
+                return getResources().getDimensionPixelSize(R.dimen.grid_container_padding);
             case MODE_LIST:
-                return getResources().getDimensionPixelSize(
-                        R.dimen.list_container_padding);
+                return getResources().getDimensionPixelSize(R.dimen.list_container_padding);
             default:
                 throw new IllegalArgumentException("Unsupported layout mode: " + mode);
         }
@@ -784,7 +758,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 .show();
     }
 
-    private void transferDocuments(final Selection selected, final int mode) {
+    private void transferDocuments(final Selection selected, final @OpType int mode) {
         // Pop up a dialog to pick a destination.  This is inadequate but works for now.
         // TODO: Implement a picker that is to spec.
         final Intent intent = new Intent(
@@ -1289,12 +1263,14 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
          * @return The adapter position of the destination item. Could be RecyclerView.NO_POSITION.
          */
         private int findTargetPosition(View view, int keyCode) {
-            if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
-                return 0;
-            }
-
-            if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
-                return mAdapter.getItemCount() - 1;
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MOVE_HOME:
+                    return 0;
+                case KeyEvent.KEYCODE_MOVE_END:
+                    return mAdapter.getItemCount() - 1;
+                case KeyEvent.KEYCODE_PAGE_UP:
+                case KeyEvent.KEYCODE_PAGE_DOWN:
+                    return findTargetPositionByPage(view, keyCode);
             }
 
             // Find a navigation target based on the arrow key that the user pressed.
@@ -1327,6 +1303,50 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             }
 
             return RecyclerView.NO_POSITION;
+        }
+
+        /**
+         * Given a PgUp/PgDn event and the current view, find the position of the target view.
+         * This returns:
+         * <li>The position of the topmost (or bottom-most) visible item, if the current item is not
+         *     the top- or bottom-most visible item.
+         * <li>The position of an item that is one page's worth of items up (or down) if the current
+         *      item is the top- or bottom-most visible item.
+         * <li>The first (or last) item, if paging up (or down) would go past those limits.
+         * @param view The view that received the key event.
+         * @param keyCode Must be KEYCODE_PAGE_UP or KEYCODE_PAGE_DOWN.
+         * @return The adapter position of the target item.
+         */
+        private int findTargetPositionByPage(View view, int keyCode) {
+            int first = mLayout.findFirstVisibleItemPosition();
+            int last = mLayout.findLastVisibleItemPosition();
+            int current = mRecView.getChildAdapterPosition(view);
+            int pageSize = last - first + 1;
+
+            if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
+                if (current > first) {
+                    // If the current item isn't the first item, target the first item.
+                    return first;
+                } else {
+                    // If the current item is the first item, target the item one page up.
+                    int target = current - pageSize;
+                    return target < 0 ? 0 : target;
+                }
+            }
+
+            if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
+                if (current < last) {
+                    // If the current item isn't the last item, target the last item.
+                    return last;
+                } else {
+                    // If the current item is the last item, target the item one page down.
+                    int target = current + pageSize;
+                    int max = mAdapter.getItemCount() - 1;
+                    return target < max ? target : max;
+                }
+            }
+
+            throw new IllegalArgumentException("Unsupported keyCode: " + keyCode);
         }
 
         /**
