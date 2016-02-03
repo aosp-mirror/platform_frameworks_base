@@ -113,10 +113,9 @@ public class IpManager extends StateMachine {
     private static final int CMD_STOP = 1;
     private static final int CMD_START = 2;
     private static final int CMD_CONFIRM = 3;
-    private static final int CMD_UPDATE_DHCPV4_RESULTS = 4;
-    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE = 5;
+    private static final int EVENT_PRE_DHCP_ACTION_COMPLETE = 4;
     // Sent by NetlinkTracker to communicate netlink events.
-    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 6;
+    private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 5;
 
     private static final int MAX_LOG_RECORDS = 1000;
 
@@ -343,6 +342,19 @@ public class IpManager extends StateMachine {
         }
     }
 
+    private void handleIPv4Success(DhcpResults dhcpResults) {
+        mDhcpResults = new DhcpResults(dhcpResults);
+        setLinkProperties(assembleLinkProperties());
+        mCallback.onIPv4ProvisioningSuccess(dhcpResults);
+    }
+
+    private void handleIPv4Failure() {
+        clearIPv4Address();
+        mDhcpResults = null;
+        setLinkProperties(assembleLinkProperties());
+        mCallback.onIPv4ProvisioningFailure();
+    }
+
     class StoppedState extends State {
         @Override
         public void enter() {
@@ -418,9 +430,9 @@ public class IpManager extends StateMachine {
             // handle the result accordingly.
             if (mStaticIpConfig != null) {
                 if (applyStaticIpConfig()) {
-                    sendMessage(CMD_UPDATE_DHCPV4_RESULTS, new DhcpResults(mStaticIpConfig));
+                    handleIPv4Success(new DhcpResults(mStaticIpConfig));
                 } else {
-                    sendMessage(CMD_UPDATE_DHCPV4_RESULTS);
+                    handleIPv4Failure();
                 }
             } else {
                 // Start DHCPv4.
@@ -464,21 +476,6 @@ public class IpManager extends StateMachine {
                         mIpReachabilityMonitor.probeAll();
                     }
                     break;
-
-                case CMD_UPDATE_DHCPV4_RESULTS: {
-                    final DhcpResults dhcpResults = (DhcpResults) msg.obj;
-                    if (dhcpResults != null) {
-                        mDhcpResults = new DhcpResults(dhcpResults);
-                        setLinkProperties(assembleLinkProperties());
-                        mCallback.onIPv4ProvisioningSuccess(dhcpResults);
-                    } else {
-                        clearIPv4Address();
-                        mDhcpResults = null;
-                        setLinkProperties(assembleLinkProperties());
-                        mCallback.onIPv4ProvisioningFailure();
-                    }
-                    break;
-                }
 
                 case EVENT_PRE_DHCP_ACTION_COMPLETE:
                     // It's possible to reach here if, for example, someone
@@ -527,15 +524,10 @@ public class IpManager extends StateMachine {
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
                     switch (msg.arg1) {
                         case DhcpStateMachine.DHCP_SUCCESS:
-                            mDhcpResults = new DhcpResults(dhcpResults);
-                            setLinkProperties(assembleLinkProperties());
-                            mCallback.onIPv4ProvisioningSuccess(dhcpResults);
+                            handleIPv4Success(dhcpResults);
                             break;
                         case DhcpStateMachine.DHCP_FAILURE:
-                            clearIPv4Address();
-                            mDhcpResults = null;
-                            setLinkProperties(assembleLinkProperties());
-                            mCallback.onIPv4ProvisioningFailure();
+                            handleIPv4Failure();
                             break;
                         default:
                             Log.e(TAG, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
