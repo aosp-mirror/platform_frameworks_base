@@ -427,6 +427,19 @@ public class RestrictedLockUtils {
         return null;
     }
 
+    public static EnforcedAdmin getDeviceOwner(Context context) {
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (dpm == null) {
+            return null;
+        }
+        ComponentName adminComponent = dpm.getDeviceOwnerComponentOnAnyUser();
+        if (adminComponent != null) {
+            return new EnforcedAdmin(adminComponent, dpm.getDeviceOwnerUserId());
+        }
+        return null;
+    }
+
     /**
      * Set the menu item as disabled by admin by adding a restricted padlock at the end of the
      * text and set the click listener which will send an intent to show the admin support details
