@@ -285,6 +285,18 @@ public class TvRecordingClient {
         }
 
         @Override
+        void onConnected(TvInputManager.Session session) {
+            if (DEBUG) {
+                Log.d(TAG, "onConnected()");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onConnected - session not created");
+                return;
+            }
+            mCallback.onConnected();
+        }
+
+        @Override
         public void onSessionReleased(TvInputManager.Session session) {
             if (DEBUG) {
                 Log.d(TAG, "onSessionReleased()");
