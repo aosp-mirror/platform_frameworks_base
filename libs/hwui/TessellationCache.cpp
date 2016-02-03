@@ -242,23 +242,21 @@ void tessellateShadows(
             spotBuffer);
 }
 
-class ShadowProcessor : public TaskProcessor<TessellationCache::vertexBuffer_pair_t*> {
+class ShadowProcessor : public TaskProcessor<TessellationCache::vertexBuffer_pair_t> {
 public:
     ShadowProcessor(Caches& caches)
-            : TaskProcessor<TessellationCache::vertexBuffer_pair_t*>(&caches.tasks) {}
+            : TaskProcessor<TessellationCache::vertexBuffer_pair_t>(&caches.tasks) {}
     ~ShadowProcessor() {}
 
-    virtual void onProcess(const sp<Task<TessellationCache::vertexBuffer_pair_t*> >& task) override {
+    virtual void onProcess(const sp<Task<TessellationCache::vertexBuffer_pair_t> >& task) override {
         TessellationCache::ShadowTask* t = static_cast<TessellationCache::ShadowTask*>(task.get());
         ATRACE_NAME("shadow tessellation");
 
-        VertexBuffer* ambientBuffer = new VertexBuffer;
-        VertexBuffer* spotBuffer = new VertexBuffer;
         tessellateShadows(&t->drawTransform, &t->localClip, t->opaque, &t->casterPerimeter,
                 &t->transformXY, &t->transformZ, t->lightCenter, t->lightRadius,
-                *ambientBuffer, *spotBuffer);
+                t->ambientBuffer, t->spotBuffer);
 
-        t->setResult(new TessellationCache::vertexBuffer_pair_t(ambientBuffer, spotBuffer));
+        t->setResult(TessellationCache::vertexBuffer_pair_t(&t->ambientBuffer, &t->spotBuffer));
     }
 };
 
@@ -373,7 +371,7 @@ void TessellationCache::getShadowBuffers(const Matrix4* drawTransform, const Rec
         task = static_cast<ShadowTask*>(mShadowCache.get(key));
     }
     LOG_ALWAYS_FATAL_IF(task == nullptr, "shadow not precached");
-    outBuffers = *(task->getResult());
+    outBuffers = task->getResult();
 }
 
 sp<TessellationCache::ShadowTask> TessellationCache::getShadowTask(
@@ -390,13 +388,6 @@ sp<TessellationCache::ShadowTask> TessellationCache::getShadowTask(
     }
     LOG_ALWAYS_FATAL_IF(task == nullptr, "shadow not precached");
     return task;
-}
-
-TessellationCache::ShadowTask::~ShadowTask() {
-    TessellationCache::vertexBuffer_pair_t* bufferPair = getResult();
-    delete bufferPair->getFirst();
-    delete bufferPair->getSecond();
-    delete bufferPair;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

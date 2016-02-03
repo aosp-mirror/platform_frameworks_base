@@ -663,7 +663,7 @@ static void renderShadow(BakedOpRenderer& renderer, const BakedOpState& state, f
 }
 
 void BakedOpDispatcher::onShadowOp(BakedOpRenderer& renderer, const ShadowOp& op, const BakedOpState& state) {
-    TessellationCache::vertexBuffer_pair_t buffers = *(op.shadowTask->getResult());
+    TessellationCache::vertexBuffer_pair_t buffers = op.shadowTask->getResult();
     renderShadow(renderer, state, op.casterAlpha, buffers.first, buffers.second);
 }
 

@@ -21,6 +21,7 @@
 #include "Matrix.h"
 #include "Rect.h"
 #include "Vector.h"
+#include "VertexBuffer.h"
 #include "thread/TaskProcessor.h"
 #include "utils/Macros.h"
 #include "utils/Pair.h"
@@ -89,7 +90,7 @@ public:
         hash_t hash() const;
     };
 
-    class ShadowTask : public Task<TessellationCache::vertexBuffer_pair_t*> {
+    class ShadowTask : public Task<vertexBuffer_pair_t> {
     public:
         ShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
                 const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
@@ -104,13 +105,11 @@ public:
             , lightRadius(lightRadius) {
         }
 
-        ~ShadowTask();
-
         /* Note - we deep copy all task parameters, because *even though* pointers into Allocator
          * controlled objects (like the SkPath and Matrix4s) should be safe for the entire frame,
          * certain Allocators are destroyed before trim() is called to flush incomplete tasks.
          *
-         * These deep copies could be avoided, long term, by cancelling or flushing outstanding
+         * These deep copies could be avoided, long term, by canceling or flushing outstanding
          * tasks before tearing down single-frame LinearAllocators.
          */
         const Matrix4 drawTransform;
@@ -121,6 +120,8 @@ public:
         const Matrix4 transformZ;
         const Vector3 lightCenter;
         const float lightRadius;
+        VertexBuffer ambientBuffer;
+        VertexBuffer spotBuffer;
     };
 
     TessellationCache();
@@ -217,12 +218,12 @@ private:
     ///////////////////////////////////////////////////////////////////////////////
     // Shadow tessellation caching
     ///////////////////////////////////////////////////////////////////////////////
-    sp<TaskProcessor<vertexBuffer_pair_t*> > mShadowProcessor;
+    sp<TaskProcessor<vertexBuffer_pair_t> > mShadowProcessor;
 
     // holds a pointer, and implicit strong ref to each shadow task of the frame
-    LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*> mShadowCache;
-    class BufferPairRemovedListener : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t*>*> {
-        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t*>*& bufferPairTask) override {
+    LruCache<ShadowDescription, Task<vertexBuffer_pair_t>*> mShadowCache;
+    class BufferPairRemovedListener : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t>*> {
+        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t>*& bufferPairTask) override {
             bufferPairTask->decStrong(nullptr);
         }
     };
