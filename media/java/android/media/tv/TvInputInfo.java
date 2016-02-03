@@ -32,6 +32,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -114,6 +115,7 @@ public final class TvInputInfo implements Parcelable {
     private final int mTunerCount;
     private final boolean mCanRecord;
     private final boolean mIsHardwareInput;
+    private final Bundle mExtras;
 
     // Attributes from XML meta data.
     private String mSetupActivity;
@@ -252,7 +254,7 @@ public final class TvInputInfo implements Parcelable {
      */
     private TvInputInfo(ResolveInfo service, String id, String parentId, int type,
             boolean isHardwareInput, boolean isConnectedToHdmiSwitch, int tunerCount,
-            boolean canRecord) {
+            boolean canRecord, Bundle extras) {
         mService = service;
         mId = id;
         mParentId = parentId;
@@ -261,6 +263,7 @@ public final class TvInputInfo implements Parcelable {
         mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
         mTunerCount = tunerCount;
         mCanRecord = canRecord;
+        mExtras = extras;
     }
 
     /**
@@ -359,6 +362,14 @@ public final class TvInputInfo implements Parcelable {
      */
     public boolean canRecord() {
         return mCanRecord;
+    }
+
+    /**
+     * Returns the extras associated with this TV input.
+     * @hide
+     */
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -524,6 +535,7 @@ public final class TvInputInfo implements Parcelable {
         dest.writeInt(mLabelResId);
         dest.writeString(mLabel);
         dest.writeByte(mIsConnectedToHdmiSwitch ? (byte) 1 : 0);
+        dest.writeBundle(mExtras);
     }
 
     private Drawable loadServiceIcon(Context context) {
@@ -563,6 +575,7 @@ public final class TvInputInfo implements Parcelable {
         mLabelResId = in.readInt();
         mLabel = in.readString();
         mIsConnectedToHdmiSwitch = in.readByte() == 1;
+        mExtras = in.readBundle();
     }
 
     /**
@@ -604,6 +617,7 @@ public final class TvInputInfo implements Parcelable {
         private HdmiDeviceInfo mHdmiDeviceInfo;
         private String mParentId;
         private TvInputHardwareInfo mTvInputHardwareInfo;
+        private Bundle mExtras;
 
         /**
          * Constructs a new builder for {@link TvInputInfo}.
@@ -732,6 +746,18 @@ public final class TvInputInfo implements Parcelable {
         }
 
         /**
+         * Sets the extras associated with this TV input.
+         *
+         * @param extras The extras associated with this TV input.
+         * @return This Builder object to allow for chaining of calls to builder methods.
+         * @hide
+         */
+        public Builder setExtras(Bundle extras) {
+            this.mExtras = extras;
+            return this;
+        }
+
+        /**
          * Creates a {@link TvInputInfo} instance with the specified fields. Most of the information
          * is obtained by parsing the AndroidManifest and {@link TvInputService#SERVICE_META_DATA}
          * for the {@link TvInputService} this TV input implements.
@@ -765,7 +791,7 @@ public final class TvInputInfo implements Parcelable {
             }
 
             TvInputInfo info = new TvInputInfo(mResolveInfo, id, mParentId, type, isHardwareInput,
-                    isConnectedToHdmiSwitch, mTunerCount, mCanRecord);
+                    isConnectedToHdmiSwitch, mTunerCount, mCanRecord, mExtras);
             return parseServiceMetadata(type, info);
         }
 
