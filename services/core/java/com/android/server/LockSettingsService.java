@@ -200,7 +200,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new Notification.Builder(mContext)
-                .setSmallIcon(com.android.internal.R.drawable.ic_secure)
+                .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
                 .setWhen(0)
                 .setOngoing(true)
                 .setTicker(title)
