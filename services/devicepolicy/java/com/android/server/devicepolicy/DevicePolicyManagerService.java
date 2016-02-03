@@ -2053,7 +2053,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         resolveIntent.setComponent(adminName);
         List<ResolveInfo> infos = mContext.getPackageManager().queryBroadcastReceiversAsUser(
                 resolveIntent,
-                PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
+                PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
                 userHandle);
         if (infos == null || infos.size() <= 0) {
             throw new IllegalArgumentException("Unknown admin: " + adminName);
