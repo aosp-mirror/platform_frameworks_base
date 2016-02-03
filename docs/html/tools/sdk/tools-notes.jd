@@ -21,11 +21,31 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 <p>For a summary of all known issues in SDK Tools, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Platform-tools, Revision 23.1.0</a> <em>(December 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+        <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Changed Linux requirements for Android SDK Platform-tools revision 23.1.0 and later:
+          it now requires 64-bit Linux.</li>
+      </ul>
+    </dd>
+
+
+
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.4.1</a> <em>(October 2015)</em>
   </p>
 
