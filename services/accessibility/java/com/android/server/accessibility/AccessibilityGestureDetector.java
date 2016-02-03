@@ -25,6 +25,7 @@ import android.gesture.GestureStore;
 import android.gesture.GestureStroke;
 import android.gesture.Prediction;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -70,7 +71,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
 
     // Indicates that we've collected enough data to be sure it could be a
     // gesture.
-    private boolean mGestureConfirmed;
+    private boolean mGestureStarted;
 
     // Indicates that motion events from the second pointer are being checked
     // for a double tap.
@@ -83,29 +84,25 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // Policy flags of the previous event.
     private int mPolicyFlags;
 
-    // The X of the previous event.
-    private float mPreviousX;
+    // These values track the previous point that was saved to use for gesture
+    // detection.  They are only updated when the user moves more than the
+    // recognition threshold.
+    private float mPreviousGestureX;
+    private float mPreviousGestureY;
 
-    // The Y of the previous event.
-    private float mPreviousY;
-
-    // The X of the down event.
+    // These values track the previous point that was used to determine if there
+    // was a transition into or out of gesture detection.  They are updated when
+    // the user moves more than the detection threshold.
     private float mBaseX;
-
-    // The Y of the down event.
     private float mBaseY;
+    private long mBaseTime;
 
-    // Slop between the first and second tap to be a double tap.
-    private final int mDoubleTapSlop;
-
-    // The scaled velocity above which we detect gestures.
-    private final int mScaledGestureDetectionVelocity;
+    // This is the calculated movement threshold used track if the user is still
+    // moving their finger.
+    private final float mGestureDetectionThreshold;
 
     // Buffer for storing points for gesture detection.
     private final ArrayList<GesturePoint> mStrokeBuffer = new ArrayList<GesturePoint>(100);
-
-    // Helper to track gesture velocity.
-    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
 
     // The minimal delta between moves to add a gesture point.
     private static final int TOUCH_TOLERANCE = 3;
@@ -113,16 +110,12 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // The minimal score for accepting a predicted gesture.
     private static final float MIN_PREDICTION_SCORE = 2.0f;
 
-    // The velocity above which we detect gestures.  Expressed in DIPs/Second.
-    private static final int GESTURE_DETECTION_VELOCITY_DIP = 1000;
-
-    // Constant used to calculate velocity in seconds.
-    private static final int VELOCITY_UNITS_SECONDS = 1000;
+    private static final int GESTURE_CONFIRM_MM = 10;
+    private static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 1000;
+    private static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 500;
 
     AccessibilityGestureDetector(Context context, Listener listener) {
         mListener = listener;
-
-        mDoubleTapSlop = ViewConfiguration.get(context).getScaledDoubleTapSlop();
 
         mGestureDetector = new GestureDetector(context, this);
         mGestureDetector.setOnDoubleTapListener(this);
@@ -132,15 +125,14 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mGestureLibrary.setSequenceType(GestureStore.SEQUENCE_SENSITIVE);
         mGestureLibrary.load();
 
-        final float density = context.getResources().getDisplayMetrics().density;
-        mScaledGestureDetectionVelocity = (int) (GESTURE_DETECTION_VELOCITY_DIP * density);
+        mGestureDetectionThreshold = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_MM, 1,
+                context.getResources().getDisplayMetrics()) * GESTURE_CONFIRM_MM;
     }
 
     public boolean onMotionEvent(MotionEvent event, int policyFlags) {
-        mVelocityTracker.addMovement(event);
-
         final float x = event.getX();
         final float y = event.getY();
+        final long time = event.getEventTime();
 
         mPolicyFlags = policyFlags;
         switch (event.getActionMasked()) {
@@ -148,54 +140,56 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 mDoubleTapDetected = false;
                 mSecondFingerDoubleTap = false;
                 mRecognizingGesture = true;
-                mGestureConfirmed = false;
+                mGestureStarted = false;
+                mPreviousGestureX = x;
+                mPreviousGestureY = y;
+                mStrokeBuffer.clear();
+                mStrokeBuffer.add(new GesturePoint(x, y, time));
+
                 mBaseX = x;
                 mBaseY = y;
-                mPreviousX = x;
-                mPreviousY = y;
-                mStrokeBuffer.clear();
-                mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
-                mVelocityTracker.clear();
-                mVelocityTracker.addMovement(event);
+                mBaseTime = time;
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 if (mRecognizingGesture) {
-                    if (!mGestureConfirmed) {
-                        mVelocityTracker.addMovement(event);
-                        // It is *important* to use the distance traveled by the pointers
-                        // on the screen which may or may not be magnified.
-                        final float deltaX = mBaseX - event.getX(0);
-                        final float deltaY = mBaseY - event.getY(0);
-                        final double moveDelta = Math.hypot(deltaX, deltaY);
-                        // The user has moved enough for us to decide.
-                        if (moveDelta > mDoubleTapSlop) {
-                            // Check whether the user is performing a gesture. We
-                            // detect gestures if the pointer is moving above a
-                            // given velocity.
-                            mVelocityTracker.computeCurrentVelocity(VELOCITY_UNITS_SECONDS);
-                            final float maxAbsVelocity = Math.max(
-                                    Math.abs(mVelocityTracker.getXVelocity(0)),
-                                    Math.abs(mVelocityTracker.getYVelocity(0)));
-                            if (maxAbsVelocity > mScaledGestureDetectionVelocity) {
-                                // We have to perform gesture detection, so
-                                // notify the listener.
-                                mGestureConfirmed = true;
-                                mListener.onGestureStarted();
-                            } else {
-                                // This won't match any gesture, so notify the
-                                // listener.
-                                cancelGesture();
-                                mListener.onGestureCancelled(event, policyFlags);
-                            }
+                    final float deltaX = mBaseX - x;
+                    final float deltaY = mBaseY - y;
+                    final double moveDelta = Math.hypot(deltaX, deltaY);
+                    if (moveDelta > mGestureDetectionThreshold) {
+                        // If the pointer has moved more than the threshold,
+                        // update the stored values.
+                        mBaseX = x;
+                        mBaseY = y;
+                        mBaseTime = time;
+
+                        // If this hasn't been confirmed as a gesture yet, send
+                        // the event.
+                        if (!mGestureStarted) {
+                            mGestureStarted = true;
+                            mListener.onGestureStarted();
+                        }
+                    } else {
+                        final long timeDelta = time - mBaseTime;
+                        final long threshold = mGestureStarted ?
+                            CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS :
+                            CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS;
+
+                        // If the pointer hasn't moved for longer than the
+                        // timeout, cancel gesture detection.
+                        if (timeDelta > threshold) {
+                            cancelGesture();
+                            mListener.onGestureCancelled(event, policyFlags);
+                            return false;
                         }
                     }
-                    final float dX = Math.abs(x - mPreviousX);
-                    final float dY = Math.abs(y - mPreviousY);
+
+                    final float dX = Math.abs(x - mPreviousGestureX);
+                    final float dY = Math.abs(y - mPreviousGestureY);
                     if (dX >= TOUCH_TOLERANCE || dY >= TOUCH_TOLERANCE) {
-                        mPreviousX = x;
-                        mPreviousY = y;
-                        mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
+                        mPreviousGestureX = x;
+                        mPreviousGestureY = y;
+                        mStrokeBuffer.add(new GesturePoint(x, y, time));
                     }
                 }
                 break;
@@ -204,8 +198,8 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                 if (maybeFinishDoubleTap(event, policyFlags)) {
                     return true;
                 }
-                if (mGestureConfirmed) {
-                    mStrokeBuffer.add(new GesturePoint(x, y, event.getEventTime()));
+                if (mGestureStarted) {
+                    mStrokeBuffer.add(new GesturePoint(x, y, time));
 
                     if (!recognizeGesture()) {
                         mListener.onGestureCancelled(event, policyFlags);
@@ -223,7 +217,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
                     // If this was the second finger, attempt to recognize double
                     // taps on it.
                     mSecondFingerDoubleTap = true;
-                    mSecondPointerDownTime = event.getEventTime();
+                    mSecondPointerDownTime = time;
                 } else {
                     // If there are more than two fingers down, stop watching
                     // for a double tap.
@@ -268,8 +262,8 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
         mFirstTapDetected = false;
         mDoubleTapDetected = false;
         mSecondFingerDoubleTap = false;
+        mGestureStarted = false;
         cancelGesture();
-        mVelocityTracker.clear();
     }
 
     public boolean firstTapDetected() {
@@ -323,7 +317,7 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
 
     private void cancelGesture() {
         mRecognizingGesture = false;
-        mGestureConfirmed = false;
+        mGestureStarted = false;
         mStrokeBuffer.clear();
     }
 
