@@ -211,9 +211,9 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         // Otherwise we delegate loading data from disk to a task
         // to ensure a responsive ui.
         if (mRoots.isRecentsRoot(root)) {
-            refreshCurrentRootAndDirectory(ANIM_SIDE);
+            refreshCurrentRootAndDirectory(ANIM_NONE);
         } else {
-            new PickRootTask(root, true).executeOnExecutor(getExecutorForCurrentDirectory());
+            new PickRootTask(root).executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -323,7 +323,12 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     void openContainerDocument(DocumentInfo doc) {
         checkArgument(doc.isContainer());
         mState.pushDocument(doc);
-        refreshCurrentRootAndDirectory(ANIM_DOWN);
+        // Show an opening animation only if pressing "back" would get us back to the
+        // previous directory. Especially after opening a root document, pressing
+        // back, wouldn't go to the previous root, but close the activity.
+        final int anim = (mState.hasLocationChanged() && mState.stack.size() > 1)
+                ? ANIM_DOWN : ANIM_NONE;
+        refreshCurrentRootAndDirectory(anim);
     }
 
     /**
@@ -554,11 +559,9 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
 
     final class PickRootTask extends AsyncTask<Void, Void, DocumentInfo> {
         private RootInfo mRoot;
-        private boolean mTouched;
 
-        public PickRootTask(RootInfo root, boolean touched) {
+        public PickRootTask(RootInfo root) {
             mRoot = root;
-            mTouched = touched;
         }
 
         @Override
