@@ -167,6 +167,9 @@ public class RootsCache {
     private void loadStoppedAuthority(String authority) {
         final ContentResolver resolver = mContext.getContentResolver();
         synchronized (mLock) {
+            if (!mStoppedAuthorities.contains(authority)) {
+                return;
+            }
             if (DEBUG) {
                 Log.d(TAG, "Loading stopped authority " + authority);
             }
