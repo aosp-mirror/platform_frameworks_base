@@ -1178,6 +1178,11 @@
              description="How to extend text messaging apps to work with Auto devices.">
              Messaging for Auto</a>
       </li>
+      <li>
+       <a href="<?cs var:toroot ?>training/auto/testing/index.html" description=
+       "How to run and test Auto apps.">
+             Testing Auto Apps</a>
+      </li>
     </ul>
   </li>
   <!-- End: Building for Auto -->
