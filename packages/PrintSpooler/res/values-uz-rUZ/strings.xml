@@ -17,14 +17,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4469836075319831821">"Chop qilishni nazorat qilish"</string>
-    <string name="more_options_button" msgid="2243228396432556771">"Yana"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"Ko‘proq"</string>
     <string name="label_destination" msgid="9132510997381599275">"Mo‘ljal"</string>
     <string name="label_copies" msgid="3634531042822968308">"Nusxalar"</string>
     <string name="label_copies_summary" msgid="3861966063536529540">"Nusxalari soni:"</string>
     <string name="label_paper_size" msgid="908654383827777759">"Qog‘oz o‘lchami"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Qog‘oz o‘lchami:"</string>
     <string name="label_color" msgid="1108690305218188969">"Rang"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Ikki tomonlama"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Ikki tomonlama"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Joylashuv"</string>
     <string name="label_pages" msgid="7768589729282182230">"Sahifalar"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Barchasi (<xliff:g id="PAGE_COUNT">%1$s</xliff:g>)"</string>
@@ -34,8 +34,8 @@
     <string name="install_for_print_preview" msgid="6366303997385509332">"PDF ko‘rsatuvchi dasturni o‘rnatish"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"Chop etish dasturi buzildi"</string>
     <string name="generating_print_job" msgid="3119608742651698916">"Chop etish buyrug‘i yaratilyapti"</string>
-    <string name="save_as_pdf" msgid="5718454119847596853">"PDF formatda saqlash"</string>
-    <string name="all_printers" msgid="5018829726861876202">"Barcha printerlar…"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF formatida saqlash"</string>
+    <string name="all_printers" msgid="5018829726861876202">"Barcha printerlar"</string>
     <string name="print_dialog" msgid="32628687461331979">"Chop etish oynasi"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
     <string name="page_description_template" msgid="6831239682256197161">"Sahifa: <xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
@@ -46,7 +46,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"PDF sifatida saqlash"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Chop qilish tanlamalari yoyildi"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Chop qilish tanlamalari yig‘ildi"</string>
-    <string name="search" msgid="5421724265322228497">"Izlash"</string>
+    <string name="search" msgid="5421724265322228497">"Qidirish"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Barcha printerlar"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Xizmat qo‘shish"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Izlash oynasi ko‘rsatildi"</string>
@@ -59,9 +59,9 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> ta printer topildi</item>
     </plurals>
     <string name="choose_print_service" msgid="3740309762324459694">"Chop etish xizmatini tanlang"</string>
-    <string name="print_searching_for_printers" msgid="6550424555079932867">"Printerlarni izlash"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Printerlar qidirilmoqda"</string>
     <string name="print_no_printers" msgid="4869403323900054866">"Printerlar topilmadi"</string>
-    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> chop etilmoqda"</string>
+    <string name="printing_notification_title_template" msgid="295903957762447362">"Chop etilmoqda: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> bekor qilinmoqda"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"Printerda xatolik: <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printer <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>ni taqiqladi"</string>
@@ -79,7 +79,7 @@
     <item msgid="2762241247228983754">"Rang"</item>
   </string-array>
   <string-array name="duplex_mode_labels">
-    <item msgid="3882302912790928315">"Hech biri"</item>
+    <item msgid="3882302912790928315">"Yo‘q"</item>
     <item msgid="7296563835355641719">"Uzun tomoni"</item>
     <item msgid="79513688117503758">"Qisqa tomoni"</item>
   </string-array>
