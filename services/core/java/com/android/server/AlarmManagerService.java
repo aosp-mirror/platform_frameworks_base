@@ -111,8 +111,9 @@ class AlarmManagerService extends SystemService {
     
     static final boolean WAKEUP_STATS = false;
 
-    private static final Intent NEXT_ALARM_CLOCK_CHANGED_INTENT = new Intent(
-            AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
+    private static final Intent NEXT_ALARM_CLOCK_CHANGED_INTENT =
+            new Intent(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)
+                    .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
 
     final LocalLog mLog = new LocalLog(TAG);
 
