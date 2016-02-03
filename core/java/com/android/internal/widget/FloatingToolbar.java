@@ -306,7 +306,7 @@ public final class FloatingToolbar {
         /* View components */
         private final ViewGroup mContentContainer;  // holds all contents.
         private final ViewGroup mMainPanel;  // holds menu items that are initially displayed.
-        private final ListView mOverflowPanel;  // holds menu items hidden in the overflow.
+        private final OverflowPanel mOverflowPanel;  // holds menu items hidden in the overflow.
         private final ImageButton mOverflowButton;  // opens/closes the overflow.
         /* overflow button drawables. */
         private final Drawable mArrow;
@@ -879,6 +879,7 @@ public final class FloatingToolbar {
 
         private void setPanelsStatesAtRestingPosition() {
             mOverflowButton.setEnabled(true);
+            mOverflowPanel.awakenScrollBars();
 
             if (mIsOverflowOpen) {
                 // Set open state.
@@ -1322,27 +1323,8 @@ public final class FloatingToolbar {
             return overflowButton;
         }
 
-        private ListView createOverflowPanel() {
-            final ListView overflowPanel = new ListView(FloatingToolbarPopup.this.mContext) {
-                @Override
-                protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                    // Update heightMeasureSpec to make sure that this view is not clipped
-                    // as we offset it's coordinates with respect to it's parent.
-                    heightMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            mOverflowPanelSize.getHeight() - mOverflowButtonSize.getHeight(),
-                            MeasureSpec.EXACTLY);
-                    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-                }
-
-                @Override
-                public boolean dispatchTouchEvent(MotionEvent ev) {
-                    if (isOverflowAnimating()) {
-                        // Eat the touch event.
-                        return true;
-                    }
-                    return super.dispatchTouchEvent(ev);
-                }
-            };
+        private OverflowPanel createOverflowPanel() {
+            final OverflowPanel overflowPanel = new OverflowPanel(this);
             overflowPanel.setLayoutParams(new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             overflowPanel.setDivider(null);
@@ -1450,6 +1432,43 @@ public final class FloatingToolbar {
 
         private static int getLineHeight(Context context) {
             return context.getResources().getDimensionPixelSize(R.dimen.floating_toolbar_height);
+        }
+
+        /**
+         * A custom ListView for the overflow panel.
+         */
+        private static final class OverflowPanel extends ListView {
+
+            private final FloatingToolbarPopup mPopup;
+
+            OverflowPanel(FloatingToolbarPopup popup) {
+                super(Preconditions.checkNotNull(popup).mContext);
+                this.mPopup = popup;
+            }
+
+            @Override
+            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+                // Update heightMeasureSpec to make sure that this view is not clipped
+                // as we offset it's coordinates with respect to it's parent.
+                int height = mPopup.mOverflowPanelSize.getHeight()
+                        - mPopup.mOverflowButtonSize.getHeight();
+                heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+
+            @Override
+            public boolean dispatchTouchEvent(MotionEvent ev) {
+                if (mPopup.isOverflowAnimating()) {
+                    // Eat the touch event.
+                    return true;
+                }
+                return super.dispatchTouchEvent(ev);
+            }
+
+            @Override
+            protected boolean awakenScrollBars() {
+                return super.awakenScrollBars();
+            }
         }
 
         /**
