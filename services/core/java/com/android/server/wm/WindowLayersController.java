@@ -16,12 +16,14 @@
 
 package com.android.server.wm;
 
-import android.app.ActivityManager.StackId;
 import android.util.Slog;
 import android.view.Display;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -55,10 +57,10 @@ public class WindowLayersController {
     }
 
     private int mHighestApplicationLayer = 0;
-    private WindowState mPinnedWindow = null;
-    private WindowState mDockedWindow = null;
+    private ArrayDeque<WindowState> mPinnedWindows = new ArrayDeque<>();
+    private ArrayDeque<WindowState> mDockedWindows = new ArrayDeque<>();
     private WindowState mDockDivider = null;
-    private WindowState mReplacingWindow = null;
+    private ArrayDeque<WindowState> mReplacingWindows = new ArrayDeque<>();
 
     final void assignLayersLocked(WindowList windows) {
         if (DEBUG_LAYERS) Slog.v(TAG_WM, "Assigning layers based on windows=" + windows,
@@ -169,43 +171,54 @@ public class WindowLayersController {
 
     private void clear() {
         mHighestApplicationLayer = 0;
-        mPinnedWindow = null;
-        mDockedWindow = null;
+        mPinnedWindows.clear();
+        mDockedWindows.clear();
+        mReplacingWindows.clear();
         mDockDivider = null;
     }
 
     private void collectSpecialWindows(WindowState w) {
         if (w.mAttrs.type == TYPE_DOCK_DIVIDER) {
             mDockDivider = w;
-        } else {
-            final TaskStack stack = w.getStack();
-            if (stack == null) {
-                return;
-            }
-            if (stack.mStackId == StackId.PINNED_STACK_ID) {
-                mPinnedWindow = w;
-            } else if (stack.mStackId == StackId.DOCKED_STACK_ID) {
-                mDockedWindow = w;
-            }
+            return;
+        }
+        if (w.mWillReplaceWindow) {
+            mReplacingWindows.add(w);
+        }
+        final TaskStack stack = w.getStack();
+        if (stack == null) {
+            return;
+        }
+        if (stack.mStackId == PINNED_STACK_ID) {
+            mPinnedWindows.add(w);
+        } else if (stack.mStackId == DOCKED_STACK_ID) {
+            mDockedWindows.add(w);
         }
     }
 
     private void adjustSpecialWindows() {
         int layer = mHighestApplicationLayer + 1;
-        // For pinned and docked stack window, we want to make them above other windows
-        // also when these windows are animating.
-        layer = assignAndIncreaseLayerIfNeeded(mDockedWindow, layer);
+        // For pinned and docked stack window, we want to make them above other windows also when
+        // these windows are animating.
+        while (!mDockedWindows.isEmpty()) {
+            layer = assignAndIncreaseLayerIfNeeded(mDockedWindows.remove(), layer);
+        }
 
         // Leave some space here so the dim layer while dismissing docked/fullscreen stack has space
         // below the divider but above the app windows. It needs to be below the divider in because
         // the divider sometimes overlaps the app windows.
         layer++;
         layer = assignAndIncreaseLayerIfNeeded(mDockDivider, layer);
-        // We know that we will be animating a relaunching window in the near future,
-        // which will receive a z-order increase. We want the replaced window to
-        // immediately receive the same treatment, e.g. to be above the dock divider.
-        layer = assignAndIncreaseLayerIfNeeded(mReplacingWindow, layer);
-        layer = assignAndIncreaseLayerIfNeeded(mPinnedWindow, layer);
+        // We know that we will be animating a relaunching window in the near future, which will
+        // receive a z-order increase. We want the replaced window to immediately receive the same
+        // treatment, e.g. to be above the dock divider.
+        while (!mReplacingWindows.isEmpty()) {
+            layer = assignAndIncreaseLayerIfNeeded(mReplacingWindows.remove(), layer);
+        }
+
+        while (!mPinnedWindows.isEmpty()) {
+            layer = assignAndIncreaseLayerIfNeeded(mPinnedWindows.remove(), layer);
+        }
     }
 
     private int assignAndIncreaseLayerIfNeeded(WindowState win, int layer) {
