@@ -250,6 +250,12 @@ abstract public class ManagedServices {
         rebindServices();
     }
 
+    public void onUserUnlocked(int user) {
+        if (DEBUG) Slog.d(TAG, "onUserUnlocked u=" + user);
+        rebuildRestoredPackages();
+        rebindServices();
+    }
+
     public ManagedServiceInfo getServiceFromTokenLocked(IInterface service) {
         if (service == null) {
             return null;
