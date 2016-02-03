@@ -734,23 +734,34 @@ void BakedOpDispatcher::onTextureLayerOp(BakedOpRenderer& renderer, const Textur
 }
 
 void BakedOpDispatcher::onLayerOp(BakedOpRenderer& renderer, const LayerOp& op, const BakedOpState& state) {
+    // Note that we don't use op->paint in this function - it's never set on a LayerOp
     OffscreenBuffer* buffer = *op.layerHandle;
 
-    // Note that we don't use op->paint here - it's never set on a LayerOp
-    float layerAlpha = op.alpha * state.alpha;
-    Glop glop;
-    GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
-            .setRoundRectClipState(state.roundRectClipState)
-            .setMeshTexturedIndexedVbo(buffer->vbo, buffer->elementCount)
-            .setFillLayer(buffer->texture, op.colorFilter, layerAlpha, op.mode, Blend::ModeOrderSwap::NoSwap)
-            .setTransform(state.computedState.transform, TransformFlags::None)
-            .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
-                    Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
-            .build();
-    renderer.renderGlop(state, glop);
+    if (CC_UNLIKELY(!buffer)) {
+        // Layer was not allocated, which can occur if there were no draw ops inside. We draw the
+        // equivalent by drawing a rect with the same layer properties (alpha/xfer/filter).
+        SkPaint paint;
+        paint.setAlpha(op.alpha * 255);
+        paint.setXfermodeMode(op.mode);
+        paint.setColorFilter(op.colorFilter);
+        RectOp rectOp(op.unmappedBounds, op.localMatrix, op.localClip, &paint);
+        BakedOpDispatcher::onRectOp(renderer, rectOp, state);
+    } else {
+        float layerAlpha = op.alpha * state.alpha;
+        Glop glop;
+        GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
+                .setRoundRectClipState(state.roundRectClipState)
+                .setMeshTexturedIndexedVbo(buffer->vbo, buffer->elementCount)
+                .setFillLayer(buffer->texture, op.colorFilter, layerAlpha, op.mode, Blend::ModeOrderSwap::NoSwap)
+                .setTransform(state.computedState.transform, TransformFlags::None)
+                .setModelViewOffsetRectSnap(op.unmappedBounds.left, op.unmappedBounds.top,
+                        Rect(op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight()))
+                .build();
+        renderer.renderGlop(state, glop);
 
-    if (op.destroy) {
-        renderer.renderState().layerPool().putOrDelete(buffer);
+        if (op.destroy) {
+            renderer.renderState().layerPool().putOrDelete(buffer);
+        }
     }
 }
 
