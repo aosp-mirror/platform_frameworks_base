@@ -86,7 +86,7 @@
     <item msgid="2219332261255416635">"Animație la scara 1x"</item>
     <item msgid="3544428804137048509">"Animație la scara 1,5x"</item>
     <item msgid="3110710404225974514">"Animație la scara 2x"</item>
-    <item msgid="4402738611528318731">"Animaţie la scara 5x"</item>
+    <item msgid="4402738611528318731">"Animație la scara 5x"</item>
     <item msgid="6189539267968330656">"Animație la scara 10x"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
@@ -99,13 +99,13 @@
     <item msgid="6660750935954853365">"Animație la scara 10x"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
-    <item msgid="6039901060648228241">"Animaţie dezactivată"</item>
-    <item msgid="1138649021950863198">"Animaţie la scara 0,5x"</item>
-    <item msgid="4394388961370833040">"Animaţie la scara 1x"</item>
-    <item msgid="8125427921655194973">"Animaţie la scara 1,5x"</item>
-    <item msgid="3334024790739189573">"Animaţie la scara 2x"</item>
-    <item msgid="3170120558236848008">"Animaţie la scara 5x"</item>
-    <item msgid="1069584980746680398">"Animaţie la scara 10x"</item>
+    <item msgid="6039901060648228241">"Animație dezactivată"</item>
+    <item msgid="1138649021950863198">"Animație la scara 0,5x"</item>
+    <item msgid="4394388961370833040">"Animație la scara 1x"</item>
+    <item msgid="8125427921655194973">"Animație la scara 1,5x"</item>
+    <item msgid="3334024790739189573">"Animație la scara 2x"</item>
+    <item msgid="3170120558236848008">"Animație la scara 5x"</item>
+    <item msgid="1069584980746680398">"Animație la scara 10x"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"Niciuna"</item>
