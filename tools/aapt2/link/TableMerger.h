@@ -20,6 +20,7 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "filter/ConfigFilter.h"
 #include "io/File.h"
 #include "process/IResourceTableConsumer.h"
 #include "util/Util.h"
@@ -51,6 +52,11 @@ struct TableMergerOptions {
      * If true, resources in overlays can be added without previously having existed.
      */
     bool autoAddOverlay = false;
+
+    /**
+     * A filter that removes resources whose configurations don't match.
+     */
+    IConfigFilter* filter = nullptr;
 };
 
 /**

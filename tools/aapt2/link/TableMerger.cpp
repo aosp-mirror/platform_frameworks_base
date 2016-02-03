@@ -100,7 +100,7 @@ bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& package
                 return false;
             }
 
-            mFilesToMerge[ResourceKeyRef{ name, config }] = FileToMerge{
+            mFilesToMerge[ResourceKeyRef(name, config)] = FileToMerge{
                     f, oldFile->getSource(), util::utf16ToUtf8(*newFile->path) };
             return true;
         };
@@ -201,6 +201,9 @@ bool TableMerger::doMerge(const Source& src,
                 auto iter = std::lower_bound(dstEntry->values.begin(), dstEntry->values.end(),
                                              srcValue.config, cmp::lessThanConfig);
 
+                const bool stripConfig = mOptions.filter ?
+                        !mOptions.filter->match(srcValue.config) : false;
+
                 if (iter != dstEntry->values.end() && iter->config == srcValue.config) {
                     const int collisionResult = ResourceTable::resolveValueCollision(
                             iter->value.get(), srcValue.value.get());
@@ -224,9 +227,13 @@ bool TableMerger::doMerge(const Source& src,
                         continue;
                     }
 
-                } else {
+                } else if (!stripConfig){
                     // Insert a place holder value. We will fill it in below.
                     iter = dstEntry->values.insert(iter, ResourceConfigValue{ srcValue.config });
+                }
+
+                if (stripConfig) {
+                    continue;
                 }
 
                 if (FileReference* f = valueCast<FileReference>(srcValue.value.get())) {
@@ -287,7 +294,7 @@ bool TableMerger::mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, b
 
     auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
                        FileReference* newFile, FileReference* oldFile) -> bool {
-        mFilesToMerge[ResourceKeyRef{ name, config }] = FileToMerge{
+        mFilesToMerge[ResourceKeyRef(name, config)] = FileToMerge{
                 file, oldFile->getSource(), util::utf16ToUtf8(*newFile->path) };
         return true;
     };

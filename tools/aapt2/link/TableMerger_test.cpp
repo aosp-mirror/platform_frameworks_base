@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "filter/ConfigFilter.h"
 #include "io/FileSystem.h"
 #include "link/TableMerger.h"
 #include "test/Builders.h"
@@ -241,6 +242,38 @@ TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
 
     ASSERT_TRUE(merger.merge({}, tableA.get()));
     ASSERT_FALSE(merger.mergeOverlay({}, tableB.get()));
+}
+
+TEST_F(TableMergerTest, MergeAndStripResourcesNotMatchingFilter) {
+    ResourceTable finalTable;
+    TableMergerOptions options;
+    options.autoAddOverlay = false;
+
+    AxisConfigFilter filter;
+    filter.addConfig(test::parseConfigOrDie("en"));
+    options.filter = &filter;
+
+    test::TestFile fileA("res/layout-en/main.xml"), fileB("res/layout-fr-rFR/main.xml");
+    const ResourceName name = test::parseNameOrDie(u"@com.app.a:layout/main");
+    const ConfigDescription configEn = test::parseConfigOrDie("en");
+    const ConfigDescription configFr = test::parseConfigOrDie("fr-rFR");
+
+    TableMerger merger(mContext.get(), &finalTable, options);
+    ASSERT_TRUE(merger.mergeFile(ResourceFile{ name, configEn }, &fileA));
+    ASSERT_TRUE(merger.mergeFile(ResourceFile{ name, configFr }, &fileB));
+
+    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(&finalTable,
+                                                              u"@com.app.a:layout/main",
+                                                              configEn));
+    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(&finalTable,
+                                                              u"@com.app.a:layout/main",
+                                                              configFr));
+
+    EXPECT_NE(merger.getFilesToMerge().end(),
+              merger.getFilesToMerge().find(ResourceKeyRef(name, configEn)));
+
+    EXPECT_EQ(merger.getFilesToMerge().end(),
+              merger.getFilesToMerge().find(ResourceKeyRef(name, configFr)));
 }
 
 } // namespace aapt
