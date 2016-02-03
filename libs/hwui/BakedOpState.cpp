@@ -63,16 +63,11 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
     }
 }
 
-ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot) {
-    transform = *snapshot.transform;
-
-    // Since the op doesn't have known bounds, we conservatively set the mapped bounds
-    // to the current clipRect, and clipSideFlags to Full.
-    clipState = snapshot.mutateClipArea().serializeClip(allocator);
-    LOG_ALWAYS_FATAL_IF(!clipState, "clipState required");
-    clippedBounds = clipState->rect;
-    clipSideFlags = OpClipSideFlags::Full;
-}
+ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot)
+        : transform(*snapshot.transform)
+        , clipState(snapshot.mutateClipArea().serializeClip(allocator))
+        , clippedBounds(clipState->rect)
+        , clipSideFlags(OpClipSideFlags::Full) {}
 
 ResolvedRenderState::ResolvedRenderState(const ClipRect* viewportRect, const Rect& dstRect)
         : transform(Matrix4::identity())

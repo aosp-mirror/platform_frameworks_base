@@ -26,6 +26,7 @@
 #include "utils/Pair.h"
 
 #include <SkPaint.h>
+#include <SkPath.h>
 
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
@@ -33,7 +34,6 @@
 
 class SkBitmap;
 class SkCanvas;
-class SkPath;
 struct SkRect;
 
 namespace android {
@@ -89,6 +89,40 @@ public:
         hash_t hash() const;
     };
 
+    class ShadowTask : public Task<TessellationCache::vertexBuffer_pair_t*> {
+    public:
+        ShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
+                const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
+                const Vector3& lightCenter, float lightRadius)
+            : drawTransform(*drawTransform)
+            , localClip(localClip)
+            , opaque(opaque)
+            , casterPerimeter(*casterPerimeter)
+            , transformXY(*transformXY)
+            , transformZ(*transformZ)
+            , lightCenter(lightCenter)
+            , lightRadius(lightRadius) {
+        }
+
+        ~ShadowTask();
+
+        /* Note - we deep copy all task parameters, because *even though* pointers into Allocator
+         * controlled objects (like the SkPath and Matrix4s) should be safe for the entire frame,
+         * certain Allocators are destroyed before trim() is called to flush incomplete tasks.
+         *
+         * These deep copies could be avoided, long term, by cancelling or flushing outstanding
+         * tasks before tearing down single-frame LinearAllocators.
+         */
+        const Matrix4 drawTransform;
+        const Rect localClip;
+        bool opaque;
+        const SkPath casterPerimeter;
+        const Matrix4 transformXY;
+        const Matrix4 transformZ;
+        const Vector3 lightCenter;
+        const float lightRadius;
+    };
+
     TessellationCache();
     ~TessellationCache();
 
@@ -133,16 +167,21 @@ public:
     const VertexBuffer* getRoundRect(const Matrix4& transform, const SkPaint& paint,
             float width, float height, float rx, float ry);
 
+    // TODO: delete these when switching to HWUI_NEW_OPS
     void precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
             bool opaque, const SkPath* casterPerimeter,
             const Matrix4* transformXY, const Matrix4* transformZ,
             const Vector3& lightCenter, float lightRadius);
-
     void getShadowBuffers(const Matrix4* drawTransform, const Rect& localClip,
             bool opaque, const SkPath* casterPerimeter,
             const Matrix4* transformXY, const Matrix4* transformZ,
             const Vector3& lightCenter, float lightRadius,
             vertexBuffer_pair_t& outBuffers);
+
+    sp<ShadowTask> getShadowTask(const Matrix4* drawTransform, const Rect& localClip,
+            bool opaque, const SkPath* casterPerimeter,
+            const Matrix4* transformXY, const Matrix4* transformZ,
+            const Vector3& lightCenter, float lightRadius);
 
 private:
     class Buffer;

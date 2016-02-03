@@ -45,13 +45,11 @@ public:
      * Position agnostic shadow lighting info. Used with all shadow ops in scene.
      */
     struct LightInfo {
-        LightInfo() : LightInfo(0, 0, 0) {}
-        LightInfo(float lightRadius, uint8_t ambientShadowAlpha,
+        LightInfo() : LightInfo(0, 0) {}
+        LightInfo(uint8_t ambientShadowAlpha,
                 uint8_t spotShadowAlpha)
-                : lightRadius(lightRadius)
-                , ambientShadowAlpha(ambientShadowAlpha)
+                : ambientShadowAlpha(ambientShadowAlpha)
                 , spotShadowAlpha(spotShadowAlpha) {}
-        float lightRadius;
         uint8_t ambientShadowAlpha;
         uint8_t spotShadowAlpha;
     };

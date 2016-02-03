@@ -55,14 +55,24 @@ class Rect;
  */
 class FrameBuilder : public CanvasStateClient {
 public:
+    struct LightGeometry {
+        Vector3 center;
+        float radius;
+    };
+
+    // TODO: remove
     FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
-            const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter);
+            const std::vector< sp<RenderNode> >& nodes,
+            const LightGeometry& lightGeometry,
+            Caches* caches)
+            : FrameBuilder(layers, clip, viewportWidth, viewportHeight, nodes, lightGeometry, Rect(), caches) {}
 
     FrameBuilder(const LayerUpdateQueue& layers, const SkRect& clip,
             uint32_t viewportWidth, uint32_t viewportHeight,
-            const std::vector< sp<RenderNode> >& nodes, const Vector3& lightCenter,
-            const Rect &contentDrawBounds);
+            const std::vector< sp<RenderNode> >& nodes,
+            const LightGeometry& lightGeometry,
+            const Rect &contentDrawBounds, Caches* caches);
 
     virtual ~FrameBuilder() {}
 
@@ -216,7 +226,11 @@ private:
 
     CanvasState mCanvasState;
 
-    // contains ResolvedOps and Batches
+    Caches* mCaches = nullptr;
+
+    float mLightRadius;
+
+    // contains single-frame objects, such as BakedOpStates, LayerBuilders, Batches
     LinearAllocator mAllocator;
 };
 
