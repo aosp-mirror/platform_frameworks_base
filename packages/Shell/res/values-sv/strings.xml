@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Skal"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Felrapporten har skapats"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Dra till vänster om du vill dela felrapporten"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Svep åt vänster om du vill dela felrapporten"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Tryck om du vill dela felrapporten"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Felrapporter innehåller data från systemets olika loggfiler, inklusive personliga och privata uppgifter. Dela bara felrapporter med personer du litar på."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Visa det här meddelandet nästa gång"</string>
