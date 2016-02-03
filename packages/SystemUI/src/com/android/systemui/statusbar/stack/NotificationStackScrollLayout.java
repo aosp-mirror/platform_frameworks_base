@@ -2605,6 +2605,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         mIsExpanded = isExpanded;
         mStackScrollAlgorithm.setIsExpanded(isExpanded);
         if (changed) {
+            if (!mIsExpanded) {
+                mGroupManager.collapseAllGroups();
+            }
             updateNotificationAnimationStates();
             updateChronometers();
         }
