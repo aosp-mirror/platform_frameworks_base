@@ -26,28 +26,26 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.wifi.ScanSettings;
 import android.os.Binder;
 import android.os.Build;
-import android.os.IBinder;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.WorkSource;
-import android.os.Messenger;
 import android.util.Log;
 import android.util.SparseArray;
-
-import java.net.InetAddress;
-import java.util.concurrent.CountDownLatch;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
+import java.net.InetAddress;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * This class provides the primary API for managing all aspects of Wi-Fi
@@ -112,6 +110,51 @@ public class WifiManager {
     /** @hide */
     @SystemApi
     public static final int WIFI_CREDENTIAL_FORGOT = 1;
+
+    /**
+     * Broadcast intent action indicating that the a Passpoint release 2 icon has been received.
+     * @hide
+     */
+    public static final String PASSPOINT_ICON_RECEIVED_ACTION =
+            "android.net.wifi.PASSPOINT_ICON_RECEIVED";
+    /** @hide */
+    public static final String EXTRA_PASSPOINT_ICON_BSSID = "bssid";
+    /** @hide */
+    public static final String EXTRA_PASSPOINT_ICON_FILE = "file";
+    /** @hide */
+    public static final String EXTRA_PASSPOINT_ICON_DATA = "icon";
+
+    /**
+     * Broadcast intent action indicating that the a Passpoint release
+     * 2 WNM frame has been received.
+     * @hide
+     */
+    public static final String PASSPOINT_WNM_FRAME_RECEIVED_ACTION =
+            "android.net.wifi.PASSPOINT_WNM_FRAME_RECEIVED";
+    /**
+     * Originating BSS
+     * @hide */
+    public static final String EXTRA_PASSPOINT_WNM_BSSID = "bssid";
+    /**
+     * SOAP-XML or OMA-DM
+     * @hide */
+    public static final String EXTRA_PASSPOINT_WNM_METHOD = "method";
+    /**
+     * Type of Passpoint match
+     * @hide */
+    public static final String EXTRA_PASSPOINT_WNM_PPOINT_MATCH = "match";
+    /**
+     * String
+     * @hide */
+    public static final String EXTRA_PASSPOINT_WNM_URL = "url";
+    /**
+     * Boolean true=ess, false=bss
+     * @hide */
+    public static final String EXTRA_PASSPOINT_WNM_ESS = "ess";
+    /**
+     * Delay in seconds
+     * @hide */
+    public static final String EXTRA_PASSPOINT_WNM_DELAY = "delay";
 
     /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
@@ -771,6 +814,76 @@ public class WifiManager {
     }
 
     /**
+     * Add a Hotspot 2.0 release 2 Management Object
+     * @param mo The MO in XML form
+     * @return -1 for failure
+     * @hide
+     */
+    public int addPasspointManagementObject(String mo) {
+        try {
+            return mService.addPasspointManagementObject(mo);
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Modify a Hotspot 2.0 release 2 Management Object
+     * @param fqdn The FQDN of the service provider
+     * @param mos A List of MO definitions to be updated
+     * @return the number of nodes updated, or -1 for failure
+     * @hide
+     */
+    public int modifyPasspointManagementObject(String fqdn,
+                                               List<PasspointManagementObjectDefinition> mos) {
+        try {
+            return mService.modifyPasspointManagementObject(fqdn, mos);
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Query for a Hotspot 2.0 release 2 OSU icon
+     * @param bssid The BSSID of the AP
+     * @param fileName Icon file name
+     * @hide
+     */
+    public void queryPasspointIcon(long bssid, String fileName) {
+        try {
+            mService.queryPasspointIcon(bssid, fileName);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Match the currently associated network against the SP matching the given FQDN
+     * @param fqdn FQDN of the SP
+     * @return ordinal [HomeProvider, RoamingProvider, Incomplete, None, Declined]
+     * @hide
+     */
+    public int matchProviderWithCurrentNetwork(String fqdn) {
+        try {
+            return mService.matchProviderWithCurrentNetwork(fqdn);
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Deauthenticate and set the re-authentication hold off time for the current network
+     * @param holdoff hold off time in milliseconds
+     * @param ess set if the hold off pertains to an ESS rather than a BSS
+     * @hide
+     */
+    public void deauthenticateNetwork(long holdoff, boolean ess) {
+        try {
+            mService.deauthenticateNetwork(holdoff, ess);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Remove the specified network from the list of configured networks.
      * This may result in the asynchronous delivery of state change
      * events.
@@ -1187,30 +1300,6 @@ public class WifiManager {
             return mService.getScanResults(mContext.getOpPackageName());
         } catch (RemoteException e) {
             return null;
-        }
-    }
-
-    /**
-     * An augmented version of getScanResults that returns ScanResults as well as OSU information
-     * wrapped in ScanInfo objects.
-     * @return
-     */
-    public List<ScanInfo> getScanInfos() {
-        try {
-            return mService.getScanInfos(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Notify the OSU framework about the currently selected OSU.
-     * @param osuID The OSU ID from ScanInfo.getOsuIdentity()
-     */
-    public void setOsuSelection(int osuID) {
-        try {
-            mService.setOsuSelection(osuID);
-        } catch (RemoteException e) {
         }
     }
 

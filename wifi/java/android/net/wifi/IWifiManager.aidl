@@ -20,7 +20,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
 import android.net.wifi.ScanResult;
-import android.net.wifi.ScanInfo;
+import android.net.wifi.PasspointManagementObjectDefinition;
 import android.net.wifi.WifiConnectionStatistics;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.Network;
@@ -50,6 +50,17 @@ interface IWifiManager
 
     int addOrUpdateNetwork(in WifiConfiguration config);
 
+    int addPasspointManagementObject(String mo);
+
+    int modifyPasspointManagementObject(String fqdn,
+                                        in List<PasspointManagementObjectDefinition> mos);
+
+    void queryPasspointIcon(long bssid, String fileName);
+
+    int matchProviderWithCurrentNetwork(String fqdn);
+
+    void deauthenticateNetwork(long holdoff, boolean ess);
+
     boolean removeNetwork(int netId);
 
     boolean enableNetwork(int netId, boolean disableOthers);
@@ -63,10 +74,6 @@ interface IWifiManager
     List<ScanResult> getScanResults(String callingPackage);
 
     void disconnect();
-
-    List<ScanInfo> getScanInfos(String callingPackage);
-
-    void setOsuSelection(int osuID);
 
     void reconnect();
 
