@@ -38,8 +38,8 @@ import android.location.FusedBatchOptions;
 import android.location.GnssStatus;
 import android.location.IGnssStatusListener;
 import android.location.IGnssStatusProvider;
-import android.location.GpsMeasurementsEvent;
-import android.location.GpsNavigationMessageEvent;
+import android.location.GnssMeasurementsEvent;
+import android.location.GnssNavigationMessageEvent;
 import android.location.IGpsGeofenceHardware;
 import android.location.ILocationManager;
 import android.location.INetInitiatedListener;
@@ -368,8 +368,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
     private final GnssStatusListenerHelper mListenerHelper;
-    private final GpsMeasurementsProvider mGpsMeasurementsProvider;
-    private final GpsNavigationMessageProvider mGpsNavigationMessageProvider;
+    private final GnssMeasurementsProvider mGnssMeasurementsProvider;
+    private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
 
     // Handler for processing events
     private Handler mHandler;
@@ -428,12 +428,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
         return mGpsGeofenceBinder;
     }
 
-    public GpsMeasurementsProvider getGpsMeasurementsProvider() {
-        return mGpsMeasurementsProvider;
+    public GnssMeasurementsProvider getGnssMeasurementsProvider() {
+        return mGnssMeasurementsProvider;
     }
 
-    public GpsNavigationMessageProvider getGpsNavigationMessageProvider() {
-        return mGpsNavigationMessageProvider;
+    public GnssNavigationMessageProvider getGnssNavigationMessageProvider() {
+        return mGnssNavigationMessageProvider;
     }
 
     /**
@@ -713,7 +713,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         };
 
-        mGpsMeasurementsProvider = new GpsMeasurementsProvider(mHandler) {
+        mGnssMeasurementsProvider = new GnssMeasurementsProvider(mHandler) {
             @Override
             public boolean isAvailableInPlatform() {
                 return native_is_measurement_supported();
@@ -735,7 +735,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         };
 
-        mGpsNavigationMessageProvider = new GpsNavigationMessageProvider(mHandler) {
+        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(mHandler) {
             @Override
             protected boolean isAvailableInPlatform() {
                 return native_is_navigation_message_supported();
@@ -1087,8 +1087,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
             }
 
-            mGpsMeasurementsProvider.onGpsEnabledChanged();
-            mGpsNavigationMessageProvider.onGpsEnabledChanged();
+            mGnssMeasurementsProvider.onGpsEnabledChanged();
+            mGnssNavigationMessageProvider.onGpsEnabledChanged();
         } else {
             synchronized (mLock) {
                 mEnabled = false;
@@ -1123,8 +1123,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // do this before releasing wakelock
         native_cleanup();
 
-        mGpsMeasurementsProvider.onGpsEnabledChanged();
-        mGpsNavigationMessageProvider.onGpsEnabledChanged();
+        mGnssMeasurementsProvider.onGpsEnabledChanged();
+        mGnssNavigationMessageProvider.onGpsEnabledChanged();
     }
 
     @Override
@@ -1655,15 +1655,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * called from native code - Gps measurements callback
      */
-    private void reportMeasurementData(GpsMeasurementsEvent event) {
-        mGpsMeasurementsProvider.onMeasurementsAvailable(event);
+    private void reportMeasurementData(GnssMeasurementsEvent event) {
+        mGnssMeasurementsProvider.onMeasurementsAvailable(event);
     }
 
     /**
      * called from native code - GPS navigation message callback
      */
-    private void reportNavigationMessage(GpsNavigationMessageEvent event) {
-        mGpsNavigationMessageProvider.onNavigationMessageAvailable(event);
+    private void reportNavigationMessage(GnssNavigationMessageEvent event) {
+        mGnssNavigationMessageProvider.onNavigationMessageAvailable(event);
     }
 
     /**
@@ -1677,9 +1677,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
             requestUtcTime();
         }
 
-        mGpsMeasurementsProvider.onCapabilitiesUpdated(
+        mGnssMeasurementsProvider.onCapabilitiesUpdated(
                 (capabilities & GPS_CAPABILITY_MEASUREMENTS) == GPS_CAPABILITY_MEASUREMENTS);
-        mGpsNavigationMessageProvider.onCapabilitiesUpdated(
+        mGnssNavigationMessageProvider.onCapabilitiesUpdated(
                 (capabilities & GPS_CAPABILITY_NAV_MESSAGES) == GPS_CAPABILITY_NAV_MESSAGES);
     }
 

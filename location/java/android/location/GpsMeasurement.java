@@ -16,17 +16,17 @@
 
 package android.location;
 
-import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
 /**
  * A class representing a GPS satellite measurement, containing raw and computed information.
+ *
+ * @hide
  */
-public final class GpsMeasurement implements Parcelable {
+@SystemApi
+public class GpsMeasurement implements Parcelable {
     private int mFlags;
     private byte mPrn;
     private double mTimeOffsetInNs;
@@ -59,8 +59,6 @@ public final class GpsMeasurement implements Parcelable {
     private double mAzimuthInDeg;
     private double mAzimuthUncertaintyInDeg;
     private boolean mUsedInFix;
-    private double mPseudorangeRateCarrierInMetersPerSec;
-    private double mPseudorangeRateCarrierUncertaintyInMetersPerSec;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -85,11 +83,6 @@ public final class GpsMeasurement implements Parcelable {
     private static final int HAS_USED_IN_FIX = (1<<17);
     private static final int GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
 
-    /** The status of 'loss of lock'. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LOSS_OF_LOCK_UNKNOWN, LOSS_OF_LOCK_OK, LOSS_OF_LOCK_CYCLE_SLIP})
-    public @interface LossOfLockStatus {}
-
     /**
      * The indicator is not available or it is unknown.
      */
@@ -104,12 +97,6 @@ public final class GpsMeasurement implements Parcelable {
      * 'Loss of lock' detected between the previous and current observation: cycle slip possible.
      */
     public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2;
-
-    /** The status of multipath. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MULTIPATH_INDICATOR_UNKNOWN, MULTIPATH_INDICATOR_DETECTED,
-        MULTIPATH_INDICATOR_NOT_USED})
-    public @interface MultipathIndicator {}
 
     /**
      * The indicator is not available or it is unknown.
@@ -231,10 +218,6 @@ public final class GpsMeasurement implements Parcelable {
         mAzimuthInDeg = measurement.mAzimuthInDeg;
         mAzimuthUncertaintyInDeg = measurement.mAzimuthUncertaintyInDeg;
         mUsedInFix = measurement.mUsedInFix;
-        mPseudorangeRateCarrierInMetersPerSec =
-                measurement.mPseudorangeRateCarrierInMetersPerSec;
-        mPseudorangeRateCarrierUncertaintyInMetersPerSec =
-                measurement.mPseudorangeRateCarrierUncertaintyInMetersPerSec;
     }
 
     /**
@@ -793,7 +776,6 @@ public final class GpsMeasurement implements Parcelable {
     /**
      * Gets a value indicating the 'loss of lock' state of the event.
      */
-    @LossOfLockStatus
     public byte getLossOfLock() {
         return mLossOfLock;
     }
@@ -801,7 +783,7 @@ public final class GpsMeasurement implements Parcelable {
     /**
      * Sets the 'loss of lock' status.
      */
-    public void setLossOfLock(@LossOfLockStatus byte value) {
+    public void setLossOfLock(byte value) {
         mLossOfLock = value;
     }
 
@@ -959,7 +941,6 @@ public final class GpsMeasurement implements Parcelable {
     /**
      * Gets a value indicating the 'multipath' state of the event.
      */
-    @MultipathIndicator
     public byte getMultipathIndicator() {
         return mMultipathIndicator;
     }
@@ -967,7 +948,7 @@ public final class GpsMeasurement implements Parcelable {
     /**
      * Sets the 'multi-path' indicator.
      */
-    public void setMultipathIndicator(@MultipathIndicator byte value) {
+    public void setMultipathIndicator(byte value) {
         mMultipathIndicator = value;
     }
 
@@ -1176,34 +1157,6 @@ public final class GpsMeasurement implements Parcelable {
         mUsedInFix = value;
     }
 
-    /**
-     * Gets pseudorange rate (based on carrier phase changes) at the timestamp in m/s.
-     */
-    public double getPseudorangeRateCarrierInMetersPerSec() {
-        return mPseudorangeRateCarrierInMetersPerSec;
-    }
-
-    /**
-     * Sets pseudorange rate (based on carrier phase changes) at the timestamp in m/s.
-     */
-    public void setPseudorangeRateCarrierInMetersPerSec(double value) {
-        mPseudorangeRateCarrierInMetersPerSec = value;
-    }
-
-    /**
-     * Gets 1-Sigma uncertainty of the pseudorange rate carrier.
-     */
-    public double getPseudorangeRateCarrierUncertaintyInMetersPerSec() {
-        return mPseudorangeRateCarrierUncertaintyInMetersPerSec;
-    }
-
-    /**
-     * Sets 1-Sigma uncertainty of the pseudorange rate carrier.
-     */
-    public void setPseudorangeRateCarrierUncertaintyInMetersPerSec(double value) {
-        mPseudorangeRateCarrierUncertaintyInMetersPerSec = value;
-    }
-
     public static final Creator<GpsMeasurement> CREATOR = new Creator<GpsMeasurement>() {
         @Override
         public GpsMeasurement createFromParcel(Parcel parcel) {
@@ -1241,8 +1194,6 @@ public final class GpsMeasurement implements Parcelable {
             gpsMeasurement.mAzimuthInDeg = parcel.readDouble();
             gpsMeasurement.mAzimuthUncertaintyInDeg = parcel.readDouble();
             gpsMeasurement.mUsedInFix = parcel.readInt() != 0;
-            gpsMeasurement.mPseudorangeRateCarrierInMetersPerSec = parcel.readDouble();
-            gpsMeasurement.mPseudorangeRateCarrierUncertaintyInMetersPerSec = parcel.readDouble();
 
             return gpsMeasurement;
         }
@@ -1286,8 +1237,6 @@ public final class GpsMeasurement implements Parcelable {
         parcel.writeDouble(mAzimuthInDeg);
         parcel.writeDouble(mAzimuthUncertaintyInDeg);
         parcel.writeInt(mUsedInFix ? 1 : 0);
-        parcel.writeDouble(mPseudorangeRateCarrierInMetersPerSec);
-        parcel.writeDouble(mPseudorangeRateCarrierUncertaintyInMetersPerSec);
     }
 
     @Override
@@ -1412,11 +1361,6 @@ public final class GpsMeasurement implements Parcelable {
 
         builder.append(String.format(format, "UsedInFix", mUsedInFix));
 
-        builder.append(String.format(format, "PseudorangeRateCarrierInMetersPerSec",
-                    mPseudorangeRateCarrierInMetersPerSec));
-        builder.append(String.format(format, "PseudorangeRateCarrierUncertaintyInMetersPerSec",
-                    mPseudorangeRateCarrierUncertaintyInMetersPerSec));
-
         return builder.toString();
     }
 
@@ -1453,8 +1397,6 @@ public final class GpsMeasurement implements Parcelable {
         resetAzimuthInDeg();
         resetAzimuthUncertaintyInDeg();
         setUsedInFix(false);
-        setPseudorangeRateCarrierInMetersPerSec(Double.MIN_VALUE);
-        setPseudorangeRateCarrierUncertaintyInMetersPerSec(Double.MIN_VALUE);
     }
 
     private void setFlag(int flag) {

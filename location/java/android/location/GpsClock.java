@@ -16,41 +16,36 @@
 
 package android.location;
 
-import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class containing a GPS clock timestamp.
  * It represents a measurement of the GPS receiver's clock.
+ *
+ * @hide
  */
-public final class GpsClock implements Parcelable {
+@SystemApi
+public class GpsClock implements Parcelable {
 
     // The following enumerations must be in sync with the values declared in gps.h
-
-    /** The type of the GPS Clock. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CLOCK_TYPE_UNKNOWN, CLOCK_TYPE_LOCAL_HW_TIME, CLOCK_TYPE_GPS_TIME})
-    public @interface GpsClockType {}
 
     /**
      * The type of the time stored is not available or it is unknown.
      */
-    public static final byte CLOCK_TYPE_UNKNOWN = 0;
+    public static final byte TYPE_UNKNOWN = 0;
 
     /**
      * The source of the time value reported by this class is the 'Local Hardware Clock'.
      */
-    public static final byte CLOCK_TYPE_LOCAL_HW_TIME = 1;
+    public static final byte TYPE_LOCAL_HW_TIME = 1;
 
     /**
      * The source of the time value reported by this class is the 'GPS time' derived from
      * satellites (epoch = Jan 6, 1980).
      */
-    public static final byte CLOCK_TYPE_GPS_TIME = 2;
+    public static final byte TYPE_GPS_TIME = 2;
 
     private static final short HAS_NO_FLAGS = 0;
     private static final short HAS_LEAP_SECOND = (1<<0);
@@ -73,7 +68,6 @@ public final class GpsClock implements Parcelable {
     private double mBiasUncertaintyInNs;
     private double mDriftInNsPerSec;
     private double mDriftUncertaintyInNsPerSec;
-    private long mTimeOfLastHwClockDiscontinuityInNs;
 
     GpsClock() {
         initialize();
@@ -93,7 +87,6 @@ public final class GpsClock implements Parcelable {
         mBiasUncertaintyInNs = clock.mBiasUncertaintyInNs;
         mDriftInNsPerSec = clock.mDriftInNsPerSec;
         mDriftUncertaintyInNsPerSec = clock.mDriftUncertaintyInNsPerSec;
-        mTimeOfLastHwClockDiscontinuityInNs = clock.mTimeOfLastHwClockDiscontinuityInNs;
     }
 
     /**
@@ -106,7 +99,6 @@ public final class GpsClock implements Parcelable {
     /**
      * Gets the type of time reported by {@link #getTimeInNs()}.
      */
-    @GpsClockType
     public byte getType() {
         return mType;
     }
@@ -114,7 +106,7 @@ public final class GpsClock implements Parcelable {
     /**
      * Sets the type of time reported.
      */
-    public void setType(@GpsClockType byte value) {
+    public void setType(byte value) {
         mType = value;
     }
 
@@ -124,11 +116,11 @@ public final class GpsClock implements Parcelable {
      */
     private String getTypeString() {
         switch (mType) {
-            case CLOCK_TYPE_UNKNOWN:
+            case TYPE_UNKNOWN:
                 return "Unknown";
-            case CLOCK_TYPE_GPS_TIME:
+            case TYPE_GPS_TIME:
                 return "GpsTime";
-            case CLOCK_TYPE_LOCAL_HW_TIME:
+            case TYPE_LOCAL_HW_TIME:
                 return "LocalHwClock";
             default:
                 return "<Invalid:" + mType + ">";
@@ -171,8 +163,8 @@ public final class GpsClock implements Parcelable {
 
     /**
      * Gets the GPS receiver internal clock value in nanoseconds.
-     * This can be either the 'local hardware clock' value ({@link #CLOCK_TYPE_LOCAL_HW_TIME}), or the
-     * current GPS time derived inside GPS receiver ({@link #CLOCK_TYPE_GPS_TIME}).
+     * This can be either the 'local hardware clock' value ({@link #TYPE_LOCAL_HW_TIME}), or the
+     * current GPS time derived inside GPS receiver ({@link #TYPE_GPS_TIME}).
      * {@link #getType()} defines the time reported.
      *
      * For 'local hardware clock' this value is expected to be monotonically increasing during the
@@ -231,7 +223,7 @@ public final class GpsClock implements Parcelable {
     }
 
     /**
-     * Returns true if {@link #getFullBiasInNs()} is available, false otherwise.
+     * Returns true if {@link @getFullBiasInNs()} is available, false otherwise.
      */
     public boolean hasFullBiasInNs() {
         return isFlagSet(HAS_FULL_BIAS);
@@ -241,7 +233,7 @@ public final class GpsClock implements Parcelable {
      * Gets the difference between hardware clock ({@link #getTimeInNs()}) inside GPS receiver and
      * the true GPS time since 0000Z, January 6, 1980, in nanoseconds.
      *
-     * This value is available if {@link #CLOCK_TYPE_LOCAL_HW_TIME} is set, and GPS receiver has solved
+     * This value is available if {@link #TYPE_LOCAL_HW_TIME} is set, and GPS receiver has solved
      * the clock for GPS time.
      * {@link #getBiasUncertaintyInNs()} should be used for quality check.
      *
@@ -395,20 +387,6 @@ public final class GpsClock implements Parcelable {
     }
 
     /**
-     * Gets time of last hardware clock discontinuity.
-     */
-    public long getTimeOfLastHwClockDiscontinuityInNs() {
-        return mTimeOfLastHwClockDiscontinuityInNs;
-    }
-
-    /**
-     * Sets time of last hardware clock discontinuity.
-     */
-    public void setTimeOfLastHwClockDiscontinuityInNs(long timeOfLastHwClockDiscontinuityInNs) {
-        mTimeOfLastHwClockDiscontinuityInNs = timeOfLastHwClockDiscontinuityInNs;
-    }
-
-    /**
      * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      */
     public void resetDriftUncertaintyInNsPerSec() {
@@ -431,7 +409,6 @@ public final class GpsClock implements Parcelable {
             gpsClock.mBiasUncertaintyInNs = parcel.readDouble();
             gpsClock.mDriftInNsPerSec = parcel.readDouble();
             gpsClock.mDriftUncertaintyInNsPerSec = parcel.readDouble();
-            gpsClock.mTimeOfLastHwClockDiscontinuityInNs = parcel.readLong();
 
             return gpsClock;
         }
@@ -453,7 +430,6 @@ public final class GpsClock implements Parcelable {
         parcel.writeDouble(mBiasUncertaintyInNs);
         parcel.writeDouble(mDriftInNsPerSec);
         parcel.writeDouble(mDriftUncertaintyInNsPerSec);
-        parcel.writeLong(mTimeOfLastHwClockDiscontinuityInNs);
     }
 
     @Override
@@ -497,17 +473,13 @@ public final class GpsClock implements Parcelable {
                 "DriftUncertaintyInNsPerSec",
                 hasDriftUncertaintyInNsPerSec() ? mDriftUncertaintyInNsPerSec : null));
 
-        builder.append(String.format(format, "TimeOfLastHwClockDiscontinuityInNs",
-                getType() == CLOCK_TYPE_LOCAL_HW_TIME
-                        ? mTimeOfLastHwClockDiscontinuityInNs : null));
-
         return builder.toString();
     }
 
     private void initialize() {
         mFlags = HAS_NO_FLAGS;
         resetLeapSecond();
-        setType(CLOCK_TYPE_UNKNOWN);
+        setType(TYPE_UNKNOWN);
         setTimeInNs(Long.MIN_VALUE);
         resetTimeUncertaintyInNs();
         resetFullBiasInNs();
@@ -515,7 +487,6 @@ public final class GpsClock implements Parcelable {
         resetBiasUncertaintyInNs();
         resetDriftInNsPerSec();
         resetDriftUncertaintyInNsPerSec();
-        setTimeOfLastHwClockDiscontinuityInNs(Long.MIN_VALUE);
     }
 
     private void setFlag(short flag) {

@@ -336,8 +336,8 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/IGeofenceProvider.aidl \
 	location/java/android/location/IGnssStatusListener.aidl \
 	location/java/android/location/IGnssStatusProvider.aidl \
-	location/java/android/location/IGpsMeasurementsListener.aidl \
-	location/java/android/location/IGpsNavigationMessageListener.aidl \
+	location/java/android/location/IGnssMeasurementsListener.aidl \
+	location/java/android/location/IGnssNavigationMessageListener.aidl \
 	location/java/android/location/ILocationListener.aidl \
 	location/java/android/location/ILocationManager.aidl \
 	location/java/android/location/IFusedGeofenceHardware.aidl \

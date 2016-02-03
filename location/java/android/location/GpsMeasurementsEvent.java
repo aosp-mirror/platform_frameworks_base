@@ -16,13 +16,11 @@
 
 package android.location;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,13 +28,12 @@ import java.util.Collections;
 
 /**
  * A class implementing a container for data associated with a measurement event.
- * Events are delivered to registered instances of {@link Callback}.
+ * Events are delivered to registered instances of {@link Listener}.
+ *
+ * @hide
  */
-public final class GpsMeasurementsEvent implements Parcelable {
-    /** The status of GPS measurements event. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GPS_LOCATION_DISABLED})
-    public @interface GpsMeasurementsStatus {}
+@SystemApi
+public class GpsMeasurementsEvent implements Parcelable {
 
     /**
      * The system does not support tracking of GPS Measurements. This status will not change in the
@@ -61,20 +58,22 @@ public final class GpsMeasurementsEvent implements Parcelable {
     /**
      * Used for receiving GPS satellite measurements from the GPS engine.
      * Each measurement contains raw and computed data identifying a satellite.
-     * You can implement this interface and call
-     * {@link LocationManager#registerGpsMeasurementCallback}.
+     * You can implement this interface and call {@link LocationManager#addGpsMeasurementListener}.
+     *
+     * @hide
      */
-    public static abstract class Callback {
+    @SystemApi
+    public interface Listener {
 
         /**
          * Returns the latest collected GPS Measurements.
          */
-        public void onGpsMeasurementsReceived(GpsMeasurementsEvent eventArgs) {}
+        void onGpsMeasurementsReceived(GpsMeasurementsEvent eventArgs);
 
         /**
          * Returns the latest status of the GPS Measurements sub-system.
          */
-        public void onStatusChanged(@GpsMeasurementsStatus int status) {}
+        void onStatusChanged(int status);
     }
 
     public GpsMeasurementsEvent(GpsClock clock, GpsMeasurement[] measurements) {

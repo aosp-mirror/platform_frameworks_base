@@ -64,8 +64,8 @@ public class LocationManager {
 
     private final Context mContext;
     private final ILocationManager mService;
-    private final GpsMeasurementCallbackTransport mGpsMeasurementCallbackTransport;
-    private final GpsNavigationMessageCallbackTransport mGpsNavigationMessageCallbackTransport;
+    private final GnssMeasurementCallbackTransport mGnssMeasurementCallbackTransport;
+    private final GnssNavigationMessageCallbackTransport mGnssNavigationMessageCallbackTransport;
     private final HashMap<GpsStatus.Listener, GnssStatusListenerTransport> mGpsStatusListeners =
             new HashMap<>();
     private final HashMap<GpsStatus.NmeaListener, GnssStatusListenerTransport> mGpsNmeaListeners =
@@ -321,9 +321,9 @@ public class LocationManager {
     public LocationManager(Context context, ILocationManager service) {
         mService = service;
         mContext = context;
-        mGpsMeasurementCallbackTransport = new GpsMeasurementCallbackTransport(mContext, mService);
-        mGpsNavigationMessageCallbackTransport =
-                new GpsNavigationMessageCallbackTransport(mContext, mService);
+        mGnssMeasurementCallbackTransport = new GnssMeasurementCallbackTransport(mContext, mService);
+        mGnssNavigationMessageCallbackTransport =
+                new GnssNavigationMessageCallbackTransport(mContext, mService);
     }
 
     private LocationProvider createProvider(String name, ProviderProperties properties) {
@@ -1817,73 +1817,119 @@ public class LocationManager {
     }
 
     /**
-     * Registers a GPS Measurement callback.
-     *
-     * @param callback a {@link GpsMeasurementsEvent.Callback} object to register.
-     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #registerGnssMeasurementCallback} instead.
+     * @hide
+     * @deprecated
      */
-    @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean registerGpsMeasurementCallback(GpsMeasurementsEvent.Callback callback) {
-        return registerGpsMeasurementCallback(callback, null);
+    @Deprecated
+    @SystemApi
+    public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
+        return false;
     }
 
     /**
      * Registers a GPS Measurement callback.
      *
-     * @param callback a {@link GpsMeasurementsEvent.Callback} object to register.
+     * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
+     * @return {@code true} if the callback was added successfully, {@code false} otherwise.
+     */
+    @RequiresPermission(ACCESS_FINE_LOCATION)
+    public boolean registerGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback) {
+        return registerGnssMeasurementCallback(callback, null);
+    }
+
+    /**
+     * Registers a GPS Measurement callback.
+     *
+     * @param callback a {@link GnssMeasurementsEvent.Callback} object to register.
      * @param handler the handler that the callback runs on.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean registerGpsMeasurementCallback(GpsMeasurementsEvent.Callback callback,
+    public boolean registerGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback,
             Handler handler) {
-        return mGpsMeasurementCallbackTransport.add(callback, handler);
+        return mGnssMeasurementCallbackTransport.add(callback, handler);
+    }
+
+    /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #unregisterGnssMeasurementCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
     }
 
     /**
      * Unregisters a GPS Measurement callback.
      *
-     * @param callback a {@link GpsMeasurementsEvent.Callback} object to remove.
+     * @param callback a {@link GnssMeasurementsEvent.Callback} object to remove.
      */
-    public void unregisterGpsMeasurementCallback(GpsMeasurementsEvent.Callback callback) {
-        mGpsMeasurementCallbackTransport.remove(callback);
+    public void unregisterGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback) {
+        mGnssMeasurementCallbackTransport.remove(callback);
+    }
+
+    /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #registerGnssNavigationMessageCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
+        return false;
     }
 
     /**
      * Registers a GPS Navigation Message callback.
      *
-     * @param callback a {@link GpsNavigationMessageEvent.Callback} object to register.
+     * @param callback a {@link GnssNavigationMessageEvent.Callback} object to register.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
-    public boolean registerGpsNavigationMessageCallback(
-            GpsNavigationMessageEvent.Callback callback) {
-        return registerGpsNavigationMessageCallback(callback, null);
+    public boolean registerGnssNavigationMessageCallback(
+            GnssNavigationMessageEvent.Callback callback) {
+        return registerGnssNavigationMessageCallback(callback, null);
     }
 
     /**
      * Registers a GPS Navigation Message callback.
      *
-     * @param callback a {@link GpsNavigationMessageEvent.Callback} object to register.
+     * @param callback a {@link GnssNavigationMessageEvent.Callback} object to register.
      * @param handler the handler that the callback runs on.
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean registerGpsNavigationMessageCallback(
-            GpsNavigationMessageEvent.Callback callback, Handler handler) {
-        return mGpsNavigationMessageCallbackTransport.add(callback, handler);
+    public boolean registerGnssNavigationMessageCallback(
+            GnssNavigationMessageEvent.Callback callback, Handler handler) {
+        return mGnssNavigationMessageCallbackTransport.add(callback, handler);
     }
 
     /**
      * Unregisters a GPS Navigation Message callback.
      *
-     * @param callback a {@link GpsNavigationMessageEvent.Callback} object to remove.
+     * @param callback a {@link GnssNavigationMessageEvent.Callback} object to remove.
      */
-    public void unregisterGpsNavigationMessageCallback(
-            GpsNavigationMessageEvent.Callback callback) {
-        mGpsNavigationMessageCallbackTransport.remove(callback);
+    public void unregisterGnssNavigationMessageCallback(
+            GnssNavigationMessageEvent.Callback callback) {
+        mGnssNavigationMessageCallbackTransport.remove(callback);
     }
 
-     /**
+    /**
+     * No-op method to keep backward-compatibility.
+     * Don't use it. Use {@link #unregisterGnssNavigationMessageCallback} instead.
+     * @hide
+     * @deprecated
+     */
+    @Deprecated
+    @SystemApi
+    public void removeGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
+    }
+
+    /**
      * Retrieves information about the current status of the GPS engine.
      * This should only be called from the {@link GpsStatus.Listener#onGpsStatusChanged}
      * callback to ensure that the data is copied atomically.

@@ -16,54 +16,49 @@
 
 package android.location;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.security.InvalidParameterException;
 
 /**
  * A class containing a GPS satellite Navigation Message.
+ *
+ * @hide
  */
-public final class GpsNavigationMessage implements Parcelable {
+@SystemApi
+public class GpsNavigationMessage implements Parcelable {
 
     private static final byte[] EMPTY_ARRAY = new byte[0];
-
-    /** The type of the GPS Clock. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MESSAGE_TYPE_UNKNOWN, MESSAGE_TYPE_L1CA, MESSAGE_TYPE_L2CNAV, MESSAGE_TYPE_L5CNAV,
-            MESSAGE_TYPE_CNAV2})
-    public @interface GpsNavigationMessageType {}
 
     // The following enumerations must be in sync with the values declared in gps.h
 
     /**
      * The type of the navigation message is not available or unknown.
      */
-    public static final byte MESSAGE_TYPE_UNKNOWN = 0;
+    public static final byte TYPE_UNKNOWN = 0;
 
     /**
      * The Navigation Message is of type L1 C/A.
      */
-    public static final byte MESSAGE_TYPE_L1CA = 1;
+    public static final byte TYPE_L1CA = 1;
 
     /**
      * The Navigation Message is of type L1-CNAV.
      */
-    public static final byte MESSAGE_TYPE_L2CNAV = 2;
+    public static final byte TYPE_L2CNAV = 2;
 
     /**
      * The Navigation Message is of type L5-CNAV.
      */
-    public static final byte MESSAGE_TYPE_L5CNAV = 3;
+    public static final byte TYPE_L5CNAV = 3;
 
     /**
      * The Navigation Message is of type CNAV-2.
      */
-    public static final byte MESSAGE_TYPE_CNAV2 = 4;
+    public static final byte TYPE_CNAV2 = 4;
 
     /**
      * The Navigation Message Status is 'unknown'.
@@ -116,7 +111,6 @@ public final class GpsNavigationMessage implements Parcelable {
     /**
      * Gets the type of the navigation message contained in the object.
      */
-    @GpsNavigationMessageType
     public byte getType() {
         return mType;
     }
@@ -124,7 +118,7 @@ public final class GpsNavigationMessage implements Parcelable {
     /**
      * Sets the type of the navigation message.
      */
-    public void setType(@GpsNavigationMessageType byte value) {
+    public void setType(byte value) {
         mType = value;
     }
 
@@ -134,15 +128,15 @@ public final class GpsNavigationMessage implements Parcelable {
      */
     private String getTypeString() {
         switch (mType) {
-            case MESSAGE_TYPE_UNKNOWN:
+            case TYPE_UNKNOWN:
                 return "Unknown";
-            case MESSAGE_TYPE_L1CA:
+            case TYPE_L1CA:
                 return "L1 C/A";
-            case MESSAGE_TYPE_L2CNAV:
+            case TYPE_L2CNAV:
                 return "L2-CNAV";
-            case MESSAGE_TYPE_L5CNAV:
+            case TYPE_L5CNAV:
                 return "L5-CNAV";
-            case MESSAGE_TYPE_CNAV2:
+            case TYPE_CNAV2:
                 return "CNAV-2";
             default:
                 return "<Invalid:" + mType + ">";
@@ -320,7 +314,7 @@ public final class GpsNavigationMessage implements Parcelable {
     }
 
     private void initialize() {
-        mType = MESSAGE_TYPE_UNKNOWN;
+        mType = TYPE_UNKNOWN;
         mPrn = 0;
         mMessageId = -1;
         mSubmessageId = -1;
