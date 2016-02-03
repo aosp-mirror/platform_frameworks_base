@@ -499,7 +499,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"डेटा सेभर अन छ"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"डेटा सेभर बन्द छ"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"सक्रिय गर्नुहोस्"</string>
-    <string name="nav_bar" msgid="1993221402773877607">"नेभिगेसन पट्टी"</string>
+    <string name="nav_bar" msgid="1993221402773877607">"नेभिगेशन पट्टी"</string>
     <string name="start" msgid="6873794757232879664">"सुरु गर्नुहोस्"</string>
     <string name="center" msgid="4327473927066010960">"केन्द्र"</string>
     <string name="end" msgid="125797972524818282">"अन्त्य गर्नुहोस्"</string>
@@ -514,9 +514,9 @@
     <string name="adjust_button_width" msgid="6138616087197632947">"बटनको चौडाइ समायोजन गर्नुहोस्"</string>
     <string name="clipboard" msgid="1313879395099896312">"क्लिपबोर्ड"</string>
     <string name="clipboard_description" msgid="3819919243940546364">"क्लिपबोर्डले वस्तुहरूलाई क्लिपबोर्डमा प्रत्यक्ष तान्न अनुमति दिन्छ। प्रस्तुत गर्दा वस्तुहरूलाई क्लिपबोर्डबाट प्रत्यक्ष रूपमा बाहिर तान्न पनि सकिन्छ।"</string>
-    <string name="accessibility_key" msgid="5701989859305675896">"अनुकूलन नेभिगेशन बटन"</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"अनुकूलनको नेभिगेशन बटन"</string>
     <string name="keycode" msgid="7335281375728356499">"Keycode"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Keycode बटनहरूले किबोर्ड कुञ्जीहरूलाई नेभिगेसन पट्टीमा थपिने अनुमति दिन्छ। थिच्दा तिनीहरूले चयन गरिएको किबोर्ड कुञ्जी अनुकरण गर्छन्। सुरुमा बटनका लागि कुञ्जी चयन गर्नुपर्छ, त्यसपछि बटनमा छवि देखिनुपर्छ।"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Keycode बटनहरूले किबोर्ड कुञ्जीहरूलाई नेभिगेशन पट्टीमा थपिने अनुमति दिन्छ। थिच्दा तिनीहरूले चयन गरिएको किबोर्ड कुञ्जी अनुकरण गर्छन्। सुरुमा बटनका लागि कुञ्जी चयन गर्नुपर्छ, त्यसपछि बटनमा छवि देखिनुपर्छ।"</string>
     <string name="select_keycode" msgid="7413765103381924584">"किबोर्ड बटन चयन गर्नुहोस्"</string>
     <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
 </resources>

@@ -495,9 +495,9 @@
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ஹெட்ஃபோன்கள் இணைக்கப்பட்டன"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ஹெட்செட் இணைக்கப்பட்டது"</string>
     <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"நிலைப் பட்டியில் ஐகான்களைக் காட்டுவதை இயக்கும் அல்லது முடக்கும்."</string>
-    <string name="data_saver" msgid="5037565123367048522">"தரவுச் சேமிப்பான்"</string>
-    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"தரவுச் சேமிப்பான் இயக்கப்பட்டது"</string>
-    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"தரவுச் சேமிப்பான் முடக்கப்பட்டது"</string>
+    <string name="data_saver" msgid="5037565123367048522">"தரவுச்சேமிப்பான்"</string>
+    <string name="accessibility_data_saver_on" msgid="8454111686783887148">"தரவு சேமிப்பான் இயக்கப்பட்டது"</string>
+    <string name="accessibility_data_saver_off" msgid="8841582529453005337">"தரவு சேமிப்பான் முடக்கப்பட்டது"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"இயக்கு"</string>
     <string name="nav_bar" msgid="1993221402773877607">"வழிசெலுத்தல் பட்டி"</string>
     <string name="start" msgid="6873794757232879664">"தொடங்கு"</string>
