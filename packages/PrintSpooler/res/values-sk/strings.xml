@@ -20,11 +20,11 @@
     <string name="more_options_button" msgid="2243228396432556771">"Ďalšie možnosti"</string>
     <string name="label_destination" msgid="9132510997381599275">"Cieľ"</string>
     <string name="label_copies" msgid="3634531042822968308">"Kópie"</string>
-    <string name="label_copies_summary" msgid="3861966063536529540">"Počet kópií:"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Kópie:"</string>
     <string name="label_paper_size" msgid="908654383827777759">"Veľkosť papiera"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Veľkosť papiera:"</string>
     <string name="label_color" msgid="1108690305218188969">"Farba"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Duplex"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Obojstranné"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientácia"</string>
     <string name="label_pages" msgid="7768589729282182230">"Strany"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Všetky: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
@@ -46,7 +46,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"Uložiť do súboru PDF"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"Možnosti tlače sú rozbalené"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"Možnosti tlače sú zbalené"</string>
-    <string name="search" msgid="5421724265322228497">"VYHĽADÁVANIE"</string>
+    <string name="search" msgid="5421724265322228497">"Hľadať"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Všetky tlačiarne"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Pridať službu"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Vyhľadávacie pole sa zobrazuje"</string>
