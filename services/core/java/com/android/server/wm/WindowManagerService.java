@@ -5376,8 +5376,18 @@ public class WindowManagerService extends IWindowManager.Stub
             mWindowPlacerLocked.performSurfacePlacement();
 
             // Notify whether the docked stack exists for the current user
-            getDefaultDisplayContentLocked().mDividerControllerLocked
+            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+            displayContent.mDividerControllerLocked
                     .notifyDockedStackExistsChanged(hasDockedTasksForUser(newUserId));
+
+            // If the display is already prepared, update the density.
+            // Otherwise, we'll update it when it's prepared.
+            if (mDisplayReady) {
+                final int forcedDensity = getForcedDisplayDensityForUserLocked(newUserId);
+                final int targetDensity = forcedDensity != 0 ? forcedDensity
+                        : displayContent.mInitialDisplayDensity;
+                setForcedDisplayDensityLocked(displayContent, targetDensity);
+            }
         }
     }
 
@@ -8371,21 +8381,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Display density.
-        String densityStr = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.DISPLAY_DENSITY_FORCED);
-        if (densityStr == null || densityStr.length() == 0) {
-            densityStr = SystemProperties.get(DENSITY_OVERRIDE, null);
-        }
-        if (densityStr != null && densityStr.length() > 0) {
-            int density;
-            try {
-                density = Integer.parseInt(densityStr);
-                if (displayContent.mBaseDisplayDensity != density) {
-                    Slog.i(TAG_WM, "FORCED DISPLAY DENSITY: " + density);
-                    displayContent.mBaseDisplayDensity = density;
-                }
-            } catch (NumberFormatException ex) {
-            }
+        final int density = getForcedDisplayDensityForUserLocked(mCurrentUserId);
+        if (density != 0) {
+            displayContent.mBaseDisplayDensity = density;
         }
 
         // Display scaling mode.
@@ -8471,20 +8469,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayContent displayContent = getDisplayContentLocked(displayId);
                 if (displayContent != null) {
                     setForcedDisplayDensityLocked(displayContent, density);
-                    Settings.Global.putString(mContext.getContentResolver(),
-                            Settings.Global.DISPLAY_DENSITY_FORCED, Integer.toString(density));
+                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                            Settings.Secure.DISPLAY_DENSITY_FORCED,
+                            Integer.toString(density), mCurrentUserId);
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    // displayContent must not be null
-    private void setForcedDisplayDensityLocked(DisplayContent displayContent, int density) {
-        Slog.i(TAG_WM, "Using new display density: " + density);
-        displayContent.mBaseDisplayDensity = density;
-        reconfigureDisplayLocked(displayContent);
     }
 
     @Override
@@ -8505,13 +8497,45 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (displayContent != null) {
                     setForcedDisplayDensityLocked(displayContent,
                             displayContent.mInitialDisplayDensity);
-                    Settings.Global.putString(mContext.getContentResolver(),
-                            Settings.Global.DISPLAY_DENSITY_FORCED, "");
+                    Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                            Settings.Secure.DISPLAY_DENSITY_FORCED, "", mCurrentUserId);
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    /**
+     * @param userId the ID of the user
+     * @return the forced display density for the specified user, if set, or
+     *         {@code 0} if not set
+     */
+    private int getForcedDisplayDensityForUserLocked(int userId) {
+        String densityStr = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.DISPLAY_DENSITY_FORCED, userId);
+        if (densityStr == null || densityStr.length() == 0) {
+            densityStr = SystemProperties.get(DENSITY_OVERRIDE, null);
+        }
+        if (densityStr != null && densityStr.length() > 0) {
+            try {
+                return Integer.parseInt(densityStr);
+            } catch (NumberFormatException ex) {
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Forces the given display to the use the specified density.
+     *
+     * @param displayContent the display to modify
+     * @param density the density in DPI to use
+     */
+    private void setForcedDisplayDensityLocked(@NonNull DisplayContent displayContent,
+            int density) {
+        displayContent.mBaseDisplayDensity = density;
+        reconfigureDisplayLocked(displayContent);
     }
 
     // displayContent must not be null
