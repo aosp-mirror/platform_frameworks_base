@@ -5303,28 +5303,41 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void killAllBackgroundProcesses() {
+        killAllBackgroundProcesses(-1);
+    }
+
+    /**
+     * Kills all background processes with targetSdkVersion below the specified
+     * target SDK version.
+     *
+     * @param targetSdkVersion the target SDK version below which to kill
+     *                         processes, or {@code -1} to kill all processes
+     */
+    private void killAllBackgroundProcesses(int targetSdkVersion) {
         if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: killAllBackgroundProcesses() from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid()
+            final String msg = "Permission Denial: killAllBackgroundProcesses() from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
                     + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }
 
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized(this) {
-                ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
+            synchronized (this) {
+                final ArrayList<ProcessRecord> procs = new ArrayList<>();
                 final int NP = mProcessNames.getMap().size();
-                for (int ip=0; ip<NP; ip++) {
-                    SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
+                for (int ip = 0; ip < NP; ip++) {
+                    final SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
                     final int NA = apps.size();
-                    for (int ia=0; ia<NA; ia++) {
-                        ProcessRecord app = apps.valueAt(ia);
+                    for (int ia = 0; ia < NA; ia++) {
+                        final ProcessRecord app = apps.valueAt(ia);
                         if (app.persistent) {
-                            // we don't kill persistent processes
+                            // We don't kill persistent processes.
+                            continue;
+                        }
+                        if (targetSdkVersion > 0 && app.info.targetSdkVersion < targetSdkVersion) {
                             continue;
                         }
                         if (app.removed) {
@@ -5336,11 +5349,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                int N = procs.size();
-                for (int i=0; i<N; i++) {
+                final int N = procs.size();
+                for (int i = 0; i < N; i++) {
                     removeProcessLocked(procs.get(i), false, true, "kill all background");
                 }
+
                 mAllowLowerMemLevel = true;
+
                 updateOomAdjLocked();
                 doLowMemReportIfNeededLocked(null);
             }
@@ -17803,6 +17818,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     msg.obj = new Configuration(configCopy);
                     msg.arg1 = userId;
                     mHandler.sendMessage(msg);
+                }
+
+                final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
+                if (isDensityChange) {
+                    killAllBackgroundProcesses(Build.VERSION_CODES.N);
                 }
 
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
