@@ -292,8 +292,11 @@
     <protected-broadcast android:name="android.intent.action.REMOTE_BUGREPORT_FINISHED" />
     <protected-broadcast android:name="android.intent.action.REMOTE_BUGREPORT_DISPATCH" />
 
+    <!-- Legacy -->
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_END" />
+
+    <protected-broadcast android:name="com.android.server.task.controllers.IdleController.ACTION_TRIGGER_IDLE" />
 
     <protected-broadcast android:name="android.intent.action.HDMI_PLUGGED" />
 
