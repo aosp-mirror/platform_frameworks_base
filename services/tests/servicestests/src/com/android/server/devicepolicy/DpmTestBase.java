@@ -29,6 +29,7 @@ import android.test.AndroidTestCase;
 import java.io.File;
 import java.util.List;
 
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 
@@ -135,8 +136,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
 
         doReturn(realResolveInfo).when(mMockContext.packageManager).queryBroadcastReceiversAsUser(
                 MockUtils.checkIntentComponent(admin),
-                eq(PackageManager.GET_META_DATA
-                        | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS),
+                anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
 
         // Set up getPackageInfo().
