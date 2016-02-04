@@ -59,13 +59,7 @@ public:
         mMayRunAsync = mayRunAsync;
     }
     bool mayRunAsync() { return mMayRunAsync; }
-    ANDROID_API void start() {
-        if (mStagingPlayState == PlayState::NotStarted) {
-            mStagingPlayState = PlayState::Running;
-        } else {
-            mStagingPlayState = PlayState::Restarted;
-        }
-        onStagingPlayStateChanged(); }
+    ANDROID_API void start() { mStagingPlayState = PlayState::Running; onStagingPlayStateChanged(); }
     ANDROID_API void end() { mStagingPlayState = PlayState::Finished; onStagingPlayStateChanged(); }
 
     void attach(RenderNode* target);
@@ -83,27 +77,10 @@ public:
     void forceEndNow(AnimationContext& context);
 
 protected:
-    // PlayState is used by mStagingPlayState and mPlayState to track the state initiated from UI
-    // thread and Render Thread animation state, respectively.
-    // From the UI thread, mStagingPlayState transition looks like
-    // NotStarted -> Running -> Finished
-    //                ^            |
-    //                |            |
-    //            Restarted <------
-    // Note: For mStagingState, the Finished state (optional) is only set when the animation is
-    // terminated by user.
-    //
-    // On Render Thread, mPlayState transition:
-    // NotStart -> Running -> Finished
-    //                ^            |
-    //                |            |
-    //                -------------
-
     enum class PlayState {
         NotStarted,
         Running,
         Finished,
-        Restarted,
     };
 
     BaseRenderNodeAnimator(float finalValue);
@@ -116,7 +93,6 @@ protected:
     void callOnFinishedListener(AnimationContext& context);
 
     virtual void onStagingPlayStateChanged() {}
-    virtual void onPlayTimeChanged(nsecs_t playTime) {}
 
     RenderNode* mTarget;
 

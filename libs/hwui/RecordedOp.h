@@ -17,7 +17,6 @@
 #ifndef ANDROID_HWUI_RECORDED_OP_H
 #define ANDROID_HWUI_RECORDED_OP_H
 
-#include "RecordedOp.h"
 #include "font/FontUtil.h"
 #include "Matrix.h"
 #include "Rect.h"
@@ -39,10 +38,6 @@ struct ClipBase;
 class OffscreenBuffer;
 class RenderNode;
 struct Vertex;
-
-namespace VectorDrawable {
-class Tree;
-}
 
 /**
  * Authoritative op list, used for generating the op ID enum, ID based LUTS, and
@@ -80,7 +75,6 @@ class Tree;
         PRE_RENDER_OP_FN(EndLayerOp) \
         PRE_RENDER_OP_FN(BeginUnclippedLayerOp) \
         PRE_RENDER_OP_FN(EndUnclippedLayerOp) \
-        PRE_RENDER_OP_FN(VectorDrawableOp) \
         \
         RENDER_ONLY_OP_FN(ShadowOp) \
         RENDER_ONLY_OP_FN(LayerOp) \
@@ -329,13 +323,6 @@ struct RoundRectPropsOp : RecordedOp {
     const float* bottom;
     const float* rx;
     const float* ry;
-};
-
-struct VectorDrawableOp : RecordedOp {
-    VectorDrawableOp(VectorDrawable::Tree* tree, BASE_PARAMS_PAINTLESS)
-            : SUPER_PAINTLESS(VectorDrawableOp)
-            , vectorDrawable(tree) {}
-    VectorDrawable::Tree* vectorDrawable;
 };
 
 /**

@@ -39,7 +39,6 @@ import android.util.PathParser;
 import android.util.Xml;
 
 import com.android.internal.R;
-import com.android.internal.util.VirtualRefBasePtr;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -48,7 +47,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Stack;
 
 /**
@@ -524,13 +522,13 @@ public class VectorDrawable extends Drawable {
     public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        if (mVectorState.mRootGroup != null || mVectorState.mNativeRendererRefBase != null) {
+        if (mVectorState.mRootGroup != null || mVectorState.mNativeRendererPtr != 0) {
             // This VD has been used to display other VD resource content, clean up.
             mVectorState.mRootGroup = new VGroup();
-            if (mVectorState.mNativeRendererRefBase != null) {
-                mVectorState.mNativeRendererRefBase.release();
+            if (mVectorState.mNativeRendererPtr != 0) {
+                nDestroyRenderer(mVectorState.mNativeRendererPtr);
             }
-            mVectorState.createNativeRenderer(mVectorState.mRootGroup.mNativePtr);
+            mVectorState.mNativeRendererPtr = nCreateRenderer(mVectorState.mRootGroup.mNativePtr);
         }
         final VectorDrawableState state = mVectorState;
         state.setDensity(Drawable.resolveDensity(r, 0));
@@ -709,7 +707,7 @@ public class VectorDrawable extends Drawable {
         return mVectorState.mAutoMirrored;
     }
 
-    static class VectorDrawableState extends ConstantState {
+    private static class VectorDrawableState extends ConstantState {
         // Variables below need to be copied (deep copy if applicable) for mutation.
         int[] mThemeAttrs;
         int mChangingConfigurations;
@@ -724,7 +722,7 @@ public class VectorDrawable extends Drawable {
         Insets mOpticalInsets = Insets.NONE;
         String mRootName = null;
         VGroup mRootGroup;
-        VirtualRefBasePtr mNativeRendererRefBase = null;
+        long mNativeRendererPtr;
 
         int mDensity = DisplayMetrics.DENSITY_DEFAULT;
         final ArrayMap<String, Object> mVGTargetsMap = new ArrayMap<>();
@@ -745,7 +743,7 @@ public class VectorDrawable extends Drawable {
                 mTintMode = copy.mTintMode;
                 mAutoMirrored = copy.mAutoMirrored;
                 mRootGroup = new VGroup(copy.mRootGroup, mVGTargetsMap);
-                createNativeRenderer(mRootGroup.mNativePtr);
+                mNativeRendererPtr = nCreateRenderer(mRootGroup.mNativePtr);
 
                 mBaseWidth = copy.mBaseWidth;
                 mBaseHeight = copy.mBaseHeight;
@@ -760,15 +758,18 @@ public class VectorDrawable extends Drawable {
             }
         }
 
-        private void createNativeRenderer(long rootGroupPtr) {
-            mNativeRendererRefBase = new VirtualRefBasePtr(nCreateRenderer(rootGroupPtr));
+        @Override
+        public void finalize() throws Throwable {
+            if (mNativeRendererPtr != 0) {
+                nDestroyRenderer(mNativeRendererPtr);
+                mNativeRendererPtr = 0;
+            }
+            super.finalize();
         }
 
+
         long getNativeRenderer() {
-            if (mNativeRendererRefBase == null) {
-                return 0;
-            }
-            return mNativeRendererRefBase.get();
+            return mNativeRendererPtr;
         }
 
         public boolean canReuseCache() {
@@ -807,7 +808,7 @@ public class VectorDrawable extends Drawable {
 
         public VectorDrawableState() {
             mRootGroup = new VGroup();
-            createNativeRenderer(mRootGroup.mNativePtr);
+            mNativeRendererPtr = nCreateRenderer(mRootGroup.mNativePtr);
         }
 
         @Override
@@ -871,16 +872,16 @@ public class VectorDrawable extends Drawable {
          * has changed.
          */
         public boolean setAlpha(float alpha) {
-            return nSetRootAlpha(mNativeRendererRefBase.get(), alpha);
+            return nSetRootAlpha(mNativeRendererPtr, alpha);
         }
 
         @SuppressWarnings("unused")
         public float getAlpha() {
-            return nGetRootAlpha(mNativeRendererRefBase.get());
+            return nGetRootAlpha(mNativeRendererPtr);
         }
     }
 
-    static class VGroup implements VObject {
+    private static class VGroup implements VObject {
         private static final int ROTATE_INDEX = 0;
         private static final int PIVOT_X_INDEX = 1;
         private static final int PIVOT_Y_INDEX = 2;
@@ -889,28 +890,6 @@ public class VectorDrawable extends Drawable {
         private static final int TRANSLATE_X_INDEX = 5;
         private static final int TRANSLATE_Y_INDEX = 6;
         private static final int TRANSFORM_PROPERTY_COUNT = 7;
-
-        private static final HashMap<String, Integer> sPropertyMap =
-                new HashMap<String, Integer>() {
-                    {
-                        put("translateX", TRANSLATE_X_INDEX);
-                        put("translateY", TRANSLATE_Y_INDEX);
-                        put("scaleX", SCALE_X_INDEX);
-                        put("scaleY", SCALE_Y_INDEX);
-                        put("pivotX", PIVOT_X_INDEX);
-                        put("pivotY", PIVOT_Y_INDEX);
-                        put("rotation", ROTATE_INDEX);
-                    }
-                };
-
-        static int getPropertyIndex(String propertyName) {
-            if (sPropertyMap.containsKey(propertyName)) {
-                return sPropertyMap.get(propertyName);
-            } else {
-                // property not found
-                return -1;
-            }
-        }
 
         // Temp array to store transform values obtained from native.
         private float[] mTransform;
@@ -1170,7 +1149,7 @@ public class VectorDrawable extends Drawable {
     /**
      * Common Path information for clip path and normal path.
      */
-    static abstract class VPath implements VObject {
+    private static abstract class VPath implements VObject {
         protected PathParser.PathData mPathData = null;
 
         String mPathName;
@@ -1281,7 +1260,7 @@ public class VectorDrawable extends Drawable {
     /**
      * Normal path, which contains all the fill / paint information.
      */
-    static class VFullPath extends VPath {
+    private static class VFullPath extends VPath {
         private static final int STROKE_WIDTH_INDEX = 0;
         private static final int STROKE_COLOR_INDEX = 1;
         private static final int STROKE_ALPHA_INDEX = 2;
@@ -1294,20 +1273,6 @@ public class VectorDrawable extends Drawable {
         private static final int STROKE_LINE_JOIN_INDEX = 9;
         private static final int STROKE_MITER_LIMIT_INDEX = 10;
         private static final int TOTAL_PROPERTY_COUNT = 11;
-
-        private final static HashMap<String, Integer> sPropertyMap
-                = new HashMap<String, Integer> () {
-            {
-                put("strokeWidth", STROKE_WIDTH_INDEX);
-                put("strokeColor", STROKE_COLOR_INDEX);
-                put("strokeAlpha", STROKE_ALPHA_INDEX);
-                put("fillColor", FILL_COLOR_INDEX);
-                put("fillAlpha", FILL_ALPHA_INDEX);
-                put("trimPathStart", TRIM_PATH_START_INDEX);
-                put("trimPathEnd", TRIM_PATH_END_INDEX);
-                put("trimPathOffset", TRIM_PATH_OFFSET_INDEX);
-            }
-        };
 
         // Temp array to store property data obtained from native getter.
         private byte[] mPropertyData;
@@ -1330,14 +1295,6 @@ public class VectorDrawable extends Drawable {
             mThemeAttrs = copy.mThemeAttrs;
             mStrokeColors = copy.mStrokeColors;
             mFillColors = copy.mFillColors;
-        }
-
-        int getPropertyIndex(String propertyName) {
-            if (!sPropertyMap.containsKey(propertyName)) {
-                return -1;
-            } else {
-                return sPropertyMap.get(propertyName);
-            }
         }
 
         @Override
@@ -1638,6 +1595,7 @@ public class VectorDrawable extends Drawable {
     }
 
     private static native long nCreateRenderer(long rootGroupPtr);
+    private static native void nDestroyRenderer(long rendererPtr);
     private static native void nSetRendererViewportSize(long rendererPtr, float viewportWidth,
             float viewportHeight);
     private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
