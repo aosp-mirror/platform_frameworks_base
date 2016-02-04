@@ -24,6 +24,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -83,23 +85,29 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_LOCALE = "locale";
     private static final String KEY_LOCK_SETTINGS = "lock_settings";
     private static final String KEY_SOFTAP_CONFIG = "softap_config";
+    private static final String KEY_NETWORK_POLICIES = "network_policies";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 5;
+    private static final int STATE_VERSION = 6;
+
+    // Versioning of the Network Policies backup payload.
+    private static final int NETWORK_POLICIES_BACKUP_VERSION = 1;
+
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
-    private static final int STATE_SYSTEM          = 0;
-    private static final int STATE_SECURE          = 1;
-    private static final int STATE_LOCALE          = 2;
-    private static final int STATE_WIFI_SUPPLICANT = 3;
-    private static final int STATE_WIFI_CONFIG     = 4;
-    private static final int STATE_GLOBAL          = 5;
-    private static final int STATE_LOCK_SETTINGS   = 6;
-    private static final int STATE_SOFTAP_CONFIG   = 7;
+    private static final int STATE_SYSTEM           = 0;
+    private static final int STATE_SECURE           = 1;
+    private static final int STATE_LOCALE           = 2;
+    private static final int STATE_WIFI_SUPPLICANT  = 3;
+    private static final int STATE_WIFI_CONFIG      = 4;
+    private static final int STATE_GLOBAL           = 5;
+    private static final int STATE_LOCK_SETTINGS    = 6;
+    private static final int STATE_SOFTAP_CONFIG    = 7;
+    private static final int STATE_NETWORK_POLICIES = 8;
 
-    private static final int STATE_SIZE            = 8; // The current number of state items
+    private static final int STATE_SIZE             = 9; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
@@ -108,15 +116,17 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             5,              // version 2 added STATE_WIFI_CONFIG
             6,              // version 3 added STATE_GLOBAL
             7,              // version 4 added STATE_LOCK_SETTINGS
-            STATE_SIZE      // version 5 added STATE_SOFTAP_CONFIG
+            8,              // version 5 added STATE_SOFTAP_CONFIG
+            STATE_SIZE      // version 6 added STATE_NETWORK_POLICIES
     };
 
     // Versioning of the 'full backup' format
     // Increment this version any time a new item is added
-    private static final int FULL_BACKUP_VERSION = 4;
+    private static final int FULL_BACKUP_VERSION = 5;
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
     private static final int FULL_BACKUP_ADDED_LOCK_SETTINGS = 3; // added the "lock_settings" entry
     private static final int FULL_BACKUP_ADDED_SOFTAP_CONF = 4; //added the "softap_config" entry
+    private static final int FULL_BACKUP_ADDED_NETWORK_POLICIES = 5; //added "network_policies"
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -412,6 +422,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
         byte[] softApConfigData = getSoftAPConfiguration();
+        byte[] netPoliciesData = getNetworkPolicies();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
@@ -435,6 +446,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_SOFTAP_CONFIG] =
                 writeIfChanged(stateChecksums[STATE_SOFTAP_CONFIG], KEY_SOFTAP_CONFIG,
                         softApConfigData, data);
+        stateChecksums[STATE_NETWORK_POLICIES] =
+                writeIfChanged(stateChecksums[STATE_NETWORK_POLICIES], KEY_NETWORK_POLICIES,
+                        netPoliciesData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -592,6 +606,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     restoreSoftApConfiguration(softapData);
                     break;
 
+                case KEY_NETWORK_POLICIES:
+                    byte[] netPoliciesData = new byte[size];
+                    data.readEntityData(netPoliciesData, 0, size);
+                    restoreNetworkPolicies(netPoliciesData);
+                    break;
+
                 default :
                     data.skipEntityData();
 
@@ -622,6 +642,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
         byte[] softApConfigData = getSoftAPConfiguration();
+        byte[] netPoliciesData = getNetworkPolicies();
 
         // Write the data to the staging file, then emit that as our tarfile
         // representation of the backed-up settings.
@@ -665,6 +686,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, softApConfigData.length + " bytes of softap config data");
             out.writeInt(softApConfigData.length);
             out.write(softApConfigData);
+            if (DEBUG_BACKUP) Log.d(TAG, netPoliciesData.length + " bytes of net policies data");
+            out.writeInt(netPoliciesData.length);
+            out.write(netPoliciesData);
 
             out.flush();    // also flushes downstream
 
@@ -766,7 +790,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     restoreSoftApConfiguration(buffer);
                 }
             }
-
+            // network policies
+            if (version >= FULL_BACKUP_ADDED_NETWORK_POLICIES) {
+                nBytes = in.readInt();
+                if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of network policies data");
+                if (nBytes > buffer.length) buffer = new byte[nBytes];
+                if (nBytes > 0) {
+                    in.readFully(buffer, 0, nBytes);
+                    restoreNetworkPolicies(buffer);
+                }
+            }
             if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
         } else {
             data.close();
@@ -1109,7 +1142,6 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
             }
         }
-
     }
 
     private void restoreFileData(String filename, byte[] bytes, int size) {
@@ -1231,6 +1263,65 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             wifiManager.setWifiApConfiguration(config);
         } catch (IOException | BackupUtils.BadVersionException e) {
             Log.e(TAG, "Failed to unMarshal SoftAPConfiguration " + e.getMessage());
+        }
+    }
+
+    private byte[] getNetworkPolicies() {
+        NetworkPolicyManager networkPolicyManager =
+                (NetworkPolicyManager) getSystemService(NETWORK_POLICY_SERVICE);
+        NetworkPolicy[] policies = networkPolicyManager.getNetworkPolicies();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        if (policies != null && policies.length != 0) {
+            DataOutputStream out = new DataOutputStream(baos);
+            try {
+                out.writeInt(NETWORK_POLICIES_BACKUP_VERSION);
+                out.writeInt(policies.length);
+                for (NetworkPolicy policy : policies) {
+                    if (policy != null) {
+                        byte[] marshaledPolicy = policy.getBytesForBackup();
+                        out.writeByte(BackupUtils.NOT_NULL);
+                        out.writeInt(marshaledPolicy.length);
+                        out.write(marshaledPolicy);
+                    } else {
+                        out.writeByte(BackupUtils.NULL);
+                    }
+                }
+            } catch (IOException ioe) {
+                Log.e(TAG, "Failed to convert NetworkPolicies to byte array " + ioe.getMessage());
+                baos.reset();
+            }
+        }
+        return baos.toByteArray();
+    }
+
+    private void restoreNetworkPolicies(byte[] data) {
+        NetworkPolicyManager networkPolicyManager =
+                (NetworkPolicyManager) getSystemService(NETWORK_POLICY_SERVICE);
+        if (data != null && data.length != 0) {
+            DataInputStream in = new DataInputStream(new ByteArrayInputStream(data));
+            try {
+                int version = in.readInt();
+                if (version < 1 || version > NETWORK_POLICIES_BACKUP_VERSION) {
+                    throw new BackupUtils.BadVersionException(
+                            "Unknown Backup Serialization Version");
+                }
+                int length = in.readInt();
+                NetworkPolicy[] policies = new NetworkPolicy[length];
+                for (int i = 0; i < length; i++) {
+                    byte isNull = in.readByte();
+                    if (isNull == BackupUtils.NULL) continue;
+                    int byteLength = in.readInt();
+                    byte[] policyData = new byte[byteLength];
+                    in.read(policyData, 0, byteLength);
+                    policies[i] = NetworkPolicy.getNetworkPolicyFromBackup(
+                            new DataInputStream(new ByteArrayInputStream(policyData)));
+                }
+                // Only set the policies if there was no error in the restore operation
+                networkPolicyManager.setNetworkPolicies(policies);
+            } catch (NullPointerException | IOException | BackupUtils.BadVersionException e) {
+                // NPE can be thrown when trying to instantiate a NetworkPolicy
+                Log.e(TAG, "Failed to convert byte array to NetworkPolicies " + e.getMessage());
+            }
         }
     }
 
