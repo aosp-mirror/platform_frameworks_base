@@ -141,7 +141,7 @@ public abstract class BasePrintTest extends InstrumentationTestCase {
         // Set to US locale.
         Resources resources = getInstrumentation().getTargetContext().getResources();
         Configuration oldConfiguration = resources.getConfiguration();
-        if (!oldConfiguration.getLocales().getPrimary().equals(Locale.US)) {
+        if (!oldConfiguration.getLocales().get(0).equals(Locale.US)) {
             mOldLocale = oldConfiguration.getLocales();
             DisplayMetrics displayMetrics = resources.getDisplayMetrics();
             Configuration newConfiguration = new Configuration(oldConfiguration);

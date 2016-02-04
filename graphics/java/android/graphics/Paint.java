@@ -459,7 +459,7 @@ public class Paint {
         // setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
         //        ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
-        setTextLocales(LocaleList.getDefault());
+        setTextLocales(LocaleList.getAdjustedDefault());
     }
 
     /**
@@ -500,7 +500,7 @@ public class Paint {
         mInvCompatScaling = 1;
 
         mBidiFlags = BIDI_DEFAULT_LTR;
-        setTextLocales(LocaleList.getDefault());
+        setTextLocales(LocaleList.getAdjustedDefault());
         setElegantTextHeight(false);
         mFontFeatureSettings = null;
     }
@@ -1292,7 +1292,7 @@ public class Paint {
      */
     @NonNull
     public Locale getTextLocale() {
-        return mLocales.getPrimary();
+        return mLocales.get(0);
     }
 
     /**
@@ -1317,7 +1317,7 @@ public class Paint {
         if (locale == null) {
             throw new IllegalArgumentException("locale cannot be null");
         }
-        if (mLocales != null && mLocales.size() == 1 && locale.equals(mLocales.getPrimary())) {
+        if (mLocales != null && mLocales.size() == 1 && locale.equals(mLocales.get(0))) {
             return;
         }
         mLocales = new LocaleList(locale);
@@ -1340,8 +1340,8 @@ public class Paint {
      * each language.
      *
      * By default, the text locale list is initialized to a one-member list just containing the
-     * system locale (as returned by {@link LocaleList#getDefault()}). This assumes that the text to
-     * be rendered will most likely be in the user's preferred language.
+     * system locales. This assumes that the text to be rendered will most likely be in the user's
+     * preferred language.
      *
      * If the actual language or languages of the text is/are known, then they can be provided to
      * the text renderer using this method. The text renderer may attempt to guess the

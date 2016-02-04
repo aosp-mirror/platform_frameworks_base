@@ -47,12 +47,7 @@ public final class LocaleList implements Parcelable {
     private static final LocaleList sEmptyLocaleList = new LocaleList();
 
     public Locale get(int location) {
-        return location < mList.length ? mList[location] : null;
-    }
-
-    @Nullable
-    public Locale getPrimary() {
-        return mList.length == 0 ? null : get(0);
+        return (0 <= location && location < mList.length) ? mList[location] : null;
     }
 
     public boolean isEmpty() {
@@ -464,7 +459,7 @@ public final class LocaleList implements Parcelable {
                 // someone has called Locale.setDefault() since we last set or adjusted the default
                 // locale list. So let's recalculate the locale list.
                 if (sDefaultLocaleList != null
-                        && defaultLocale.equals(sDefaultLocaleList.getPrimary())) {
+                        && defaultLocale.equals(sDefaultLocaleList.get(0))) {
                     // The default Locale has changed, but it happens to be the first locale in the
                     // default locale list, so we don't need to construct a new locale list.
                     return sDefaultLocaleList;
