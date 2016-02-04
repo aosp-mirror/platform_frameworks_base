@@ -154,10 +154,14 @@ public class NotificationGroupManager implements HeadsUpManager.OnHeadsUpChanged
         }
         mBarState = newState;
         if (mBarState == StatusBarState.KEYGUARD) {
-            for (NotificationGroup group : mGroupMap.values()) {
-                if (group.expanded) {
-                    setGroupExpanded(group, false);
-                }
+            collapseAllGroups();
+        }
+    }
+
+    public void collapseAllGroups() {
+        for (NotificationGroup group : mGroupMap.values()) {
+            if (group.expanded) {
+                setGroupExpanded(group, false);
             }
         }
     }
