@@ -19,6 +19,7 @@
 #include "DeferredLayerUpdater.h"
 #include "RecordedOp.h"
 #include "RenderNode.h"
+#include "VectorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -395,7 +396,6 @@ void RecordingCanvas::drawCircle(
             &x->value, &y->value, &radius->value));
 }
 
-
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
     addOp(new (alloc()) OvalOp(
             Rect(left, top, right, bottom),
@@ -420,6 +420,15 @@ void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
             refPaint(&paint), refPath(&path)));
+}
+
+void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
+    mDisplayList->ref(tree);
+    addOp(new (alloc()) VectorDrawableOp(
+            tree,
+            Rect(tree->getBounds()),
+            *(mState.currentSnapshot()->transform),
+            getRecordedClip()));
 }
 
 // Bitmap-based

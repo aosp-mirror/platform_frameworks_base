@@ -90,6 +90,9 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
         doSetStartValue(getValue(mTarget));
     }
     if (mStagingPlayState > mPlayState) {
+        if (mStagingPlayState == PlayState::Restarted) {
+            mStagingPlayState = PlayState::Running;
+        }
         mPlayState = mStagingPlayState;
         // Oh boy, we're starting! Man the battle stations!
         if (mPlayState == PlayState::Running) {
@@ -131,6 +134,11 @@ bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
         return true;
     }
 
+    // This should be set before setValue() so animators can query this time when setValue
+    // is called.
+    nsecs_t currentFrameTime = context.frameTimeMs();
+    onPlayTimeChanged(currentFrameTime - mStartTime);
+
     // If BaseRenderNodeAnimator is handling the delay (not typical), then
     // because the staging properties reflect the final value, we always need
     // to call setValue even if the animation isn't yet running or is still
@@ -141,8 +149,9 @@ bool BaseRenderNodeAnimator::animate(AnimationContext& context) {
     }
 
     float fraction = 1.0f;
+
     if (mPlayState == PlayState::Running && mDuration > 0) {
-        fraction = (float)(context.frameTimeMs() - mStartTime) / mDuration;
+        fraction = (float)(currentFrameTime - mStartTime) / mDuration;
     }
     if (fraction >= 1.0f) {
         fraction = 1.0f;
