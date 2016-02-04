@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -35,7 +34,7 @@ import java.util.ArrayList;
 @RemoteViews.RemoteView
 public class NotificationHeaderView extends ViewGroup {
     public static final int NO_COLOR = -1;
-    private final int mHeaderMinWidth;
+    private final int mChildMinWidth;
     private final int mExpandTopPadding;
     private final int mContentEndMargin;
     private View mAppName;
@@ -46,6 +45,7 @@ public class NotificationHeaderView extends ViewGroup {
     private View mIcon;
     private TextView mChildCount;
     private View mProfileBadge;
+    private View mInfo;
     private int mIconColor;
     private int mOriginalNotificationColor;
     private boolean mGroupHeader;
@@ -66,7 +66,7 @@ public class NotificationHeaderView extends ViewGroup {
 
     public NotificationHeaderView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mHeaderMinWidth = getResources().getDimensionPixelSize(
+        mChildMinWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
@@ -82,6 +82,7 @@ public class NotificationHeaderView extends ViewGroup {
         mIcon = findViewById(com.android.internal.R.id.icon);
         mChildCount = (TextView) findViewById(com.android.internal.R.id.number_of_children);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
+        mInfo = findViewById(com.android.internal.R.id.header_content_info);
     }
 
     @Override
@@ -109,14 +110,23 @@ public class NotificationHeaderView extends ViewGroup {
         }
         if (totalWidth > givenWidth) {
             int overFlow = totalWidth - givenWidth;
-            // We are overflowing, lets shrink
+            // We are overflowing, lets shrink the info first
+            final int infoWidth = mInfo.getMeasuredWidth();
+            if (mInfo.getVisibility() != GONE && infoWidth > mChildMinWidth) {
+                int newSize = infoWidth - Math.min(infoWidth - mChildMinWidth, overFlow);
+                int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
+                mInfo.measure(childWidthSpec, wrapContentHeightSpec);
+                overFlow -= infoWidth - newSize;
+            }
+            // still overflowing, lets shrink the app name now
             final int appWidth = mAppName.getMeasuredWidth();
-            if (mAppName.getVisibility() != GONE && appWidth > mHeaderMinWidth) {
-                int newSize = appWidth - Math.min(appWidth - mHeaderMinWidth, overFlow);
+            if (overFlow > 0 && mAppName.getVisibility() != GONE && appWidth > mChildMinWidth) {
+                int newSize = appWidth - Math.min(appWidth - mChildMinWidth, overFlow);
                 int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
                 mAppName.measure(childWidthSpec, wrapContentHeightSpec);
                 overFlow -= appWidth - newSize;
             }
+            // still overflowing, finaly we shrink the subtext
             if (overFlow > 0 && mSubTextView.getVisibility() != GONE) {
                 // we're still too big
                 final int subTextWidth = mSubTextView.getMeasuredWidth();
