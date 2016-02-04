@@ -22,7 +22,6 @@ import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 
 /**
  * <p>A display list records a series of graphics related operations and can replay
@@ -772,14 +771,6 @@ public class RenderNode {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
         }
         nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
-        mOwningView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(this);
-    }
-
-    public void addAnimator(AnimatedVectorDrawable.VectorDrawableAnimator animatorSet) {
-        if (mOwningView == null || mOwningView.mAttachInfo == null) {
-            throw new IllegalStateException("Cannot start this animator on a detached view!");
-        }
-        nAddAnimator(mNativeRenderNode, animatorSet.getAnimatorNativePtr());
         mOwningView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(this);
     }
 
