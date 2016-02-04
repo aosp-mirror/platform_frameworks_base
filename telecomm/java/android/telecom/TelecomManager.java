@@ -1414,6 +1414,23 @@ public class TelecomManager {
         return result;
     }
 
+    /**
+     * Launches the {@link android.app.Activity} to manage blocked numbers.
+     * <p> This method displays the UI to manage blocked numbers only if
+     * {@link android.provider.BlockedNumberContract#canCurrentUserBlockNumbers(Context)} returns
+     * {@code true} for the current user.
+     */
+    public void launchManageBlockedNumbersActivity() {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                service.launchManageBlockedNumbersActivity(mContext.getPackageName());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecomService#manageBlockedNumbers", e);
+            }
+        }
+    }
+
     private ITelecomService getTelecomService() {
         if (mTelecomServiceOverride != null) {
             return mTelecomServiceOverride;
