@@ -25,9 +25,9 @@
             android:id="@+id/no_notifications"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:paddingTop="12dp"
+            android:paddingTop="28dp"
             android:gravity="top|center_horizontal"
-            android:textColor="#ffffff"
-            android:textSize="20sp"
+            android:textColor="#e6ffffff"
+            android:textSize="16sp"
             android:text="@string/empty_shade_text"/>
 </com.android.systemui.statusbar.EmptyShadeView>
