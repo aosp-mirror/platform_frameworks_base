@@ -26,10 +26,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Property;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 /**
@@ -71,7 +70,6 @@ public class DividerHandleView extends ImageButton {
     private final int mWidth;
     private final int mHeight;
     private final int mCircleDiameter;
-    private final Interpolator mFastOutSlowInInterpolator;
     private int mCurrentWidth;
     private int mCurrentHeight;
     private AnimatorSet mAnimator;
@@ -85,8 +83,6 @@ public class DividerHandleView extends ImageButton {
         mCurrentWidth = mWidth;
         mCurrentHeight = mHeight;
         mCircleDiameter = (mWidth + mHeight) / 3;
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.fast_out_slow_in);
     }
 
     public void setTouching(boolean touching, boolean animate) {
@@ -120,8 +116,8 @@ public class DividerHandleView extends ImageButton {
                 ? DividerView.TOUCH_ANIMATION_DURATION
                 : DividerView.TOUCH_RELEASE_ANIMATION_DURATION);
         mAnimator.setInterpolator(touching
-                ? DividerView.TOUCH_RESPONSE_INTERPOLATOR
-                : mFastOutSlowInInterpolator);
+                ? Interpolators.TOUCH_RESPONSE
+                : Interpolators.FAST_OUT_SLOW_IN);
         mAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

@@ -118,7 +118,10 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
+import com.android.systemui.recents.events.EventBus;
+import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.stackdivider.WindowManagerProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -1112,17 +1115,25 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public boolean onLongClick(View v) {
             if (mRecents != null) {
-                Point realSize = new Point();
-                mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
-                        .getRealSize(realSize);
-                Rect initialBounds= new Rect(0, 0, realSize.x, realSize.y);
-                boolean docked = mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
-                        ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                        initialBounds);
-                if (docked) {
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS);
+                int dockSide = WindowManagerProxy.getInstance().getDockSide();
+                if (dockSide == WindowManager.DOCKED_INVALID) {
+                    Point realSize = new Point();
+                    mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
+                            .getRealSize(realSize);
+                    Rect initialBounds= new Rect(0, 0, realSize.x, realSize.y);
+                    boolean docked = mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+                            ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
+                            initialBounds);
+                    if (docked) {
+                        MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS);
+                        return true;
+                    }
+                } else {
+                    EventBus.getDefault().send(new UndockingTaskEvent());
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
                     return true;
                 }
+
             }
             return false;
         }
