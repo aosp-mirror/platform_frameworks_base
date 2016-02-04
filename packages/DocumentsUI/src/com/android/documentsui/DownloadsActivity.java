@@ -35,9 +35,6 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.BaseAdapter;
-import android.widget.Spinner;
 import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
@@ -56,14 +53,8 @@ import java.util.List;
 public class DownloadsActivity extends BaseActivity {
     private static final String TAG = "DownloadsActivity";
 
-    private Toolbar mToolbar;
-    private Spinner mToolbarStack;
-
-    private ItemSelectedListener mStackListener;
-    private BaseAdapter mStackAdapter;
-
     public DownloadsActivity() {
-        super(R.layout.manage_roots_activity, TAG);
+        super(R.layout.downloads_activity, TAG);
     }
 
     @Override
@@ -72,18 +63,9 @@ public class DownloadsActivity extends BaseActivity {
 
         final Context context = this;
 
-        mDrawer = DrawerController.createDummy();
-
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitleTextAppearance(context,
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitleTextAppearance(context,
                 android.R.style.TextAppearance_DeviceDefault_Widget_ActionBar_Title);
-
-        mStackAdapter = new StackAdapter();
-        mStackListener = new ItemSelectedListener();
-        mToolbarStack = (Spinner) findViewById(R.id.stack);
-        mToolbarStack.setOnItemSelectedListener(mStackListener);
-
-        setActionBar(mToolbar);
 
         if (!mState.restored) {
             // In this case, we set the activity title in AsyncTask.onPostExecute(). To prevent
@@ -112,33 +94,12 @@ public class DownloadsActivity extends BaseActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        updateActionBar();
+        mNavigator.update();
     }
 
     @Override
-    public void updateActionBar() {
-        // No navigation in manage root mode.
-        mToolbar.setNavigationIcon(null);
-        mToolbar.setNavigationOnClickListener(null);
-
-        if (mSearchManager.isExpanded()) {
-            mToolbar.setTitle(null);
-            mToolbarStack.setVisibility(View.GONE);
-            mToolbarStack.setAdapter(null);
-        } else {
-            if (mState.stack.size() <= 1) {
-                mToolbar.setTitle(getCurrentRoot().title);
-                mToolbarStack.setVisibility(View.GONE);
-                mToolbarStack.setAdapter(null);
-            } else {
-                mToolbar.setTitle(null);
-                mToolbarStack.setVisibility(View.VISIBLE);
-                mToolbarStack.setAdapter(mStackAdapter);
-
-                mStackListener.mIgnoreNextNavigation = true;
-                mToolbarStack.setSelection(mStackAdapter.getCount() - 1);
-            }
-        }
+    public String getDrawerTitle() {
+        return null;  // being and nothingness
     }
 
     @Override

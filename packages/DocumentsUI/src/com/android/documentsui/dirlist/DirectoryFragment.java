@@ -100,6 +100,7 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperations;
+
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -151,7 +152,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private String mStateKey;
 
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
-    private boolean mLastShowSize;
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<DirectoryResult> mCallbacks;
     private FragmentTuner mTuner;
@@ -428,7 +428,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
     private void updateDisplayState() {
         State state = getDisplayState();
-        mLastShowSize = state.showSize;
         updateLayout(state.derivedMode);
         mRecView.setAdapter(mAdapter);
     }

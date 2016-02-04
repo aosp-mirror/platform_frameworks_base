@@ -42,16 +42,10 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Spinner;
+import android.widget.Toolbar;
 
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.SearchManager.SearchManagerListener;
@@ -72,7 +66,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public abstract class BaseActivity extends Activity implements SearchManagerListener {
+public abstract class BaseActivity extends Activity
+        implements SearchManagerListener, NavigationView.Environment {
 
     static final String EXTRA_STATE = "state";
 
@@ -80,7 +75,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
     RootsCache mRoots;
     SearchManager mSearchManager;
     DrawerController mDrawer;
-    boolean mProductivityDevice;
+    NavigationView mNavigator;
 
     private final String mTag;
     @LayoutRes
@@ -92,7 +87,6 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
 
     abstract void onTaskFinished(Uri... uris);
     abstract void refreshDirectory(int anim);
-    abstract void updateActionBar();
     abstract void saveStackBlocking();
     abstract State buildState();
 
@@ -101,19 +95,21 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         mTag = tag;
     }
 
+    @CallSuper
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        setContentView(mLayoutId);
+
+        mDrawer = DrawerController.create(this);
         mState = (icicle != null)
                 ? icicle.<State>getParcelable(EXTRA_STATE)
                         : buildState();
-
         Metrics.logActivityLaunch(this, mState, getIntent());
 
-        setContentView(mLayoutId);
-
         mRoots = DocumentsApplication.getRootsCache(this);
+
         mRoots.setOnCacheUpdateListener(
                 new RootsCache.OnCacheUpdateListener() {
                     @Override
@@ -121,8 +117,18 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
                         new HandleRootsChangedTask().execute(getCurrentRoot());
                     }
                 });
+
         mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
         mSearchManager = new SearchManager(this);
+
+        DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
+        setActionBar(toolbar);
+        mNavigator = new NavigationView(
+                mDrawer,
+                toolbar,
+                (Spinner) findViewById(R.id.stack),
+                mState,
+                this);
 
         // Base classes must update result in their onCreate.
         setResult(Activity.RESULT_CANCELED);
@@ -133,7 +139,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.activity, menu);
-        mSearchManager.install((DocumentsToolBar) findViewById(R.id.toolbar));
+        mSearchManager.install((DocumentsToolbar) findViewById(R.id.toolbar));
 
         return showMenu;
     }
@@ -341,7 +347,8 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
      * The current directory name and selection will get updated.
      * @param anim
      */
-    final void refreshCurrentRootAndDirectory(int anim) {
+    @Override
+    public final void refreshCurrentRootAndDirectory(int anim) {
         mSearchManager.cancelSearch();
 
         mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_ENTER);
@@ -352,8 +359,7 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
             roots.onCurrentRootChanged();
         }
 
-        updateActionBar();
-
+        mNavigator.update();
         invalidateOptionsMenu();
     }
 
@@ -489,6 +495,12 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
         super.onRestoreInstanceState(state);
     }
 
+    @Override
+    public boolean isSearchExpanded() {
+        return mSearchManager.isExpanded();
+    }
+
+    @Override
     public RootInfo getCurrentRoot() {
         if (mState.stack.root != null) {
             return mState.stack.root;
@@ -694,92 +706,6 @@ public abstract class BaseActivity extends Activity implements SearchManagerList
                 mSearchManager.update(homeRoot);
                 openContainerDocument(mHome);
             }
-        }
-    }
-
-    final class ItemSelectedListener implements OnItemSelectedListener {
-
-        boolean mIgnoreNextNavigation;
-
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            if (mIgnoreNextNavigation) {
-                mIgnoreNextNavigation = false;
-                return;
-            }
-
-            while (mState.stack.size() > position + 1) {
-                mState.popDocument();
-            }
-            refreshCurrentRootAndDirectory(ANIM_LEAVE);
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-            // Ignored
-        }
-    }
-
-    /**
-     * Class providing toolbar with runtime access to useful activity data.
-     */
-    final class StackAdapter extends BaseAdapter {
-        @Override
-        public int getCount() {
-            return mState.stack.size();
-        }
-
-        @Override
-        public DocumentInfo getItem(int position) {
-            return mState.stack.get(mState.stack.size() - position - 1);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_subdir_title, parent, false);
-            }
-
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final DocumentInfo doc = getItem(position);
-
-            if (position == 0) {
-                final RootInfo root = getCurrentRoot();
-                title.setText(root.title);
-            } else {
-                title.setText(doc.displayName);
-            }
-
-            return convertView;
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_subdir, parent, false);
-            }
-
-            final ImageView subdir = (ImageView) convertView.findViewById(R.id.subdir);
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final DocumentInfo doc = getItem(position);
-
-            if (position == 0) {
-                final RootInfo root = getCurrentRoot();
-                title.setText(root.title);
-                subdir.setVisibility(View.GONE);
-            } else {
-                title.setText(doc.displayName);
-                subdir.setVisibility(View.VISIBLE);
-            }
-
-            return convertView;
         }
     }
 

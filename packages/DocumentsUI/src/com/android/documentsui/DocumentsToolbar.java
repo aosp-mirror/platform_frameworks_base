@@ -24,28 +24,28 @@ import android.widget.Toolbar;
 /**
  * ToolBar of Documents UI.
  */
-public class DocumentsToolBar extends Toolbar {
+public class DocumentsToolbar extends Toolbar {
     interface OnActionViewCollapsedListener {
         void onActionViewCollapsed();
     }
 
     private OnActionViewCollapsedListener mOnActionViewCollapsedListener;
 
-    public DocumentsToolBar(Context context, AttributeSet attrs,
+    public DocumentsToolbar(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    public DocumentsToolBar(Context context, AttributeSet attrs,
+    public DocumentsToolbar(Context context, AttributeSet attrs,
             int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    public DocumentsToolBar(Context context, AttributeSet attrs) {
+    public DocumentsToolbar(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public DocumentsToolBar(Context context) {
+    public DocumentsToolbar(Context context) {
         super(context);
     }
 

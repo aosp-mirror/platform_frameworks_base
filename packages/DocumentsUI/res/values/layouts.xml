@@ -15,7 +15,7 @@
 -->
 
 <resources>
-    <item name="docs_activity" type="layout">@layout/drawer_layout</item>
+    <item name="documents_activity" type="layout">@layout/drawer_layout</item>
     <item name="files_activity" type="layout">@layout/drawer_layout</item>
-    <item name="manage_roots_activity" type="layout">@layout/single_pane_layout</item>
+    <item name="downloads_activity" type="layout">@layout/single_pane_layout</item>
 </resources>

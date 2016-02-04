@@ -47,7 +47,7 @@ final class SearchManager implements
     private boolean mSearchExpanded;
     private boolean mIgnoreNextClose;
 
-    private DocumentsToolBar mActionBar;
+    private DocumentsToolbar mActionBar;
     private MenuItem mMenu;
     private SearchView mView;
 
@@ -59,7 +59,7 @@ final class SearchManager implements
         mListener = listener;
     }
 
-    public void install(DocumentsToolBar actionBar) {
+    public void install(DocumentsToolbar actionBar) {
         assert (mActionBar == null);
         mActionBar = actionBar;
         mMenu = actionBar.getSearchMenu();

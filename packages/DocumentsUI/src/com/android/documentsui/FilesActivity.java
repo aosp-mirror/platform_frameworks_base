@@ -40,10 +40,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.BaseAdapter;
-import android.widget.Spinner;
-import android.widget.Toolbar;
 
 import com.android.documentsui.OperationDialogFragment.DialogType;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
@@ -67,10 +63,6 @@ public class FilesActivity extends BaseActivity {
 
     public static final String TAG = "FilesActivity";
 
-    private Toolbar mToolbar;
-    private Spinner mToolbarStack;
-    private ItemSelectedListener mStackListener;
-    private BaseAdapter mStackAdapter;
     private DocumentClipper mClipper;
 
     public FilesActivity() {
@@ -81,17 +73,7 @@ public class FilesActivity extends BaseActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        mStackAdapter = new StackAdapter();
-        mStackListener = new ItemSelectedListener();
-        mToolbarStack = (Spinner) findViewById(R.id.stack);
-        mToolbarStack.setOnItemSelectedListener(mStackListener);
-
-        setActionBar(mToolbar);
-
         mClipper = new DocumentClipper(this);
-        mDrawer = DrawerController.create(this);
 
         RootsFragment.show(getFragmentManager(), null);
 
@@ -179,11 +161,11 @@ public class FilesActivity extends BaseActivity {
         // serach. Why? Because this avoid an early (undesired) load of
         // the recents root...which is the default root in other activities.
         // In Files app "Home" is the default, but it is loaded async.
-        // updateActionBar will be called once Home root is loaded.
+        // update will be called once Home root is loaded.
         // Except while searching we need this call to ensure the
         // search bits get layed out correctly.
         if (mSearchManager.isSearching()) {
-            updateActionBar();
+            mNavigator.update();
         }
     }
 
@@ -203,44 +185,8 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    public void updateActionBar() {
-        final RootInfo root = getCurrentRoot();
-
-        if (mDrawer.isPresent()) {
-            mToolbar.setNavigationIcon(R.drawable.ic_hamburger);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mDrawer.setOpen(true);
-                        }
-                    });
-        } else {
-            mToolbar.setNavigationIcon(
-                    root != null ? root.loadToolbarIcon(mToolbar.getContext()) : null);
-            mToolbar.setNavigationContentDescription(R.string.drawer_open);
-            mToolbar.setNavigationOnClickListener(null);
-        }
-
-        if (mSearchManager.isExpanded()) {
-            mToolbar.setTitle(null);
-            mToolbarStack.setVisibility(View.GONE);
-            mToolbarStack.setAdapter(null);
-        } else {
-            if (mState.stack.size() <= 1) {
-                mToolbar.setTitle(root.title);
-                mToolbarStack.setVisibility(View.GONE);
-                mToolbarStack.setAdapter(null);
-            } else {
-                mToolbar.setTitle(null);
-                mToolbarStack.setVisibility(View.VISIBLE);
-                mToolbarStack.setAdapter(mStackAdapter);
-
-                mStackListener.mIgnoreNextNavigation = true;
-                mToolbarStack.setSelection(mStackAdapter.getCount() - 1);
-            }
-        }
+    public String getDrawerTitle() {
+        return getResources().getString(R.string.files_label);
     }
 
     @Override
