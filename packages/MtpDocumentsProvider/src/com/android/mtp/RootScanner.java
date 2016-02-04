@@ -17,7 +17,6 @@
 package com.android.mtp;
 
 import android.content.ContentResolver;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Process;
 import android.provider.DocumentsContract;
@@ -52,7 +51,6 @@ final class RootScanner {
     private final static long AWAIT_TERMINATION_TIMEOUT = 2000;
 
     final ContentResolver mResolver;
-    final Resources mResources;
     final MtpManager mManager;
     final MtpDatabase mDatabase;
 
@@ -61,11 +59,9 @@ final class RootScanner {
 
     RootScanner(
             ContentResolver resolver,
-            Resources resources,
             MtpManager manager,
             MtpDatabase database) {
         mResolver = resolver;
-        mResources = resources;
         mManager = manager;
         mDatabase = database;
     }
@@ -144,8 +140,7 @@ final class RootScanner {
                         continue;
                     }
                     mDatabase.getMapper().startAddingDocuments(documentId);
-                    if (mDatabase.getMapper().putStorageDocuments(
-                            documentId, mResources, device.roots)) {
+                    if (mDatabase.getMapper().putStorageDocuments(documentId, device.roots)) {
                         changed = true;
                     }
                     if (mDatabase.getMapper().stopAddingDocuments(documentId)) {

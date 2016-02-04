@@ -27,4 +27,9 @@ class TestResources extends MockResources {
         }
         throw new NotFoundException();
     }
+
+    @Override
+    public String getString(int id, Object... formatArgs) throws NotFoundException {
+        return String.format(getString(id), formatArgs);
+    }
 }

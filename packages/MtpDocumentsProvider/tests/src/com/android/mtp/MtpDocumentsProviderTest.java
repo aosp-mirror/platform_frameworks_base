@@ -62,13 +62,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
-                "Device",
+                "Device A",
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
                             0 /* deviceId */,
                             1 /* storageId */,
-                            "Device A" /* device model name */,
                             "Storage A" /* volume description */,
                             1024 /* free space */,
                             2048 /* total space */,
@@ -100,13 +99,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         // Check if the following notification is the first one or not.
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
-                "Device",
+                "Device A",
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
                             0 /* deviceId */,
                             1 /* storageId */,
-                            "Device A" /* device model name */,
                             "Storage A" /* volume description */,
                             1024 /* free space */,
                             2048 /* total space */,
@@ -130,7 +128,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                     new MtpRoot(
                             0 /* deviceId */,
                             1 /* storageId */,
-                            "Device A" /* device model name */,
                             "Storage A" /* volume description */,
                             1024 /* free space */,
                             2048 /* total space */,
@@ -169,13 +166,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
-                "Device",
+                "Device A",
                 false /* unopened */,
                 new MtpRoot[] {
                         new MtpRoot(
                                 0 /* deviceId */,
                                 1 /* storageId */,
-                                "Device A" /* device model name */,
                                 "Storage A" /* volume description */,
                                 1024 /* free space */,
                                 2048 /* total space */,
@@ -185,13 +181,12 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 null));
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
-                "Device",
+                "Device B",
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
                             1 /* deviceId */,
                             1 /* storageId */,
-                            "Device B" /* device model name */,
                             "Storage B" /* volume description */,
                             2048 /* free space */,
                             4096 /* total space */,
@@ -242,7 +237,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                     new MtpRoot(
                             1 /* deviceId */,
                             1 /* storageId */,
-                            "Device B" /* device model name */,
                             "Storage B" /* volume description */,
                             2048 /* free space */,
                             4096 /* total space */,
@@ -282,7 +276,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testQueryDocument() throws IOException, InterruptedException, TimeoutException {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "") });
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupDocuments(
                 0,
                 0,
@@ -319,7 +313,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryDocument_directory()
             throws IOException, InterruptedException, TimeoutException {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "") });
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupDocuments(
                 0,
                 0,
@@ -358,7 +352,6 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 new MtpRoot(
                         0 /* deviceId */,
                         1 /* storageId */,
-                        "Device A" /* device model name */,
                         "Storage A" /* volume description */,
                         1024 /* free space */,
                         4096 /* total space */,
@@ -370,7 +363,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         cursor.moveToNext();
         assertEquals("2", cursor.getString(0));
         assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, cursor.getString(1));
-        assertEquals("Device A Storage A", cursor.getString(2));
+        assertEquals("Storage A", cursor.getString(2));
         assertTrue(cursor.isNull(3));
         assertEquals(0, cursor.getInt(4));
         assertEquals(3072, cursor.getInt(5));
@@ -378,7 +371,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testQueryChildDocuments() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "") });
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         setupDocuments(
                 0,
                 0,
@@ -421,7 +414,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
 
     public void testQueryChildDocuments_documentError() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Device", "Storage", 1000, 1000, "") });
+        setupRoots(0, new MtpRoot[] { new MtpRoot(0, 0, "Storage", 1000, 1000, "") });
         mMtpManager.setObjectHandles(0, 0, -1, new int[] { 1 });
         try {
             mProvider.queryChildDocuments("1", null, null);
@@ -434,7 +427,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testDeleteDocument() throws IOException, InterruptedException, TimeoutException {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
-                new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")
+                new MtpRoot(0, 0, "Storage", 0, 0, "")
         });
         setupDocuments(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, "1", new MtpObjectInfo[] {
                 new MtpObjectInfo.Builder()
@@ -454,7 +447,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             throws IOException, InterruptedException, TimeoutException {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
-                new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")
+                new MtpRoot(0, 0, "Storage", 0, 0, "")
         });
         setupDocuments(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, "1", new MtpObjectInfo[] {
                 new MtpObjectInfo.Builder()
@@ -477,7 +470,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testOpenDocument() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
-                new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")
+                new MtpRoot(0, 0, "Storage", 0, 0, "")
         });
         final byte[] bytes = "Hello world".getBytes();
         setupDocuments(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, "1", new MtpObjectInfo[] {
@@ -515,7 +508,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         };
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         setupRoots(0, new MtpRoot[] {
-                new MtpRoot(0, 0, "Device", "Storage", 0, 0, "")
+                new MtpRoot(0, 0, "Storage", 0, 0, "")
         });
         final byte[] bytes = "Hello world".getBytes();
         setupDocuments(0, 0, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, "1", new MtpObjectInfo[] {

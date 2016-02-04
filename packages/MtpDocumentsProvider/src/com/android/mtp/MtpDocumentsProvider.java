@@ -58,7 +58,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     private final Object mDeviceListLock = new Object();
 
@@ -89,7 +89,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mResolver = getContext().getContentResolver();
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
-        mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
+        mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         mIntentSender = new ServiceIntentSender(getContext());
         // TODO: Mount AppFuse on demands.
@@ -116,7 +116,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mResolver = resolver;
         mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
         mDatabase = database;
-        mRootScanner = new RootScanner(mResolver, mResources, mMtpManager, mDatabase);
+        mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
         mAppFuse = new AppFuse(TAG, new AppFuseCallback());
         mIntentSender = intentSender;
         // TODO: Mount AppFuse on demands.
@@ -135,7 +135,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_ROOT_PROJECTION;
         }
-        final Cursor cursor = mDatabase.queryRoots(projection);
+        final Cursor cursor = mDatabase.queryRoots(mResources, projection);
         cursor.setNotificationUri(
                 mResolver, DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY));
         return cursor;
