@@ -304,8 +304,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     public void onTuningChanged(String key, String newValue) {
         switch (key) {
             case KEY_DOCK_WINDOW_GESTURE:
-                mDockWindowEnabled = (newValue == null) ||
-                        (Integer.parseInt(newValue) != 0);
+                mDockWindowEnabled = newValue != null && (Integer.parseInt(newValue) != 0);
                 break;
         }
     }

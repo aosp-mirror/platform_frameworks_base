@@ -1184,6 +1184,11 @@
     <!-- Description for the toggle to set the initial scroll state to be paging or stack. DO NOT TRANSLATE -->
     <string name="overview_initial_state_paging_desc">Determines whether Overview will initially be in a stacked or paged state</string>
 
+    <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=60]-->
+    <string name="overview_nav_bar_gesture">Enable split-screen swipe-up accelerator</string>
+    <!-- Description for the toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=NONE]-->
+    <string name="overview_nav_bar_gesture_desc">Enable gesture to enter split-screen by swiping up from the Overview button</string>
+
     <!-- Category in the System UI Tuner settings, where new/experimental
          settings are -->
     <string name="experimental">Experimental</string>
