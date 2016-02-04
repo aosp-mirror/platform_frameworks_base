@@ -53,6 +53,7 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
     private ContentProviderClient mClient;
     private RootInfo mRoot_0;
     private RootInfo mRoot_1;
+    private FilesActivity mActivity;
 
     public void setUp() throws Exception {
         // Initialize UiDevice instance.
@@ -76,7 +77,8 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
         // Launch app.
         Intent intent = mContext.getPackageManager().getLaunchIntentForPackage(TARGET_PKG);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivity(intent);
+        mActivity = launchActivityWithIntent(TARGET_PKG, FilesActivity.class, intent);
+        assertNotNull("Activity not started.", mActivity);
 
         // Wait for the app to appear.
         mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), TIMEOUT);
@@ -90,6 +92,12 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
+
+        if (mActivity != null) {
+            mActivity.finish();
+            mActivity = null;
+        }
+
         Log.d(TAG, "Resetting storage from setUp");
         resetStorage();
         mClient.release();
