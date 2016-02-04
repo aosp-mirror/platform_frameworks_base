@@ -136,8 +136,7 @@ public class DividerSnapAlgorithm {
                     / (mFirstSplitTarget.position - getStartInset());
         } else if (position > mLastSplitTarget.position) {
             return (float) (position - mLastSplitTarget.position)
-                    / (mDismissEndTarget.position - getEndInset()
-                            - mLastSplitTarget.position - mDividerSize);
+                    / (mDismissEndTarget.position - mLastSplitTarget.position - mDividerSize);
         }
         return 0f;
     }
@@ -222,7 +221,8 @@ public class DividerSnapAlgorithm {
                 addMiddleTarget(isHorizontalDivision);
                 break;
         }
-        mTargets.add(new SnapTarget(dividerMax, SnapTarget.FLAG_DISMISS_END, 0.35f));
+        int navBarSize = isHorizontalDivision ? mInsets.bottom : mInsets.right;
+        mTargets.add(new SnapTarget(dividerMax - navBarSize, SnapTarget.FLAG_DISMISS_END, 0.35f));
     }
 
     private void addFixedDivisionTargets(boolean isHorizontalDivision) {

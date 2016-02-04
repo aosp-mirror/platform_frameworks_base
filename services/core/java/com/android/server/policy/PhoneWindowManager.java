@@ -2645,11 +2645,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         } else if (win.getAttrs().type == TYPE_DOCK_DIVIDER) {
-            if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
-                return R.anim.fade_in;
-            } else if (transit == TRANSIT_EXIT) {
-                return R.anim.fade_out;
-            }
+            return selectDockedDividerAnimationLw(win, transit);
         }
 
         if (transit == TRANSIT_PREVIEW_DONE) {
@@ -2667,6 +2663,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return 0;
+    }
+
+    private int selectDockedDividerAnimationLw(WindowState win, int transit) {
+        int insets = mWindowManagerFuncs.getDockedDividerInsetsLw();
+
+        // If the divider is behind the navigation bar, don't animate.
+        if (mNavigationBar != null
+                && (win.getFrameLw().top + insets >= mNavigationBar.getFrameLw().top
+                        || win.getFrameLw().left + insets >= mNavigationBar.getFrameLw().left)) {
+            return 0;
+        }
+        if (transit == TRANSIT_ENTER || transit == TRANSIT_SHOW) {
+            return R.anim.fade_in;
+        } else if (transit == TRANSIT_EXIT) {
+            return R.anim.fade_out;
+        } else {
+            return 0;
+        }
     }
 
     @Override
