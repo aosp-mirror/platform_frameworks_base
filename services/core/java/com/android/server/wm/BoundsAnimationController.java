@@ -22,6 +22,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -50,13 +51,15 @@ public class BoundsAnimationController {
         private final Rect mFrom;
         private final Rect mTo;
         private final Rect mTmpRect;
+        private final boolean mMoveToFullScreen;
 
-        BoundsAnimator(AnimateBoundsUser target, Rect from, Rect to) {
+        BoundsAnimator(AnimateBoundsUser target, Rect from, Rect to, boolean moveToFullScreen) {
             super();
             mTarget = target;
             mFrom = from;
             mTo = to;
             mTmpRect = new Rect();
+            mMoveToFullScreen = moveToFullScreen;
             addUpdateListener(this);
             addListener(this);
         }
@@ -88,6 +91,9 @@ public class BoundsAnimationController {
         @Override
         public void onAnimationEnd(Animator animation) {
             finishAnimation();
+            if (mMoveToFullScreen) {
+                mTarget.moveToFullscreen();
+            }
         }
 
         @Override
@@ -125,14 +131,25 @@ public class BoundsAnimationController {
          * necessary cleanup.
          */
         void finishBoundsAnimation();
+
+        void moveToFullscreen();
+
+        void getFullScreenBounds(Rect bounds);
     }
 
-    void animateBounds(AnimateBoundsUser target, Rect from, Rect to) {
+    void animateBounds(final AnimateBoundsUser target, Rect from, Rect to) {
+        boolean moveToFullscreen = false;
+        if (to == null) {
+            to = new Rect();
+            target.getFullScreenBounds(to);
+            moveToFullscreen = true;
+        }
+
         final BoundsAnimator existing = mRunningAnimations.get(target);
         if (existing != null) {
             existing.cancel();
         }
-        BoundsAnimator animator = new BoundsAnimator(target, from, to);
+        BoundsAnimator animator = new BoundsAnimator(target, from, to, moveToFullscreen);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
         animator.setDuration(DEFAULT_APP_TRANSITION_DURATION);

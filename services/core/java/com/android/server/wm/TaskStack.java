@@ -927,4 +927,18 @@ public class TaskStack implements DimLayer.DimLayerUser,
             }
         }
     }
+
+    @Override
+    public void moveToFullscreen() {
+        try {
+            mService.mActivityManager.moveTasksToFullscreenStack(mStackId, true);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void getFullScreenBounds(Rect bounds) {
+        getDisplayContent().getContentRect(bounds);
+    }
 }
