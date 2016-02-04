@@ -89,10 +89,7 @@ $(eval include $(BUILD_PREBUILT))
 endef
 
 font_src_files := \
-    Clockopia.ttf \
-    AndroidClock.ttf \
-    AndroidClock_Highlight.ttf \
-    AndroidClock_Solid.ttf
+    AndroidClock.ttf
 
 $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 

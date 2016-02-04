@@ -20,7 +20,4 @@ PRODUCT_COPY_FILES := \
 PRODUCT_PACKAGES := \
     DroidSansFallback.ttf \
     DroidSansMono.ttf \
-    Clockopia.ttf \
     AndroidClock.ttf \
-    AndroidClock_Highlight.ttf \
-    AndroidClock_Solid.ttf \
