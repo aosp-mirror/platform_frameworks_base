@@ -106,6 +106,7 @@ final class TaskRecord {
     private static final String ATTR_AUTOREMOVERECENTS = "auto_remove_recents";
     private static final String ATTR_ASKEDCOMPATMODE = "asked_compat_mode";
     private static final String ATTR_USERID = "user_id";
+    private static final String ATTR_USER_SETUP_COMPLETE = "user_setup_complete";
     private static final String ATTR_EFFECTIVE_UID = "effective_uid";
     private static final String ATTR_TASKTYPE = "task_type";
     private static final String ATTR_FIRSTACTIVETIME = "first_active_time";
@@ -155,6 +156,8 @@ final class TaskRecord {
 
     String stringName;      // caching of toString() result.
     int userId;             // user for which this task was created
+    boolean mUserSetupComplete; // The user set-up is complete as of the last time the task activity
+                                // was changed.
 
     int numFullscreen;      // Number of fullscreen activities.
 
@@ -311,7 +314,8 @@ final class TaskRecord {
             boolean neverRelinquishIdentity, TaskDescription _lastTaskDescription,
             TaskThumbnailInfo lastThumbnailInfo, int taskAffiliation, int prevTaskId,
             int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
-            int resizeMode, boolean privileged, boolean _realActivitySuspended) {
+            int resizeMode, boolean privileged, boolean _realActivitySuspended,
+            boolean userSetupComplete) {
         mService = service;
         mFilename = String.valueOf(_taskId) + TASK_THUMBNAIL_SUFFIX +
                 TaskPersister.IMAGE_EXTENSION;
@@ -334,6 +338,7 @@ final class TaskRecord {
         taskType = _taskType;
         mTaskToReturnTo = HOME_ACTIVITY_TYPE;
         userId = _userId;
+        mUserSetupComplete = userSetupComplete;
         effectiveUid = _effectiveUid;
         firstActiveTime = _firstActiveTime;
         lastActiveTime = _lastActiveTime;
@@ -434,6 +439,7 @@ final class TaskRecord {
         }
 
         userId = UserHandle.getUserId(info.applicationInfo.uid);
+        mUserSetupComplete = mService.mUserController.isUserSetupCompleteLocked(userId);
         if ((info.flags & ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS) != 0) {
             // If the activity itself has requested auto-remove, then just always do it.
             autoRemoveRecents = true;
@@ -1064,6 +1070,7 @@ final class TaskRecord {
         out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
         out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
         out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
         out.attribute(null, ATTR_TASKTYPE, String.valueOf(taskType));
         out.attribute(null, ATTR_FIRSTACTIVETIME, String.valueOf(firstActiveTime));
@@ -1133,6 +1140,7 @@ final class TaskRecord {
         boolean askedCompatMode = false;
         int taskType = ActivityRecord.APPLICATION_ACTIVITY_TYPE;
         int userId = 0;
+        boolean userSetupComplete = true;
         int effectiveUid = -1;
         String lastDescription = null;
         long firstActiveTime = -1;
@@ -1179,6 +1187,8 @@ final class TaskRecord {
                 askedCompatMode = Boolean.valueOf(attrValue);
             } else if (ATTR_USERID.equals(attrName)) {
                 userId = Integer.valueOf(attrValue);
+            } else if (ATTR_USER_SETUP_COMPLETE.equals(attrName)) {
+                userSetupComplete = Boolean.valueOf(attrValue);
             } else if (ATTR_EFFECTIVE_UID.equals(attrName)) {
                 effectiveUid = Integer.valueOf(attrValue);
             } else if (ATTR_TASKTYPE.equals(attrName)) {
@@ -1278,7 +1288,7 @@ final class TaskRecord {
                 activities, firstActiveTime, lastActiveTime, lastTimeOnTop, neverRelinquishIdentity,
                 taskDescription, thumbnailInfo, taskAffiliation, prevTaskId, nextTaskId,
                 taskAffiliationColor, callingUid, callingPackage, resizeMode, privileged,
-                realActivitySuspended);
+                realActivitySuspended, userSetupComplete);
         task.updateOverrideConfiguration(bounds);
 
         for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
