@@ -234,6 +234,16 @@ public abstract class ShellCommand {
         }
     }
 
+    public String peekNextArg() {
+        if (mCurArgData != null) {
+            return mCurArgData;
+        } else if (mArgPos < mArgs.length) {
+            return mArgs[mArgPos];
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Return the next argument on the command line, whatever it is; if there are
      * no arguments left, throws an IllegalArgumentException to report this to the user.

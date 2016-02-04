@@ -1774,18 +1774,33 @@ public class Am extends BaseCommand {
             System.err.println("Error: invalid input bounds");
             return;
         }
-        resizeStack(stackId, bounds, 0, false);
+        resizeStack(stackId, bounds, 0);
     }
 
     private void runStackResizeAnimated() throws Exception {
         String stackIdStr = nextArgRequired();
         int stackId = Integer.valueOf(stackIdStr);
-        final Rect bounds = getBounds();
-        if (bounds == null) {
-            System.err.println("Error: invalid input bounds");
-            return;
+        final Rect bounds;
+        if ("null".equals(mArgs.peekNextArg())) {
+            bounds = null;
+        } else {
+            bounds = getBounds();
+            if (bounds == null) {
+                System.err.println("Error: invalid input bounds");
+                return;
+            }
         }
-        resizeStack(stackId, bounds, 0, true);
+        resizeStackUnchecked(stackId, bounds, 0, true);
+    }
+
+    private void resizeStackUnchecked(int stackId, Rect bounds, int delayMs, boolean animate) {
+        try {
+            mAm.resizeStack(stackId, bounds, false, false, animate);
+            Thread.sleep(delayMs);
+        } catch (RemoteException e) {
+            showError("Error: resizing stack " + e);
+        } catch (InterruptedException e) {
+        }
     }
 
     private void runStackResizeDocked() throws Exception {
@@ -1802,20 +1817,13 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void resizeStack(int stackId, Rect bounds, int delayMs, boolean animate)
+    private void resizeStack(int stackId, Rect bounds, int delayMs)
             throws Exception {
         if (bounds == null) {
             showError("Error: invalid input bounds");
             return;
         }
-
-        try {
-            mAm.resizeStack(stackId, bounds, false, false, animate);
-            Thread.sleep(delayMs);
-        } catch (RemoteException e) {
-            showError("Error: resizing stack " + e);
-        } catch (InterruptedException e) {
-        }
+        resizeStackUnchecked(stackId, bounds, delayMs, false);
     }
 
     private void runStackPositionTask() throws Exception {
@@ -1924,7 +1932,7 @@ public class Am extends BaseCommand {
             maxChange = Math.min(stepSize, currentPoint - minPoint);
             currentPoint -= maxChange;
             setBoundsSide(bounds, side, currentPoint);
-            resizeStack(DOCKED_STACK_ID, bounds, delayMs, false);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
         }
 
         System.out.println("Growing docked stack side=" + side);
@@ -1932,7 +1940,7 @@ public class Am extends BaseCommand {
             maxChange = Math.min(stepSize, maxPoint - currentPoint);
             currentPoint += maxChange;
             setBoundsSide(bounds, side, currentPoint);
-            resizeStack(DOCKED_STACK_ID, bounds, delayMs, false);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
         }
 
         System.out.println("Back to Original size side=" + side);
@@ -1940,7 +1948,7 @@ public class Am extends BaseCommand {
             maxChange = Math.min(stepSize, currentPoint - startPoint);
             currentPoint -= maxChange;
             setBoundsSide(bounds, side, currentPoint);
-            resizeStack(DOCKED_STACK_ID, bounds, delayMs, false);
+            resizeStack(DOCKED_STACK_ID, bounds, delayMs);
         }
     }
 
