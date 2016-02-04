@@ -43,6 +43,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -164,7 +165,20 @@ public class PopupWindow {
         com.android.internal.R.attr.state_above_anchor
     };
 
+    private final OnAttachStateChangeListener mOnAnchorRootDetachedListener =
+            new OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {}
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    mIsAnchorRootAttached = false;
+                }
+            };
+
     private WeakReference<View> mAnchor;
+    private WeakReference<View> mAnchorRoot;
+    private boolean mIsAnchorRootAttached;
 
     private final OnScrollChangedListener mOnScrollChangedListener = new OnScrollChangedListener() {
         @Override
@@ -1037,7 +1051,7 @@ public class PopupWindow {
 
         TransitionManager.endTransitions(mDecorView);
 
-        unregisterForScrollChanged();
+        unregisterForViewTreeChanges();
 
         mIsShowing = true;
         mIsDropdown = false;
@@ -1120,7 +1134,7 @@ public class PopupWindow {
 
         TransitionManager.endTransitions(mDecorView);
 
-        registerForScrollChanged(anchor, xoff, yoff, gravity);
+        registerForViewTreeChanges(anchor, xoff, yoff, gravity);
 
         mIsShowing = true;
         mIsDropdown = true;
@@ -1633,14 +1647,23 @@ public class PopupWindow {
         mIsShowing = false;
         mIsTransitioningToDismiss = true;
 
+        // This method may be called as part of window detachment, in which
+        // case the anchor view (and its root) will still return true from
+        // isAttachedToWindow() during execution of this method; however, we
+        // can expect the OnAttachStateChangeListener to have been called prior
+        // to executing this method, so we can rely on that instead.
         final Transition exitTransition = mExitTransition;
-        if (exitTransition != null && decorView.isLaidOut()) {
+        if (!mIsAnchorRootAttached && exitTransition != null && decorView.isLaidOut()) {
             // The decor view is non-interactive during exit transitions.
             final LayoutParams p = (LayoutParams) decorView.getLayoutParams();
             p.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
             p.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
             mWindowManager.updateViewLayout(decorView, p);
 
+            // Once we start dismissing the decor view, all state (including
+            // the anchor root) needs to be moved to the decor view since we
+            // may open another popup while it's busy exiting.
+            final View anchorRoot = mAnchorRoot != null ? mAnchorRoot.get() : null;
             final Rect epicenter = getTransitionEpicenter();
             exitTransition.setEpicenterCallback(new EpicenterCallback() {
                 @Override
@@ -1648,18 +1671,19 @@ public class PopupWindow {
                     return epicenter;
                 }
             });
-            decorView.startExitTransition(exitTransition, new TransitionListenerAdapter() {
-                @Override
-                public void onTransitionEnd(Transition transition) {
-                    dismissImmediate(decorView, contentHolder, contentView);
-                }
-            });
+            decorView.startExitTransition(exitTransition, anchorRoot,
+                    new TransitionListenerAdapter() {
+                        @Override
+                        public void onTransitionEnd(Transition transition) {
+                            dismissImmediate(decorView, contentHolder, contentView);
+                        }
+                    });
         } else {
             dismissImmediate(decorView, contentHolder, contentView);
         }
 
         // Clears the anchor view.
-        unregisterForScrollChanged();
+        unregisterForViewTreeChanges();
 
         if (mOnDismissListener != null) {
             mOnDismissListener.onDismiss();
@@ -1925,7 +1949,7 @@ public class PopupWindow {
         final WeakReference<View> oldAnchor = mAnchor;
         final boolean needsUpdate = updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff);
         if (oldAnchor == null || oldAnchor.get() != anchor || (needsUpdate && !mIsDropdown)) {
-            registerForScrollChanged(anchor, xoff, yoff, mAnchoredGravity);
+            registerForViewTreeChanges(anchor, xoff, yoff, mAnchoredGravity);
         } else if (needsUpdate) {
             // No need to register again if this is a DropDown, showAsDropDown already did.
             mAnchorXoff = xoff;
@@ -1969,26 +1993,37 @@ public class PopupWindow {
         public void onDismiss();
     }
 
-    private void unregisterForScrollChanged() {
-        final WeakReference<View> anchorRef = mAnchor;
-        final View anchor = anchorRef == null ? null : anchorRef.get();
+    private void unregisterForViewTreeChanges() {
+        final View anchor = mAnchor != null ? mAnchor.get() : null;
         if (anchor != null) {
             final ViewTreeObserver vto = anchor.getViewTreeObserver();
             vto.removeOnScrollChangedListener(mOnScrollChangedListener);
         }
 
+        final View anchorRoot = mAnchorRoot != null ? mAnchorRoot.get() : null;
+        if (anchorRoot != null) {
+            anchorRoot.removeOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
+        }
+
         mAnchor = null;
+        mAnchorRoot = null;
+        mIsAnchorRootAttached = false;
     }
 
-    private void registerForScrollChanged(View anchor, int xoff, int yoff, int gravity) {
-        unregisterForScrollChanged();
-
-        mAnchor = new WeakReference<>(anchor);
+    private void registerForViewTreeChanges(View anchor, int xoff, int yoff, int gravity) {
+        unregisterForViewTreeChanges();
 
         final ViewTreeObserver vto = anchor.getViewTreeObserver();
         if (vto != null) {
             vto.addOnScrollChangedListener(mOnScrollChangedListener);
         }
+
+        final View anchorRoot = anchor.getRootView();
+        anchorRoot.addOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
+
+        mAnchor = new WeakReference<>(anchor);
+        mAnchorRoot = new WeakReference<>(anchorRoot);
+        mIsAnchorRootAttached = anchorRoot.isAttachedToWindow();
 
         mAnchorXoff = xoff;
         mAnchorYoff = yoff;
@@ -2109,16 +2144,23 @@ public class PopupWindow {
          * its {@code onTransitionEnd} method called even if the transition
          * never starts; however, it may be called with a {@code null} argument.
          */
-        public void startExitTransition(Transition transition, final TransitionListener listener) {
+        public void startExitTransition(Transition transition, final View anchorRoot,
+                final TransitionListener listener) {
             if (transition == null) {
                 return;
             }
+
+            // The anchor view's window may go away while we're executing our
+            // transition, in which case we need to end the transition
+            // immediately and execute the listener to remove the popup.
+            anchorRoot.addOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
 
             // The exit listener MUST be called for cleanup, even if the
             // transition never starts or ends. Stash it for later.
             mPendingExitListener = new TransitionListenerAdapter() {
                 @Override
                 public void onTransitionEnd(Transition transition) {
+                    anchorRoot.removeOnAttachStateChangeListener(mOnAnchorRootDetachedListener);
                     listener.onTransitionEnd(transition);
 
                     // The listener was called. Our job here is done.
@@ -2153,6 +2195,19 @@ public class PopupWindow {
                 mPendingExitListener.onTransitionEnd(null);
             }
         }
+
+        private final OnAttachStateChangeListener mOnAnchorRootDetachedListener =
+                new OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {}
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+                        v.removeOnAttachStateChangeListener(this);
+
+                        TransitionManager.endTransitions(PopupDecorView.this);
+                    }
+                };
     }
 
     private class PopupBackgroundView extends FrameLayout {
