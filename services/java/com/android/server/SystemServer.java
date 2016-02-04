@@ -979,7 +979,9 @@ public final class SystemServer {
 
                 mSystemServiceManager.startService(TrustManagerService.class);
 
-                mSystemServiceManager.startService(FingerprintService.class);
+                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+                    mSystemServiceManager.startService(FingerprintService.class);
+                }
 
                 try {
                     Slog.i(TAG, "BackgroundDexOptService");
