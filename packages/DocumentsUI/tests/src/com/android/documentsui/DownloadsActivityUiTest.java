@@ -30,7 +30,7 @@ import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.Until;
-import android.test.InstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -38,7 +38,7 @@ import android.view.MotionEvent;
 import com.android.documentsui.model.RootInfo;
 
 @LargeTest
-public class DownloadsActivityUiTest extends InstrumentationTestCase {
+public class DownloadsActivityUiTest extends ActivityInstrumentationTestCase2<DownloadsActivity> {
 
     private static final int TIMEOUT = 5000;
     private static final String TAG = "DownloadsActivityUiTest";
@@ -52,6 +52,10 @@ public class DownloadsActivityUiTest extends InstrumentationTestCase {
     private DocumentsProviderHelper mDocsHelper;
     private ContentProviderClient mClient;
     private RootInfo mRoot;
+
+    public DownloadsActivityUiTest() {
+        super(DownloadsActivity.class);
+    }
 
     public void setUp() throws Exception {
         // Initialize UiDevice instance.
@@ -79,7 +83,8 @@ public class DownloadsActivityUiTest extends InstrumentationTestCase {
         intent.setDataAndType(mRoot.getUri(), DocumentsContract.Root.MIME_TYPE_ITEM);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivity(intent);
+        setActivityIntent(intent);
+        getActivity();  // Start the activity.
 
         // Wait for the app to appear.
         mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), TIMEOUT);
@@ -92,11 +97,11 @@ public class DownloadsActivityUiTest extends InstrumentationTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        // Need to kill off the task we started.
-        super.tearDown();
         Log.d(TAG, "Resetting storage from setUp");
         resetStorage();
         mClient.release();
+
+        super.tearDown();
     }
 
     private void resetStorage() throws RemoteException {

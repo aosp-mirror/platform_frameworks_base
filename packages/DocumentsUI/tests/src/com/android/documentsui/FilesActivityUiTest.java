@@ -30,7 +30,7 @@ import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.Until;
-import android.test.InstrumentationTestCase;
+import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -38,7 +38,7 @@ import android.view.MotionEvent;
 import com.android.documentsui.model.RootInfo;
 
 @LargeTest
-public class FilesActivityUiTest extends InstrumentationTestCase {
+public class FilesActivityUiTest extends ActivityInstrumentationTestCase2<FilesActivity> {
 
     private static final int TIMEOUT = 5000;
     private static final String TAG = "FilesActivityUiTest";
@@ -53,7 +53,10 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
     private ContentProviderClient mClient;
     private RootInfo mRoot_0;
     private RootInfo mRoot_1;
-    private FilesActivity mActivity;
+
+    public FilesActivityUiTest() {
+        super(FilesActivity.class);
+    }
 
     public void setUp() throws Exception {
         // Initialize UiDevice instance.
@@ -72,13 +75,14 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
         mResolver = mContext.getContentResolver();
 
         mClient = mResolver.acquireUnstableContentProviderClient(DEFAULT_AUTHORITY);
+        assertNotNull("Failed to acquire ContentProviderClient.", mClient);
         mDocsHelper = new DocumentsProviderHelper(DEFAULT_AUTHORITY, mClient);
 
         // Launch app.
         Intent intent = mContext.getPackageManager().getLaunchIntentForPackage(TARGET_PKG);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mActivity = launchActivityWithIntent(TARGET_PKG, FilesActivity.class, intent);
-        assertNotNull("Activity not started.", mActivity);
+        setActivityIntent(intent);
+        getActivity();  // Start the activity.
 
         // Wait for the app to appear.
         mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), TIMEOUT);
@@ -91,16 +95,11 @@ public class FilesActivityUiTest extends InstrumentationTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        super.tearDown();
-
-        if (mActivity != null) {
-            mActivity.finish();
-            mActivity = null;
-        }
-
         Log.d(TAG, "Resetting storage from setUp");
         resetStorage();
         mClient.release();
+
+        super.tearDown();
     }
 
     private void resetStorage() throws RemoteException {
