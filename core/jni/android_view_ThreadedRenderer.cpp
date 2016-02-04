@@ -134,7 +134,14 @@ public:
 
     virtual void prepareTree(TreeInfo& info) {
         info.errorHandler = this;
+        // TODO: This is hacky
+        info.windowInsetLeft = -stagingProperties().getLeft();
+        info.windowInsetTop = -stagingProperties().getTop();
+        info.updateWindowPositions = true;
         RenderNode::prepareTree(info);
+        info.updateWindowPositions = false;
+        info.windowInsetLeft = 0;
+        info.windowInsetTop = 0;
         info.errorHandler = NULL;
     }
 
@@ -369,28 +376,28 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
 static void android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<ANativeWindow> window = android_view_Surface_getNativeWindow(env, jsurface);
-    proxy->initialize(window);
+    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
+    proxy->initialize(surface);
 }
 
 static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<ANativeWindow> window;
+    sp<Surface> surface;
     if (jsurface) {
-        window = android_view_Surface_getNativeWindow(env, jsurface);
+        surface = android_view_Surface_getSurface(env, jsurface);
     }
-    proxy->updateSurface(window);
+    proxy->updateSurface(surface);
 }
 
 static jboolean android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<ANativeWindow> window;
+    sp<Surface> surface;
     if (jsurface) {
-        window = android_view_Surface_getNativeWindow(env, jsurface);
+        surface = android_view_Surface_getSurface(env, jsurface);
     }
-    return proxy->pauseSurface(window);
+    return proxy->pauseSurface(surface);
 }
 
 static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,

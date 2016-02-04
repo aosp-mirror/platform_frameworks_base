@@ -209,6 +209,19 @@ public:
     OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
 #endif
 
+    class ANDROID_API PositionListener {
+    public:
+        virtual ~PositionListener() {}
+        virtual void onPositionUpdated(RenderNode& node, const TreeInfo& info) = 0;
+    };
+
+    // Note this is not thread safe, this needs to be called
+    // before the RenderNode is used for drawing.
+    // RenderNode takes ownership of the pointer
+    ANDROID_API void setPositionListener(PositionListener* listener) {
+        mPositionListener.reset(listener);
+    }
+
 private:
     typedef key_value_pair_t<float, DrawRenderNodeOp*> ZDrawRenderNodeOpPair;
 
@@ -317,6 +330,8 @@ private:
     // This is *NOT* thread-safe, and should therefore only be tracking
     // mDisplayList, not mStagingDisplayList.
     uint32_t mParentCount;
+
+    std::unique_ptr<PositionListener> mPositionListener;
 }; // class RenderNode
 
 } /* namespace uirenderer */

@@ -136,6 +136,9 @@ public class RenderNode {
     private RenderNode(String name, View owningView) {
         mNativeRenderNode = nCreate(name);
         mOwningView = owningView;
+        if (mOwningView instanceof SurfaceView) {
+            nRequestPositionUpdates(mNativeRenderNode, (SurfaceView) mOwningView);
+        }
     }
 
     /**
@@ -862,6 +865,8 @@ public class RenderNode {
     private static native float nGetPivotY(long renderNode);
     private static native void nOutput(long renderNode);
     private static native int nGetDebugSize(long renderNode);
+
+    private static native void nRequestPositionUpdates(long renderNode, SurfaceView callback);
 
     ///////////////////////////////////////////////////////////////////////////
     // Animations

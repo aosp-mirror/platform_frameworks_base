@@ -92,18 +92,18 @@ void CanvasContext::destroy() {
     }
 }
 
-void CanvasContext::setSurface(ANativeWindow* window) {
+void CanvasContext::setSurface(Surface* surface) {
     ATRACE_CALL();
 
-    mNativeWindow = window;
+    mNativeSurface = surface;
 
     if (mEglSurface != EGL_NO_SURFACE) {
         mEglManager.destroySurface(mEglSurface);
         mEglSurface = EGL_NO_SURFACE;
     }
 
-    if (window) {
-        mEglSurface = mEglManager.createSurface(window);
+    if (surface) {
+        mEglSurface = mEglManager.createSurface(surface);
     }
 
     if (mEglSurface != EGL_NO_SURFACE) {
@@ -127,8 +127,8 @@ void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
     mSwapBehavior = swapBehavior;
 }
 
-void CanvasContext::initialize(ANativeWindow* window) {
-    setSurface(window);
+void CanvasContext::initialize(Surface* surface) {
+    setSurface(surface);
 #if !HWUI_NEW_OPS
     if (mCanvas) return;
     mCanvas = new OpenGLRenderer(mRenderThread.renderState());
@@ -136,11 +136,11 @@ void CanvasContext::initialize(ANativeWindow* window) {
 #endif
 }
 
-void CanvasContext::updateSurface(ANativeWindow* window) {
-    setSurface(window);
+void CanvasContext::updateSurface(Surface* surface) {
+    setSurface(surface);
 }
 
-bool CanvasContext::pauseSurface(ANativeWindow* window) {
+bool CanvasContext::pauseSurface(Surface* surface) {
     return mRenderThread.removeFrameCallback(this);
 }
 
@@ -204,6 +204,10 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     info.renderer = mCanvas;
 #endif
 
+    if (CC_LIKELY(mNativeSurface.get())) {
+        info.frameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
+    }
+
     mAnimationContext->startFrame(info.mode);
     for (const sp<RenderNode>& node : mRenderNodes) {
         // Only the primary target node will be drawn full - all other nodes would get drawn in
@@ -219,7 +223,7 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
     freePrefetechedLayers();
     GL_CHECKPOINT(MODERATE);
 
-    if (CC_UNLIKELY(!mNativeWindow.get())) {
+    if (CC_UNLIKELY(!mNativeSurface.get())) {
         mCurrentFrameInfo->addFlag(FrameInfoFlags::SkippedFrame);
         info.out.canDrawThisFrame = false;
         return;
@@ -242,8 +246,9 @@ void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo,
         } else {
             // We're maybe behind? Find out for sure
             int runningBehind = 0;
-            mNativeWindow->query(mNativeWindow.get(),
-                    NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
+            // TODO: Have this method be on Surface, too, not just ANativeWindow...
+            ANativeWindow* window = mNativeSurface.get();
+            window->query(window, NATIVE_WINDOW_CONSUMER_RUNNING_BEHIND, &runningBehind);
             info.out.canDrawThisFrame = !runningBehind;
         }
     } else {

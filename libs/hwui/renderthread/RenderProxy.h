@@ -67,9 +67,9 @@ public:
     ANDROID_API bool loadSystemProperties();
     ANDROID_API void setName(const char* name);
 
-    ANDROID_API void initialize(const sp<ANativeWindow>& window);
-    ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
-    ANDROID_API bool pauseSurface(const sp<ANativeWindow>& window);
+    ANDROID_API void initialize(const sp<Surface>& surface);
+    ANDROID_API void updateSurface(const sp<Surface>& surface);
+    ANDROID_API bool pauseSurface(const sp<Surface>& surface);
     ANDROID_API void setup(int width, int height, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setLightCenter(const Vector3& lightCenter);
