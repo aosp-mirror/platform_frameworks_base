@@ -32,6 +32,7 @@ parent.link=index.html
       Using the Android Emulator</a></li>
     <li><a href="{@docRoot}tools/publishing/app-signing.html">
       Signing Your Applications</a></li>
+      <li><a href="{@docRoot}tools/help/app-link-indexing.html">Deep Link and App Indexing API Support in Android Studio</a></li>
   </ol>
 
   </div>
