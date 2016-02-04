@@ -44,11 +44,38 @@ class Identifier {
             return false;
         final Identifier other = (Identifier) obj;
         return mDeviceId == other.mDeviceId && mStorageId == other.mStorageId &&
-                mObjectHandle == other.mObjectHandle && mDocumentId == other.mDocumentId;
+                mObjectHandle == other.mObjectHandle && mDocumentId.equals(other.mDocumentId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mDeviceId, mStorageId, mObjectHandle, mDocumentId);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Identifier { ");
+
+        builder.append("mDeviceId: ");
+        builder.append(mDeviceId);
+        builder.append(", ");
+
+        builder.append("mStorageId: ");
+        builder.append(mStorageId);
+        builder.append(", ");
+
+        builder.append("mObjectHandle: ");
+        builder.append(mObjectHandle);
+        builder.append(", ");
+
+        builder.append("mDocumentId: ");
+        builder.append(mDocumentId);
+        builder.append(", ");
+
+        builder.append("mDocumentType: ");
+        builder.append(mDocumentType);
+        builder.append(" }");
+        return builder.toString();
     }
 }

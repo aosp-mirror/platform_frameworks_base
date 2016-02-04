@@ -58,6 +58,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
     };
 
+    static final boolean DEBUG = true;
+
     private final Object mDeviceListLock = new Object();
 
     private static MtpDocumentsProvider sSingleton;
@@ -151,6 +153,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public Cursor queryChildDocuments(String parentDocumentId,
             String[] projection, String sortOrder) throws FileNotFoundException {
+        if (DEBUG) {
+            Log.d(TAG, "queryChildDocuments: " + parentDocumentId);
+        }
         if (projection == null) {
             projection = MtpDocumentsProvider.DEFAULT_DOCUMENT_PROJECTION;
         }
@@ -298,6 +303,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             if (mDeviceToolkits.containsKey(deviceId)) {
                 return;
             }
+            if (DEBUG) {
+                Log.d(TAG, "Open device " + deviceId);
+            }
             mMtpManager.openDevice(deviceId);
             mDeviceToolkits.put(
                     deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
@@ -383,6 +391,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         // TODO: Flush the device before closing (if not closed externally).
         if (!mDeviceToolkits.containsKey(deviceId)) {
             return;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Close device " + deviceId);
         }
         getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
         mDeviceToolkits.remove(deviceId);
