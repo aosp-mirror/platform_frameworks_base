@@ -16,19 +16,24 @@
 
 package com.android.server.net;
 
-import java.io.PrintWriter;
+import static com.android.server.net.NetworkPolicyManagerService.TAG;
 
-import android.content.Intent;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.net.INetworkPolicyManager;
+import android.net.NetworkPolicy;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.util.Log;
 
-public class NetworkPolicyManagerShellCommand extends ShellCommand {
+class NetworkPolicyManagerShellCommand extends ShellCommand {
 
     final INetworkPolicyManager mInterface;
 
-    NetworkPolicyManagerShellCommand(NetworkPolicyManagerService service) {
+    NetworkPolicyManagerShellCommand(INetworkPolicyManager service) {
         mInterface = service;
     }
 
@@ -66,16 +71,24 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
-        pw.println("  get restrict-background");
-        pw.println("    Gets the global restrict background usage status.");
-        pw.println("  set restrict-background BOOLEAN");
-        pw.println("    Sets the global restrict background usage status.");
-        pw.println("  list restrict-background-whitelist");
-        pw.println("    Prints UID that are whitelisted for restrict background usage.");
         pw.println("  add restrict-background-whitelist UID");
         pw.println("    Adds a UID to the whitelist for restrict background usage.");
+        pw.println("  get metered-network ID");
+        pw.println("    Checks whether the given non-mobile network is metered or not.");
+        pw.println("  get restrict-background");
+        pw.println("    Gets the global restrict background usage status.");
+        pw.println("  list metered-networks [BOOLEAN]");
+        pw.println("    Lists all non-mobile networks and whether they are metered or not.");
+        pw.println("    If a boolean argument is passed, filters just the metered (or unmetered)");
+        pw.println("    networks.");
+        pw.println("  list restrict-background-whitelist");
+        pw.println("    Lists UIDs that are whitelisted for restrict background usage.");
         pw.println("  remove restrict-background-whitelist UID");
         pw.println("    Removes a UID from the whitelist for restrict background usage.");
+        pw.println("  set metered-network ID BOOLEAN");
+        pw.println("    Toggles whether the given non-mobile network is metered.");
+        pw.println("  set restrict-background BOOLEAN");
+        pw.println("    Sets the global restrict background usage status.");
     }
 
     private int runGet() throws RemoteException {
@@ -86,6 +99,8 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
             return -1;
         }
         switch(type) {
+            case "metered-network":
+                return getNonMobileMeteredNetwork();
             case "restrict-background":
                 return getRestrictBackground();
         }
@@ -101,6 +116,8 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
             return -1;
         }
         switch(type) {
+            case "metered-network":
+                return setNonMobileMeteredNetwork();
             case "restrict-background":
                 return setRestrictBackground();
         }
@@ -116,6 +133,8 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
             return -1;
         }
         switch(type) {
+            case "metered-networks":
+                return listNonMobileMeteredNetworks();
             case "restrict-background-whitelist":
                 return runListRestrictBackgroundWhitelist();
         }
@@ -207,6 +226,86 @@ public class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         mInterface.removeRestrictBackgroundWhitelistedUid(uid);
         return 0;
+    }
+
+    private int listNonMobileMeteredNetworks() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final String arg = getNextArg();
+        final Boolean filter = arg == null ? null : Boolean.valueOf(arg);
+        for (NetworkPolicy policy : getNonMobilePolicies()) {
+            if (filter != null && filter.booleanValue() != policy.metered) {
+                continue;
+            }
+            pw.print(getNetworkId(policy));
+            pw.print(';');
+            pw.println(policy.metered);
+        }
+        return 0;
+    }
+
+    private int getNonMobileMeteredNetwork() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final String id = getNextArg();
+        if (id == null) {
+            pw.println("Error: didn't specify ID");
+            return -1;
+        }
+        final List<NetworkPolicy> policies = getNonMobilePolicies();
+        for (NetworkPolicy policy: policies) {
+            if (id.equals(getNetworkId(policy))) {
+                pw.println(policy.metered);
+                return 0;
+            }
+        }
+        return 0;
+    }
+
+    private int setNonMobileMeteredNetwork() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final String id = getNextArg();
+        if (id == null) {
+            pw.println("Error: didn't specify ID");
+            return -1;
+        }
+        final String arg = getNextArg();
+        if (arg == null) {
+            pw.println("Error: didn't specify BOOLEAN");
+            return -1;
+        }
+        final boolean metered = Boolean.valueOf(arg);
+        final NetworkPolicy[] policies = mInterface.getNetworkPolicies(null);
+        boolean changed = false;
+        for (NetworkPolicy policy : policies) {
+            if (policy.template.isMatchRuleMobile() || policy.metered == metered) {
+                continue;
+            }
+            final String networkId = getNetworkId(policy);
+            if (id.equals(networkId)) {
+                Log.i(TAG, "Changing " + networkId + " metered status to " + metered);
+                policy.metered = metered;
+                changed = true;
+            }
+        }
+        if (changed) {
+            mInterface.setNetworkPolicies(policies);
+        }
+        return 0;
+    }
+
+    private List<NetworkPolicy> getNonMobilePolicies() throws RemoteException {
+        final NetworkPolicy[] policies = mInterface.getNetworkPolicies(null);
+        final List<NetworkPolicy> nonMobilePolicies = new ArrayList<NetworkPolicy>(policies.length);
+        for (NetworkPolicy policy: policies) {
+            if (!policy.template.isMatchRuleMobile()) {
+                nonMobilePolicies.add(policy);
+            }
+        }
+        return nonMobilePolicies;
+    }
+
+    private String getNetworkId(NetworkPolicy policy) {
+        // ids are typically enclosed on double quotes (")
+        return policy.template.getNetworkId().replaceAll("^\"|\"$", "");
     }
 
     private int getNextBooleanArg() {
