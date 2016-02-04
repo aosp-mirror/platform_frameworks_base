@@ -1,262 +1,293 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2016 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
 package com.android.systemui.qs.customize;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
-import android.service.quicksettings.TileService;
-import android.util.Log;
+import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ItemDecoration;
+import android.support.v7.widget.RecyclerView.State;
+import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.support.v7.widget.helper.ItemTouchHelper.Callback;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-
+import android.widget.FrameLayout;
 import com.android.systemui.R;
-import com.android.systemui.qs.QSTile;
-import com.android.systemui.qs.QSTile.Icon;
-import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.QSIconView;
+import com.android.systemui.qs.QSTileView;
+import com.android.systemui.qs.customize.TileAdapter.Holder;
+import com.android.systemui.qs.customize.TileQueryHelper.TileInfo;
+import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.statusbar.phone.QSTileHost;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
-public class TileAdapter extends BaseAdapter {
+public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileStateListener {
 
-    private static final String TAG = "TileAdapter";
+    private static final long DRAG_LENGTH = 100;
+    private static final float DRAG_SCALE = 1.2f;
+    public static final long MOVE_DURATION = 150;
 
-    private final ArrayList<TileGroup> mGroups = new ArrayList<>();
+    private static final int TYPE_TILE = 0;
+    private static final int TYPE_EDIT = 1;
+
     private final Context mContext;
 
-    private TileSelectedListener mListener;
-    private ArrayList<String> mCurrentTiles;
+    private final List<TileInfo> mTiles = new ArrayList<>();
+    private int mDividerIndex;
+    private List<String> mCurrentSpecs;
+    private List<TileInfo> mOtherTiles;
+    private List<TileInfo> mAllTiles;
 
-    public TileAdapter(Context context, Collection<QSTile<?>> currentTiles, QSTileHost host) {
+    private Holder mCurrentDrag;
+
+    public TileAdapter(Context context) {
         mContext = context;
-        addSystemTiles(currentTiles, host);
-        // TODO: Live?
-    }
-
-    private void addSystemTiles(Collection<QSTile<?>> currentTiles, QSTileHost host) {
-        try {
-            ArrayList<String> tileSpecs = new ArrayList<>();
-            for (QSTile<?> tile : currentTiles) {
-                tileSpecs.add(tile.getTileSpec());
-            }
-            mCurrentTiles = tileSpecs;
-            final TileGroup group = new TileGroup("com.android.settings", mContext);
-            boolean hasColorMod = host.getDisplayController().isEnabled();
-            String possible = mContext.getString(R.string.quick_settings_tiles_default)
-                    + ",hotspot,inversion,saver" + (hasColorMod ? ",colors" : "");
-            String[] possibleTiles = possible.split(",");
-            for (int i = 0; i < possibleTiles.length; i++) {
-                final String spec = possibleTiles[i];
-                if (spec.startsWith("q")) {
-                    // Quick tiles can't be customized.
-                    continue;
-                }
-                if (tileSpecs.contains(spec)) {
-                    Log.d(TAG, "Skipping " + spec);
-                    continue;
-                }
-                Log.d(TAG, "Trying " + spec);
-                final QSTile<?> tile = host.createTile(spec);
-                if (tile == null) {
-                    continue;
-                }
-                // Bad, bad, very bad.
-                tile.setListening(true);
-                tile.clearState();
-                tile.refreshState();
-                tile.setListening(false);
-                new Handler(host.getLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        group.addTile(spec, tile.getState().icon, tile.getState().label, mContext);
-                    }
-                });
-            }
-            // Error: Badness (10000).
-            // Serialize this work after the host's looper's queue is empty.
-            new Handler(host.getLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (group.mTiles.size() > 0) {
-                                mGroups.add(group);
-                                notifyDataSetChanged();
-                            }
-                            new QueryTilesTask().execute();
-                        }
-                    });
-                }
-            });
-        } catch (NameNotFoundException e) {
-            Log.e(TAG, "Couldn't load system tiles", e);
-        }
-    }
-
-    public void setListener(TileSelectedListener listener) {
-        mListener = listener;
-    }
-
-    @Override
-    public int getCount() {
-        return mGroups.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return mGroups.get(position);
+        setHasStableIds(true);
     }
 
     @Override
     public long getItemId(int position) {
-        return position;
+        return mTiles.get(position) != null ? mAllTiles.indexOf(mTiles.get(position)) : -1;
+    }
+
+    public Callback getCallback() {
+        return mCallbacks;
+    }
+
+    public ItemDecoration getItemDecoration() {
+        return mDecoration;
+    }
+
+    public void saveSpecs(QSTileHost host) {
+        List<String> newSpecs = new ArrayList<>();
+        for (int i = 0; mTiles.get(i) != null; i++) {
+            newSpecs.add(mTiles.get(i).spec);
+        }
+        host.changeTiles(mCurrentSpecs, newSpecs);
+        setTileSpecs(newSpecs);
+    }
+
+    public void setTileSpecs(List<String> currentSpecs) {
+        mCurrentSpecs = currentSpecs;
+        recalcSpecs();
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        return mGroups.get(position).getView(mContext, convertView, parent, mListener);
+    public void onTilesChanged(List<TileInfo> tiles) {
+        mAllTiles = tiles;
+        recalcSpecs();
     }
 
-    private static class TileGroup {
-        private final ArrayList<TileInfo> mTiles = new ArrayList<>();
-        private CharSequence mLabel;
-        private Drawable mIcon;
-
-        public TileGroup(String pkg, Context context) throws NameNotFoundException {
-            PackageManager pm = context.getPackageManager();
-            ApplicationInfo info = pm.getApplicationInfo(pkg, 0);
-            mLabel = info.loadLabel(pm);
-            mIcon = info.loadIcon(pm);
-            Log.d(TAG, "Added " + mLabel);
+    private void recalcSpecs() {
+        if (mCurrentSpecs == null || mAllTiles == null) {
+            return;
         }
-
-        private void addTile(String spec, Drawable icon, CharSequence label) {
-            TileInfo info = new TileInfo();
-            info.label = label;
-            info.drawable = icon;
-            info.spec = spec;
-            mTiles.add(info);
+        mOtherTiles = new ArrayList<TileInfo>(mAllTiles);
+        mTiles.clear();
+        for (int i = 0; i < mCurrentSpecs.size(); i++) {
+            mTiles.add(getAndRemoveOther(mCurrentSpecs.get(i)));
         }
+        mTiles.add(null);
+        mTiles.addAll(mOtherTiles);
+        mDividerIndex = mTiles.indexOf(null);
+        notifyDataSetChanged();
+    }
 
-        private void addTile(String spec, Icon icon, CharSequence label, Context context) {
-            addTile(spec, icon != null ? icon.getDrawable(context) : null, label);
-        }
-
-        private View getView(Context context, View convertView, ViewGroup parent,
-                final TileSelectedListener listener) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(R.layout.tile_listing, parent,
-                        false);
+    private TileInfo getAndRemoveOther(String s) {
+        for (int i = 0; i < mOtherTiles.size(); i++) {
+            if (mOtherTiles.get(i).spec.equals(s)) {
+                return mOtherTiles.remove(i);
             }
-            ((TextView) convertView.findViewById(android.R.id.title)).setText(mLabel);
-            ((ImageView) convertView.findViewById(android.R.id.icon)).setImageDrawable(mIcon);
-            GridLayout grid = (GridLayout) convertView.findViewById(R.id.tile_grid);
-            final int N = mTiles.size();
-            if (grid.getChildCount() != N) {
-                grid.removeAllViews();
+        }
+        return null;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mTiles.get(position) == null) {
+            return TYPE_EDIT;
+        }
+        return TYPE_TILE;
+    }
+
+    @Override
+    public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+        final Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        if (viewType == 1) {
+            return new Holder(inflater.inflate(R.layout.qs_customize_divider, parent, false));
+        }
+        FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
+                false);
+        frame.addView(new QSTileView(context, new QSIconView(context)));
+        return new Holder(frame);
+    }
+
+    @Override
+    public int getItemCount() {
+        return mTiles.size();
+    }
+
+    @Override
+    public void onBindViewHolder(Holder holder, int position) {
+        if (holder.getItemViewType() == TYPE_EDIT) return;
+
+        TileInfo info = mTiles.get(position);
+        holder.mTileView.onStateChanged(info.state);
+    }
+
+    public SpanSizeLookup getSizeLookup() {
+        return mSizeLookup;
+    }
+
+    public class Holder extends ViewHolder {
+        private QSTileView mTileView;
+
+        public Holder(View itemView) {
+            super(itemView);
+            if (itemView instanceof FrameLayout) {
+                mTileView = (QSTileView) ((FrameLayout) itemView).getChildAt(0);
             }
-            for (int i = 0; i < N; i++) {
-                if (grid.getChildCount() <= i) {
-                    grid.addView(createTile(context));
-                }
-                View view = grid.getChildAt(i);
-                final TileInfo tileInfo = mTiles.get(i);
-                ((ImageView) view.findViewById(R.id.tile_icon)).setImageDrawable(tileInfo.drawable);
-                ((TextView) view.findViewById(R.id.tile_label)).setText(tileInfo.label);
-                view.setClickable(true);
-                view.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        listener.onTileSelected(tileInfo.spec);
-                    }
-                });
-            }
-            return convertView;
         }
 
-        private View createTile(Context context) {
-            return LayoutInflater.from(context).inflate(R.layout.qs_add_tile_layout, null);
+        public void startDrag() {
+            itemView.animate()
+                    .setDuration(DRAG_LENGTH)
+                    .scaleX(DRAG_SCALE)
+                    .scaleY(DRAG_SCALE);
+            mTileView.findViewById(R.id.tile_label).animate()
+                    .setDuration(DRAG_LENGTH)
+                    .alpha(0);
+        }
+
+        public void stopDrag() {
+            itemView.animate()
+                    .setDuration(DRAG_LENGTH)
+                    .scaleX(1)
+                    .scaleY(1);
+            mTileView.findViewById(R.id.tile_label).animate()
+                    .setDuration(DRAG_LENGTH)
+                    .alpha(1);
         }
     }
 
-    private static class TileInfo {
-        private String spec;
-        private Drawable drawable;
-        private CharSequence label;
-    }
-
-    private class QueryTilesTask extends AsyncTask<Void, Void, Collection<TileGroup>> {
+    private final SpanSizeLookup mSizeLookup = new SpanSizeLookup() {
         @Override
-        protected Collection<TileGroup> doInBackground(Void... params) {
-            HashMap<String, TileGroup> pkgMap = new HashMap<>();
-            PackageManager pm = mContext.getPackageManager();
-            // TODO: Handle userness.
-            List<ResolveInfo> services = pm.queryIntentServices(
-                    new Intent(TileService.ACTION_QS_TILE), 0);
-            for (ResolveInfo info : services) {
-                String packageName = info.serviceInfo.packageName;
-                ComponentName componentName = new ComponentName(packageName, info.serviceInfo.name);
-                String spec = CustomTile.toSpec(componentName);
-                if (mCurrentTiles.contains(spec)) {
+        public int getSpanSize(int position) {
+            return getItemViewType(position) == TYPE_EDIT ? 3 : 1;
+        }
+    };
+
+    private final ItemDecoration mDecoration = new ItemDecoration() {
+        // TODO: Move this to resource.
+        private final ColorDrawable mDrawable = new ColorDrawable(0xff384248);
+
+        @Override
+        public void onDraw(Canvas c, RecyclerView parent, State state) {
+            super.onDraw(c, parent, state);
+
+            final int childCount = parent.getChildCount();
+            final int width = parent.getWidth();
+            final int bottom = parent.getBottom();
+            for (int i = 0; i < childCount; i++) {
+                final View child = parent.getChildAt(i);
+                final ViewHolder holder = parent.getChildViewHolder(child);
+                if (holder.getAdapterPosition() < mDividerIndex) {
                     continue;
                 }
-                try {
-                    TileGroup group = pkgMap.get(packageName);
-                    if (group == null) {
-                        group = new TileGroup(packageName, mContext);
-                        pkgMap.put(packageName, group);
-                    }
-                    Drawable icon = info.serviceInfo.loadIcon(pm);
-                    CharSequence label = info.serviceInfo.loadLabel(pm);
-                    group.addTile(spec, icon, label != null ? label.toString() : "null");
-                } catch (NameNotFoundException e) {
-                    Log.w(TAG, "Couldn't find resolved package... " + packageName, e);
-                }
+
+                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
+                        .getLayoutParams();
+                final int top = child.getTop() + params.topMargin +
+                        Math.round(ViewCompat.getTranslationY(child));
+                // Draw full width, in case there aren't tiles all the way across.
+                mDrawable.setBounds(0, top, width, bottom);
+                mDrawable.draw(c);
+                break;
             }
-            return pkgMap.values();
+        }
+    };
+
+    private final ItemTouchHelper.Callback mCallbacks = new ItemTouchHelper.Callback() {
+
+        @Override
+        public boolean isLongPressDragEnabled() {
+            return true;
         }
 
         @Override
-        protected void onPostExecute(Collection<TileGroup> result) {
-            mGroups.addAll(result);
-            notifyDataSetChanged();
+        public boolean isItemViewSwipeEnabled() {
+            return false;
         }
-    }
 
-    public interface TileSelectedListener {
-        void onTileSelected(String spec);
-    }
+        @Override
+        public void onSelectedChanged(ViewHolder viewHolder, int actionState) {
+            super.onSelectedChanged(viewHolder, actionState);
+            if (mCurrentDrag != null) {
+                mCurrentDrag.stopDrag();
+            }
+            if (viewHolder != null) {
+                mCurrentDrag = (Holder) viewHolder;
+                mCurrentDrag.startDrag();
+            }
+        }
+
+        @Override
+        public int getMovementFlags(RecyclerView recyclerView, ViewHolder viewHolder) {
+            if (viewHolder.getItemViewType() == TYPE_EDIT) {
+                return makeMovementFlags(0, 0);
+            }
+            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.RIGHT
+                    | ItemTouchHelper.LEFT;
+            return makeMovementFlags(dragFlags, 0);
+        }
+
+        @Override
+        public boolean onMove(RecyclerView recyclerView, ViewHolder viewHolder, ViewHolder target) {
+            int from = viewHolder.getAdapterPosition();
+            int to = target.getAdapterPosition();
+            if (to > mDividerIndex) {
+                if (from < mDividerIndex) {
+                    to = mDividerIndex;
+                } else {
+                    return false;
+                }
+            }
+            if (target.getItemViewType() == TYPE_EDIT && from < mDividerIndex) {
+                to++;
+            }
+            move(from, to, mTiles);
+            mDividerIndex = mTiles.indexOf(null);
+            notifyItemMoved(from, to);
+            return true;
+        }
+
+        private <T> void move(int from, int to, List<T> list) {
+            list.add(from > to ? to : to + 1, list.get(from));
+            list.remove(from > to ? from + 1 : from);
+        }
+
+        @Override
+        public void onSwiped(ViewHolder viewHolder, int direction) {
+        }
+    };
 }

@@ -47,7 +47,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
     }
 
     @Override
-    protected BooleanState newTileState() {
+    public BooleanState newTileState() {
         return new BooleanState();
     }
 

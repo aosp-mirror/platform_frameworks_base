@@ -75,7 +75,7 @@ public class IntentTile extends QSTile<QSTile.State> {
     }
 
     @Override
-    protected State newTileState() {
+    public State newTileState() {
         return new State();
     }
 

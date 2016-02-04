@@ -37,7 +37,7 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     }
 
     @Override
-    protected State newTileState() {
+    public State newTileState() {
         return new QSTile.State();
     }
 

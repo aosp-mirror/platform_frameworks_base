@@ -1400,4 +1400,7 @@
     <!-- SysUI Tuner: Label for preview area in navigation bar tuner [CHAR LIMIT=NONE] -->
     <string name="preview">Preview</string>
 
+    <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
+    <string name="drag_to_add_tiles">Drag to add tiles</string>
+
 </resources>
