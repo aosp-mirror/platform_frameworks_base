@@ -108,7 +108,7 @@ class MtpDatabase {
      * @param columnNames Column names defined in {@link android.provider.DocumentsContract.Root}.
      * @return Database cursor.
      */
-    Cursor queryRoots(String[] columnNames) {
+    Cursor queryRoots(Resources resources, String[] columnNames) {
         final String selection =
                 COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + " = ?";
         final Cursor deviceCursor = mDatabase.query(
@@ -183,10 +183,14 @@ class MtpDatabase {
                     }
                     if (storageCursor.getCount() == 1 && values.containsKey(Root.COLUMN_TITLE)) {
                         storageCursor.moveToFirst();
+                        // Add storage name to device name if we have only 1 storage.
                         values.put(
                                 Root.COLUMN_TITLE,
-                                storageCursor.getString(
-                                        storageCursor.getColumnIndex(Root.COLUMN_TITLE)));
+                                resources.getString(
+                                        R.string.root_name,
+                                        values.getAsString(Root.COLUMN_TITLE),
+                                        storageCursor.getString(
+                                                storageCursor.getColumnIndex(Root.COLUMN_TITLE))));
                     }
                 } finally {
                     storageCursor.close();
@@ -533,13 +537,11 @@ class MtpDatabase {
     /**
      * Gets {@link ContentValues} for the given root.
      * @param values {@link ContentValues} that receives values.
-     * @param resources Resources used to get localized root name.
      * @param root Root to be converted {@link ContentValues}.
      */
     static void getStorageDocumentValues(
             ContentValues values,
             ContentValues extraValues,
-            Resources resources,
             String parentDocumentId,
             MtpRoot root) {
         values.clear();
@@ -550,13 +552,12 @@ class MtpDatabase {
         values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
         values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_STORAGE);
         values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
-        values.put(Document.COLUMN_DISPLAY_NAME, root.getRootName(resources));
+        values.put(Document.COLUMN_DISPLAY_NAME, root.mDescription);
         values.putNull(Document.COLUMN_SUMMARY);
         values.putNull(Document.COLUMN_LAST_MODIFIED);
         values.put(Document.COLUMN_ICON, R.drawable.ic_root_mtp);
         values.put(Document.COLUMN_FLAGS, 0);
-        values.put(Document.COLUMN_SIZE,
-                (int) Math.min(root.mMaxCapacity - root.mFreeSpace, Integer.MAX_VALUE));
+        values.put(Document.COLUMN_SIZE, root.mMaxCapacity - root.mFreeSpace);
 
         extraValues.put(
                 Root.COLUMN_FLAGS,

@@ -20,11 +20,9 @@ import static com.android.mtp.MtpDatabaseConstants.*;
 
 import android.annotation.Nullable;
 import android.content.ContentValues;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
@@ -87,12 +85,10 @@ class Mapper {
     /**
      * Puts root information to database.
      * @param parentDocumentId Document ID of device document.
-     * @param resources Resources required to localize root name.
      * @param roots List of root information.
      * @return If roots are added or removed from the database.
      */
-    synchronized boolean putStorageDocuments(
-            String parentDocumentId, Resources resources, MtpRoot[] roots) {
+    synchronized boolean putStorageDocuments(String parentDocumentId, MtpRoot[] roots) {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
@@ -117,7 +113,7 @@ class Mapper {
                 valuesList[i] = new ContentValues();
                 extraValuesList[i] = new ContentValues();
                 MtpDatabase.getStorageDocumentValues(
-                        valuesList[i], extraValuesList[i], resources, parentDocumentId, roots[i]);
+                        valuesList[i], extraValuesList[i], parentDocumentId, roots[i]);
             }
             final boolean changed = putDocuments(
                     valuesList,
