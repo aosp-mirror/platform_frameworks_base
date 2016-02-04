@@ -19,6 +19,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.systemui">
 
+    <!-- QS Tiles -->
+    <uses-permission android:name="lineageos.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="lineageos.permission.WRITE_SECURE_SETTINGS" />
+
     <!-- SystemUI Tuner -->
     <application>
         <activity-alias

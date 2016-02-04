@@ -39,4 +39,10 @@
 
     <!-- Label for current user in power menu options dialog -->
     <string name="global_action_current_user">Current</string>
+
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine off.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine on.</string>
 </resources>
