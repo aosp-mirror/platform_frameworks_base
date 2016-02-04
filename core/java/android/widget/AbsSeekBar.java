@@ -955,7 +955,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 if (!canUserSetProgress()) {
                     return false;
                 }
-                int increment = Math.max(1, Math.round((float) getMax() / 5));
+                int increment = Math.max(1, Math.round((float) getMax() / 20));
                 if (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD) {
                     increment = -increment;
                 }
