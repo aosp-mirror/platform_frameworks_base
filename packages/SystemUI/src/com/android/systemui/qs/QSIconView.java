@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import android.widget.ImageView.ScaleType;
 import com.android.systemui.R;
 
 import java.util.Objects;
@@ -96,7 +97,7 @@ public class QSIconView extends ViewGroup {
     protected View createIcon() {
         final ImageView icon = new ImageView(mContext);
         icon.setId(android.R.id.icon);
-        icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        icon.setScaleType(ScaleType.FIT_CENTER);
         return icon;
     }
 
