@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.View;
@@ -52,6 +53,20 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
         userSwitcher.setOnInflateListener(this);
         mUserSwitcher = userSwitcher;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        reloadWidth(mScrollView);
+        reloadWidth(mStackScroller);
+    }
+
+    private void reloadWidth(View view) {
+        LayoutParams params = (LayoutParams) view.getLayoutParams();
+        params.width = getContext().getResources().getDimensionPixelSize(
+                R.dimen.notification_panel_width);
+        view.setLayoutParams(params);
     }
 
     @Override

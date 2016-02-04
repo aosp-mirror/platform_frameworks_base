@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
- * Copyright (c) 2011, The Android Open Source Project
+ * Copyright (c) 2016, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 */
 -->
 <resources>
-    <!-- thickness (width) of the navigation bar on phones that require it -->
-    <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_width</dimen>
-
-    <!-- Standard notification gravity -->
-    <integer name="notification_panel_layout_gravity">@integer/standard_notification_panel_layout_gravity</integer>
-
-    <dimen name="docked_divider_handle_width">2dp</dimen>
-    <dimen name="docked_divider_handle_height">16dp</dimen>
+    <!-- Standard notification width + gravity -->
+    <dimen name="notification_panel_width">544dp</dimen>
 </resources>
