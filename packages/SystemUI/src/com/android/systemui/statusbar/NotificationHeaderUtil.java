@@ -74,8 +74,7 @@ public class NotificationHeaderUtil {
         }
 
         private void applyToChild(View view, boolean shouldApply, int originalColor) {
-            if (view.getVisibility() == View.VISIBLE
-                    && originalColor != NotificationHeaderView.NO_COLOR) {
+            if (originalColor != NotificationHeaderView.NO_COLOR) {
                 ImageView imageView = (ImageView) view;
                 imageView.getDrawable().mutate();
                 if (shouldApply) {
