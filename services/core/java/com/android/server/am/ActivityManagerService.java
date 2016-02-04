@@ -5337,7 +5337,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // We don't kill persistent processes.
                             continue;
                         }
-                        if (targetSdkVersion > 0 && app.info.targetSdkVersion < targetSdkVersion) {
+                        if (targetSdkVersion > 0
+                                && app.info.targetSdkVersion >= targetSdkVersion) {
                             continue;
                         }
                         if (app.removed) {
