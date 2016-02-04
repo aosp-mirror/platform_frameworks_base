@@ -112,9 +112,9 @@ void run(const TestScene::Info& info, const TestScene::Options& opts) {
             scene->doFrame(i);
             proxy->syncAndDrawFrame();
         }
-        proxy->fence();
-        nsecs_t done = systemTime(CLOCK_MONOTONIC);
         if (opts.reportFrametimeWeight) {
+            proxy->fence();
+            nsecs_t done = systemTime(CLOCK_MONOTONIC);
             avgMs.add((done - vsync) / 1000000.0);
             if (i % 10 == 9) {
                 printf("Average frametime %.3fms\n", avgMs.average());
