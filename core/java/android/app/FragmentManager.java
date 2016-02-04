@@ -1503,6 +1503,26 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
     }
 
+    public void execSingleAction(Runnable action, boolean allowStateLoss) {
+        if (mExecutingActions) {
+            throw new IllegalStateException("FragmentManager is already executing transactions");
+        }
+
+        if (Looper.myLooper() != mHost.getHandler().getLooper()) {
+            throw new IllegalStateException("Must be called from main thread of fragment host");
+        }
+
+        if (allowStateLoss) {
+            checkStateLoss();
+        }
+
+        mExecutingActions = true;
+        action.run();
+        mExecutingActions = false;
+
+        doPendingDeferredStart();
+    }
+
     /**
      * Only call from main thread!
      */
@@ -1543,6 +1563,12 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             didSomething = true;
         }
 
+        doPendingDeferredStart();
+
+        return didSomething;
+    }
+
+    void doPendingDeferredStart() {
         if (mHavePendingDeferredStart) {
             boolean loadersRunning = false;
             for (int i=0; i<mActive.size(); i++) {
@@ -1556,7 +1582,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 startPendingDeferredFragments();
             }
         }
-        return didSomething;
     }
 
     void reportBackStackChanged() {

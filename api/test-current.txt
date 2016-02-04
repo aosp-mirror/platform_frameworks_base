@@ -4605,6 +4605,8 @@ package android.app {
     method public abstract android.app.FragmentTransaction attach(android.app.Fragment);
     method public abstract int commit();
     method public abstract int commitAllowingStateLoss();
+    method public abstract void commitNow();
+    method public abstract void commitNowAllowingStateLoss();
     method public abstract android.app.FragmentTransaction detach(android.app.Fragment);
     method public abstract android.app.FragmentTransaction disallowAddToBackStack();
     method public abstract android.app.FragmentTransaction hide(android.app.Fragment);
