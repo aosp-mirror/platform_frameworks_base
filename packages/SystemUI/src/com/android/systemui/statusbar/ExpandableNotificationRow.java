@@ -947,6 +947,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         }
     }
 
+    public boolean mustStayOnScreen() {
+        return mIsHeadsUp;
+    }
+
     private void updateClearability() {
         // public versions cannot be dismissed
         mVetoButton.setVisibility(isClearable() && !mShowingPublic ? View.VISIBLE : View.GONE);

@@ -79,7 +79,8 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                 mTouchingHeadsUpView = false;
                 if (child instanceof ExpandableNotificationRow) {
                     mPickedChild = (ExpandableNotificationRow) child;
-                    mTouchingHeadsUpView = mPickedChild.isHeadsUp() && mPickedChild.isPinned();
+                    mTouchingHeadsUpView = !mStackScroller.isExpanded()
+                            && mPickedChild.isHeadsUp() && mPickedChild.isPinned();
                 }
                 break;
             case MotionEvent.ACTION_POINTER_UP:
