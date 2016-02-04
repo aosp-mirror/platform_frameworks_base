@@ -376,7 +376,13 @@ public class AppWidgetHostView extends FrameLayout {
      * AppWidget provider. Will animate into these new views as needed
      */
     public void updateAppWidget(RemoteViews remoteViews) {
+        applyRemoteViews(remoteViews);
+    }
 
+    /**
+     * @hide
+     */
+    protected void applyRemoteViews(RemoteViews remoteViews) {
         if (LOGD) Log.d(TAG, "updateAppWidget called mOld=" + mOld);
 
         boolean recycled = false;
@@ -573,8 +579,9 @@ public class AppWidgetHostView extends FrameLayout {
     /**
      * Build a {@link Context} cloned into another package name, usually for the
      * purposes of reading remote resources.
+     * @hide
      */
-    private Context getRemoteContext() {
+    protected Context getRemoteContext() {
         try {
             // Return if cloned successfully, otherwise default
             return mContext.createApplicationContext(
