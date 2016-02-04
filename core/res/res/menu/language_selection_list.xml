@@ -14,12 +14,12 @@
      limitations under the License.
 -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/locale_search_menu"
         android:title="@string/locale_search_menu"
-        app:showAsAction="always"
-        app:actionViewClass="android.widget.SearchView" />
+        android:icon="@*android:drawable/ic_search_api_material"
+        android:showAsAction="always|collapseActionView"
+        android:actionViewClass="android.widget.SearchView" />
 
 </menu>
