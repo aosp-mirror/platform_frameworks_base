@@ -51,6 +51,8 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
     private static final float BOLT_LEVEL_THRESHOLD = 0.3f;  // opaque bolt below this fraction
 
     private final int[] mColors;
+    private final int mIntrinsicWidth;
+    private final int mIntrinsicHeight;
 
     private boolean mShowPercent;
     private float mButtonHeightFraction;
@@ -161,6 +163,19 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mLightModeBackgroundColor =
                 context.getColor(R.color.light_mode_icon_color_dual_tone_background);
         mLightModeFillColor = context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
+
+        mIntrinsicWidth = context.getResources().getDimensionPixelSize(R.dimen.battery_width);
+        mIntrinsicHeight = context.getResources().getDimensionPixelSize(R.dimen.battery_height);
+    }
+
+    @Override
+    public int getIntrinsicHeight() {
+        return mIntrinsicHeight;
+    }
+
+    @Override
+    public int getIntrinsicWidth() {
+        return mIntrinsicWidth;
     }
 
     public void startListening() {
