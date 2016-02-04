@@ -45,7 +45,8 @@ bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
  * `outResource` set to the parsed resource name and `outPrivate` set to true if a '*' prefix
  * was present.
  */
-bool parseResourceName(const StringPiece16& str, ResourceNameRef* outResource, bool* outPrivate);
+bool parseResourceName(const StringPiece16& str, ResourceNameRef* outResource,
+                       bool* outPrivate = nullptr);
 
 /*
  * Returns true if the string was parsed as a reference (@[+][package:]type/name), with

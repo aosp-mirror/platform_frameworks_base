@@ -51,6 +51,10 @@ bool extractResourceName(const StringPiece16& str, StringPiece16* outPackage,
 }
 
 bool parseResourceName(const StringPiece16& str, ResourceNameRef* outRef, bool* outPrivate) {
+    if (str.empty()) {
+        return false;
+    }
+
     size_t offset = 0;
     bool priv = false;
     if (str.data()[0] == u'*') {

@@ -154,8 +154,8 @@ struct Reference : public BaseItem<Reference> {
     bool privateReference = false;
 
     Reference();
-    Reference(const ResourceNameRef& n, Type type = Type::kResource);
-    Reference(const ResourceId& i, Type type = Type::kResource);
+    explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
+    explicit Reference(const ResourceId& i, Type type = Type::kResource);
 
     bool flatten(android::Res_value* outValue) const override;
     Reference* clone(StringPool* newPool) const override;

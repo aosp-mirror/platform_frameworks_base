@@ -18,6 +18,7 @@
 #define AAPT_VALUE_VISITOR_H
 
 #include "ResourceValues.h"
+#include "ResourceTable.h"
 
 namespace aapt {
 
@@ -138,6 +139,23 @@ T* valueCast(Value* value) {
     DynCastVisitor<T> visitor;
     value->accept(&visitor);
     return visitor.value;
+}
+
+
+inline void visitAllValuesInPackage(ResourceTablePackage* pkg, RawValueVisitor* visitor) {
+    for (auto& type : pkg->types) {
+        for (auto& entry : type->entries) {
+            for (auto& configValue : entry->values) {
+                configValue.value->accept(visitor);
+            }
+        }
+    }
+}
+
+inline void visitAllValuesInTable(ResourceTable* table, RawValueVisitor* visitor) {
+    for (auto& pkg : table->packages) {
+        visitAllValuesInPackage(pkg.get(), visitor);
+    }
 }
 
 } // namespace aapt

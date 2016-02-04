@@ -1,0 +1,210 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option optimize_for = LITE_RUNTIME;
+
+package aapt.pb;
+
+message ConfigDescription {
+	optional bytes data = 1;
+	optional string product = 2;
+}
+
+message StringPool {
+	optional bytes data = 1;
+}
+
+message CompiledFile {
+	message Symbol {
+		optional string resource_name = 1;
+		optional uint32 line_no = 2;
+	}
+	
+	optional string resource_name = 1;
+	optional ConfigDescription config = 2;
+	optional string source_path = 3;
+	repeated Symbol exported_symbols = 4;
+}
+
+message ResourceTable {
+	optional StringPool string_pool = 1;
+	optional StringPool source_pool = 2;
+	optional StringPool symbol_pool = 3;
+	repeated Package packages = 4;
+}
+
+message Package {
+	optional uint32 package_id = 1;
+	optional string package_name = 2;
+	repeated Type types = 3;
+}
+
+message Type {	
+	optional uint32 id = 1;
+	optional string name = 2;
+	repeated Entry entries = 3;
+}
+
+message SymbolStatus {
+	enum Visibility {
+		Unknown = 0;
+		Private = 1;
+		Public = 2;
+	}
+	optional Visibility visibility = 1;
+	optional Source source = 2;
+	optional string comment = 3;
+}
+
+message Entry {
+	optional uint32 id = 1;
+	optional string name = 2;
+	optional SymbolStatus symbol_status = 3;
+	repeated ConfigValue config_values = 4;
+}
+
+message ConfigValue {
+	optional ConfigDescription config = 1;
+	optional Value value = 2;
+}
+
+message Source {
+	optional uint32 path_idx = 1;
+	optional uint32 line_no = 2;
+	optional uint32 col_no = 3;
+}
+
+message Reference {
+	enum Type {
+		Ref = 0;
+		Attr = 1;
+	}
+	optional Type type = 1;
+	optional uint32 id = 2;
+	optional uint32 symbol_idx = 3;
+	optional bool private = 4;
+}
+
+message Id {
+}
+
+message String {
+	optional uint32 idx = 1;
+}
+
+message RawString {
+	optional uint32 idx = 1;
+}
+
+message FileReference {
+	optional uint32 path_idx = 1;
+}
+
+message Primitive {
+	optional uint32 type = 1;
+	optional uint32 data = 2;
+}
+
+message Attribute {
+	message Symbol {
+		optional Source source = 1;
+		optional string comment = 2;
+		optional Reference name = 3;
+		optional uint32 value = 4;
+	}
+	optional uint32 format_flags = 1;
+	optional int32 min_int = 2;
+	optional int32 max_int = 3;
+	repeated Symbol symbols = 4;
+}
+
+message Style {
+	message Entry {
+		optional Source source = 1;
+		optional string comment = 2;
+		optional Reference key = 3;
+		optional Item item = 4;
+	}
+
+	optional Reference parent = 1;
+	optional Source parent_source = 2;
+	repeated Entry entries = 3;
+}
+
+message Styleable {
+	message Entry {
+		optional Source source = 1;
+		optional string comment = 2;
+		optional Reference attr = 3;
+	}
+	repeated Entry entries = 1;
+}
+
+message Array {
+	message Entry {
+		optional Source source = 1;
+		optional string comment = 2;
+		optional Item item = 3;
+	}
+	repeated Entry entries = 1;
+}
+
+message Plural {
+	enum Arity {
+		Zero = 0;
+		One = 1;
+		Two = 2;
+		Few = 3;
+		Many = 4;
+		Other = 5;
+	}
+		
+	message Entry {
+		optional Source source = 1;
+		optional string comment = 2;
+		optional Arity arity = 3;
+		optional Item item = 4;
+	}
+	repeated Entry entries = 1;
+}
+
+message Item {
+	optional Reference ref = 1;
+	optional String str = 2;
+	optional RawString raw_str = 3;
+	optional FileReference file = 4;
+	optional Id id = 5;
+	optional Primitive prim = 6;
+}
+
+message CompoundValue {
+	optional Attribute attr = 1;
+	optional Style style = 2;
+	optional Styleable styleable = 3;
+	optional Array array = 4;
+	optional Plural plural = 5;
+}
+
+message Value {
+	optional Source source = 1;
+	optional string comment = 2;
+	optional bool weak = 3;
+	
+	optional Item item = 4;
+	optional CompoundValue compound_value = 5;	
+}
