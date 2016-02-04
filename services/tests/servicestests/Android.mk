@@ -11,6 +11,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.core \
     services.devicepolicy \
     services.net \
+    services.usage \
     easymocklib \
     guava \
     android-support-test \

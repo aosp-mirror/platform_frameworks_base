@@ -47,20 +47,6 @@ public final class UsageStats implements Parcelable {
     public long mLastTimeUsed;
 
     /**
-     * The last time the package was used via implicit, non-user initiated actions (service
-     * was bound, etc).
-     * {@hide}
-     */
-    public long mLastTimeSystemUsed;
-
-    /**
-     * Last time the package was used and the beginning of the idle countdown.
-     * This uses a different timebase that is about how much the device has been in use in general.
-     * {@hide}
-     */
-    public long mBeginIdleTime;
-
-    /**
      * {@hide}
      */
     public long mTotalTimeInForeground;
@@ -89,8 +75,6 @@ public final class UsageStats implements Parcelable {
         mTotalTimeInForeground = stats.mTotalTimeInForeground;
         mLaunchCount = stats.mLaunchCount;
         mLastEvent = stats.mLastEvent;
-        mBeginIdleTime = stats.mBeginIdleTime;
-        mLastTimeSystemUsed = stats.mLastTimeSystemUsed;
     }
 
     public String getPackageName() {
@@ -127,25 +111,6 @@ public final class UsageStats implements Parcelable {
     }
 
     /**
-     * @hide
-     * Get the last time this package was used by the system (not the user). This can be different
-     * from {@link #getLastTimeUsed()} when the system binds to one of this package's services.
-     * See {@link System#currentTimeMillis()}.
-     */
-    public long getLastTimeSystemUsed() {
-        return mLastTimeSystemUsed;
-    }
-
-    /**
-     * @hide
-     * Get the last time this package was active, measured in milliseconds. This timestamp
-     * uses a timebase that represents how much the device was used and not wallclock time.
-     */
-    public long getBeginIdleTime() {
-        return mBeginIdleTime;
-    }
-
-    /**
      * Get the total time this package spent in the foreground, measured in milliseconds.
      */
     public long getTotalTimeInForeground() {
@@ -172,8 +137,6 @@ public final class UsageStats implements Parcelable {
             // regards to their mEndTimeStamp.
             mLastEvent = right.mLastEvent;
             mLastTimeUsed = right.mLastTimeUsed;
-            mBeginIdleTime = right.mBeginIdleTime;
-            mLastTimeSystemUsed = right.mLastTimeSystemUsed;
         }
         mBeginTimeStamp = Math.min(mBeginTimeStamp, right.mBeginTimeStamp);
         mEndTimeStamp = Math.max(mEndTimeStamp, right.mEndTimeStamp);
@@ -195,8 +158,6 @@ public final class UsageStats implements Parcelable {
         dest.writeLong(mTotalTimeInForeground);
         dest.writeInt(mLaunchCount);
         dest.writeInt(mLastEvent);
-        dest.writeLong(mBeginIdleTime);
-        dest.writeLong(mLastTimeSystemUsed);
     }
 
     public static final Creator<UsageStats> CREATOR = new Creator<UsageStats>() {
@@ -210,8 +171,6 @@ public final class UsageStats implements Parcelable {
             stats.mTotalTimeInForeground = in.readLong();
             stats.mLaunchCount = in.readInt();
             stats.mLastEvent = in.readInt();
-            stats.mBeginIdleTime = in.readLong();
-            stats.mLastTimeSystemUsed = in.readLong();
             return stats;
         }
 
