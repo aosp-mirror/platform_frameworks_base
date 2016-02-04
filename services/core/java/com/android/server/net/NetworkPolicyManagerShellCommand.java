@@ -215,7 +215,12 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
       if (uid < 0) {
           return uid;
       }
-      mInterface.addRestrictBackgroundWhitelistedUid(uid);
+      final long token = Binder.clearCallingIdentity();
+      try {
+          mInterface.addRestrictBackgroundWhitelistedUid(uid);
+      } finally {
+          Binder.restoreCallingIdentity(token);
+      }
       return 0;
     }
 
@@ -224,7 +229,12 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         if (uid < 0) {
             return uid;
         }
-        mInterface.removeRestrictBackgroundWhitelistedUid(uid);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mInterface.removeRestrictBackgroundWhitelistedUid(uid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         return 0;
     }
 

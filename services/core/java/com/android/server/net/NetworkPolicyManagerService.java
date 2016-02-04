@@ -1689,6 +1689,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             writePolicy = true;
         }
+        updateRulesForGlobalChangeLocked(true);
 
         // Remove associated UID policies
         int[] uids = new int[0];
@@ -1862,8 +1863,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         Slog.i(TAG, "adding uid " + uid + " to restrict background whitelist");
         synchronized (mRulesLock) {
             mRestrictBackgroundWhitelistUids.append(uid, true);
+            updateRulesForGlobalChangeLocked(true);
             writePolicyLocked();
-            // TODO: call other update methods like updateNetworkRulesLocked?
         }
         mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0).sendToTarget();
     }
@@ -1878,9 +1879,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0).sendToTarget();
     }
 
-    private void removeRestrictBackgroundWhitelistedUidLocked(int uid, boolean writePolicy) {
+    private void removeRestrictBackgroundWhitelistedUidLocked(int uid, boolean updateNow) {
         mRestrictBackgroundWhitelistUids.delete(uid);
-        if (writePolicy) {
+        if (updateNow) {
+            updateRulesForGlobalChangeLocked(true);
             writePolicyLocked();
         }
     }
