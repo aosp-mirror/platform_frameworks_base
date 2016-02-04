@@ -93,4 +93,6 @@
 
     <dimen name="navigation_key_width">128dp</dimen>
     <dimen name="navigation_key_padding">25dp</dimen>
+
+    <dimen name="qs_expand_margin">0dp</dimen>
 </resources>
