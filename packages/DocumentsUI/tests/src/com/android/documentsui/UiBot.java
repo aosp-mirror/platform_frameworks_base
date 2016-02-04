@@ -47,8 +47,10 @@ import java.util.regex.Pattern;
  * programmatically, and making assertions against the state of the UI.
  */
 class UiBot {
+    public static final String TARGET_PKG = "com.android.documentsui";
 
     private static final String TAG = "UiBot";
+    private static final String LAUNCHER_PKG = "com.android.launcher";
 
     private static final BySelector SNACK_DELETE =
             By.desc(Pattern.compile("^Deleting [0-9]+ file.+"));
@@ -390,4 +392,13 @@ class UiBot {
         }
     }
 
+    void revealLauncher() {
+        mDevice.pressHome();
+        mDevice.wait(Until.hasObject(By.pkg(LAUNCHER_PKG).depth(0)), mTimeout);
+    }
+
+    void revealApp() {
+        mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), mTimeout);
+        mDevice.waitForIdle();
+    }
 }
