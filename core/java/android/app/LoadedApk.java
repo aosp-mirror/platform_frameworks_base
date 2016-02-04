@@ -382,6 +382,13 @@ public final class LoadedApk {
                     libraryPermittedPath += File.pathSeparator +
                                             System.getProperty("java.library.path");
                 }
+                // DO NOT SHIP: this is a workaround for apps loading native libraries
+                // provided by 3rd party apps using absolute path instead of corresponding
+                // classloader; see http://b/26954419 for example.
+                if (mApplicationInfo.targetSdkVersion <= 23) {
+                    libraryPermittedPath += File.pathSeparator + "/data/app";
+                }
+                // -----------------------------------------------------------------------------
 
                 final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
 
