@@ -464,6 +464,8 @@ public class WindowManagerService extends IWindowManager.Stub
     EmulatorDisplayOverlay mEmulatorDisplayOverlay;
 
     final float[] mTmpFloats = new float[9];
+    final Rect mTmpRect = new Rect();
+    final Rect mTmpRect2 = new Rect();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -4842,17 +4844,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             bounds.setEmpty();
-        }
-    }
-
-    /** Returns true if the input bounds corresponds to the fullscreen bounds the stack is on. */
-    public boolean isFullscreenBounds(int stackId, Rect bounds) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null || bounds == null) {
-                return true;
-            }
-            return stack.isFullscreenBounds(bounds);
         }
     }
 
@@ -10394,8 +10385,28 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void getStableInsets(Rect outInsets) throws RemoteException {
         synchronized (mWindowMap) {
+            getStableInsetsLocked(outInsets);
+        }
+    }
+
+    private void getStableInsetsLocked(Rect outInsets) {
+        final DisplayInfo di = getDefaultDisplayInfoLocked();
+        mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
+    }
+
+    /**
+     * Intersects the specified {@code inOutBounds} with the display frame that excludes the stable
+     * inset areas.
+     *
+     * @param inOutBounds The inOutBounds to subtract the stable inset areas from.
+     */
+    public void subtractStableInsets(Rect inOutBounds) {
+        synchronized (mWindowMap) {
+            getStableInsetsLocked(mTmpRect2);
             final DisplayInfo di = getDefaultDisplayInfoLocked();
-            mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
+            mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
+            mTmpRect.inset(mTmpRect2);
+            inOutBounds.intersect(mTmpRect);
         }
     }
 
@@ -10597,6 +10608,13 @@ public class WindowManagerService extends IWindowManager.Stub
         public boolean isStackVisible(int stackId) {
             synchronized (mWindowMap) {
                 return WindowManagerService.this.isStackVisibleLocked(stackId);
+            }
+        }
+
+        @Override
+        public boolean isDockedDividerResizing() {
+            synchronized (mWindowMap) {
+                return getDefaultDisplayContentLocked().getDockedDividerController().isResizing();
             }
         }
     }

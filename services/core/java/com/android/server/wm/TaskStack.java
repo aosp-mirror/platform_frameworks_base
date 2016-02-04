@@ -255,11 +255,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
             rotation = mDisplayContent.getDisplayInfo().rotation;
-            if (bounds == null) {
+            mFullscreen = bounds == null;
+            if (mFullscreen) {
                 bounds = mTmpRect;
-                mFullscreen = true;
-            } else {
-                mFullscreen = mTmpRect.equals(bounds);
             }
         }
 
@@ -865,14 +863,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
         final int orientation = mService.mCurConfiguration.orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             // Portrait mode, docked either at the top or the bottom.
-            if (bounds.top - mTmpRect.top < mTmpRect.bottom - bounds.bottom) {
+            if (bounds.top - mTmpRect.top <= mTmpRect.bottom - bounds.bottom) {
                 return DOCKED_TOP;
             } else {
                 return DOCKED_BOTTOM;
             }
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // Landscape mode, docked either on the left or on the right.
-            if (bounds.left - mTmpRect.left < mTmpRect.right - bounds.right) {
+            if (bounds.left - mTmpRect.left <= mTmpRect.right - bounds.right) {
                 return DOCKED_LEFT;
             } else {
                 return DOCKED_RIGHT;

@@ -39,8 +39,6 @@ import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -211,10 +209,6 @@ public class NotificationPanelView extends PanelView implements
             notifyBarPanelExpansionChanged();
         }
     };
-
-    /** Interpolator to be used for animations that respond directly to a touch */
-    private final Interpolator mTouchResponseInterpolator =
-            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -1447,7 +1441,7 @@ public class NotificationPanelView extends PanelView implements
         mScrollView.setBlockFlinging(true);
         ValueAnimator animator = ValueAnimator.ofFloat(mQsExpansionHeight, target);
         if (isClick) {
-            animator.setInterpolator(mTouchResponseInterpolator);
+            animator.setInterpolator(Interpolators.TOUCH_RESPONSE);
             animator.setDuration(368);
         } else {
             mFlingAnimationUtils.apply(animator, mQsExpansionHeight, target, vel);

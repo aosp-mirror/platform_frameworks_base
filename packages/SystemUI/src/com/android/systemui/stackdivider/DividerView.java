@@ -48,10 +48,12 @@ import android.widget.FrameLayout;
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
+import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
@@ -67,8 +69,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     static final long TOUCH_ANIMATION_DURATION = 150;
     static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
-    static final Interpolator TOUCH_RESPONSE_INTERPOLATOR =
-            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 
     private static final String TAG = "DividerView";
 
@@ -116,7 +116,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final Rect mOtherInsetRect = new Rect();
     private final Rect mLastResizeRect = new Rect();
     private final WindowManagerProxy mWindowManagerProxy = WindowManagerProxy.getInstance();
-    private Interpolator mFastOutSlowInInterpolator;
     private DividerWindowManager mWindowManager;
     private VelocityTracker mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
@@ -158,8 +157,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mGrowRecents = getResources().getBoolean(R.bool.recents_grow_in_multiwindow);
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
-                android.R.interpolator.fast_out_slow_in);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mFlingAnimationUtils = new FlingAnimationUtils(getContext(), 0.3f);
         updateDisplayInfo();
@@ -192,7 +189,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     insets.getStableInsetRight(), insets.getStableInsetBottom());
             if (mSnapAlgorithm != null) {
                 mSnapAlgorithm = null;
-                getSnapAlgorithm();
+                initializeSnapAlgorithm();
             }
         }
         return super.onApplyWindowInsets(insets);
@@ -211,17 +208,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mHandle.setTouching(true, animate);
         }
         mDockSide = mWindowManagerProxy.getDockSide();
-        getSnapAlgorithm();
-        if (mDockSide != WindowManager.DOCKED_INVALID) {
-            mWindowManagerProxy.setResizing(true);
-            mWindowManager.setSlippery(false);
-            if (touching) {
-                liftBackground();
-            }
-            return true;
-        } else {
-            return false;
+        initializeSnapAlgorithm();
+        mWindowManagerProxy.setResizing(true);
+        mWindowManager.setSlippery(false);
+        if (touching) {
+            liftBackground();
         }
+        return mDockSide != WindowManager.DOCKED_INVALID;
     }
 
     public void stopDragging(int position, float velocity, boolean avoidDismissStart) {
@@ -233,17 +226,36 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     public void stopDragging(int position, SnapTarget target, long duration,
             Interpolator interpolator) {
+        stopDragging(position, target, duration, 0 /* startDelay*/, interpolator);
+    }
+
+    public void stopDragging(int position, SnapTarget target, long duration, long startDelay,
+            Interpolator interpolator) {
         mHandle.setTouching(false, true /* animate */);
-        flingTo(position, target, duration, interpolator);
+        flingTo(position, target, duration, startDelay, interpolator);
         mWindowManager.setSlippery(true);
         releaseBackground();
     }
 
-    public DividerSnapAlgorithm getSnapAlgorithm() {
+    private void stopDragging() {
+        mHandle.setTouching(false, true /* animate */);
+        mWindowManager.setSlippery(true);
+        releaseBackground();
+    }
+
+    private void updateDockSide() {
+        mDockSide = mWindowManagerProxy.getDockSide();
+    }
+
+    private void initializeSnapAlgorithm() {
         if (mSnapAlgorithm == null) {
             mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(), mDisplayWidth,
                     mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
         }
+    }
+
+    public DividerSnapAlgorithm getSnapAlgorithm() {
+        initializeSnapAlgorithm();
         return mSnapAlgorithm;
     }
 
@@ -267,6 +279,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mStartX = (int) event.getX();
                 mStartY = (int) event.getY();
                 boolean result = startDragging(true /* animate */, true /* touching */);
+                if (!result) {
+
+                    // Weren't able to start dragging successfully, so cancel it again.
+                    stopDragging();
+                }
                 mStartPosition = getCurrentPosition();
                 mMoving = false;
                 return result;
@@ -320,10 +337,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         anim.start();
     }
 
-    private void flingTo(int position, SnapTarget target, long duration,
+    private void flingTo(int position, SnapTarget target, long duration, long startDelay,
             Interpolator interpolator) {
         ValueAnimator anim = getFlingAnimator(position, target);
         anim.setDuration(duration);
+        anim.setStartDelay(startDelay);
         anim.setInterpolator(interpolator);
         anim.start();
     }
@@ -377,7 +395,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mBackground.animate().scaleX(1.4f);
         }
         mBackground.animate()
-                .setInterpolator(TOUCH_RESPONSE_INTERPOLATOR)
+                .setInterpolator(Interpolators.TOUCH_RESPONSE)
                 .setDuration(TOUCH_ANIMATION_DURATION)
                 .translationZ(mTouchElevation)
                 .start();
@@ -385,7 +403,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         // Lift handle as well so it doesn't get behind the background, even though it doesn't
         // cast shadow.
         mHandle.animate()
-                .setInterpolator(TOUCH_RESPONSE_INTERPOLATOR)
+                .setInterpolator(Interpolators.TOUCH_RESPONSE)
                 .setDuration(TOUCH_ANIMATION_DURATION)
                 .translationZ(mTouchElevation)
                 .start();
@@ -393,14 +411,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private void releaseBackground() {
         mBackground.animate()
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
                 .translationZ(0)
                 .scaleX(1f)
                 .scaleY(1f)
                 .start();
         mHandle.animate()
-                .setInterpolator(mFastOutSlowInInterpolator)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
                 .translationZ(0)
                 .start();
@@ -421,6 +439,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
         mSnapAlgorithm = null;
+        initializeSnapAlgorithm();
     }
 
     private int calculatePosition(int touchX, int touchY) {
@@ -725,13 +744,29 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {
         if (mAnimateAfterRecentsDrawn) {
             mAnimateAfterRecentsDrawn = false;
+            updateDockSide();
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
-                    TOUCH_RESPONSE_INTERPOLATOR);
+                    Interpolators.TOUCH_RESPONSE);
         }
         if (mGrowAfterRecentsDrawn) {
             mGrowAfterRecentsDrawn = false;
+            updateDockSide();
             stopDragging(getCurrentPosition(), mSnapAlgorithm.getMiddleTarget(), 250,
-                    TOUCH_RESPONSE_INTERPOLATOR);
+                    Interpolators.TOUCH_RESPONSE);
+        }
+    }
+
+    public final void onBusEvent(UndockingTaskEvent undockingTaskEvent) {
+        int dockSide = mWindowManagerProxy.getDockSide();
+        if (dockSide != WindowManager.DOCKED_INVALID) {
+            startDragging(false /* animate */, false /* touching */);
+            SnapTarget target = dockSideTopLeft(dockSide)
+                    ? mSnapAlgorithm.getDismissEndTarget()
+                    : mSnapAlgorithm.getDismissStartTarget();
+
+            // Don't start immediately - give a little bit time to settle the drag resize change.
+            stopDragging(getCurrentPosition(), target, 336 /* duration */, 100 /* startDelay */,
+                    Interpolators.TOUCH_RESPONSE);
         }
     }
 }

@@ -268,4 +268,9 @@ public abstract class WindowManagerInternal {
 
     /** Returns true if the stack with the input Id is currently visible. */
     public abstract boolean isStackVisible(int stackId);
+
+    /**
+     * @return True if and only if the docked divider is currently in resize mode.
+     */
+    public abstract boolean isDockedDividerResizing();
 }

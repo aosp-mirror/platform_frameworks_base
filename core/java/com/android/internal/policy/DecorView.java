@@ -922,6 +922,26 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return false;
     }
 
+    static int getColorViewTopInset(int stableTop, int systemTop) {
+        return Math.min(stableTop, systemTop);
+    }
+
+    static int getColorViewBottomInset(int stableBottom, int systemBottom) {
+        return Math.min(stableBottom, systemBottom);
+    }
+
+    static int getColorViewRightInset(int stableRight, int systemRight) {
+        return Math.min(stableRight, systemRight);
+    }
+
+    static boolean isNavBarToRightEdge(int bottomInset, int rightInset) {
+        return bottomInset == 0 && rightInset > 0;
+    }
+
+    static int getNavBarSize(int bottomInset, int rightInset) {
+        return isNavBarToRightEdge(bottomInset, rightInset) ? rightInset : bottomInset;
+    }
+
     WindowInsets updateColorViews(WindowInsets insets, boolean animate) {
         WindowManager.LayoutParams attrs = mWindow.getAttributes();
         int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
@@ -933,11 +953,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mLastWindowFlags = attrs.flags;
 
             if (insets != null) {
-                mLastTopInset = Math.min(insets.getStableInsetTop(),
+                mLastTopInset = getColorViewTopInset(insets.getStableInsetTop(),
                         insets.getSystemWindowInsetTop());
-                mLastBottomInset = Math.min(insets.getStableInsetBottom(),
+                mLastBottomInset = getColorViewBottomInset(insets.getStableInsetBottom(),
                         insets.getSystemWindowInsetBottom());
-                mLastRightInset = Math.min(insets.getStableInsetRight(),
+                mLastRightInset = getColorViewRightInset(insets.getStableInsetRight(),
                         insets.getSystemWindowInsetRight());
 
                 // Don't animate if the presence of stable insets has changed, because that
@@ -956,8 +976,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 mLastHasRightStableInset = hasRightStableInset;
             }
 
-            boolean navBarToRightEdge = mLastBottomInset == 0 && mLastRightInset > 0;
-            int navBarSize = navBarToRightEdge ? mLastRightInset : mLastBottomInset;
+            boolean navBarToRightEdge = isNavBarToRightEdge(mLastBottomInset, mLastRightInset);
+            int navBarSize = getNavBarSize(mLastBottomInset, mLastRightInset);
             updateColorViewInt(mNavigationColorViewState, sysUiVisibility,
                     mWindow.mNavigationBarColor, navBarSize, navBarToRightEdge,
                     0 /* rightInset */, animate && !disallowAnimate, false /* force */);
@@ -1041,14 +1061,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      */
     private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
             int size, boolean verticalBar, int rightMargin, boolean animate, boolean force) {
-        state.present = size > 0 && (sysUiVis & state.systemUiHideFlag) == 0
+        state.present = (sysUiVis & state.systemUiHideFlag) == 0
                 && (mWindow.getAttributes().flags & state.hideWindowFlag) == 0
                 && ((mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         || force);
         boolean show = state.present
                 && (color & Color.BLACK) != 0
                 && ((mWindow.getAttributes().flags & state.translucentFlag) == 0  || force);
-        boolean showView = show && !isResizing();
+        boolean showView = show && !isResizing() && size > 0;
 
         boolean visibilityChanged = false;
         View view = state.view;
@@ -1672,7 +1692,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             loadBackgroundDrawablesIfNeeded();
             mBackdropFrameRenderer.onResourcesLoaded(
                     this, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
-                    mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState));
+                    mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
+                    getCurrentColor(mNavigationColorViewState));
         }
 
         mDecorCaptionView = createDecorCaptionView(inflater);
@@ -1854,14 +1875,16 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     @Override
-    public void onWindowSizeIsChanging(Rect newBounds) {
+    public void onWindowSizeIsChanging(Rect newBounds, boolean fullscreen, Rect systemInsets,
+            Rect stableInsets) {
         if (mBackdropFrameRenderer != null) {
-            mBackdropFrameRenderer.setTargetRect(newBounds);
+            mBackdropFrameRenderer.setTargetRect(newBounds, fullscreen, systemInsets, stableInsets);
         }
     }
 
     @Override
-    public void onWindowDragResizeStart(Rect initialBounds) {
+    public void onWindowDragResizeStart(Rect initialBounds, boolean fullscreen, Rect systemInsets,
+            Rect stableInsets) {
         if (mWindow.isDestroyed()) {
             // If the owner's window is gone, we should not be able to come here anymore.
             releaseThreadedRenderer();
@@ -1875,7 +1898,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             loadBackgroundDrawablesIfNeeded();
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
-                    mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState));
+                    mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
+                    getCurrentColor(mNavigationColorViewState), fullscreen, systemInsets,
+                    stableInsets);
 
             // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
             // If we want to get the shadow shown while resizing, we would need to elevate a new
@@ -1969,10 +1994,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     int getCaptionHeight() {
         return isShowingCaption() ? mDecorCaptionView.getCaptionHeight() : 0;
-    }
-
-    int getStatusBarHeight() {
-        return mStatusColorViewState.view != null ? mStatusColorViewState.view.getHeight() : 0;
     }
 
     /**

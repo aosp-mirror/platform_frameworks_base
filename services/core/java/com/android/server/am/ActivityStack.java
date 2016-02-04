@@ -2168,7 +2168,9 @@ final class ActivityStack {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next);
 
             // This activity is now becoming visible.
-            mWindowManager.setAppVisibility(next.appToken, true);
+            if (!next.visible) {
+                mWindowManager.setAppVisibility(next.appToken, true);
+            }
 
             // schedule launch ticks to collect information about slow apps.
             next.startLaunchTickingLocked();
@@ -4302,6 +4304,12 @@ final class ActivityStack {
         if (Configuration.EMPTY.equals(oldTaskOverride)
                 && !Configuration.EMPTY.equals(taskConfig)) {
             oldTaskOverride = record.task.extractOverrideConfig(record.configuration);
+        }
+
+        // Conversely, do the same when going the other direction.
+        if (Configuration.EMPTY.equals(taskConfig)
+                && !Configuration.EMPTY.equals(oldTaskOverride)) {
+            taskConfig = record.task.extractOverrideConfig(record.configuration);
         }
 
         // Determine what has changed.  May be nothing, if this is a config

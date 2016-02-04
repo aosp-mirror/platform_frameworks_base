@@ -16,37 +16,7 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
-import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_ADD_REMOVE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
-
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
@@ -55,6 +25,7 @@ import android.app.ActivityManager.TaskThumbnail;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -85,6 +56,37 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
+import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
+import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_ADD_REMOVE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
+import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 
 final class TaskRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskRecord" : TAG_AM;
@@ -160,6 +162,8 @@ final class TaskRecord {
 
     int mResizeMode;        // The resize mode of this task and its activities.
                             // Based on the {@link ActivityInfo#resizeMode} of the root activity.
+    boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
+                                     // changes on a temporary basis.
     int mLockTaskMode;      // Which tasklock mode to launch this task in. One of
                             // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
     private boolean mPrivileged;    // The root activity application of this task holds
@@ -238,6 +242,9 @@ final class TaskRecord {
 
     // Bounds of the Task. null for fullscreen tasks.
     Rect mBounds = null;
+    private final Rect mTmpRect = new Rect();
+    private final Rect mTmpRect2 = new Rect();
+
     // Last non-fullscreen bounds the task was launched in or resized to.
     // The information is persisted and used to determine the appropriate stack to launch the
     // task into on restore.
@@ -934,7 +941,7 @@ final class TaskRecord {
 
     boolean isResizeable() {
         return !isHomeTask() && (mService.mForceResizableActivities
-                || ActivityInfo.isResizeableMode(mResizeMode));
+                || ActivityInfo.isResizeableMode(mResizeMode)) && !mTemporarilyUnresizable;
     }
 
     boolean inCropWindowsResizeMode() {
@@ -1291,9 +1298,22 @@ final class TaskRecord {
 
     /**
      * Update task's override configuration based on the bounds.
+     * @param bounds The bounds of the task.
      * @return Update configuration or null if there is no change.
      */
     Configuration updateOverrideConfiguration(Rect bounds) {
+        return updateOverrideConfiguration(bounds, null /* insetBounds */);
+    }
+
+    /**
+     * Update task's override configuration based on the bounds.
+     * @param bounds The bounds of the task.
+     * @param insetBounds The bounds used to calculate the system insets, which is used here to
+     *                    subtract the navigation bar/status bar size from the screen size reported
+     *                    to the application. See {@link IActivityManager#resizeDockedStack}.
+     * @return Update configuration or null if there is no change.
+     */
+    Configuration updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {
         if (Objects.equals(mBounds, bounds)) {
             return null;
         }
@@ -1316,7 +1336,12 @@ final class TaskRecord {
             if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-            mOverrideConfig = calculateOverrideConfig(mBounds);
+
+            // Stable insets need to be subtracted because we also subtract it in the fullscreen
+            // configuration.
+            mTmpRect.set(bounds);
+            subtractStableInsets(mTmpRect, insetBounds != null ? insetBounds : mTmpRect);
+            mOverrideConfig = calculateOverrideConfig(mTmpRect);
         }
 
         if (mFullscreen != oldFullscreen) {
@@ -1324,6 +1349,16 @@ final class TaskRecord {
         }
 
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
+    }
+
+    private void subtractStableInsets(Rect inOutBounds, Rect inInsetBounds) {
+        mTmpRect2.set(inInsetBounds);
+        mService.mWindowManager.subtractStableInsets(mTmpRect2);
+        int leftInset = mTmpRect2.left - inInsetBounds.left;
+        int topInset = mTmpRect2.top - inInsetBounds.top;
+        int rightInset = inInsetBounds.right - mTmpRect2.right;
+        int bottomInset = inInsetBounds.bottom - mTmpRect2.bottom;
+        inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
     }
 
     Configuration calculateOverrideConfig(Rect bounds) {
@@ -1341,8 +1376,9 @@ final class TaskRecord {
                 ? Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
         final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
-        config.screenLayout = Configuration.reduceScreenLayout(
-                sl, config.screenWidthDp, config.screenHeightDp);
+        int longSize = Math.max(config.screenWidthDp, config.screenHeightDp);
+        int shortSize = Math.min(config.screenWidthDp, config.screenHeightDp);
+        config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
         return config;
     }
 

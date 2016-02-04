@@ -335,6 +335,21 @@ public final class Rect implements Parcelable {
     }
 
     /**
+     * Insets the rectangle on all sides specified by the insets.
+     * @hide
+     * @param left The amount to add from the rectangle's left
+     * @param top The amount to add from the rectangle's top
+     * @param right The amount to subtract from the rectangle's right
+     * @param bottom The amount to subtract from the rectangle's bottom
+     */
+    public void inset(int left, int top, int right, int bottom) {
+        this.left += left;
+        this.top += top;
+        this.right -= right;
+        this.bottom -= bottom;
+    }
+
+    /**
      * Returns true if (x,y) is inside the rectangle. The left and top are
      * considered to be inside, while the right and bottom are not. This means
      * that for a x,y to be contained: left <= x < right and top <= y < bottom.

@@ -252,10 +252,12 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
+import static android.app.ActivityManager.StackId.FIRST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityManager.StackId.LAST_STATIC_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -17632,6 +17634,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             final ActivityStack stack = mStackSupervisor.getStack(fromStackId);
             if (stack != null) {
+                if (fromStackId == DOCKED_STACK_ID) {
+
+                    // We are moving all tasks from the docked stack to the fullscreen stack, which
+                    // is dismissing the docked stack, so resize all other stacks to fullscreen here
+                    // already so we don't end up with resize trashing.
+                    for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                        if (StackId.isResizeableByDockedStack(i)) {
+                            ActivityStack otherStack = mStackSupervisor.getStack(i);
+                            if (otherStack != null) {
+                                mStackSupervisor.resizeStackLocked(i,
+                                        null, null, null, PRESERVE_WINDOWS,
+                                        true /* allowResizeInDockedMode */);
+                            }
+                        }
+                    }
+                }
                 final ArrayList<TaskRecord> tasks = stack.getAllTasks();
                 final int size = tasks.size();
                 if (onTop) {

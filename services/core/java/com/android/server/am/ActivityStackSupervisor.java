@@ -1889,12 +1889,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     private void resizeStackUncheckedLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
             Rect tempTaskInsetBounds) {
-        if (bounds != null && mWindowManager.isFullscreenBounds(stack.mStackId, bounds)) {
-            // The bounds passed in corresponds to the fullscreen bounds which we normally
-            // represent with null. Go ahead and set it to null so that all tasks configuration
-            // can have the right fullscreen state.
-            bounds = null;
-        }
         bounds = TaskRecord.validateBounds(bounds);
 
         mTmpBounds.clear();
@@ -1913,7 +1907,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     task.updateOverrideConfiguration(tempRect2);
                 } else {
                     task.updateOverrideConfiguration(
-                            tempTaskBounds != null ? tempTaskBounds : bounds);
+                            tempTaskBounds != null ? tempTaskBounds : bounds,
+                            tempTaskInsetBounds != null ? tempTaskInsetBounds : bounds);
                 }
             }
 
@@ -2213,9 +2208,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
         // if a docked stack is created below which will lead to the stack we are moving from and
         // its resizeable tasks being resized.
-        task.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
+        task.mTemporarilyUnresizable = true;
         final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
-        task.mResizeMode = resizeMode;
+        task.mTemporarilyUnresizable = false;
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
         stack.addTask(task, toTop, reason);
 

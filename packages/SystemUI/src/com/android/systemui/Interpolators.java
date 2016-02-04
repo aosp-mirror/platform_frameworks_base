@@ -34,4 +34,10 @@ public class Interpolators {
     public static final Interpolator LINEAR = new LinearInterpolator();
     public static final Interpolator ACCELERATE_DECELERATE = new AccelerateDecelerateInterpolator();
     public static final Interpolator DECELERATE_QUINT = new DecelerateInterpolator(2.5f);
+
+    /**
+     * Interpolator to be used when animating a move based on a click. Pair with enough duration.
+     */
+    public static final Interpolator TOUCH_RESPONSE =
+            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
 }
