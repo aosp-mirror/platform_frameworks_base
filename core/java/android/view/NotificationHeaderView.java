@@ -134,12 +134,8 @@ public class NotificationHeaderView extends ViewGroup {
                 int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
                 mSubTextView.measure(childWidthSpec, wrapContentHeightSpec);
             }
-            totalWidth = givenWidth;
         }
-        if (mProfileBadge.getVisibility() != View.GONE) {
-            totalWidth = givenWidth;
-        }
-        setMeasuredDimension(totalWidth, givenHeight);
+        setMeasuredDimension(givenWidth, givenHeight);
     }
 
     @Override
@@ -285,18 +281,16 @@ public class NotificationHeaderView extends ViewGroup {
             mTouchRects.clear();
             addRectAroundViewView(mIcon);
             addRectAroundViewView(mExpandButton);
-            addInBetweenRect();
+            addWidthRect();
             mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         }
 
-        private void addInBetweenRect() {
-            final Rect r = new Rect();
+        private void addWidthRect() {
+            Rect r = new Rect();
             r.top = 0;
             r.bottom = (int) (32 * getResources().getDisplayMetrics().density);
-            Rect leftRect = mTouchRects.get(0);
-            r.left = leftRect.right;
-            Rect rightRect = mTouchRects.get(1);
-            r.right = rightRect.left;
+            r.left = 0;
+            r.right = getWidth();
             mTouchRects.add(r);
         }
 
