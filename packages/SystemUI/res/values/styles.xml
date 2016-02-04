@@ -241,6 +241,10 @@
         parent="@*android:style/TextAppearance.Material.Notification.Info">
     </style>
 
+    <style name="TextAppearance.Material.Notification.HybridNotificationDivider"
+        parent="@*android:style/TextAppearance.Material.Notification">
+    </style>
+
     <style name="SearchPanelCircle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
