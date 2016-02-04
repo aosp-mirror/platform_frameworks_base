@@ -236,6 +236,7 @@ LOCAL_CFLAGS := \
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
+    tests/unit/BufferPoolTests.cpp \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
     tests/unit/CrashHandlerInjector.cpp \
@@ -245,11 +246,11 @@ LOCAL_SRC_FILES += \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
-    tests/unit/VectorDrawableTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
+    tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/StringUtilsTests.cpp \
-    tests/unit/BufferPoolTests.cpp \
-    tests/unit/TextDropShadowCacheTests.cpp
+    tests/unit/TextDropShadowCacheTests.cpp \
+    tests/unit/VectorDrawableTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
