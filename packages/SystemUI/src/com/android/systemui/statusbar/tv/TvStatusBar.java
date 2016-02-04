@@ -80,10 +80,6 @@ public class TvStatusBar extends BaseStatusBar {
             boolean showImeSwitcher) {
     }
 
-    @Override
-    public void toggleRecentApps() {
-    }
-
     @Override // CommandQueue
     public void setWindowState(int window, int state) {
     }
