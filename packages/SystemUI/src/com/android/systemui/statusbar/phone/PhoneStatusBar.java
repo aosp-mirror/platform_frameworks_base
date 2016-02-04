@@ -1115,16 +1115,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 Point realSize = new Point();
                 mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
                         .getRealSize(realSize);
-                Rect initialBounds;
-
-                // Hack level over 9000: Make it one pixel smaller so activity manager doesn't
-                // dismiss it immediately again. Remove once b/26777526 is fixed.
-                if (mContext.getResources().getConfiguration().orientation
-                        == Configuration.ORIENTATION_LANDSCAPE) {
-                    initialBounds = new Rect(0, 0, realSize.x - 1, realSize.y);
-                } else {
-                    initialBounds = new Rect(0, 0, realSize.x, realSize.y - 1);
-                }
+                Rect initialBounds= new Rect(0, 0, realSize.x, realSize.y);
                 boolean docked = mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
                         ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
                         initialBounds);

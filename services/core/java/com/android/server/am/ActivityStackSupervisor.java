@@ -1889,12 +1889,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     private void resizeStackUncheckedLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
             Rect tempTaskInsetBounds) {
-        if (bounds != null && mWindowManager.isFullscreenBounds(stack.mStackId, bounds)) {
-            // The bounds passed in corresponds to the fullscreen bounds which we normally
-            // represent with null. Go ahead and set it to null so that all tasks configuration
-            // can have the right fullscreen state.
-            bounds = null;
-        }
         bounds = TaskRecord.validateBounds(bounds);
 
         mTmpBounds.clear();

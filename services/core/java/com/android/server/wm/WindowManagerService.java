@@ -4847,17 +4847,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /** Returns true if the input bounds corresponds to the fullscreen bounds the stack is on. */
-    public boolean isFullscreenBounds(int stackId, Rect bounds) {
-        synchronized (mWindowMap) {
-            final TaskStack stack = mStackIdToStack.get(stackId);
-            if (stack == null || bounds == null) {
-                return true;
-            }
-            return stack.isFullscreenBounds(bounds);
-        }
-    }
-
     /**
      * Re-sizes a stack and its containing tasks.
      * @param stackId Id of stack to resize.

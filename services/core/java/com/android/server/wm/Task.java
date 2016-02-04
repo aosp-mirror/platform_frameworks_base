@@ -289,11 +289,9 @@ class Task implements DimLayer.DimLayerUser {
         if (displayContent != null) {
             displayContent.getLogicalDisplayRect(mTmpRect);
             rotation = displayContent.getDisplayInfo().rotation;
-            if (bounds == null) {
+            mFullscreen = bounds == null;
+            if (mFullscreen) {
                 bounds = mTmpRect;
-                mFullscreen = true;
-            } else {
-                mFullscreen = mTmpRect.equals(bounds);
             }
         }
 
