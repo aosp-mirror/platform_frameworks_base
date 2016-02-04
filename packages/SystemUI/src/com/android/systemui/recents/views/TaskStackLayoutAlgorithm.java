@@ -383,6 +383,7 @@ public class TaskStackLayoutAlgorithm {
      */
     void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet) {
         SystemServicesProxy ssp = Recents.getSystemServices();
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
         // Clear the progress map
         mTaskIndexMap.clear();
@@ -449,7 +450,6 @@ public class TaskStackLayoutAlgorithm {
             if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
                 mInitialScrollP = mMinScrollP;
             } else if (getDefaultFocusState() > 0f) {
-                RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
                 if (launchState.launchedFromHome) {
                     mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, launchTaskIndex));
                 } else {

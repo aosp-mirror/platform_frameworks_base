@@ -45,7 +45,6 @@ import com.android.systemui.recents.events.activity.AppWidgetProviderChangedEven
 import com.android.systemui.recents.events.activity.CancelEnterRecentsWindowAnimationEvent;
 import com.android.systemui.recents.events.activity.DebugFlagsChangedEvent;
 import com.android.systemui.recents.events.activity.DismissRecentsToHomeAnimationStarted;
-import com.android.systemui.recents.events.activity.EnterRecentsTaskStackAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationCompletedEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.ExitRecentsWindowFirstAnimationFrameEvent;
@@ -438,11 +437,8 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     protected void onPause() {
         super.onPause();
 
-        RecentsDebugFlags flags = Recents.getDebugFlags();
-        if (flags.isFastToggleRecentsEnabled()) {
-            // Stop the fast-toggle dozer
-            mIterateTrigger.stopDozing();
-        }
+        // Stop the fast-toggle dozer
+        mIterateTrigger.stopDozing();
     }
 
     @Override
@@ -649,6 +645,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     public final void onBusEvent(UserInteractionEvent event) {
+        // Stop the fast-toggle dozer
         mIterateTrigger.stopDozing();
     }
 
@@ -691,21 +688,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                         }
                     }
                 });
-            }
-        }
-    }
-
-    public final void onBusEvent(EnterRecentsTaskStackAnimationCompletedEvent event) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled() &&
-                RecentsDebugFlags.Static.EnableFastToggleTimeoutOnEnter) {
-            mIterateTrigger.setDozeDuration(
-                    getResources().getInteger(R.integer.recents_auto_advance_duration));
-            if (!mIterateTrigger.isDozing()) {
-                mIterateTrigger.startDozing();
-            } else {
-                mIterateTrigger.poke();
             }
         }
     }

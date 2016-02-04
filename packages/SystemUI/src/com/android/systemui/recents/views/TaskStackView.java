@@ -58,6 +58,7 @@ import com.android.systemui.recents.events.activity.EnterRecentsWindowAnimationC
 import com.android.systemui.recents.events.activity.HideHistoryButtonEvent;
 import com.android.systemui.recents.events.activity.HideHistoryEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskStartedEvent;
 import com.android.systemui.recents.events.activity.PackagesChangedEvent;
@@ -1544,6 +1545,24 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mUIDozeTrigger.stopDozing();
     }
 
+    public final void onBusEvent(LaunchNextTaskRequestEvent event) {
+        int launchTaskIndex = mStack.indexOfStackTask(mStack.getLaunchTarget());
+        if (launchTaskIndex != -1) {
+            launchTaskIndex = Math.max(0, launchTaskIndex - 1);
+        } else {
+            launchTaskIndex = mStack.getTaskCount() - 1;
+        }
+        if (launchTaskIndex != -1) {
+            // Stop all animations
+            mUIDozeTrigger.stopDozing();
+            cancelAllTaskViewAnimations();
+
+            Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
+            EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(launchTask),
+                    launchTask, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+        }
+    }
+
     public final void onBusEvent(LaunchTaskStartedEvent event) {
         mAnimationHelper.startLaunchTaskAnimation(event.taskView, event.screenPinningRequested,
                 event.getAnimationTrigger());
@@ -1759,21 +1778,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     EventBus.getDefault().send(new EnterRecentsTaskStackAnimationCompletedEvent());
                 }
             });
-        }
-    }
-
-    public final void onBusEvent(EnterRecentsTaskStackAnimationCompletedEvent event) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled() &&
-                RecentsDebugFlags.Static.EnableFastToggleTimeoutOnEnter) {
-            if (mFocusedTask != null) {
-                int timerIndicatorDuration = getResources().getInteger(
-                        R.integer.recents_auto_advance_duration);
-                int focusedTaskIndex = mStack.indexOfStackTask(mFocusedTask);
-                setFocusedTask(focusedTaskIndex, false /* scrollToTask */,
-                        false /* requestViewFocus */, timerIndicatorDuration);
-            }
         }
     }
 
