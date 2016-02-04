@@ -16,10 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.Shared.TAG;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ProviderInfo;
@@ -471,6 +467,14 @@ public class StubProvider extends DocumentsProvider {
 
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
+        // We're not supposed to override any of the default DocumentsProvider
+        // methods that are supported by "call", so javadoc asks that we
+        // always call super.call first and return if response is not null.
+        Bundle result = super.call(method, arg, extras);
+        if (result != null) {
+            return result;
+        }
+
         switch (method) {
             case "clear":
                 clearCacheAndBuildRoots();
@@ -484,11 +488,10 @@ public class StubProvider extends DocumentsProvider {
                 simulateReadErrorsForFile(arg);
                 return null;
             case "createDocumentWithFlags":
-                Bundle bundle = dispatchCreateDocumentWithFlags(extras);
-                return bundle;
-            default:
-                return super.call(method, arg, extras);
+                return dispatchCreateDocumentWithFlags(extras);
         }
+
+        return null;
     }
 
     private Bundle createVirtualFileFromBundle(Bundle extras) {
