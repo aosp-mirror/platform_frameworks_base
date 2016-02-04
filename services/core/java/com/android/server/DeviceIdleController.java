@@ -1325,6 +1325,7 @@ public class DeviceIdleController extends SystemService
             // Whoops, there is an upcoming alarm.  We don't actually want to go idle.
             if (mState != STATE_ACTIVE) {
                 becomeActiveLocked("alarm", Process.myUid());
+                becomeInactiveIfAppropriateLocked();
             }
             return;
         }
