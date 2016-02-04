@@ -192,7 +192,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     insets.getStableInsetRight(), insets.getStableInsetBottom());
             if (mSnapAlgorithm != null) {
                 mSnapAlgorithm = null;
-                getSnapAlgorithm();
+                initializeSnapAlgorithm();
             }
         }
         return super.onApplyWindowInsets(insets);
@@ -211,7 +211,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             mHandle.setTouching(true, animate);
         }
         mDockSide = mWindowManagerProxy.getDockSide();
-        getSnapAlgorithm();
+        initializeSnapAlgorithm();
         if (mDockSide != WindowManager.DOCKED_INVALID) {
             mWindowManagerProxy.setResizing(true);
             mWindowManager.setSlippery(false);
@@ -239,11 +239,15 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         releaseBackground();
     }
 
-    public DividerSnapAlgorithm getSnapAlgorithm() {
+    private void initializeSnapAlgorithm() {
         if (mSnapAlgorithm == null) {
             mSnapAlgorithm = new DividerSnapAlgorithm(getContext().getResources(), mDisplayWidth,
                     mDisplayHeight, mDividerSize, isHorizontalDivision(), mStableInsets);
         }
+    }
+
+    public DividerSnapAlgorithm getSnapAlgorithm() {
+        initializeSnapAlgorithm();
         return mSnapAlgorithm;
     }
 
@@ -421,6 +425,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
         mSnapAlgorithm = null;
+        initializeSnapAlgorithm();
     }
 
     private int calculatePosition(int touchX, int touchY) {
