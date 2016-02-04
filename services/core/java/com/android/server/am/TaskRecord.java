@@ -162,6 +162,8 @@ final class TaskRecord {
 
     int mResizeMode;        // The resize mode of this task and its activities.
                             // Based on the {@link ActivityInfo#resizeMode} of the root activity.
+    boolean mTemporarilyUnresizable; // Separate flag from mResizeMode used to suppress resize
+                                     // changes on a temporary basis.
     int mLockTaskMode;      // Which tasklock mode to launch this task in. One of
                             // ActivityManager.LOCK_TASK_LAUNCH_MODE_*
     private boolean mPrivileged;    // The root activity application of this task holds
@@ -939,7 +941,7 @@ final class TaskRecord {
 
     boolean isResizeable() {
         return !isHomeTask() && (mService.mForceResizableActivities
-                || ActivityInfo.isResizeableMode(mResizeMode));
+                || ActivityInfo.isResizeableMode(mResizeMode)) && !mTemporarilyUnresizable;
     }
 
     boolean inCropWindowsResizeMode() {

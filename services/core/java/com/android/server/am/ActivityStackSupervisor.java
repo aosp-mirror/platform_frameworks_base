@@ -2208,9 +2208,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // Temporarily disable resizeablility of task we are moving. We don't want it to be resized
         // if a docked stack is created below which will lead to the stack we are moving from and
         // its resizeable tasks being resized.
-        task.mResizeMode = RESIZE_MODE_UNRESIZEABLE;
+        task.mTemporarilyUnresizable = true;
         final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, toTop);
-        task.mResizeMode = resizeMode;
+        task.mTemporarilyUnresizable = false;
         mWindowManager.moveTaskToStack(task.taskId, stack.mStackId, toTop);
         stack.addTask(task, toTop, reason);
 
