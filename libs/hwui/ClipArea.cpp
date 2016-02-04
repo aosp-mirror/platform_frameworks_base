@@ -213,6 +213,7 @@ void ClipArea::setClip(float left, float top, float right, float bottom) {
 
 void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
         SkRegion::Op op) {
+    if (!mPostViewportClipObserved && op == SkRegion::kIntersect_Op) op = SkRegion::kReplace_Op;
     onClipUpdated();
     switch (mMode) {
     case ClipMode::Rectangle:
@@ -228,6 +229,7 @@ void ClipArea::clipRectWithTransform(const Rect& r, const mat4* transform,
 }
 
 void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
+    if (!mPostViewportClipObserved && op == SkRegion::kIntersect_Op) op = SkRegion::kReplace_Op;
     onClipUpdated();
     enterRegionMode();
     mClipRegion.op(region, op);
@@ -236,6 +238,7 @@ void ClipArea::clipRegion(const SkRegion& region, SkRegion::Op op) {
 
 void ClipArea::clipPathWithTransform(const SkPath& path, const mat4* transform,
         SkRegion::Op op) {
+    if (!mPostViewportClipObserved && op == SkRegion::kIntersect_Op) op = SkRegion::kReplace_Op;
     onClipUpdated();
     SkMatrix skTransform;
     transform->copyTo(skTransform);

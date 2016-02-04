@@ -455,6 +455,23 @@ TEST(RecordingCanvas, drawRenderNode_projection) {
     }
 }
 
+TEST(RecordingCanvas, firstClipWillReplace) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SaveFlags::MatrixClip);
+        // since no explicit clip set on canvas, this should be the one observed on op:
+        canvas.clipRect(-100, -100, 300, 300, SkRegion::kIntersect_Op);
+
+        SkPaint paint;
+        paint.setColor(SK_ColorWHITE);
+        canvas.drawRect(0, 0, 100, 100, paint);
+
+        canvas.restore();
+    });
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must have one op";
+    // first clip must be preserved, even if it extends beyond canvas bounds
+    EXPECT_CLIP_RECT(Rect(-100, -100, 300, 300), dl->getOps()[0]->localClip);
+}
+
 TEST(RecordingCanvas, insertReorderBarrier) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawRect(0, 0, 400, 400, SkPaint());
