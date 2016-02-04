@@ -342,7 +342,7 @@ message MetricsEvent {
 
     // QS Tile for Data Saver.
     QS_DATA_SAVER = 284;
-    
+
     // OPEN: Settings > Security > User credentials
     // CATEGORY: Settings
     // OS: 6.1
@@ -351,6 +351,6 @@ message MetricsEvent {
 
     // Logged when the user undocks a previously docked window by long pressing recents while in
     // docked mode.
-    ACTION_WINDOW_UNDOCK_LONGPRESS = 285;
+    ACTION_WINDOW_UNDOCK_LONGPRESS = 286;
   }
 }
