@@ -18,6 +18,7 @@ package android.widget;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -34,6 +35,9 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -92,13 +96,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
     // We cache the FixedSizeRemoteViewsCaches across orientation. These are the related data
     // structures;
-    private static final HashMap<RemoteViewsCacheKey,
-            FixedSizeRemoteViewsCache> sCachedRemoteViewsCaches
-            = new HashMap<RemoteViewsCacheKey,
-                    FixedSizeRemoteViewsCache>();
+    private static final HashMap<RemoteViewsCacheKey, FixedSizeRemoteViewsCache>
+            sCachedRemoteViewsCaches = new HashMap<>();
     private static final HashMap<RemoteViewsCacheKey, Runnable>
-            sRemoteViewsCacheRemoveRunnables
-            = new HashMap<RemoteViewsCacheKey, Runnable>();
+            sRemoteViewsCacheRemoveRunnables = new HashMap<>();
 
     private static HandlerThread sCacheRemovalThread;
     private static Handler sCacheRemovalQueue;
@@ -312,29 +313,21 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * adapter that have not yet had their RemoteViews loaded.
      */
     private class RemoteViewsFrameLayoutRefSet {
-        private HashMap<Integer, LinkedList<RemoteViewsFrameLayout>> mReferences;
-        private HashMap<RemoteViewsFrameLayout, LinkedList<RemoteViewsFrameLayout>>
-                mViewToLinkedList;
-
-        public RemoteViewsFrameLayoutRefSet() {
-            mReferences = new HashMap<Integer, LinkedList<RemoteViewsFrameLayout>>();
-            mViewToLinkedList =
-                    new HashMap<RemoteViewsFrameLayout, LinkedList<RemoteViewsFrameLayout>>();
-        }
+        private final SparseArray<LinkedList<RemoteViewsFrameLayout>> mReferences =
+                new SparseArray<>();
+        private final HashMap<RemoteViewsFrameLayout, LinkedList<RemoteViewsFrameLayout>>
+                mViewToLinkedList = new HashMap<>();
 
         /**
          * Adds a new reference to a RemoteViewsFrameLayout returned by the adapter.
          */
         public void add(int position, RemoteViewsFrameLayout layout) {
-            final Integer pos = position;
-            LinkedList<RemoteViewsFrameLayout> refs;
+            LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(position);
 
             // Create the list if necessary
-            if (mReferences.containsKey(pos)) {
-                refs = mReferences.get(pos);
-            } else {
+            if (refs == null) {
                 refs = new LinkedList<RemoteViewsFrameLayout>();
-                mReferences.put(pos, refs);
+                mReferences.put(position, refs);
             }
             mViewToLinkedList.put(layout, refs);
 
@@ -349,10 +342,9 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         public void notifyOnRemoteViewsLoaded(int position, RemoteViews view) {
             if (view == null) return;
 
-            final Integer pos = position;
-            if (mReferences.containsKey(pos)) {
+            final LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(position);
+            if (refs != null) {
                 // Notify all the references for that position of the newly loaded RemoteViews
-                final LinkedList<RemoteViewsFrameLayout> refs = mReferences.get(pos);
                 for (final RemoteViewsFrameLayout ref : refs) {
                     ref.onRemoteViewsLoaded(view, mRemoteViewsOnClickHandler);
                     if (mViewToLinkedList.containsKey(ref)) {
@@ -361,7 +353,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 }
                 refs.clear();
                 // Remove this set from the original mapping
-                mReferences.remove(pos);
+                mReferences.remove(position);
             }
         }
 
@@ -402,7 +394,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         int mFirstViewHeight;
 
         // A mapping from type id to a set of unique type ids
-        private final HashMap<Integer, Integer> mTypeIdIndexMap = new HashMap<Integer, Integer>();
+        private final SparseIntArray mTypeIdIndexMap = new SparseIntArray();
 
         public RemoteViewsMetaData() {
             reset();
@@ -438,23 +430,18 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
 
         public int getMappedViewType(int typeId) {
-            if (mTypeIdIndexMap.containsKey(typeId)) {
-                return mTypeIdIndexMap.get(typeId);
-            } else {
+            int mappedTypeId = mTypeIdIndexMap.get(typeId, -1);
+            if (mappedTypeId == -1) {
                 // We +1 because the loading view always has view type id of 0
-                int incrementalTypeId = mTypeIdIndexMap.size() + 1;
-                mTypeIdIndexMap.put(typeId, incrementalTypeId);
-                return incrementalTypeId;
+                mappedTypeId = mTypeIdIndexMap.size() + 1;
+                mTypeIdIndexMap.put(typeId, mappedTypeId);
             }
+            return mappedTypeId;
         }
 
         public boolean isViewTypeInRange(int typeId) {
             int mappedType = getMappedViewType(typeId);
-            if (mappedType >= viewTypeCount) {
-                return false;
-            } else {
-                return true;
-            }
+            return (mappedType < viewTypeCount);
         }
 
         private RemoteViewsFrameLayout createLoadingView(int position, View convertView,
@@ -548,8 +535,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // The meta data objects are made final so that they can be locked on independently
         // of the FixedSizeRemoteViewsCache. If we ever lock on both meta data objects, it is in
         // the order mTemporaryMetaData followed by mMetaData.
-        private final RemoteViewsMetaData mMetaData;
-        private final RemoteViewsMetaData mTemporaryMetaData;
+        private final RemoteViewsMetaData mMetaData = new RemoteViewsMetaData();
+        private final RemoteViewsMetaData mTemporaryMetaData = new RemoteViewsMetaData();
 
         // The cache/mapping of position to RemoteViewsMetaData.  This set is guaranteed to be
         // greater than or equal to the set of RemoteViews.
@@ -558,22 +545,20 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // the heavy RemoteViews around.  The RemoteViews cache is trimmed to fixed constraints wrt.
         // memory and size, but this metadata cache will retain information until the data at the
         // position is guaranteed as not being necessary any more (usually on notifyDataSetChanged).
-        private HashMap<Integer, RemoteViewsIndexMetaData> mIndexMetaData;
+        private final SparseArray<RemoteViewsIndexMetaData> mIndexMetaData = new SparseArray<>();
 
         // The cache of actual RemoteViews, which may be pruned if the cache gets too large, or uses
         // too much memory.
-        private HashMap<Integer, RemoteViews> mIndexRemoteViews;
+        private final SparseArray<RemoteViews> mIndexRemoteViews = new SparseArray<>();
 
-        // The set of indices that have been explicitly requested by the collection view
-        private HashSet<Integer> mRequestedIndices;
+        // An array of indices to load, Indices which are explicitely requested are set to true,
+        // and those determined by the preloading algorithm to prefetch are set to false.
+        private final SparseBooleanArray mIndicesToLoad = new SparseBooleanArray();
 
         // We keep a reference of the last requested index to determine which item to prune the
         // farthest items from when we hit the memory limit
         private int mLastRequestedIndex;
 
-        // The set of indices to load, including those explicitly requested, as well as those
-        // determined by the preloading algorithm to be prefetched
-        private HashSet<Integer> mLoadIndices;
 
         // The lower and upper bounds of the preloaded range
         private int mPreloadLowerBound;
@@ -584,8 +569,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // The maxCountSlack is used to determine if a new position in the cache to be loaded is
         // sufficiently ouside the old set, prompting a shifting of the "window" of items to be
         // preloaded.
-        private int mMaxCount;
-        private int mMaxCountSlack;
+        private final int mMaxCount;
+        private final int mMaxCountSlack;
         private static final float sMaxCountSlackPercent = 0.75f;
         private static final int sMaxMemoryLimitInBytes = 2 * 1024 * 1024;
 
@@ -594,17 +579,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             mMaxCountSlack = Math.round(sMaxCountSlackPercent * (mMaxCount / 2));
             mPreloadLowerBound = 0;
             mPreloadUpperBound = -1;
-            mMetaData = new RemoteViewsMetaData();
-            mTemporaryMetaData = new RemoteViewsMetaData();
-            mIndexMetaData = new HashMap<Integer, RemoteViewsIndexMetaData>();
-            mIndexRemoteViews = new HashMap<Integer, RemoteViews>();
-            mRequestedIndices = new HashSet<Integer>();
             mLastRequestedIndex = -1;
-            mLoadIndices = new HashSet<Integer>();
         }
 
-        public void insert(int position, RemoteViews v, long itemId,
-                ArrayList<Integer> visibleWindow) {
+        public void insert(int position, RemoteViews v, long itemId, int[] visibleWindow) {
             // Trim the cache if we go beyond the count
             if (mIndexRemoteViews.size() >= mMaxCount) {
                 mIndexRemoteViews.remove(getFarthestPositionFrom(position, visibleWindow));
@@ -630,8 +608,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             }
 
             // Update the metadata cache
-            if (mIndexMetaData.containsKey(position)) {
-                final RemoteViewsIndexMetaData metaData = mIndexMetaData.get(position);
+            final RemoteViewsIndexMetaData metaData = mIndexMetaData.get(position);
+            if (metaData != null) {
                 metaData.set(v, itemId);
             } else {
                 mIndexMetaData.put(position, new RemoteViewsIndexMetaData(v, itemId));
@@ -646,16 +624,10 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             return mTemporaryMetaData;
         }
         public RemoteViews getRemoteViewsAt(int position) {
-            if (mIndexRemoteViews.containsKey(position)) {
-                return mIndexRemoteViews.get(position);
-            }
-            return null;
+            return mIndexRemoteViews.get(position);
         }
         public RemoteViewsIndexMetaData getMetaDataAt(int position) {
-            if (mIndexMetaData.containsKey(position)) {
-                return mIndexMetaData.get(position);
-            }
-            return null;
+            return mIndexMetaData.get(position);
         }
 
         public void commitTemporaryMetaData() {
@@ -669,8 +641,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         private int getRemoteViewsBitmapMemoryUsage() {
             // Calculate the memory usage of all the RemoteViews bitmaps being cached
             int mem = 0;
-            for (Integer i : mIndexRemoteViews.keySet()) {
-                final RemoteViews v = mIndexRemoteViews.get(i);
+            for (int i = mIndexRemoteViews.size() - 1; i >= 0; i--) {
+                final RemoteViews v = mIndexRemoteViews.valueAt(i);
                 if (v != null) {
                     mem += v.estimateMemoryUsage();
                 }
@@ -678,24 +650,25 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             return mem;
         }
 
-        private int getFarthestPositionFrom(int pos, ArrayList<Integer> visibleWindow) {
+        private int getFarthestPositionFrom(int pos, int[] visibleWindow) {
             // Find the index farthest away and remove that
             int maxDist = 0;
             int maxDistIndex = -1;
             int maxDistNotVisible = 0;
             int maxDistIndexNotVisible = -1;
-            for (int i : mIndexRemoteViews.keySet()) {
-                int dist = Math.abs(i-pos);
-                if (dist > maxDistNotVisible && !visibleWindow.contains(i)) {
+            for (int i = mIndexRemoteViews.size() - 1; i >= 0; i--) {
+                int index = mIndexRemoteViews.keyAt(i);
+                int dist = Math.abs(index-pos);
+                if (dist > maxDistNotVisible && Arrays.binarySearch(visibleWindow, index) < 0) {
                     // maxDistNotVisible/maxDistIndexNotVisible will store the index of the
                     // farthest non-visible position
-                    maxDistIndexNotVisible = i;
+                    maxDistIndexNotVisible = index;
                     maxDistNotVisible = dist;
                 }
                 if (dist >= maxDist) {
                     // maxDist/maxDistIndex will store the index of the farthest position
                     // regardless of whether it is visible or not
-                    maxDistIndex = i;
+                    maxDistIndex = index;
                     maxDist = dist;
                 }
             }
@@ -707,9 +680,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
 
         public void queueRequestedPositionToLoad(int position) {
             mLastRequestedIndex = position;
-            synchronized (mLoadIndices) {
-                mRequestedIndices.add(position);
-                mLoadIndices.add(position);
+            synchronized (mIndicesToLoad) {
+                mIndicesToLoad.put(position, true);
             }
         }
         public boolean queuePositionsToBePreloadedFromRequestedPosition(int position) {
@@ -725,11 +697,13 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             synchronized (mMetaData) {
                 count = mMetaData.count;
             }
-            synchronized (mLoadIndices) {
-                mLoadIndices.clear();
-
-                // Add all the requested indices
-                mLoadIndices.addAll(mRequestedIndices);
+            synchronized (mIndicesToLoad) {
+                // Remove all indices which have not been previously requested.
+                for (int i = mIndicesToLoad.size() - 1; i >= 0; i--) {
+                    if (!mIndicesToLoad.valueAt(i)) {
+                        mIndicesToLoad.removeAt(i);
+                    }
+                }
 
                 // Add all the preload indices
                 int halfMaxCount = mMaxCount / 2;
@@ -738,43 +712,40 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 int effectiveLowerBound = Math.max(0, mPreloadLowerBound);
                 int effectiveUpperBound = Math.min(mPreloadUpperBound, count - 1);
                 for (int i = effectiveLowerBound; i <= effectiveUpperBound; ++i) {
-                    mLoadIndices.add(i);
+                    if (mIndexRemoteViews.indexOfKey(i) < 0 && !mIndicesToLoad.get(i)) {
+                        // If the index has not been requested, and has not been loaded.
+                        mIndicesToLoad.put(i, false);
+                    }
                 }
-
-                // But remove all the indices that have already been loaded and are cached
-                mLoadIndices.removeAll(mIndexRemoteViews.keySet());
             }
             return true;
         }
-        /** Returns the next index to load, and whether that index was directly requested or not */
-        public int[] getNextIndexToLoad() {
+        /** Returns the next index to load */
+        public int getNextIndexToLoad() {
             // We try and prioritize items that have been requested directly, instead
             // of items that are loaded as a result of the caching mechanism
-            synchronized (mLoadIndices) {
+            synchronized (mIndicesToLoad) {
                 // Prioritize requested indices to be loaded first
-                if (!mRequestedIndices.isEmpty()) {
-                    Integer i = mRequestedIndices.iterator().next();
-                    mRequestedIndices.remove(i);
-                    mLoadIndices.remove(i);
-                    return new int[]{i.intValue(), 1};
+                int index = mIndicesToLoad.indexOfValue(true);
+                if (index < 0) {
+                    // Otherwise, preload other indices as necessary
+                    index = mIndicesToLoad.indexOfValue(false);
                 }
-
-                // Otherwise, preload other indices as necessary
-                if (!mLoadIndices.isEmpty()) {
-                    Integer i = mLoadIndices.iterator().next();
-                    mLoadIndices.remove(i);
-                    return new int[]{i.intValue(), 0};
+                if (index < 0) {
+                    return -1;
+                } else {
+                    int key = mIndicesToLoad.keyAt(index);
+                    mIndicesToLoad.removeAt(index);
+                    return key;
                 }
-
-                return new int[]{-1, 0};
             }
         }
 
         public boolean containsRemoteViewAt(int position) {
-            return mIndexRemoteViews.containsKey(position);
+            return mIndexRemoteViews.indexOfKey(position) >= 0;
         }
         public boolean containsMetaDataAt(int position) {
-            return mIndexMetaData.containsKey(position);
+            return mIndexMetaData.indexOfKey(position) >= 0;
         }
 
         public void reset() {
@@ -787,9 +758,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             mLastRequestedIndex = -1;
             mIndexRemoteViews.clear();
             mIndexMetaData.clear();
-            synchronized (mLoadIndices) {
-                mRequestedIndices.clear();
-                mLoadIndices.clear();
+            synchronized (mIndicesToLoad) {
+                mIndicesToLoad.clear();
             }
         }
     }
@@ -942,8 +912,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                     // Get the next index to load
                     int position = -1;
                     synchronized (mCache) {
-                        int[] res = mCache.getNextIndexToLoad();
-                        position = res[0];
+                        position = mCache.getNextIndexToLoad();
                     }
                     if (position > -1) {
                         // Load the item, and notify any existing RemoteViewsFrameLayouts
@@ -1048,7 +1017,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         }
         synchronized (mCache) {
             if (viewTypeInRange) {
-                ArrayList<Integer> visibleWindow = getVisibleWindow(mVisibleWindowLowerBound,
+                int[] visibleWindow = getVisibleWindow(mVisibleWindowLowerBound,
                         mVisibleWindowUpperBound, cacheCount);
                 // Cache the RemoteViews we loaded
                 mCache.insert(position, remoteViews, itemId, visibleWindow);
@@ -1276,7 +1245,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // Re-request the new metadata (only after the notification to the factory)
         updateTemporaryMetaData();
         int newCount;
-        ArrayList<Integer> visibleWindow;
+        int[] visibleWindow;
         synchronized(mCache.getTemporaryMetaData()) {
             newCount = mCache.getTemporaryMetaData().count;
             visibleWindow = getVisibleWindow(mVisibleWindowLowerBound,
@@ -1311,26 +1280,33 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         mNotifyDataSetChangedAfterOnServiceConnected = false;
     }
 
-    private ArrayList<Integer> getVisibleWindow(int lower, int upper, int count) {
-        ArrayList<Integer> window = new ArrayList<Integer>();
-
+    /**
+     * Returns a sorted array of all integers between lower and upper.
+     */
+    private int[] getVisibleWindow(int lower, int upper, int count) {
         // In the case that the window is invalid or uninitialized, return an empty window.
         if ((lower == 0 && upper == 0) || lower < 0 || upper < 0) {
-            return window;
+            return new int[0];
         }
 
+        int[] window;
         if (lower <= upper) {
-            for (int i = lower;  i <= upper; i++){
-                window.add(i);
+            window = new int[upper + 1 - lower];
+            for (int i = lower, j = 0;  i <= upper; i++, j++){
+                window[j] = i;
             }
         } else {
             // If the upper bound is less than the lower bound it means that the visible window
             // wraps around.
-            for (int i = lower; i < count; i++) {
-                window.add(i);
+            count = Math.max(count, lower);
+            window = new int[count - lower + upper + 1];
+            int j = 0;
+            // Add the entries in sorted order
+            for (int i = 0; i <= upper; i++, j++) {
+                window[j] = i;
             }
-            for (int i = 0; i <= upper; i++) {
-                window.add(i);
+            for (int i = lower; i < count; i++, j++) {
+                window[j] = i;
             }
         }
         return window;
