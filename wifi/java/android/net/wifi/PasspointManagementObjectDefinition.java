@@ -36,15 +36,15 @@ public class PasspointManagementObjectDefinition implements Parcelable {
         mMoTree = moTree;
     }
 
-    public String getmBaseUri() {
+    public String getBaseUri() {
         return mBaseUri;
     }
 
-    public String getmUrn() {
+    public String getUrn() {
         return mUrn;
     }
 
-    public String getmMoTree() {
+    public String getMoTree() {
         return mMoTree;
     }
 
