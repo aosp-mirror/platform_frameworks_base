@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.os.UserHandle;
+import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +44,8 @@ import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
  * A class which manages the bouncer on the lockscreen.
  */
 public class KeyguardBouncer {
+
+    final static private String TAG = "KeyguardBouncer";
 
     protected Context mContext;
     protected ViewMediatorCallback mCallback;
@@ -84,14 +89,25 @@ public class KeyguardBouncer {
             return;
         }
 
-        // Try to dismiss the Keyguard. If no security pattern is set, this will dismiss the whole
-        // Keyguard. If we need to authenticate, show the bouncer.
-        if (!mKeyguardView.dismiss()) {
-            mShowingSoon = true;
-
-            // Split up the work over multiple frames.
-            DejankUtils.postAfterTraversal(mShowRunnable);
+        final int activeUserId = ActivityManager.getCurrentUser();
+        final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
+        final boolean allowDismissKeyguard = activeUserId != UserHandle.USER_SYSTEM
+                && activeUserId == keyguardUserId;
+        // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern) is
+        // set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
+        if (allowDismissKeyguard && mKeyguardView.dismiss()) {
+            return;
         }
+
+        // This condition may indicate an error on Android, so log it.
+        if (!allowDismissKeyguard) {
+            Slog.w(TAG, "User can't dismiss keyguard: " + activeUserId + " != " + keyguardUserId);
+        }
+
+        mShowingSoon = true;
+
+        // Split up the work over multiple frames.
+        DejankUtils.postAfterTraversal(mShowRunnable);
     }
 
     private final Runnable mShowRunnable = new Runnable() {
