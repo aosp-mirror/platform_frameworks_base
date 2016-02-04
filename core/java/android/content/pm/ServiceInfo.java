@@ -52,7 +52,6 @@ public class ServiceInfo extends ComponentInfo
      * Bit in {@link #flags}: If set, the service can be bound and run in the
      * calling application's package, rather than the package in which it is
      * declared.  Set from {@link android.R.attr#externalService} attribute.
-     * @hide
      */
     public static final int FLAG_EXTERNAL_SERVICE = 0x0004;
 
