@@ -52,7 +52,7 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
 
     private static final long RECENCY_TIME_PERIOD = 1000 * 60 * 60 * 12;
 
-    private static final float RECENCY_MULTIPLIER = 3.f;
+    private static final float RECENCY_MULTIPLIER = 2.f;
 
     private final Collator mCollator;
     private final boolean mHttp;

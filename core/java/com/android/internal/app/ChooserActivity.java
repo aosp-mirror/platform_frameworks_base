@@ -761,6 +761,7 @@ public class ChooserActivity extends ResolverActivity {
         public static final int TARGET_STANDARD = 2;
 
         private static final int MAX_SERVICE_TARGETS = 8;
+        private static final int MAX_TARGETS_PER_SERVICE = 4;
 
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
@@ -925,7 +926,7 @@ public class ChooserActivity extends ResolverActivity {
             final float parentScore = getScore(origTarget);
             Collections.sort(targets, mBaseTargetComparator);
             float lastScore = 0;
-            for (int i = 0, N = targets.size(); i < N; i++) {
+            for (int i = 0, N = Math.min(targets.size(), MAX_TARGETS_PER_SERVICE); i < N; i++) {
                 final ChooserTarget target = targets.get(i);
                 float targetScore = target.getScore();
                 targetScore *= parentScore;
