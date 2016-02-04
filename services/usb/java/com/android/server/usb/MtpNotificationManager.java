@@ -30,7 +30,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.UserHandle;
-import android.util.Log;
 
 /**
  * Manager for MTP storage notification.

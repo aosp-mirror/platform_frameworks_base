@@ -21,7 +21,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.net.Uri;
+import android.util.Log;
+
+import java.io.IOException;
 
 public class UsbIntentReceiver extends BroadcastReceiver {
     @Override
@@ -29,17 +31,15 @@ public class UsbIntentReceiver extends BroadcastReceiver {
         final UsbDevice device = intent.getExtras().getParcelable(UsbManager.EXTRA_DEVICE);
         switch (intent.getAction()) {
             case UsbManager.ACTION_USB_DEVICE_ATTACHED:
-                startService(context, MtpDocumentsService.ACTION_OPEN_DEVICE, device);
+                MtpDocumentsProvider.getInstance().resumeRootScanner();
                 break;
             case UsbManager.ACTION_USB_DEVICE_DETACHED:
-                startService(context, MtpDocumentsService.ACTION_CLOSE_DEVICE, device);
+                try {
+                    MtpDocumentsProvider.getInstance().closeDevice(device.getDeviceId());
+                } catch (IOException | InterruptedException e) {
+                    Log.e(MtpDocumentsProvider.TAG, "Failed to close device", e);
+                }
                 break;
         }
-    }
-
-    private void startService(Context context, String action, UsbDevice device) {
-        final Intent intent = new Intent(action, Uri.EMPTY, context, MtpDocumentsService.class);
-        intent.putExtra(MtpDocumentsService.EXTRA_DEVICE, device);
-        context.startService(intent);
     }
 }
