@@ -437,6 +437,7 @@ public final class SystemServer {
         boolean disableNonCoreServices = SystemProperties.getBoolean("config.disable_noncore", false);
         boolean disableNetwork = SystemProperties.getBoolean("config.disable_network", false);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime", false);
+        boolean disableRtt = SystemProperties.getBoolean("config.disable_rtt", false);
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
         try {
@@ -697,7 +698,9 @@ public final class SystemServer {
                 mSystemServiceManager.startService(
                             "com.android.server.wifi.WifiScanningService");
 
-                mSystemServiceManager.startService("com.android.server.wifi.RttService");
+                if (!disableRtt) {
+                    mSystemServiceManager.startService("com.android.server.wifi.RttService");
+                }
 
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
                     mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
