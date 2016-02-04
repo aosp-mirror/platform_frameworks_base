@@ -4506,9 +4506,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                     break;
                 case R.styleable.View_pointerShape:
-                    final int pointerShape = a.getInt(attr, PointerIcon.STYLE_NOT_SPECIFIED);
-                    if (pointerShape != PointerIcon.STYLE_NOT_SPECIFIED) {
-                        setPointerIcon(PointerIcon.getSystemIcon(context, pointerShape));
+                    final int resourceId = a.getResourceId(attr, 0);
+                    if (resourceId != 0) {
+                        setPointerIcon(PointerIcon.loadCustomIcon(
+                                context.getResources(), resourceId));
+                    } else {
+                        final int pointerShape = a.getInt(attr, PointerIcon.STYLE_NOT_SPECIFIED);
+                        if (pointerShape != PointerIcon.STYLE_NOT_SPECIFIED) {
+                            setPointerIcon(PointerIcon.getSystemIcon(context, pointerShape));
+                        }
                     }
                     break;
             }
