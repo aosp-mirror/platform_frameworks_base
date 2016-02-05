@@ -2079,10 +2079,11 @@ public final class ContactsContract {
             if (preferHighres) {
                 final Uri displayPhotoUri = Uri.withAppendedPath(contactUri,
                         Contacts.Photo.DISPLAY_PHOTO);
-                InputStream inputStream;
                 try {
                     AssetFileDescriptor fd = cr.openAssetFileDescriptor(displayPhotoUri, "r");
-                    return fd.createInputStream();
+                    if (fd != null) {
+                        return fd.createInputStream();
+                    }
                 } catch (IOException e) {
                     // fallback to the thumbnail code
                 }
