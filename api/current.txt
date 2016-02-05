@@ -34369,6 +34369,9 @@ package android.service.media {
     ctor public MediaBrowserService.BrowserRoot(java.lang.String, android.os.Bundle);
     method public android.os.Bundle getExtras();
     method public java.lang.String getRootId();
+    field public static final java.lang.String EXTRA_OFFLINE = "android.service.media.extra.OFFLINE";
+    field public static final java.lang.String EXTRA_RECENT = "android.service.media.extra.RECENT";
+    field public static final java.lang.String EXTRA_SUGGESTED = "android.service.media.extra.SUGGESTED";
   }
 
   public class MediaBrowserService.Result {
