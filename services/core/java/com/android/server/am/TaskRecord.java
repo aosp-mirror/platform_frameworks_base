@@ -933,8 +933,13 @@ final class TaskRecord {
         }
         return false;
     }
+
     boolean isHomeTask() {
         return taskType == HOME_ACTIVITY_TYPE;
+    }
+
+    boolean isRecentsTask() {
+        return taskType == RECENTS_ACTIVITY_TYPE;
     }
 
     boolean isApplicationTask() {
