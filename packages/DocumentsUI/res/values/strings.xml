@@ -123,7 +123,7 @@
     <string name="no_results">No matches in %1$s</string>
 
     <!-- Toast shown when no app can be found to open the selected document [CHAR LIMIT=48] -->
-    <string name="toast_no_application">Can\'t open file</string>
+    <string name="toast_no_application">Can\u2019t open file</string>
     <!-- Toast shown when some of the selected documents failed to be deleted [CHAR LIMIT=48] -->
     <string name="toast_failed_delete">Unable to delete some documents</string>
 
@@ -160,27 +160,27 @@
     <string name="delete_preparing">Preparing for delete\u2026</string>
     <!-- Title of the copy error notification [CHAR LIMIT=48] -->
     <plurals name="copy_error_notification_title">
-        <item quantity="one">Couldn\'t copy <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
-        <item quantity="other">Couldn\'t copy <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
+        <item quantity="one">Couldn\u2019t copy <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
+        <item quantity="other">Couldn\u2019t copy <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
     </plurals>
     <!-- Title of the move error notification [CHAR LIMIT=48] -->
     <plurals name="move_error_notification_title">
-        <item quantity="one">Couldn\'t move <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
-        <item quantity="other">Couldn\'t move <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
+        <item quantity="one">Couldn\u2019t move <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
+        <item quantity="other">Couldn\u2019t move <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
     </plurals>
     <!-- Title of the delete error notification [CHAR LIMIT=48] -->
     <plurals name="delete_error_notification_title">
-        <item quantity="one">Couldn\'t delete <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
-        <item quantity="other">Couldn\'t delete <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
+        <item quantity="one">Couldn\u2019t delete <xliff:g id="count" example="1">%1$d</xliff:g> file</item>
+        <item quantity="other">Couldn\u2019t delete <xliff:g id="count" example="2">%1$d</xliff:g> files</item>
     </plurals>
     <!-- Second line for notifications saying that more information will be shown after touching [CHAR LIMIT=48] -->
     <string name="notification_touch_for_details">Tap to view details</string>
     <!-- Label of the close dialog button.[CHAR LIMIT=24] -->
     <string name="close">Close</string>
     <!-- Contents of the copying failure alert dialog. [CHAR LIMIT=48] -->
-    <string name="copy_failure_alert_content">These files weren\'t copied: <xliff:g id="list">%1$s</xliff:g></string>
+    <string name="copy_failure_alert_content">These files weren\u2019t copied: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Contents of the moving failure alert dialog. [CHAR LIMIT=48] -->
-    <string name="move_failure_alert_content">These files weren\'t moved: <xliff:g id="list">%1$s</xliff:g></string>
+    <string name="move_failure_alert_content">These files weren\u2019t moved: <xliff:g id="list">%1$s</xliff:g></string>
     <!-- Contents of the copying warning dialog due to converted files. [CHAR LIMIT=64] -->
     <string name="copy_converted_warning_content">These files were converted to another format: <xliff:g id="list" example="Document.pdf, Photo.jpg, Song.ogg">%1$s</xliff:g></string>
     <!-- Toast shown when a user copies files to clipboard. -->
