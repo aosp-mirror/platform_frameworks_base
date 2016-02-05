@@ -185,14 +185,6 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean showMenu = super.onCreateOptionsMenu(menu);
-
-        expandMenus(menu);
-        return showMenu;
-    }
-
-    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
@@ -201,15 +193,13 @@ public class FilesActivity extends BaseActivity {
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
+        final MenuItem newWindow = menu.findItem(R.id.menu_new_window);
 
         createDir.setVisible(true);
         createDir.setEnabled(canCreateDirectory());
         pasteFromCb.setEnabled(mClipper.hasItemsToPaste());
         settings.setVisible(root.hasSettings());
-
-        // TODO: For some reason settings menu item is not
-        // honoring the "showAsAction=never" setting in activity.xml.
-        settings.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        newWindow.setVisible(true);
 
         Menus.disableHiddenItems(menu, pasteFromCb);
         return true;
