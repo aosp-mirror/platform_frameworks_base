@@ -168,10 +168,13 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     texture->blend = info.hasAlpha;
     texture->generation = 1;
 
-    // Asume the cache is always big enough
+    // Assume the cache is always big enough
     const uint32_t size = info.width * 2 * bytesPerPixel();
     while (getSize() + size > mMaxSize) {
-        mCache.removeOldest();
+        LOG_ALWAYS_FATAL_IF(!mCache.removeOldest(),
+                "Ran out of things to remove from the cache? getSize() = %" PRIu32
+                ", size = %" PRIu32 ", mMaxSize = %" PRIu32 ", width = %" PRIu32,
+                getSize(), size, mMaxSize, info.width);
     }
 
     generateTexture(colors, positions, info.width, 2, texture);

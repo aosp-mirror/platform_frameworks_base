@@ -250,7 +250,8 @@ LOCAL_SRC_FILES += \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/StringUtilsTests.cpp \
     tests/unit/TextDropShadowCacheTests.cpp \
-    tests/unit/VectorDrawableTests.cpp
+    tests/unit/VectorDrawableTests.cpp \
+    tests/unit/GradientCacheTests.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
