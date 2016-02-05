@@ -19,7 +19,8 @@
           style="?android:attr/preferenceCategoryStyle"
           android:layout_width="match_parent"
           android:layout_height="36dp"
-          android:paddingStart="12dp"
-          android:paddingEnd="12dp"
+          android:gravity="center_vertical"
+          android:paddingStart="18dp"
+          android:paddingEnd="18dp"
           android:textColor="?android:attr/colorAccent"
           tools:text="@string/language_picker_section_all"/>
