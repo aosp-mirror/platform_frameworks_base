@@ -24,9 +24,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Process;
 import android.provider.DocumentsContract;
+import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -56,11 +58,17 @@ class DocumentLoader {
 
     private static MtpObjectInfo[] loadDocuments(MtpManager manager, int deviceId, int[] handles)
             throws IOException {
-        final MtpObjectInfo[] objectInfos = new MtpObjectInfo[handles.length];
+        final ArrayList<MtpObjectInfo> objects = new ArrayList<>();
         for (int i = 0; i < handles.length; i++) {
-            objectInfos[i] = manager.getObjectInfo(deviceId, handles[i]);
+            final MtpObjectInfo info = manager.getObjectInfo(deviceId, handles[i]);
+            if (info == null) {
+                Log.e(MtpDocumentsProvider.TAG,
+                        "Failed to obtain object info handle=" + handles[i]);
+                continue;
+            }
+            objects.add(info);
         }
-        return objectInfos;
+        return objects.toArray(new MtpObjectInfo[objects.size()]);
     }
 
     synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
