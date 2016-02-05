@@ -339,7 +339,7 @@ import java.util.Set;
  *     &lt;action android:name="{@link #ACTION_EDIT android.intent.action.EDIT}" /&gt;
  *     &lt;action android:name="{@link #ACTION_PICK android.intent.action.PICK}" /&gt;
  *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
- *     &lt;data mimeType:name="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
+ *     &lt;data android:mimeType="vnd.android.cursor.dir/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
  * <p>This declares the things that the activity can do on a directory of
  * notes.  The type being supported is given with the &lt;type&gt; tag, where
