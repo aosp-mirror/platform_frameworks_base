@@ -27,7 +27,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
-
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.tuner.TunerService;
@@ -58,8 +57,9 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
     public static final String KEY_IMAGE_DELIM = ":";
     public static final String KEY_CODE_END = ")";
 
-    protected final LayoutInflater mLayoutInflater;
-    protected final LayoutInflater mLandscapeInflater;
+    protected LayoutInflater mLayoutInflater;
+    protected LayoutInflater mLandscapeInflater;
+    private int mDensity;
 
     protected FrameLayout mRot0;
     protected FrameLayout mRot90;
@@ -69,11 +69,27 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
 
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mLayoutInflater = LayoutInflater.from(context);
+        mDensity = context.getResources().getConfiguration().densityDpi;
+        createInflaters();
+    }
+
+    private void createInflaters() {
+        mLayoutInflater = LayoutInflater.from(mContext);
         Configuration landscape = new Configuration();
-        landscape.setTo(context.getResources().getConfiguration());
+        landscape.setTo(mContext.getResources().getConfiguration());
         landscape.orientation = Configuration.ORIENTATION_LANDSCAPE;
-        mLandscapeInflater = LayoutInflater.from(context.createConfigurationContext(landscape));
+        mLandscapeInflater = LayoutInflater.from(mContext.createConfigurationContext(landscape));
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mDensity != newConfig.densityDpi) {
+            mDensity = newConfig.densityDpi;
+            createInflaters();
+            clearViews();
+            inflateLayout(mCurrentLayout);
+        }
     }
 
     @Override
