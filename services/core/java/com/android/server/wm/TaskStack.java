@@ -585,7 +585,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     void getStackDockedModeBoundsLocked(Rect outBounds, boolean ignoreVisibility) {
-        if (!StackId.isResizeableByDockedStack(mStackId) || mDisplayContent == null) {
+        if ((mStackId != DOCKED_STACK_ID && !StackId.isResizeableByDockedStack(mStackId))
+                || mDisplayContent == null) {
             outBounds.set(mBounds);
             return;
         }
@@ -614,8 +615,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
         mDisplayContent.getLogicalDisplayRect(mTmpRect);
         dockedStack.getRawBounds(mTmpRect2);
-        final boolean dockedOnTopOrLeft = dockedSide == DOCKED_TOP
-                || dockedSide == DOCKED_LEFT;
+        final boolean dockedOnTopOrLeft = dockedSide == DOCKED_TOP || dockedSide == DOCKED_LEFT;
         getStackDockedModeBounds(mTmpRect, outBounds, mStackId, mTmpRect2,
                 mDisplayContent.mDividerControllerLocked.getContentWidth(), dockedOnTopOrLeft);
 
@@ -718,6 +718,19 @@ public class TaskStack implements DimLayer.DimLayerUser,
                                 1 /*allowResizeInDockedMode*/, fullscreen ? null : bounds));
             }
         }
+    }
+
+    void resetDockedStackToMiddle() {
+        if (mStackId != DOCKED_STACK_ID) {
+            throw new IllegalStateException("Not a docked stack=" + this);
+        }
+
+        mService.mDockedStackCreateBounds = null;
+
+        final Rect bounds = new Rect();
+        getStackDockedModeBoundsLocked(bounds, true /*ignoreVisibility*/);
+        mService.mH.obtainMessage(RESIZE_STACK, DOCKED_STACK_ID,
+                1 /*allowResizeInDockedMode*/, bounds).sendToTarget();
     }
 
     void detachDisplay() {

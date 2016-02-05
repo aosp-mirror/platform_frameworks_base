@@ -57,6 +57,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import static android.app.ActivityManager.StackId;
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
@@ -1608,6 +1609,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                             win.mAppToken.appDied = true;
                         }
                         mService.removeWindowLocked(win);
+                        if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
+                            // The owner of the docked divider died :( We reset the docked stack,
+                            // just in case they have the divider at an unstable position.
+                            final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+                            if (stack != null) {
+                                stack.resetDockedStackToMiddle();
+                            }
+                        }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         mService.removeWindowLocked(WindowState.this);
