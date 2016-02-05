@@ -344,8 +344,8 @@ bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
         // For some reason our surface was destroyed out from under us
         // This really shouldn't happen, but if it does we can recover easily
         // by just not trying to use the surface anymore
-        ALOGW("swapBuffers encountered EGL_BAD_SURFACE on %p, halting rendering...",
-                frame.mSurface);
+        ALOGW("swapBuffers encountered EGL error %d on %p, halting rendering...",
+                err, frame.mSurface);
         return false;
     }
     LOG_ALWAYS_FATAL("Encountered EGL error %d %s during rendering",
