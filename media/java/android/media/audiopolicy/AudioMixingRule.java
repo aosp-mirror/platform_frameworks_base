@@ -428,8 +428,17 @@ public class AudioMixingRule {
                     }
                 }
                 // rule didn't exist, add it
-                // FIXME doesn't work with RULE_MATCH_UID yet
-                mCriteria.add(new AttributeMatchCriterion(attrToMatch, rule));
+                switch (match_rule) {
+                    case RULE_MATCH_ATTRIBUTE_USAGE:
+                    case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                        mCriteria.add(new AttributeMatchCriterion(attrToMatch, rule));
+                        break;
+                    case RULE_MATCH_UID:
+                        mCriteria.add(new AttributeMatchCriterion(intProp, rule));
+                        break;
+                    default:
+                        throw new IllegalStateException("Unreachable code in addRuleInternal()");
+                }
             }
             return this;
         }
