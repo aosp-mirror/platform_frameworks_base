@@ -52,6 +52,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
@@ -173,6 +174,10 @@ public class ResolverActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // We're dispatching intents that might be coming from legacy apps, so
+        // don't kill ourselves.
+        StrictMode.disableDeathOnFileUriExposure();
+
         // Use a specialized prompt when we're handling the 'Home' app startActivity()
         final Intent intent = makeMyIntent();
         final Set<String> categories = intent.getCategories();
