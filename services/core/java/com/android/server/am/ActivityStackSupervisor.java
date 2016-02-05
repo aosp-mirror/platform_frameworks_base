@@ -583,7 +583,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord r = topRunningActivityLocked();
-        if (mService.mFocusedActivity != r) {
+        if (!mService.mDoingSetFocusedActivity && mService.mFocusedActivity != r) {
             // The focus activity should always be the top activity in the focused stack.
             // There will be chaos and anarchy if it isn't...
             mService.setFocusedActivityLocked(r, reason + " setFocusStack");

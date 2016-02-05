@@ -600,6 +600,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final AppErrors mAppErrors;
 
+    boolean mDoingSetFocusedActivity;
+
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown;
     }
@@ -2730,6 +2732,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedActivityLocked: r=" + r);
+
+        final boolean wasDoingSetFocusedActivity = mDoingSetFocusedActivity;
+        if (wasDoingSetFocusedActivity) Slog.w(TAG,
+                "setFocusedActivityLocked: called recursively, r=" + r + ", reason=" + reason);
+        mDoingSetFocusedActivity = true;
+
         final ActivityRecord last = mFocusedActivity;
         mFocusedActivity = r;
         if (r.task.isApplicationTask()) {
@@ -2780,6 +2788,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     FOREGROUND_PROFILE_CHANGED_MSG, mFocusedActivity.userId, 0).sendToTarget();
             mLastFocusedUserId = mFocusedActivity.userId;
         }
+
+        // Log a warning if the focused app is changed during the process. This could
+        // indicate a problem of the focus setting logic!
+        if (mFocusedActivity != r) Slog.w(TAG,
+                "setFocusedActivityLocked: r=" + r + " but focused to " + mFocusedActivity);
+        mDoingSetFocusedActivity = wasDoingSetFocusedActivity;
 
         EventLogTags.writeAmFocusedActivity(
                 mFocusedActivity == null ? -1 : mFocusedActivity.userId,
