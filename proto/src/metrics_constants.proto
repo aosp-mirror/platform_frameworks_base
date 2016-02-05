@@ -287,13 +287,14 @@ message MetricsEvent {
     QS_USER_TILE = 260;
     QS_BATTERY_TILE = 261;
     NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 262;
-    ACTION_ZEN_ALLOW_PEEK = 263;
+    ACTION_ZEN_ALLOW_WHEN_SCREEN_OFF = 263;
+    // Dead
     ACTION_ZEN_ALLOW_LIGHTS = 264;
     NOTIFICATION_TOPIC_NOTIFICATION = 265;
     ACTION_DEFAULT_SMS_APP_CHANGED = 266;
     QS_COLOR_MATRIX = 267;
     QS_CUSTOM = 268;
-    ACTION_ZEN_ALLOW_SCREEN_ON = 269;
+    ACTION_ZEN_ALLOW_WHEN_SCREEN_ON = 269;
 
     // Logged when the user docks a window from recents by
     // longpressing a task and dragging it to the dock area.
