@@ -510,7 +510,7 @@ public:
 
         size_t glyphCount = end - start;
 
-        if (CC_UNLIKELY(canvas->isHighContrastText())) {
+        if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
             // high contrast draw path
             int color = paint.getColor();
             int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
