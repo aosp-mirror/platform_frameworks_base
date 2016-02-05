@@ -753,7 +753,7 @@ public class Activity extends ContextThemeWrapper
     static final class NonConfigurationInstances {
         Object activity;
         HashMap<String, Object> children;
-        List<Fragment> fragments;
+        FragmentManagerNonConfig fragments;
         ArrayMap<String, LoaderManager> loaders;
         VoiceInteractor voiceInteractor;
     }
@@ -2070,7 +2070,7 @@ public class Activity extends ContextThemeWrapper
     NonConfigurationInstances retainNonConfigurationInstances() {
         Object activity = onRetainNonConfigurationInstance();
         HashMap<String, Object> children = onRetainNonConfigurationChildInstances();
-        List<Fragment> fragments = mFragments.retainNonConfig();
+        FragmentManagerNonConfig fragments = mFragments.retainNestedNonConfig();
         ArrayMap<String, LoaderManager> loaders = mFragments.retainLoaderNonConfig();
         if (activity == null && children == null && fragments == null && loaders == null
                 && mVoiceInteractor == null) {

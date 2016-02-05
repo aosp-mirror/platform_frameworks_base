@@ -4532,10 +4532,12 @@ package android.app {
     method public void noteStateNotSaved();
     method public android.view.View onCreateView(android.view.View, java.lang.String, android.content.Context, android.util.AttributeSet);
     method public void reportLoaderStart();
-    method public void restoreAllState(android.os.Parcelable, java.util.List<android.app.Fragment>);
+    method public deprecated void restoreAllState(android.os.Parcelable, java.util.List<android.app.Fragment>);
+    method public void restoreAllState(android.os.Parcelable, android.app.FragmentManagerNonConfig);
     method public void restoreLoaderNonConfig(android.util.ArrayMap<java.lang.String, android.app.LoaderManager>);
     method public android.util.ArrayMap<java.lang.String, android.app.LoaderManager> retainLoaderNonConfig();
-    method public java.util.List<android.app.Fragment> retainNonConfig();
+    method public android.app.FragmentManagerNonConfig retainNestedNonConfig();
+    method public deprecated java.util.List<android.app.Fragment> retainNonConfig();
     method public android.os.Parcelable saveAllState();
   }
 
@@ -4593,6 +4595,9 @@ package android.app {
 
   public static abstract interface FragmentManager.OnBackStackChangedListener {
     method public abstract void onBackStackChanged();
+  }
+
+  public class FragmentManagerNonConfig {
   }
 
   public abstract class FragmentTransaction {
