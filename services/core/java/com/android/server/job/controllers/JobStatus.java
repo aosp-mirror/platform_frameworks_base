@@ -349,9 +349,9 @@ public class JobStatus {
         pw.print(prefix); UserHandle.formatUid(pw, uId);
         pw.print(" tag="); pw.println(tag);
         pw.print(prefix);
-        pw.print("Source: uid="); UserHandle.formatUid(pw, sourceUid);
-        pw.print(" user="); pw.print(sourceUserId);
-        pw.print(" pkg="); pw.println(sourcePackageName);
+        pw.print("Source: uid="); UserHandle.formatUid(pw, getSourceUid());
+        pw.print(" user="); pw.print(getSourceUserId());
+        pw.print(" pkg="); pw.println(getSourcePackageName());
         pw.print(prefix); pw.println("JobInfo:");
         pw.print(prefix); pw.print("  Service: ");
         pw.println(job.getService().flattenToShortString());

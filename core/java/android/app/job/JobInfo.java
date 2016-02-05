@@ -24,6 +24,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.util.Log;
+import static android.util.TimeUtils.formatForLogging;
 
 import java.util.ArrayList;
 
@@ -640,12 +641,14 @@ public class JobInfo implements Parcelable {
             }
             JobInfo job = new JobInfo(this);
             if (job.intervalMillis != job.getIntervalMillis()) {
-                Log.w(TAG, "Specified interval is less than minimum interval. Clamped to "
-                        + job.getIntervalMillis());
+                Log.w(TAG, "Specified interval for " + mJobService.getPackageName() + " is "
+                        + formatForLogging(mIntervalMillis) + ". Clamped to " +
+                        formatForLogging(job.getIntervalMillis()));
             }
             if (job.flexMillis != job.getFlexMillis()) {
-                Log.w(TAG, "Specified flex is less than minimum flex. Clamped to "
-                        + job.getFlexMillis());
+                Log.w(TAG, "Specified interval for " + mJobService.getPackageName() + " is "
+                        + formatForLogging(mFlexMillis) + ". Clamped to " +
+                        formatForLogging(job.getFlexMillis()));
             }
             return job;
         }
