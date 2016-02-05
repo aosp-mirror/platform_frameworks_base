@@ -98,8 +98,13 @@ public final class NfcF extends BasicTagTechnology {
     /**
      * Send raw NFC-F commands to the tag and receive the response.
      *
-     * <p>Applications must not append the SoD (length) or EoD (CRC) to the payload,
-     * it will be automatically calculated.
+     * <p>Applications must not prefix the SoD (preamble and sync code)
+     * and/or append the EoD (CRC) to the payload, it will be automatically calculated.
+     *
+     * <p>A typical NFC-F frame for this method looks like:
+     * <pre>
+     * LENGTH (1 byte) --- CMD (1 byte) -- IDm (8 bytes) -- PARAMS (LENGTH - 10 bytes)
+     * </pre>
      *
      * <p>Use {@link #getMaxTransceiveLength} to retrieve the maximum amount of bytes
      * that can be sent with {@link #transceive}.
