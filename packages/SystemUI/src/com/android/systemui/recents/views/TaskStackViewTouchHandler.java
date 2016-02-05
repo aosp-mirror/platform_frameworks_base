@@ -59,8 +59,6 @@ import java.util.List;
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     private static final int INACTIVE_POINTER_ID = -1;
-
-    private static final RectFEvaluator RECT_EVALUATOR = new RectFEvaluator();
     private static final Interpolator STACK_TRANSFORM_INTERPOLATOR =
             new PathInterpolator(0.73f, 0.33f, 0.42f, 0.85f);
 
@@ -545,8 +543,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
             mTmpTransform.copyFrom(fromTransform);
             // We only really need to interpolate the bounds, progress and translation
-            mTmpTransform.rect.set(RECT_EVALUATOR.evaluate(dismissFraction, fromTransform.rect,
-                    toTransform.rect));
+            mTmpTransform.rect.set(Utilities.RECTF_EVALUATOR.evaluate(dismissFraction,
+                    fromTransform.rect, toTransform.rect));
             mTmpTransform.p = fromTransform.p + (toTransform.p - fromTransform.p) * dismissFraction;
             mTmpTransform.translationZ = fromTransform.translationZ +
                     (toTransform.translationZ - fromTransform.translationZ) * dismissFraction;

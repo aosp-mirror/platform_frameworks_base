@@ -62,6 +62,8 @@ public class Utilities {
                 }
             };
 
+    public static final RectFEvaluator RECTF_EVALUATOR = new RectFEvaluator();
+
     /**
      * @return the first parent walking up the view hierarchy that has the given class type.
      *
