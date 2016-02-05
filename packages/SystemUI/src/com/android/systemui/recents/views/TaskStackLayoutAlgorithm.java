@@ -383,6 +383,7 @@ public class TaskStackLayoutAlgorithm {
      */
     void update(TaskStack stack, ArraySet<Task.TaskKey> ignoreTasksSet) {
         SystemServicesProxy ssp = Recents.getSystemServices();
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
 
         // Clear the progress map
         mTaskIndexMap.clear();
@@ -449,7 +450,6 @@ public class TaskStackLayoutAlgorithm {
             if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1) {
                 mInitialScrollP = mMinScrollP;
             } else if (getDefaultFocusState() > 0f) {
-                RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
                 if (launchState.launchedFromHome) {
                     mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP, launchTaskIndex));
                 } else {
@@ -568,7 +568,7 @@ public class TaskStackLayoutAlgorithm {
             boolean isFrontMostTaskInGroup = task.group == null || task.group.isFrontMostTask(task);
             if (isFrontMostTaskInGroup) {
                 getStackTransform(taskProgress, mInitialScrollP, tmpTransform, null,
-                        false /* ignoreSingleTaskCase */);
+                        false /* ignoreSingleTaskCase */, false /* forceUpdate */);
                 float screenY = tmpTransform.rect.top;
                 boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
                 if (hasVisibleThumbnail) {
@@ -601,6 +601,12 @@ public class TaskStackLayoutAlgorithm {
      */
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform) {
+        return getStackTransform(task, stackScroll, transformOut, frontTransform,
+                false /* forceUpdate */);
+    }
+
+    public TaskViewTransform getStackTransform(Task task, float stackScroll,
+        TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate) {
         if (mFreeformLayoutAlgorithm.isTransformAvailable(task, this)) {
             mFreeformLayoutAlgorithm.getTransform(task, transformOut, this);
             return transformOut;
@@ -610,8 +616,9 @@ public class TaskStackLayoutAlgorithm {
                 transformOut.reset();
                 return transformOut;
             }
-            return getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
-                    frontTransform, false /* ignoreSingleTaskCase */);
+            getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
+                    frontTransform, false /* ignoreSingleTaskCase */, forceUpdate);
+            return transformOut;
         }
     }
 
@@ -635,9 +642,9 @@ public class TaskStackLayoutAlgorithm {
      *                             internally to ensure that we can calculate the transform for any
      *                             position in the stack.
      */
-    public TaskViewTransform getStackTransform(float taskProgress, float stackScroll,
+    public void getStackTransform(float taskProgress, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
-            boolean ignoreSingleTaskCase) {
+            boolean ignoreSingleTaskCase, boolean forceUpdate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Compute the focused and unfocused offset
@@ -658,9 +665,9 @@ public class TaskStackLayoutAlgorithm {
         }
 
         // Skip if the task is not visible
-        if (!unfocusedVisible && !focusedVisible) {
+        if (!forceUpdate && !unfocusedVisible && !focusedVisible) {
             transformOut.reset();
-            return transformOut;
+            return;
         }
 
         int x = (mStackRect.width() - mTaskRect.width()) / 2;
@@ -700,7 +707,6 @@ public class TaskStackLayoutAlgorithm {
         transformOut.visible = (transformOut.rect.top < mStackRect.bottom) &&
                 (frontTransform == null || transformOut.rect.top != frontTransform.rect.top);
         transformOut.p = relP;
-        return transformOut;
     }
 
     /**
@@ -797,8 +803,10 @@ public class TaskStackLayoutAlgorithm {
                 mFocusState * (mFocusedRange.relativeMin - mUnfocusedRange.relativeMin);
         float max = mUnfocusedRange.relativeMax +
                 mFocusState * (mFocusedRange.relativeMax - mUnfocusedRange.relativeMax);
-        getStackTransform(min, 0f, mBackOfStackTransform, null, true /* ignoreSingleTaskCase */);
-        getStackTransform(max, 0f, mFrontOfStackTransform, null, true /* ignoreSingleTaskCase */);
+        getStackTransform(min, 0f, mBackOfStackTransform, null, true /* ignoreSingleTaskCase */,
+                true /* forceUpdate */);
+        getStackTransform(max, 0f, mFrontOfStackTransform, null, true /* ignoreSingleTaskCase */,
+                true /* forceUpdate */);
         mBackOfStackTransform.visible = true;
         mFrontOfStackTransform.visible = true;
     }

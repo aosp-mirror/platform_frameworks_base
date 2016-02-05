@@ -38,6 +38,7 @@ import android.util.MutableBoolean;
 import android.view.AppTransitionAnimationSpec;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.Prefs;
@@ -48,6 +49,7 @@ import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.recents.events.activity.EnterRecentsWindowLastAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.activity.IterateRecentsEvent;
+import com.android.systemui.recents.events.activity.LaunchNextTaskRequestEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
@@ -81,8 +83,10 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener {
 
     private final static String TAG = "RecentsImpl";
+
     // The minimum amount of time between each recents button press that we will handle
     private final static int MIN_TOGGLE_DELAY_MS = 350;
+
     // The duration within which the user releasing the alt tab (from when they pressed alt tab)
     // that the fast alt-tab animation will run.  If the user's alt-tab takes longer than this
     // duration, then we will toggle recents after this duration.
@@ -337,21 +341,31 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mTriggeredFromAltTab = false;
 
         try {
+            ViewConfiguration viewConfig = ViewConfiguration.get(mContext);
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
+            long elapsedTime = SystemClock.elapsedRealtime() - mLastToggleTime;
+
             if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (!launchState.launchedWithAltTab) {
-                    // Notify recents to move onto the next task
-                    EventBus.getDefault().post(new IterateRecentsEvent());
+                    // If the user taps quickly
+                    if (ViewConfiguration.getDoubleTapMinTime() < elapsedTime &&
+                            elapsedTime < ViewConfiguration.getDoubleTapTimeout()) {
+                        // Launch the next focused task
+                        EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
+                    } else {
+                        // Notify recents to move onto the next task
+                        EventBus.getDefault().post(new IterateRecentsEvent());
+                    }
                 } else {
                     // If the user has toggled it too quickly, then just eat up the event here (it's
                     // better than showing a janky screenshot).
                     // NOTE: Ideally, the screenshot mechanism would take the window transform into
                     // account
-                    if ((SystemClock.elapsedRealtime() - mLastToggleTime) < MIN_TOGGLE_DELAY_MS) {
+                    if (elapsedTime < MIN_TOGGLE_DELAY_MS) {
                         return;
                     }
 
@@ -364,7 +378,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 // better than showing a janky screenshot).
                 // NOTE: Ideally, the screenshot mechanism would take the window transform into
                 // account
-                if ((SystemClock.elapsedRealtime() - mLastToggleTime) < MIN_TOGGLE_DELAY_MS) {
+                if (elapsedTime < MIN_TOGGLE_DELAY_MS) {
                     return;
                 }
 

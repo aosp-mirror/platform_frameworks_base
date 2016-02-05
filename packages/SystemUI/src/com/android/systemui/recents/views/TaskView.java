@@ -242,7 +242,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     void updateViewPropertiesToTaskTransform(TaskViewTransform toTransform,
-                                             AnimationProps toAnimation, ValueAnimator.AnimatorUpdateListener updateCallback) {
+            AnimationProps toAnimation, ValueAnimator.AnimatorUpdateListener updateCallback) {
         RecentsConfiguration config = Recents.getConfiguration();
         cancelTransformAnimation();
 
@@ -261,14 +261,16 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
                 updateCallback.onAnimationUpdate(null);
             }
         } else {
+            // Both the progress and the update are a function of the bounds movement of the task
             if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
-                mTmpAnimators.add(ObjectAnimator.ofFloat(this, TASK_PROGRESS, getTaskProgress(),
-                        toTransform.p));
+                ObjectAnimator anim = ObjectAnimator.ofFloat(this, TASK_PROGRESS, getTaskProgress(),
+                        toTransform.p);
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, anim));
             }
             if (updateCallback != null) {
                 ValueAnimator updateCallbackAnim = ValueAnimator.ofInt(0, 1);
                 updateCallbackAnim.addUpdateListener(updateCallback);
-                mTmpAnimators.add(updateCallbackAnim);
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, updateCallbackAnim));
             }
 
             // Create the animator

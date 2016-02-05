@@ -67,9 +67,30 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
     public static class ViewHolder extends RecyclerView.ViewHolder implements Task.TaskCallbacks {
         public final View content;
 
-        public ViewHolder(View v) {
-            super(v);
-            content = v;
+        private Task mTask;
+
+        public ViewHolder(View content) {
+            super(content);
+            this.content = content;
+        }
+
+        /**
+         * Binds this view holder to the given task.
+         */
+        public void bindToTask(Task newTask) {
+            unbindFromTask();
+            mTask = newTask;
+            mTask.addCallback(this);
+        }
+
+        /**
+         * Unbinds this view holder from the
+         */
+        public void unbindFromTask() {
+            if (mTask != null) {
+                mTask.removeCallback(this);
+                mTask = null;
+            }
         }
 
         @Override
@@ -267,12 +288,13 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             }
             case TASK_ROW_VIEW_TYPE: {
                 TaskRow taskRow = (TaskRow) row;
-                taskRow.task.addCallback(holder);
                 TextView tv = (TextView) holder.content.findViewById(R.id.description);
                 tv.setText(taskRow.task.title);
                 ImageView iv = (ImageView) holder.content.findViewById(R.id.icon);
                 iv.setAlpha(0f);
                 holder.content.setOnClickListener(taskRow);
+
+                holder.bindToTask(taskRow.task);
                 loader.loadTaskData(taskRow.task, false /* fetchAndInvalidateThumbnails */);
                 break;
             }
@@ -289,7 +311,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             if (viewType == TASK_ROW_VIEW_TYPE) {
                 TaskRow taskRow = (TaskRow) row;
                 loader.unloadTaskData(taskRow.task);
-                taskRow.task.removeCallback(holder);
+                holder.unbindFromTask();
             }
         }
     }

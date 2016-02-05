@@ -39,8 +39,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final boolean EnableAffiliatedTaskGroups = true;
         // Overrides the Tuner flags and enables the fast toggle and timeout
         public static final boolean EnableFastToggleTimeoutOverride = true;
-        // Enables toggling the fast-toggle timeout immediately after entering Recents
-        public static final boolean EnableFastToggleTimeoutOnEnter = true;
 
         // Enables us to create mock recents tasks
         public static final boolean EnableMockTasks = false;
@@ -90,9 +88,6 @@ public class RecentsDebugFlags implements TunerService.Tunable {
      * @return whether the initial stack state is paging.
      */
     public boolean isInitialStatePaging() {
-        if (Static.EnableFastToggleTimeoutOnEnter) {
-            return true;
-        }
         return mInitialStatePaging;
     }
 

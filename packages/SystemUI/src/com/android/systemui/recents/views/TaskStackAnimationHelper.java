@@ -108,7 +108,7 @@ public class TaskStackAnimationHelper {
             return;
         }
 
-        int offscreenY = stackLayout.mStackRect.bottom;
+        int offscreenYOffset = stackLayout.mStackRect.height();
         int taskViewAffiliateGroupEnterOffset = res.getDimensionPixelSize(
                 R.dimen.recents_task_view_affiliate_group_enter_offset);
 
@@ -145,7 +145,7 @@ public class TaskStackAnimationHelper {
             } else if (launchState.launchedFromHome) {
                 // Move the task view off screen (below) so we can animate it in
                 RectF bounds = new RectF(mTmpTransform.rect);
-                bounds.offsetTo(bounds.left, offscreenY);
+                bounds.offset(0, offscreenYOffset);
                 tv.setLeftTopRightBottom((int) bounds.left, (int) bounds.top, (int) bounds.right,
                         (int) bounds.bottom);
             }
@@ -247,7 +247,7 @@ public class TaskStackAnimationHelper {
             return;
         }
 
-        int offscreenY = stackLayout.mStackRect.bottom;
+        int offscreenYOffset = stackLayout.mStackRect.height();
 
         // Create the animations for each of the tasks
         List<TaskView> taskViews = mStackView.getTaskViews();
@@ -277,7 +277,7 @@ public class TaskStackAnimationHelper {
 
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
-            mTmpTransform.rect.offsetTo(mTmpTransform.rect.left, offscreenY);
+            mTmpTransform.rect.offset(0, offscreenYOffset);
             mStackView.updateTaskViewToTransform(tv, mTmpTransform, taskAnimation);
         }
     }
