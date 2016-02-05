@@ -34,6 +34,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
@@ -230,6 +231,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                         if (parent != null) {
                             parent.requestDisallowInterceptTouchEvent(true);
                         }
+
+                        MetricsLogger.action(mSv.getContext(), MetricsEvent.OVERVIEW_SCROLL);
                     }
                 }
                 if (mIsScrolling) {

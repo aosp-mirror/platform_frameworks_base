@@ -43,6 +43,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
@@ -1601,6 +1603,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public final void onBusEvent(TaskViewDismissedEvent event) {
         removeTaskViewFromStack(event.taskView, event.task);
         EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
+
+        MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_DISMISS,
+                event.task.key.getComponent().toString());
     }
 
     public final void onBusEvent(FocusNextTaskViewEvent event) {

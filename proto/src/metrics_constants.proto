@@ -318,10 +318,10 @@ message MetricsEvent {
     OVERVIEW_HISTORY = 275;
 
     // Logged when the user pages through overview.
-    ACTION_OVERVIEW_PAGE = 276;
+    OVERVIEW_PAGE = 276;
 
     // Logged when the user launches a task from overview.
-    ACTION_OVERVIEW_SELECT = 277;
+    OVERVIEW_SELECT = 277;
 
     // Logged when the user views the emergency info.
     ACTION_VIEW_EMERGENCY_INFO = 278;
@@ -353,5 +353,14 @@ message MetricsEvent {
     // Logged when the user undocks a previously docked window by long pressing recents while in
     // docked mode.
     ACTION_WINDOW_UNDOCK_LONGPRESS = 286;
+
+    // Logged when the user scrolls through overview manually
+    OVERVIEW_SCROLL = 287;
+
+    // Logged when the overview times out automatically selecting an app
+    OVERVIEW_SELECT_TIMEOUT = 288;
+
+    // Logged when a user dismisses a task in overview
+    OVERVIEW_DISMISS = 289;
   }
 }

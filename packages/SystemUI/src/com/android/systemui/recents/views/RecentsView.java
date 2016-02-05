@@ -248,13 +248,18 @@ public class RecentsView extends FrameLayout {
     }
 
     /** Launches the focused task from the first stack if possible */
-    public boolean launchFocusedTask() {
+    public boolean launchFocusedTask(int logEvent) {
         if (mTaskStackView != null) {
             Task task = mTaskStackView.getFocusedTask();
             if (task != null) {
                 TaskView taskView = mTaskStackView.getChildViewForTask(task);
                 EventBus.getDefault().send(new LaunchTaskEvent(taskView, task, null,
                         INVALID_STACK_ID, false));
+
+                if (logEvent != 0) {
+                    MetricsLogger.action(getContext(), logEvent,
+                            task.key.getComponent().toString());
+                }
                 return true;
             }
         }
