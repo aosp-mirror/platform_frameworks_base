@@ -45,7 +45,9 @@ import android.util.Log;
  *         &lt;action android:name="android.service.notification.NotificationAssistantService" />
  *     &lt;/intent-filter>
  * &lt;/service></pre>
+ * @hide
  */
+@SystemApi
 public abstract class NotificationAssistantService extends NotificationListenerService {
     private static final String TAG = "NotificationAssistant";
 
@@ -208,29 +210,6 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
-    }
-
-    /**
-     * Add an annotation to a an existing notification. The delete intent will
-     * be fired when the host notification is deleted, or when this annotation
-     * is removed or replaced.
-     *
-     * @param key the key of the notification to be annotated
-     * @param annotation the new annotation object
-     */
-    public final void setAnnotation(String key, Notification annotation)
-    {
-        // TODO: pack up the annotation and send it to the NotificationManager.
-    }
-
-    /**
-     * Remove the annotation from a notification.
-     *
-     * @param key the key of the notification to be cleansed of annotatons
-     */
-    public final void clearAnnotation(String key)
-    {
-        // TODO: ask the NotificationManager to clear the annotation.
     }
 
     private class NotificationAssistantWrapper extends NotificationListenerWrapper {
