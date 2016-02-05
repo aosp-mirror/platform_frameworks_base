@@ -29,6 +29,7 @@ import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IVolumeController;
+import android.media.ToneGenerator;
 import android.media.VolumePolicy;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession.Token;
@@ -66,6 +67,9 @@ public class VolumeDialogController {
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
     private static final int VIBRATE_HINT_DURATION = 50;
 
+    private static final int FREE_DELAY = 10000;
+    private static final int BEEP_DURATION = 150;
+
     private static final int[] STREAMS = {
         AudioSystem.STREAM_ALARM,
         AudioSystem.STREAM_BLUETOOTH_SCO,
@@ -101,10 +105,13 @@ public class VolumeDialogController {
     private VolumePolicy mVolumePolicy;
     private boolean mShowDndTile = true;
 
+    private ToneGenerator mToneGenerators[];
+
     public VolumeDialogController(Context context, ComponentName component) {
         mContext = context.getApplicationContext();
         Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
         mComponent = component;
+        mToneGenerators = new ToneGenerator[AudioSystem.getNumStreamTypes()];
         mWorkerThread = new HandlerThread(VolumeDialogController.class.getSimpleName());
         mWorkerThread.start();
         mWorker = new W(mWorkerThread.getLooper());
@@ -284,6 +291,7 @@ public class VolumeDialogController {
         final boolean fromKey = (flags & AudioManager.FLAG_FROM_KEY) != 0;
         final boolean showVibrateHint = (flags & AudioManager.FLAG_SHOW_VIBRATE_HINT) != 0;
         final boolean showSilentHint = (flags & AudioManager.FLAG_SHOW_SILENT_HINT) != 0;
+        final boolean playSound = (flags & AudioManager.FLAG_PLAY_SOUND) != 0;
         boolean changed = false;
         if (showUI) {
             changed |= updateActiveStreamW(stream);
@@ -302,6 +310,18 @@ public class VolumeDialogController {
         }
         if (showSilentHint) {
             mCallbacks.onShowSilentHint();
+        }
+        if (playSound) {
+            if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0) {
+                mWorker.removeMessages(W.PLAY_SOUND);
+                mWorker.sendMessageDelayed(mWorker.obtainMessage(W.PLAY_SOUND, stream, flags),
+                        AudioSystem.PLAY_SOUND_DELAY);
+            }
+
+            if ((flags & AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE) != 0) {
+                mWorker.removeMessages(W.PLAY_SOUND);
+                onStopSoundsW();
+            }
         }
         if (changed && fromKey) {
             Events.writeEvent(mContext, Events.EVENT_KEY, stream, lastAudibleStreamVolume);
@@ -544,6 +564,9 @@ public class VolumeDialogController {
         private static final int NOTIFY_VISIBLE = 12;
         private static final int USER_ACTIVITY = 13;
         private static final int SHOW_SAFETY_WARNING = 14;
+        private static final int PLAY_SOUND = 15;
+        private static final int STOP_SOUNDS = 16;
+        private static final int FREE_RESOURCES = 17;
 
         W(Looper looper) {
             super(looper);
@@ -566,6 +589,9 @@ public class VolumeDialogController {
                 case NOTIFY_VISIBLE: onNotifyVisibleW(msg.arg1 != 0); break;
                 case USER_ACTIVITY: onUserActivityW(); break;
                 case SHOW_SAFETY_WARNING: onShowSafetyWarningW(msg.arg1); break;
+                case PLAY_SOUND: onPlaySoundW(msg.arg1, msg.arg2); break;
+                case STOP_SOUNDS: onStopSoundsW(); break;
+                case FREE_RESOURCES: onFreeResourcesW(); break;
             }
         }
     }
@@ -694,6 +720,65 @@ public class VolumeDialogController {
         }
     }
 
+    protected void onPlaySoundW(int streamType, int flags) {
+
+        // If preference is no sound - just exit here
+        if (Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.VOLUME_ADJUST_SOUNDS_ENABLED, 1) == 0) {
+            return;
+        }
+
+        if (mWorker.hasMessages(W.STOP_SOUNDS)) {
+            mWorker.removeMessages(W.STOP_SOUNDS);
+            // Force stop right now
+            onStopSoundsW();
+        }
+
+        ToneGenerator toneGen = getOrCreateToneGeneratorW(streamType);
+        if (toneGen != null) {
+            toneGen.startTone(ToneGenerator.TONE_PROP_BEEP);
+            mWorker.sendMessageDelayed(mWorker.obtainMessage(W.STOP_SOUNDS), BEEP_DURATION);
+        }
+
+        mWorker.removeMessages(W.FREE_RESOURCES);
+        mWorker.sendMessageDelayed(mWorker.obtainMessage(W.FREE_RESOURCES), FREE_DELAY);
+    }
+
+    protected void onStopSoundsW() {
+        int numStreamTypes = AudioSystem.getNumStreamTypes();
+        for (int i = numStreamTypes - 1; i >= 0; i--) {
+            ToneGenerator toneGen = mToneGenerators[i];
+            if (toneGen != null) {
+                toneGen.stopTone();
+            }
+        }
+    }
+
+    private ToneGenerator getOrCreateToneGeneratorW(int streamType) {
+        if (mToneGenerators[streamType] == null) {
+            try {
+                mToneGenerators[streamType] = new ToneGenerator(streamType,
+                        ToneGenerator.MAX_VOLUME);
+            } catch (RuntimeException e) {
+                if (false) {
+                    Log.d(TAG, "ToneGenerator constructor failed with "
+                            + "RuntimeException: " + e);
+                }
+            }
+        }
+        return mToneGenerators[streamType];
+    }
+
+    protected void onFreeResourcesW() {
+        synchronized (this) {
+            for (int i = mToneGenerators.length - 1; i >= 0; i--) {
+                if (mToneGenerators[i] != null) {
+                    mToneGenerators[i].release();
+                }
+                mToneGenerators[i] = null;
+            }
+        }
+    }
 
     private final class SettingObserver extends ContentObserver {
         private final Uri SERVICE_URI = Settings.Secure.getUriFor(
