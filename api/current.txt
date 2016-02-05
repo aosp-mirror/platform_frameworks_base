@@ -104,6 +104,7 @@ package android {
     field public static final java.lang.String READ_WRITE_CONTACT_METADATA = "android.permission.READ_WRITE_CONTACT_METADATA";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_BOOT_COMPLETED = "android.permission.RECEIVE_BOOT_COMPLETED";
+    field public static final java.lang.String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field public static final java.lang.String RECEIVE_MMS = "android.permission.RECEIVE_MMS";
     field public static final java.lang.String RECEIVE_SMS = "android.permission.RECEIVE_SMS";
     field public static final java.lang.String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
