@@ -358,7 +358,7 @@ import java.util.Set;
  *     &lt;category android:name="{@link #CATEGORY_DEFAULT android.intent.category.DEFAULT}" /&gt;
  *     &lt;data android:mimeType="vnd.android.cursor.item/<i>vnd.google.note</i>" /&gt;
  * &lt;/intent-filter&gt;</pre>
- * <p>This filter describes the ability return to the caller a note selected by
+ * <p>This filter describes the ability to return to the caller a note selected by
  * the user without needing to know where it came from.  The data type
  * <code>vnd.android.cursor.item/vnd.google.note</code> is a URI from which
  * a Cursor of exactly one (<code>vnd.android.cursor.item</code>) item can
