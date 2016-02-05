@@ -2404,7 +2404,7 @@ public class GridView extends AbsListView {
         }
 
         final LayoutParams lp = (LayoutParams) view.getLayoutParams();
-        final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
+        final boolean isHeading = lp != null && lp.viewType == ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
         final boolean isSelected = isItemChecked(position);
         final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(
                 row, 1, column, 1, isHeading, isSelected);
