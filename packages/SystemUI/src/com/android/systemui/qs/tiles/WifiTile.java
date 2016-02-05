@@ -181,6 +181,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
     }
 
+    @Override
+    public boolean isAvailable() {
+        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
+    }
+
     private static String removeDoubleQuotes(String string) {
         if (string == null) return null;
         final int length = string.length();
@@ -188,10 +193,6 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             return string.substring(1, length - 1);
         }
         return string;
-    }
-
-    public static boolean isSupported(Host host) {
-        return host.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI);
     }
 
     protected static final class CallbackInfo {

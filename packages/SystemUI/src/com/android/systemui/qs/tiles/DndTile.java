@@ -179,6 +179,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
         }
     }
 
+    @Override
+    public boolean isAvailable() {
+        return isVisible(mContext);
+    }
+
     private final OnSharedPreferenceChangeListener mPrefListener
             = new OnSharedPreferenceChangeListener() {
         @Override
@@ -205,10 +210,6 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             refreshState();
         }
     };
-
-    public static boolean isSupported(Host host) {
-        return isVisible(host.getContext());
-    }
 
     private final class DndDetailAdapter implements DetailAdapter, OnAttachStateChangeListener {
 
