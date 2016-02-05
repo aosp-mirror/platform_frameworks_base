@@ -117,6 +117,9 @@ public final class MediaBrowser {
      * to the media browse service when connecting and retrieving the root id
      * for browsing, or null if none. The contents of this bundle may affect
      * the information returned when browsing.
+     * @see android.service.media.MediaBrowserService.BrowserRoot#EXTRA_RECENT
+     * @see android.service.media.MediaBrowserService.BrowserRoot#EXTRA_OFFLINE
+     * @see android.service.media.MediaBrowserService.BrowserRoot#EXTRA_SUGGESTED
      */
     public MediaBrowser(Context context, ComponentName serviceComponent,
             ConnectionCallback callback, Bundle rootHints) {

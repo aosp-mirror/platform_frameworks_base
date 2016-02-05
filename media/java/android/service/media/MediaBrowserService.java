@@ -351,6 +351,9 @@ public abstract class MediaBrowserService extends Service {
      *            root id for browsing, or null if none. The contents of this
      *            bundle may affect the information returned when browsing.
      * @return The {@link BrowserRoot} for accessing this app's content or null.
+     * @see BrowserRoot#EXTRA_RECENT
+     * @see BrowserRoot#EXTRA_OFFLINE
+     * @see BrowserRoot#EXTRA_SUGGESTED
      */
     public abstract @Nullable BrowserRoot onGetRoot(@NonNull String clientPackageName,
             int clientUid, @Nullable Bundle rootHints);
@@ -667,6 +670,57 @@ public abstract class MediaBrowserService extends Service {
      * when first connected.
      */
     public static final class BrowserRoot {
+        /**
+         * The lookup key for a boolean that indicates whether the browser service should return a
+         * browser root for recently played media items.
+         *
+         * <p>When creating a media browser for a given media browser service, this key can be
+         * supplied as a root hint for retrieving media items that are recently played.
+         * If the media browser service can provide such media items, the implementation must return
+         * the key in the root hint when {@link #onGetRoot(String, int, Bundle)} is called back.
+         *
+         * <p>The root hint may contain multiple keys.
+         *
+         * @see #EXTRA_OFFLINE
+         * @see #EXTRA_SUGGESTED
+         */
+        public static final String EXTRA_RECENT = "android.service.media.extra.RECENT";
+
+        /**
+         * The lookup key for a boolean that indicates whether the browser service should return a
+         * browser root for offline media items.
+         *
+         * <p>When creating a media browser for a given media browser service, this key can be
+         * supplied as a root hint for retrieving media items that are can be played without an
+         * internet connection.
+         * If the media browser service can provide such media items, the implementation must return
+         * the key in the root hint when {@link #onGetRoot(String, int, Bundle)} is called back.
+         *
+         * <p>The root hint may contain multiple keys.
+         *
+         * @see #EXTRA_RECENT
+         * @see #EXTRA_SUGGESTED
+         */
+        public static final String EXTRA_OFFLINE = "android.service.media.extra.OFFLINE";
+
+        /**
+         * The lookup key for a boolean that indicates whether the browser service should return a
+         * browser root for suggested media items.
+         *
+         * <p>When creating a media browser for a given media browser service, this key can be
+         * supplied as a root hint for retrieving the media items suggested by the media browser
+         * service. The list of media items passed in {@link android.media.browse.MediaBrowser.SubscriptionCallback#onChildrenLoaded(String, List)}
+         * is considered ordered by relevance, first being the top suggestion.
+         * If the media browser service can provide such media items, the implementation must return
+         * the key in the root hint when {@link #onGetRoot(String, int, Bundle)} is called back.
+         *
+         * <p>The root hint may contain multiple keys.
+         *
+         * @see #EXTRA_RECENT
+         * @see #EXTRA_OFFLINE
+         */
+        public static final String EXTRA_SUGGESTED = "android.service.media.extra.SUGGESTED";
+
         final private String mRootId;
         final private Bundle mExtras;
 
