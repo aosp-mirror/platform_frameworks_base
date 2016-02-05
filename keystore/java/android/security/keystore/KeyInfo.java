@@ -269,7 +269,7 @@ public class KeyInfo implements KeySpec {
 
     /**
      * Returns {@code true} if the requirement that this key can only be used if the user has been
-     * authenticated if enforced by secure hardware (e.g., Trusted Execution Environment (TEE) or
+     * authenticated is enforced by secure hardware (e.g., Trusted Execution Environment (TEE) or
      * Secure Element (SE)).
      *
      * @see #isUserAuthenticationRequired()
