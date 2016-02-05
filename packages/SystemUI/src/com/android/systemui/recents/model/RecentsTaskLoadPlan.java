@@ -188,11 +188,12 @@ public class RecentsTaskLoadPlan {
                     : null;
             Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
+            int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
 
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, contentDescription, dismissDescription, activityColor,
-                    !isStackTask, isLaunchTarget, t.bounds, t.taskDescription);
+                    backgroundColor, !isStackTask, isLaunchTarget, t.bounds, t.taskDescription);
 
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);

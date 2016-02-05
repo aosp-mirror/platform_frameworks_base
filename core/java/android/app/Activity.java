@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static java.lang.Character.MIN_VALUE;
+
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
@@ -26,20 +28,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
-import android.os.PersistableBundle;
-import android.transition.Scene;
-import android.transition.TransitionManager;
-import android.util.ArrayMap;
-import android.util.SuperNotCalledException;
-import android.view.DragEvent;
-import android.view.DropPermissions;
-import android.view.Window.WindowControllerCallback;
-import android.widget.Toolbar;
-
-import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.app.ToolbarActionBar;
-
 import android.annotation.SystemApi;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
@@ -61,7 +49,12 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.InsetDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
@@ -71,6 +64,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.UserHandle;
@@ -78,16 +72,22 @@ import android.text.Selection;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
+import android.transition.Scene;
+import android.transition.TransitionManager;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SuperNotCalledException;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ContextThemeWrapper;
+import android.view.DragEvent;
+import android.view.DropPermissions;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.KeyboardShortcutInfo;
@@ -104,11 +104,17 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewManager;
 import android.view.ViewRootImpl;
 import android.view.Window;
+import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
+import android.widget.Toolbar;
 
+import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.app.ToolbarActionBar;
+import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 import java.io.FileDescriptor;
@@ -118,8 +124,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static java.lang.Character.MIN_VALUE;
 
 /**
  * An activity is a single, focused thing that the user can do.  Almost all
@@ -3974,14 +3978,49 @@ public class Activity extends ContextThemeWrapper
         // Get the primary color and update the TaskDescription for this activity
         if (theme != null) {
             TypedArray a = theme.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
+            int windowBgResourceId = a.getResourceId(
+                    com.android.internal.R.styleable.Window_windowBackground, 0);
+            int windowBgFallbackResourceId = a.getResourceId(
+                    com.android.internal.R.styleable.Window_windowBackgroundFallback, 0);
             int colorPrimary = a.getColor(com.android.internal.R.styleable.Theme_colorPrimary, 0);
+            int colorBg = tryExtractColorFromDrawable(DecorView.getResizingBackgroundDrawable(this,
+                    windowBgResourceId, windowBgFallbackResourceId));
             a.recycle();
             if (colorPrimary != 0) {
-                ActivityManager.TaskDescription v = new ActivityManager.TaskDescription(null, null,
-                        colorPrimary);
-                setTaskDescription(v);
+                ActivityManager.TaskDescription td = new ActivityManager.TaskDescription();
+                td.setPrimaryColor(colorPrimary);
+                td.setBackgroundColor(colorBg);
+                setTaskDescription(td);
             }
         }
+    }
+
+    /**
+     * Attempts to extract the color from a given drawable.
+     *
+     * @return the extracted color or 0 if no color could be extracted.
+     */
+    private int tryExtractColorFromDrawable(Drawable drawable) {
+        if (drawable instanceof ColorDrawable) {
+            return ((ColorDrawable) drawable).getColor();
+        } else if (drawable instanceof InsetDrawable) {
+            return tryExtractColorFromDrawable(((InsetDrawable) drawable).getDrawable());
+        } else if (drawable instanceof ShapeDrawable) {
+            Paint p = ((ShapeDrawable) drawable).getPaint();
+            if (p != null) {
+                return p.getColor();
+            }
+        } else if (drawable instanceof LayerDrawable) {
+            LayerDrawable ld = (LayerDrawable) drawable;
+            int numLayers = ld.getNumberOfLayers();
+            for (int i = 0; i < numLayers; i++) {
+                int color = tryExtractColorFromDrawable(ld.getDrawable(i));
+                if (color != 0) {
+                    return color;
+                }
+            }
+        }
+        return 0;
     }
 
     /**
@@ -5612,8 +5651,8 @@ public class Activity extends ContextThemeWrapper
         if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
             final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
             final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size, true);
-            td = new ActivityManager.TaskDescription(taskDescription.getLabel(), icon,
-                    taskDescription.getPrimaryColor());
+            td = new ActivityManager.TaskDescription(taskDescription);
+            td.setIcon(icon);
         } else {
             td = taskDescription;
         }

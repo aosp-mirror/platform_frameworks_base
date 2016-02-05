@@ -128,6 +128,7 @@ public class Task {
     public String contentDescription;
     public String dismissDescription;
     public int colorPrimary;
+    public int colorBackground;
     public boolean useLightOnPrimaryColor;
 
     /**
@@ -154,8 +155,8 @@ public class Task {
 
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
                 Bitmap thumbnail, String title, String contentDescription,
-                String dismissDescription, int colorPrimary, boolean isHistorical,
-                boolean isLaunchTarget, Rect bounds,
+                String dismissDescription, int colorPrimary, int colorBackground,
+                boolean isHistorical, boolean isLaunchTarget, Rect bounds,
                 ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
@@ -168,6 +169,7 @@ public class Task {
         this.contentDescription = contentDescription;
         this.dismissDescription = dismissDescription;
         this.colorPrimary = hasAffiliationGroupColor ? affiliationColor : colorPrimary;
+        this.colorBackground = colorBackground;
         this.useLightOnPrimaryColor = Utilities.computeContrastBetweenColors(this.colorPrimary,
                 Color.WHITE) > 3f;
         this.bounds = bounds;
@@ -188,6 +190,7 @@ public class Task {
         this.contentDescription = o.contentDescription;
         this.dismissDescription = o.dismissDescription;
         this.colorPrimary = o.colorPrimary;
+        this.colorBackground = o.colorBackground;
         this.useLightOnPrimaryColor = o.useLightOnPrimaryColor;
         this.bounds = o.bounds;
         this.isLaunchTarget = o.isLaunchTarget;

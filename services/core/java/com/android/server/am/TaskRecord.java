@@ -1011,6 +1011,7 @@ final class TaskRecord {
             String label = null;
             String iconFilename = null;
             int colorPrimary = 0;
+            int colorBackground = 0;
             for (--activityNdx; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = mActivities.get(activityNdx);
                 if (r.taskDescription != null) {
@@ -1023,9 +1024,13 @@ final class TaskRecord {
                     if (colorPrimary == 0) {
                         colorPrimary = r.taskDescription.getPrimaryColor();
                     }
+                    if (colorBackground == 0) {
+                        colorBackground = r.taskDescription.getBackgroundColor();
+                    }
                 }
             }
-            lastTaskDescription = new TaskDescription(label, colorPrimary, iconFilename);
+            lastTaskDescription = new TaskDescription(label, null, iconFilename, colorPrimary,
+                    colorBackground);
             // Update the task affiliation color if we are the parent of the group
             if (taskId == mAffiliatedTaskId) {
                 mAffiliatedTaskColor = lastTaskDescription.getPrimaryColor();
