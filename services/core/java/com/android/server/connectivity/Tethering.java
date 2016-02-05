@@ -451,7 +451,7 @@ public class Tethering extends BaseNetworkObserver {
                 ((BluetoothPan) proxy).setBluetoothTethering(enable);
                 // TODO: Enabling bluetooth tethering can fail asynchronously here.
                 // We should figure out a way to bubble up that failure instead of sending success.
-                int result = ((BluetoothPan) proxy).isTetheringOn() ?
+                int result = ((BluetoothPan) proxy).isTetheringOn() == enable ?
                         ConnectivityManager.TETHER_ERROR_NO_ERROR :
                         ConnectivityManager.TETHER_ERROR_MASTER_ERROR;
                 sendTetherResult(receiver, result);
