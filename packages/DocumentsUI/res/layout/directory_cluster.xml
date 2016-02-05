@@ -25,7 +25,7 @@
         android:elevation="8dp"
         android:background="@color/material_grey_50"/>
 
-    <com.android.documentsui.DirectoryContainerView
+    <FrameLayout
         android:id="@+id/container_directory"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -80,7 +80,6 @@ public abstract class BaseActivity extends Activity
     private final String mTag;
     @LayoutRes
     private int mLayoutId;
-    private DirectoryContainerView mDirectoryContainer;
 
     public abstract void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
@@ -118,7 +117,6 @@ public abstract class BaseActivity extends Activity
                     }
                 });
 
-        mDirectoryContainer = (DirectoryContainerView) findViewById(R.id.container_directory);
         mSearchManager = new SearchManager(this);
 
         DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
@@ -351,7 +349,6 @@ public abstract class BaseActivity extends Activity
     public final void refreshCurrentRootAndDirectory(int anim) {
         mSearchManager.cancelSearch();
 
-        mDirectoryContainer.setDrawDisappearingFirst(anim == ANIM_ENTER);
         refreshDirectory(anim);
 
         final RootsFragment roots = RootsFragment.get(getFragmentManager());
@@ -370,7 +367,6 @@ public abstract class BaseActivity extends Activity
      */
     @Override
     public void onSearchChanged() {
-        mDirectoryContainer.setDrawDisappearingFirst(false);
         refreshDirectory(ANIM_NONE);
     }
 
