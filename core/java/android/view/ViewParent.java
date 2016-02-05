@@ -192,6 +192,9 @@ public interface ViewParent {
      * the subclass is added directly to the window manager (for example,
      * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
      * then it should override this and show the context menu.
+     * <p>
+     * If a subclass overrides this method it should also override
+     * {@link #showContextMenuForChild(View)}.
      *
      * @param originalView the source view where the context menu was first
      *                     invoked
@@ -202,7 +205,7 @@ public interface ViewParent {
      * @return {@code true} if the context menu was shown, {@code false}
      *         otherwise
      */
-    public boolean showContextMenuForChild(View originalView, float x, float y);
+    boolean showContextMenuForChild(View originalView, float x, float y);
 
     /**
      * Have the parent populate the specified context menu if it has anything to
