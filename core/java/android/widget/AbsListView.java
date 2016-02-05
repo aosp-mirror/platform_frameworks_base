@@ -3247,6 +3247,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
+        if (isShowingContextMenuWithCoords()) {
+            return false;
+        }
         return showContextMenuForChildInternal(originalView, 0, 0, false);
     }
 
