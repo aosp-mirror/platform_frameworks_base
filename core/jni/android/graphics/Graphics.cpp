@@ -746,10 +746,12 @@ void RecyclingClippingPixelAllocator::copyIfNecessary() {
     if (mNeedsCopy) {
         SkPixelRef* recycledPixels = mRecycledBitmap->refPixelRef();
         void* dst = recycledPixels->pixels();
-        size_t dstRowBytes = mRecycledBitmap->rowBytes();
-        size_t bytesToCopy = SkTMin(mRecycledBitmap->info().minRowBytes(),
+        const size_t dstRowBytes = mRecycledBitmap->rowBytes();
+        const size_t bytesToCopy = std::min(mRecycledBitmap->info().minRowBytes(),
                 mSkiaBitmap->info().minRowBytes());
-        for (int y = 0; y < mRecycledBitmap->info().height(); y++) {
+        const int rowsToCopy = std::min(mRecycledBitmap->info().height(),
+                mSkiaBitmap->info().height());
+        for (int y = 0; y < rowsToCopy; y++) {
             memcpy(dst, mSkiaBitmap->getAddr(0, y), bytesToCopy);
             dst = SkTAddOffset<void>(dst, dstRowBytes);
         }
