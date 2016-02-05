@@ -47,7 +47,8 @@ public class WifiNanEventListener {
 
     /**
      * Configuration failed callback event registration flag. Corresponding
-     * callback is {@link WifiNanEventListener#onConfigFailed(int)}.
+     * callback is
+     * {@link WifiNanEventListener#onConfigFailed(ConfigRequest, int)}.
      */
     public static final int LISTEN_CONFIG_FAILED = 0x1 << 1;
 
@@ -93,7 +94,7 @@ public class WifiNanEventListener {
                         WifiNanEventListener.this.onConfigCompleted((ConfigRequest) msg.obj);
                         break;
                     case LISTEN_CONFIG_FAILED:
-                        WifiNanEventListener.this.onConfigFailed(msg.arg1);
+                        WifiNanEventListener.this.onConfigFailed((ConfigRequest) msg.obj, msg.arg1);
                         break;
                     case LISTEN_NAN_DOWN:
                         WifiNanEventListener.this.onNanDown(msg.arg1);
@@ -129,7 +130,7 @@ public class WifiNanEventListener {
      *
      * @param reason Failure reason code, see {@code NanSessionListener.FAIL_*}.
      */
-    public void onConfigFailed(int reason) {
+    public void onConfigFailed(ConfigRequest failedConfig, int reason) {
         Log.w(TAG, "onConfigFailed: called in stub - override if interested or disable");
     }
 
@@ -173,11 +174,14 @@ public class WifiNanEventListener {
         }
 
         @Override
-        public void onConfigFailed(int reason) {
-            if (VDBG) Log.v(TAG, "onConfigFailed: reason=" + reason);
+        public void onConfigFailed(ConfigRequest failedConfig, int reason) {
+            if (VDBG) {
+                Log.v(TAG, "onConfigFailed: failedConfig=" + failedConfig + ", reason=" + reason);
+            }
 
             Message msg = mHandler.obtainMessage(LISTEN_CONFIG_FAILED);
             msg.arg1 = reason;
+            msg.obj = failedConfig;
             mHandler.sendMessage(msg);
         }
 
