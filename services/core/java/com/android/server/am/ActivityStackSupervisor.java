@@ -1932,7 +1932,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     private void ensureConfigurationAndResume(ActivityStack stack, ActivityRecord r,
             boolean preserveWindows) {
-        if (r == null) {
+        if (r == null || !r.visible) {
             return;
         }
         final boolean updated = stack.ensureActivityConfigurationLocked(r, 0,
