@@ -80,7 +80,7 @@ private:
     public:
         WorkerThread(const String8 name): mSignal(Condition::WAKE_UP_ONE), mName(name) { }
 
-        bool addTask(const TaskWrapper& task);
+        bool addTask(TaskWrapper task);
         size_t getTaskCount() const;
         void exit();
 
