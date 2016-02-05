@@ -933,6 +933,17 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         return -1;
     }
 
+    protected void setTransitioningViewsVisiblity(int visiblity, boolean invalidate) {
+        final int numElements = mTransitioningViews == null ? 0 : mTransitioningViews.size();
+        for (int i = 0; i < numElements; i++) {
+            final View view = mTransitioningViews.get(i);
+            view.setTransitionVisibility(visiblity);
+            if (invalidate) {
+                view.invalidate();
+            }
+        }
+    }
+
     private static class FixedEpicenterCallback extends Transition.EpicenterCallback {
         private Rect mEpicenter;
 

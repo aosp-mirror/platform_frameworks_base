@@ -263,6 +263,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                 mViewsReadyListener = null;
             }
             showViews(mTransitioningViews, true);
+            setTransitioningViewsVisiblity(View.VISIBLE, true);
             mSharedElements.clear();
             mAllSharedElementNames.clear();
             mTransitioningViews.clear();
@@ -280,6 +281,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (!mIsViewsTransitionStarted) {
                 mIsViewsTransitionStarted = true;
                 showViews(mTransitioningViews, true);
+                setTransitioningViewsVisiblity(View.VISIBLE, true);
                 mTransitioningViews.clear();
                 viewsTransitionComplete();
             }
@@ -506,7 +508,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             if (viewsTransition == null) {
                 viewsTransitionComplete();
             } else {
-                viewsTransition.forceVisibility(View.INVISIBLE, true);
                 final ArrayList<View> transitioningViews = mTransitioningViews;
                 viewsTransition.addListener(new ContinueTransitionListener() {
                     @Override
@@ -532,12 +533,15 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition transition = mergeTransitions(sharedElementTransition, viewsTransition);
         if (transition != null) {
             transition.addListener(new ContinueTransitionListener());
+            if (startEnterTransition) {
+                setTransitioningViewsVisiblity(View.INVISIBLE, false);
+            }
             TransitionManager.beginDelayedTransition(decorView, transition);
             if (startSharedElementTransition && !mSharedElementNames.isEmpty()) {
                 mSharedElements.get(0).invalidate();
-            } else if (startEnterTransition && mTransitioningViews != null &&
-                    !mTransitioningViews.isEmpty()) {
-                mTransitioningViews.get(0).invalidate();
+            }
+            if (startEnterTransition) {
+                setTransitioningViewsVisiblity(View.VISIBLE, true);
             }
         } else {
             transitionStarted();
@@ -613,6 +617,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         moveSharedElementsFromOverlay();
         if (mTransitioningViews != null) {
             showViews(mTransitioningViews, true);
+            setTransitioningViewsVisiblity(View.VISIBLE, true);
         }
         showViews(mSharedElements, true);
         clearState();
