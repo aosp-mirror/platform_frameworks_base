@@ -14894,7 +14894,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println(mi.hasActivities ? ",a" : ",e");
             } else {
                 pw.print(tag); pw.print(","); pw.print(mi.shortLabel); pw.print(",");
-                pw.println(mi.pss); pw.print(dumpSwapPss ? mi.swapPss : "N/A");
+                pw.print(mi.pss); pw.print(","); pw.println(dumpSwapPss ? mi.swapPss : "N/A");
             }
             if (mi.subitems != null) {
                 dumpMemItems(pw, prefix + "    ", mi.shortLabel, mi.subitems,
@@ -14959,6 +14959,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final void dumpApplicationMemoryUsageHeader(PrintWriter pw, long uptime,
             long realtime, boolean isCheckinRequest, boolean isCompact) {
+        if (isCompact) {
+            pw.print("version,"); pw.println(MEMINFO_COMPACT_VERSION);
+        }
         if (isCheckinRequest || isCompact) {
             // short checkin version
             pw.print("time,"); pw.print(uptime); pw.print(","); pw.println(realtime);
@@ -15016,6 +15019,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static String stringifyKBSize(long size) {
         return stringifySize(size * 1024, 1024);
     }
+
+    // Update this version number in case you change the 'compact' format
+    private static final int MEMINFO_COMPACT_VERSION = 1;
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief, PrintWriter categoryPw) {
