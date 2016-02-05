@@ -205,8 +205,8 @@ nativeGetSensorAtIndex(JNIEnv *env, jclass clazz, jlong sensorManager, jobject s
     SensorManager* mgr = reinterpret_cast<SensorManager*>(sensorManager);
 
     Sensor const* const* sensorList;
-    size_t count = mgr->getSensorList(&sensorList);
-    if (size_t(index) >= count) {
+    ssize_t count = mgr->getSensorList(&sensorList);
+    if (ssize_t(index) >= count) {
         return false;
     }
 
