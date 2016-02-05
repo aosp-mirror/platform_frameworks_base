@@ -591,6 +591,14 @@ public class CarrierConfigManager {
     @SystemApi
     public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
 
+    /**
+     * The duration in seconds that platform call and message blocking is disabled after the user
+     * contacts emergency services. Platform considers values in the range 0 to 604800 (one week) as
+     * valid. See {@link android.provider.BlockedNumberContract#isBlocked(Context, String)}).
+     */
+    public static final String KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT =
+            "duration_blocking_disabled_after_emergency_int";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -660,6 +668,7 @@ public class CarrierConfigManager {
                 "max_retries=3, 5000, 5000, 5000");
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
+        sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY, null);
