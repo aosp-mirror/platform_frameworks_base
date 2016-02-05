@@ -324,7 +324,7 @@ void Group::draw(SkCanvas* outCanvas, const SkMatrix& currentMatrix, float scale
     // Save the current clip information, which is local to this group.
     outCanvas->save();
     // Draw the group tree in the same order as the XML file.
-    for (Node* child : mChildren) {
+    for (auto& child : mChildren) {
         child->draw(outCanvas, stackedMatrix, scaleX, scaleY);
     }
     // Restore the previous clip information.
@@ -361,7 +361,7 @@ void Group::getLocalMatrix(SkMatrix* outMatrix) {
 }
 
 void Group::addChild(Node* child) {
-    mChildren.push_back(child);
+    mChildren.emplace_back(child);
 }
 
 bool Group::getProperties(float* outProperties, int length) {
