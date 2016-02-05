@@ -148,8 +148,7 @@ public class ContentProviderClient implements AutoCloseable {
                 return null;
             }
 
-            if ("com.google.android.gms".equals(mPackageName)
-                    || "com.google.android.syncadapters.contacts".equals(mPackageName)) {
+            if ("com.google.android.gms".equals(mPackageName)) {
                 // They're casting to a concrete subclass, sigh
                 return cursor;
             } else {
