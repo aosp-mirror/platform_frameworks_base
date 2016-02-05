@@ -3869,7 +3869,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.DATA_ROAMING);
             MOVED_TO_GLOBAL.add(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.DEVICE_PROVISIONED);
-            MOVED_TO_GLOBAL.add(Settings.Global.DISPLAY_DENSITY_FORCED);
             MOVED_TO_GLOBAL.add(Settings.Global.DISPLAY_SIZE_FORCED);
             MOVED_TO_GLOBAL.add(Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
             MOVED_TO_GLOBAL.add(Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
@@ -5102,6 +5101,15 @@ public final class Settings {
          */
         public static final String DISABLED_PRINT_SERVICES =
             "disabled_print_services";
+
+        /**
+         * The saved value for WindowManagerService.setForcedDisplayDensity()
+         * formatted as a single integer representing DPI. If unset, then use
+         * the real display density.
+         *
+         * @hide
+         */
+        public static final String DISPLAY_DENSITY_FORCED = "display_density_forced";
 
         /**
          * Setting to always use the default text-to-speech settings regardless
@@ -6533,13 +6541,6 @@ public final class Settings {
         * system user unless they are marked to show over keyguard.
         */
        public static final String DEVICE_PROVISIONED = "device_provisioned";
-
-       /**
-        * The saved value for WindowManagerService.setForcedDisplayDensity().
-        * One integer in dpi.  If unset, then use the real display density.
-        * @hide
-        */
-       public static final String DISPLAY_DENSITY_FORCED = "display_density_forced";
 
        /**
         * The saved value for WindowManagerService.setForcedDisplaySize().
