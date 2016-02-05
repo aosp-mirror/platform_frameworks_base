@@ -161,6 +161,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     boolean mCanReuseTaskStackViews = true;
     boolean mDraggingInRecents;
     boolean mReloadTasks;
+    boolean mLaunchedWhileDocking;
 
     // Task launching
     Rect mSearchBarBounds = new Rect();
@@ -270,10 +271,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
-            boolean animate, boolean reloadTasks) {
+            boolean animate, boolean launchedWhileDockingTask) {
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
-        mReloadTasks = reloadTasks;
+        mLaunchedWhileDocking = launchedWhileDockingTask;
         if (mFastAltTabTrigger.hasTriggered()) {
             // We are calling this from the doze trigger, so just fall through to show Recents
             mFastAltTabTrigger.resetTrigger();
@@ -338,6 +339,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         mDraggingInRecents = false;
+        mLaunchedWhileDocking = false;
         mTriggeredFromAltTab = false;
 
         try {
@@ -865,11 +867,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // In the case where alt-tab is triggered, we never get a preloadRecents() call, so we
         // should always preload the tasks now. If we are dragging in recents, reload them as
         // the stacks might have changed.
-        if (mReloadTasks || mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
+        if (mLaunchedWhileDocking || mTriggeredFromAltTab ||sInstanceLoadPlan == null) {
             // Create a new load plan if preloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
-        if (mReloadTasks || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
+        if (mLaunchedWhileDocking || mTriggeredFromAltTab || !sInstanceLoadPlan.hasTasks()) {
             loader.preloadTasks(sInstanceLoadPlan, topTask.id, isTopTaskHome);
         }
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
@@ -957,6 +959,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         launchState.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
         launchState.launchedHasConfigurationChanged = false;
         launchState.launchedViaDragGesture = mDraggingInRecents;
+        launchState.launchedWhileDocking = mLaunchedWhileDocking;
 
         Intent intent = new Intent();
         intent.setClassName(RECENTS_PACKAGE, mRecentsIntentActivityName);
