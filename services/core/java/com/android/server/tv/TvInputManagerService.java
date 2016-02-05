@@ -584,14 +584,14 @@ public final class TvInputManagerService extends SystemService {
         for (IBinder sessionToken : serviceState.sessionTokens) {
             SessionState sessionState = userState.sessionStateMap.get(sessionToken);
             if (sessionState.session == null && (inputId == null
-                    || sessionState.info.getId().equals(inputId))) {
+                    || sessionState.inputId.equals(inputId))) {
                 sessionsToAbort.add(sessionState);
             }
         }
         for (SessionState sessionState : sessionsToAbort) {
             removeSessionStateLocked(sessionState.sessionToken, sessionState.userId);
             sendSessionTokenToClientLocked(sessionState.client,
-                    sessionState.info.getId(), null, null, sessionState.seq);
+                    sessionState.inputId, null, null, sessionState.seq);
         }
         updateServiceConnectionLocked(serviceState.component, userId);
     }
@@ -601,7 +601,7 @@ public final class TvInputManagerService extends SystemService {
         UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (DEBUG) {
-            Slog.d(TAG, "createSessionInternalLocked(inputId=" + sessionState.info.getId() + ")");
+            Slog.d(TAG, "createSessionInternalLocked(inputId=" + sessionState.inputId + ")");
         }
         InputChannel[] channels = InputChannel.openInputChannelPair(sessionToken.toString());
 
@@ -611,14 +611,14 @@ public final class TvInputManagerService extends SystemService {
         // Create a session. When failed, send a null token immediately.
         try {
             if (sessionState.isRecordingSession) {
-                service.createRecordingSession(callback, sessionState.info.getId());
+                service.createRecordingSession(callback, sessionState.inputId);
             } else {
-                service.createSession(channels[1], callback, sessionState.info.getId());
+                service.createSession(channels[1], callback, sessionState.inputId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
             removeSessionStateLocked(sessionToken, userId);
-            sendSessionTokenToClientLocked(sessionState.client, sessionState.info.getId(), null,
+            sendSessionTokenToClientLocked(sessionState.client, sessionState.inputId, null,
                     null, sessionState.seq);
         }
         channels[1].dispose();
@@ -684,14 +684,11 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        TvInputInfo info = sessionState.info;
-        if (info != null) {
-            ServiceState serviceState = userState.serviceStateMap.get(info.getComponent());
-            if (serviceState != null) {
-                serviceState.sessionTokens.remove(sessionToken);
-            }
+        ServiceState serviceState = userState.serviceStateMap.get(sessionState.componentName);
+        if (serviceState != null) {
+            serviceState.sessionTokens.remove(sessionToken);
         }
-        updateServiceConnectionLocked(sessionState.info.getComponent(), userId);
+        updateServiceConnectionLocked(sessionState.componentName, userId);
 
         // Log the end of watch.
         SomeArgs args = SomeArgs.obtain();
@@ -707,7 +704,7 @@ public final class TvInputManagerService extends SystemService {
                 sessionState = getSessionStateLocked(sessionState.hardwareSessionToken,
                         Process.SYSTEM_UID, userId);
             }
-            ServiceState serviceState = getServiceStateLocked(sessionState.info.getComponent(), userId);
+            ServiceState serviceState = getServiceStateLocked(sessionState.componentName, userId);
             if (!serviceState.isHardware) {
                 return;
             }
@@ -1091,8 +1088,9 @@ public final class TvInputManagerService extends SystemService {
 
                     // Create a new session token and a session state.
                     IBinder sessionToken = new Binder();
-                    SessionState sessionState = new SessionState(sessionToken, info,
-                            isRecordingSession, client, seq, callingUid, resolvedUserId);
+                    SessionState sessionState = new SessionState(sessionToken, info.getId(),
+                            info.getComponent(), isRecordingSession, client, seq, callingUid,
+                            resolvedUserId);
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
@@ -1273,7 +1271,7 @@ public final class TvInputManagerService extends SystemService {
 
                         // Log the start of watch.
                         SomeArgs args = SomeArgs.obtain();
-                        args.arg1 = sessionState.info.getComponent().getPackageName();
+                        args.arg1 = sessionState.componentName.getPackageName();
                         args.arg2 = System.currentTimeMillis();
                         args.arg3 = ContentUris.parseId(channelUri);
                         args.arg4 = params;
@@ -1779,10 +1777,10 @@ public final class TvInputManagerService extends SystemService {
                         return false;
                     }
                     for (SessionState sessionState : userState.sessionStateMap.values()) {
-                        if (sessionState.info.getId().equals(inputId)
+                        if (sessionState.inputId.equals(inputId)
                                 && sessionState.hardwareSessionToken != null) {
                             hardwareInputId = userState.sessionStateMap.get(
-                                    sessionState.hardwareSessionToken).info.getId();
+                                    sessionState.hardwareSessionToken).inputId;
                             break;
                         }
                     }
@@ -1918,7 +1916,7 @@ public final class TvInputManagerService extends SystemService {
                         pw.println(entry.getKey() + ": " + session);
 
                         pw.increaseIndent();
-                        pw.println("info: " + session.info);
+                        pw.println("inputId: " + session.inputId);
                         pw.println("client: " + session.client);
                         pw.println("seq: " + session.seq);
                         pw.println("callingUid: " + session.callingUid);
@@ -2046,7 +2044,8 @@ public final class TvInputManagerService extends SystemService {
     }
 
     private final class SessionState implements IBinder.DeathRecipient {
-        private final TvInputInfo info;
+        private final String inputId;
+        private final ComponentName componentName;
         private final boolean isRecordingSession;
         private final ITvInputClient client;
         private final int seq;
@@ -2058,10 +2057,12 @@ public final class TvInputManagerService extends SystemService {
         // Not null if this session represents an external device connected to a hardware TV input.
         private IBinder hardwareSessionToken;
 
-        private SessionState(IBinder sessionToken, TvInputInfo info, boolean isRecordingSession,
-                ITvInputClient client, int seq, int callingUid, int userId) {
+        private SessionState(IBinder sessionToken, String inputId, ComponentName componentName,
+                boolean isRecordingSession, ITvInputClient client, int seq, int callingUid,
+                int userId) {
             this.sessionToken = sessionToken;
-            this.info = info;
+            this.inputId = inputId;
+            this.componentName = componentName;
             this.isRecordingSession = isRecordingSession;
             this.client = client;
             this.seq = seq;
@@ -2274,19 +2275,19 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public void onSessionCreated(ITvInputSession session, IBinder hardwareSessionToken) {
             if (DEBUG) {
-                Slog.d(TAG, "onSessionCreated(inputId=" + mSessionState.info.getId() + ")");
+                Slog.d(TAG, "onSessionCreated(inputId=" + mSessionState.inputId + ")");
             }
             synchronized (mLock) {
                 mSessionState.session = session;
                 mSessionState.hardwareSessionToken = hardwareSessionToken;
                 if (session != null && addSessionTokenToClientStateLocked(session)) {
                     sendSessionTokenToClientLocked(mSessionState.client,
-                            mSessionState.info.getId(), mSessionState.sessionToken, mChannels[0],
+                            mSessionState.inputId, mSessionState.sessionToken, mChannels[0],
                             mSessionState.seq);
                 } else {
                     removeSessionStateLocked(mSessionState.sessionToken, mSessionState.userId);
                     sendSessionTokenToClientLocked(mSessionState.client,
-                            mSessionState.info.getId(), null, null, mSessionState.seq);
+                            mSessionState.inputId, null, null, mSessionState.seq);
                 }
                 mChannels[0].dispose();
             }
