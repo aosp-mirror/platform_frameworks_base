@@ -32,11 +32,6 @@ static jlong createTree(JNIEnv*, jobject, jlong groupPtr) {
     return reinterpret_cast<jlong>(tree);
 }
 
-static void deleteTree(JNIEnv*, jobject, jlong treePtr) {
-    VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
-    delete tree;
-}
-
 static void setTreeViewportSize(JNIEnv*, jobject, jlong treePtr,
         jfloat viewportWidth, jfloat viewportHeight) {
     VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
@@ -333,7 +328,6 @@ static void setTrimPathOffset(JNIEnv*, jobject, jlong fullPathPtr, jfloat trimPa
 
 static const JNINativeMethod gMethods[] = {
         {"nCreateRenderer", "!(J)J", (void*)createTree},
-        {"nDestroyRenderer", "!(J)V", (void*)deleteTree},
         {"nSetRendererViewportSize", "!(JFF)V", (void*)setTreeViewportSize},
         {"nSetRootAlpha", "!(JF)Z", (void*)setRootAlpha},
         {"nGetRootAlpha", "!(J)F", (void*)getRootAlpha},

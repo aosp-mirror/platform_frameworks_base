@@ -52,6 +52,13 @@ typedef uint32_t Flags;
 
 } // namespace SaveFlags
 
+namespace uirenderer {
+namespace VectorDrawable {
+class Tree;
+};
+};
+typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
+
 class ANDROID_API Canvas {
 public:
     virtual ~Canvas() {};
@@ -216,6 +223,11 @@ public:
      * to be added to each glyph's position to get its absolute position.
      */
     virtual bool drawTextAbsolutePos() const = 0;
+
+    /**
+     * Draws a VectorDrawable onto the canvas.
+     */
+    virtual void drawVectorDrawable(VectorDrawableRoot* tree);
 
 protected:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
