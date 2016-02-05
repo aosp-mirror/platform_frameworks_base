@@ -298,7 +298,7 @@ app.</p>
 <p>In the <code><a
 href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element,
 the {@code android:name} attribute specifies the fully qualified class name of the {@link
-android.app.Activity} subclass and the {@code android:label} attributes specifies a string
+android.app.Activity} subclass and the {@code android:label} attribute specifies a string
 to use as the user-visible label for the activity.</p>
 
 <p>You must declare all app components this way:</p>
