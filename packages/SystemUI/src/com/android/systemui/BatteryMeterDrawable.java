@@ -182,6 +182,7 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mListening = true;
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
+        updateShowPercent();
         if (mDemoMode) return;
         mBatteryController.addStateChangedCallback(this);
     }
@@ -191,6 +192,11 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mContext.getContentResolver().unregisterContentObserver(mSettingObserver);
         if (mDemoMode) return;
         mBatteryController.removeStateChangedCallback(this);
+    }
+
+    public void disableShowPercent() {
+        mShowPercent = false;
+        postInvalidate();
     }
 
     private void postInvalidate() {
