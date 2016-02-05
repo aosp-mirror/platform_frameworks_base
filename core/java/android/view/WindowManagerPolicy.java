@@ -631,7 +631,7 @@ public interface WindowManagerPolicy {
 
     /**
      * Return the display width available after excluding any screen
-     * decorations that can never be removed.  That is, system bar or
+     * decorations that could never be removed in Honeycomb. That is, system bar or
      * button bar.
      */
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation,
@@ -639,7 +639,7 @@ public interface WindowManagerPolicy {
 
     /**
      * Return the display height available after excluding any screen
-     * decorations that can never be removed.  That is, system bar or
+     * decorations that could never be removed in Honeycomb. That is, system bar or
      * button bar.
      */
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation,
@@ -1349,5 +1349,17 @@ public interface WindowManagerPolicy {
      * @param outInsets the insets to return
      */
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
+            Rect outInsets);
+
+    /**
+     * Calculates the insets for the areas that could never be removed in Honeycomb, i.e. system
+     * bar or button bar. See {@link #getNonDecorDisplayWidth}.
+     *
+     * @param displayRotation the current display rotation
+     * @param displayWidth the current display width
+     * @param displayHeight the current display height
+     * @param outInsets the insets to return
+     */
+    public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             Rect outInsets);
 }

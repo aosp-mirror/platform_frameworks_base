@@ -6075,9 +6075,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             Rect outInsets) {
         outInsets.setEmpty();
+
+        // Navigation bar and status bar.
+        getNonDecorInsetsLw(displayRotation, displayWidth, displayHeight, outInsets);
         if (mStatusBar != null) {
             outInsets.top = mStatusBarHeight;
         }
+    }
+
+    @Override
+    public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
+            Rect outInsets) {
+        outInsets.setEmpty();
+
+        // Only navigation bar
         if (mNavigationBar != null) {
             if (isNavigationBarOnBottom(displayWidth, displayHeight)) {
                 outInsets.bottom = getNavigationBarHeight(displayRotation, mUiMode);
