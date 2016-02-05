@@ -92,8 +92,14 @@ public class StorageManager {
     /** {@hide} */
     public static final int DEBUG_EMULATE_FBE = 1 << 1;
 
+    // NOTE: keep in sync with installd
     /** {@hide} */
-    public static final int FLAG_FOR_WRITE = 1 << 0;
+    public static final int FLAG_STORAGE_DE = 1 << 0;
+    /** {@hide} */
+    public static final int FLAG_STORAGE_CE = 1 << 1;
+
+    /** {@hide} */
+    public static final int FLAG_FOR_WRITE = 1 << 8;
 
     private final Context mContext;
     private final ContentResolver mResolver;
@@ -1003,10 +1009,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void prepareUserStorage(
-            String volumeUuid, int userId, int serialNumber, boolean ephemeral) {
+    public void prepareUserStorage(String volumeUuid, int userId, int serialNumber, int flags) {
         try {
-            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, ephemeral);
+            mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

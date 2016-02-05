@@ -235,7 +235,6 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
-import com.android.server.pm.Installer.StorageFlags;
 import com.android.server.pm.PermissionsState.PermissionState;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
@@ -2388,9 +2387,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // can't wait for user to start
             final int flags;
             if (StorageManager.isFileBasedEncryptionEnabled()) {
-                flags = Installer.FLAG_DE_STORAGE;
+                flags = StorageManager.FLAG_STORAGE_DE;
             } else {
-                flags = Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE;
+                flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             }
             reconcileAppsData(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM, flags);
 
@@ -6860,7 +6859,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private boolean removeDataDirsLI(String volumeUuid, String packageName) {
         // TODO: triage flags as part of 26466827
-        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
 
         boolean res = true;
         final int[] users = sUserManager.getUserIds();
@@ -6906,7 +6905,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private void deleteCodeCacheDirsLI(String volumeUuid, String packageName) {
         // TODO: triage flags as part of 26466827
-        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
 
         final int[] users = sUserManager.getUserIds();
         for (int user : users) {
@@ -13947,7 +13946,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 outInfo.removedUsers = new int[] {removeUser};
             }
             // TODO: triage flags as part of 26466827
-            final int installerFlags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+            final int installerFlags = StorageManager.FLAG_STORAGE_CE
+                    | StorageManager.FLAG_STORAGE_DE;
             try {
                 mInstaller.destroyAppData(ps.volumeUuid, packageName, removeUser, installerFlags);
             } catch (InstallerException e) {
@@ -14127,7 +14127,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // record of app. This helps users recover from UID mismatches without
         // resorting to a full data wipe.
         // TODO: triage flags as part of 26466827
-        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
         try {
             mInstaller.clearAppData(pkg.volumeUuid, packageName, userId, flags);
         } catch (InstallerException e) {
@@ -14362,7 +14362,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         // TODO: triage flags as part of 26466827
-        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
         try {
             mInstaller.clearAppData(p.volumeUuid, packageName, userId,
                     flags | Installer.FLAG_CLEAR_CACHE_ONLY);
@@ -14463,7 +14463,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // TODO: triage flags as part of 26466827
-        final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+        final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
         try {
             mInstaller.getAppSize(p.volumeUuid, packageName, userHandle, flags, apkPath,
                     libDirRoot, publicSrcDir, asecPath, dexCodeInstructionSets, pStats);
@@ -16787,16 +16787,20 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         // Reconcile app data for all started/unlocked users
+        final StorageManager sm = mContext.getSystemService(StorageManager.class);
         final UserManager um = mContext.getSystemService(UserManager.class);
         for (UserInfo user : um.getUsers()) {
+            final int flags;
             if (um.isUserUnlocked(user.id)) {
-                reconcileAppsData(volumeUuid, user.id,
-                        Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE);
+                flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (um.isUserRunning(user.id)) {
-                reconcileAppsData(volumeUuid, user.id, Installer.FLAG_DE_STORAGE);
+                flags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 continue;
             }
+
+            sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, flags);
+            reconcileAppsData(volumeUuid, user.id, flags);
         }
 
         synchronized (mPackages) {
@@ -16905,20 +16909,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 }
             }
         }
-
-        final StorageManager sm = mContext.getSystemService(StorageManager.class);
-        final UserManager um = mContext.getSystemService(UserManager.class);
-        for (UserInfo user : um.getUsers()) {
-            final File userDir = Environment.getDataUserDirectory(volumeUuid, user.id);
-            if (userDir.exists()) continue;
-
-            try {
-                sm.prepareUserStorage(volumeUuid, user.id, user.serialNumber, user.isEphemeral());
-                UserManagerService.enforceSerialNumber(userDir, user.serialNumber);
-            } catch (IOException e) {
-                Log.wtf(TAG, "Failed to create user directory on " + volumeUuid, e);
-            }
-        }
     }
 
     private void assertPackageKnown(String volumeUuid, String packageName)
@@ -16988,7 +16978,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps on all mounted volumes.
      */
-    void reconcileAppsData(int userId, @StorageFlags int flags) {
+    void reconcileAppsData(int userId, int flags) {
         final StorageManager storage = mContext.getSystemService(StorageManager.class);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final String volumeUuid = vol.getFsUuid();
@@ -17005,7 +16995,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * Verifies that directories exist and that ownership and labeling is
      * correct for all installed apps.
      */
-    private void reconcileAppsData(String volumeUuid, int userId, @StorageFlags int flags) {
+    private void reconcileAppsData(String volumeUuid, int userId, int flags) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags));
 
@@ -17016,7 +17006,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
         // First look for stale data that doesn't belong, and check if things
         // have changed since we did our last restorecon
-        if ((flags & Installer.FLAG_CE_STORAGE) != 0) {
+        if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
             if (!isUserKeyUnlocked(userId)) {
                 throw new RuntimeException(
                         "Yikes, someone asked us to reconcile CE storage while " + userId
@@ -17034,12 +17024,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     synchronized (mInstallLock) {
                         destroyAppDataLI(volumeUuid, packageName, userId,
-                                Installer.FLAG_CE_STORAGE);
+                                StorageManager.FLAG_STORAGE_CE);
                     }
                 }
             }
         }
-        if ((flags & Installer.FLAG_DE_STORAGE) != 0) {
+        if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
             restoreconNeeded |= SELinuxMMAC.isRestoreconNeeded(deDir);
 
             final File[] files = FileUtils.listFilesOrEmpty(deDir);
@@ -17051,7 +17041,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     logCriticalInfo(Log.WARN, "Destroying " + file + " due to: " + e);
                     synchronized (mInstallLock) {
                         destroyAppDataLI(volumeUuid, packageName, userId,
-                                Installer.FLAG_DE_STORAGE);
+                                StorageManager.FLAG_STORAGE_DE);
                     }
                 }
             }
@@ -17080,10 +17070,10 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         if (restoreconNeeded) {
-            if ((flags & Installer.FLAG_CE_STORAGE) != 0) {
+            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
                 SELinuxMMAC.setRestoreconDone(ceDir);
             }
-            if ((flags & Installer.FLAG_DE_STORAGE) != 0) {
+            if ((flags & StorageManager.FLAG_STORAGE_DE) != 0) {
                 SELinuxMMAC.setRestoreconDone(deDir);
             }
         }
@@ -17112,9 +17102,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         for (UserInfo user : um.getUsers()) {
             final int flags;
             if (um.isUserUnlocked(user.id)) {
-                flags = Installer.FLAG_DE_STORAGE | Installer.FLAG_CE_STORAGE;
+                flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             } else if (um.isUserRunning(user.id)) {
-                flags = Installer.FLAG_DE_STORAGE;
+                flags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 continue;
             }
@@ -17135,7 +17125,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * will try recovering system apps by wiping data; third-party app data is
      * left intact.
      */
-    private void prepareAppData(String volumeUuid, int userId, @StorageFlags int flags,
+    private void prepareAppData(String volumeUuid, int userId, int flags,
             PackageParser.Package pkg, boolean restoreconNeeded) {
         if (DEBUG_APP_DATA) {
             Slog.v(TAG, "prepareAppData for " + pkg.packageName + " u" + userId + " 0x"
@@ -17173,7 +17163,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 restoreconAppDataLI(volumeUuid, packageName, userId, flags, appId, app.seinfo);
             }
 
-            if ((flags & Installer.FLAG_CE_STORAGE) != 0) {
+            if ((flags & StorageManager.FLAG_STORAGE_CE) != 0) {
                 // Create a native library symlink only if we have native libraries
                 // and if the native libraries are 32 bit libraries. We do not provide
                 // this symlink for 64 bit libraries.

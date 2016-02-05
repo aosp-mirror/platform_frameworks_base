@@ -74,6 +74,9 @@ public final class UserHandle implements Parcelable {
     /** @hide A user id constant to indicate the "system" user of the device */
     public static final @UserIdInt int USER_SYSTEM = 0;
 
+    /** @hide A user serial constant to indicate the "system" user of the device */
+    public static final int USER_SERIAL_SYSTEM = 0;
+
     /** @hide A user handle to indicate the "system" user of the device */
     public static final UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
 

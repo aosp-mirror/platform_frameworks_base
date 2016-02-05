@@ -3787,7 +3787,7 @@ final class Settings {
                 continue;
             }
             // TODO: triage flags!
-            final int flags = Installer.FLAG_CE_STORAGE | Installer.FLAG_DE_STORAGE;
+            final int flags = StorageManager.FLAG_STORAGE_CE | StorageManager.FLAG_STORAGE_DE;
             try {
                 installer.createAppData(volumeUuids[i], names[i], userHandle, flags, appIds[i],
                         seinfos[i], targetSdkVersions[i]);
