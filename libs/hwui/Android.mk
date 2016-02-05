@@ -314,7 +314,8 @@ LOCAL_SRC_FILES += \
     tests/microbench/DisplayListCanvasBench.cpp \
     tests/microbench/LinearAllocatorBench.cpp \
     tests/microbench/PathParserBench.cpp \
-    tests/microbench/ShadowBench.cpp
+    tests/microbench/ShadowBench.cpp \
+    tests/microbench/TaskManagerBench.cpp
 
 ifeq (true, $(HWUI_NEW_OPS))
     LOCAL_SRC_FILES += \
