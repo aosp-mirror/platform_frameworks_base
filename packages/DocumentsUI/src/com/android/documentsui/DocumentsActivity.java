@@ -221,14 +221,6 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean showMenu = super.onCreateOptionsMenu(menu);
-
-        expandMenus(menu);
-        return showMenu;
-    }
-
-    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 

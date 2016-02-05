@@ -65,6 +65,9 @@ public abstract class BaseActivity extends Activity
 
     static final String EXTRA_STATE = "state";
 
+    // See comments where this const is referenced for details.
+    private static final int DRAWER_NO_FIDDLE_DELAY = 1500;
+
     State mState;
     RootsCache mRoots;
     SearchManager mSearchManager;
@@ -72,8 +75,13 @@ public abstract class BaseActivity extends Activity
     NavigationView mNavigator;
 
     private final String mTag;
+
     @LayoutRes
     private int mLayoutId;
+
+    // Track the time we opened the drawer in response to back being pressed.
+    // We use the time gap to figure out whether to close app or reopen the drawer.
+    private long mDrawerLastFiddled;
 
     public abstract void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
@@ -229,21 +237,6 @@ public abstract class BaseActivity extends Activity
             refreshCurrentRootAndDirectory(ANIM_NONE);
         } else {
             new PickRootTask(this, root).executeOnExecutor(getExecutorForCurrentDirectory());
-        }
-    }
-
-    void expandMenus(Menu menu) {
-        for (int i = 0; i < menu.size(); i++) {
-            final MenuItem item = menu.getItem(i);
-            switch (item.getItemId()) {
-                case R.id.menu_advanced:
-                case R.id.menu_file_size:
-                case R.id.menu_new_window:
-                case R.id.menu_search:
-                    break;
-                default:
-                    item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-            }
         }
     }
 
@@ -541,16 +534,35 @@ public abstract class BaseActivity extends Activity
             return;
         }
 
-        final int size = mState.stack.size();
+        int size = mState.stack.size();
 
-        if (mDrawer.isOpen()) {
-            mDrawer.setOpen(false);
-        } else if (size > 1) {
+        // Do some "do what a I want" drawer fiddling, but don't
+        // do it if user already hit back recently and we recently
+        // did some fiddling.
+        if ((System.currentTimeMillis() - mDrawerLastFiddled) > DRAWER_NO_FIDDLE_DELAY) {
+            // Close drawer if it is open.
+            if (mDrawer.isOpen()) {
+                mDrawer.setOpen(false);
+                mDrawerLastFiddled = System.currentTimeMillis();
+                return;
+            }
+
+            // Open the Close drawer if it is closed and we're at the top of a root.
+            if (size == 1) {
+                mDrawer.setOpen(true);
+                // Remember so we don't just close it again if back is pressed again.
+                mDrawerLastFiddled = System.currentTimeMillis();
+                return;
+            }
+        }
+
+        if (size > 1) {
             mState.stack.pop();
             refreshCurrentRootAndDirectory(ANIM_LEAVE);
-        } else {
-            super.onBackPressed();
+            return;
         }
+
+        super.onBackPressed();
     }
 
     public void onStackPicked(DocumentStack stack) {
