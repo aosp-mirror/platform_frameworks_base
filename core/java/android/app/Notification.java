@@ -3236,6 +3236,7 @@ public class Notification implements Parcelable
                 return;
             }
             contentView.setTextViewText(R.id.app_name_text, appName);
+            contentView.setTextColor(R.id.app_name_text, resolveColor());
         }
 
         private void bindSmallIcon(RemoteViews contentView) {
