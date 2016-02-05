@@ -101,7 +101,7 @@
     <!-- Toast shown when creating a folder failed with an error [CHAR LIMIT=48] -->
     <string name="create_error">Failed to create folder</string>
     <!-- Error message shown when querying for a list of documents failed [CHAR LIMIT=48] -->
-    <string name="query_error">Failed to query documents</string>
+    <string name="query_error">Can\u2019t load content at the moment</string>
 
     <!-- Title of storage root location that contains recently modified or used documents [CHAR LIMIT=24] -->
     <string name="root_recent">Recent</string>
