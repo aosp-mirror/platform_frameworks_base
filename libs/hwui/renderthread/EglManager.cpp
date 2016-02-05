@@ -228,6 +228,13 @@ EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Failed to create EGLSurface for window %p, eglErr = %s",
             (void*) window, egl_error_str());
+
+    if (mSwapBehavior != SwapBehavior::Preserved) {
+        LOG_ALWAYS_FATAL_IF(eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED) == EGL_FALSE,
+                            "Failed to set swap behavior to destroyed for window %p, eglErr = %s",
+                            (void*) window, egl_error_str());
+    }
+
     return surface;
 }
 
