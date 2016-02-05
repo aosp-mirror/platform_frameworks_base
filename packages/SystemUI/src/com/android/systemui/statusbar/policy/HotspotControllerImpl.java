@@ -27,8 +27,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 
-import com.android.settingslib.TetherUtil;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -95,11 +93,6 @@ public class HotspotControllerImpl implements HotspotController {
     @Override
     public boolean isHotspotEnabled() {
         return mHotspotState == WifiManager.WIFI_AP_STATE_ENABLED;
-    }
-
-    @Override
-    public boolean isHotspotSupported() {
-        return TetherUtil.isTetheringSupported(mContext);
     }
 
     @Override

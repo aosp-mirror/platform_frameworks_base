@@ -2670,18 +2670,21 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // if ro.tether.denied = true we default to no tethering
     // gservices could set the secure setting to 1 though to enable it on a build where it
     // had previously been turned off.
+    @Override
     public boolean isTetheringSupported() {
         enforceTetherAccessPermission();
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0)
                 && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
-        return tetherEnabledInSettings && ((mTethering.getTetherableUsbRegexs().length != 0 ||
+        return tetherEnabledInSettings && mUserManager.isAdminUser() &&
+                ((mTethering.getTetherableUsbRegexs().length != 0 ||
                 mTethering.getTetherableWifiRegexs().length != 0 ||
                 mTethering.getTetherableBluetoothRegexs().length != 0) &&
                 mTethering.getUpstreamIfaceTypes().length != 0);
     }
 
+    @Override
     public void startTethering(int type, ResultReceiver receiver,
             boolean showProvisioningUi) {
         ConnectivityManager.enforceTetherChangePermission(mContext);
@@ -2692,6 +2695,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mTethering.startTethering(type, receiver, showProvisioningUi);
     }
 
+    @Override
     public void stopTethering(int type) {
         ConnectivityManager.enforceTetherChangePermission(mContext);
         mTethering.stopTethering(type);

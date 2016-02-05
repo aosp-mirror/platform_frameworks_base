@@ -15,38 +15,17 @@
  */
 package com.android.settingslib;
 
-import android.app.ActivityManager;
-import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
-import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.SystemProperties;
-import android.os.UserManager;
-import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 
 public class TetherUtil {
-
-    // Extras used for communicating with the TetherService.
-    public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
-    public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
-    public static final String EXTRA_SET_ALARM = "extraSetAlarm";
-    /**
-     * Tells the service to run a provision check now.
-     */
-    public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
 
     public static boolean setWifiTethering(boolean enable, Context context) {
         final WifiManager wifiManager =
                 (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         return wifiManager.setWifiApEnabled(null, enable);
-    }
-
-    public static boolean isWifiTetherEnabled(Context context) {
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        return wifiManager.getWifiApState() == WifiManager.WIFI_AP_STATE_ENABLED;
     }
 
     private static boolean isEntitlementCheckRequired(Context context) {
@@ -71,13 +50,4 @@ public class TetherUtil {
         }
         return (provisionApp.length == 2);
     }
-
-    public static boolean isTetheringSupported(Context context) {
-        final ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        final boolean isAdminUser =
-                UserManager.get(context).isUserAdmin(ActivityManager.getCurrentUser());
-        return isAdminUser && cm.isTetheringSupported();
-    }
-
 }
