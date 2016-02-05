@@ -117,16 +117,40 @@ public class FragmentController {
      * instances retained across configuration changes.
      *
      * @see #retainNonConfig()
+     *
+     * @deprecated use {@link #restoreAllState(Parcelable, FragmentManagerNonConfig)}
      */
     public void restoreAllState(Parcelable state, List<Fragment> nonConfigList) {
-        mHost.mFragmentManager.restoreAllState(state, nonConfigList);
+        mHost.mFragmentManager.restoreAllState(state,
+                new FragmentManagerNonConfig(nonConfigList, null));
+    }
+
+    /**
+     * Restores the saved state for all Fragments. The given FragmentManagerNonConfig are Fragment
+     * instances retained across configuration changes, including nested fragments
+     *
+     * @see #retainNestedNonConfig()
+     */
+    public void restoreAllState(Parcelable state, FragmentManagerNonConfig nonConfig) {
+        mHost.mFragmentManager.restoreAllState(state, nonConfig);
     }
 
     /**
      * Returns a list of Fragments that have opted to retain their instance across
      * configuration changes.
+     *
+     * @deprecated use {@link #retainNestedNonConfig()} to also track retained
+     *             nested child fragments
      */
     public List<Fragment> retainNonConfig() {
+        return mHost.mFragmentManager.retainNonConfig().getFragments();
+    }
+
+    /**
+     * Returns a nested tree of Fragments that have opted to retain their instance across
+     * configuration changes.
+     */
+    public FragmentManagerNonConfig retainNestedNonConfig() {
         return mHost.mFragmentManager.retainNonConfig();
     }
 

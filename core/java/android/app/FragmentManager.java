@@ -1672,24 +1672,47 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         }
         return true;
     }
-    
-    ArrayList<Fragment> retainNonConfig() {
+
+    FragmentManagerNonConfig retainNonConfig() {
         ArrayList<Fragment> fragments = null;
+        ArrayList<FragmentManagerNonConfig> childFragments = null;
         if (mActive != null) {
             for (int i=0; i<mActive.size(); i++) {
                 Fragment f = mActive.get(i);
-                if (f != null && f.mRetainInstance) {
-                    if (fragments == null) {
-                        fragments = new ArrayList<Fragment>();
+                if (f != null) {
+                    if (f.mRetainInstance) {
+                        if (fragments == null) {
+                            fragments = new ArrayList<>();
+                        }
+                        fragments.add(f);
+                        f.mRetaining = true;
+                        f.mTargetIndex = f.mTarget != null ? f.mTarget.mIndex : -1;
+                        if (DEBUG) Log.v(TAG, "retainNonConfig: keeping retained " + f);
                     }
-                    fragments.add(f);
-                    f.mRetaining = true;
-                    f.mTargetIndex = f.mTarget != null ? f.mTarget.mIndex : -1;
-                    if (DEBUG) Log.v(TAG, "retainNonConfig: keeping retained " + f);
+                    boolean addedChild = false;
+                    if (f.mChildFragmentManager != null) {
+                        FragmentManagerNonConfig child = f.mChildFragmentManager.retainNonConfig();
+                        if (child != null) {
+                            if (childFragments == null) {
+                                childFragments = new ArrayList<>();
+                                for (int j = 0; j < i; j++) {
+                                    childFragments.add(null);
+                                }
+                            }
+                            childFragments.add(child);
+                            addedChild = true;
+                        }
+                    }
+                    if (childFragments != null && !addedChild) {
+                        childFragments.add(null);
+                    }
                 }
             }
         }
-        return fragments;
+        if (fragments == null && childFragments == null) {
+            return null;
+        }
+        return new FragmentManagerNonConfig(fragments, childFragments);
     }
     
     void saveFragmentViewState(Fragment f) {
@@ -1846,18 +1869,23 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         return fms;
     }
     
-    void restoreAllState(Parcelable state, List<Fragment> nonConfig) {
+    void restoreAllState(Parcelable state, FragmentManagerNonConfig nonConfig) {
         // If there is no saved state at all, then there can not be
         // any nonConfig fragments either, so that is that.
         if (state == null) return;
         FragmentManagerState fms = (FragmentManagerState)state;
         if (fms.mActive == null) return;
-        
+
+        List<FragmentManagerNonConfig> childNonConfigs = null;
+
         // First re-attach any non-config instances we are retaining back
         // to their saved state, so we don't try to instantiate them again.
         if (nonConfig != null) {
-            for (int i=0; i<nonConfig.size(); i++) {
-                Fragment f = nonConfig.get(i);
+            List<Fragment> nonConfigFragments = nonConfig.getFragments();
+            childNonConfigs = nonConfig.getChildNonConfigs();
+            final int count = nonConfigFragments != null ? nonConfigFragments.size() : 0;
+            for (int i = 0; i < count; i++) {
+                Fragment f = nonConfigFragments.get(i);
                 if (DEBUG) Log.v(TAG, "restoreAllState: re-attaching retained " + f);
                 FragmentState fs = fms.mActive[f.mIndex];
                 fs.mInstance = f;
@@ -1877,14 +1905,18 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         
         // Build the full list of active fragments, instantiating them from
         // their saved state.
-        mActive = new ArrayList<Fragment>(fms.mActive.length);
+        mActive = new ArrayList<>(fms.mActive.length);
         if (mAvailIndices != null) {
             mAvailIndices.clear();
         }
         for (int i=0; i<fms.mActive.length; i++) {
             FragmentState fs = fms.mActive[i];
             if (fs != null) {
-                Fragment f = fs.instantiate(mHost, mParent);
+                FragmentManagerNonConfig childNonConfig = null;
+                if (childNonConfigs != null && i < childNonConfigs.size()) {
+                    childNonConfig = childNonConfigs.get(i);
+                }
+                Fragment f = fs.instantiate(mHost, mParent, childNonConfig);
                 if (DEBUG) Log.v(TAG, "restoreAllState: active #" + i + ": " + f);
                 mActive.add(f);
                 // Now that the fragment is instantiated (or came from being
@@ -1894,7 +1926,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             } else {
                 mActive.add(null);
                 if (mAvailIndices == null) {
-                    mAvailIndices = new ArrayList<Integer>();
+                    mAvailIndices = new ArrayList<>();
                 }
                 if (DEBUG) Log.v(TAG, "restoreAllState: avail #" + i);
                 mAvailIndices.add(i);
@@ -1903,8 +1935,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
         
         // Update the target of all retained fragments.
         if (nonConfig != null) {
-            for (int i=0; i<nonConfig.size(); i++) {
-                Fragment f = nonConfig.get(i);
+            List<Fragment> nonConfigFragments = nonConfig.getFragments();
+            final int count = nonConfigFragments != null ? nonConfigFragments.size() : 0;
+            for (int i = 0; i < count; i++) {
+                Fragment f = nonConfigFragments.get(i);
                 if (f.mTargetIndex >= 0) {
                     if (f.mTargetIndex < mActive.size()) {
                         f.mTarget = mActive.get(f.mTargetIndex);
