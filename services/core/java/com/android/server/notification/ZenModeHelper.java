@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.media.AudioAttributes.USAGE_ALARM;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 import static android.media.AudioAttributes.USAGE_UNKNOWN;
@@ -195,25 +194,33 @@ public class ZenModeHelper {
     }
 
     public void onUserSwitched(int user) {
-        if (mUser == user || user < UserHandle.USER_SYSTEM) return;
-        mUser = user;
-        if (DEBUG) Log.d(TAG, "onUserSwitched u=" + user);
-        ZenModeConfig config = mConfigs.get(user);
-        if (config == null) {
-            if (DEBUG) Log.d(TAG, "onUserSwitched: generating default config for user " + user);
-            config = mDefaultConfig.copy();
-            config.user = user;
-        }
-        synchronized (mConfig) {
-            setConfigLocked(config, "onUserSwitched");
-        }
-        cleanUpZenRules();
+        loadConfigForUser(user, "onUserSwitched");
     }
 
     public void onUserRemoved(int user) {
         if (user < UserHandle.USER_SYSTEM) return;
         if (DEBUG) Log.d(TAG, "onUserRemoved u=" + user);
         mConfigs.remove(user);
+    }
+
+    public void onUserUnlocked(int user) {
+        loadConfigForUser(user, "onUserUnlocked");
+    }
+
+    private void loadConfigForUser(int user, String reason) {
+        if (mUser == user || user < UserHandle.USER_SYSTEM) return;
+        mUser = user;
+        if (DEBUG) Log.d(TAG, reason + " u=" + user);
+        ZenModeConfig config = mConfigs.get(user);
+        if (config == null) {
+            if (DEBUG) Log.d(TAG, reason + " generating default config for user " + user);
+            config = mDefaultConfig.copy();
+            config.user = user;
+        }
+        synchronized (mConfig) {
+            setConfigLocked(config, reason);
+        }
+        cleanUpZenRules();
     }
 
     public int getZenModeListenerInterruptionFilter() {

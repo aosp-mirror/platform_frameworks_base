@@ -816,6 +816,12 @@ public class NotificationManagerService extends SystemService {
             } else if (action.equals(Intent.ACTION_USER_REMOVED)) {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
                 mZenModeHelper.onUserRemoved(user);
+            } else if (action.equals(Intent.ACTION_USER_UNLOCKED)) {
+                final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                mConditionProviders.onUserUnlocked(user);
+                mListeners.onUserUnlocked(user);
+                mAssistant.onUserUnlocked(user);
+                mZenModeHelper.onUserUnlocked(user);
             }
         }
     };
@@ -994,6 +1000,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED);
         getContext().registerReceiver(mIntentReceiver, filter);
 
