@@ -184,6 +184,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public ParcelFileDescriptor openDocument(
             String documentId, String mode, CancellationSignal signal)
                     throws FileNotFoundException {
+        if (DEBUG) {
+            Log.d(TAG, "openDocument: " + documentId);
+        }
         final Identifier identifier = mDatabase.createIdentifier(documentId);
         try {
             openDevice(identifier.mDeviceId);
@@ -270,6 +273,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     @Override
     public String createDocument(String parentDocumentId, String mimeType, String displayName)
             throws FileNotFoundException {
+        if (DEBUG) {
+            Log.d(TAG, "createDocument: " + displayName);
+        }
         try {
             final Identifier parentId = mDatabase.createIdentifier(parentDocumentId);
             openDevice(parentId.mDeviceId);

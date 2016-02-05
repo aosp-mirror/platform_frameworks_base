@@ -577,9 +577,7 @@ class MtpDatabase {
     static void getObjectDocumentValues(
             ContentValues values, int deviceId, String parentId, MtpObjectInfo info) {
         values.clear();
-        final String mimeType = info.getFormat() == MtpConstants.FORMAT_ASSOCIATION ?
-                DocumentsContract.Document.MIME_TYPE_DIR :
-                MediaFile.getMimeTypeForFormatCode(info.getFormat());
+        final String mimeType = getMimeType(info);
         int flag = 0;
         if (info.getProtectionStatus() == 0) {
             flag |= Document.FLAG_SUPPORTS_DELETE |
@@ -606,6 +604,17 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_ICON);
         values.put(Document.COLUMN_FLAGS, flag);
         values.put(Document.COLUMN_SIZE, info.getCompressedSize());
+    }
+
+    private static String getMimeType(MtpObjectInfo info) {
+        if (info.getFormat() == MtpConstants.FORMAT_ASSOCIATION) {
+            return DocumentsContract.Document.MIME_TYPE_DIR;
+        }
+        final String formatCodeMimeType = MediaFile.getMimeTypeForFormatCode(info.getFormat());
+        if (formatCodeMimeType != null) {
+            return formatCodeMimeType;
+        }
+        return MediaFile.getMimeTypeForFile(info.getName());
     }
 
     static String[] strings(Object... args) {
