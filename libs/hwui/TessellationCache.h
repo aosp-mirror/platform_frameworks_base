@@ -131,11 +131,6 @@ public:
      * Clears the cache. This causes all TessellationBuffers to be deleted.
      */
     void clear();
-
-    /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
     /**
      * Returns the maximum size of the cache in bytes.
      */
@@ -198,8 +193,7 @@ private:
 
     Buffer* getOrCreateBuffer(const Description& entry, Tessellator tessellator);
 
-    uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
 
     bool mDebugEnabled;
 

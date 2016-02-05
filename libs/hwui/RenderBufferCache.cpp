@@ -40,16 +40,9 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-RenderBufferCache::RenderBufferCache(): mSize(0), mMaxSize(MB(DEFAULT_RENDER_BUFFER_CACHE_SIZE)) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_RENDER_BUFFER_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting render buffer cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default render buffer cache size of %.2fMB",
-                DEFAULT_RENDER_BUFFER_CACHE_SIZE);
-    }
-}
+RenderBufferCache::RenderBufferCache()
+        : mSize(0)
+        , mMaxSize(Properties::renderBufferCacheSize) {}
 
 RenderBufferCache::~RenderBufferCache() {
     clear();
@@ -65,11 +58,6 @@ uint32_t RenderBufferCache::getSize() {
 
 uint32_t RenderBufferCache::getMaxSize() {
     return mMaxSize;
-}
-
-void RenderBufferCache::setMaxSize(uint32_t maxSize) {
-    clear();
-    mMaxSize = maxSize;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

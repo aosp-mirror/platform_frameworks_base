@@ -37,7 +37,18 @@ bool Properties::useBufferAge = true;
 bool Properties::enablePartialUpdates = true;
 
 float Properties::textGamma = DEFAULT_TEXT_GAMMA;
-int Properties::layerPoolSize = DEFAULT_LAYER_CACHE_SIZE;
+
+int Properties::fboCacheSize = DEFAULT_FBO_CACHE_SIZE;
+int Properties::gradientCacheSize = MB(DEFAULT_GRADIENT_CACHE_SIZE);
+int Properties::layerPoolSize = MB(DEFAULT_LAYER_CACHE_SIZE);
+int Properties::patchCacheSize = KB(DEFAULT_PATCH_CACHE_SIZE);
+int Properties::pathCacheSize = MB(DEFAULT_PATH_CACHE_SIZE);
+int Properties::renderBufferCacheSize = MB(DEFAULT_RENDER_BUFFER_CACHE_SIZE);
+int Properties::tessellationCacheSize = MB(DEFAULT_VERTEX_CACHE_SIZE);
+int Properties::textDropShadowCacheSize = MB(DEFAULT_DROP_SHADOW_CACHE_SIZE);
+int Properties::textureCacheSize = MB(DEFAULT_TEXTURE_CACHE_SIZE);
+
+float Properties::textureCacheFlushRate = DEFAULT_TEXTURE_CACHE_FLUSH_RATE;
 
 DebugLevel Properties::debugLevel = kDebugDisabled;
 OverdrawColorSet Properties::overdrawColorSet = OverdrawColorSet::Default;
@@ -78,7 +89,6 @@ bool Properties::load() {
     bool prevDebugLayersUpdates = debugLayersUpdates;
     bool prevDebugOverdraw = debugOverdraw;
     StencilClipDebug prevDebugStencilClip = debugStencilClip;
-
 
     debugOverdraw = false;
     if (property_get(PROPERTY_DEBUG_OVERDRAW, property, nullptr) > 0) {
@@ -133,7 +143,18 @@ bool Properties::load() {
     enablePartialUpdates = property_get_bool(PROPERTY_ENABLE_PARTIAL_UPDATES, true);
 
     textGamma = property_get_float(PROPERTY_TEXT_GAMMA, DEFAULT_TEXT_GAMMA);
+
+    fboCacheSize = property_get_int(PROPERTY_FBO_CACHE_SIZE, DEFAULT_FBO_CACHE_SIZE);
+    gradientCacheSize = MB(property_get_float(PROPERTY_GRADIENT_CACHE_SIZE, DEFAULT_GRADIENT_CACHE_SIZE));
     layerPoolSize = MB(property_get_float(PROPERTY_LAYER_CACHE_SIZE, DEFAULT_LAYER_CACHE_SIZE));
+    patchCacheSize = KB(property_get_float(PROPERTY_PATCH_CACHE_SIZE, DEFAULT_PATCH_CACHE_SIZE));
+    pathCacheSize = MB(property_get_float(PROPERTY_PATH_CACHE_SIZE, DEFAULT_PATH_CACHE_SIZE));
+    renderBufferCacheSize = MB(property_get_float(PROPERTY_RENDER_BUFFER_CACHE_SIZE, DEFAULT_RENDER_BUFFER_CACHE_SIZE));
+    tessellationCacheSize = MB(property_get_float(PROPERTY_VERTEX_CACHE_SIZE, DEFAULT_VERTEX_CACHE_SIZE));
+    textDropShadowCacheSize = MB(property_get_float(PROPERTY_DROP_SHADOW_CACHE_SIZE, DEFAULT_DROP_SHADOW_CACHE_SIZE));
+    textureCacheSize = MB(property_get_float(PROPERTY_TEXTURE_CACHE_SIZE, DEFAULT_TEXTURE_CACHE_SIZE));
+    textureCacheFlushRate = std::max(0.0f, std::min(1.0f,
+            property_get_float(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, DEFAULT_TEXTURE_CACHE_FLUSH_RATE)));
 
     return (prevDebugLayersUpdates != debugLayersUpdates)
             || (prevDebugOverdraw != debugOverdraw)

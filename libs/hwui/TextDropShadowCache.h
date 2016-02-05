@@ -148,10 +148,6 @@ public:
     }
 
     /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
-    /**
      * Returns the maximum size of the cache in bytes.
      */
     uint32_t getMaxSize();
@@ -161,13 +157,11 @@ public:
     uint32_t getSize();
 
 private:
-    void init();
-
     LruCache<ShadowText, ShadowTexture*> mCache;
 
     uint32_t mSize;
-    uint32_t mMaxSize;
-    FontRenderer* mRenderer;
+    const uint32_t mMaxSize;
+    FontRenderer* mRenderer = nullptr;
     bool mDebugEnabled;
 }; // class TextDropShadowCache
 

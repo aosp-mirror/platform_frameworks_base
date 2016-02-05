@@ -35,26 +35,9 @@ namespace uirenderer {
 TextureCache::TextureCache()
         : mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE))
-        , mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE)
+        , mMaxSize(Properties::textureCacheSize)
+        , mFlushRate(Properties::textureCacheFlushRate)
         , mAssetAtlas(nullptr) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting texture cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
-    }
-
-    if (property_get(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, property, nullptr) > 0) {
-        float flushRate = atof(property);
-        INIT_LOGD("  Setting texture cache flush rate to %.2f%%", flushRate * 100.0f);
-        setFlushRate(flushRate);
-    } else {
-        INIT_LOGD("  Using default texture cache flush rate of %.2f%%",
-                DEFAULT_TEXTURE_CACHE_FLUSH_RATE * 100.0f);
-    }
-
     mCache.setOnEntryRemovedListener(this);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
@@ -77,17 +60,6 @@ uint32_t TextureCache::getSize() {
 
 uint32_t TextureCache::getMaxSize() {
     return mMaxSize;
-}
-
-void TextureCache::setMaxSize(uint32_t maxSize) {
-    mMaxSize = maxSize;
-    while (mSize > mMaxSize) {
-        mCache.removeOldest();
-    }
-}
-
-void TextureCache::setFlushRate(float flushRate) {
-    mFlushRate = std::max(0.0f, std::min(1.0f, flushRate));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
