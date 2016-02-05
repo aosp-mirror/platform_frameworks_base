@@ -30,7 +30,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
@@ -98,19 +97,19 @@ public class FilesActivity extends BaseActivity {
             refreshCurrentRootAndDirectory(ANIM_NONE);
         } else if (intent.getAction() == Intent.ACTION_VIEW) {
             checkArgument(uri != null);
-            new OpenUriForViewTask().executeOnExecutor(
+            new OpenUriForViewTask(this).executeOnExecutor(
                     ProviderExecutor.forAuthority(uri.getAuthority()), uri);
         } else if (DocumentsContract.isRootUri(this, uri)) {
             if (DEBUG) Log.d(TAG, "Launching with root URI.");
             // If we've got a specific root to display, restore that root using a dedicated
             // authority. That way a misbehaving provider won't result in an ANR.
-            new RestoreRootTask(uri).executeOnExecutor(
+            new RestoreRootTask(this, uri).executeOnExecutor(
                     ProviderExecutor.forAuthority(uri.getAuthority()));
         } else {
             if (DEBUG) Log.d(TAG, "Launching into Home directory.");
             // If all else fails, try to load "Home" directory.
             final Uri homeUri = DocumentsContract.buildHomeUri();
-            new RestoreRootTask(homeUri).executeOnExecutor(
+            new RestoreRootTask(this, homeUri).executeOnExecutor(
                     ProviderExecutor.forAuthority(homeUri.getAuthority()));
         }
 
@@ -134,9 +133,7 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    State buildState() {
-        State state = buildDefaultState();
-
+    void includeState(State state) {
         final Intent intent = getIntent();
 
         state.action = State.ACTION_BROWSE;
@@ -149,8 +146,6 @@ public class FilesActivity extends BaseActivity {
         if (stack != null) {
             state.stack = stack;
         }
-
-        return state;
     }
 
     @Override
@@ -363,13 +358,15 @@ public class FilesActivity extends BaseActivity {
         }
     }
 
-    @Override
-    void saveStackBlocking() {
+    // Turns out only DocumentsActivity was ever calling saveStackBlocking.
+    // There may be a  case where we want to contribute entries from
+    // Behavior here in FilesActivity, but it isn't yet obvious.
+    // TODO: Contribute to recents, or remove this.
+    void writeStackToRecentsBlocking() {
         final ContentResolver resolver = getContentResolver();
         final ContentValues values = new ContentValues();
 
-        final byte[] rawStack = DurableUtils.writeToArrayOrNull(
-                getDisplayState().stack);
+        final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
 
         // Remember location for next app launch
         final String packageName = getCallingPackageMaybeExtra();
@@ -408,12 +405,19 @@ public class FilesActivity extends BaseActivity {
      * to know which root to select. Also, the stack doesn't contain intermediate directories.
      * It's primarly used for opening ZIP archives from Downloads app.
      */
-    final class OpenUriForViewTask extends AsyncTask<Uri, Void, Void> {
+    private static final class OpenUriForViewTask extends PairedTask<FilesActivity, Uri, Void> {
+
+        private final State mState;
+        public OpenUriForViewTask(FilesActivity activity) {
+            super(activity);
+            mState = activity.mState;
+        }
+
         @Override
-        protected Void doInBackground(Uri... params) {
+        protected Void run(Uri... params) {
             final Uri uri = params[0];
 
-            final RootsCache rootsCache = DocumentsApplication.getRootsCache(FilesActivity.this);
+            final RootsCache rootsCache = DocumentsApplication.getRootsCache(mOwner);
             final String authority = uri.getAuthority();
 
             final Collection<RootInfo> roots =
@@ -426,20 +430,17 @@ public class FilesActivity extends BaseActivity {
             final RootInfo root = roots.iterator().next();
             mState.stack.root = root;
             try {
-                mState.stack.add(DocumentInfo.fromUri(getContentResolver(), uri));
+                mState.stack.add(DocumentInfo.fromUri(mOwner.getContentResolver(), uri));
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "Failed to resolve DocumentInfo from Uri: " + uri);
             }
-            mState.stack.add(getRootDocumentBlocking(root));
+            mState.stack.add(mOwner.getRootDocumentBlocking(root));
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            if (isDestroyed()) {
-                return;
-            }
-            refreshCurrentRootAndDirectory(ANIM_NONE);
+        protected void finish(Void result) {
+            mOwner.refreshCurrentRootAndDirectory(ANIM_NONE);
         }
     }
 }

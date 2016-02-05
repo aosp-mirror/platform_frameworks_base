@@ -24,8 +24,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -37,10 +35,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toolbar;
 
-import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
-import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Preconditions;
 
@@ -72,23 +68,19 @@ public class DownloadsActivity extends BaseActivity {
             // talkback from reading aloud the default title, we clear it here.
             setTitle("");
             final Uri rootUri = getIntent().getData();
-            new RestoreRootTask(rootUri).executeOnExecutor(getExecutorForCurrentDirectory());
+            new RestoreRootTask(this, rootUri).executeOnExecutor(getExecutorForCurrentDirectory());
         } else {
             refreshCurrentRootAndDirectory(ANIM_NONE);
         }
     }
 
     @Override
-    State buildState() {
-        State state = buildDefaultState();
-
+    void includeState(State state) {
         state.action = ACTION_MANAGE;
         state.acceptMimes = new String[] { "*/*" };
         state.allowMultiple = true;
         state.showSize = true;
         state.excludedAuthorities = getExcludedAuthorities();
-
-        return state;
     }
 
     @Override
@@ -168,21 +160,6 @@ public class DownloadsActivity extends BaseActivity {
 
     @Override
     public void onDocumentsPicked(List<DocumentInfo> docs) {}
-
-    @Override
-    void saveStackBlocking() {
-        final ContentResolver resolver = getContentResolver();
-        final ContentValues values = new ContentValues();
-
-        final byte[] rawStack = DurableUtils.writeToArrayOrNull(mState.stack);
-
-        // Remember location for next app launch
-        final String packageName = getCallingPackageMaybeExtra();
-        values.clear();
-        values.put(ResumeColumns.STACK, rawStack);
-        values.put(ResumeColumns.EXTERNAL, 0);
-        resolver.insert(RecentsProvider.buildResume(packageName), values);
-    }
 
     @Override
     void onTaskFinished(Uri... uris) {

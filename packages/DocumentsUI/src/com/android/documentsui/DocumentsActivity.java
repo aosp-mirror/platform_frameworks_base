@@ -16,6 +16,7 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_OPEN;
@@ -31,11 +32,12 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
@@ -52,7 +54,12 @@ import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 
+import libcore.io.IoUtils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class DocumentsActivity extends BaseActivity {
@@ -94,16 +101,14 @@ public class DocumentsActivity extends BaseActivity {
             // In this case, we set the activity title in AsyncTask.onPostExecute().  To prevent
             // talkback from reading aloud the default title, we clear it here.
             setTitle("");
-            new RestoreStackTask().execute();
+            new RestoreStackTask(this).execute();
         } else {
             refreshCurrentRootAndDirectory(ANIM_NONE);
         }
     }
 
     @Override
-    State buildState() {
-        State state = buildDefaultState();
-
+    void includeState(State state) {
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
@@ -134,8 +139,6 @@ public class DocumentsActivity extends BaseActivity {
             state.transferMode = intent.getIntExtra(FileOperationService.EXTRA_OPERATION,
                     FileOperationService.OPERATION_COPY);
         }
-
-        return state;
     }
 
     @Override
@@ -319,11 +322,13 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     void onSaveRequested(DocumentInfo replaceTarget) {
-        new ExistingFinishTask(replaceTarget.derivedUri).executeOnExecutor(getExecutorForCurrentDirectory());
+        new ExistingFinishTask(this, replaceTarget.derivedUri)
+                .executeOnExecutor(getExecutorForCurrentDirectory());
     }
 
     void onSaveRequested(String mimeType, String displayName) {
-        new CreateFinishTask(mimeType, displayName).executeOnExecutor(getExecutorForCurrentDirectory());
+        new CreateFinishTask(this, mimeType, displayName)
+                .executeOnExecutor(getExecutorForCurrentDirectory());
     }
 
     @Override
@@ -343,7 +348,8 @@ public class DocumentsActivity extends BaseActivity {
             openContainerDocument(doc);
         } else if (mState.action == ACTION_OPEN || mState.action == ACTION_GET_CONTENT) {
             // Explicit file picked, return
-            new ExistingFinishTask(doc.derivedUri).executeOnExecutor(getExecutorForCurrentDirectory());
+            new ExistingFinishTask(this, doc.derivedUri)
+                    .executeOnExecutor(getExecutorForCurrentDirectory());
         } else if (mState.action == ACTION_CREATE) {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
@@ -358,7 +364,8 @@ public class DocumentsActivity extends BaseActivity {
             for (int i = 0; i < size; i++) {
                 uris[i] = docs.get(i).derivedUri;
             }
-            new ExistingFinishTask(uris).executeOnExecutor(getExecutorForCurrentDirectory());
+            new ExistingFinishTask(this, uris)
+                    .executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -373,11 +380,10 @@ public class DocumentsActivity extends BaseActivity {
             // Should not be reached.
             throw new IllegalStateException("Invalid mState.action.");
         }
-        new PickFinishTask(result).executeOnExecutor(getExecutorForCurrentDirectory());
+        new PickFinishTask(this, result).executeOnExecutor(getExecutorForCurrentDirectory());
     }
 
-    @Override
-    void saveStackBlocking() {
+    void writeStackToRecentsBlocking() {
         final ContentResolver resolver = getContentResolver();
         final ContentValues values = new ContentValues();
 
@@ -438,69 +444,138 @@ public class DocumentsActivity extends BaseActivity {
         finish();
     }
 
+
     public static DocumentsActivity get(Fragment fragment) {
         return (DocumentsActivity) fragment.getActivity();
     }
 
-    private final class PickFinishTask extends AsyncTask<Void, Void, Void> {
+    /**
+     * Restores the stack from Recents for the specified package.
+     */
+    private static final class RestoreStackTask
+            extends PairedTask<DocumentsActivity, Void, Void> {
+
+        private volatile boolean mRestoredStack;
+        private volatile boolean mExternal;
+        private Context mContext;
+        private State mState;
+
+        public RestoreStackTask(DocumentsActivity activity) {
+            super(activity);
+            mState = activity.mState;
+        }
+
+        @Override
+        protected Void run(Void... params) {
+            if (DEBUG && !mState.stack.isEmpty()) {
+                Log.w(TAG, "Overwriting existing stack.");
+            }
+            RootsCache roots = DocumentsApplication.getRootsCache(mContext);
+
+            String packageName = mOwner.getCallingPackageMaybeExtra();
+            Uri resumeUri = RecentsProvider.buildResume(packageName);
+            Cursor cursor = mOwner.getContentResolver().query(resumeUri, null, null, null, null);
+            try {
+                if (cursor.moveToFirst()) {
+                    mExternal = cursor.getInt(cursor.getColumnIndex(ResumeColumns.EXTERNAL)) != 0;
+                    final byte[] rawStack = cursor.getBlob(
+                            cursor.getColumnIndex(ResumeColumns.STACK));
+                    DurableUtils.readFromArray(rawStack, mState.stack);
+                    mRestoredStack = true;
+                }
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to resume: " + e);
+            } finally {
+                IoUtils.closeQuietly(cursor);
+            }
+
+            if (mRestoredStack) {
+                // Update the restored stack to ensure we have freshest data
+                final Collection<RootInfo> matchingRoots = roots.getMatchingRootsBlocking(mState);
+                try {
+                    mState.stack.updateRoot(matchingRoots);
+                    mState.stack.updateDocuments(mOwner.getContentResolver());
+                } catch (FileNotFoundException e) {
+                    Log.w(TAG, "Failed to restore stack for package: " + packageName
+                            + " because of error: "+ e);
+                    mState.stack.reset();
+                    mRestoredStack = false;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void finish(Void result) {
+            mState.restored = true;
+            mOwner.refreshCurrentRootAndDirectory(ANIM_NONE);
+            mOwner.onStackRestored(mRestoredStack, mExternal);
+        }
+    }
+
+    private static final class PickFinishTask extends PairedTask<DocumentsActivity, Void, Void> {
         private final Uri mUri;
 
-        public PickFinishTask(Uri uri) {
+        public PickFinishTask(DocumentsActivity activity, Uri uri) {
+            super(activity);
             mUri = uri;
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
+        protected Void run(Void... params) {
+            mOwner.writeStackToRecentsBlocking();
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            onTaskFinished(mUri);
+        protected void finish(Void result) {
+            mOwner.onTaskFinished(mUri);
         }
     }
 
-    final class ExistingFinishTask extends AsyncTask<Void, Void, Void> {
+    private static final class ExistingFinishTask extends PairedTask<DocumentsActivity, Void, Void> {
         private final Uri[] mUris;
 
-        public ExistingFinishTask(Uri... uris) {
+        public ExistingFinishTask(DocumentsActivity activity, Uri... uris) {
+            super(activity);
             mUris = uris;
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            saveStackBlocking();
+        protected Void run(Void... params) {
+            mOwner.writeStackToRecentsBlocking();
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            onTaskFinished(mUris);
+        protected void finish(Void result) {
+            mOwner.onTaskFinished(mUris);
         }
     }
 
     /**
      * Task that creates a new document in the background.
      */
-    final class CreateFinishTask extends AsyncTask<Void, Void, Uri> {
+    private static final class CreateFinishTask extends PairedTask<DocumentsActivity, Void, Uri> {
         private final String mMimeType;
         private final String mDisplayName;
 
-        public CreateFinishTask(String mimeType, String displayName) {
+        public CreateFinishTask(DocumentsActivity activity, String mimeType, String displayName) {
+            super(activity);
             mMimeType = mimeType;
             mDisplayName = displayName;
         }
 
         @Override
-        protected void onPreExecute() {
-            setPending(true);
+        protected void prepare() {
+            mOwner.setPending(true);
         }
 
         @Override
-        protected Uri doInBackground(Void... params) {
-            final ContentResolver resolver = getContentResolver();
-            final DocumentInfo cwd = getCurrentDirectory();
+        protected Uri run(Void... params) {
+            final ContentResolver resolver = mOwner.getContentResolver();
+            final DocumentInfo cwd = mOwner.getCurrentDirectory();
 
             ContentProviderClient client = null;
             Uri childUri = null;
@@ -516,22 +591,22 @@ public class DocumentsActivity extends BaseActivity {
             }
 
             if (childUri != null) {
-                saveStackBlocking();
+                mOwner.writeStackToRecentsBlocking();
             }
 
             return childUri;
         }
 
         @Override
-        protected void onPostExecute(Uri result) {
+        protected void finish(Uri result) {
             if (result != null) {
-                onTaskFinished(result);
+                mOwner.onTaskFinished(result);
             } else {
                 Snackbars.makeSnackbar(
-                    DocumentsActivity.this, R.string.save_error, Snackbar.LENGTH_SHORT).show();
+                        mOwner, R.string.save_error, Snackbar.LENGTH_SHORT).show();
             }
 
-            setPending(false);
+            mOwner.setPending(false);
         }
     }
 }

@@ -45,22 +45,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
-import android.widget.Toolbar;
 
-import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.SearchManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Preconditions;
 
-import libcore.io.IoUtils;
-
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -86,8 +80,8 @@ public abstract class BaseActivity extends Activity
 
     abstract void onTaskFinished(Uri... uris);
     abstract void refreshDirectory(int anim);
-    abstract void saveStackBlocking();
-    abstract State buildState();
+    /** Allows sub-classes to include information in a newly created State instance. */
+    abstract void includeState(State initialState);
 
     public BaseActivity(@LayoutRes int layoutId, String tag) {
         mLayoutId = layoutId;
@@ -102,9 +96,7 @@ public abstract class BaseActivity extends Activity
         setContentView(mLayoutId);
 
         mDrawer = DrawerController.create(this);
-        mState = (icicle != null)
-                ? icicle.<State>getParcelable(EXTRA_STATE)
-                        : buildState();
+        mState = getState(icicle);
         Metrics.logActivityLaunch(this, mState, getIntent());
 
         mRoots = DocumentsApplication.getRootsCache(this);
@@ -113,7 +105,8 @@ public abstract class BaseActivity extends Activity
                 new RootsCache.OnCacheUpdateListener() {
                     @Override
                     public void onCacheUpdate() {
-                        new HandleRootsChangedTask().execute(getCurrentRoot());
+                        new HandleRootsChangedTask(BaseActivity.this)
+                                .execute(getCurrentRoot());
                     }
                 });
 
@@ -182,7 +175,20 @@ public abstract class BaseActivity extends Activity
         super.onDestroy();
     }
 
-    State buildDefaultState() {
+    private State getState(@Nullable Bundle icicle) {
+        if (icicle != null) {
+            State state = icicle.<State>getParcelable(EXTRA_STATE);
+            if (DEBUG) Log.d(mTag, "Recovered existing state object: " + state);
+            return state;
+        }
+
+        State state = createSharedState();
+        includeState(state);
+        if (DEBUG) Log.d(mTag, "Created new state object: " + state);
+        return state;
+    }
+
+    private State createSharedState() {
         State state = new State();
 
         final Intent intent = getIntent();
@@ -222,7 +228,7 @@ public abstract class BaseActivity extends Activity
         if (mRoots.isRecentsRoot(root)) {
             refreshCurrentRootAndDirectory(ANIM_NONE);
         } else {
-            new PickRootTask(root).executeOnExecutor(getExecutorForCurrentDirectory());
+            new PickRootTask(this, root).executeOnExecutor(getExecutorForCurrentDirectory());
         }
     }
 
@@ -570,115 +576,40 @@ public abstract class BaseActivity extends Activity
         }
     }
 
-    final class PickRootTask extends AsyncTask<Void, Void, DocumentInfo> {
+    private static final class PickRootTask extends PairedTask<BaseActivity, Void, DocumentInfo> {
         private RootInfo mRoot;
 
-        public PickRootTask(RootInfo root) {
+        public PickRootTask(BaseActivity activity, RootInfo root) {
+            super(activity);
             mRoot = root;
         }
 
         @Override
-        protected DocumentInfo doInBackground(Void... params) {
-            return getRootDocumentBlocking(mRoot);
+        protected DocumentInfo run(Void... params) {
+            return mOwner.getRootDocumentBlocking(mRoot);
         }
 
         @Override
-        protected void onPostExecute(DocumentInfo result) {
-            if (result != null && !isDestroyed()) {
-                openContainerDocument(result);
+        protected void finish(DocumentInfo result) {
+            if (result != null) {
+                mOwner.openContainerDocument(result);
             }
         }
     }
 
-    final class RestoreStackTask extends AsyncTask<Void, Void, Void> {
-        private volatile boolean mRestoredStack;
-        private volatile boolean mExternal;
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            if (DEBUG && !mState.stack.isEmpty()) {
-                Log.w(mTag, "Overwriting existing stack.");
-            }
-            RootsCache roots = DocumentsApplication.getRootsCache(BaseActivity.this);
-
-            // Restore last stack for calling package
-            final String packageName = getCallingPackageMaybeExtra();
-            final Cursor cursor = getContentResolver()
-                    .query(RecentsProvider.buildResume(packageName), null, null, null, null);
-            try {
-                if (cursor.moveToFirst()) {
-                    mExternal = cursor.getInt(cursor.getColumnIndex(ResumeColumns.EXTERNAL)) != 0;
-                    final byte[] rawStack = cursor.getBlob(
-                            cursor.getColumnIndex(ResumeColumns.STACK));
-                    DurableUtils.readFromArray(rawStack, mState.stack);
-                    mRestoredStack = true;
-                }
-            } catch (IOException e) {
-                Log.w(mTag, "Failed to resume: " + e);
-            } finally {
-                IoUtils.closeQuietly(cursor);
-            }
-
-            if (mRestoredStack) {
-                // Update the restored stack to ensure we have freshest data
-                final Collection<RootInfo> matchingRoots = roots.getMatchingRootsBlocking(mState);
-                try {
-                    mState.stack.updateRoot(matchingRoots);
-                    mState.stack.updateDocuments(getContentResolver());
-                } catch (FileNotFoundException e) {
-                    Log.w(mTag, "Failed to restore stack: " + e);
-                    mState.stack.reset();
-                    mRestoredStack = false;
-                }
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            if (isDestroyed()) return;
-            mState.restored = true;
-            refreshCurrentRootAndDirectory(ANIM_NONE);
-            onStackRestored(mRestoredStack, mExternal);
-        }
-    }
-
-    final class RestoreRootTask extends AsyncTask<Void, Void, RootInfo> {
-        private Uri mRootUri;
-
-        public RestoreRootTask(Uri rootUri) {
-            mRootUri = rootUri;
-        }
-
-        @Override
-        protected RootInfo doInBackground(Void... params) {
-            final String rootId = DocumentsContract.getRootId(mRootUri);
-            return mRoots.getRootOneshot(mRootUri.getAuthority(), rootId);
-        }
-
-        @Override
-        protected void onPostExecute(RootInfo root) {
-            if (isDestroyed()) return;
-            mState.restored = true;
-
-            if (root != null) {
-                onRootPicked(root);
-            } else {
-                Log.w(mTag, "Failed to find root: " + mRootUri);
-                finish();
-            }
-        }
-    }
-
-    final class HandleRootsChangedTask extends AsyncTask<RootInfo, Void, RootInfo> {
+    private static final class HandleRootsChangedTask
+            extends PairedTask<BaseActivity, RootInfo, RootInfo> {
         DocumentInfo mHome;
 
+        public HandleRootsChangedTask(BaseActivity activity) {
+            super(activity);
+        }
+
         @Override
-        protected RootInfo doInBackground(RootInfo... roots) {
+        protected RootInfo run(RootInfo... roots) {
             checkArgument(roots.length == 1);
             final RootInfo currentRoot = roots[0];
-            final Collection<RootInfo> cachedRoots = mRoots.getRootsBlocking();
+            final Collection<RootInfo> cachedRoots = mOwner.mRoots.getRootsBlocking();
             RootInfo homeRoot = null;
             for (final RootInfo root : cachedRoots) {
                 if (root.isHome()) {
@@ -690,17 +621,17 @@ public abstract class BaseActivity extends Activity
                 }
             }
             Preconditions.checkNotNull(homeRoot);
-            mHome = getRootDocumentBlocking(homeRoot);
+            mHome = mOwner.getRootDocumentBlocking(homeRoot);
             return homeRoot;
         }
 
         @Override
-        protected void onPostExecute(RootInfo homeRoot) {
-            if (homeRoot != null && mHome != null && !isDestroyed()) {
+        protected void finish(RootInfo homeRoot) {
+            if (homeRoot != null && mHome != null) {
                 // Clear entire backstack and start in new root
-                mState.onRootChanged(homeRoot);
-                mSearchManager.update(homeRoot);
-                openContainerDocument(mHome);
+                mOwner.mState.onRootChanged(homeRoot);
+                mOwner.mSearchManager.update(homeRoot);
+                mOwner.openContainerDocument(mHome);
             }
         }
     }
