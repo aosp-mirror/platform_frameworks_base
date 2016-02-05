@@ -166,7 +166,7 @@ appearance and behavior. The items in the above menu include the following attri
 
 <dl>
   <dt>{@code android:id}</dt>
-    <dd>A resource ID that's unique to the item, which allows the application can recognize the item
+    <dd>A resource ID that's unique to the item, which allows the application to recognize the item
 when the user selects it.</dd>
   <dt>{@code android:icon}</dt>
     <dd>A reference to a drawable to use as the item's icon.</dd>
