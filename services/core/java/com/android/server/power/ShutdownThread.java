@@ -94,6 +94,9 @@ public final class ShutdownThread extends Thread {
     // Indicates whether we are rebooting into safe mode
     public static final String REBOOT_SAFEMODE_PROPERTY = "persist.sys.safemode";
 
+    // Indicates whether we should stay in safe mode until ro.build.date.utc is newer than this
+    public static final String AUDIT_SAFEMODE_PROPERTY = "persist.sys.audit_safemode";
+
     // static instance of this thread
     private static final ShutdownThread sInstance = new ShutdownThread();
 

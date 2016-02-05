@@ -320,6 +320,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final float DRAG_SHADOW_ALPHA_TRANSPARENT = .7071f;
 
+    private static final String PROPERTY_BUILD_DATE_UTC = "ro.build.date.utc";
+
     final private KeyguardDisableHandler mKeyguardDisableHandler;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -7458,8 +7460,22 @@ public class WindowManagerService extends IWindowManager.Stub
                 || volumeDownState > 0;
         try {
             if (SystemProperties.getInt(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, 0) != 0) {
-                mSafeMode = true;
-                SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
+                int auditSafeMode = SystemProperties.getInt(ShutdownThread.AUDIT_SAFEMODE_PROPERTY, 0);
+
+                if (auditSafeMode == 0) {
+                    mSafeMode = true;
+                    SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
+                } else {
+                    // stay in safe mode until we have updated to a newer build
+                    int buildDate = SystemProperties.getInt(PROPERTY_BUILD_DATE_UTC, 0);
+
+                    if (auditSafeMode >= buildDate) {
+                        mSafeMode = true;
+                    } else {
+                        SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
+                        SystemProperties.set(ShutdownThread.AUDIT_SAFEMODE_PROPERTY, "");
+                    }
+                }
             }
         } catch (IllegalArgumentException e) {
         }
