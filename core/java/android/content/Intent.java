@@ -8939,6 +8939,8 @@ public class Intent implements Parcelable, Cloneable {
                 case ACTION_MEDIA_SCANNER_STARTED:
                 case ACTION_MEDIA_SCANNER_FINISHED:
                 case ACTION_MEDIA_SCANNER_SCAN_FILE:
+                case ACTION_PACKAGE_NEEDS_VERIFICATION:
+                case ACTION_PACKAGE_VERIFIED:
                     // Ignore legacy actions
                     break;
                 default:
