@@ -8770,6 +8770,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         continue;
                     }
 
+                    if (!tr.mUserSetupComplete) {
+                        // Don't include task launched while user is not done setting-up.
+                        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS,
+                                "Skipping, user setup not complete: " + tr);
+                        continue;
+                    }
+
                     ActivityManager.RecentTaskInfo rti = createRecentTaskInfoFromTaskRecord(tr);
                     if (!detailed) {
                         rti.baseIntent.replaceExtras((Bundle)null);
@@ -12425,9 +12432,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
 
-            // Make sure we have the current profile info, since it is needed for
-            // security checks.
-            mUserController.updateCurrentProfileIdsLocked();
+            // Make sure we have the current profile info, since it is needed for security checks.
+            mUserController.onSystemReady();
 
             mRecentTasks.onSystemReady();
             // Check to see if there are any update receivers to run.
