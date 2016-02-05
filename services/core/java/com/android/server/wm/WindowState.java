@@ -1260,8 +1260,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * it may obscure windows behind it.
      */
     boolean isOpaqueDrawn() {
-        return (mAttrs.format == PixelFormat.OPAQUE
-                        || mAttrs.type == TYPE_WALLPAPER)
+        // When there is keyguard, wallpaper could be placed over the secure app
+        // window but invisible. We need to check wallpaper visibility explicitly
+        // to determine if it's occluding apps.
+        return ((!mIsWallpaper && mAttrs.format == PixelFormat.OPAQUE)
+                || (mIsWallpaper && mWallpaperVisible))
                 && isDrawnLw() && mWinAnimator.mAnimation == null
                 && (mAppToken == null || mAppToken.mAppAnimator.animation == null);
     }
