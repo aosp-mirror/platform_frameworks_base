@@ -25,7 +25,6 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
@@ -49,7 +48,6 @@ public class TaskViewThumbnail extends View {
     float mDimAlpha;
     Matrix mScaleMatrix = new Matrix();
     Paint mDrawPaint = new Paint();
-    Paint mBgFillPaint = new Paint();
     BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
 
@@ -81,7 +79,6 @@ public class TaskViewThumbnail extends View {
         mDrawPaint.setAntiAlias(true);
         mCornerRadius = getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
-        mBgFillPaint.setColor(Color.WHITE);
     }
 
     /**
@@ -103,37 +100,10 @@ public class TaskViewThumbnail extends View {
         if (mInvisible) {
             return;
         }
-
-        if (mThumbnailRect.width() <= 0 || mThumbnailRect.height() <= 0 ||
-                mTaskViewRect.width() <= 0 || mTaskViewRect.height() <= 0) {
-            return;
-        }
-
-        int thumbnailHeight = (int) (((float) mTaskViewRect.width() / mThumbnailRect.width()) *
-                mThumbnailRect.height());
-        if (thumbnailHeight >= mTaskViewRect.height()) {
-            // The thumbnail fills the full task view bounds, so just draw it
-            canvas.drawRoundRect(0, 0, mTaskViewRect.width(), mTaskViewRect.height(),
-                    mCornerRadius, mCornerRadius, mDrawPaint);
-        } else {
-            // The thumbnail only covers part of the task view bounds, so fill in the non-thumbnail
-            // space with the default background color.  This is the equivalent of the GL border
-            // texture mode.
-            int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
-
-            // Since we want the top corners to be rounded, just clip at the thumbnail height
-            canvas.clipRect(0, 0, mTaskViewRect.width(), thumbnailHeight, Region.Op.REPLACE);
-            canvas.drawRoundRect(0, 0, mTaskViewRect.width(), thumbnailHeight + mCornerRadius,
-                    mCornerRadius, mCornerRadius, mDrawPaint);
-
-            // In the remaining space, draw the background color
-            canvas.clipRect(0, thumbnailHeight, mTaskViewRect.width(), mTaskViewRect.height(),
-                    Region.Op.REPLACE);
-            canvas.drawRoundRect(0, thumbnailHeight - mCornerRadius, mTaskViewRect.width(),
-                    mTaskViewRect.height(), mCornerRadius, mCornerRadius, mBgFillPaint);
-
-            canvas.restoreToCount(count);
-        }
+        // Draw the thumbnail with the rounded corners
+        canvas.drawRoundRect(0, 0, mTaskViewRect.width(), mTaskViewRect.height(),
+                mCornerRadius,
+                mCornerRadius, mDrawPaint);
     }
 
     /** Sets the thumbnail to a given bitmap. */
