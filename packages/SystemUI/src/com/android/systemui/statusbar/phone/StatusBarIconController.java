@@ -30,12 +30,12 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
@@ -226,12 +226,25 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
 
     public void setExternalIcon(String slot) {
         int viewIndex = getViewIndex(getSlotIndex(slot));
+        int height = mContext.getResources().getDimensionPixelSize(
+                R.dimen.status_bar_icon_drawing_size);
         ImageView imageView = (ImageView) mStatusIcons.getChildAt(viewIndex);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setAdjustViewBounds(true);
+        setHeightAndCenter(imageView, height);
         imageView = (ImageView) mStatusIconsKeyguard.getChildAt(viewIndex);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setAdjustViewBounds(true);
+        setHeightAndCenter(imageView, height);
+    }
+
+    private void setHeightAndCenter(ImageView imageView, int height) {
+        ViewGroup.LayoutParams params = imageView.getLayoutParams();
+        params.height = height;
+        if (params instanceof LinearLayout.LayoutParams) {
+            ((LinearLayout.LayoutParams) params).gravity = Gravity.CENTER_VERTICAL;
+        }
+        imageView.setLayoutParams(params);
     }
 
     public void setIcon(String slot, StatusBarIcon icon) {
