@@ -715,7 +715,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * about setLocales() has changed locale directly. */
     private void fixUpLocaleList() {
         if ((locale == null && !mLocaleList.isEmpty()) ||
-                (locale != null && !locale.equals(mLocaleList.getPrimary()))) {
+                (locale != null && !locale.equals(mLocaleList.get(0)))) {
             mLocaleList = new LocaleList(locale);
         }
     }
@@ -1269,7 +1269,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             localeArray[i] = Locale.forLanguageTag(source.readString());
         }
         mLocaleList = new LocaleList(localeArray);
-        locale = mLocaleList.getPrimary();
+        locale = mLocaleList.get(0);
 
         userSetLocale = (source.readInt()==1);
         touchscreen = source.readInt();
@@ -1435,7 +1435,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public void setLocales(@Nullable LocaleList locales) {
         mLocaleList = locales == null ? LocaleList.getEmptyLocaleList() : locales;
-        locale = mLocaleList.getPrimary();
+        locale = mLocaleList.get(0);
         setLayoutDirection(locale);
     }
 
@@ -1900,7 +1900,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
 
         final String localesStr = XmlUtils.readStringAttribute(parser, XML_ATTR_LOCALES);
         configOut.mLocaleList = LocaleList.forLanguageTags(localesStr);
-        configOut.locale = configOut.mLocaleList.getPrimary();
+        configOut.locale = configOut.mLocaleList.get(0);
 
         configOut.touchscreen = XmlUtils.readIntAttribute(parser, XML_ATTR_TOUCHSCREEN,
                 TOUCHSCREEN_UNDEFINED);

@@ -381,7 +381,7 @@ public class Resources {
     private PluralRules getPluralRule() {
         synchronized (sSync) {
             if (mPluralRule == null) {
-                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
+                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().get(0));
             }
             return mPluralRule;
         }
@@ -444,7 +444,7 @@ public class Resources {
     @NonNull
     public String getString(@StringRes int id, Object... formatArgs) throws NotFoundException {
         final String raw = getString(id);
-        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
+        return String.format(mConfiguration.getLocales().get(0), raw, formatArgs);
     }
 
     /**
@@ -475,7 +475,7 @@ public class Resources {
     public String getQuantityString(@PluralsRes int id, int quantity, Object... formatArgs)
             throws NotFoundException {
         String raw = getQuantityText(id, quantity).toString();
-        return String.format(mConfiguration.getLocales().getPrimary(), raw, formatArgs);
+        return String.format(mConfiguration.getLocales().get(0), raw, formatArgs);
     }
 
     /**
@@ -1971,7 +1971,7 @@ public class Resources {
             }
 
             mAssets.setConfiguration(mConfiguration.mcc, mConfiguration.mnc,
-                    adjustLanguageTag(locales.getPrimary().toLanguageTag()),
+                    adjustLanguageTag(locales.get(0).toLanguageTag()),
                     mConfiguration.orientation,
                     mConfiguration.touchscreen,
                     mConfiguration.densityDpi, mConfiguration.keyboard,
@@ -1996,7 +1996,7 @@ public class Resources {
         }
         synchronized (sSync) {
             if (mPluralRule != null) {
-                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().getPrimary());
+                mPluralRule = PluralRules.forLocale(mConfiguration.getLocales().get(0));
             }
         }
     }

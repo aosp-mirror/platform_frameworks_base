@@ -97,12 +97,12 @@ public class LocaleSpan extends MetricAffectingSpan implements ParcelableSpan {
      * @return The {@link Locale} for this span.  If multiple locales are associated with this
      * span, only the first locale is returned.  {@code null} if no {@link Locale} is specified.
      *
-     * @see LocaleList#getPrimary()
+     * @see LocaleList#get()
      * @see #getLocales()
      */
     @Nullable
     public Locale getLocale() {
-        return mLocales.getPrimary();
+        return mLocales.get(0);
     }
 
     /**

@@ -17788,7 +17788,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (values.getLocales().size() == 1) {
                         // This is an optimization to avoid the JNI call when the result of
                         // getFirstMatch() does not depend on the supported locales.
-                        locale = values.getLocales().getPrimary();
+                        locale = values.getLocales().get(0);
                     } else {
                         if (mSupportedSystemLocales == null) {
                             mSupportedSystemLocales =
