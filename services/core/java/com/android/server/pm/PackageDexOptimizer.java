@@ -176,8 +176,14 @@ class PackageDexOptimizer {
                 dexoptNeeded = adjustDexoptNeeded(dexoptNeeded);
 
                 if (dexoptNeeded == DexFile.NO_DEXOPT_NEEDED) {
-                    // No dexopt needed and we don't use profiles. Nothing to do.
-                    continue;
+                    if (useProfiles) {
+                        // Profiles may trigger re-compilation. The final decision is taken in
+                        // installd.
+                        dexoptNeeded = DexFile.DEX2OAT_NEEDED;
+                    } else {
+                        // No dexopt needed and we don't use profiles. Nothing to do.
+                        continue;
+                    }
                 }
                 final String dexoptType;
                 String oatDir = null;
