@@ -1193,13 +1193,52 @@ public class DownloadManager {
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification) {
         return addCompletedDownload(title, description, isMediaScannerScannable, mimeType, path,
-                length, showNotification, false);
+                length, showNotification, false, null, null);
+    }
+
+    /**
+     * Adds a file to the downloads database system, so it could appear in Downloads App
+     * (and thus become eligible for management by the Downloads App).
+     * <p>
+     * It is helpful to make the file scannable by MediaScanner by setting the param
+     * isMediaScannerScannable to true. It makes the file visible in media managing
+     * applications such as Gallery App, which could be a useful purpose of using this API.
+     *
+     * @param title the title that would appear for this file in Downloads App.
+     * @param description the description that would appear for this file in Downloads App.
+     * @param isMediaScannerScannable true if the file is to be scanned by MediaScanner. Files
+     * scanned by MediaScanner appear in the applications used to view media (for example,
+     * Gallery app).
+     * @param mimeType mimetype of the file.
+     * @param path absolute pathname to the file. The file should be world-readable, so that it can
+     * be managed by the Downloads App and any other app that is used to read it (for example,
+     * Gallery app to display the file, if the file contents represent a video/image).
+     * @param length length of the downloaded file
+     * @param showNotification true if a notification is to be sent, false otherwise
+     * @param uri the original HTTP URI of the download
+     * @param referer the HTTP Referer for the download
+     * @return  an ID for the download entry added to the downloads app, unique across the system
+     * This ID is used to make future calls related to this download.
+     */
+    public long addCompletedDownload(String title, String description,
+            boolean isMediaScannerScannable, String mimeType, String path, long length,
+            boolean showNotification, Uri uri, Uri referer) {
+        return addCompletedDownload(title, description, isMediaScannerScannable, mimeType, path,
+                length, showNotification, false, uri, referer);
     }
 
     /** {@hide} */
     public long addCompletedDownload(String title, String description,
             boolean isMediaScannerScannable, String mimeType, String path, long length,
             boolean showNotification, boolean allowWrite) {
+        return addCompletedDownload(title, description, isMediaScannerScannable, mimeType, path,
+                length, showNotification, allowWrite, null, null);
+    }
+
+    /** {@hide} */
+    public long addCompletedDownload(String title, String description,
+            boolean isMediaScannerScannable, String mimeType, String path, long length,
+            boolean showNotification, boolean allowWrite, Uri uri, Uri referer) {
         // make sure the input args are non-null/non-zero
         validateArgumentIsNonEmpty("title", title);
         validateArgumentIsNonEmpty("description", description);
@@ -1210,10 +1249,18 @@ public class DownloadManager {
         }
 
         // if there is already an entry with the given path name in downloads.db, return its id
-        Request request = new Request(NON_DOWNLOADMANAGER_DOWNLOAD)
-                .setTitle(title)
+        Request request;
+        if (uri != null) {
+            request = new Request(uri);
+        } else {
+            request = new Request(NON_DOWNLOADMANAGER_DOWNLOAD);
+        }
+        request.setTitle(title)
                 .setDescription(description)
                 .setMimeType(mimeType);
+        if (referer != null) {
+            request.addRequestHeader("Referer", referer.toString());
+        }
         ContentValues values = request.toContentValues(null);
         values.put(Downloads.Impl.COLUMN_DESTINATION,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
