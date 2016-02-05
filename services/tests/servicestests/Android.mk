@@ -26,7 +26,9 @@ LOCAL_PACKAGE_NAME := FrameworksServicesTests
 
 LOCAL_CERTIFICATE := platform
 
-LOCAL_JNI_SHARED_LIBRARIES := libapfjni
+LOCAL_JNI_SHARED_LIBRARIES := \
+    libapfjni \
+    libnativehelper
 
 include $(BUILD_PACKAGE)
 
