@@ -42,6 +42,7 @@ public class TileQueryHelper {
     private static final String TAG = "TileQueryHelper";
 
     private final ArrayList<TileInfo> mTiles = new ArrayList<>();
+    private final ArrayList<String> mSpecs = new ArrayList<>();
     private final Context mContext;
     private TileStateListener mListener;
 
@@ -76,7 +77,7 @@ public class TileQueryHelper {
                     mainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            addTile(spec, state, mTiles);
+                            addTile(spec, state);
                             mListener.onTilesChanged(mTiles);
                         }
                     });
@@ -95,20 +96,23 @@ public class TileQueryHelper {
         mListener = listener;
     }
 
-    private static void addTile(String spec, QSTile.State state, List<TileInfo> tiles) {
+    private void addTile(String spec, QSTile.State state) {
+        if (mSpecs.contains(spec)) {
+            return;
+        }
         TileInfo info = new TileInfo();
         info.state = state;
         info.spec = spec;
-        tiles.add(info);
+        mTiles.add(info);
+        mSpecs.add(spec);
     }
 
-    private static void addTile(String spec, Drawable drawable, CharSequence label, Context context,
-            List<TileInfo> tiles) {
+    private void addTile(String spec, Drawable drawable, CharSequence label, Context context) {
         QSTile.State state = new QSTile.State();
         state.label = label;
         state.contentDescription = label;
         state.icon = new DrawableIcon(drawable);
-        addTile(spec, state, tiles);
+        addTile(spec, state);
     }
 
     public static class TileInfo {
@@ -133,7 +137,7 @@ public class TileQueryHelper {
                     icon.setTint(mContext.getColor(android.R.color.white));
                 }
                 CharSequence label = info.serviceInfo.loadLabel(pm);
-                addTile(spec, icon, label != null ? label.toString() : "null", mContext, tiles);
+                addTile(spec, icon, label != null ? label.toString() : "null", mContext);
             }
             return tiles;
         }
