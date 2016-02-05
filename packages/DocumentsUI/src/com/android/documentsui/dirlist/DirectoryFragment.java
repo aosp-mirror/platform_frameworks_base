@@ -99,7 +99,6 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperations;
-
 import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
@@ -847,27 +846,28 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     }
 
     private void showEmptyDirectory() {
-        showEmptyView(R.string.empty);
+        showEmptyView(R.string.empty, R.drawable.cabinet);
     }
 
     private void showNoResults(RootInfo root) {
         CharSequence msg = getContext().getResources().getText(R.string.no_results);
-        showEmptyView(String.format(String.valueOf(msg), root.title));
+        showEmptyView(String.format(String.valueOf(msg), root.title), R.drawable.cabinet);
     }
 
-    // Shows an error indicating documents couldn't be queried.
     private void showQueryError() {
-        showEmptyView(R.string.query_error);
+        showEmptyView(R.string.query_error, R.drawable.hourglass);
     }
 
-    private void showEmptyView(@StringRes int id) {
-        showEmptyView(getContext().getResources().getText(id));
+    private void showEmptyView(@StringRes int id, int drawable) {
+        showEmptyView(getContext().getResources().getText(id), drawable);
     }
 
-    private void showEmptyView(CharSequence msg) {
+    private void showEmptyView(CharSequence msg, int drawable) {
         View content = mEmptyView.findViewById(R.id.content);
         TextView msgView = (TextView) mEmptyView.findViewById(R.id.message);
+        ImageView imageView = (ImageView) mEmptyView.findViewById(R.id.artwork);
         msgView.setText(msg);
+        imageView.setImageResource(drawable);
 
         content.animate().cancel();  // cancel any ongoing animations
 
