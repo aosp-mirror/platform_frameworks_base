@@ -25,6 +25,8 @@ import android.animation.ValueAnimator;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
+import android.app.Application;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -35,6 +37,7 @@ import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -198,6 +201,24 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mAnimatedVectorState.mVectorDrawable.clearMutated();
         }
         mMutated = false;
+    }
+
+    /**
+     * In order to avoid breaking old apps, we only throw exception on invalid VectorDrawable
+     * animations * for apps targeting N and later. For older apps, we ignore (i.e. quietly skip)
+     * these animations.
+     *
+     * @return whether invalid animations for vector drawable should be ignored.
+     */
+    private static boolean shouldIgnoreInvalidAnimation() {
+        Application app = ActivityThread.currentApplication();
+        if (app == null || app.getApplicationInfo() == null) {
+            return true;
+        }
+        if (app.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -763,6 +784,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private boolean mInitialized = false;
         private boolean mAnimationPending = false;
         private boolean mIsReversible = false;
+        // This needs to be set before parsing starts.
+        private boolean mShouldIgnoreInvalidAnim;
         // TODO: Consider using NativeAllocationRegistery to track native allocation
         private final VirtualRefBasePtr mSetRefBasePtr;
         private WeakReference<RenderNode> mTarget = null;
@@ -782,6 +805,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 throw new UnsupportedOperationException("VectorDrawableAnimator cannot be " +
                         "re-initialized");
             }
+            mShouldIgnoreInvalidAnim = shouldIgnoreInvalidAnimation();
             parseAnimatorSet(set, 0);
             mInitialized = true;
 
@@ -841,7 +865,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                     }  else if (target instanceof VectorDrawable.VFullPath) {
                         createRTAnimatorForFullPath(animator, (VectorDrawable.VFullPath) target,
                                 startTime);
-                    } else {
+                    } else if (!mShouldIgnoreInvalidAnim) {
                         throw new IllegalArgumentException("ClipPath only supports PathData " +
                                 "property");
                     }
@@ -850,10 +874,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             } else if (target instanceof VectorDrawable.VectorDrawableState) {
                 createRTAnimatorForRootGroup(values, animator,
                         (VectorDrawable.VectorDrawableState) target, startTime);
-            } else {
+            } else if (!mShouldIgnoreInvalidAnim) {
                 // Should never get here
                 throw new UnsupportedOperationException("Target should be either VGroup, VPath, " +
-                        "or ConstantState, " + target.getClass() + " is not supported");
+                        "or ConstantState, " + target == null ? "Null target" : target.getClass() +
+                        " is not supported");
             }
         }
 
@@ -912,8 +937,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             long nativePtr = target.getNativePtr();
             if (mTmpValues.type == Float.class || mTmpValues.type == float.class) {
                 if (propertyId < 0) {
-                    throw new IllegalArgumentException("Property: " + mTmpValues
-                            .propertyName + " is not supported for FullPath");
+                    if (mShouldIgnoreInvalidAnim) {
+                        return;
+                    } else {
+                        throw new IllegalArgumentException("Property: " + mTmpValues.propertyName
+                                + " is not supported for FullPath");
+                    }
                 }
                 propertyPtr = nCreatePathPropertyHolder(nativePtr, propertyId,
                         (Float) mTmpValues.startValue, (Float) mTmpValues.endValue);
@@ -922,9 +951,13 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 propertyPtr = nCreatePathColorPropertyHolder(nativePtr, propertyId,
                         (Integer) mTmpValues.startValue, (Integer) mTmpValues.endValue);
             } else {
-                throw new UnsupportedOperationException("Unsupported type: " +
-                        mTmpValues.type + ". Only float, int or PathData value is " +
-                        "supported for Paths.");
+                if (mShouldIgnoreInvalidAnim) {
+                    return;
+                } else {
+                    throw new UnsupportedOperationException("Unsupported type: " +
+                            mTmpValues.type + ". Only float, int or PathData value is " +
+                            "supported for Paths.");
+                }
             }
             if (mTmpValues.dataSource != null) {
                 float[] dataPoints = createDataPoints(mTmpValues.dataSource, animator
@@ -939,8 +972,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 long startTime) {
                 long nativePtr = target.getNativeRenderer();
                 if (!animator.getPropertyName().equals("alpha")) {
-                    throw new UnsupportedOperationException("Only alpha is supported for root " +
-                            "group");
+                    if (mShouldIgnoreInvalidAnim) {
+                        return;
+                    } else {
+                        throw new UnsupportedOperationException("Only alpha is supported for root "
+                                + "group");
+                    }
                 }
                 Float startValue = null;
                 Float endValue = null;
@@ -953,7 +990,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                     }
                 }
                 if (startValue == null && endValue == null) {
-                    throw new UnsupportedOperationException("No alpha values are specified");
+                    if (mShouldIgnoreInvalidAnim) {
+                        return;
+                    } else {
+                        throw new UnsupportedOperationException("No alpha values are specified");
+                    }
                 }
                 long propertyPtr = nCreateRootAlphaPropertyHolder(nativePtr, startValue, endValue);
                 createNativeChildAnimator(propertyPtr, startTime, animator);

@@ -316,7 +316,7 @@ private:
         // Count of the properties, must be at the end.
         Count,
     };
-    std::vector<Node*> mChildren;
+    std::vector< std::unique_ptr<Node> > mChildren;
     Properties mProperties;
 };
 
@@ -360,7 +360,7 @@ private:
     float mViewportHeight = 0;
     float mRootAlpha = 1.0f;
 
-    Group* mRootNode;
+    std::unique_ptr<Group> mRootNode;
     SkRect mBounds;
     SkMatrix mCanvasMatrix;
     SkPaint mPaint;

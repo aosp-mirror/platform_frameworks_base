@@ -138,11 +138,6 @@ static jlong createGroup(JNIEnv*, jobject, jlong srcGroupPtr) {
     return reinterpret_cast<jlong>(newGroup);
 }
 
-static void deleteNode(JNIEnv*, jobject, jlong nodePtr) {
-    VectorDrawable::Node* node = reinterpret_cast<VectorDrawable::Node*>(nodePtr);
-    delete node;
-}
-
 static void setNodeName(JNIEnv* env, jobject, jlong nodePtr, jstring nameStr) {
     VectorDrawable::Node* node = reinterpret_cast<VectorDrawable::Node*>(nodePtr);
     const char* nodeName = env->GetStringUTFChars(nameStr, NULL);
@@ -346,7 +341,6 @@ static const JNINativeMethod gMethods[] = {
         {"nCreateClipPath", "!(J)J", (void*)createClipPath},
         {"nCreateGroup", "!()J", (void*)createEmptyGroup},
         {"nCreateGroup", "!(J)J", (void*)createGroup},
-        {"nDestroy", "!(J)V", (void*)deleteNode},
         {"nSetName", "(JLjava/lang/String;)V", (void*)setNodeName},
         {"nUpdateGroupProperties", "!(JFFFFFFF)V", (void*)updateGroupProperties},
 

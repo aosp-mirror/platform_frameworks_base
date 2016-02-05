@@ -924,8 +924,11 @@ public class VectorDrawable extends Drawable {
         private int mChangingConfigurations;
         private int[] mThemeAttrs;
         private String mGroupName = null;
-        private long mNativePtr = 0;
 
+        // The native object will be created in the constructor and will be destroyed in native
+        // when the neither java nor native has ref to the tree. This pointer should be valid
+        // throughout this VGroup Java object's life.
+        private final long mNativePtr;
         public VGroup(VGroup copy, ArrayMap<String, Object> targetsMap) {
 
             mIsStateful = copy.mIsStateful;
@@ -1065,16 +1068,6 @@ public class VectorDrawable extends Drawable {
         }
 
         @Override
-        protected void finalize() throws Throwable {
-            if (mNativePtr != 0) {
-                nDestroy(mNativePtr);
-                mNativePtr = 0;
-            }
-            super.finalize();
-        }
-
-
-        @Override
         public void applyTheme(Theme t) {
             if (mThemeAttrs != null) {
                 final TypedArray a = t.resolveAttributes(mThemeAttrs,
@@ -1208,10 +1201,10 @@ public class VectorDrawable extends Drawable {
      * Clip path, which only has name and pathData.
      */
     private static class VClipPath extends VPath {
-        long mNativePtr = 0;
+        private final long mNativePtr;
+
         public VClipPath() {
             mNativePtr = nCreateClipPath();
-            // Empty constructor.
         }
 
         public VClipPath(VClipPath copy) {
@@ -1224,14 +1217,6 @@ public class VectorDrawable extends Drawable {
             return mNativePtr;
         }
 
-        @Override
-        protected void finalize() throws Throwable {
-            if (mNativePtr != 0) {
-                nDestroy(mNativePtr);
-                mNativePtr = 0;
-            }
-            super.finalize();
-        }
         @Override
         public void inflate(Resources r, AttributeSet attrs, Theme theme) {
             final TypedArray a = obtainAttributes(r, theme, attrs,
@@ -1317,10 +1302,9 @@ public class VectorDrawable extends Drawable {
 
         ComplexColor mStrokeColors = null;
         ComplexColor mFillColors = null;
-        private long mNativePtr = 0;
+        private final long mNativePtr;
 
         public VFullPath() {
-            // Empty constructor.
             mNativePtr = nCreateFullPath();
         }
 
@@ -1382,15 +1366,6 @@ public class VectorDrawable extends Drawable {
                     R.styleable.VectorDrawablePath);
             updateStateFromTypedArray(a);
             a.recycle();
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            if (mNativePtr != 0) {
-                nDestroy(mNativePtr);
-                mNativePtr = 0;
-            }
-            super.finalize();
         }
 
         private void updateStateFromTypedArray(TypedArray a) {
@@ -1647,7 +1622,7 @@ public class VectorDrawable extends Drawable {
     private static native void nDraw(long rendererPtr, long canvasWrapperPtr,
             long colorFilterPtr, Rect bounds, boolean needsMirroring, boolean canReuseCache);
     private static native long nCreateFullPath();
-    private static native long nCreateFullPath(long mNativeFullPathPtr);
+    private static native long nCreateFullPath(long nativeFullPathPtr);
     private static native boolean nGetFullPathProperties(long pathPtr, byte[] properties,
             int length);
 
@@ -1663,7 +1638,6 @@ public class VectorDrawable extends Drawable {
 
     private static native long nCreateGroup();
     private static native long nCreateGroup(long groupPtr);
-    private static native void nDestroy(long nodePtr);
     private static native void nSetName(long nodePtr, String name);
     private static native boolean nGetGroupProperties(long groupPtr, float[] properties,
             int length);
