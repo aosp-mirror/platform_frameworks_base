@@ -457,7 +457,6 @@ public class DocumentsActivity extends BaseActivity {
 
         private volatile boolean mRestoredStack;
         private volatile boolean mExternal;
-        private Context mContext;
         private State mState;
 
         public RestoreStackTask(DocumentsActivity activity) {
@@ -470,7 +469,7 @@ public class DocumentsActivity extends BaseActivity {
             if (DEBUG && !mState.stack.isEmpty()) {
                 Log.w(TAG, "Overwriting existing stack.");
             }
-            RootsCache roots = DocumentsApplication.getRootsCache(mContext);
+            RootsCache roots = DocumentsApplication.getRootsCache(mOwner);
 
             String packageName = mOwner.getCallingPackageMaybeExtra();
             Uri resumeUri = RecentsProvider.buildResume(packageName);
