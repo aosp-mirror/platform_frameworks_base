@@ -267,7 +267,16 @@ public:
 
     static float textGamma;
 
+    static int fboCacheSize;
+    static int gradientCacheSize;
     static int layerPoolSize;
+    static int patchCacheSize;
+    static int pathCacheSize;
+    static int renderBufferCacheSize;
+    static int tessellationCacheSize;
+    static int textDropShadowCacheSize;
+    static int textureCacheSize;
+    static float textureCacheFlushRate;
 
     static DebugLevel debugLevel;
     static OverdrawColorSet overdrawColorSet;

@@ -265,18 +265,9 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 TessellationCache::TessellationCache()
-        : mSize(0)
-        , mMaxSize(MB(DEFAULT_VERTEX_CACHE_SIZE))
+        : mMaxSize(Properties::tessellationCacheSize)
         , mCache(LruCache<Description, Buffer*>::kUnlimitedCapacity)
         , mShadowCache(LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*>::kUnlimitedCapacity) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_VERTEX_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting tessellation cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default tessellation cache size of %.2fMB", DEFAULT_VERTEX_CACHE_SIZE);
-    }
-
     mCache.setOnEntryRemovedListener(&mBufferRemovedListener);
     mShadowCache.setOnEntryRemovedListener(&mBufferPairRemovedListener);
     mDebugEnabled = Properties::debugLevel & kDebugCaches;
@@ -301,13 +292,6 @@ uint32_t TessellationCache::getSize() {
 
 uint32_t TessellationCache::getMaxSize() {
     return mMaxSize;
-}
-
-void TessellationCache::setMaxSize(uint32_t maxSize) {
-    mMaxSize = maxSize;
-    while (mSize > mMaxSize) {
-        mCache.removeOldest();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

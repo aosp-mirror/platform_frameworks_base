@@ -93,34 +93,19 @@ int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-TextDropShadowCache::TextDropShadowCache():
-        mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting drop shadow cache size to %sMB", property);
-        setMaxSize(MB(atof(property)));
-    } else {
-        INIT_LOGD("  Using default drop shadow cache size of %.2fMB",
-                DEFAULT_DROP_SHADOW_CACHE_SIZE);
-    }
+TextDropShadowCache::TextDropShadowCache()
+        : TextDropShadowCache(Properties::textDropShadowCacheSize) {}
 
-    init();
-}
-
-TextDropShadowCache::TextDropShadowCache(uint32_t maxByteSize):
-        mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
-    init();
+TextDropShadowCache::TextDropShadowCache(uint32_t maxByteSize)
+        : mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(maxByteSize) {
+    mCache.setOnEntryRemovedListener(this);
+    mDebugEnabled = Properties::debugLevel & kDebugMoreCaches;
 }
 
 TextDropShadowCache::~TextDropShadowCache() {
     mCache.clear();
-}
-
-void TextDropShadowCache::init() {
-    mCache.setOnEntryRemovedListener(this);
-    mDebugEnabled = Properties::debugLevel & kDebugMoreCaches;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -133,13 +118,6 @@ uint32_t TextDropShadowCache::getSize() {
 
 uint32_t TextDropShadowCache::getMaxSize() {
     return mMaxSize;
-}
-
-void TextDropShadowCache::setMaxSize(uint32_t maxSize) {
-    mMaxSize = maxSize;
-    while (mSize > mMaxSize) {
-        mCache.removeOldest();
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

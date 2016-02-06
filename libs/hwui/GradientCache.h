@@ -123,10 +123,6 @@ public:
     void clear();
 
     /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
-    /**
      * Returns the maximum size of the cache in bytes.
      */
     uint32_t getMaxSize();
@@ -177,7 +173,7 @@ private:
     LruCache<GradientCacheEntry, Texture*> mCache;
 
     uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
 
     GLint mMaxTextureSize;
     bool mUseFloatTexture;

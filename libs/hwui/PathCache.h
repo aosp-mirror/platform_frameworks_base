@@ -300,7 +300,7 @@ private:
 
     LruCache<PathDescription, PathTexture*> mCache;
     uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
     GLuint mMaxTextureSize;
 
     bool mDebugEnabled;

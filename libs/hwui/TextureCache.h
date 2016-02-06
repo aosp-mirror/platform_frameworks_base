@@ -109,10 +109,6 @@ public:
     void clear();
 
     /**
-     * Sets the maximum size of the cache in bytes.
-     */
-    void setMaxSize(uint32_t maxSize);
-    /**
      * Returns the maximum size of the cache in bytes.
      */
     uint32_t getMaxSize();
@@ -126,11 +122,6 @@ public:
      * is defined by the flush rate.
      */
     void flush();
-    /**
-     * Indicates the percentage of the cache to retain when a
-     * memory trim is requested (see Caches::flush).
-     */
-    void setFlushRate(float flushRate);
 
     void setAssetAtlas(AssetAtlas* assetAtlas);
 
@@ -148,10 +139,10 @@ private:
     LruCache<uint32_t, Texture*> mCache;
 
     uint32_t mSize;
-    uint32_t mMaxSize;
+    const uint32_t mMaxSize;
     GLint mMaxTextureSize;
 
-    float mFlushRate;
+    const float mFlushRate;
 
     bool mDebugEnabled;
 

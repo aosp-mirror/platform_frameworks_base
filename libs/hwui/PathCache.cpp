@@ -135,17 +135,10 @@ static void drawPath(const SkPath *path, const SkPaint* paint, SkBitmap& bitmap,
 // Cache constructor/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-PathCache::PathCache():
-        mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_PATH_CACHE_SIZE)) {
-    char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, nullptr) > 0) {
-        INIT_LOGD("  Setting path cache size to %sMB", property);
-        mMaxSize = MB(atof(property));
-    } else {
-        INIT_LOGD("  Using default path cache size of %.2fMB", DEFAULT_PATH_CACHE_SIZE);
-    }
-
+PathCache::PathCache()
+        : mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(Properties::pathCacheSize) {
     mCache.setOnEntryRemovedListener(this);
 
     GLint maxTextureSize;
