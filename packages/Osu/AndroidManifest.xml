@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android">
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+	android:enabled="false"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+	android:persistent="true"
+        android:supportsRtl="true">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.android.hotspot2.OSU_NOTIFICATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+	<receiver android:name="com.android.MainActivity$WifiReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" android:enabled="true"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.wifi.SCAN_RESULTS" android:enabled="true"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.wifi.PASSPOINT_WNM_FRAME_RECEIVED" android:enabled="true"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" android:enabled="true"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.wifi.CONFIGURED_NETWORKS_CHANGE" android:enabled="true"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" android:enabled="true"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.wifi.STATE_CHANGE" android:enabled="true"/>
+            </intent-filter>
+	</receiver>
+	<service android:name="com.android.MainActivity$OSUService" />
+    </application>
+
+</manifest>
