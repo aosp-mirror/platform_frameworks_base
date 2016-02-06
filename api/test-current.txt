@@ -22999,7 +22999,7 @@ package android.media.tv {
     method public void notifyRecordingStopped(android.net.Uri);
     method public abstract void onConnect(android.net.Uri);
     method public abstract void onDisconnect();
-    method public abstract void onStartRecording();
+    method public abstract void onStartRecording(android.net.Uri);
     method public abstract void onStopRecording();
   }
 
@@ -23045,7 +23045,7 @@ package android.media.tv {
     ctor public TvRecordingClient(android.content.Context, java.lang.String, android.media.tv.TvRecordingClient.RecordingCallback, android.os.Handler);
     method public void connect(java.lang.String, android.net.Uri);
     method public void disconnect();
-    method public void startRecording();
+    method public void startRecording(android.net.Uri);
     method public void stopRecording();
   }
 

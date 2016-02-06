@@ -19,6 +19,7 @@ package com.android.server.tv;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -1582,7 +1583,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void startRecording(IBinder sessionToken, int userId) {
+        public void startRecording(IBinder sessionToken, @Nullable Uri programHint, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "startRecording");
@@ -1590,7 +1591,8 @@ public final class TvInputManagerService extends SystemService {
             try {
                 synchronized (mLock) {
                     try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId).startRecording();
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId).startRecording(
+                                programHint);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in startRecording", e);
                     }
@@ -2474,7 +2476,8 @@ public final class TvInputManagerService extends SystemService {
         public void onSessionEvent(String eventType, Bundle eventArgs) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onEvent(what=" + eventType + ", data=" + eventArgs + ")");
+                    Slog.d(TAG, "onEvent(eventType=" + eventType + ", eventArgs=" + eventArgs
+                            + ")");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
@@ -2491,7 +2494,7 @@ public final class TvInputManagerService extends SystemService {
         public void onTimeShiftStatusChanged(int status) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onTimeShiftStatusChanged()");
+                    Slog.d(TAG, "onTimeShiftStatusChanged(status=" + status + ")");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
@@ -2508,7 +2511,7 @@ public final class TvInputManagerService extends SystemService {
         public void onTimeShiftStartPositionChanged(long timeMs) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onTimeShiftStartPositionChanged()");
+                    Slog.d(TAG, "onTimeShiftStartPositionChanged(timeMs=" + timeMs + ")");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
@@ -2525,7 +2528,7 @@ public final class TvInputManagerService extends SystemService {
         public void onTimeShiftCurrentPositionChanged(long timeMs) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onTimeShiftCurrentPositionChanged()");
+                    Slog.d(TAG, "onTimeShiftCurrentPositionChanged(timeMs=" + timeMs + ")");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
@@ -2580,7 +2583,8 @@ public final class TvInputManagerService extends SystemService {
         public void onRecordingStopped(Uri recordedProgramUri) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onRecordingStopped()");
+                    Slog.d(TAG, "onRecordingStopped(recordedProgramUri=" + recordedProgramUri
+                            + ")");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
@@ -2598,7 +2602,7 @@ public final class TvInputManagerService extends SystemService {
         public void onError(int error) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onError()");
+                    Slog.d(TAG, "onError(error=" + error + ")");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;

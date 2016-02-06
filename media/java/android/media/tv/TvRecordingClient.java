@@ -17,6 +17,7 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.net.Uri;
@@ -131,20 +132,31 @@ public class TvRecordingClient {
     }
 
     /**
-     * Starts TV program recording for the current recording session. It is expected that recording
+     * Starts TV program recording in the current recording session. It is expected that recording
      * starts immediately after calling this method.
+     *
+     * <p>The application may supply the URI for a TV program as a hint to the corresponding TV
+     * input service for filling in program specific data fields in the
+     * {@link android.media.tv.TvContract.RecordedPrograms} table. A non-null {@code programHint}
+     * implies the started recording should be of that specific program, whereas null
+     * {@code programHint} does not impose such a requirement and the recording can span across
+     * multiple TV programs. In either case, the caller must call {@link #stopRecording()} to stop
+     * the recording.
      *
      * <p>The recording session will respond by calling
      * {@link RecordingCallback#onRecordingStarted()} or {@link RecordingCallback#onError(int)}.
+     *
+     * @param programHint The URI for the TV program to record as a hint, built by
+     *            {@link TvContract#buildProgramUri(long)}. Can be null.
      */
-    public void startRecording() {
+    public void startRecording(@Nullable  Uri programHint) {
         if (mSession != null) {
-            mSession.startRecording();
+            mSession.startRecording(programHint);
         }
     }
 
     /**
-     * Stops TV program recording for the current recording session. It is expected that recording
+     * Stops TV program recording in the current recording session. It is expected that recording
      * stops immediately after calling this method.
      *
      * <p>The recording session will respond by calling
@@ -325,7 +337,7 @@ public class TvRecordingClient {
         @Override
         public void onRecordingStopped(TvInputManager.Session session, Uri recordedProgramUri) {
             if (DEBUG) {
-                Log.d(TAG, "onRecordingStopped()");
+                Log.d(TAG, "onRecordingStopped(recordedProgramUri= " + recordedProgramUri + ")");
             }
             if (this != mSessionCallback) {
                 Log.w(TAG, "onRecordingStopped - session not created");
@@ -337,7 +349,7 @@ public class TvRecordingClient {
         @Override
         public void onError(TvInputManager.Session session, int error) {
             if (DEBUG) {
-                Log.d(TAG, "onError()");
+                Log.d(TAG, "onError(error=" + error + ")");
             }
             if (this != mSessionCallback) {
                 Log.w(TAG, "onError - session not created");
@@ -350,7 +362,8 @@ public class TvRecordingClient {
         public void onSessionEvent(TvInputManager.Session session, String eventType,
                 Bundle eventArgs) {
             if (DEBUG) {
-                Log.d(TAG, "onSessionEvent(" + eventType + ")");
+                Log.d(TAG, "onSessionEvent(eventType=" + eventType + ", eventArgs=" + eventArgs
+                        + ")");
             }
             if (this != mSessionCallback) {
                 Log.w(TAG, "onSessionEvent - session not created");
