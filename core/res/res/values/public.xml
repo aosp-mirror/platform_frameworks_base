@@ -2696,7 +2696,7 @@
     <public type="attr" name="endX" />
     <public type="attr" name="endY" />
     <public type="attr" name="offset" />
-    <public type="attr" name="abiOverride" />
+    <public type="attr" name="use32bitAbi" />
     <public type="attr" name="bitmap" />
     <public type="attr" name="hotSpotX" />
     <public type="attr" name="hotSpotY" />

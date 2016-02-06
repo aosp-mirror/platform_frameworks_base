@@ -8220,7 +8220,7 @@ public class PackageManagerService extends IPackageManager.Stub {
      *
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
-    public void derivePackageAbi(PackageParser.Package pkg, File scanFile,
+    private void derivePackageAbi(PackageParser.Package pkg, File scanFile,
                                  String cpuAbiOverride, boolean extractLibs)
             throws PackageManagerException {
         // TODO: We can probably be smarter about this stuff. For installed apps,
@@ -8301,16 +8301,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (abi32 >= 0) {
                     final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
                     if (abi64 >= 0) {
-                        pkg.applicationInfo.secondaryCpuAbi = abi;
+                        if (cpuAbiOverride == null && pkg.use32bitAbi) {
+                            pkg.applicationInfo.secondaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
+                            pkg.applicationInfo.primaryCpuAbi = abi;
+                        } else {
+                            pkg.applicationInfo.secondaryCpuAbi = abi;
+                        }
                     } else {
                         pkg.applicationInfo.primaryCpuAbi = abi;
                     }
                 }
-                if (cpuAbiOverride != null &&
-                        cpuAbiOverride.equals(pkg.applicationInfo.secondaryCpuAbi)) {
-                    pkg.applicationInfo.secondaryCpuAbi = pkg.applicationInfo.primaryCpuAbi;
-                    pkg.applicationInfo.primaryCpuAbi = cpuAbiOverride;
-                }
+
             } else {
                 String[] abiList = (cpuAbiOverride != null) ?
                         new String[] { cpuAbiOverride } : Build.SUPPORTED_ABIS;

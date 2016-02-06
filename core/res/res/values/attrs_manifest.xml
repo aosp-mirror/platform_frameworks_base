@@ -429,8 +429,10 @@
          sets. -->
     <attr name="multiArch" format ="boolean" />
 
-    <!-- Specify abiOverride for multiArch application. -->
-    <attr name="abiOverride" />
+    <!-- Specify whether the 32 bit version of the ABI should be used in a
+         multiArch application. If both abioverride flag (i.e. using abi option of abd install)
+         and use32bitAbi are used, then use32bit is ignored.-->
+    <attr name="use32bitAbi" />
 
     <!-- Specify whether a component is allowed to have multiple instances
          of itself running in different processes.  Use with the activity
