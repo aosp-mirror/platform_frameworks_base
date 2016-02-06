@@ -35,26 +35,21 @@ class FontRenderer;
 
 struct ShadowText {
     ShadowText(): glyphCount(0), radius(0.0f), textSize(0.0f), typeface(nullptr),
-            flags(0), italicStyle(0.0f), scaleX(0), text(nullptr), positions(nullptr) {
+            flags(0), italicStyle(0.0f), scaleX(0), glyphs(nullptr), positions(nullptr) {
     }
 
     // len is the number of bytes in text
-    ShadowText(const SkPaint* paint, float radius, uint32_t glyphCount, const char* srcText,
-            const float* positions):
-            glyphCount(glyphCount), radius(radius), positions(positions) {
-        // TODO: Propagate this through the API, we should not cast here
-        text = (const char16_t*) srcText;
-
-        textSize = paint->getTextSize();
-        typeface = paint->getTypeface();
-
-        flags = 0;
-        if (paint->isFakeBoldText()) {
-            flags |= Font::kFakeBold;
-        }
-
-        italicStyle = paint->getTextSkewX();
-        scaleX = paint->getTextScaleX();
+    ShadowText(const SkPaint* paint, float radius, uint32_t glyphCount, const glyph_t* srcGlyphs,
+            const float* positions)
+            : glyphCount(glyphCount)
+            , radius(radius)
+            , textSize(paint->getTextSize())
+            , typeface(paint->getTypeface())
+            , flags(paint->isFakeBoldText() ? Font::kFakeBold : 0)
+            , italicStyle(paint->getTextSkewX())
+            , scaleX(paint->getTextScaleX())
+            , glyphs(srcGlyphs)
+            , positions(positions) {
     }
 
     ~ShadowText() {
@@ -73,8 +68,8 @@ struct ShadowText {
     }
 
     void copyTextLocally() {
-        str.setTo((const char16_t*) text, glyphCount);
-        text = str.string();
+        str.setTo(reinterpret_cast<const char16_t*>(glyphs), glyphCount);
+        glyphs = reinterpret_cast<const glyph_t*>(str.string());
         if (positions != nullptr) {
             positionsCopy.clear();
             positionsCopy.appendArray(positions, glyphCount * 2);
@@ -89,7 +84,7 @@ struct ShadowText {
     uint32_t flags;
     float italicStyle;
     float scaleX;
-    const char16_t* text;
+    const glyph_t* glyphs;
     const float* positions;
 
     // Not directly used to compute the cache key
@@ -135,7 +130,7 @@ public:
      */
     void operator()(ShadowText& text, ShadowTexture*& texture) override;
 
-    ShadowTexture* get(const SkPaint* paint, const char* text,
+    ShadowTexture* get(const SkPaint* paint, const glyph_t* text,
             int numGlyphs, float radius, const float* positions);
 
     /**

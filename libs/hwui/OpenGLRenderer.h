@@ -191,9 +191,9 @@ public:
     void drawPath(const SkPath* path, const SkPaint* paint);
     void drawLines(const float* points, int count, const SkPaint* paint);
     void drawPoints(const float* points, int count, const SkPaint* paint);
-    void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+    void drawTextOnPath(const glyph_t* glyphs, int bytesCount, int count, const SkPath* path,
             float hOffset, float vOffset, const SkPaint* paint);
-    void drawText(const char* text, int bytesCount, int count, float x, float y,
+    void drawText(const glyph_t* glyphs, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = DrawOpMode::kImmediate);
     void drawRects(const float* rects, int count, const SkPaint* paint);
@@ -647,7 +647,7 @@ private:
      * @param x The x coordinate where the shadow will be drawn
      * @param y The y coordinate where the shadow will be drawn
      */
-    void drawTextShadow(const SkPaint* paint, const char* text, int count,
+    void drawTextShadow(const SkPaint* paint, const glyph_t* glyphs, int count,
             const float* positions, FontRenderer& fontRenderer, int alpha,
             float x, float y);
 

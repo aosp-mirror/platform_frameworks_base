@@ -31,9 +31,6 @@ namespace uirenderer {
 // Compile-time properties
 ///////////////////////////////////////////////////////////////////////////////
 
-// If turned on, text is interpreted as glyphs instead of UTF-16
-#define RENDER_TEXT_AS_GLYPHS 1
-
 // Textures used by layers must have dimensions multiples of this number
 #define LAYER_SIZE 64
 

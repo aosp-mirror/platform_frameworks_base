@@ -104,14 +104,14 @@ public:
 
     void setFont(const SkPaint* paint, const SkMatrix& matrix);
 
-    void precache(const SkPaint* paint, const char* text, int numGlyphs, const SkMatrix& matrix);
+    void precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs, const SkMatrix& matrix);
     void endPrecaching();
 
-    bool renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
+    bool renderPosText(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
             int numGlyphs, int x, int y, const float* positions,
             Rect* outBounds, TextDrawFunctor* functor, bool forceFinish = true);
 
-    bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
+    bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
             int numGlyphs, const SkPath* path,
             float hOffset, float vOffset, Rect* outBounds, TextDrawFunctor* functor);
 
@@ -125,7 +125,7 @@ public:
 
     // After renderDropShadow returns, the called owns the memory in DropShadow.image
     // and is responsible for releasing it when it's done with it
-    DropShadow renderDropShadow(const SkPaint* paint, const char *text, int numGlyphs,
+    DropShadow renderDropShadow(const SkPaint* paint, const glyph_t *glyphs, int numGlyphs,
             float radius, const float* positions);
 
     void setTextureFiltering(bool linearFiltering) {

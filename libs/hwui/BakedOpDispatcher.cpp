@@ -201,8 +201,7 @@ static void renderTextShadow(BakedOpRenderer& renderer, FontRenderer& fontRender
 
     renderer.caches().dropShadowCache.setFontRenderer(fontRenderer);
     ShadowTexture* texture = renderer.caches().dropShadowCache.get(
-            op.paint, (const char*) op.glyphs,
-            op.glyphCount, textShadow.radius, op.positions);
+            op.paint, op.glyphs, op.glyphCount, textShadow.radius, op.positions);
     // If the drop shadow exceeds the max texture size or couldn't be
     // allocated, skip drawing
     if (!texture) return;
@@ -277,8 +276,7 @@ static void renderTextOp(BakedOpRenderer& renderer, const TextOp& op, const Bake
     bool forceFinish = (renderType == TextRenderType::Flush);
     bool mustDirtyRenderTarget = renderer.offscreenRenderTarget();
     const Rect* localOpClip = pureTranslate ? &state.computedState.clipRect() : nullptr;
-    fontRenderer.renderPosText(op.paint, localOpClip,
-            (const char*) op.glyphs, op.glyphCount, x, y,
+    fontRenderer.renderPosText(op.paint, localOpClip, op.glyphs, op.glyphCount, x, y,
             op.positions, mustDirtyRenderTarget ? &layerBounds : nullptr, &functor, forceFinish);
 
     if (mustDirtyRenderTarget) {
@@ -701,8 +699,7 @@ void BakedOpDispatcher::onTextOnPathOp(BakedOpRenderer& renderer, const TextOnPa
 
     bool mustDirtyRenderTarget = renderer.offscreenRenderTarget();
     const Rect localSpaceClip = state.computedState.computeLocalSpaceClip();
-    if (fontRenderer.renderTextOnPath(op.paint, &localSpaceClip,
-            reinterpret_cast<const char*>(op.glyphs), op.glyphCount,
+    if (fontRenderer.renderTextOnPath(op.paint, &localSpaceClip, op.glyphs, op.glyphCount,
             op.path, op.hOffset, op.vOffset,
             mustDirtyRenderTarget ? &layerBounds : nullptr, &functor)) {
         if (mustDirtyRenderTarget) {

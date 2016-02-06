@@ -256,10 +256,6 @@ private:
         return dstBuffer;
     }
 
-    inline char* refText(const char* text, size_t byteLength) {
-        return (char*) refBuffer<uint8_t>((uint8_t*)text, byteLength);
-    }
-
     inline const SkPath* refPath(const SkPath* path) {
         if (!path) return nullptr;
 

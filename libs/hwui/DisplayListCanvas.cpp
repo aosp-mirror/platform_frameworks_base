@@ -428,7 +428,7 @@ void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,
     if (!glyphs || count <= 0) return;
 
     int bytesCount = 2 * count;
-    DrawOp* op = new (alloc()) DrawTextOnPathOp(refText((const char*) glyphs, bytesCount),
+    DrawOp* op = new (alloc()) DrawTextOnPathOp(refBuffer<glyph_t>(glyphs, count),
             bytesCount, count, refPath(&path),
             hOffset, vOffset, refPaint(&paint));
     addDrawOp(op);
@@ -442,11 +442,10 @@ void DisplayListCanvas::drawText(const uint16_t* glyphs, const float* positions,
     if (!glyphs || count <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
 
     int bytesCount = count * 2;
-    const char* text = refText((const char*) glyphs, bytesCount);
     positions = refBuffer<float>(positions, count * 2);
     Rect bounds(boundsLeft, boundsTop, boundsRight, boundsBottom);
 
-    DrawOp* op = new (alloc()) DrawTextOp(text, bytesCount, count,
+    DrawOp* op = new (alloc()) DrawTextOp(refBuffer<glyph_t>(glyphs, count), bytesCount, count,
             x, y, positions, refPaint(&paint), totalAdvance, bounds);
     addDrawOp(op);
     drawTextDecorations(x, y, totalAdvance, paint);
