@@ -919,6 +919,16 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mDragResizing;
     }
 
+    private void setDragResizingLocked(boolean resizing) {
+        if (mDragResizing == resizing) {
+            return;
+        }
+        mDragResizing = resizing;
+        for (int i = mTasks.size() - 1; i >= 0 ; i--) {
+            mTasks.get(i).resetDragResizingChangeReported();
+        }
+    }
+
     @Override  // AnimatesBounds
     public boolean setSize(Rect bounds) {
         synchronized (mService.mWindowMap) {
@@ -936,14 +946,14 @@ public class TaskStack implements DimLayer.DimLayerUser,
     @Override  // AnimatesBounds
     public void onAnimationStart() {
         synchronized (mService.mWindowMap) {
-            mDragResizing = true;
+            setDragResizingLocked(true);
         }
     }
 
     @Override  // AnimatesBounds
     public void onAnimationEnd() {
         synchronized (mService.mWindowMap) {
-            mDragResizing = false;
+            setDragResizingLocked(false);
             mService.requestTraversal();
         }
         if (mStackId == PINNED_STACK_ID) {

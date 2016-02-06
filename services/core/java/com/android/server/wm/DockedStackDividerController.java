@@ -27,6 +27,8 @@ import android.view.SurfaceControl;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
 
+import java.util.ArrayList;
+
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.WindowManager.DOCKED_BOTTOM;
@@ -77,7 +79,17 @@ public class DockedStackDividerController implements DimLayerUser {
     }
 
     void setResizing(boolean resizing) {
-        mResizing = resizing;
+        if (mResizing != resizing) {
+            mResizing = resizing;
+            resetDragResizingChangeReported();
+        }
+    }
+
+    private void resetDragResizingChangeReported() {
+        final WindowList windowList = mDisplayContent.getWindowList();
+        for (int i = windowList.size() - 1; i >= 0; i--) {
+            windowList.get(i).resetDragResizingChangeReported();
+        }
     }
 
     void setWindow(WindowState window) {

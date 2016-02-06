@@ -161,6 +161,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
     boolean mDragResizing;
+    boolean mDragResizingChangeReported;
     int mResizeMode;
 
     RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
@@ -2103,6 +2104,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, newConfig, getBackdropFrame(frame),
                 isDragResizeChanged() /* forceRelayout */);
+        mDragResizingChangeReported = true;
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
@@ -2137,6 +2139,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mDragResizing != computeDragResizing();
     }
 
+    /**
+     * @return Whether we reported a drag resize change to the application or not already.
+     */
+    boolean isDragResizingChangeReported() {
+        return mDragResizingChangeReported;
+    }
+
+    /**
+     * Resets the state whether we reported a drag resize change to the app.
+     */
+    void resetDragResizingChangeReported() {
+        mDragResizingChangeReported = false;
+    }
+
     int getResizeMode() {
         return mResizeMode;
     }
@@ -2161,7 +2177,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void setDragResizing() {
-        mDragResizing = computeDragResizing();
+        final boolean resizing = computeDragResizing();
+        if (resizing == mDragResizing) {
+            return;
+        }
+        mDragResizing = resizing;
         mResizeMode = mDragResizing && mDisplayContent.mDividerControllerLocked.isResizing()
                 ? DRAG_RESIZE_MODE_DOCKED_DIVIDER
                 : DRAG_RESIZE_MODE_FREEFORM;

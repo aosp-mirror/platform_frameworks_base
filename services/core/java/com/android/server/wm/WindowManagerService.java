@@ -8839,7 +8839,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "Win " + w + " config changed: "
                         + mCurConfiguration);
             }
-            final boolean dragResizingChanged = w.isDragResizeChanged();
+            final boolean dragResizingChanged = w.isDragResizeChanged()
+                    && !w.isDragResizingChangeReported();
             if (localLOGV) Slog.v(TAG_WM, "Resizing " + w
                     + ": configChanged=" + configChanged
                     + " dragResizingChanged=" + dragResizingChanged
