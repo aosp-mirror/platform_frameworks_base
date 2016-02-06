@@ -1426,6 +1426,17 @@ public final class TvContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/recorded_program";
 
         /**
+         * The ID of the TV input service that is associated with this recorded program.
+         *
+         * <p>Use {@link #buildInputId} to build the ID.
+         *
+         * <p>This is a required field.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_INPUT_ID = "input_id";
+
+        /**
          * The ID of the TV channel that provided this recorded TV program.
          *
          * <p>This is a part of the channel URI and matches to {@link BaseColumns#_ID}.
