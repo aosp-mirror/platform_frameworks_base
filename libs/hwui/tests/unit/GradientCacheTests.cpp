@@ -26,7 +26,7 @@ using namespace android::uirenderer;
 RENDERTHREAD_TEST(GradientCache, addRemove) {
     Extensions extensions;
     GradientCache cache(extensions);
-    cache.setMaxSize(5000);
+    ASSERT_LT(1000u, cache.getMaxSize()) << "Expect non-trivial size";
 
     SkColor colors[] = { 0xFF00FF00, 0xFFFF0000, 0xFF0000FF };
     float positions[] = { 1, 2, 3 };
