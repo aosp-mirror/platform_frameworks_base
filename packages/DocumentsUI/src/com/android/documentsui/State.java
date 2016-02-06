@@ -158,9 +158,14 @@ public class State implements android.os.Parcelable {
         out.writeInt(mStackTouched ? 1 : 0);
     }
 
-    public static final Creator<State> CREATOR = new Creator<State>() {
+    public static final ClassLoaderCreator<State> CREATOR = new ClassLoaderCreator<State>() {
         @Override
         public State createFromParcel(Parcel in) {
+            return createFromParcel(in, null);
+        }
+
+        @Override
+        public State createFromParcel(Parcel in, ClassLoader loader) {
             final State state = new State();
             state.action = in.readInt();
             state.acceptMimes = in.readStringArray();
@@ -174,9 +179,9 @@ public class State implements android.os.Parcelable {
             state.restored = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
             state.currentSearch = in.readString();
-            in.readMap(state.dirState, null);
-            in.readList(state.selectedDocumentsForCopy, null);
-            in.readList(state.excludedAuthorities, null);
+            in.readMap(state.dirState, loader);
+            in.readList(state.selectedDocumentsForCopy, loader);
+            in.readList(state.excludedAuthorities, loader);
             state.openableOnly = in.readInt() != 0;
             state.mStackTouched = in.readInt() != 0;
             return state;
