@@ -65,6 +65,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
                 "Device A",
+                null /* deviceKey */,
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
@@ -102,6 +103,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
                 "Device A",
+                null /* deviceKey */,
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
@@ -125,6 +127,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
                 "Device A",
+                null /* deviceKey */,
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
@@ -169,6 +172,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 0,
                 "Device A",
+                "Device key A",
                 false /* unopened */,
                 new MtpRoot[] {
                         new MtpRoot(
@@ -184,6 +188,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
                 "Device B",
+                "Device key B",
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
@@ -230,10 +235,17 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testQueryRoots_error() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
-                0, "Device A", false /* unopened */, new MtpRoot[0], null, null));
+                0,
+                "Device A",
+                "Device key A",
+                false /* unopened */,
+                new MtpRoot[0],
+                null,
+                null));
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
                 "Device B",
+                "Device key B",
                 false /* unopened */,
                 new MtpRoot[] {
                     new MtpRoot(
@@ -537,7 +549,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         };
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
-                0, "Device A", false /* unopened */, new MtpRoot[0], null, null));
+                0, "Device A", null /* deviceKey */, false /* unopened */, new MtpRoot[0], null,
+                null));
 
         mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
@@ -557,7 +570,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testLockedDevice() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
-                0, "Device A", false /* unopened */, new MtpRoot[0], null, null));
+                0, "Device A", null, false /* unopened */, new MtpRoot[0], null, null));
 
         mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
@@ -603,7 +616,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             throws InterruptedException, TimeoutException, IOException {
         final int changeCount = mResolver.getChangeCount(ROOTS_URI);
         mMtpManager.addValidDevice(
-                new MtpDeviceRecord(deviceId, "Device", false /* unopened */, roots, null, null));
+                new MtpDeviceRecord(deviceId, "Device", null /* deviceKey */, false /* unopened */,
+                roots, null, null));
         mProvider.openDevice(deviceId);
         mResolver.waitForNotification(ROOTS_URI, changeCount + 1);
         return getStrings(mProvider.queryRoots(strings(DocumentsContract.Root.COLUMN_ROOT_ID)));
