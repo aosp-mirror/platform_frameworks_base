@@ -374,6 +374,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
      * Resumes root scanner to handle the update of device list.
      */
     void resumeRootScanner() {
+        if (DEBUG) {
+            Log.d(MtpDocumentsProvider.TAG, "resumeRootScanner");
+        }
         mRootScanner.resume();
     }
 

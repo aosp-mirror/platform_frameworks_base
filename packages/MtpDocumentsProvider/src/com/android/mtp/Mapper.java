@@ -24,13 +24,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 import static com.android.mtp.MtpDatabaseConstants.*;
 import static com.android.mtp.MtpDatabase.strings;
@@ -44,11 +44,9 @@ class Mapper {
     private final MtpDatabase mDatabase;
 
     /**
-     * Mapping mode for a parent. The key is document ID of parent, or null for root documents.
-     * Methods operate the state needs to be synchronized.
-     * TODO: Replace this with unboxing int map.
+     * IDs which currently Mapper operates mapping for.
      */
-    private final Map<String, Integer> mMappingMode = new HashMap<>();
+    private final Set<String> mInMappingIds = new ArraySet<>();
 
     Mapper(MtpDatabase database) {
         mDatabase = database;
@@ -75,7 +73,7 @@ class Mapper {
                     extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
                     EMPTY_ARGS,
-                    Document.COLUMN_DISPLAY_NAME);
+                    strings(COLUMN_DEVICE_ID, COLUMN_MAPPING_KEY));
             database.setTransactionSuccessful();
             return changed;
         } finally {
@@ -96,18 +94,6 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            final String mapColumn;
-            Preconditions.checkState(mMappingMode.containsKey(parentDocumentId));
-            switch (mMappingMode.get(parentDocumentId)) {
-                case MAP_BY_MTP_IDENTIFIER:
-                    mapColumn = COLUMN_STORAGE_ID;
-                    break;
-                case MAP_BY_NAME:
-                    mapColumn = Document.COLUMN_DISPLAY_NAME;
-                    break;
-                default:
-                    throw new Error("Unexpected map mode.");
-            }
             final ContentValues[] valuesList = new ContentValues[roots.length];
             final ContentValues[] extraValuesList = new ContentValues[roots.length];
             for (int i = 0; i < roots.length; i++) {
@@ -120,9 +106,9 @@ class Mapper {
                     parentDocumentId,
                     valuesList,
                     extraValuesList,
-                    COLUMN_PARENT_DOCUMENT_ID + "=?",
+                    COLUMN_PARENT_DOCUMENT_ID + " = ?",
                     strings(parentDocumentId),
-                    mapColumn);
+                    strings(COLUMN_STORAGE_ID, Document.COLUMN_DISPLAY_NAME));
 
             database.setTransactionSuccessful();
             return changed;
@@ -141,38 +127,25 @@ class Mapper {
      */
     synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents)
             throws FileNotFoundException {
-        final String mapColumn;
-        Preconditions.checkState(mMappingMode.containsKey(parentId));
-        switch (mMappingMode.get(parentId)) {
-            case MAP_BY_MTP_IDENTIFIER:
-                mapColumn = COLUMN_OBJECT_HANDLE;
-                break;
-            case MAP_BY_NAME:
-                mapColumn = Document.COLUMN_DISPLAY_NAME;
-                break;
-            default:
-                throw new Error("Unexpected map mode.");
-        }
         final ContentValues[] valuesList = new ContentValues[documents.length];
         for (int i = 0; i < documents.length; i++) {
             valuesList[i] = new ContentValues();
-            MtpDatabase.getObjectDocumentValues(
-                    valuesList[i], deviceId, parentId, documents[i]);
+            MtpDatabase.getObjectDocumentValues(valuesList[i], deviceId, parentId, documents[i]);
         }
         putDocuments(
                 parentId,
                 valuesList,
                 null,
-                COLUMN_PARENT_DOCUMENT_ID + "=?",
+                COLUMN_PARENT_DOCUMENT_ID + " = ?",
                 strings(parentId),
-                mapColumn);
+                strings(COLUMN_OBJECT_HANDLE, Document.COLUMN_DISPLAY_NAME));
     }
 
     void clearMapping() {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            mMappingMode.clear();
+            mInMappingIds.clear();
             // Disconnect all device rows.
             try {
                 startAddingDocuments(null);
@@ -211,7 +184,7 @@ class Mapper {
         database.beginTransaction();
         try {
             getParentOrHaltMapping(parentDocumentId);
-            Preconditions.checkState(!mMappingMode.containsKey(parentDocumentId));
+            Preconditions.checkState(!mInMappingIds.contains(parentDocumentId));
 
             // Set all valid documents as invalidated.
             final ContentValues values = new ContentValues();
@@ -222,15 +195,8 @@ class Mapper {
                     selection + " AND " + COLUMN_ROW_STATE + " = ?",
                     DatabaseUtils.appendSelectionArgs(args, strings(ROW_STATE_VALID)));
 
-            // If we have rows that does not have MTP identifier, do heuristic mapping by name.
-            final boolean useNameForResolving = DatabaseUtils.queryNumEntries(
-                    database,
-                    TABLE_DOCUMENTS,
-                    selection + " AND " + COLUMN_DEVICE_ID + " IS NULL",
-                    args) > 0;
             database.setTransactionSuccessful();
-            mMappingMode.put(
-                    parentDocumentId, useNameForResolving ? MAP_BY_NAME : MAP_BY_MTP_IDENTIFIER);
+            mInMappingIds.add(parentDocumentId);
         } finally {
             database.endTransaction();
         }
@@ -249,7 +215,7 @@ class Mapper {
      * @param rootExtraValuesList Values for root extra to be stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param args Argument for selection SQL.
-     * @return Whether it adds at least one new row that is not mapped with existing document ID.
+     * @return Whether the database content is changed.
      * @throws FileNotFoundException When parentId is not registered in the database.
      */
     private boolean putDocuments(
@@ -258,13 +224,15 @@ class Mapper {
             @Nullable ContentValues[] rootExtraValuesList,
             String selection,
             String[] args,
-            String mappingKey) throws FileNotFoundException {
+            String[] mappingKeys) throws FileNotFoundException {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
-        boolean added = false;
+        boolean changed = false;
         database.beginTransaction();
         try {
             getParentOrHaltMapping(parentId);
-            Preconditions.checkState(mMappingMode.containsKey(parentId));
+            Preconditions.checkState(mInMappingIds.contains(parentId));
+            final ContentValues oldRowSnapshot = new ContentValues();
+            final ContentValues newRowSnapshot = new ContentValues();
             for (int i = 0; i < valuesList.length; i++) {
                 final ContentValues values = valuesList[i];
                 final ContentValues rootExtraValues;
@@ -273,29 +241,18 @@ class Mapper {
                 } else {
                     rootExtraValues = null;
                 }
-                final Cursor candidateCursor = database.query(
-                        TABLE_DOCUMENTS,
-                        strings(Document.COLUMN_DOCUMENT_ID),
-                        selection + " AND " +
-                        COLUMN_ROW_STATE + " IN (?, ?) AND " +
-                        mappingKey + "=?",
-                        DatabaseUtils.appendSelectionArgs(
-                                args,
-                                strings(ROW_STATE_INVALIDATED,
-                                        ROW_STATE_DISCONNECTED,
-                                        values.getAsString(mappingKey))),
-                        null,
-                        null,
-                        null,
-                        "1");
-                try {
+                try (final Cursor candidateCursor =
+                        queryCandidate(selection, args, mappingKeys, values)) {
                     final long rowId;
-                    if (candidateCursor.getCount() == 0) {
+                    if (candidateCursor == null) {
                         rowId = database.insert(TABLE_DOCUMENTS, null, values);
-                        added = true;
+                        changed = true;
                     } else {
                         candidateCursor.moveToNext();
                         rowId = candidateCursor.getLong(0);
+                        if (!changed) {
+                            mDatabase.writeRowSnapshot(String.valueOf(rowId), oldRowSnapshot);
+                        }
                         database.update(
                                 TABLE_DOCUMENTS,
                                 values,
@@ -309,13 +266,20 @@ class Mapper {
                         rootExtraValues.put(Root.COLUMN_ROOT_ID, rowId);
                         database.replace(TABLE_ROOT_EXTRA, null, rootExtraValues);
                     }
-                } finally {
-                    candidateCursor.close();
+
+                    if (!changed) {
+                        mDatabase.writeRowSnapshot(String.valueOf(rowId), newRowSnapshot);
+                        // Put row state as string because SQLite returns snapshot values as string.
+                        oldRowSnapshot.put(COLUMN_ROW_STATE, String.valueOf(ROW_STATE_VALID));
+                        if (!oldRowSnapshot.equals(newRowSnapshot)) {
+                            changed = true;
+                        }
+                    }
                 }
             }
 
             database.setTransactionSuccessful();
-            return added;
+            return changed;
         } finally {
             database.endTransaction();
         }
@@ -334,7 +298,7 @@ class Mapper {
         final String selection;
         final String[] args;
         if (parentId != null) {
-            selection = COLUMN_PARENT_DOCUMENT_ID + "=?";
+            selection = COLUMN_PARENT_DOCUMENT_ID + " = ?";
             args = strings(parentId);
         } else {
             selection = COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
@@ -345,8 +309,8 @@ class Mapper {
         database.beginTransaction();
         try {
             final Identifier parentIdentifier = getParentOrHaltMapping(parentId);
-            Preconditions.checkState(mMappingMode.containsKey(parentId));
-            mMappingMode.remove(parentId);
+            Preconditions.checkState(mInMappingIds.contains(parentId));
+            mInMappingIds.remove(parentId);
 
             boolean changed = false;
             // Delete/disconnect all invalidated rows that cannot be mapped.
@@ -375,6 +339,58 @@ class Mapper {
     }
 
     /**
+     * Queries candidate for each mappingKey, and returns the first cursor that includes a
+     * candidate.
+     *
+     * @param selection Pre-selection for candidate.
+     * @param args Arguments for selection.
+     * @param mappingKeys List of mapping key columns.
+     * @param values Values of document that Mapper tries to map.
+     * @return Cursor for mapping candidate or null when Mapper does not find any candidate.
+     */
+    private @Nullable Cursor queryCandidate(
+            String selection, String[] args, String[] mappingKeys, ContentValues values) {
+        for (final String mappingKey : mappingKeys) {
+            final Cursor candidateCursor = queryCandidate(selection, args, mappingKey, values);
+            if (candidateCursor.getCount() == 0) {
+                candidateCursor.close();
+                continue;
+            }
+            return candidateCursor;
+        }
+        return null;
+    }
+
+    /**
+     * Looks for mapping candidate with given mappingKey.
+     *
+     * @param selection Pre-selection for candidate.
+     * @param args Arguments for selection.
+     * @param mappingKey Column name of mapping key.
+     * @param values Values of document that Mapper tries to map.
+     * @return Cursor for mapping candidate.
+     */
+    private Cursor queryCandidate(
+            String selection, String[] args, String mappingKey, ContentValues values) {
+        final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
+        return database.query(
+                TABLE_DOCUMENTS,
+                strings(Document.COLUMN_DOCUMENT_ID),
+                selection + " AND " +
+                COLUMN_ROW_STATE + " IN (?, ?) AND " +
+                mappingKey + " = ?",
+                DatabaseUtils.appendSelectionArgs(
+                        args,
+                        strings(ROW_STATE_INVALIDATED,
+                                ROW_STATE_DISCONNECTED,
+                                values.getAsString(mappingKey))),
+                null,
+                null,
+                null,
+                "1");
+    }
+
+    /**
      * Returns the parent identifier from parent document ID if the parent ID is found in the
      * database. Otherwise it halts mapping and throws FileNotFoundException.
      *
@@ -395,7 +411,7 @@ class Mapper {
             }
             return identifier;
         } catch (FileNotFoundException error) {
-            mMappingMode.remove(parentId);
+            mInMappingIds.remove(parentId);
             throw error;
         }
     }

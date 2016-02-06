@@ -44,7 +44,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(1, "Device", true, new MtpRoot[0], null, null));
+                new MtpDeviceRecord(1, "Device", null, true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");

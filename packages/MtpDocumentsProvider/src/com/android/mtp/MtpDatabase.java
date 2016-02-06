@@ -562,6 +562,25 @@ class MtpDatabase {
         }
     }
 
+    void writeRowSnapshot(String documentId, ContentValues values) throws FileNotFoundException {
+        try (final Cursor cursor = mDatabase.query(
+                JOIN_ROOTS,
+                strings("*"),
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null,
+                "1")) {
+            if (cursor.getCount() == 0) {
+                throw new FileNotFoundException();
+            }
+            cursor.moveToNext();
+            values.clear();
+            DatabaseUtils.cursorRowToContentValues(cursor, values);
+        }
+    }
+
     private static class OpenHelper extends SQLiteOpenHelper {
         public OpenHelper(Context context, int flags) {
             super(context,
@@ -600,6 +619,7 @@ class MtpDatabase {
         values.putNull(COLUMN_PARENT_DOCUMENT_ID);
         values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
         values.put(COLUMN_DOCUMENT_TYPE, DOCUMENT_TYPE_DEVICE);
+        values.put(COLUMN_MAPPING_KEY, device.deviceKey);
         values.put(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
         values.put(Document.COLUMN_DISPLAY_NAME, device.name);
         values.putNull(Document.COLUMN_SUMMARY);

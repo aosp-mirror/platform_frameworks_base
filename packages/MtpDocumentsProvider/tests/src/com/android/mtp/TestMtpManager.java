@@ -76,7 +76,8 @@ public class TestMtpManager extends MtpManager {
                 result[i] = device;
             } else {
                 result[i] = new MtpDeviceRecord(
-                        device.deviceId, device.name, device.opened, new MtpRoot[0], null, null);
+                        device.deviceId, device.name, device.deviceKey, device.opened,
+                        new MtpRoot[0], null, null);
             }
         }
         return result;
@@ -90,7 +91,9 @@ public class TestMtpManager extends MtpManager {
         }
         mDevices.put(
                 deviceId,
-                new MtpDeviceRecord(device.deviceId, device.name, true, device.roots, null, null));
+                new MtpDeviceRecord(
+                        device.deviceId, device.name, device.deviceKey, true, device.roots, null,
+                        null));
     }
 
     @Override
@@ -101,7 +104,8 @@ public class TestMtpManager extends MtpManager {
         }
         mDevices.put(
                 deviceId,
-                new MtpDeviceRecord(device.deviceId, device.name, false, device.roots, null, null));
+                new MtpDeviceRecord(device.deviceId, device.name, device.deviceKey, false,
+                        device.roots, null, null));
     }
 
     @Override
