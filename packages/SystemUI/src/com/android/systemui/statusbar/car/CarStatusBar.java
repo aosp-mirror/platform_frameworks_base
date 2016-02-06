@@ -109,6 +109,10 @@ public class CarStatusBar extends PhoneStatusBar {
         }
 
         @Override
+        public void onPinnedStackAnimationEnded() {
+        }
+
+        @Override
         public void onTaskStackChanged() {
             mHandler.removeCallbacks(this);
             mHandler.post(this);

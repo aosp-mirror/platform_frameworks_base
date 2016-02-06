@@ -124,6 +124,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         public void onPinnedActivityRestartAttempt() {
         }
 
+        @Override
+        public void onPinnedStackAnimationEnded() {
+        }
+
         /** Preloads the next task */
         public void run() {
             RecentsConfiguration config = Recents.getConfiguration();

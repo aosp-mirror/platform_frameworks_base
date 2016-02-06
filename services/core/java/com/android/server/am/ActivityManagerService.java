@@ -1451,6 +1451,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int VR_MODE_CHANGE_MSG = 63;
     static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 64;
     static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 65;
+    static final int NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG = 66;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1971,6 +1972,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             // Make a one-way callback to the listener
                             mTaskStackListeners.getBroadcastItem(i).onPinnedActivityRestartAttempt();
+                        } catch (RemoteException e){
+                            // Handled by the RemoteCallbackList
+                        }
+                    }
+                    mTaskStackListeners.finishBroadcast();
+                }
+                break;
+            }
+            case NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    for (int i = mTaskStackListeners.beginBroadcast() - 1; i >= 0; i--) {
+                        try {
+                            // Make a one-way callback to the listener
+                            mTaskStackListeners.getBroadcastItem(i).onPinnedStackAnimationEnded();
                         } catch (RemoteException e){
                             // Handled by the RemoteCallbackList
                         }
@@ -7161,8 +7176,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final Rect bounds = (mStackSupervisor.getStack(PINNED_STACK_ID) == null)
                         ? mDefaultPinnedStackBounds : null;
 
-                mStackSupervisor.moveActivityToStackLocked(
-                        r, PINNED_STACK_ID, "enterPictureInPicture", bounds);
+                mStackSupervisor.moveActivityToPinnedStackLocked(
+                        r, "enterPictureInPicture", bounds);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -11050,6 +11065,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     void notifyPinnedActivityRestartAttemptLocked() {
         mHandler.removeMessages(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
         mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG).sendToTarget();
+    }
+
+    /** Notifies all listeners when the pinned stack animation ends. */
+    @Override
+    public void notifyPinnedStackAnimationEnded() {
+        synchronized (this) {
+            mHandler.removeMessages(NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG);
+            mHandler.obtainMessage(
+                    NOTIFY_PINNED_STACK_ANIMATION_ENDED_LISTENERS_MSG).sendToTarget();
+        }
     }
 
     @Override
