@@ -107,7 +107,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 140 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 141 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -186,8 +186,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public interface ExternalStatsSync {
-        void scheduleSync(String reason);
-        void scheduleWifiSync(String reason);
+        public static final int UPDATE_CPU = 0x01;
+        public static final int UPDATE_WIFI = 0x02;
+        public static final int UPDATE_RADIO = 0x04;
+        public static final int UPDATE_BT = 0x08;
+        public static final int UPDATE_ALL = UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
+
+        void scheduleSync(String reason, int flags);
         void scheduleCpuSyncDueToRemovedUid(int uid);
     }
 
@@ -224,6 +229,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     final ArrayList<StopwatchTimer> mVideoTurnedOnTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mFlashlightTurnedOnTimers = new ArrayList<>();
     final ArrayList<StopwatchTimer> mCameraTurnedOnTimers = new ArrayList<>();
+    final ArrayList<StopwatchTimer> mBluetoothScanOnTimers = new ArrayList<>();
 
     // Last partial timers we use for distributing CPU usage.
     final ArrayList<StopwatchTimer> mLastPartialTimers = new ArrayList<>();
@@ -434,6 +440,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mWifiSignalStrengthBin = -1;
     final StopwatchTimer[] mWifiSignalStrengthsTimer =
             new StopwatchTimer[NUM_WIFI_SIGNAL_STRENGTH_BINS];
+
+    int mBluetoothScanNesting;
+    StopwatchTimer mBluetoothScanTimer;
 
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTime;
@@ -3714,7 +3723,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = true;
             mWifiOnTimer.startRunningLocked(elapsedRealtime);
-            scheduleSyncExternalWifiStatsLocked("wifi-off");
+            scheduleSyncExternalStatsLocked("wifi-off", ExternalStatsSync.UPDATE_WIFI);
         }
     }
 
@@ -3728,7 +3737,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiOn = false;
             mWifiOnTimer.stopRunningLocked(elapsedRealtime);
-            scheduleSyncExternalWifiStatsLocked("wifi-on");
+            scheduleSyncExternalStatsLocked("wifi-on", ExternalStatsSync.UPDATE_WIFI);
         }
     }
 
@@ -3946,6 +3955,65 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private void noteBluetoothScanStartedLocked(int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        if (mBluetoothScanNesting == 0) {
+            mHistoryCur.states2 |= HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "BLE scan started for: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+        }
+        mBluetoothScanNesting++;
+        getUidStatsLocked(uid).noteBluetoothScanStartedLocked(elapsedRealtime);
+    }
+
+    public void noteBluetoothScanStartedFromSourceLocked(WorkSource ws) {
+        final int N = ws.size();
+        for (int i = 0; i < N; i++) {
+            noteBluetoothScanStartedLocked(ws.get(i));
+        }
+    }
+
+    private void noteBluetoothScanStoppedLocked(int uid) {
+        uid = mapUid(uid);
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        mBluetoothScanNesting--;
+        if (mBluetoothScanNesting == 0) {
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "BLE scan stopped for: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+        }
+        getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime);
+    }
+
+    public void noteBluetoothScanStoppedFromSourceLocked(WorkSource ws) {
+        final int N = ws.size();
+        for (int i = 0; i < N; i++) {
+            noteBluetoothScanStoppedLocked(ws.get(i));
+        }
+    }
+
+    public void noteResetBluetoothScanLocked() {
+        if (mBluetoothScanNesting > 0) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
+            final long uptime = SystemClock.uptimeMillis();
+            mBluetoothScanNesting = 0;
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG;
+            if (DEBUG_HISTORY) Slog.v(TAG, "BLE can stopped for: "
+                    + Integer.toHexString(mHistoryCur.states2));
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtime);
+            for (int i=0; i<mUidStats.size(); i++) {
+                BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
+                uid.noteResetBluetoothScanLocked(elapsedRealtime);
+            }
+        }
+    }
+
     public void noteWifiRadioPowerState(int powerState, long timestampNs) {
         final long elapsedRealtime = SystemClock.elapsedRealtime();
         final long uptime = SystemClock.uptimeMillis();
@@ -3980,7 +4048,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
             }
-            scheduleSyncExternalWifiStatsLocked("wifi-running");
+            scheduleSyncExternalStatsLocked("wifi-running", ExternalStatsSync.UPDATE_WIFI);
         } else {
             Log.w(TAG, "noteWifiRunningLocked -- called while WIFI running");
         }
@@ -4019,7 +4087,7 @@ public final class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
-            scheduleSyncExternalWifiStatsLocked("wifi-stopped");
+            scheduleSyncExternalStatsLocked("wifi-stopped", ExternalStatsSync.UPDATE_WIFI);
         } else {
             Log.w(TAG, "noteWifiStoppedLocked -- called while WIFI not running");
         }
@@ -4034,7 +4102,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mWifiState = wifiState;
             mWifiStateTimer[wifiState].startRunningLocked(elapsedRealtime);
-            scheduleSyncExternalWifiStatsLocked("wifi-state");
+            scheduleSyncExternalStatsLocked("wifi-state", ExternalStatsSync.UPDATE_WIFI);
         }
     }
 
@@ -4530,6 +4598,11 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override
+    public long getBluetoothScanTime(long elapsedRealtimeUs, int which) {
+        return mBluetoothScanTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
+    }
+
+    @Override
     public long getNetworkActivityBytes(int type, int which) {
         if (type >= 0 && type < mNetworkByteActivityCounters.length) {
             return mNetworkByteActivityCounters[type].getCountLocked(which);
@@ -4603,9 +4676,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         StopwatchTimer mVideoTurnedOnTimer;
         StopwatchTimer mFlashlightTurnedOnTimer;
         StopwatchTimer mCameraTurnedOnTimer;
-
-
         StopwatchTimer mForegroundActivityTimer;
+        StopwatchTimer mBluetoothScanTimer;
 
         int mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
         StopwatchTimer[] mProcessStateTimer;
@@ -4997,6 +5069,30 @@ public final class BatteryStatsImpl extends BatteryStats {
             return mForegroundActivityTimer;
         }
 
+        public StopwatchTimer createBluetoothScanTimerLocked() {
+            if (mBluetoothScanTimer == null) {
+                mBluetoothScanTimer = new StopwatchTimer(Uid.this, BLUETOOTH_SCAN_ON,
+                        mBluetoothScanOnTimers, mOnBatteryTimeBase);
+            }
+            return mBluetoothScanTimer;
+        }
+
+        public void noteBluetoothScanStartedLocked(long elapsedRealtimeMs) {
+            createBluetoothScanTimerLocked().startRunningLocked(elapsedRealtimeMs);
+        }
+
+        public void noteBluetoothScanStoppedLocked(long elapsedRealtimeMs) {
+            if (mBluetoothScanTimer != null) {
+                mBluetoothScanTimer.stopRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
+        public void noteResetBluetoothScanLocked(long elapsedRealtimeMs) {
+            if (mBluetoothScanTimer != null) {
+                mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtimeMs);
+            }
+        }
+
         @Override
         public void noteActivityResumedLocked(long elapsedRealtimeMs) {
             // We always start, since we want multiple foreground PIDs to nest
@@ -5108,6 +5204,11 @@ public final class BatteryStatsImpl extends BatteryStats {
         @Override
         public Timer getForegroundActivityTimer() {
             return mForegroundActivityTimer;
+        }
+
+        @Override
+        public Timer getBluetoothScanTimer() {
+            return mBluetoothScanTimer;
         }
 
         void makeProcessState(int i, Parcel in) {
@@ -5335,6 +5436,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mForegroundActivityTimer != null) {
                 active |= !mForegroundActivityTimer.reset(false);
             }
+            if (mBluetoothScanTimer != null) {
+                active |= !mBluetoothScanTimer.reset(false);
+            }
             if (mProcessStateTimer != null) {
                 for (int i = 0; i < NUM_PROCESS_STATE; i++) {
                     if (mProcessStateTimer[i] != null) {
@@ -5509,6 +5613,10 @@ public final class BatteryStatsImpl extends BatteryStats {
                     mForegroundActivityTimer.detach();
                     mForegroundActivityTimer = null;
                 }
+                if (mBluetoothScanTimer != null) {
+                    mBluetoothScanTimer.detach();
+                    mBluetoothScanTimer = null;
+                }
                 if (mUserActivityCounters != null) {
                     for (int i=0; i<NUM_USER_ACTIVITY_TYPES; i++) {
                         mUserActivityCounters[i].detach();
@@ -5666,6 +5774,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (mForegroundActivityTimer != null) {
                 out.writeInt(1);
                 mForegroundActivityTimer.writeToParcel(out, elapsedRealtimeUs);
+            } else {
+                out.writeInt(0);
+            }
+            if (mBluetoothScanTimer != null) {
+                out.writeInt(1);
+                mBluetoothScanTimer.writeToParcel(out, elapsedRealtimeUs);
             } else {
                 out.writeInt(0);
             }
@@ -5873,6 +5987,12 @@ public final class BatteryStatsImpl extends BatteryStats {
                         Uid.this, FOREGROUND_ACTIVITY, null, mOnBatteryTimeBase, in);
             } else {
                 mForegroundActivityTimer = null;
+            }
+            if (in.readInt() != 0) {
+                mBluetoothScanTimer = new StopwatchTimer(Uid.this, BLUETOOTH_SCAN_ON,
+                        mBluetoothScanOnTimers, mOnBatteryTimeBase, in);
+            } else {
+                mBluetoothScanTimer = null;
             }
             mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             for (int i = 0; i < NUM_PROCESS_STATE; i++) {
@@ -7133,6 +7253,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mVideoOnTimer = new StopwatchTimer(null, -8, null, mOnBatteryTimeBase);
         mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase);
         mCameraOnTimer = new StopwatchTimer(null, -13, null, mOnBatteryTimeBase);
+        mBluetoothScanTimer = new StopwatchTimer(null, -14, null, mOnBatteryTimeBase);
         mOnBattery = mOnBatteryInternal = false;
         long uptime = SystemClock.uptimeMillis() * 1000;
         long realtime = SystemClock.elapsedRealtime() * 1000;
@@ -7732,6 +7853,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mVideoOnTimer.reset(false);
         mFlashlightOnTimer.reset(false);
         mCameraOnTimer.reset(false);
+        mBluetoothScanTimer.reset(false);
         for (int i=0; i<SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
             mPhoneSignalStrengthsTimer[i].reset(false);
         }
@@ -8264,40 +8386,167 @@ public final class BatteryStatsImpl extends BatteryStats {
             Slog.d(TAG, "Updating bluetooth stats: " + info);
         }
 
-        if (info != null && mOnBatteryInternal) {
-            mHasBluetoothReporting = true;
-            mBluetoothActivity.getRxTimeCounter().addCountLocked(
-                    info.getControllerRxTimeMillis());
-            mBluetoothActivity.getTxTimeCounters()[0].addCountLocked(
-                    info.getControllerTxTimeMillis());
-            mBluetoothActivity.getIdleTimeCounter().addCountLocked(
-                    info.getControllerIdleTimeMillis());
+        if (info == null || !mOnBatteryInternal) {
+            return;
+        }
 
-            // POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
-            final double opVolt = mPowerProfile.getAveragePower(
-                    PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
-            if (opVolt != 0) {
-                // We store the power drain as mAms.
-                mBluetoothActivity.getPowerCounter().addCountLocked(
-                        (long) (info.getControllerEnergyUsed() / opVolt));
+        mHasBluetoothReporting = true;
+
+        final long elapsedRealtimeMs = SystemClock.elapsedRealtime();
+        final long rxTimeMs = info.getControllerRxTimeMillis();
+        final long txTimeMs = info.getControllerTxTimeMillis();
+
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "------ BEGIN BLE power blaming ------");
+            Slog.d(TAG, "  Tx Time:    " + txTimeMs + " ms");
+            Slog.d(TAG, "  Rx Time:    " + rxTimeMs + " ms");
+            Slog.d(TAG, "  Idle Time:  " + info.getControllerIdleTimeMillis() + " ms");
+        }
+
+        long totalScanTimeMs = 0;
+
+        final int uidCount = mUidStats.size();
+        for (int i = 0; i < uidCount; i++) {
+            final Uid u = mUidStats.valueAt(i);
+            if (u.mBluetoothScanTimer == null) {
+                continue;
             }
 
-            final UidTraffic[] uidTraffic = info.getUidTraffic();
-            final int numUids = uidTraffic != null ? uidTraffic.length : 0;
+            totalScanTimeMs += u.mBluetoothScanTimer.getTimeSinceMarkLocked(
+                    elapsedRealtimeMs * 1000) / 1000;
+        }
+
+        final boolean normalizeScanRxTime = (totalScanTimeMs > rxTimeMs);
+        final boolean normalizeScanTxTime = (totalScanTimeMs > txTimeMs);
+
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Normalizing scan power for RX=" + normalizeScanRxTime
+                    + " TX=" + normalizeScanTxTime);
+        }
+
+        long leftOverRxTimeMs = rxTimeMs;
+        long leftOverTxTimeMs = txTimeMs;
+
+        for (int i = 0; i < uidCount; i++) {
+            final Uid u = mUidStats.valueAt(i);
+            if (u.mBluetoothScanTimer == null) {
+                continue;
+            }
+
+            long scanTimeSinceMarkMs = u.mBluetoothScanTimer.getTimeSinceMarkLocked(
+                    elapsedRealtimeMs * 1000) / 1000;
+            if (scanTimeSinceMarkMs > 0) {
+                // Set the new mark so that next time we get new data since this point.
+                u.mBluetoothScanTimer.setMark(elapsedRealtimeMs);
+
+                long scanTimeRxSinceMarkMs = scanTimeSinceMarkMs;
+                long scanTimeTxSinceMarkMs = scanTimeSinceMarkMs;
+
+                if (normalizeScanRxTime) {
+                    // Scan time is longer than the total rx time in the controller,
+                    // so distribute the scan time proportionately. This means regular traffic
+                    // will not blamed, but scans are more expensive anyways.
+                    scanTimeRxSinceMarkMs = (rxTimeMs * scanTimeRxSinceMarkMs) / totalScanTimeMs;
+                }
+
+                if (normalizeScanTxTime) {
+                    // Scan time is longer than the total tx time in the controller,
+                    // so distribute the scan time proportionately. This means regular traffic
+                    // will not blamed, but scans are more expensive anyways.
+                    scanTimeTxSinceMarkMs = (txTimeMs * scanTimeTxSinceMarkMs) / totalScanTimeMs;
+                }
+
+                final ControllerActivityCounterImpl counter =
+                        u.getOrCreateBluetoothControllerActivityLocked();
+                counter.getRxTimeCounter().addCountLocked(scanTimeRxSinceMarkMs);
+                counter.getTxTimeCounters()[0].addCountLocked(scanTimeTxSinceMarkMs);
+
+                leftOverRxTimeMs -= scanTimeRxSinceMarkMs;
+                leftOverTxTimeMs -= scanTimeTxSinceMarkMs;
+            }
+        }
+
+        if (DEBUG_ENERGY) {
+            Slog.d(TAG, "Left over time for traffic RX=" + leftOverRxTimeMs
+                    + " TX=" + leftOverTxTimeMs);
+        }
+
+        //
+        // Now distribute blame to apps that did bluetooth traffic.
+        //
+
+        long totalTxBytes = 0;
+        long totalRxBytes = 0;
+
+        final UidTraffic[] uidTraffic = info.getUidTraffic();
+        final int numUids = uidTraffic != null ? uidTraffic.length : 0;
+        for (int i = 0; i < numUids; i++) {
+            final UidTraffic traffic = uidTraffic[i];
+
+            // Add to the global counters.
+            mNetworkByteActivityCounters[NETWORK_BT_RX_DATA].addCountLocked(
+                    traffic.getRxBytes());
+            mNetworkByteActivityCounters[NETWORK_BT_TX_DATA].addCountLocked(
+                    traffic.getTxBytes());
+
+            // Add to the UID counters.
+            final Uid u = getUidStatsLocked(mapUid(traffic.getUid()));
+            u.noteNetworkActivityLocked(NETWORK_BT_RX_DATA, traffic.getRxBytes(), 0);
+            u.noteNetworkActivityLocked(NETWORK_BT_TX_DATA, traffic.getTxBytes(), 0);
+
+            // Calculate the total traffic.
+            totalTxBytes += traffic.getTxBytes();
+            totalRxBytes += traffic.getRxBytes();
+        }
+
+        if ((totalTxBytes != 0 || totalRxBytes != 0) &&
+                (leftOverRxTimeMs != 0 || leftOverTxTimeMs != 0)) {
             for (int i = 0; i < numUids; i++) {
                 final UidTraffic traffic = uidTraffic[i];
 
-                // Add to the global counters.
-                mNetworkByteActivityCounters[NETWORK_BT_RX_DATA].addCountLocked(
-                        traffic.getRxBytes());
-                mNetworkByteActivityCounters[NETWORK_BT_TX_DATA].addCountLocked(
-                        traffic.getTxBytes());
-
-                // Add to the UID counters.
                 final Uid u = getUidStatsLocked(mapUid(traffic.getUid()));
-                u.noteNetworkActivityLocked(NETWORK_BT_RX_DATA, traffic.getRxBytes(), 0);
-                u.noteNetworkActivityLocked(NETWORK_BT_TX_DATA, traffic.getTxBytes(), 0);
+                final ControllerActivityCounterImpl counter =
+                        u.getOrCreateBluetoothControllerActivityLocked();
+
+                if (totalRxBytes > 0 && traffic.getRxBytes() > 0) {
+                    final long timeRxMs = (leftOverRxTimeMs * traffic.getRxBytes()) / totalRxBytes;
+
+                    if (DEBUG_ENERGY) {
+                        Slog.d(TAG, "UID=" + traffic.getUid() + " rx_bytes=" + traffic.getRxBytes()
+                                + " rx_time=" + timeRxMs);
+                    }
+                    counter.getRxTimeCounter().addCountLocked(timeRxMs);
+                    leftOverRxTimeMs -= timeRxMs;
+                }
+
+                if (totalTxBytes > 0 && traffic.getTxBytes() > 0) {
+                    final long timeTxMs = (leftOverTxTimeMs * traffic.getTxBytes()) / totalTxBytes;
+
+                    if (DEBUG_ENERGY) {
+                        Slog.d(TAG, "UID=" + traffic.getUid() + " tx_bytes=" + traffic.getTxBytes()
+                                + " tx_time=" + timeTxMs);
+                    }
+
+                    counter.getTxTimeCounters()[0].addCountLocked(timeTxMs);
+                    leftOverTxTimeMs -= timeTxMs;
+                }
             }
+        }
+
+        mBluetoothActivity.getRxTimeCounter().addCountLocked(
+                info.getControllerRxTimeMillis());
+        mBluetoothActivity.getTxTimeCounters()[0].addCountLocked(
+                info.getControllerTxTimeMillis());
+        mBluetoothActivity.getIdleTimeCounter().addCountLocked(
+                info.getControllerIdleTimeMillis());
+
+        // POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
+        final double opVolt = mPowerProfile.getAveragePower(
+                PowerProfile.POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
+        if (opVolt != 0) {
+            // We store the power drain as mAms.
+            mBluetoothActivity.getPowerCounter().addCountLocked(
+                    (long) (info.getControllerEnergyUsed() / opVolt));
         }
     }
 
@@ -8739,15 +8988,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private void scheduleSyncExternalStatsLocked(String reason) {
+    private void scheduleSyncExternalStatsLocked(String reason, int updateFlags) {
         if (mExternalSync != null) {
-            mExternalSync.scheduleSync(reason);
-        }
-    }
-
-    private void scheduleSyncExternalWifiStatsLocked(String reason) {
-        if (mExternalSync != null) {
-            mExternalSync.scheduleWifiSync(reason);
+            mExternalSync.scheduleSync(reason, updateFlags);
         }
     }
 
@@ -8815,7 +9058,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
                 // TODO(adamlesinski): Schedule the creation of a HistoryStepDetails record
                 // which will pull external stats.
-                scheduleSyncExternalStatsLocked("battery-level");
+                scheduleSyncExternalStatsLocked("battery-level", ExternalStatsSync.UPDATE_ALL);
             }
             if (mHistoryCur.batteryStatus != status) {
                 mHistoryCur.batteryStatus = (byte)status;
@@ -9596,6 +9839,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mFlashlightOnTimer.readSummaryFromParcelLocked(in);
         mCameraOnNesting = 0;
         mCameraOnTimer.readSummaryFromParcelLocked(in);
+        mBluetoothScanNesting = 0;
+        mBluetoothScanTimer.readSummaryFromParcelLocked(in);
 
         int NKW = in.readInt();
         if (NKW > 10000) {
@@ -9665,6 +9910,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             if (in.readInt() != 0) {
                 u.createForegroundActivityTimerLocked().readSummaryFromParcelLocked(in);
+            }
+            if (in.readInt() != 0) {
+                u.createBluetoothScanTimerLocked().readSummaryFromParcelLocked(in);
             }
             u.mProcessState = ActivityManager.PROCESS_STATE_NONEXISTENT;
             for (int i = 0; i < Uid.NUM_PROCESS_STATE; i++) {
@@ -9928,6 +10176,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mNumConnectivityChange);
         mFlashlightOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mCameraOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        mBluetoothScanTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
 
         out.writeInt(mKernelWakelockStats.size());
         for (Map.Entry<String, SamplingTimer> ent : mKernelWakelockStats.entrySet()) {
@@ -10018,6 +10267,12 @@ public final class BatteryStatsImpl extends BatteryStats {
             if (u.mForegroundActivityTimer != null) {
                 out.writeInt(1);
                 u.mForegroundActivityTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+            } else {
+                out.writeInt(0);
+            }
+            if (u.mBluetoothScanTimer != null) {
+                out.writeInt(1);
+                u.mBluetoothScanTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
             } else {
                 out.writeInt(0);
             }
@@ -10289,6 +10544,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mFlashlightOnTimer = new StopwatchTimer(null, -9, null, mOnBatteryTimeBase, in);
         mCameraOnNesting = 0;
         mCameraOnTimer = new StopwatchTimer(null, -13, null, mOnBatteryTimeBase, in);
+        mBluetoothScanNesting = 0;
+        mBluetoothScanTimer = new StopwatchTimer(null, -14, null, mOnBatteryTimeBase, in);
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
@@ -10436,6 +10693,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mUnpluggedNumConnectivityChange);
         mFlashlightOnTimer.writeToParcel(out, uSecRealtime);
         mCameraOnTimer.writeToParcel(out, uSecRealtime);
+        mBluetoothScanTimer.writeToParcel(out, uSecRealtime);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargePlugLevel);
         out.writeInt(mDischargeCurrentLevel);

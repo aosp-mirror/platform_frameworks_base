@@ -124,4 +124,5 @@ interface IBatteryStats {
 
     void noteBleScanStarted(in WorkSource ws);
     void noteBleScanStopped(in WorkSource ws);
+    void noteResetBleScan();
 }
