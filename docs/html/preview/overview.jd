@@ -1,0 +1,389 @@
+page.title=Program Overview
+page.metaDescription=Welcome to the Android M Developer Preview, a program that gives you everything you need to test and optimize your apps for the next version of Android.
+page.image=images/cards/card-preview_16-9_2x.png
+page.tags="preview", "developer", "android"
+
+@jd:body
+
+<div class="cols" style=
+"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 3 is now available
+  </h3>
+  <p>Includes final SDK and near-final system images</p>
+   <div style="margin:auto 1em">
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="{@docRoot}preview/support.html#preview3-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+  </div>
+</div>
+
+<p>
+  Welcome to the <strong>Android M Developer Preview</strong>, a program that gives you
+  everything you need to test and optimize your apps for the next version of
+  Android. It's free, and you can get started right away just by downloading
+  the M Developer Preview tools.
+</p>
+
+<div style="background-color:#eceff1;padding:1em;">
+<div class="wrap">
+  <div class="cols">
+    <div class="col-4of12">
+      <h5>
+        Hardware and emulator system images
+      </h5>
+
+      <p>
+        Run and test your apps on Nexus 5, 6, 9, and Player (for TV), as well
+        as emulator.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Latest platform code
+      </h5>
+
+      <p>
+        We’ll provide multiple updates during the Preview, so you’ll be testing
+        against the latest platform changes.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Updates delivered by OTA
+      </h5>
+
+      <p>
+        You  can get updates over-the-air, once you’ve flashed a
+        device to the initial preview.
+      </p>
+    </div>
+  </div>
+
+  <div class="cols">
+
+
+    <div class="col-4of12">
+      <h5>
+        New behaviors and capabilities
+      </h5>
+
+      <p>
+        Start work early to support new platform behaviors such as
+        the new runtime permissions model and power-saving features.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Priority window for developer-reported issues
+      </h5>
+
+      <p>
+        During the first several weeks we’ll give priority to developer-reported
+        issues, so test and give feedback as soon as possible.
+      </p>
+    </div>
+
+    <div class="col-4of12">
+      <h5>
+        Feedback and support
+      </h5>
+
+      <p>
+        Report issues and give us feedback using our <a href=
+        "https://code.google.com/p/android-developer-preview/">issue tracker</a>.
+        Connect with other developers in the <a
+        href="http://g.co/dev/AndroidMDevPreview">M&nbsp;Developer Community</a>.
+
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!--
+<p>
+  With the M Developer Preview, you'll get an early start on testing your apps,
+  with enough time to make adjustments before the public platform release later
+  in the year. We'll provide several updates to the Preview tools in the weeks
+  ahead, so you can keep in sync with the latest changes as the platform moves
+  toward launch.
+</p>
+<img src="{@docRoot}preview/images/m-preview-timeline.png" alt=
+"Preview program timeline" id="timeline">
+<p>
+  You can help us improve the platform by <a href=
+  "https://code.google.com/p/android-developer-preview/">reporting issues</a>
+  through our feedback channels. This is especially
+  critical in the first month of the preview, when we’ll be giving priority to
+  developer-reported issues and feedback.
+</p> -->
+
+
+<h2 id="timeline">
+  Timeline and updates
+</h2>
+<img src="{@docRoot}preview/images/m-preview-timeline-crop.png" alt=
+"Preview program timeline" id="timeline">
+<p>
+  The M Developer Preview runs from May 28 until the final Android M public release planned for Q3
+  2015.
+</p>
+
+<p>
+  At key development milestones, we’ll deliver updates for your test devices.
+  The milestones are
+</p>
+
+<ul>
+  <li>
+    <strong><a href="{@docRoot}preview/download_mp1.html">Preview&nbsp;1</a></strong> (available).
+  </li>
+
+  <li>
+    <strong><a href="{@docRoot}preview/download_mp2.html">Preview&nbsp;2</a></strong> (available).
+  </li>
+
+  <li>
+  <strong><a href="{@docRoot}preview/download.html">Preview&nbsp;3</a></strong>
+    (final APIs and official Android 6.0 SDK, available).
+  </li>
+</ul>
+
+<p>
+  These updates culminate in the <strong>official Android 6.0 SDK</strong> (now available),
+  which lets you build with the final APIs for the new version of Android, as well as
+  near-final system images to let you test system behaviors and features.
+</p>
+
+<p>
+  As you test and develop on Android M, we strongly recommend <strong>keeping
+  your development environment up-to-date</strong> as Preview updates are released.
+  To make the process easier, we'll deliver <strong>updates over-the-air
+  (OTA)</strong> to devices already flashed to a Preview build, as well as
+  providing system images that you can download and flash manually.
+</p>
+<p class="note">
+  <strong>Note:</strong> Developer Preview 3 includes final APIs and near-final
+  system images available by both download and OTA. At the full public release of
+  Android M later in Q3, final system images will be available by download only,
+  so you'll need to <strong>flash manually</strong> to
+  your test devices.</strong>
+</p>
+
+<p>
+  We’ll notify you when Preview updates are available via the <a href=
+  "http://android-developers.blogspot.com/">Android Developers Blog</a>, as
+  well as this site and the
+  <a href="http://g.co/dev/AndroidMDevPreview">Android M Developer Community</a>.
+</p>
+
+<h2 id="preview_tools">
+  What’s in the Preview?
+</h2>
+
+<p>
+  The M Developer Preview includes everything you need to test your existing
+  apps on a variety of screen sizes, network technologies, CPU/GPU chipsets,
+  and hardware architectures.
+</p>
+
+<h4>
+  SDK tools
+</h4>
+
+<p>
+  You can download these components through the SDK Manager in <a href=
+  "{@docRoot}sdk/installing/adding-packages.html">Android Studio</a>:
+</p>
+
+<ul>
+  <li><strong>Official Android 6.0 SDK and tools</strong>
+  </li>
+
+  <li>M Developer Preview <strong>emulator system image</strong> (32-bit &amp;
+  64-bit)
+  </li>
+
+  <li>M Developer Preview <strong>emulator system Image for Android TV</strong>
+  (32-bit)
+  </li>
+</ul>
+
+<h4>
+  Hardware system images
+</h4>
+
+<p>
+  You can download these hardware system images for Nexus devices from the
+  <a href="download.html">Downloads page</a>:
+</p>
+
+<ul>
+  <li>
+    <strong>Nexus 5</strong> (GSM/LTE) “hammerhead” device system image
+  </li>
+
+  <li>
+    <strong>Nexus 6</strong> “shamu” device system image
+  </li>
+
+  <li>
+    <strong>Nexus 9</strong> (Wi-Fi) “volantis” device system image
+  </li>
+
+  <li>
+    <strong>Nexus Player</strong> (Android TV) “fugu” device system image
+  </li>
+</ul>
+
+<h4>
+  Documentation and sample code
+</h4>
+
+<p>
+  These documentation resources help you learn about the Preview:
+</p>
+
+<ul>
+  <li>
+    <a href="setup-sdk.html">Set Up the SDK</a> has step-by-step instructions
+    for getting started.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/testing/guide.html">Testing Guide</a> and <a href=
+    "behavior-changes.html">Behavior Changes</a> point you to key areas to test.
+  </li>
+
+  <li>Documentation of new APIs, including an <a href="api-overview.html">API Overview</a>,
+  downloadable <a href="{@docRoot}preview/download.html#docs">API Reference</a>, and detailed developer guides on
+  key features such as
+  <a href="{@docRoot}preview/features/runtime-permissions.html">permissions</a>,
+  <a href="{@docRoot}preview/backup/index.html">app backup</a>, and others.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/samples.html">Sample code</a> that demonstrates how to support
+    permissions and other new features.
+  </li>
+
+  <li>
+    <a href="{@docRoot}preview/support.html#release-notes">Release notes</a> for the current version
+    of the M Developer Preview, including change notes and diff reports.
+  </li>
+</ul>
+
+<h4>
+  Support resources
+</h4>
+
+<p>
+  Use these support resources as you test and develop on the M
+  Developer Preview:
+</p>
+
+<ul>
+  <li><a href="https://code.google.com/p/android-developer-preview/">M
+  Developer Preview Issue Tracker</a> is your <strong>primary feedback
+  channel.</strong> You can report bugs, performance issues, and general
+  feedback through the issue tracker. You can also check for <a
+  href="https://code.google.com/p/android-developer-preview/wiki/KnownIssues">known issues</a>
+  and find workaround steps.
+  </li>
+
+  <li>The <a href="http://g.co/dev/AndroidMDevPreview">Android M Developer
+  Community</a> is a Google+ community where you can <strong>connect with
+  other developers</strong> working with Android M. You can share
+  observations or ideas or find answers to questions about Android M.
+  </li>
+</ul>
+
+
+<h2 id="preview_apis_and_publishing">
+  Final SDK, targeting, and publishing
+</h2>
+
+<p>
+   <p>With Developer Preview 3, the platform APIs are now official (API level 23) and the
+   <strong>official Android 6.0 SDK is now available</strong>.  We recommend updating your environment
+   right away through Android Studio. Once you've updated your environment, you can target
+   the new API level, compile against the new platform, and publish at your convenience
+   to Google Play (including alpha, beta, or release channels).
+
+  <p>If you want to opt out
+  of compatibility behaviors (which is strongly recommended),
+  you can target the Android 6.0 platform by setting your app's <code><a href=
+  "/guide/topics/manifest/uses-sdk-element.html">targetSdkVersion</a></code>
+  to <code>“23”</code>.
+</p>
+
+  <p>Before releasing an app that targets API level 23, we strongly
+  recommend distributing it to a group of testers through the new <a
+  href="http://android-developers.blogspot.com/2015/07/iterate-faster-on-google-play-with.html"> 
+  beta testing features available in the Google Play Developer Console. See the
+  <a href="https://support.google.com/googleplay/android-developer/answer/3131213">Help
+  Center article</a> for more information. 
+</p>
+
+<h2 id="get_started">
+  How to get started
+</h2>
+
+<p>
+  To get started testing your app with Android M:
+</p>
+
+<ol>
+  <li>Review the <a href="{@docRoot}preview/api-overview.html">API Overview</a>
+    and <a href="{@docRoot}preview/behavior-changes.html">Behavior Changes</a> to get an
+    idea of what's new and how it affects your apps. In particular, learn about
+    the new <a href="{@docRoot}preview/features/runtime-permissions.html">runtime
+    permissions</a> model, power-saving features, and auto backup.
+  </li>
+
+  <li>Set up your environment by following the instructions for
+    <a href="{@docRoot}preview/setup-sdk.html">Setting up the Preview SDK</a>
+    and configuring test devices.
+  </li>
+
+  <li>Follow the <a href="https://developers.google.com/android/nexus/images">
+    flashing instructions</a> to flash the latest M developer preview system image
+    for Nexus 5, 6, 9, and Player. Once you've flashed your development device,
+    Preview updates will be delivered through over-the-air (OTA) updates.</a>
+  </li>
+
+  <li>Review the <a href="{@docRoot}reference/packages.html">API
+  Reference</a> and <a href="{@docRoot}preview/samples.html">M Preview
+  samples</a> to gain more insight into new API features and how to use them in
+  your app.
+  </li>
+
+  <li>Join the <a href="http://g.co/dev/AndroidMDevPreview">Android M
+  Developer Community</a> to get the latest news and connect with other
+  developers working with the new platform.
+  </li>
+</ol>
+
+<p>
+  Thank you for your participation in the Android M Developer Preview program!
+</p>

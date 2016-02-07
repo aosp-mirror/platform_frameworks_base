@@ -1042,6 +1042,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-hdf android.whichdoc online \
 		$(sample_groups) \
 		-useUpdatedTemplates \
+		-includePreview \
 		-hdf android.hasSamples true \
 		-samplesdir $(samples_dir)
 

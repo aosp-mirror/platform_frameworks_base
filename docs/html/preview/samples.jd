@@ -1,0 +1,70 @@
+page.title=Samples
+page.image=images/cards/samples-new_2x.png
+@jd:body
+
+<p>
+  The following code samples are provided for the M Developer Preview. To download
+  the samples in Android Studio, select the <b>File > Import Samples</b> menu option.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> These downloadable projects are designed
+   for use with Gradle and Android Studio.
+</p>
+
+
+<h3 id="RuntimePermissions">Runtime Permissions</h3>
+
+<p>
+ Android M changes the way system permissions work. Users are asked to approve permission
+ requests at runtime instead of during installation. This sample shows how to request these
+ permissions.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-RuntimePermissions">Get it on GitHub</a></p>
+
+<h3 id="ConfirmCredentials">Confirm Credential</h3>
+
+<p>
+ This sample demonstrates how to use device credentials as an authentication method in your app.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ConfirmCredential">Get it on
+GitHub</a></p>
+
+<h3 id="FingerprintDialog">Fingerprint Dialog</h3>
+
+<p>
+ This sample demonstrates how to recognize registered fingerprints to authenticate the user
+ in your app.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-FingerprintDialog">Get it on GitHub</a></p>
+
+<h3 id="AutomaticBackup">Auto Backup for Apps</h3>
+
+<p>
+ Android M introduces automatic backup for app settings. This sample demonstrates how to add
+ filtering rules to an app in order to manage settings backup.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-AutoBackupForApps">Get it on GitHub</a></p>
+
+<h3 id="CameraRaw">Camera 2 Raw</h3>
+
+<p>
+  Demonstrates how to use the <code>Camera2</code> API to capture RAW camera buffers and save
+  them as <code>DNG</code> files.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-Camera2Raw">Get it on GitHub</a></p>
+
+<h3 id="ActiveNotification">Active Notification</h3>
+
+<p>
+  This sample demonstrates how the
+  <a href="{@docRoot}reference/android/app/NotificationManager.html"><code>NotificationManager</code></a>
+  can tell you how many notifications your app is currently showing.
+</p>
+
+<p><a href="https://github.com/googlesamples/android-ActiveNotifications">Get it on GitHub</a></p>
