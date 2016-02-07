@@ -22,6 +22,7 @@ import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
 
+import java.io.FileNotFoundException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -123,14 +124,22 @@ final class RootScanner {
 
                 // Update devices.
                 final MtpDeviceRecord[] devices = mManager.getDevices();
-                mDatabase.getMapper().startAddingDocuments(null /* parentDocumentId */);
-                for (final MtpDeviceRecord device : devices) {
-                    if (mDatabase.getMapper().putDeviceDocument(device)) {
+                try {
+                    mDatabase.getMapper().startAddingDocuments(null /* parentDocumentId */);
+                    for (final MtpDeviceRecord device : devices) {
+                        if (mDatabase.getMapper().putDeviceDocument(device)) {
+                            changed = true;
+                        }
+                    }
+                    if (mDatabase.getMapper().stopAddingDocuments(
+                            null /* parentDocumentId */)) {
                         changed = true;
                     }
-                }
-                if (mDatabase.getMapper().stopAddingDocuments(null /* parentDocumentId */)) {
-                    changed = true;
+                } catch (FileNotFoundException exception) {
+                    // The top root (ID is null) must exist always.
+                    // FileNotFoundException is unexpected.
+                    Log.e(MtpDocumentsProvider.TAG, "Unexpected FileNotFoundException", exception);
+                    throw new AssertionError("Unexpected exception for the top parent", exception);
                 }
 
                 // Update roots.
@@ -139,12 +148,17 @@ final class RootScanner {
                     if (documentId == null) {
                         continue;
                     }
-                    mDatabase.getMapper().startAddingDocuments(documentId);
-                    if (mDatabase.getMapper().putStorageDocuments(documentId, device.roots)) {
-                        changed = true;
-                    }
-                    if (mDatabase.getMapper().stopAddingDocuments(documentId)) {
-                        changed = true;
+                    try {
+                        mDatabase.getMapper().startAddingDocuments(documentId);
+                        if (mDatabase.getMapper().putStorageDocuments(documentId, device.roots)) {
+                            changed = true;
+                        }
+                        if (mDatabase.getMapper().stopAddingDocuments(documentId)) {
+                            changed = true;
+                        }
+                    } catch (FileNotFoundException exception) {
+                        Log.e(MtpDocumentsProvider.TAG, "Parent document is gone.", exception);
+                        continue;
                     }
                 }
 

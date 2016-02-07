@@ -36,16 +36,23 @@ public class DocumentLoaderTest extends AndroidTestCase {
     private TestContentResolver mResolver;
     private DocumentLoader mLoader;
     final private Identifier mParentIdentifier = new Identifier(
-            0, 0, 0, "1", MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE);
+            0, 0, 0, "2", MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE);
 
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
-        mDatabase.getMapper().startAddingDocuments("deviceDocId");
-        mDatabase.getMapper().putStorageDocuments("deviceDocId", new MtpRoot[] {
+
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(
+                new MtpDeviceRecord(1, "Device", true, new MtpRoot[0], null, null));
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        mDatabase.getMapper().startAddingDocuments("1");
+        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
                 new MtpRoot(0, 0, "Storage", 1000, 1000, "")
         });
-        mDatabase.getMapper().stopAddingDocuments("deviceDocId");
+        mDatabase.getMapper().stopAddingDocuments("1");
+
         mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
         mLoader = new DocumentLoader(mManager, mResolver, mDatabase);
