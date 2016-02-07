@@ -310,14 +310,14 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals(3, cursor.getCount());
             cursor.moveToNext();
             assertEquals(1, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_STORAGE_ID));
+            assertEquals(200, getInt(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage A", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.moveToNext();
             assertEquals(2, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertTrue(isNull(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage B", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.moveToNext();
-            assertEquals(4, getInt(cursor, COLUMN_DOCUMENT_ID));
+            assertEquals(3, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertEquals(202, getInt(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage C", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.close();
@@ -333,7 +333,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals(200, getInt(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage A", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.moveToNext();
-            assertEquals(4, getInt(cursor, COLUMN_DOCUMENT_ID));
+            assertEquals(3, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertEquals(202, getInt(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage C", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.close();
@@ -387,7 +387,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals(4, cursor.getCount());
 
             cursor.moveToPosition(3);
-            assertEquals(5, getInt(cursor, COLUMN_DOCUMENT_ID));
+            assertEquals(4, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertEquals(203, getInt(cursor, COLUMN_OBJECT_HANDLE));
             assertEquals("video.mp4", getString(cursor, COLUMN_DISPLAY_NAME));
 
@@ -406,7 +406,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals("note.txt", getString(cursor, COLUMN_DISPLAY_NAME));
 
             cursor.moveToNext();
-            assertEquals(5, getInt(cursor, COLUMN_DOCUMENT_ID));
+            assertEquals(4, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertEquals(203, getInt(cursor, COLUMN_OBJECT_HANDLE));
             assertEquals("video.mp4", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.close();
@@ -544,7 +544,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals(1, cursor.getCount());
             cursor.moveToNext();
             assertEquals(2, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_OBJECT_HANDLE));
+            assertEquals(201, getInt(cursor, COLUMN_OBJECT_HANDLE));
             cursor.close();
         }
     }
@@ -626,11 +626,12 @@ public class MtpDatabaseTest extends AndroidTestCase {
             final Cursor cursor = mDatabase.queryRootDocuments(columns);
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
-            assertEquals(2, getInt(cursor, COLUMN_DOCUMENT_ID));
+            // One reuses exisitng document ID 1.
+            assertEquals(1, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertEquals(200, getInt(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.moveToNext();
-            assertEquals(3, getInt(cursor, COLUMN_DOCUMENT_ID));
+            assertEquals(2, getInt(cursor, COLUMN_DOCUMENT_ID));
             assertEquals(201, getInt(cursor, COLUMN_STORAGE_ID));
             assertEquals("Storage", getString(cursor, COLUMN_DISPLAY_NAME));
             cursor.close();
