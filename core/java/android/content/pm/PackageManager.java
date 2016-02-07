@@ -68,6 +68,9 @@ import java.util.List;
 public abstract class PackageManager {
     private static final String TAG = "PackageManager";
 
+    /** {@hide} */
+    public static final boolean APPLY_FORCE_DEVICE_ENCRYPTED = true;
+
     /**
      * This exception is thrown when a given package, application, or component
      * name cannot be found.
