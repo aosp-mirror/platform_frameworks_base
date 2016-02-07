@@ -2385,13 +2385,41 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Prepare storage for system user really early during boot,
             // since core system apps like SettingsProvider and SystemUI
             // can't wait for user to start
-            final int flags;
+            final int storageFlags;
             if (StorageManager.isFileBasedEncryptionEnabled()) {
-                flags = StorageManager.FLAG_STORAGE_DE;
+                storageFlags = StorageManager.FLAG_STORAGE_DE;
             } else {
-                flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
+                storageFlags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
             }
-            reconcileAppsData(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM, flags);
+            reconcileAppsData(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
+                    storageFlags);
+
+            if (!StorageManager.isFileBasedEncryptionEnabled()
+                    && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
+                // When upgrading a non-FBE device, we might need to shuffle
+                // around the default storage location of system apps
+                final List<UserInfo> users = sUserManager.getUsers(true);
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    if (ps.pkg == null || !ps.isSystem()) continue;
+                    final int storageTarget = ps.pkg.applicationInfo.isForceDeviceEncrypted()
+                            ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
+                    for (UserInfo user : users) {
+                        if (ps.getInstalled(user.id)) {
+                            try {
+                                mInstaller.migrateAppData(StorageManager.UUID_PRIVATE_INTERNAL,
+                                        ps.name, user.id, storageTarget);
+                            } catch (InstallerException e) {
+                                logCriticalInfo(Log.WARN,
+                                        "Failed to migrate " + ps.name + ": " + e.getMessage());
+                            }
+                            // We may have just shuffled around app data
+                            // directories, so prepare it one more time
+                            prepareAppData(StorageManager.UUID_PRIVATE_INTERNAL, user.id,
+                                    storageFlags, ps.pkg, false);
+                        }
+                    }
+                }
+            }
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.

@@ -1045,7 +1045,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
                 .getAbsolutePath();
 
         if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0
-                && StorageManager.isFileBasedEncryptionEnabled()) {
+                && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
             dataDir = deviceEncryptedDataDir;
         } else {
             dataDir = credentialEncryptedDataDir;
@@ -1112,6 +1112,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public boolean isExternalAsec() {
         return TextUtils.isEmpty(volumeUuid)
                 && (flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
+    }
+
+    /** @hide */
+    public boolean isForceDeviceEncrypted() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0;
     }
 
     /** @hide */

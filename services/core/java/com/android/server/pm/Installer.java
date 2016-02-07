@@ -86,6 +86,11 @@ public final class Installer extends SystemService {
                 seinfo);
     }
 
+    public void migrateAppData(String uuid, String pkgname, int userid, int flags)
+            throws InstallerException {
+        mInstaller.execute("migrate_app_data", uuid, pkgname, userid, flags);
+    }
+
     public void clearAppData(String uuid, String pkgname, int userid, int flags)
             throws InstallerException {
         mInstaller.execute("clear_app_data", uuid, pkgname, userid, flags);
