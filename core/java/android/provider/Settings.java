@@ -5922,6 +5922,52 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
+
+        /**
+         * Behavior of twilight on the device.
+         * One of {@link #TWILIGHT_MODE_LOCKED_OFF}, {@link #TWILIGHT_MODE_LOCKED_ON}
+         * or {@link #TWILIGHT_MODE_AUTO}.
+         * @hide
+         */
+        public static final String TWILIGHT_MODE = "twilight_mode";
+
+        /**
+         * Twilight mode always off.
+         * @hide
+         */
+        public static final int TWILIGHT_MODE_LOCKED_OFF = 0;
+
+        /**
+         * Twilight mode always on.
+         * @hide
+         */
+        public static final int TWILIGHT_MODE_LOCKED_ON = 1;
+
+        /**
+         * Twilight mode auto.
+         * @hide
+         */
+        public static final int TWILIGHT_MODE_AUTO = 2;
+
+        /**
+         * Twilight mode auto, temporarily overriden to on.
+         * @hide
+         */
+        public static final int TWILIGHT_MODE_AUTO_OVERRIDE_OFF = 3;
+
+        /**
+         * Twilight mode auto, temporarily overriden to off.
+         * @hide
+         */
+        public static final int TWILIGHT_MODE_AUTO_OVERRIDE_ON = 4;
+
+        /**
+         * Whether brightness should automatically adjust based on twilight state.
+         * @hide
+         */
+        public static final String BRIGHTNESS_USE_TWILIGHT = "brightness_use_twilight";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear

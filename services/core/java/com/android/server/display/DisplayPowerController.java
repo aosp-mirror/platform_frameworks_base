@@ -615,7 +615,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && mPowerRequest.brightnessSetByUser;
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
                     mPowerRequest.screenAutoBrightnessAdjustment, state != Display.STATE_ON,
-                    userInitiatedChange);
+                    userInitiatedChange, mPowerRequest.useTwilight);
         }
 
         // Apply brightness boost.

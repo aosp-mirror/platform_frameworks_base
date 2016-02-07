@@ -1240,29 +1240,43 @@
     <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="notification_done">Done</string>
 
-    <!-- Label for no color transform [CHAR LIMIT=30] -->
-    <string name="color_matrix_none">Normal colors</string>
+    <!-- SysUI Tuner: Color and appearance screen title [CHAR LIMIT=50] -->
+    <string name="color_and_appearance">Color and appearance</string>
 
-    <!-- Label for night color transform [CHAR LIMIT=30] -->
-    <string name="color_matrix_night">Night colors</string>
+    <!-- SysUI Tuner: Name of the night mode feature [CHAR LIMIT=30] -->
+    <string name="night_mode">Night mode</string>
 
-    <!-- Label for custom color transform [CHAR LIMIT=30] -->
-    <string name="color_matrix_custom">Custom colors</string>
+    <!-- SysUI Tuner: Name of calibrate display dialog [CHAR LIMIT=30] -->
+    <string name="calibrate_display">Calibrate display</string>
 
-    <!-- Label for auto color transforms [CHAR LIMIT=30] -->
-    <string name="color_matrix_auto">Auto</string>
+    <!-- SysUI Tuner: Summary of night mode when its on [CHAR LIMIT=NONE] -->
+    <string name="night_mode_on">On</string>
 
-    <!-- Label for unknown color transform [CHAR LIMIT=30] -->
-    <string name="color_matrix_unknown">Unknown colors</string>
+    <!-- SysUI Tuner: Summary of night mode when its off [CHAR LIMIT=NONE] -->
+    <string name="night_mode_off">Off</string>
 
-    <!-- Title for color transform [CHAR LIMIT=30] -->
-    <string name="color_transform">Color modification</string>
+    <!-- SysUI Tuner: Label for switch to turn on night mode automatically [CHAR LIMIT=50] -->
+    <string name="turn_on_automatically">Turn on automatically</string>
 
-    <!-- Title for setting to show Quick Settings tile [CHAR LIMIT=60] -->
-    <string name="color_matrix_show_qs">Show Quick Settings tile</string>
+    <!-- SysUI Tuner: Summary for switch to turn on night mode automatically [CHAR LIMIT=NONE] -->
+    <string name="turn_on_auto_summary">Switch into Night Mode as appropriate for location and time of day</string>
 
-    <!-- Title for switch to enable custom color transform [CHAR LIMIT=60] -->
-    <string name="color_enable_custom">Enable custom transform</string>
+    <!-- SysUI Tuner: Label for section controlling what night mode does [CHAR LIMIT=60] -->
+    <string name="when_night_mode_on">When Night Mode is on</string>
+
+    <!-- SysUI Tuner: Switch controlling whether dark theme is turned on with night mode [CHAR LIMIT=45] -->
+    <string name="use_dark_theme">Use dark theme for Android OS</string>
+
+    <!-- SysUI Tuner: Switch controlling whether tint is changed with night mode [CHAR LIMIT=45] -->
+    <string name="adjust_tint">Adjust tint</string>
+
+    <!-- SysUI Tuner: Switch controlling whether brightness is changed with night mode [CHAR LIMIT=45] -->
+    <string name="adjust_brightness">Adjust brightness</string>
+
+    <!-- SysUI Tuner: Disclaimer about using dark theme with night mode [CHAR LIMIT=NONE] -->
+    <string name="night_mode_disclaimer">The dark theme is applied to
+        core areas of Android OS that are normally displayed in a light theme,
+        such as Settings and notifications.</string>
 
     <!-- Button to apply settings [CHAR LIMIT=30] -->
     <string name="color_apply">Apply</string>
@@ -1343,6 +1357,9 @@
 
     <!-- Label for feature switch [CHAR LIMIT=30] -->
     <string name="switch_bar_on">On</string>
+
+    <!-- Label for feature switch [CHAR LIMIT=30] -->
+    <string name="switch_bar_off">Off</string>
 
     <!-- SysUI Tuner: Button that leads to the navigation bar customization screen [CHAR LIMIT=60] -->
     <string name="nav_bar">Navigation bar</string>

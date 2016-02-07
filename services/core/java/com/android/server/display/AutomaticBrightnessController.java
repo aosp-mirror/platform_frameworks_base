@@ -60,22 +60,8 @@ class AutomaticBrightnessController {
     // non-zero, which in turn ensures that the total weight is non-zero.
     private static final long AMBIENT_LIGHT_PREDICTION_TIME_MILLIS = 100;
 
-    // If true, enables the use of the current time as an auto-brightness adjustment.
-    // The basic idea here is to expand the dynamic range of auto-brightness
-    // when it is especially dark outside.  The light sensor tends to perform
-    // poorly at low light levels so we compensate for it by making an
-    // assumption about the environment.
-    private static final boolean USE_TWILIGHT_ADJUSTMENT =
-            PowerManager.useTwilightAdjustmentFeature();
-
     // Specifies the maximum magnitude of the time of day adjustment.
-    private static final float TWILIGHT_ADJUSTMENT_MAX_GAMMA = 1.5f;
-
-    // The amount of time after or before sunrise over which to start adjusting
-    // the gamma.  We want the change to happen gradually so that it is below the
-    // threshold of perceptibility and so that the adjustment has maximum effect
-    // well after dusk.
-    private static final long TWILIGHT_ADJUSTMENT_TIME = DateUtils.HOUR_IN_MILLIS * 2;
+    private static final float TWILIGHT_ADJUSTMENT_MAX_GAMMA = 1f;
 
     // Debounce for sampling user-initiated changes in display brightness to ensure
     // the user is satisfied with the result before storing the sample.
@@ -193,6 +179,8 @@ class AutomaticBrightnessController {
     private int mBrightnessAdjustmentSampleOldBrightness;
     private float mBrightnessAdjustmentSampleOldGamma;
 
+    private boolean mUseTwilight;
+
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
             int brightnessMin, int brightnessMax, float dozeScaleFactor,
@@ -221,10 +209,6 @@ class AutomaticBrightnessController {
         if (!DEBUG_PRETEND_LIGHT_SENSOR_ABSENT) {
             mLightSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
         }
-
-        if (USE_TWILIGHT_ADJUSTMENT) {
-            mTwilight.registerListener(mTwilightListener, mHandler);
-        }
     }
 
     public int getAutomaticScreenBrightness() {
@@ -235,7 +219,7 @@ class AutomaticBrightnessController {
     }
 
     public void configure(boolean enable, float adjustment, boolean dozing,
-            boolean userInitiatedChange) {
+            boolean userInitiatedChange, boolean useTwilight) {
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -244,12 +228,24 @@ class AutomaticBrightnessController {
         mDozing = dozing;
         boolean changed = setLightSensorEnabled(enable && !dozing);
         changed |= setScreenAutoBrightnessAdjustment(adjustment);
+        changed |= setUseTwilight(useTwilight);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
         }
         if (enable && !dozing && userInitiatedChange) {
             prepareBrightnessAdjustmentSample();
         }
+    }
+
+    private boolean setUseTwilight(boolean useTwilight) {
+        if (mUseTwilight == useTwilight) return false;
+        if (useTwilight) {
+            mTwilight.registerListener(mTwilightListener, mHandler);
+        } else {
+            mTwilight.unregisterListener(mTwilightListener);
+        }
+        mUseTwilight = useTwilight;
+        return true;
     }
 
     public void dump(PrintWriter pw) {
@@ -484,18 +480,13 @@ class AutomaticBrightnessController {
             }
         }
 
-        if (USE_TWILIGHT_ADJUSTMENT) {
+        if (mUseTwilight) {
             TwilightState state = mTwilight.getCurrentState();
             if (state != null && state.isNight()) {
                 final long now = System.currentTimeMillis();
-                final float earlyGamma =
-                        getTwilightGamma(now, state.getYesterdaySunset(), state.getTodaySunrise());
-                final float lateGamma =
-                        getTwilightGamma(now, state.getTodaySunset(), state.getTomorrowSunrise());
-                gamma *= earlyGamma * lateGamma;
+                gamma *= 1 + state.getAmount() * TWILIGHT_ADJUSTMENT_MAX_GAMMA;
                 if (DEBUG) {
-                    Slog.d(TAG, "updateAutoBrightness: earlyGamma=" + earlyGamma
-                            + ", lateGamma=" + lateGamma);
+                    Slog.d(TAG, "updateAutoBrightness: twilight amount=" + state.getAmount());
                 }
             }
         }
@@ -577,25 +568,6 @@ class AutomaticBrightnessController {
                         mLastScreenAutoBrightnessGamma);
             }
         }
-    }
-
-    private static float getTwilightGamma(long now, long lastSunset, long nextSunrise) {
-        if (lastSunset < 0 || nextSunrise < 0
-                || now < lastSunset || now > nextSunrise) {
-            return 1.0f;
-        }
-
-        if (now < lastSunset + TWILIGHT_ADJUSTMENT_TIME) {
-            return MathUtils.lerp(1.0f, TWILIGHT_ADJUSTMENT_MAX_GAMMA,
-                    (float)(now - lastSunset) / TWILIGHT_ADJUSTMENT_TIME);
-        }
-
-        if (now > nextSunrise - TWILIGHT_ADJUSTMENT_TIME) {
-            return MathUtils.lerp(1.0f, TWILIGHT_ADJUSTMENT_MAX_GAMMA,
-                    (float)(nextSunrise - now) / TWILIGHT_ADJUSTMENT_TIME);
-        }
-
-        return TWILIGHT_ADJUSTMENT_MAX_GAMMA;
     }
 
     private final class AutomaticBrightnessHandler extends Handler {
