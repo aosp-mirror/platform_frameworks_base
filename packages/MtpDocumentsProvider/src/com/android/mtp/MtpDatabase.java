@@ -219,7 +219,7 @@ class MtpDatabase {
         return mDatabase.query(
                 TABLE_DOCUMENTS,
                 columnNames,
-                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + "=?",
+                COLUMN_ROW_STATE + " IN (?, ?) AND " + COLUMN_DOCUMENT_TYPE + " = ?",
                 strings(ROW_STATE_VALID, ROW_STATE_INVALIDATED, DOCUMENT_TYPE_STORAGE),
                 null,
                 null,
@@ -294,15 +294,6 @@ class MtpDatabase {
                 "1");
     }
 
-    /**
-     * Remove all rows belong to a device.
-     * @param deviceId Device ID.
-     */
-    void removeDeviceRows(int deviceId) {
-        // Call non-recursive version because it anyway deletes all rows in the devices.
-        deleteDocumentsAndRoots(COLUMN_DEVICE_ID + "=?", strings(deviceId));
-    }
-
     @Nullable String getDocumentIdForDevice(int deviceId) {
         final Cursor cursor = mDatabase.query(
                 TABLE_DOCUMENTS,
@@ -344,7 +335,7 @@ class MtpDatabase {
             if (cursor.moveToNext()) {
                 return createIdentifier(cursor.getString(0));
             } else {
-                throw new FileNotFoundException("Cannot find a row having ID=" + documentId);
+                throw new FileNotFoundException("Cannot find a row having ID = " + documentId);
             }
         } finally {
             cursor.close();
@@ -438,7 +429,7 @@ class MtpDatabase {
             try {
                 while (cursor.moveToNext()) {
                     if (deleteDocumentsAndRootsRecursively(
-                            COLUMN_PARENT_DOCUMENT_ID + "=?",
+                            COLUMN_PARENT_DOCUMENT_ID + " = ?",
                             strings(cursor.getString(0)))) {
                         changed = true;
                     }
@@ -456,7 +447,43 @@ class MtpDatabase {
         }
     }
 
-    private boolean deleteDocumentsAndRoots(String selection, String[] args) {
+    /**
+     * Marks the documents and their child as disconnected documents.
+     * @param selection
+     * @param args
+     * @return True if at least one row is updated.
+     */
+    boolean disconnectDocumentsRecursively(String selection, String[] args) {
+        mDatabase.beginTransaction();
+        try {
+            boolean changed = false;
+            try (final Cursor cursor = mDatabase.query(
+                    TABLE_DOCUMENTS,
+                    strings(Document.COLUMN_DOCUMENT_ID),
+                    selection,
+                    args,
+                    null,
+                    null,
+                    null)) {
+                while (cursor.moveToNext()) {
+                    if (disconnectDocumentsRecursively(
+                            COLUMN_PARENT_DOCUMENT_ID + " = ?",
+                            strings(cursor.getString(0)))) {
+                        changed = true;
+                    }
+                }
+            }
+            if (disconnectDocuments(selection, args)) {
+                changed = true;
+            }
+            mDatabase.setTransactionSuccessful();
+            return changed;
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    boolean deleteDocumentsAndRoots(String selection, String[] args) {
         mDatabase.beginTransaction();
         try {
             int deleted = 0;
@@ -481,6 +508,39 @@ class MtpDatabase {
         }
     }
 
+    boolean disconnectDocuments(String selection, String[] args) {
+        mDatabase.beginTransaction();
+        try {
+            final ContentValues values = new ContentValues();
+            values.put(COLUMN_ROW_STATE, ROW_STATE_DISCONNECTED);
+            values.putNull(COLUMN_DEVICE_ID);
+            values.putNull(COLUMN_STORAGE_ID);
+            values.putNull(COLUMN_OBJECT_HANDLE);
+            final boolean updated = mDatabase.update(TABLE_DOCUMENTS, values, selection, args) != 0;
+            mDatabase.setTransactionSuccessful();
+            return updated;
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    int getRowState(String documentId) throws FileNotFoundException {
+        try (final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(COLUMN_ROW_STATE),
+                SELECTION_DOCUMENT_ID,
+                strings(documentId),
+                null,
+                null,
+                null)) {
+            if (cursor.getCount() == 0) {
+                throw new FileNotFoundException();
+            }
+            cursor.moveToNext();
+            return cursor.getInt(0);
+        }
+    }
+
     private static class OpenHelper extends SQLiteOpenHelper {
         public OpenHelper(Context context, int flags) {
             super(context,
@@ -497,6 +557,12 @@ class MtpDatabase {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            if (oldVersion == 1) {
+                db.execSQL("DROP TABLE " + TABLE_DOCUMENTS);
+                db.execSQL("DROP TABLE " + TABLE_ROOT_EXTRA);
+                onCreate(db);
+                return;
+            }
             throw new UnsupportedOperationException();
         }
     }
