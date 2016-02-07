@@ -27,9 +27,9 @@ import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,11 +56,12 @@ class Mapper {
 
     /**
      * Puts device information to database.
+     *
      * @return If device is added to the database.
+     * @throws FileNotFoundException
      */
-    synchronized boolean putDeviceDocument(MtpDeviceRecord device) {
+    synchronized boolean putDeviceDocument(MtpDeviceRecord device) throws FileNotFoundException {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
-        Preconditions.checkState(mMappingMode.containsKey(/* no parent for root */ null));
         database.beginTransaction();
         try {
             final ContentValues[] valuesList = new ContentValues[1];
@@ -69,6 +70,7 @@ class Mapper {
             extraValuesList[0] = new ContentValues();
             MtpDatabase.getDeviceDocumentValues(valuesList[0], extraValuesList[0], device);
             final boolean changed = putDocuments(
+                    null,
                     valuesList,
                     extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
@@ -83,11 +85,14 @@ class Mapper {
 
     /**
      * Puts root information to database.
+     *
      * @param parentDocumentId Document ID of device document.
      * @param roots List of root information.
      * @return If roots are added or removed from the database.
+     * @throws FileNotFoundException
      */
-    synchronized boolean putStorageDocuments(String parentDocumentId, MtpRoot[] roots) {
+    synchronized boolean putStorageDocuments(String parentDocumentId, MtpRoot[] roots)
+            throws FileNotFoundException {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
@@ -112,6 +117,7 @@ class Mapper {
                         valuesList[i], extraValuesList[i], parentDocumentId, roots[i]);
             }
             final boolean changed = putDocuments(
+                    parentDocumentId,
                     valuesList,
                     extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + "=?",
@@ -127,11 +133,14 @@ class Mapper {
 
     /**
      * Puts document information to database.
+     *
      * @param deviceId Device ID
      * @param parentId Parent document ID.
      * @param documents List of document information.
+     * @throws FileNotFoundException
      */
-    synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents) {
+    synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents)
+            throws FileNotFoundException {
         final String mapColumn;
         Preconditions.checkState(mMappingMode.containsKey(parentId));
         switch (mMappingMode.get(parentId)) {
@@ -151,6 +160,7 @@ class Mapper {
                     valuesList[i], deviceId, parentId, documents[i]);
         }
         putDocuments(
+                parentId,
                 valuesList,
                 null,
                 COLUMN_PARENT_DOCUMENT_ID + "=?",
@@ -181,9 +191,9 @@ class Mapper {
      * a corresponding existing row. Otherwise it does heuristic.
      *
      * @param parentDocumentId Parent document ID or NULL for root documents.
+     * @throws FileNotFoundException
      */
-    void startAddingDocuments(@Nullable String parentDocumentId) {
-        Preconditions.checkState(!mMappingMode.containsKey(parentDocumentId));
+    void startAddingDocuments(@Nullable String parentDocumentId) throws FileNotFoundException {
         final String selection;
         final String[] args;
         if (parentDocumentId != null) {
@@ -197,6 +207,9 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
+            getParentOrHaltMapping(parentDocumentId);
+            Preconditions.checkState(!mMappingMode.containsKey(parentDocumentId));
+
             // Set all documents as invalidated.
             final ContentValues values = new ContentValues();
             values.put(COLUMN_ROW_STATE, ROW_STATE_INVALIDATED);
@@ -224,22 +237,27 @@ class Mapper {
      * {@link #stopAddingDocuments(String)} turns the pending rows into 'valid'
      * rows. If the methods adds rows to database, it updates valueList with correct document ID.
      *
+     * @param parentId Parent document ID.
      * @param valuesList Values for documents to be stored in the database.
      * @param rootExtraValuesList Values for root extra to be stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param args Argument for selection SQL.
-     * @return Whether the method adds new rows.
+     * @return Whether it adds at least one new row that is not mapped with existing document ID.
+     * @throws FileNotFoundException When parentId is not registered in the database.
      */
     private boolean putDocuments(
+            String parentId,
             ContentValues[] valuesList,
             @Nullable ContentValues[] rootExtraValuesList,
             String selection,
             String[] args,
-            String mappingKey) {
+            String mappingKey) throws FileNotFoundException {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         boolean added = false;
         database.beginTransaction();
         try {
+            getParentOrHaltMapping(parentId);
+            Preconditions.checkState(mMappingMode.containsKey(parentId));
             for (int i = 0; i < valuesList.length; i++) {
                 final ContentValues values = valuesList[i];
                 final ContentValues rootExtraValues;
@@ -298,11 +316,12 @@ class Mapper {
      * Maps 'pending' document and 'invalidated' document that shares the same column of groupKey.
      * If the database does not find corresponding 'invalidated' document, it just removes
      * 'invalidated' document from the database.
+     *
      * @param parentId Parent document ID or null for root documents.
      * @return Whether the methods adds or removed visible rows.
+     * @throws FileNotFoundException
      */
-    boolean stopAddingDocuments(@Nullable String parentId) {
-        Preconditions.checkState(mMappingMode.containsKey(parentId));
+    boolean stopAddingDocuments(@Nullable String parentId) throws FileNotFoundException {
         final String selection;
         final String[] args;
         if (parentId != null) {
@@ -312,12 +331,15 @@ class Mapper {
             selection = COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
             args = EMPTY_ARGS;
         }
-        mMappingMode.remove(parentId);
+
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            boolean changed = false;
+            getParentOrHaltMapping(parentId);
+            Preconditions.checkState(mMappingMode.containsKey(parentId));
+            mMappingMode.remove(parentId);
 
+            boolean changed = false;
             // Delete all invalidated rows that cannot be mapped.
             if (mDatabase.deleteDocumentsAndRootsRecursively(
                     COLUMN_ROW_STATE + " = ? AND " + selection,
@@ -329,6 +351,27 @@ class Mapper {
             return changed;
         } finally {
             database.endTransaction();
+        }
+    }
+
+    /**
+     * Returns the parent identifier from parent document ID if the parent ID is found in the
+     * database. Otherwise it halts mapping and throws FileNotFoundException.
+     *
+     * @param parentId Parent document ID
+     * @return Parent identifier
+     * @throws FileNotFoundException
+     */
+    private @Nullable Identifier getParentOrHaltMapping(
+            @Nullable String parentId) throws FileNotFoundException {
+        if (parentId == null) {
+            return null;
+        }
+        try {
+            return mDatabase.createIdentifier(parentId);
+        } catch (FileNotFoundException error) {
+            mMappingMode.remove(parentId);
+            throw error;
         }
     }
 }

@@ -18,7 +18,6 @@ package com.android.mtp;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteException;
 import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -262,29 +261,37 @@ class DocumentLoader {
             if (objectInfoList.length == 0 || getState() != STATE_LOADING) {
                 return;
             }
-            if (mNumLoaded == 0) {
-                mDatabase.getMapper().startAddingDocuments(mIdentifier.mDocumentId);
-            }
-            try {
+            try{
+                if (mNumLoaded == 0) {
+                    mDatabase.getMapper().startAddingDocuments(mIdentifier.mDocumentId);
+                }
                 mDatabase.getMapper().putChildDocuments(
                         mIdentifier.mDeviceId, mIdentifier.mDocumentId, objectInfoList);
                 mNumLoaded += objectInfoList.length;
-            } catch (SQLiteException exp) {
-                mError = exp;
-                mNumLoaded = 0;
-            }
-            if (getState() != STATE_LOADING) {
-                mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
+                if (getState() != STATE_LOADING) {
+                    mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
+                }
+            } catch (FileNotFoundException exception) {
+                setErrorInternal(exception);
             }
         }
 
-        void setError(Exception message) {
+        void setError(Exception error) {
             final int lastState = getState();
-            mError = message;
-            mNumLoaded = 0;
+            setErrorInternal(error);
             if (lastState == STATE_LOADING) {
-                mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
+                try {
+                    mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
+                } catch (FileNotFoundException exception) {
+                    setErrorInternal(exception);
+                }
             }
+        }
+
+        private void setErrorInternal(Exception error) {
+            Log.e(MtpDocumentsProvider.TAG, "Error in DocumentLoader thread", error);
+            mError = error;
+            mNumLoaded = 0;
         }
 
         private Uri createUri() {
