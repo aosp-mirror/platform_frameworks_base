@@ -145,6 +145,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.location.LocationManager;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -16890,7 +16891,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     || Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_MEDIA_SCANNER_SCAN_FILE.equals(action)
                     || AppWidgetManager.ACTION_APPWIDGET_CONFIGURE.equals(action)
-                    || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) {
+                    || AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)
+                    || LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
                 // Broadcast is either protected, or it's a public action that
                 // we've relaxed, so it's fine for system internals to send.
             } else {
