@@ -73,7 +73,6 @@ class Mapper {
                     extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
                     EMPTY_ARGS,
-                    /* heuristic */ false,
                     COLUMN_DEVICE_ID);
             database.setTransactionSuccessful();
             return changed;
@@ -92,16 +91,13 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            final boolean heuristic;
             final String mapColumn;
             Preconditions.checkState(mMappingMode.containsKey(parentDocumentId));
             switch (mMappingMode.get(parentDocumentId)) {
                 case MAP_BY_MTP_IDENTIFIER:
-                    heuristic = false;
                     mapColumn = COLUMN_STORAGE_ID;
                     break;
                 case MAP_BY_NAME:
-                    heuristic = true;
                     mapColumn = Document.COLUMN_DISPLAY_NAME;
                     break;
                 default:
@@ -120,7 +116,6 @@ class Mapper {
                     extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + "=?",
                     strings(parentDocumentId),
-                    heuristic,
                     mapColumn);
 
             database.setTransactionSuccessful();
@@ -137,16 +132,13 @@ class Mapper {
      * @param documents List of document information.
      */
     synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents) {
-        final boolean heuristic;
         final String mapColumn;
         Preconditions.checkState(mMappingMode.containsKey(parentId));
         switch (mMappingMode.get(parentId)) {
             case MAP_BY_MTP_IDENTIFIER:
-                heuristic = false;
                 mapColumn = COLUMN_OBJECT_HANDLE;
                 break;
             case MAP_BY_NAME:
-                heuristic = true;
                 mapColumn = Document.COLUMN_DISPLAY_NAME;
                 break;
             default:
@@ -163,17 +155,13 @@ class Mapper {
                 null,
                 COLUMN_PARENT_DOCUMENT_ID + "=?",
                 strings(parentId),
-                heuristic,
                 mapColumn);
     }
 
-    @VisibleForTesting
     void clearMapping() {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            mDatabase.deleteDocumentsAndRootsRecursively(
-                    COLUMN_ROW_STATE + " = ?", strings(ROW_STATE_PENDING));
             final ContentValues values = new ContentValues();
             values.putNull(COLUMN_OBJECT_HANDLE);
             values.putNull(COLUMN_STORAGE_ID);
@@ -209,11 +197,6 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            // Delete all pending rows.
-            mDatabase.deleteDocumentsAndRootsRecursively(
-                    selection + " AND " + COLUMN_ROW_STATE + "=?",
-                    DatabaseUtils.appendSelectionArgs(args, strings(ROW_STATE_PENDING)));
-
             // Set all documents as invalidated.
             final ContentValues values = new ContentValues();
             values.put(COLUMN_ROW_STATE, ROW_STATE_INVALIDATED);
@@ -245,7 +228,6 @@ class Mapper {
      * @param rootExtraValuesList Values for root extra to be stored in the database.
      * @param selection SQL where closure to select rows that shares the same parent.
      * @param args Argument for selection SQL.
-     * @param heuristic Whether the mapping mode is heuristic.
      * @return Whether the method adds new rows.
      */
     private boolean putDocuments(
@@ -253,7 +235,6 @@ class Mapper {
             @Nullable ContentValues[] rootExtraValuesList,
             String selection,
             String[] args,
-            boolean heuristic,
             String mappingKey) {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         boolean added = false;
@@ -285,7 +266,7 @@ class Mapper {
                     if (candidateCursor.getCount() == 0) {
                         rowId = database.insert(TABLE_DOCUMENTS, null, values);
                         added = true;
-                    } else if (!heuristic) {
+                    } else {
                         candidateCursor.moveToNext();
                         rowId = candidateCursor.getLong(0);
                         database.update(
@@ -293,9 +274,6 @@ class Mapper {
                                 values,
                                 SELECTION_DOCUMENT_ID,
                                 strings(rowId));
-                    } else {
-                        values.put(COLUMN_ROW_STATE, ROW_STATE_PENDING);
-                        rowId = database.insertOrThrow(TABLE_DOCUMENTS, null, values);
                     }
                     // Document ID is a primary integer key of the table. So the returned row
                     // IDs should be same with the document ID.
@@ -334,84 +312,10 @@ class Mapper {
             selection = COLUMN_PARENT_DOCUMENT_ID + " IS NULL";
             args = EMPTY_ARGS;
         }
-        final String groupKey;
-        switch (mMappingMode.get(parentId)) {
-            case MAP_BY_MTP_IDENTIFIER:
-                groupKey = parentId != null ? COLUMN_OBJECT_HANDLE : COLUMN_STORAGE_ID;
-                break;
-            case MAP_BY_NAME:
-                groupKey = Document.COLUMN_DISPLAY_NAME;
-                break;
-            default:
-                throw new Error("Unexpected mapping state.");
-        }
         mMappingMode.remove(parentId);
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            // Get 1-to-1 mapping of invalidated document and pending document.
-            final String invalidatedIdQuery = createStateFilter(
-                    ROW_STATE_INVALIDATED, Document.COLUMN_DOCUMENT_ID);
-            final String pendingIdQuery = createStateFilter(
-                    ROW_STATE_PENDING, Document.COLUMN_DOCUMENT_ID);
-            // SQL should be like:
-            // SELECT group_concat(CASE WHEN raw_state = 1 THEN document_id ELSE NULL END),
-            //        group_concat(CASE WHEN raw_state = 2 THEN document_id ELSE NULL END)
-            // WHERE device_id = ? AND parent_document_id IS NULL
-            // GROUP BY display_name
-            // HAVING count(CASE WHEN raw_state = 1 THEN document_id ELSE NULL END) = 1 AND
-            //        count(CASE WHEN raw_state = 2 THEN document_id ELSE NULL END) = 1
-            final Cursor mergingCursor = database.query(
-                    TABLE_DOCUMENTS,
-                    new String[] {
-                            "group_concat(" + invalidatedIdQuery + ")",
-                            "group_concat(" + pendingIdQuery + ")"
-                    },
-                    selection,
-                    args,
-                    groupKey,
-                    "count(" + invalidatedIdQuery + ") = 1 AND count(" + pendingIdQuery + ") = 1",
-                    null);
-
-            final ContentValues values = new ContentValues();
-            while (mergingCursor.moveToNext()) {
-                final String invalidatedId = mergingCursor.getString(0);
-                final String pendingId = mergingCursor.getString(1);
-
-                // Obtain the new values including the latest object handle from mapping row.
-                getFirstRow(
-                        TABLE_DOCUMENTS,
-                        SELECTION_DOCUMENT_ID,
-                        new String[] { pendingId },
-                        values);
-                values.remove(Document.COLUMN_DOCUMENT_ID);
-                values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
-                database.update(
-                        TABLE_DOCUMENTS,
-                        values,
-                        SELECTION_DOCUMENT_ID,
-                        new String[] { invalidatedId });
-
-                getFirstRow(
-                        TABLE_ROOT_EXTRA,
-                        SELECTION_ROOT_ID,
-                        new String[] { pendingId },
-                        values);
-                if (values.size() > 0) {
-                    values.remove(Root.COLUMN_ROOT_ID);
-                    database.update(
-                            TABLE_ROOT_EXTRA,
-                            values,
-                            SELECTION_ROOT_ID,
-                            new String[] { invalidatedId });
-                }
-
-                // Delete 'pending' row.
-                mDatabase.deleteDocumentsAndRootsRecursively(
-                        SELECTION_DOCUMENT_ID, new String[] { pendingId });
-            }
-            mergingCursor.close();
-
             boolean changed = false;
 
             // Delete all invalidated rows that cannot be mapped.
@@ -421,58 +325,10 @@ class Mapper {
                 changed = true;
             }
 
-            // The database cannot find old document ID for the pending rows.
-            // Turn the all pending rows into valid state, which means the rows become to be
-            // valid with new document ID.
-            values.clear();
-            values.put(COLUMN_ROW_STATE, ROW_STATE_VALID);
-            if (database.update(
-                    TABLE_DOCUMENTS,
-                    values,
-                    COLUMN_ROW_STATE + " = ? AND " + selection,
-                    DatabaseUtils.appendSelectionArgs(strings(ROW_STATE_PENDING), args)) != 0) {
-                changed = true;
-            }
             database.setTransactionSuccessful();
             return changed;
         } finally {
             database.endTransaction();
         }
-    }
-
-    /**
-     * Obtains values of the first row for the query.
-     * @param values ContentValues that the values are stored to.
-     * @param table Target table.
-     * @param selection Query to select rows.
-     * @param args Argument for query.
-     */
-    private void getFirstRow(String table, String selection, String[] args, ContentValues values) {
-        final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
-        values.clear();
-        final Cursor cursor = database.query(table, null, selection, args, null, null, null, "1");
-        try {
-            if (cursor.getCount() == 0) {
-                return;
-            }
-            cursor.moveToNext();
-            DatabaseUtils.cursorRowToContentValues(cursor, values);
-        } finally {
-            cursor.close();
-        }
-    }
-
-    /**
-     * Gets SQL expression that represents the given value or NULL depends on the row state.
-     * You must pass static constants to this methods otherwise you may be suffered from SQL
-     * injections.
-     * @param state Expected row state.
-     * @param a SQL value.
-     * @return Expression that represents a if the row state is expected one, and represents NULL
-     *     otherwise.
-     */
-    private static String createStateFilter(int state, String a) {
-        return "CASE WHEN " + COLUMN_ROW_STATE + " = " + Integer.toString(state) +
-                " THEN " + a + " ELSE NULL END";
     }
 }
