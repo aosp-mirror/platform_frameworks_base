@@ -10377,13 +10377,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.w(TAG, "animateResizePinnedStack: stackId " + PINNED_STACK_ID + " not found.");
                 return;
             }
-            final ArrayList<Task> tasks = stack.getTasks();
-            if (tasks.isEmpty()) {
-                Slog.w(TAG, "animateResizePinnedStack: pinned stack doesn't have any tasks.");
-                return;
-            }
-            final Task task = tasks.get(tasks.size() - 1);
-            task.setDragResizing(true);
             final Rect originalBounds = new Rect();
             stack.getBounds(originalBounds);
             UiThread.getHandler().post(new Runnable() {

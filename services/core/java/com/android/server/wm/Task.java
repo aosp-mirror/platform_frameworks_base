@@ -540,7 +540,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     boolean isDragResizing() {
-        return mDragResizing;
+        return mDragResizing || (mStack != null && mStack.isDragResizing());
     }
 
     void updateDisplayInfo(final DisplayContent displayContent) {
