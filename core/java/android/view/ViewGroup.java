@@ -387,6 +387,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED = 0x10000000;
 
     /**
+     * When set, indicates that a call to showContextMenuForChild was made with explicit
+     * coordinates within the initiating child view.
+     */
+    private static final int FLAG_SHOW_CONTEXT_MENU_WITH_COORDS = 0x20000000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -756,11 +762,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
+        if (isShowingContextMenuWithCoords()) {
+            // We're being called for compatibility. Return false and let the version
+            // with coordinates recurse up.
+            return false;
+        }
         return mParent != null && mParent.showContextMenuForChild(originalView);
+    }
+
+    /**
+     * @hide used internally for compatibility with existing app code only
+     */
+    public final boolean isShowingContextMenuWithCoords() {
+        return (mGroupFlags & FLAG_SHOW_CONTEXT_MENU_WITH_COORDS) != 0;
     }
 
     @Override
     public boolean showContextMenuForChild(View originalView, float x, float y) {
+        try {
+            mGroupFlags |= FLAG_SHOW_CONTEXT_MENU_WITH_COORDS;
+            if (showContextMenuForChild(originalView)) {
+                return true;
+            }
+        } finally {
+            mGroupFlags &= ~FLAG_SHOW_CONTEXT_MENU_WITH_COORDS;
+        }
         return mParent != null && mParent.showContextMenuForChild(originalView, x, y);
     }
 

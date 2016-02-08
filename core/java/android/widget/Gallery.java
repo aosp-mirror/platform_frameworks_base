@@ -1160,6 +1160,9 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
+        if (isShowingContextMenuWithCoords()) {
+            return false;
+        }
         return showContextMenuForChildInternal(originalView, 0, 0, false);
     }
 
