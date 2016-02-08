@@ -5718,18 +5718,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
-        final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             // Check if this is the profile owner who is calling
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            int userId = UserHandle.getCallingUserId();
+            final int userId = UserHandle.getCallingUserId();
+            enforceManagedProfile(userId, "enable the profile");
 
             long id = mInjector.binderClearCallingIdentity();
             try {
                 mUserManager.setUserEnabled(userId);
                 UserInfo parent = mUserManager.getProfileParent(userId);
                 Intent intent = new Intent(Intent.ACTION_MANAGED_PROFILE_ADDED);
-                intent.putExtra(Intent.EXTRA_USER, new UserHandle(userHandle));
+                intent.putExtra(Intent.EXTRA_USER, new UserHandle(userId));
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY |
                         Intent.FLAG_RECEIVER_FOREGROUND);
                 mContext.sendBroadcastAsUser(intent, new UserHandle(parent.id));
