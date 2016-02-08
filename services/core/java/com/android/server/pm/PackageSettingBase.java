@@ -28,6 +28,8 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Settings base class for pending and resolved classes.
@@ -48,6 +50,9 @@ abstract class PackageSettingBase extends SettingBase {
 
     final String name;
     final String realName;
+
+    String parentPackageName;
+    List<String> childPackageNames;
 
     /**
      * Path where this package was found on disk. For monolithic packages
@@ -126,10 +131,14 @@ abstract class PackageSettingBase extends SettingBase {
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int pkgPrivateFlags) {
+            int pVersionCode, int pkgFlags, int pkgPrivateFlags,
+            String parentPackageName, List<String> childPackageNames) {
         super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
+        this.parentPackageName = parentPackageName;
+        this.childPackageNames = (childPackageNames != null)
+                ? new ArrayList<>(childPackageNames) : null;
         init(codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbiString,
                 secondaryCpuAbiString, cpuAbiOverrideString, pVersionCode);
     }
@@ -174,6 +183,10 @@ abstract class PackageSettingBase extends SettingBase {
         volumeUuid = base.volumeUuid;
 
         keySetData = new PackageKeySetData(base.keySetData);
+
+        parentPackageName = base.parentPackageName;
+        childPackageNames = (base.childPackageNames != null)
+                ? new ArrayList<>(base.childPackageNames) : null;
     }
 
     void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,

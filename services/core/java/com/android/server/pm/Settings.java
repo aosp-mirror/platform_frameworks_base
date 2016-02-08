@@ -184,6 +184,8 @@ final class Settings {
     private static final String TAG_SHARED_USER = "shared-user";
     private static final String TAG_RUNTIME_PERMISSIONS = "runtime-permissions";
     private static final String TAG_PERMISSIONS = "perms";
+    private static final String TAG_CHILD_PACKAGE = "child-package";
+
     private static final String TAG_PERSISTENT_PREFERRED_ACTIVITIES =
             "persistent-preferred-activities";
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
@@ -416,9 +418,23 @@ final class Settings {
             String legacyNativeLibraryPathString, String primaryCpuAbi, String secondaryCpuAbi,
             int pkgFlags, int pkgPrivateFlags, UserHandle user, boolean add) {
         final String name = pkg.packageName;
+        final String parentPackageName = (pkg.parentPackage != null)
+                ? pkg.parentPackage.packageName : null;
+
+        List<String> childPackageNames = null;
+        if (pkg.childPackages != null) {
+            final int childCount = pkg.childPackages.size();
+            childPackageNames = new ArrayList<>(childCount);
+            for (int i = 0; i < childCount; i++) {
+                String childPackageName = pkg.childPackages.get(i).packageName;
+                childPackageNames.add(childPackageName);
+            }
+        }
+
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
                 resourcePath, legacyNativeLibraryPathString, primaryCpuAbi, secondaryCpuAbi,
-                pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user, add, true /* allowInstall */);
+                pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user, add, true /* allowInstall */,
+                parentPackageName, childPackageNames);
         return p;
     }
 
@@ -503,8 +519,7 @@ final class Settings {
         return mSharedUsers.values();
     }
 
-
-    boolean disableSystemPackageLPw(String name) {
+    boolean disableSystemPackageLPw(String name, boolean replaced) {
         final PackageSetting p = mPackages.get(name);
         if(p == null) {
             Log.w(PackageManagerService.TAG, "Package " + name + " is not an installed package");
@@ -512,18 +527,22 @@ final class Settings {
         }
         final PackageSetting dp = mDisabledSysPackages.get(name);
         // always make sure the system package code and resource paths dont change
-        if (dp == null) {
+        if (dp == null && p.pkg != null && p.pkg.isSystemApp() && !p.pkg.isUpdatedSystemApp()) {
             if((p.pkg != null) && (p.pkg.applicationInfo != null)) {
                 p.pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
             mDisabledSysPackages.put(name, p);
 
-            // a little trick...  when we install the new package, we don't
-            // want to modify the existing PackageSetting for the built-in
-            // version.  so at this point we need a new PackageSetting that
-            // is okay to muck with.
-            PackageSetting newp = new PackageSetting(p);
-            replacePackageLPw(name, newp);
+            if (replaced) {
+                // a little trick...  when we install the new package, we don't
+                // want to modify the existing PackageSetting for the built-in
+                // version.  so at this point we need a new PackageSetting that
+                // is okay to muck with.
+                PackageSetting newp = new PackageSetting(p);
+                replacePackageLPw(name, newp);
+            } else {
+                mPackages.remove(name);
+            }
             return true;
         }
         return false;
@@ -542,7 +561,8 @@ final class Settings {
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.secondaryCpuAbiString,
-                p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags);
+                p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
+                p.parentPackageName, p.childPackageNames);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -557,7 +577,8 @@ final class Settings {
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString, String secondaryCpuAbiString,
-            String cpuAbiOverrideString, int uid, int vc, int pkgFlags, int pkgPrivateFlags) {
+            String cpuAbiOverrideString, int uid, int vc, int pkgFlags, int pkgPrivateFlags,
+            String parentPackageName, List<String> childPackageNames) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -569,7 +590,8 @@ final class Settings {
         }
         p = new PackageSetting(name, realName, codePath, resourcePath,
                 legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags);
+                cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags, parentPackageName,
+                childPackageNames);
         p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -650,7 +672,8 @@ final class Settings {
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, int vc, int pkgFlags, int pkgPrivateFlags,
-            UserHandle installUser, boolean add, boolean allowInstall) {
+            UserHandle installUser, boolean add, boolean allowInstall, String parentPackage,
+            List<String> childPackageNames) {
         PackageSetting p = mPackages.get(name);
         UserManagerService userManager = UserManagerService.getInstance();
         if (p != null) {
@@ -700,7 +723,8 @@ final class Settings {
                 // We are consuming the data from an existing package.
                 p = new PackageSetting(origPackage.name, name, codePath, resourcePath,
                         legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags);
+                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags,
+                        parentPackage, childPackageNames);
                 if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                         + name + " is adopting original package " + origPackage.name);
                 // Note that we will retain the new package's signature so
@@ -719,7 +743,8 @@ final class Settings {
             } else {
                 p = new PackageSetting(name, realName, codePath, resourcePath,
                         legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags);
+                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags,
+                        parentPackage, childPackageNames);
                 p.setTimeStamp(codePath.lastModified());
                 p.sharedUser = sharedUser;
                 // If this is not a system app, it starts out stopped.
@@ -2049,6 +2074,20 @@ final class Settings {
         serializer.endTag(null, TAG_PERMISSIONS);
     }
 
+    void writeChildPackagesLPw(XmlSerializer serializer, List<String> childPackageNames)
+            throws IOException {
+        if (childPackageNames == null) {
+            return;
+        }
+        final int childCount = childPackageNames.size();
+        for (int i = 0; i < childCount; i++) {
+            String childPackageName = childPackageNames.get(i);
+            serializer.startTag(null, TAG_CHILD_PACKAGE);
+            serializer.attribute(null, ATTR_NAME, childPackageName);
+            serializer.endTag(null, TAG_CHILD_PACKAGE);
+        }
+    }
+
     // Note: assumed "stopped" field is already cleared in all packages.
     // Legacy reader, used to read in the old file format after an upgrade. Not used after that.
     void readStoppedLPw() {
@@ -2449,6 +2488,12 @@ final class Settings {
             serializer.attribute(null, "sharedUserId", Integer.toString(pkg.appId));
         }
 
+        if (pkg.parentPackageName != null) {
+            serializer.attribute(null, "parentPackageName", pkg.parentPackageName);
+        }
+
+        writeChildPackagesLPw(serializer, pkg.childPackageNames);
+
         // If this is a shared user, the permissions will be written there.
         if (pkg.sharedUser == null) {
             writePermissionsLPr(serializer, pkg.getPermissionsState()
@@ -2506,6 +2551,13 @@ final class Settings {
         if (pkg.volumeUuid != null) {
             serializer.attribute(null, "volumeUuid", pkg.volumeUuid);
         }
+
+        if (pkg.parentPackageName != null) {
+            serializer.attribute(null, "parentPackageName", pkg.parentPackageName);
+        }
+
+        writeChildPackagesLPw(serializer, pkg.childPackageNames);
+
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
 
         writePermissionsLPr(serializer, pkg.getPermissionsState()
@@ -2798,7 +2850,8 @@ final class Settings {
                         (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
                         pp.legacyNativeLibraryPathString, pp.primaryCpuAbiString,
                         pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags, pp.pkgPrivateFlags,
-                        null, true /* add */, false /* allowInstall */);
+                        null, true /* add */, false /* allowInstall */, pp.parentPackageName,
+                        pp.childPackageNames);
                 if (p == null) {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unable to create application package for " + pp.name);
@@ -3246,6 +3299,8 @@ final class Settings {
         String legacyCpuAbiStr = parser.getAttributeValue(null, "requiredCpuAbi");
         String legacyNativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
 
+        String parentPackageName = parser.getAttributeValue(null, "parentPackageName");
+
         String primaryCpuAbiStr = parser.getAttributeValue(null, "primaryCpuAbi");
         String secondaryCpuAbiStr = parser.getAttributeValue(null, "secondaryCpuAbi");
         String cpuAbiOverrideStr = parser.getAttributeValue(null, "cpuAbiOverride");
@@ -3275,7 +3330,8 @@ final class Settings {
         }
         PackageSetting ps = new PackageSetting(name, realName, codePathFile,
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
-                secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags);
+                secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags,
+                parentPackageName, null);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -3324,6 +3380,12 @@ final class Settings {
 
             if (parser.getName().equals(TAG_PERMISSIONS)) {
                 readInstallPermissionsLPr(parser, ps.getPermissionsState());
+            } else if (parser.getName().equals(TAG_CHILD_PACKAGE)) {
+                String childPackageName = parser.getAttributeValue(null, ATTR_NAME);
+                if (ps.childPackageNames == null) {
+                    ps.childPackageNames = new ArrayList<>();
+                }
+                ps.childPackageNames.add(childPackageName);
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <updated-package>: " + parser.getName());
@@ -3363,6 +3425,7 @@ final class Settings {
         PackageSettingBase packageSetting = null;
         String version = null;
         int versionCode = 0;
+        String parentPackageName;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3373,6 +3436,8 @@ final class Settings {
             resourcePathStr = parser.getAttributeValue(null, "resourcePath");
 
             legacyCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
+
+            parentPackageName = parser.getAttributeValue(null, "parentPackageName");
 
             legacyNativeLibraryPathStr = parser.getAttributeValue(null, "nativeLibraryPath");
             primaryCpuAbiString = parser.getAttributeValue(null, "primaryCpuAbi");
@@ -3494,7 +3559,7 @@ final class Settings {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiString,
                         secondaryCpuAbiString, cpuAbiOverrideString, userId, versionCode, pkgFlags,
-                        pkgPrivateFlags);
+                        pkgPrivateFlags, parentPackageName, null);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3513,7 +3578,8 @@ final class Settings {
                     packageSetting = new PendingPackage(name.intern(), realName, new File(
                             codePathStr), new File(resourcePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                            userId, versionCode, pkgFlags, pkgPrivateFlags);
+                            userId, versionCode, pkgFlags, pkgPrivateFlags, parentPackageName,
+                            null);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -3575,6 +3641,7 @@ final class Settings {
                     packageSetting.installStatus = PackageSettingBase.PKG_INSTALL_COMPLETE;
                 }
             }
+
             int outerDepth = parser.getDepth();
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3621,6 +3688,12 @@ final class Settings {
                     packageSetting.keySetData.addDefinedKeySet(id, alias);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
                     readDomainVerificationLPw(parser, packageSetting);
+                } else if (tagName.equals(TAG_CHILD_PACKAGE)) {
+                    String childPackageName = parser.getAttributeValue(null, ATTR_NAME);
+                    if (packageSetting.childPackageNames == null) {
+                        packageSetting.childPackageNames = new ArrayList<>();
+                    }
+                    packageSetting.childPackageNames.add(childPackageName);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -3884,6 +3957,28 @@ final class Settings {
         return mVerifierDeviceIdentity;
     }
 
+    public boolean hasOtherDisabledSystemPkgWithChildLPr(String parentPackageName,
+            String childPackageName) {
+        final int packageCount = mDisabledSysPackages.size();
+        for (int i = 0; i < packageCount; i++) {
+            PackageSetting disabledPs = mDisabledSysPackages.valueAt(i);
+            if (disabledPs.childPackageNames == null || disabledPs.childPackageNames.isEmpty()) {
+                continue;
+            }
+            if (disabledPs.name.equals(parentPackageName)) {
+                continue;
+            }
+            final int childCount = disabledPs.childPackageNames.size();
+            for (int j = 0; j < childCount; j++) {
+                String currChildPackageName = disabledPs.childPackageNames.get(j);
+                if (currChildPackageName.equals(childPackageName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public PackageSetting getDisabledSystemPkgLPr(String name) {
         PackageSetting ps = mDisabledSysPackages.get(name);
         return ps;
@@ -4136,6 +4231,34 @@ final class Settings {
         }
         pw.println();
         if (ps.pkg != null) {
+            if (ps.pkg.parentPackage != null) {
+                PackageParser.Package parentPkg = ps.pkg.parentPackage;
+                PackageSetting pps = mPackages.get(parentPkg.packageName);
+                if (pps == null || !pps.codePathString.equals(parentPkg.codePath)) {
+                    pps = mDisabledSysPackages.get(parentPkg.packageName);
+                }
+                if (pps != null) {
+                    pw.print(prefix); pw.print("  parentPackage=");
+                    pw.println(pps.realName != null ? pps.realName : pps.name);
+                }
+            } else if (ps.pkg.childPackages != null) {
+                pw.print(prefix); pw.print("  childPackages=[");
+                final int childCount = ps.pkg.childPackages.size();
+                for (int i = 0; i < childCount; i++) {
+                    PackageParser.Package childPkg = ps.pkg.childPackages.get(i);
+                    PackageSetting cps = mPackages.get(childPkg.packageName);
+                    if (cps == null || !cps.codePathString.equals(childPkg.codePath)) {
+                        cps = mDisabledSysPackages.get(childPkg.packageName);
+                    }
+                    if (cps != null) {
+                        if (i > 0) {
+                            pw.print(", ");
+                        }
+                        pw.print(cps.realName != null ? cps.realName : cps.name);
+                    }
+                }
+                pw.println("]");
+            }
             pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, ps.pkg); pw.println();
             pw.print(prefix); pw.print("  applicationInfo=");

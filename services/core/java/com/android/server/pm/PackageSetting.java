@@ -21,6 +21,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Settings data for a particular package we know about.
@@ -33,10 +34,11 @@ final class PackageSetting extends PackageSettingBase {
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int privateFlags) {
+            int pVersionCode, int pkgFlags, int privateFlags, String parentPackageName,
+            List<String> childPackageNames) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags, privateFlags);
+                pVersionCode, pkgFlags, privateFlags, parentPackageName, childPackageNames);
     }
 
     /**
