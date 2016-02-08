@@ -52,6 +52,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -502,7 +503,22 @@ public final class TvInputInfo implements Parcelable {
         }
 
         TvInputInfo obj = (TvInputInfo) o;
-        return mId.equals(obj.mId);
+        return TextUtils.equals(mId, obj.mId)
+                && TextUtils.equals(mParentId, obj.mParentId)
+                && Objects.equals(mService, obj.mService)
+                && TextUtils.equals(mSetupActivity, obj.mSetupActivity)
+                && TextUtils.equals(mSettingsActivity, obj.mSettingsActivity)
+                && mType == obj.mType
+                && mTunerCount == obj.mTunerCount
+                && mCanRecord == obj.mCanRecord
+                && mIsHardwareInput == obj.mIsHardwareInput
+                && Objects.equals(mHdmiDeviceInfo, obj.mHdmiDeviceInfo)
+                && Objects.equals(mIcon, obj.mIcon)
+                && Objects.equals(mIconUri, obj.mIconUri)
+                && mLabelResId == obj.mLabelResId
+                && TextUtils.equals(mLabel, obj.mLabel)
+                && mIsConnectedToHdmiSwitch == obj.mIsConnectedToHdmiSwitch
+                && Objects.equals(mExtras, obj.mExtras);
     }
 
     @Override
