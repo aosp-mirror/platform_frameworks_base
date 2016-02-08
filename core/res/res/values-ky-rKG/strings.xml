@@ -912,8 +912,8 @@
     <string name="noApplications" msgid="2991814273936504689">"Бул аракетти аткара турган колдонмо жок."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> токтотулду"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> токтотулду"</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> кайра эле токтотулууда"</string>
-    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> кайра эле токтотулууда"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> колдонмосу иштебей калып жатат"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Колдонмону кайра жүргүзүү"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Колдонмону баштапкы абалга келтирип, кайра жүргүзүү"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Жооп пикир жөнөтүү"</string>
@@ -1032,16 +1032,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта кошулду"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Уюктук тармакка кирүү үчүн түзмөгүңүздү өчүрүп күйгүзүңүз."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Кайра баштоо"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Жаңы SIM картаңыз талаптагыдай иштеши үчүн, колдонмону орнотуп, аны операторуңуз аркылуу ачышыңыз керек болот."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"КОЛДОНМОГО ЭЭ БОЛУУ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"АЗЫР ЭМЕС"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Жаңы SIM карта салынды"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Аны жөндөө үчүн таптап коюңуз"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Убакыт орнотуу"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Күнүн орнотуу"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Коюу"</string>
@@ -1474,7 +1469,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Бошотуудан мурун кулпуну ачкан үлгү суралсын"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
     <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Колдонмонун көлөмүн өзгөртүүгө болбойт, андыктан эки манжаңыз менен сыдырып караңыз."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Колдонмо экранды бөлүүнү колдобойт."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Колдонмодо экран бөлүнбөйт."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Администраторуңуз тарабынан орнотулган"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Администраторуңуз жаңырткан"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Администраторуңуз тарабынан жок кылынган"</string>

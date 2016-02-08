@@ -1033,16 +1033,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"បាន​បន្ថែម​ស៊ីម​កាត"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"ចាប់ផ្ដើម​ឧបករណ៍​របស់​អ្នក​ឡើងវិញ ដើម្បី​ចូល​ប្រើ​បណ្ដាញ​ចល័ត។"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"ដើម្បីឲ្យស៊ីមកាតថ្មីរបស់អ្នកដំណើរការប្រក្រតី អ្នកត្រូវដំឡើង និងបើកកម្មវិធីចេញពីក្រុមហ៊ុនផ្តល់សេវាទូរស័ព្ទរបស់អ្នក។"</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ទាញយកកម្មវិធី"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"មិនមែនឥឡូវទេ"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"ស៊ីមកាតថ្មីត្រូវបានស៊កចូល"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"ប៉ះដើម្បីដំឡើង"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"កំណត់​ម៉ោង​"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"កំណត់​កាល​បរិច្ឆេទ​"</string>
     <string name="date_time_set" msgid="5777075614321087758">"កំណត់"</string>

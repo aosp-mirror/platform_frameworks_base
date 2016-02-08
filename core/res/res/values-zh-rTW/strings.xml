@@ -266,7 +266,7 @@
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"控管顯示畫面放大功能"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"控管顯示畫面的縮放等級和位置。"</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"使用手勢"</string>
-    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可使用輕按、滑動和雙指撥動等手勢。"</string>
+    <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"可使用輕觸、滑動和雙指撥動等手勢。"</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"以狀態列顯示"</string>
@@ -766,7 +766,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"停留在這一頁"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\n您確定要前往其他網頁瀏覽嗎？"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可縮放。"</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕觸兩下即可縮放。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"設定自動填入功能"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" //*** Empty segment here as a separator ***//"</string>
@@ -918,7 +918,7 @@
     <string name="aerr_report" msgid="5371800241488400617">"提供意見"</string>
     <string name="aerr_close" msgid="2991640326563991340">"關閉"</string>
     <string name="aerr_mute" msgid="7698966346654789433">"忽略"</string>
-    <string name="aerr_wait" msgid="3199956902437040261">"等一下"</string>
+    <string name="aerr_wait" msgid="3199956902437040261">"等候"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"關閉應用程式"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="8493290105678066167">"「<xliff:g id="APPLICATION">%2$s</xliff:g>」沒有回應"</string>
@@ -1031,16 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 卡已新增"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"請重新啟動裝置，才能使用行動網路。"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"重新啟動"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"要讓新的 SIM 卡正常運作，您必須先安裝行動通訊業者提供的應用程式，並開啟該應用程式。"</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"取得應用程式"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"暫時不要"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"已插入新的 SIM 卡"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"輕觸這裡即可進行設定"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"設定時間"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日期設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
@@ -1437,7 +1432,7 @@
     <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
     <string name="reason_service_unavailable" msgid="7824008732243903268">"列印服務尚未啟用"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"已安裝「<xliff:g id="NAME">%s</xliff:g>」服務"</string>
-    <string name="print_service_installed_message" msgid="5897362931070459152">"輕按啟用"</string>
+    <string name="print_service_installed_message" msgid="5897362931070459152">"輕觸啟用"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"輸入管理員 PIN"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"輸入 PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"不正確"</string>
@@ -1564,7 +1559,7 @@
     <string name="user_encrypted_message" msgid="7504541494700807850">"輕觸即可繼續作業"</string>
     <string name="user_encrypted_detail" msgid="979981584766912935">"使用者個人資料目前處於鎖定狀態"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"已連線至 <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
-    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"輕按即可查看檔案"</string>
+    <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"輕觸即可查看檔案"</string>
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資訊"</string>
