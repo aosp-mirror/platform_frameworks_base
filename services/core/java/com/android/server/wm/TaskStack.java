@@ -99,6 +99,9 @@ public class TaskStack implements DimLayer.DimLayerUser,
     boolean mDeferDetach;
     private boolean mUpdateBoundsAfterRotation = false;
 
+    // Whether the stack and all its tasks is currently being drag-resized
+    private boolean mDragResizing;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
@@ -911,6 +914,10 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return false;
     }
 
+    boolean isDragResizing() {
+        return mDragResizing;
+    }
+
     @Override  // AnimatesBounds
     public boolean setSize(Rect bounds) {
         synchronized (mService.mWindowMap) {
@@ -926,16 +933,17 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     @Override  // AnimatesBounds
-    public void finishBoundsAnimation() {
+    public void onAnimationStart() {
         synchronized (mService.mWindowMap) {
-            if (mTasks.isEmpty()) {
-                return;
-            }
-            final Task task = mTasks.get(mTasks.size() - 1);
-            if (task != null) {
-                task.setDragResizing(false);
-                mService.requestTraversal();
-            }
+            mDragResizing = true;
+        }
+    }
+
+    @Override  // AnimatesBounds
+    public void onAnimationEnd() {
+        synchronized (mService.mWindowMap) {
+            mDragResizing = false;
+            mService.requestTraversal();
         }
     }
 
