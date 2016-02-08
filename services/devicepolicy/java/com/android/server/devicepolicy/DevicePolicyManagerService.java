@@ -115,6 +115,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -273,12 +274,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final int PROFILE_KEYGUARD_FEATURES =
             PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER | PROFILE_KEYGUARD_FEATURES_AFFECT_PROFILE;
 
+    private static final int DEVICE_ADMIN_DEACTIVATE_TIMEOUT = 10000;
+
     final Context mContext;
     final Injector mInjector;
     final IPackageManager mIPackageManager;
     final UserManager mUserManager;
     final UserManagerInternal mUserManagerInternal;
     private final LockPatternUtils mLockPatternUtils;
+
+    /**
+     * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
+     * is requested for user u.
+     */
+    private final Set<Pair<String, Integer>> mPackagesToRemove =
+            new ArraySet<Pair<String, Integer>>();
 
     final LocalService mLocalService;
 
@@ -2014,34 +2024,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
         if (admin != null) {
             getUserData(userHandle).mRemovingAdmins.add(adminReceiver);
-
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED,
                     new BroadcastReceiver() {
                         @Override
                         public void onReceive(Context context, Intent intent) {
-                            synchronized (DevicePolicyManagerService.this) {
-                                int userHandle = admin.getUserHandle().getIdentifier();
-                                DevicePolicyData policy = getUserData(userHandle);
-                                boolean doProxyCleanup = admin.info.usesPolicy(
-                                        DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
-                                policy.mAdminList.remove(admin);
-                                policy.mAdminMap.remove(adminReceiver);
-                                validatePasswordOwnerLocked(policy);
-                                if (doProxyCleanup) {
-                                    resetGlobalProxyLocked(getUserData(userHandle));
-                                }
-                                saveSettingsLocked(userHandle);
-                                updateMaximumTimeToLockLocked(userHandle);
-                                policy.mRemovingAdmins.remove(adminReceiver);
-                            }
-                            // The removed admin might have disabled camera, so update user
-                            // restrictions.
-                            pushUserRestrictions(userHandle);
+                            removeAdminArtifacts(adminReceiver, userHandle);
+                            removePackageIfRequired(adminReceiver.getPackageName(), userHandle);
                         }
                     });
         }
     }
+
 
     public DeviceAdminInfo findAdmin(ComponentName adminName, int userHandle,
             boolean throwForMissiongPermission) {
@@ -8445,5 +8439,132 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         List<SecurityEvent> logs = mSecurityLogMonitor.retrieveLogs();
         return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
+    }
+
+    private void enforceCanManageDeviceAdmin() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS,
+                null);
+    }
+
+    @Override
+    public boolean isUninstallInQueue(final String packageName) {
+        enforceCanManageDeviceAdmin();
+        final int userId = mInjector.userHandleGetCallingUserId();
+        Pair<String, Integer> packageUserPair = new Pair<>(packageName, userId);
+        synchronized (this) {
+            return mPackagesToRemove.contains(packageUserPair);
+        }
+    }
+
+    @Override
+    public void uninstallPackageWithActiveAdmins(final String packageName) {
+        enforceCanManageDeviceAdmin();
+        Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
+
+        final int userId = mInjector.userHandleGetCallingUserId();
+
+        final ComponentName profileOwner = getProfileOwner(userId);
+        if (profileOwner != null && packageName.equals(profileOwner.getPackageName())) {
+            throw new IllegalArgumentException("Cannot uninstall a package with a profile owner");
+        }
+
+        final ComponentName deviceOwner = getDeviceOwnerComponent(/* callingUserOnly= */ false);
+        if (getDeviceOwnerUserId() == userId && deviceOwner != null
+                && packageName.equals(deviceOwner.getPackageName())) {
+            throw new IllegalArgumentException("Cannot uninstall a package with a device owner");
+        }
+
+        final Pair<String, Integer> packageUserPair = new Pair<>(packageName, userId);
+        synchronized (this) {
+            mPackagesToRemove.add(packageUserPair);
+        }
+
+        final List<ComponentName> activeAdminsList = getActiveAdmins(userId);
+        if (activeAdminsList == null || activeAdminsList.size() == 0) {
+            startUninstallIntent(packageName, userId);
+            return;
+        }
+
+        for (ComponentName activeAdmin : activeAdminsList) {
+            if (packageName.equals(activeAdmin.getPackageName())) {
+                removeActiveAdmin(activeAdmin, userId);
+            }
+        }
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                for (ComponentName activeAdmin : activeAdminsList) {
+                    removeAdminArtifacts(activeAdmin, userId);
+                }
+                startUninstallIntent(packageName, userId);
+            }
+        }, DEVICE_ADMIN_DEACTIVATE_TIMEOUT); // Start uninstall after timeout anyway.
+    }
+
+    private void removePackageIfRequired(final String packageName, final int userId) {
+        if (!packageHasActiveAdmins(packageName, userId)) {
+            // Will not do anything if uninstall was not requested or was already started.
+            startUninstallIntent(packageName, userId);
+        }
+    }
+
+    private void startUninstallIntent(final String packageName, final int userId) {
+        final Pair<String, Integer> packageUserPair = new Pair<>(packageName, userId);
+        synchronized (this) {
+            if (!mPackagesToRemove.contains(packageUserPair)) {
+                // Do nothing if uninstall was not requested or was already started.
+                return;
+            }
+            mPackagesToRemove.remove(packageUserPair);
+        }
+        try {
+            if (mInjector.getIPackageManager().getPackageInfo(packageName, 0, userId) == null) {
+                // Package does not exist. Nothing to do.
+                return;
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Failure talking to PackageManager while getting package info");
+        }
+
+        try { // force stop the package before uninstalling
+            mInjector.getIActivityManager().forceStopPackage(packageName, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Failure talking to ActivityManager while force stopping package");
+        }
+        final Uri packageURI = Uri.parse("package:" + packageName);
+        final Intent uninstallIntent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageURI);
+        uninstallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivityAsUser(uninstallIntent, UserHandle.of(userId));
+    }
+
+    /**
+     * Removes the admin from the policy. Ideally called after the admin's
+     * {@link DeviceAdminReceiver#onDisabled(Context, Intent)} has been successfully completed.
+     *
+     * @param adminReceiver The admin to remove
+     * @param userHandle The user for which this admin has to be removed.
+     */
+    private void removeAdminArtifacts(final ComponentName adminReceiver, final int userHandle) {
+        synchronized (this) {
+            final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
+            if (admin == null) {
+                return;
+            }
+            final DevicePolicyData policy = getUserData(userHandle);
+            final boolean doProxyCleanup = admin.info.usesPolicy(
+                    DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
+            policy.mAdminList.remove(admin);
+            policy.mAdminMap.remove(adminReceiver);
+            validatePasswordOwnerLocked(policy);
+            if (doProxyCleanup) {
+                resetGlobalProxyLocked(policy);
+            }
+            saveSettingsLocked(userHandle);
+            updateMaximumTimeToLockLocked(userHandle);
+            policy.mRemovingAdmins.remove(adminReceiver);
+        }
+        // The removed admin might have disabled camera, so update user
+        // restrictions.
+        pushUserRestrictions(userHandle);
     }
 }
