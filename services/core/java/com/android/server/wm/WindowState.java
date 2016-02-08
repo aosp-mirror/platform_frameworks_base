@@ -386,6 +386,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mRemoved;
 
     /**
+     * Has the client requested we remove the window? In this case we know
+     * that we can dispose of it when we wish without further synchronization
+     * with the client
+     */
+    boolean mClientRemoveRequested;
+
+    /**
      * Temp for keeping track of windows that have been removed when
      * rebuilding window list.
      */
