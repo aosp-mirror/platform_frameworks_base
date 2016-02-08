@@ -1706,7 +1706,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDecorCaptionView.addView(root,
                     new ViewGroup.MarginLayoutParams(MATCH_PARENT, MATCH_PARENT));
         } else {
-            addView(root, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
+
+            // Put it below the color views.
+            addView(root, 0, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         }
         mContentRoot = (ViewGroup) root;
         initializeElevation();
