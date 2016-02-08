@@ -53,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"रूट लपवा"</string>
     <string name="save_error" msgid="6167009778003223664">"दस्तऐवज जतन करणे अयशस्वी झाले"</string>
     <string name="create_error" msgid="3735649141335444215">"फोल्डर तयार करण्यात अयशस्वी"</string>
-    <string name="query_error" msgid="1222448261663503501">"दस्‍तऐवजांना क्‍वेरी करण्‍यात अयशस्‍वी"</string>
+    <string name="query_error" msgid="5999895349602476581">"याक्षणी सामग्री लोड करू शकत नाही"</string>
     <string name="root_recent" msgid="4470053704320518133">"अलीकडील"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> विनामूल्‍य"</string>
     <string name="root_type_service" msgid="2178854894416775409">"संचयन सेवा"</string>
@@ -62,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"अधिक अ‍ॅप्‍स"</string>
     <string name="empty" msgid="7858882803708117596">"कोणतेही आयटम नाहीत"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s मध्‍ये कोणत्याही जुळण्‍या नाहीत"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"फाईल उघडू शकत नाही"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"फाईल उघडू शकत नाही"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"काही दस्‍तऐवज हटविण्‍यात अक्षम"</string>
     <string name="share_via" msgid="8966594246261344259">"द्वारे सामायिक करा"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फायली कॉपी करीत आहे"</string>
@@ -84,23 +84,23 @@
     <string name="copy_preparing" msgid="3896202461003039386">"कॉपी करण्‍यासाठी तयार करीत आहे…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"हलविण्‍यास तयार होत आहे…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"हटविण्‍यासाठी तयार करीत आहे..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी करू शकलो नाही</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी करू शकलो नाही</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी करणे शक्य झाले नाही</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी करणे शक्य झाले नाही</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> फाईल हलविणे शक्य झाले नाही</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> फायली हलविणे शक्य झाले नाही</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल हलविणे शक्य झाले नाही</item>
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फायली हलविणे शक्य झाले नाही</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल हटविणे शक्य झाले नाही</item>
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> फायली हटविणे शक्य झाले नाही</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"तपशील पाहण्यासाठी टॅप करा"</string>
     <string name="close" msgid="3043722427445528732">"बंद करा"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"या फायली कॉपी झाल्या नाहीत: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"या फायली हलविल्या नव्हत्या: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="copy_converted_warning_content" msgid="5753861488218674361">"या फायली दुसर्‍या स्वरूपनात रूपांतरित केल्या होत्या: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"या फायलींची कॉपी झाली नाही: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"या फायली हलविल्या नाहीत: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_converted_warning_content" msgid="5753861488218674361">"या फायली दुसऱ्या स्वरूपनात रूपांतरित केल्या होत्या: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">क्लिपबोर्डवर <xliff:g id="COUNT_1">%1$d</xliff:g> फाईल कॉपी केली.</item>
       <item quantity="other">क्लिपबोर्डवर <xliff:g id="COUNT_1">%1$d</xliff:g> फायली कॉपी केल्या.</item>

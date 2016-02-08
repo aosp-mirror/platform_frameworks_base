@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"အစဉ်လိုက်မြင်ကွင်း"</string>
     <string name="menu_sort" msgid="7677740407158414452">"အစဉ်အလိုက် စီခြင်း"</string>
     <string name="menu_search" msgid="3816712084502856974">"ရှာဖွေရန်"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"သိုလှောင်မှု ဆက်တင်များ"</string>
     <string name="menu_open" msgid="432922957274920903">"ဖွင့်ရန်"</string>
     <string name="menu_save" msgid="2394743337684426338">"သိမ်းပါ"</string>
     <string name="menu_share" msgid="3075149983979628146">"မျှဝေခြင်း"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"ဖိုဒါကို ပိတ်လိုက်ပါ"</string>
     <string name="save_error" msgid="6167009778003223664">"စာရွက်စာတန်း သိမ်းဆည်းမှု မအောင်​မြင်ပါ"</string>
     <string name="create_error" msgid="3735649141335444215">"အကန့်အသစ် ဖန်တီးခြင်း မအောင်မြင်ပါ"</string>
-    <string name="query_error" msgid="1222448261663503501">"စာရွက်စာတန်း ရှာဖွေမှု မအောင်မြင်ပါ"</string>
+    <string name="query_error" msgid="5999895349602476581">"အကြောင်းအရာများကို လောလောဆယ်တွင် ဖွင့်၍မရသေးပါ"</string>
     <string name="root_recent" msgid="4470053704320518133">"လတ်တလော"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> အသုံးချနိုင်ပါသည်"</string>
     <string name="root_type_service" msgid="2178854894416775409">"သိုလှောင်ရန်ဆားဗစ်များ"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"နောက်ထပ်အပလီကေးရှင်းများ"</string>
     <string name="empty" msgid="7858882803708117596">"ဘာမှ မရှိပါ"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s တွင်ကိုက်ညီမှုမရှိပါ"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ဖိုင်အား ဖွင့်မရပါ"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"ဖိုင်ကိုဖွင့်၍မရပါ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"တချို့ စာရွက်စာတန်းများ မဖျက်စီးနိုင်ပါ"</string>
     <string name="share_via" msgid="8966594246261344259">"မှ ဝေမျှပါ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ဖိုင်များကူယူနေသည်"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"မိတ္တူကူးရန်ပြင်ဆင်နေ..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"ရွှေ့ရန် ပြင်ဆင်နေသည်…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"ဖျက်ရန်အတွက် ပြင်ဆင်နေသည်..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင် ကော်ပီ မကူးနိုင်ပါ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင် ကော်ပီမကူးနိုင်ပါ</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other">ဖိုင်<xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုကူးယူ၍မရခဲ့ပါ</item>
+      <item quantity="one">ဖိုင်<xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုကူးယူ၍မရခဲ့ပါ</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်များကို မရွှေ့နိုင်ပါ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင်ကို မရွှေ့နိုင်ပါ</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other">ဖိုင်<xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုရွှေ့၍မရခဲ့ပါ</item>
+      <item quantity="one">ဖိုင်<xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုရွှေ့၍မရခဲ့ပါ</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="other">ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်၍မရပါ</item>
-      <item quantity="one">ဖိုင် <xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်၍မရပါ</item>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other">ဖိုင်<xliff:g id="COUNT_1">%1$d</xliff:g> ခုကိုဖျက်၍မရခဲ့ပါ</item>
+      <item quantity="one">ဖိုင်<xliff:g id="COUNT_0">%1$d</xliff:g> ခုကိုဖျက်၍မရခဲ့ပါ</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"အသေးစိတ်ကြည့်ရန် တို့ပါ"</string>
     <string name="close" msgid="3043722427445528732">"ပိတ်ပါ"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"ဤဖိုင်များ ကော်ပီကူးမထားပါ- <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"ဤဖိုင်များကို မရွှေ့ခဲ့ပါ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"ဤဖိုင်များကို မကူးယူခဲ့ပါ − <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"ဤဖိုင်များကို မရွှေ့ခဲ့ပါ − <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ဤဖိုင်များကို အခြားပုံစံစနစ်တစ်ခုသို့ ပြောင်းလဲခဲ့သည် − <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"> ဖိုင် <xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်ကိုအချက်အလက်သိမ်းတဲ့နေရာသို့ ကူးယူပါ။</item>

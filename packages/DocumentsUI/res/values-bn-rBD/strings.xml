@@ -26,11 +26,10 @@
     <string name="menu_list" msgid="7279285939892417279">"তালিকা দৃশ্য"</string>
     <string name="menu_sort" msgid="7677740407158414452">"এই অনুসারে বাছুন"</string>
     <string name="menu_search" msgid="3816712084502856974">"অনুসন্ধান করুন"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"সঞ্চয়স্থান সেটিংস"</string>
     <string name="menu_open" msgid="432922957274920903">"খুলুন"</string>
     <string name="menu_save" msgid="2394743337684426338">"সংরক্ষণ করুন"</string>
-    <string name="menu_share" msgid="3075149983979628146">"ভাগ করুন"</string>
+    <string name="menu_share" msgid="3075149983979628146">"শেয়ার করুন"</string>
     <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"সবগুলি নির্বাচন করুন"</string>
     <string name="menu_copy" msgid="3612326052677229148">"এতে অনুলিপি করুন…"</string>
@@ -54,7 +53,8 @@
     <string name="drawer_close" msgid="7602734368552123318">"রুটগুলি লুকান"</string>
     <string name="save_error" msgid="6167009778003223664">"দস্তাবেজ সংরক্ষণ করতে ব্যর্থ হয়েছে"</string>
     <string name="create_error" msgid="3735649141335444215">"ফোল্ডার তৈরি করতে ব্যর্থ হয়েছে"</string>
-    <string name="query_error" msgid="1222448261663503501">"উন্নত ডিভাইসগুলি প্রদর্শন করে"</string>
+    <!-- no translation found for query_error (5999895349602476581) -->
+    <skip />
     <string name="root_recent" msgid="4470053704320518133">"সাম্প্রতিক"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> খালি আছে"</string>
     <string name="root_type_service" msgid="2178854894416775409">"সঞ্চয়স্থান পরিষেবাগুলি"</string>
@@ -63,9 +63,10 @@
     <string name="root_type_apps" msgid="8838065367985945189">"আরো অ্যাপ্লিকেশান"</string>
     <string name="empty" msgid="7858882803708117596">"কোনো আইটেম নেই"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s এ কোনো মিল নেই"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ফাইল খোলা যাবে না"</string>
+    <!-- no translation found for toast_no_application (4632640357724698144) -->
+    <skip />
     <string name="toast_failed_delete" msgid="2180678019407244069">"কিছু দস্তাবেজ মুছতে অসমর্থ"</string>
-    <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে ভাগ করুন"</string>
+    <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে শেয়ার করুন"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ফাইলগুলি অনুলিপি করা হচ্ছে"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"ফাইলগুলি সরানো হচ্ছে"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> বাকি"</string>
@@ -85,22 +86,15 @@
     <string name="copy_preparing" msgid="3896202461003039386">"অনুলিপি করার জন্য প্রস্তুত করা হচ্ছে..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"সরানোর জন্য প্রস্তুত হচ্ছে..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"মোছার জন্য প্রস্তুত করা হচ্ছে..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
-    </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল সরানো যায়নি৷</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল সরানো যায়নি৷</item>
-    </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছা গেল না</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছা গেল না</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
+    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
+    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
     <string name="notification_touch_for_details" msgid="6268189413228855582">"বিশদ বিবরণ দেখতে আলতো চাপুন"</string>
     <string name="close" msgid="3043722427445528732">"বন্ধ করুন"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"এই ফাইলগুলির প্রতিলিপি করা হয় নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"এই ফাইলগুলি সরানো হয়নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
+    <skip />
+    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
+    <skip />
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"এই ফাইলগুলি অন্য ফরম্যাটে রূপান্তর করা হয়েছে: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল ক্লিপবোর্ডে প্রতিলিপি করা হয়েছে।</item>

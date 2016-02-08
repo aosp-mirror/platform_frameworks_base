@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"List view"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Sort by"</string>
     <string name="menu_search" msgid="3816712084502856974">"Search"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Storage settings"</string>
     <string name="menu_open" msgid="432922957274920903">"Open"</string>
     <string name="menu_save" msgid="2394743337684426338">"Save"</string>
     <string name="menu_share" msgid="3075149983979628146">"Share"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Hide roots"</string>
     <string name="save_error" msgid="6167009778003223664">"Failed to save document"</string>
     <string name="create_error" msgid="3735649141335444215">"Failed to create folder"</string>
-    <string name="query_error" msgid="1222448261663503501">"Failed to query documents"</string>
+    <string name="query_error" msgid="5999895349602476581">"Can’t load content at the moment"</string>
     <string name="root_recent" msgid="4470053704320518133">"Recent"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> free"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Storage services"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"More apps"</string>
     <string name="empty" msgid="7858882803708117596">"No items"</string>
     <string name="no_results" msgid="6622510343880730446">"No matches in %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Cannot open file"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Can’t open file"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unable to delete some documents"</string>
     <string name="share_via" msgid="8966594246261344259">"Share via"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Copying files"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Preparing for copy…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Preparing for move…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Preparing to delete…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">Couldn\'t copy <xliff:g id="COUNT_1">%1$d</xliff:g> files</item>
-      <item quantity="one">Couldn\'t copy <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other">Couldn’t copy <xliff:g id="COUNT_1">%1$d</xliff:g> files</item>
+      <item quantity="one">Couldn’t copy <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="other">Couldn\'t move <xliff:g id="COUNT_1">%1$d</xliff:g> files</item>
-      <item quantity="one">Couldn\'t move <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other">Couldn’t move <xliff:g id="COUNT_1">%1$d</xliff:g> files</item>
+      <item quantity="one">Couldn’t move <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="other">Couldn\'t delete <xliff:g id="COUNT_1">%1$d</xliff:g> files</item>
-      <item quantity="one">Couldn\'t delete <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other">Couldn’t delete <xliff:g id="COUNT_1">%1$d</xliff:g> files</item>
+      <item quantity="one">Couldn’t delete <xliff:g id="COUNT_0">%1$d</xliff:g> file</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Tap to view details"</string>
     <string name="close" msgid="3043722427445528732">"Close"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"These files weren\'t copied: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"These files weren\'t moved: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"These files weren’t copied: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"These files weren’t moved: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"These files were converted to another format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Copied <xliff:g id="COUNT_1">%1$d</xliff:g> files to clipboard.</item>
