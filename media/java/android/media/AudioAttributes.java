@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -242,6 +243,7 @@ public final class AudioAttributes implements Parcelable {
     private int mFlags = 0x0;
     private HashSet<String> mTags;
     private String mFormattedTags;
+    private Bundle mBundle; // lazy-initialized, may be null
 
     private AudioAttributes() {
     }
@@ -295,6 +297,20 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * @hide
+     * Return the Bundle of data.
+     * @return a copy of the Bundle for this instance, may be null.
+     */
+    @SystemApi
+    public Bundle getBundle() {
+        if (mBundle == null) {
+            return mBundle;
+        } else {
+            return new Bundle(mBundle);
+        }
+    }
+
+    /**
+     * @hide
      * Return the set of tags.
      * @return a read-only set of all tags stored as strings.
      */
@@ -327,6 +343,7 @@ public final class AudioAttributes implements Parcelable {
         private int mSource = MediaRecorder.AudioSource.AUDIO_SOURCE_INVALID;
         private int mFlags = 0x0;
         private HashSet<String> mTags = new HashSet<String>();
+        private Bundle mBundle;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -365,6 +382,9 @@ public final class AudioAttributes implements Parcelable {
             aa.mFlags = mFlags;
             aa.mTags = (HashSet<String>) mTags.clone();
             aa.mFormattedTags = TextUtils.join(";", mTags);
+            if (mBundle != null) {
+                aa.mBundle = new Bundle(mBundle);
+            }
             return aa;
         }
 
@@ -448,6 +468,25 @@ public final class AudioAttributes implements Parcelable {
         public Builder setFlags(int flags) {
             flags &= AudioAttributes.FLAG_ALL;
             mFlags |= flags;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Adds a Bundle of data
+         * @param bundle a non-null Bundle
+         * @return the same builder instance
+         */
+        @SystemApi
+        public Builder addBundle(@NonNull Bundle bundle) {
+            if (bundle == null) {
+                throw new IllegalArgumentException("Illegal null bundle");
+            }
+            if (mBundle == null) {
+                mBundle = new Bundle(bundle);
+            } else {
+                mBundle.putAll(bundle);
+            }
             return this;
         }
 
@@ -584,6 +623,10 @@ public final class AudioAttributes implements Parcelable {
      * see definition of kAudioAttributesMarshallTagFlattenTags
      */
     public final static int FLATTEN_TAGS = 0x1;
+
+    private final static int ATTR_PARCEL_IS_NULL_BUNDLE = -1977;
+    private final static int ATTR_PARCEL_IS_VALID_BUNDLE = 1980;
+
     /**
      * When adding tags for writeToParcel(Parcel, int), add them in the list of flags (| NEW_FLAG)
      */
@@ -601,6 +644,12 @@ public final class AudioAttributes implements Parcelable {
             dest.writeStringArray(tagsArray);
         } else if ((flags & FLATTEN_TAGS) == FLATTEN_TAGS) {
             dest.writeString(mFormattedTags);
+        }
+        if (mBundle == null) {
+            dest.writeInt(ATTR_PARCEL_IS_NULL_BUNDLE);
+        } else {
+            dest.writeInt(ATTR_PARCEL_IS_VALID_BUNDLE);
+            dest.writeBundle(mBundle);
         }
     }
 
@@ -620,6 +669,16 @@ public final class AudioAttributes implements Parcelable {
                 mTags.add(tagsArray[i]);
             }
             mFormattedTags = TextUtils.join(";", mTags);
+        }
+        switch (in.readInt()) {
+            case ATTR_PARCEL_IS_NULL_BUNDLE:
+                mBundle = null;
+                break;
+            case ATTR_PARCEL_IS_VALID_BUNDLE:
+                mBundle = new Bundle(in.readBundle());
+                break;
+            default:
+                Log.e(TAG, "Illegal value unmarshalling AudioAttributes, can't initialize bundle");
         }
     }
 
@@ -655,7 +714,7 @@ public final class AudioAttributes implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mContentType, mFlags, mSource, mUsage, mFormattedTags);
+        return Objects.hash(mContentType, mFlags, mSource, mUsage, mFormattedTags, mBundle);
     }
 
     @Override
@@ -664,7 +723,8 @@ public final class AudioAttributes implements Parcelable {
                 + " usage=" + mUsage
                 + " content=" + mContentType
                 + " flags=0x" + Integer.toHexString(mFlags).toUpperCase()
-                + " tags=" + mFormattedTags);
+                + " tags=" + mFormattedTags
+                + " bundle=" + (mBundle == null ? "null" : mBundle.toString()));
     }
 
     /** @hide */
