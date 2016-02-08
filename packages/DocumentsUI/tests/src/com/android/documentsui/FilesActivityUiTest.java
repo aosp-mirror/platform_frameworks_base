@@ -30,7 +30,6 @@ import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.Until;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -38,96 +37,35 @@ import android.view.MotionEvent;
 import com.android.documentsui.model.RootInfo;
 
 @LargeTest
-public class FilesActivityUiTest extends ActivityInstrumentationTestCase2<FilesActivity> {
+public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
 
     private static final int TIMEOUT = 5000;
     private static final String TAG = "FilesActivityUiTest";
     private static final String TARGET_PKG = "com.android.documentsui";
     private static final String LAUNCHER_PKG = "com.android.launcher";
 
-    private UiBot mBot;
-    private UiDevice mDevice;
-    private Context mContext;
-    private ContentResolver mResolver;
-    private DocumentsProviderHelper mDocsHelper;
-    private ContentProviderClient mClient;
-    private RootInfo mRoot_0;
-    private RootInfo mRoot_1;
-
     public FilesActivityUiTest() {
         super(FilesActivity.class);
     }
 
-    public void setUp() throws Exception {
-        // Initialize UiDevice instance.
-        Instrumentation instrumentation = getInstrumentation();
-
-        mDevice = UiDevice.getInstance(instrumentation);
-
-        Configurator.getInstance().setToolType(MotionEvent.TOOL_TYPE_MOUSE);
-
-        // Start from the home screen.
-        mDevice.pressHome();
-        mDevice.wait(Until.hasObject(By.pkg(LAUNCHER_PKG).depth(0)), TIMEOUT);
-
-        // NOTE: Must be the "target" context, else security checks in content provider will fail.
-        mContext = instrumentation.getTargetContext();
-        mResolver = mContext.getContentResolver();
-
-        mClient = mResolver.acquireUnstableContentProviderClient(DEFAULT_AUTHORITY);
-        assertNotNull("Failed to acquire ContentProviderClient.", mClient);
-        mDocsHelper = new DocumentsProviderHelper(DEFAULT_AUTHORITY, mClient);
-
-        // Launch app.
-        Intent intent = mContext.getPackageManager().getLaunchIntentForPackage(TARGET_PKG);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        setActivityIntent(intent);
-        getActivity();  // Start the activity.
-
-        // Wait for the app to appear.
-        mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), TIMEOUT);
-        mDevice.waitForIdle();
-
-        mBot = new UiBot(mDevice, mContext, TIMEOUT);
-
-        resetStorage();  // Just incase a test failed and tearDown didn't happen.
-    }
-
     @Override
-    protected void tearDown() throws Exception {
-        Log.d(TAG, "Resetting storage from setUp");
-        resetStorage();
-        mClient.release();
+    public void initTestFiles() throws RemoteException {
+        mDocsHelper.createDocument(rootDir0, "text/plain", "file0.log");
+        mDocsHelper.createDocument(rootDir0, "image/png", "file1.png");
+        mDocsHelper.createDocument(rootDir0, "text/csv", "file2.csv");
 
-        super.tearDown();
-    }
-
-    private void resetStorage() throws RemoteException {
-        mClient.call("clear", null, null);
-        // TODO: Would be nice to have an event to wait on here.
-        mDevice.waitForIdle();
-    }
-
-    private void initTestFiles() throws RemoteException {
-        mRoot_0 = mDocsHelper.getRoot(ROOT_0_ID);
-        mRoot_1 = mDocsHelper.getRoot(ROOT_1_ID);
-
-        mDocsHelper.createDocument(mRoot_0, "text/plain", "file0.log");
-        mDocsHelper.createDocument(mRoot_0, "image/png", "file1.png");
-        mDocsHelper.createDocument(mRoot_0, "text/csv", "file2.csv");
-
-        mDocsHelper.createDocument(mRoot_1, "text/plain", "anotherFile0.log");
-        mDocsHelper.createDocument(mRoot_1, "text/plain", "poodles.text");
+        mDocsHelper.createDocument(rootDir1, "text/plain", "anotherFile0.log");
+        mDocsHelper.createDocument(rootDir1, "text/plain", "poodles.text");
     }
 
     public void testRootsListed() throws Exception {
         initTestFiles();
 
-        mBot.openRoot(ROOT_0_ID);
+        bot.openRoot(ROOT_0_ID);
 
         // Should also have Drive, but that requires pre-configuration of devices
         // We omit for now.
-        mBot.assertHasRoots(
+        bot.assertHasRoots(
                 "Images",
                 "Videos",
                 "Audio",
@@ -140,60 +78,60 @@ public class FilesActivityUiTest extends ActivityInstrumentationTestCase2<FilesA
     public void testFilesListed() throws Exception {
         initTestFiles();
 
-        mBot.openRoot(ROOT_0_ID);
-        mBot.assertHasDocuments("file0.log", "file1.png", "file2.csv");
+        bot.openRoot(ROOT_0_ID);
+        bot.assertHasDocuments("file0.log", "file1.png", "file2.csv");
     }
 
     public void testLoadsHomeByDefault() throws Exception {
         initTestFiles();
 
-        mDevice.waitForIdle();
-        mBot.assertWindowTitle("Home");
+        device.waitForIdle();
+        bot.assertWindowTitle("Home");
     }
 
     public void testRootClickSetsWindowTitle() throws Exception {
         initTestFiles();
 
-        mBot.openRoot("Downloads");
-        mBot.assertWindowTitle("Downloads");
+        bot.openRoot("Downloads");
+        bot.assertWindowTitle("Downloads");
     }
 
     public void testFilesList_LiveUpdate() throws Exception {
         initTestFiles();
 
-        mBot.openRoot(ROOT_0_ID);
-        mDocsHelper.createDocument(mRoot_0, "yummers/sandwich", "Ham & Cheese.sandwich");
+        bot.openRoot(ROOT_0_ID);
+        mDocsHelper.createDocument(rootDir0, "yummers/sandwich", "Ham & Cheese.sandwich");
 
-        mDevice.waitForIdle();
-        mBot.assertHasDocuments("file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
+        device.waitForIdle();
+        bot.assertHasDocuments("file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
     }
 
     public void testDeleteDocument() throws Exception {
         initTestFiles();
 
-        mBot.openRoot(ROOT_0_ID);
+        bot.openRoot(ROOT_0_ID);
 
-        mBot.clickDocument("file1.png");
-        mDevice.waitForIdle();
-        mBot.menuDelete().click();
+        bot.clickDocument("file1.png");
+        device.waitForIdle();
+        bot.menuDelete().click();
 
-        mBot.waitForDeleteSnackbar();
-        assertFalse(mBot.hasDocuments("file1.png"));
+        bot.waitForDeleteSnackbar();
+        assertFalse(bot.hasDocuments("file1.png"));
 
-        mBot.waitForDeleteSnackbarGone();
-        assertFalse(mBot.hasDocuments("file1.png"));
+        bot.waitForDeleteSnackbarGone();
+        assertFalse(bot.hasDocuments("file1.png"));
 
         // Now delete from another root.
-        mBot.openRoot(ROOT_1_ID);
+        bot.openRoot(ROOT_1_ID);
 
-        mBot.clickDocument("poodles.text");
-        mDevice.waitForIdle();
-        mBot.menuDelete().click();
+        bot.clickDocument("poodles.text");
+        device.waitForIdle();
+        bot.menuDelete().click();
 
-        mBot.waitForDeleteSnackbar();
-        assertFalse(mBot.hasDocuments("poodles.text"));
+        bot.waitForDeleteSnackbar();
+        assertFalse(bot.hasDocuments("poodles.text"));
 
-        mBot.waitForDeleteSnackbarGone();
-        assertFalse(mBot.hasDocuments("poodles.text"));
+        bot.waitForDeleteSnackbarGone();
+        assertFalse(bot.hasDocuments("poodles.text"));
     }
 }
