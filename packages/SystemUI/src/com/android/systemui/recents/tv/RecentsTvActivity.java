@@ -287,13 +287,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         // wait on the system to send a signal that was never queued.
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        launchState.launchedFromHome = false;
-        launchState.launchedFromSearchHome = false;
-        launchState.launchedFromAppWithThumbnail = false;
-        launchState.launchedToTaskId = -1;
-        launchState.launchedWithAltTab = false;
-        launchState.launchedHasConfigurationChanged = false;
-        launchState.launchedViaDragGesture = false;
+        launchState.reset();
     }
 
     @Override
