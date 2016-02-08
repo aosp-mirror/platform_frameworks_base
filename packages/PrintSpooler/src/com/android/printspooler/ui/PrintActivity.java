@@ -320,9 +320,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (isFinishing() || (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
                     return;
                 }
-                if (mPrintedDocument.isUpdating()) {
-                    mPrintedDocument.cancel();
-                }
+                mPrintedDocument.cancel();
                 setState(STATE_PRINT_CANCELED);
                 doFinish();
             }
@@ -372,12 +370,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             spooler.updatePrintJobUserConfigurableOptionsNoPersistence(mPrintJob);
 
             switch (mState) {
-                case STATE_PRINT_CONFIRMED: {
-                    spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_QUEUED, null);
-                } break;
-
                 case STATE_PRINT_COMPLETED: {
-                    spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_COMPLETED, null);
+                    if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
+                        spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_COMPLETED,
+                                null);
+                    } else {
+                        spooler.setPrintJobState(mPrintJob.getId(), PrintJobInfo.STATE_QUEUED,
+                                null);
+                    }
                 } break;
 
                 case STATE_CREATE_FILE_FAILED: {
@@ -491,6 +491,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 requestCreatePdfFileOrFinish();
             } break;
 
+            case STATE_CREATE_FILE_FAILED:
+            case STATE_PRINT_COMPLETED:
             case STATE_PRINT_CANCELED: {
                 doFinish();
             } break;
@@ -528,8 +530,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 requestCreatePdfFileOrFinish();
             } break;
 
+            case STATE_CREATE_FILE_FAILED:
+            case STATE_PRINT_COMPLETED:
             case STATE_PRINT_CANCELED: {
                 updateOptionsUi();
+
+                doFinish();
             } break;
 
             default: {
@@ -549,6 +555,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         mProgressMessageController.cancel();
         ensureErrorUiShown(error, PrintErrorFragment.ACTION_RETRY);
+
+        if (mState == STATE_CREATE_FILE_FAILED
+                || mState == STATE_PRINT_COMPLETED
+                || mState == STATE_PRINT_CANCELED) {
+            doFinish();
+        }
 
         setState(STATE_UPDATE_FAILED);
 
@@ -644,7 +656,6 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     private void onStartCreateDocumentActivityResult(int resultCode, Intent data) {
         if (resultCode == RESULT_OK && data != null) {
-            setState(STATE_PRINT_COMPLETED);
             updateOptionsUi();
             final Uri uri = data.getData();
             // Calling finish here does not invoke lifecycle callbacks but we
@@ -657,6 +668,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             });
         } else if (resultCode == RESULT_CANCELED) {
             mState = STATE_CONFIGURING;
+
+            // The previous update might have been canceled
+            updateDocument(false);
+
             updateOptionsUi();
         } else {
             setState(STATE_CREATE_FILE_FAILED);
@@ -875,9 +890,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private static boolean isFinalState(int state) {
-        return state == STATE_PRINT_CONFIRMED
-                || state == STATE_PRINT_CANCELED
-                || state == STATE_PRINT_COMPLETED;
+        return state == STATE_PRINT_CANCELED
+                || state == STATE_PRINT_COMPLETED
+                || state == STATE_CREATE_FILE_FAILED;
     }
 
     private void updateSelectedPagesFromPreview() {
@@ -998,6 +1013,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void requestCreatePdfFileOrFinish() {
+        mPrintedDocument.cancel();
+
         if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
             startCreateDocumentActivity();
         } else {
@@ -1113,9 +1130,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private void cancelPrint() {
         setState(STATE_PRINT_CANCELED);
         updateOptionsUi();
-        if (mPrintedDocument.isUpdating()) {
-            mPrintedDocument.cancel();
-        }
+        mPrintedDocument.cancel();
         doFinish();
     }
 
@@ -1874,9 +1889,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public void onPrinterUnavailable(PrinterInfo printer) {
         if (mCurrentPrinter.getId().equals(printer.getId())) {
             setState(STATE_PRINTER_UNAVAILABLE);
-            if (mPrintedDocument.isUpdating()) {
-                mPrintedDocument.cancel();
-            }
+            mPrintedDocument.cancel();
             ensureErrorUiShown(getString(R.string.print_error_printer_unavailable),
                     PrintErrorFragment.ACTION_NONE);
             updateOptionsUi();
@@ -1933,12 +1946,18 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (writeToUri != null) {
                     mPrintedDocument.writeContent(getContentResolver(), writeToUri);
                 }
+                setState(STATE_PRINT_COMPLETED);
                 doFinish();
             }
         }).transform();
     }
 
     private void doFinish() {
+        if (mPrintedDocument.isUpdating()) {
+            // The printedDocument will call doFinish() when the current command finishes
+            return;
+        }
+
         if (mPrinterRegistry != null) {
             mPrinterRegistry.setTrackedPrinter(null);
         }
