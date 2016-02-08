@@ -1031,16 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-kaart lisatud"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Mobiilsidevõrku pääsemiseks taaskäivitage seade."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Taaskäivita"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Uue SIM-kaardi kasutamiseks peate installima ja avama operaatorilt saadud rakenduse."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"HANKIGE RAKENDUS"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"MITTE PRAEGU"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Uus SIM-kaart on sisestatud"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Puudutage seadistamiseks"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Kellaaja määramine"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Kuupäeva määramine"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Määra"</string>
