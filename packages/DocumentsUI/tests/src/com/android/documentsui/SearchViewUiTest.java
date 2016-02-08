@@ -70,7 +70,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         bot.assertDocumentsCountOnList(true, 2);
         bot.assertHasDocuments(fileName1, fileName2);
 
-        // bot.assertSearchTextField(false, query);  Quick fix for broken tests. b/27016351
+        bot.assertSearchTextField(false, query);
     }
 
     public void testSearchResultsFound_ClearsOnBack() throws Exception {
@@ -84,7 +84,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
         device.pressEnter();
         device.pressBack();
-        device.pressBack();  // Quick fix for broken tests! b/27016351
 
         assertDefaultContentOfTestDir0();
     }
@@ -106,7 +105,7 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
         String msg = String.valueOf(context.getString(R.string.no_results));
         bot.assertMessageTextView(String.format(msg, "TEST_ROOT_0"));
 
-        // bot.assertSearchTextField(false, query);  Quick fix for broken tests. b/27016351
+        bot.assertSearchTextField(false, query);
     }
 
     public void testSearchNoResults_ClearsOnBack() throws Exception {
@@ -120,7 +119,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
         device.pressEnter();
         device.pressBack();
-        device.pressBack();  // Quick fix for broken tests! b/27016351
 
         device.waitForIdle();
         assertDefaultContentOfTestDir0();
