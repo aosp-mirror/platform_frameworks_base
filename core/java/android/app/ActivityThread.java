@@ -5021,6 +5021,9 @@ public final class ActivityThread {
 
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
         if (!Process.isIsolated() && !"android".equals(appContext.getPackageName())) {
+            // This cache location probably points at credential-encrypted
+            // storage which may not be accessible yet; assign it anyway instead
+            // of pointing at device-encrypted storage.
             final File cacheDir = appContext.getCacheDir();
             if (cacheDir != null) {
                 // Provide a usable directory for temporary files
@@ -5030,8 +5033,12 @@ public final class ActivityThread {
                         + "due to missing cache directory");
             }
 
-            // Use codeCacheDir to store generated/compiled graphics code and jit profiling data.
-            final File codeCacheDir = appContext.getCodeCacheDir();
+            // Setup a location to store generated/compiled graphics code and
+            // JIT profiling data. Note that this data is stored in a
+            // device-encrypted storage area, so these caches must never contain
+            // user sensitive user data.
+            final Context deviceContext = appContext.createDeviceEncryptedStorageContext();
+            final File codeCacheDir = deviceContext.getCodeCacheDir();
             if (codeCacheDir != null) {
                 setupGraphicsSupport(data.info, codeCacheDir);
                 setupJitProfileSupport(data.info, codeCacheDir);
