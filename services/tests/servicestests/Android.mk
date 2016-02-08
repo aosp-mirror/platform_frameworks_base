@@ -29,6 +29,7 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_JNI_SHARED_LIBRARIES := \
     libapfjni \
+    libc++ \
     libnativehelper
 
 include $(BUILD_PACKAGE)
