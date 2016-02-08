@@ -34,8 +34,7 @@ import static android.service.notification.NotificationAssistantService.REASON_P
 import static android.service.notification.NotificationAssistantService.REASON_TOPIC_BANNED;
 import static android.service.notification.NotificationAssistantService.REASON_USER_STOPPED;
 import static android.service.notification.NotificationListenerService.HINT_HOST_DISABLE_EFFECTS;
-import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS;
-import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_PEEK;
+import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
@@ -2679,7 +2678,7 @@ public class NotificationManagerService extends SystemService {
         boolean wasShowLights = mLights.remove(record.getKey());
         if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && aboveThreshold
                 && ((record.getSuppressedVisualEffects()
-                & NotificationListenerService.SUPPRESSED_EFFECT_LIGHTS) == 0)) {
+                & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) == 0)) {
             mLights.add(record.getKey());
             updateLightsLocked();
             if (mUseAttentionLight) {
@@ -2691,7 +2690,7 @@ public class NotificationManagerService extends SystemService {
         }
         if (buzz || beep || blink) {
             if (((record.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON) != 0)) {
+                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0)) {
                 if (DBG) Slog.v(TAG, "Suppressed SystemUI from triggering screen on");
             } else {
                 EventLogTags.writeNotificationAlert(record.getKey(),
@@ -2878,9 +2877,10 @@ public class NotificationManagerService extends SystemService {
     private void applyZenModeLocked(NotificationRecord record) {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
         if (record.isIntercepted()) {
-            int suppressed = (mZenModeHelper.shouldSuppressLight() ? SUPPRESSED_EFFECT_LIGHTS : 0)
-                    | (mZenModeHelper.shouldSuppressPeek() ? SUPPRESSED_EFFECT_PEEK : 0)
-                    | (mZenModeHelper.shouldSuppressScreenOn() ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
+            int suppressed = (mZenModeHelper.shouldSuppressWhenScreenOff()
+                    ? SUPPRESSED_EFFECT_SCREEN_OFF : 0)
+                    | (mZenModeHelper.shouldSuppressWhenScreenOn()
+                    ? SUPPRESSED_EFFECT_SCREEN_ON : 0);
             record.setSuppressedVisualEffects(suppressed);
         }
     }

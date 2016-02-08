@@ -35,7 +35,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
@@ -150,21 +149,15 @@ public class ZenModeHelper {
         }
     }
 
-    public boolean shouldSuppressLight() {
+    public boolean shouldSuppressWhenScreenOff() {
         synchronized (mConfig) {
-            return !mConfig.allowLights;
+            return !mConfig.allowWhenScreenOff;
         }
     }
 
-    public boolean shouldSuppressPeek() {
+    public boolean shouldSuppressWhenScreenOn() {
         synchronized (mConfig) {
-            return !mConfig.allowPeek;
-        }
-    }
-
-    public boolean shouldSuppressScreenOn() {
-        synchronized (mConfig) {
-            return !mConfig.allowScreenOn;
+            return !mConfig.allowWhenScreenOn;
         }
     }
 
@@ -503,12 +496,12 @@ public class ZenModeHelper {
             return;
         }
         pw.printf("allow(calls=%s,callsFrom=%s,repeatCallers=%s,messages=%s,messagesFrom=%s,"
-                + "events=%s,reminders=%s,lights=%s,peek=%s,screenOn=%s)\n",
+                + "events=%s,reminders=%s,whenScreenOff,whenScreenOn=%s)\n",
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
                 ZenModeConfig.sourceToString(config.allowMessagesFrom),
-                config.allowEvents, config.allowReminders, config.allowLights, config.allowPeek,
-                config.allowScreenOn);
+                config.allowEvents, config.allowReminders, config.allowWhenScreenOff,
+                config.allowWhenScreenOn);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);
         if (config.automaticRules.isEmpty()) return;
         final int N = config.automaticRules.size();

@@ -283,11 +283,11 @@ public class NotificationData {
         return Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
-    public boolean shouldSuppressPeek(String key) {
+    public boolean shouldSuppressScreenOff(String key) {
         if (mRankingMap != null) {
             mRankingMap.getRanking(key, mTmpRanking);
             return (mTmpRanking.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_PEEK) != 0;
+                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0;
         }
         return false;
     }

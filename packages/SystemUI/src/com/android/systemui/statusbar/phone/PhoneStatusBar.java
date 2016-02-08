@@ -1274,7 +1274,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (shouldSupressFullScreenIntent(notification.getKey())) {
+            if (shouldSuppressFullScreenIntent(notification.getKey())) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + notification.getKey());
                 }
@@ -1301,11 +1301,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setAreThereNotifications();
     }
 
-    private boolean shouldSupressFullScreenIntent(String key) {
+    private boolean shouldSuppressFullScreenIntent(String key) {
         if (mPowerManager.isInteractive()) {
-            return mNotificationData.shouldSuppressPeek(key);
-        } else {
             return mNotificationData.shouldSuppressScreenOn(key);
+        } else {
+            return mNotificationData.shouldSuppressScreenOff(key);
         }
     }
 
