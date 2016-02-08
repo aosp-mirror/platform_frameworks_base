@@ -2742,8 +2742,30 @@ class MountService extends IMountService.Stub
         }
     }
 
+    private SensitiveArg encodeBytes(byte[] bytes) {
+        if (ArrayUtils.isEmpty(bytes)) {
+            return new SensitiveArg("!");
+        } else {
+            return new SensitiveArg(HexDump.toHexString(bytes));
+        }
+    }
+
     @Override
-    public void unlockUserKey(int userId, int serialNumber, byte[] token) {
+    public void changeUserKey(int userId, int serialNumber,
+            byte[] token, byte[] oldSecret, byte[] newSecret) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+        waitForReady();
+
+        try {
+            mCryptConnector.execute("cryptfs", "change_user_key", userId, serialNumber,
+                encodeBytes(token), encodeBytes(oldSecret), encodeBytes(newSecret));
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
         waitForReady();
 
@@ -2753,16 +2775,9 @@ class MountService extends IMountService.Stub
             throw new IllegalStateException("Token required to unlock secure user " + userId);
         }
 
-        final String encodedToken;
-        if (ArrayUtils.isEmpty(token)) {
-            encodedToken = "!";
-        } else {
-            encodedToken = HexDump.toHexString(token);
-        }
-
         try {
             mCryptConnector.execute("cryptfs", "unlock_user_key", userId, serialNumber,
-                    new SensitiveArg(encodedToken));
+                    encodeBytes(token), encodeBytes(secret));
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
