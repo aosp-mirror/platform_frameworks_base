@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"સૂચિ દૃશ્ય"</string>
     <string name="menu_sort" msgid="7677740407158414452">"આ પ્રમાણે સૉર્ટ કરો"</string>
     <string name="menu_search" msgid="3816712084502856974">"શોધો"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"સ્ટોરેજ સેટિંગ્સ"</string>
     <string name="menu_open" msgid="432922957274920903">"ખોલો"</string>
     <string name="menu_save" msgid="2394743337684426338">"સાચવો"</string>
     <string name="menu_share" msgid="3075149983979628146">"શેર કરો"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"રૂટ્સ છુપાવો"</string>
     <string name="save_error" msgid="6167009778003223664">"દસ્તાવેજ સાચવવામાં નિષ્ફળ થયાં."</string>
     <string name="create_error" msgid="3735649141335444215">"ફોલ્ડર બનાવવામાં નિષ્ફળ થયા"</string>
-    <string name="query_error" msgid="1222448261663503501">"દસ્તાવેજોને ક્વેરી કરવામાં નિષ્ફળ થયાં"</string>
+    <string name="query_error" msgid="5999895349602476581">"આ પળે સામગ્રી લોડ કરી શકતાં નથી"</string>
     <string name="root_recent" msgid="4470053704320518133">"તાજેતરના"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ખાલી"</string>
     <string name="root_type_service" msgid="2178854894416775409">"સંગ્રહ સેવાઓ"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશનો"</string>
     <string name="empty" msgid="7858882803708117596">"કોઈ આઇટમ્સ નથી"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s માં કોઇ મેળ નથી"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ફાઇલ ખોલી શકાતી નથી"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"ફાઇલ ખોલી શકતાં નથી"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"કેટલાક દસ્તાવેજો કાઢી નાખવામાં અસમર્થ"</string>
     <string name="share_via" msgid="8966594246261344259">"આના દ્વારા શેર કરો"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ફાઇલો કૉપિ કરી રહ્યાં છે"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"કૉપિ માટે તૈયારી કરી રહ્યું છે…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ખસેડવા માટે તૈયાર કરી રહ્યું છે…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"કાઢી નાખવાની તૈયારી કરી રહ્યાં છે…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી શકાઈ નથી</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી શકાઈ નથી</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કૉપિ કરી શક્યાં નથી</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કૉપિ કરી શક્યાં નથી</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી શકાઈ નથી</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો ખસેડી શકાઈ નથી</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ ખસેડી શક્યાં નથી</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ ખસેડી શક્યાં નથી</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી શક્યાં નથી</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલ કાઢી નાખી શક્યાં નથી</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"વિગતો જોવા માટે ટૅપ કરો"</string>
     <string name="close" msgid="3043722427445528732">"બંધ કરો"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"આ ફાઇલો કૉપિ કરી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"આ ફાઇલો ખસેડી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"આ ફાઇલો કૉપિ કરી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"આ ફાઇલો ખસેડી નહોતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"આ ફાઇલો બીજા ફોર્મેટમાં રૂપાંતરિત કરી હતી: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">ક્લિપબોર્ડ પર <xliff:g id="COUNT_1">%1$d</xliff:g> ફાઇલો કૉપિ કરી.</item>

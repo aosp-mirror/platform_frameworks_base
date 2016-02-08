@@ -53,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"మూలాలను దాచు"</string>
     <string name="save_error" msgid="6167009778003223664">"పత్రాన్ని సేవ్ చేయడంలో విఫలమైంది"</string>
     <string name="create_error" msgid="3735649141335444215">"ఫోల్డర్‌ను సృష్టించడంలో విఫలమైంది"</string>
-    <string name="query_error" msgid="1222448261663503501">"పత్రాల కోసం ప్రశ్నించడంలో విఫలమైంది"</string>
+    <string name="query_error" msgid="5999895349602476581">"ఈ సమయంలో కంటెంట్‌ను లోడ్ చేయడం సాధ్యపడదు"</string>
     <string name="root_recent" msgid="4470053704320518133">"ఇటీవల"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ఖాళీ"</string>
     <string name="root_type_service" msgid="2178854894416775409">"నిల్వ పరికరాలు"</string>
@@ -62,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"మరిన్ని అనువర్తనాలు"</string>
     <string name="empty" msgid="7858882803708117596">"అంశాలు లేవు"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$sలో సరిపోలినవి లేవు"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ఫైల్‌ను తెరవడం సాధ్యపడదు"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"ఫైల్‌ను తెరవడం సాధ్యపడదు"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"కొన్ని పత్రాలను తొలగించడం సాధ్యపడలేదు"</string>
     <string name="share_via" msgid="8966594246261344259">"దీని ద్వారా భాగస్వామ్యం చేయండి"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ఫైల్‌లు కాపీ అవుతున్నాయి"</string>
@@ -84,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"కాపీ చేయడానికి సిద్ధం చేస్తోంది…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"తరలించడానికి సిద్ధమవుతోంది…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"తొలగించడానికి సిద్ధం చేస్తోంది…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయలేకపోయింది</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయలేకపోయింది</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేయడం సాధ్యపడలేదు</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను కాపీ చేయడం సాధ్యపడలేదు</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను తరలించలేకపోయింది</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను తరలించలేకపోయింది</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను తరలించడం సాధ్యపడలేదు</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను తరలించడం సాధ్యపడలేదు</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను తొలగించడం సాధ్యపడలేదు</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఫైల్‌ను తొలగించడం సాధ్యపడలేదు</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"వివరాలను వీక్షించడానికి నొక్కండి"</string>
     <string name="close" msgid="3043722427445528732">"మూసివేయి"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"ఈ ఫైల్‌లు తరలించబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"ఈ ఫైల్‌లు కాపీ చేయబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"ఈ ఫైల్‌లు తరలించబడలేదు: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ఈ ఫైల్‌లు మరొక ఆకృతికి మార్చబడ్డాయి: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">క్లిప్‌బోర్డ్‌కి <xliff:g id="COUNT_1">%1$d</xliff:g> ఫైల్‌లను కాపీ చేసారు.</item>

@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Visualització de llista"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Ordena per"</string>
     <string name="menu_search" msgid="3816712084502856974">"Cerca"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Config. d\'emmagatzematge"</string>
     <string name="menu_open" msgid="432922957274920903">"Obre"</string>
     <string name="menu_save" msgid="2394743337684426338">"Desa"</string>
     <string name="menu_share" msgid="3075149983979628146">"Comparteix"</string>
@@ -54,7 +53,8 @@
     <string name="drawer_close" msgid="7602734368552123318">"Amaga les arrels"</string>
     <string name="save_error" msgid="6167009778003223664">"No s\'ha pogut desar el document."</string>
     <string name="create_error" msgid="3735649141335444215">"No s\'ha pogut crear la carpeta"</string>
-    <string name="query_error" msgid="1222448261663503501">"No s\'han pogut consultar els documents"</string>
+    <!-- no translation found for query_error (5999895349602476581) -->
+    <skip />
     <string name="root_recent" msgid="4470053704320518133">"Recent"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> lliures"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Serveis d\'emmagatzematge"</string>
@@ -63,7 +63,8 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Més aplicacions"</string>
     <string name="empty" msgid="7858882803708117596">"Sense elements"</string>
     <string name="no_results" msgid="6622510343880730446">"No hi ha cap coincidència a %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"No es pot obrir el fitxer."</string>
+    <!-- no translation found for toast_no_application (4632640357724698144) -->
+    <skip />
     <string name="toast_failed_delete" msgid="2180678019407244069">"No es poden suprimir alguns documents."</string>
     <string name="share_via" msgid="8966594246261344259">"Comparteix mitjançant"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"S\'estan copiant fitxers"</string>
@@ -85,22 +86,15 @@
     <string name="copy_preparing" msgid="3896202461003039386">"S\'està preparant una còpia…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"S\'està preparant per moure\'ls..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"S\'està preparant per suprimir…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">No s\'han pogut copiar <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
-      <item quantity="one">No s\'ha pogut copiar <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
-    </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="other">No s\'han pogut moure <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
-      <item quantity="one">No s\'ha pogut moure <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
-    </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="other">No s\'han pogut suprimir <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
-      <item quantity="one">No s\'ha pogut suprimir <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
+    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
+    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Toca per veure\'n els detalls"</string>
     <string name="close" msgid="3043722427445528732">"Tanca"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aquests fitxers no s\'han copiat: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Aquests fitxers no s\'han mogut: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
+    <skip />
+    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
+    <skip />
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Aquests fitxers s\'han convertit a un altre format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">S\'han copiat <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers al porta-retalls.</item>
