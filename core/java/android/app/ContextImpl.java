@@ -58,6 +58,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.storage.IMountService;
+import android.system.ErrnoException;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -482,21 +485,20 @@ class ContextImpl extends Context {
         return f.delete();
     }
 
-    // Common-path handling of app data dir creation
+    /**
+     * Common-path handling of app data dir creation
+     */
     private static File ensurePrivateDirExists(File file) {
         if (!file.exists()) {
-            if (!file.mkdirs()) {
-                if (file.exists()) {
-                    // spurious failure; probably racing with another process for this app
-                    return file;
+            try {
+                Os.mkdir(file.getAbsolutePath(), 0771);
+            } catch (ErrnoException e) {
+                if (e.errno == OsConstants.EEXIST) {
+                    // We must have raced with someone; that's okay
+                } else {
+                    Log.w(TAG, "Failed to ensure " + file + ": " + e.getMessage());
                 }
-                Log.w(TAG, "Failed to ensure directory " + file.getAbsolutePath());
-                return null;
             }
-            FileUtils.setPermissions(
-                    file.getPath(),
-                    FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                    -1, -1);
         }
         return file;
     }
