@@ -1229,7 +1229,7 @@ public:
 
 class DrawSomeTextOp : public DrawOp {
 public:
-    DrawSomeTextOp(const char* text, int bytesCount, int count, const SkPaint* paint)
+    DrawSomeTextOp(const glyph_t* text, int bytesCount, int count, const SkPaint* paint)
             : DrawOp(paint), mText(text), mBytesCount(bytesCount), mCount(count) {};
 
     virtual void output(int level, uint32_t logFlags) const override {
@@ -1251,14 +1251,14 @@ public:
     }
 
 protected:
-    const char* mText;
+    const glyph_t* mText;
     int mBytesCount;
     int mCount;
 };
 
 class DrawTextOnPathOp : public DrawSomeTextOp {
 public:
-    DrawTextOnPathOp(const char* text, int bytesCount, int count,
+    DrawTextOnPathOp(const glyph_t* text, int bytesCount, int count,
             const SkPath* path, float hOffset, float vOffset, const SkPaint* paint)
             : DrawSomeTextOp(text, bytesCount, count, paint),
             mPath(path), mHOffset(hOffset), mVOffset(vOffset) {
@@ -1280,7 +1280,7 @@ private:
 
 class DrawTextOp : public DrawStrokableOp {
 public:
-    DrawTextOp(const char* text, int bytesCount, int count, float x, float y,
+    DrawTextOp(const glyph_t* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds)
             : DrawStrokableOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
@@ -1341,7 +1341,7 @@ public:
     virtual const char* name() override { return "DrawText"; }
 
 private:
-    const char* mText;
+    const glyph_t* mText;
     int mBytesCount;
     int mCount;
     float mX;
