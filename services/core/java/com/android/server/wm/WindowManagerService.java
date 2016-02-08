@@ -2154,6 +2154,14 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return;
             }
+            // We set this here instead of removeWindowLocked because we only want it to be
+            // true when the client has requested we remove the window. In other remove
+            // cases, we have to wait for activity stop to safely remove the window (as the
+            // client may still be using the surface). In this case though, the client has
+            // just dismissed a window (for example a Dialog) and activity stop isn't
+            // necessarily imminent, so we need to know not to wait for it after our
+            // hanimation (if applicable) finishes.
+            win.mClientRemoveRequested = true;
             removeWindowLocked(win);
         }
     }
@@ -4188,6 +4196,24 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void notifyAppStopped(IBinder token) {
+        if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
+                "notifyAppStopped()")) {
+            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        }
+
+        synchronized(mWindowMap) {
+            final AppWindowToken wtoken;
+            wtoken = findAppWindowToken(token);
+            if (wtoken == null) {
+                Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: " + token);
+                return;
+            }
+            wtoken.notifyAppStopped();
+        }
+    }
+
+    @Override
     public void setAppVisibility(IBinder token, boolean visible) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppVisibility()")) {
@@ -4210,6 +4236,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mOpeningApps.remove(wtoken);
             mClosingApps.remove(wtoken);
+            wtoken.mAppStopped = false;
             wtoken.waitingToShow = false;
             wtoken.hiddenRequested = !visible;
 
