@@ -23,7 +23,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="9007462326786949889">"Para fazer chamadas e enviar mensagens por Wi-Fi, comece por pedir ao seu operador para configurar este serviço. Em seguida, nas Definições, ative novamente as Chamadas Wi-Fi."</item>
+    <item msgid="9007462326786949889">"Para fazer chamadas e enviar mensagens por Wi-Fi, comece por pedir ao seu operador para configurar o serviço. Em seguida, nas Definições, ative novamente as Chamadas Wi-Fi."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6747587721329739803">"Registar-se junto do seu operador"</item>

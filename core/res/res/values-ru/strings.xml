@@ -1047,16 +1047,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта добавлена"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Перезагрузите устройство, чтобы подключиться к мобильной сети."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Чтобы SIM-карта работала корректно, установите и запустите приложение оператора."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"СКАЧАТЬ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ СЕЙЧАС"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Установлена новая SIM-карта"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Нажмите, чтобы настроить."</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Настройка времени"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Настройка даты"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Установить"</string>
@@ -1547,7 +1542,7 @@
       <item quantity="other">На %d часа</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="9128205721301330797">"Следующий сигнал в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"До следующего будильника в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Пока вы не отключите режим \"Не беспокоить\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>

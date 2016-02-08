@@ -1031,16 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM 카드 추가됨"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"이동통신망에 액세스하려면 기기를 다시 시작하세요."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"다시 시작"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"새 SIM이 제대로 작동하게 하려면 이동통신사의 앱을 설치하고 열어야 합니다."</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"앱 다운로드"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"나중에"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"새 SIM이 삽입됨"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"탭하여 설정"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"시간 설정"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"날짜 설정"</string>
     <string name="date_time_set" msgid="5777075614321087758">"설정"</string>

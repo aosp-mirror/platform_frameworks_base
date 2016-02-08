@@ -1031,16 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM քարտը ավելացվել է"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Վերագործարկեք ձեր սարքը` բջջային ցանց մուտք ունենալու համար:"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Վերագործարկել"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Նոր SIM քարտի պատշաճ աշխատանքն ապահովելու համար ձեզ անհրաժեշտ է տեղադրել և գործարկել ձեր օպերատորից ստացած հավելվածը:"</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"ՏԵՂԱԴՐԵԼ ՀԱՎԵԼՎԱԾԸ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"ՈՉ ՀԻՄԱ"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"Տեղադրվել է նոր SIM քարտ"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"Հպեք՝ կարգավորելու համար"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Սահմանել ժամը"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Սահմանել ամսաթիվը"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Սահմանել"</string>

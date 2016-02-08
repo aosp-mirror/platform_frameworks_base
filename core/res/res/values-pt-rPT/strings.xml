@@ -911,8 +911,8 @@
     <string name="noApplications" msgid="2991814273936504689">"Nenhuma aplicação pode efetuar esta ação."</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> sofreu uma falha de sistema."</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> sofreu uma falha de sistema."</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> continua a parar"</string>
-    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> continua a parar"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> continua a falhar"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> continua a falhar"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Reiniciar aplicação"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Repor e reiniciar aplicação"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar comentários"</string>
