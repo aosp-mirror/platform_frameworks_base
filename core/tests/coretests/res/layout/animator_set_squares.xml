@@ -4,7 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@android:color/white"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:id="@+id/container">
     <View
         android:layout_width="50dp"
         android:layout_height="50dp"
