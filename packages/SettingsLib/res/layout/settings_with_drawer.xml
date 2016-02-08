@@ -23,7 +23,8 @@
         android:id="@+id/content_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:fitsSystemWindows="false" >
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -35,6 +36,7 @@
                 android:layout_height="wrap_content"
                 android:navigationContentDescription="@*android:string/action_bar_up_description"
                 android:theme="?android:attr/actionBarTheme"
+                android:paddingTop="@*android:dimen/status_bar_height"
                 style="?android:attr/toolbarStyle"
                 android:background="?android:attr/colorPrimary" />
         </FrameLayout>
