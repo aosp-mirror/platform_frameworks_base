@@ -556,6 +556,9 @@ class AppWindowToken extends WindowToken {
         mFrozenBounds.remove();
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
+            if (!win.mHasSurface) {
+                continue;
+            }
             win.mLayoutNeeded = true;
             win.setDisplayLayoutNeeded();
             if (!service.mResizingWindows.contains(win)) {

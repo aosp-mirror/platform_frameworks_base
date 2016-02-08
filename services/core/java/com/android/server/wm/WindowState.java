@@ -2152,7 +2152,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         // background.
         return (mDisplayContent.mDividerControllerLocked.isResizing()
                         || mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) &&
-                !task.inFreeformWorkspace();
+                !task.inFreeformWorkspace() && isVisibleLw();
 
     }
 
