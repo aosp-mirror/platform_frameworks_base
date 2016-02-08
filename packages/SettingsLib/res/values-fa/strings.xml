@@ -206,8 +206,10 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"چشمک زدن صفحه هنگام انجام عملیات طولانی توسط برنامه‌ها در رشته اصلی"</string>
     <string name="pointer_location" msgid="6084434787496938001">"محل اشاره‌گر"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"هم‌پوشانی صفحهٔ نمایش با نمایش داده لمسی فعلی"</string>
-    <string name="show_touches" msgid="1356420386500834339">"نمایش تعداد لمسها"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"نمایش بازخورد دیداری برای لمسها"</string>
+    <!-- no translation found for show_touches (2642976305235070316) -->
+    <skip />
+    <!-- no translation found for show_touches_summary (6101183132903926324) -->
+    <skip />
     <string name="show_screen_updates" msgid="5470814345876056420">"نمایش به‌روزرسانی سطح"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"هنگام به‌روزرسانی سطوح پنجره همه فلش شوند"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"‏نمایش به روزرسانی‌های نمای GPU"</string>
@@ -251,7 +253,8 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"پشتیبانی برای پنجره‌های آزاد آزمایشی را امکان‌پذیر می‌کند"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"گذرواژه پشتیبان‌گیری محلی"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"پشتیبان‌گیری کامل رایانه درحال حاضر محافظت نمی‌شود"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"برای تغییر یا حذف گذرواژه برای نسخه‌های پشتیبان کامل دسک‌تاپ لمس کنید"</string>
+    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
+    <skip />
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"گذرواژه جدید نسخهٔ پشتیبان تنظیم شد"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"گذرواژه جدید و تأیید آن با یکدیگر مطابقت ندارند"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"گذرواژه پشتیبان‌گیری تنظیم نشد"</string>
@@ -266,8 +269,10 @@
     <item msgid="5363960654009010371">"رنگ‌های بهینه‌شده برای محتوای دیجیتالی"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"برنامه‌های غیرفعال"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"غیرفعال. برای تغییر حالت لمس کنید."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"فعال. برای تغییر حالت لمس کنید."</string>
+    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
+    <skip />
+    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="8097287939865165213">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"حالت شب"</string>
@@ -309,4 +314,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"پر"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"سرپرست آن را غیرفعال کرده است"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

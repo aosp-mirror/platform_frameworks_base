@@ -48,9 +48,9 @@
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ফাইল স্থানান্তর"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"ইনপুট ডিভাইস"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"ইন্টারনেট অ্যাক্সেস"</string>
-    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"পরিচিতি ভাগ করা"</string>
-    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"পরিচিতি ভাগ করার কাজে ব্যবহার করুন"</string>
-    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ইন্টারনেট সংযোগ ভাগ করা হচ্ছে"</string>
+    <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"পরিচিতি শেয়ার করা"</string>
+    <string name="bluetooth_profile_pbap_summary" msgid="6605229608108852198">"পরিচিতি শেয়ার করার কাজে ব্যবহার করুন"</string>
+    <string name="bluetooth_profile_pan_nap" msgid="8429049285027482959">"ইন্টারনেট সংযোগ শেয়ার করা হচ্ছে"</string>
     <string name="bluetooth_profile_map" msgid="5465271250454324383">"বার্তা অ্যাক্সেস"</string>
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM -এর অ্যাক্সেস"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"মিডিয়া অডিওতে সংযুক্ত রয়েছে"</string>
@@ -206,8 +206,10 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"মুখ্য থ্রেডে অ্যাপ্লিকেশানগুলির দীর্ঘ কার্যকলাপের সময় স্ক্রীন ফ্ল্যাশ করে"</string>
     <string name="pointer_location" msgid="6084434787496938001">"পয়েন্টারের অবস্থান"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"স্ক্রীন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
-    <string name="show_touches" msgid="1356420386500834339">"স্পর্শগুলি দেখান"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"স্পর্শগুলির জন্য ভিজ্যুয়াল প্রতিক্রিয়া দেখান"</string>
+    <!-- no translation found for show_touches (2642976305235070316) -->
+    <skip />
+    <!-- no translation found for show_touches_summary (6101183132903926324) -->
+    <skip />
     <string name="show_screen_updates" msgid="5470814345876056420">"সারফেস আপডেটগুলি দেখান"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"সম্পূর্ণ উইন্ডোর সারফেস আপডেট হয়ে গেলে সেটিকে ফ্ল্যাশ করুন"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU দৃশ্য আপডেটগুলি প্রদর্শন করুন"</string>
@@ -251,7 +253,8 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"পরীক্ষামূলক ফ্রি-ফর্ম উইন্ডোগুলির জন্য সহায়তা সক্ষম করুন৷"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ডেস্কটপ ব্যাকআপ পাসওয়ার্ড"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ডেস্কটপ পূর্ণ ব্যাকআপ বর্তমানে সুরক্ষিত নয়"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ডেস্কটপ পুরো ব্যাকআপের জন্য পাসওয়ার্ড পরিবর্তন বা মুছে ফেলার জন্য স্পর্শ করুন"</string>
+    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
+    <skip />
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"নতুন ব্যাকআপ পাসওয়ার্ড সেট করুন"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ মিলছে না"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ব্যাকআপ পাসওয়ার্ড সেট করা ব্যর্থ"</string>
@@ -266,8 +269,10 @@
     <item msgid="5363960654009010371">"ডিজিট্যাল সামগ্রীর জন্য অপ্টিমাইজ করা রঙগুলি"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"নিষ্ক্রিয় অ্যাপ্লিকেশানগুলি"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"নিষ্ক্রিয় রয়েছে৷ টগল করতে স্পর্শ করুন৷"</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"সক্রিয় রয়েছে৷ টগল করতে স্পর্শ করুন৷"</string>
+    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
+    <skip />
+    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="8097287939865165213">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"রাতের মোড"</string>
@@ -309,4 +314,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"চার্জ হচ্ছে না"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"পূর্ণ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"প্রশাসক দ্বারা অক্ষমিত"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

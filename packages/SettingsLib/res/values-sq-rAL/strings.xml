@@ -206,8 +206,10 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Ndriço ekranin kur aplikacionet kryejnë operacione të gjata teksa bashkëveprojnë"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Vendndodhja e treguesit"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Mbivendosja e ekranit tregon të dhënat e prekjes"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Shfaq prekjet"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Shfaq trajektoren vizuale për prekjet"</string>
+    <!-- no translation found for show_touches (2642976305235070316) -->
+    <skip />
+    <!-- no translation found for show_touches_summary (6101183132903926324) -->
+    <skip />
     <string name="show_screen_updates" msgid="5470814345876056420">"Shfaq përditësimet e sipërfaqes"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Ndriço të gjitha sipërfaqet e dritares kur ato të përditësohen"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Shfaq përditësimet e pamjes së GPU-së"</string>
@@ -251,7 +253,8 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Aktivizon mbështetjen për dritaret eksperimentale me formë të lirë."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Fjalëkalimi rezervë i kompjuterit"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Rezervimet e plota në kompjuter nuk janë të mbrojtura aktualisht"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Prek për të ndryshuar ose hequr fjalëkalimin për rezervime të plota të desktopit"</string>
+    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
+    <skip />
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Fjalëkalimi i ri u vendos"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Fjalëkalimi i ri dhe konfirmimi nuk përputhen"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Vendosja e fjalëkalimit dështoi"</string>
@@ -266,8 +269,10 @@
     <item msgid="5363960654009010371">"Ngjyra të optimizuara për përmbajtjet dixhitale"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Aplikacionet joaktive"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Joaktiv. Preke për ta ndryshuar."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktiv. Preke për ta ndryshuar."</string>
+    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
+    <skip />
+    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Shërbimet në ekzekutim"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Modaliteti i natës"</string>
@@ -309,4 +314,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nuk po ngarkohet"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"E mbushur"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Çaktivizuar nga administratori"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

@@ -206,8 +206,10 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"මූලික පොටේ යෙදුම්, දිගු මෙහෙයුම් කරන විට තිරය ෆ්ලෑෂ් කරන්න"</string>
     <string name="pointer_location" msgid="6084434787496938001">"සූචක පිහිටීම"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"තිර උඩැතිරිය වර්තමාන ස්පර්ශ දත්ත පෙන්වයි"</string>
-    <string name="show_touches" msgid="1356420386500834339">"ස්පර්ශ පෙන්වන්න"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"ස්පර්ශ සඳහා දෘශ්‍ය ප්‍රතිපෝෂණය පෙන්වන්න"</string>
+    <!-- no translation found for show_touches (2642976305235070316) -->
+    <skip />
+    <!-- no translation found for show_touches_summary (6101183132903926324) -->
+    <skip />
     <string name="show_screen_updates" msgid="5470814345876056420">"පෘෂ්ඨ යාවත්කාලීන පෙන්වන්න"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"යාවත්කාලින වනවිට මුළු කවුළු තලයම දැල්වෙන්න"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU පෙනුම් යාවත්කාලීන පෙන්වන්න"</string>
@@ -251,7 +253,8 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"පරීක්ෂණාත්මක අනියම් හැඩැති කවුළු සඳහා සහාය සබල කරයි."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ඩෙස්ක්ටොප් උපස්ථ මුරපදය"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ දැනට ආරක්ෂා කර නොමැත"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ඩෙස්ක්ටොප් සම්පූර්ණ උපස්ථ සඳහා මුරපදය වෙනස් කිරීමට හෝ ඉවත් කිරීමට ස්පර්ශ කරන්න"</string>
+    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
+    <skip />
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"නව උපස්ථ මුරපදය සකසන ලදි"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"නව මුරපදය සහ සත්‍යාපනය නොගැළපුනි"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"උපස්ථ මුරපදය පිහිටුවීම අසාර්ථකය"</string>
@@ -266,8 +269,10 @@
     <item msgid="5363960654009010371">"ඩිජිටල් අන්තර්ගතය සඳහා වර්ණ ප්‍රශස්ත කරන ලද"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"අක්‍රිය යෙදුම්"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"අක්‍රියයි. ටොගල කිරීමට ස්පර්ශ කරන්න."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"සක්‍රියයි. ටොගල කිරීමට ස්පර්ශය. කරන්න."</string>
+    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
+    <skip />
+    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
+    <skip />
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ධාවනය වන සේවා"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"දැනට ධාවනය වන සේවා බලන්න සහ පාලනය කරන්න"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"රාත්‍රී ප්‍රකාරය"</string>
@@ -309,4 +314,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ආරෝපණය නොවෙමින්"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"පූර්ණ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"පරිපාලක විසින් අබල කරන ලදී"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>
