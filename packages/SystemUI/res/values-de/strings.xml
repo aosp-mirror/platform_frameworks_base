@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ablehnen"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> regelt die Lautstärke."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Zum Wiederherstellen des Originals hier tippen"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">"\", \" "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du verwendest dein Arbeitsprofil."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Eingebettete Akku-Prozentzahl anzeigen"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Uhrsekunden in der Statusleiste anzeigen. Kann sich auf die Akkulaufzeit auswirken."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Schnelleinstellungen neu anordnen"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Helligkeit in den Schnelleinstellungen anzeigen"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Teilen des Bildschirms durch Wischen nach oben aktivieren"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktiviert die Bewegung zum Teilen des Bildschirms, bei der von der Schaltfläche \"Übersicht\" nach oben gewischt wird"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentell"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth aktivieren?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Zum Verbinden von Tastatur und Tablet muss Bluetooth aktiviert sein."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Mit den Keycode-Schaltflächen können der Navigationsleiste Tasten hinzugefügt werden. Wird eine Keycode-Schaltfläche ausgewählt, führt sie die Aktion der entsprechenden Taste aus. Wählen Sie zuerst die Taste für die Schaltfläche aus und anschließend ein Bild, das auf der Schaltfläche erscheinen soll."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Taste auswählen"</string>
     <string name="preview" msgid="9077832302472282938">"Vorschau"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Zum Hinzufügen von Kacheln ziehen"</string>
 </resources>

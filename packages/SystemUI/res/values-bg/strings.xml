@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Отказване"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> изпълнява ролята на диалоговия прозорец за силата на звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Докоснете, за да възстановите оригинала."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Използвате служебния си потребителски профил"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Тунер на системния потребителски интерфейс"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Показване на процента на вградената батерия"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Показване на секундите на часовника в лентата на състоянието. Може да се отрази на живота на батерията."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Пренареждане на бързите настройки"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Показване на яркостта от бързите настройки"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Актив. на жеста за разделен екран с прек. на пръст нагоре"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Активиране на жеста за влизане в режим на разделен екран чрез прокарване на пръст нагоре от бутона за общ преглед"</string>
     <string name="experimental" msgid="6198182315536726162">"Експериментални"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Да се включи ли Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"За да свържете клавиатурата с таблета си, първо трябва да включите Bluetooth."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Бутоните с клавишни кодове ви дават възможност да добавяте клавиши от клавиатурата към лентата за навигация. При докосване на такъв бутон се симулира натискане на съответния клавиш. Първо, трябва да изберете клавиш за бутона, а след това – изображение, което да се показва върху него."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Избиране на клавиш от клавиатурата"</string>
     <string name="preview" msgid="9077832302472282938">"Визуализация"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Преместете с плъзгане, за да добавите плочки"</string>
 </resources>

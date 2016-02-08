@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Recusar"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> é a caixa de diálogo do volume"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Toque para restaurar o original."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Está a utilizar o seu perfil de trabalho"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sintonizador da interface do sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar percentagem da bateria incorporada"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Mostrar segundos do relógio na barra de estado. Pode afetar a autonomia da bateria."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Reorganizar as Definições rápidas"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Mostrar luminosidade nas Definições rápidas"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Ativar acelerador de deslize ráp. para cima do ecrã dividido"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Ativar o gesto para aceder ao ecrã dividido ao deslizar rapidamente para cima a partir do botão Vista geral"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Pretende ativar o Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Para ligar o teclado ao tablet, tem de ativar primeiro o Bluetooth."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Os códigos de tecla permitem adicionar teclas do teclado à Barra de navegação. Quando são premidos, emulam a tecla do teclado selecionada. É necessário selecionar primeiro a tecla para botão e depois uma imagem que será apresentada no mesmo."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Selecionar o botão do teclado"</string>
     <string name="preview" msgid="9077832302472282938">"Pré-visualizar"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arraste para adicionar mosaicos"</string>
 </resources>

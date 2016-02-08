@@ -32,7 +32,7 @@
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bildirishnomalar yo‘q"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Joriy"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Eslatmalar"</string>
-    <string name="battery_low_title" msgid="6456385927409742437">"Batareya quvvati kam"</string>
+    <string name="battery_low_title" msgid="6456385927409742437">"Batareya quvvati kam qoldi"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash funksiyasi yoqilgan."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB orqali zaryadlab bo‘lmaydi.\nFaqat taklif qilingan zaryadlagichdan foydalaning."</string>
@@ -52,7 +52,7 @@
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Kiritish usullarini moslash"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tashqi tugmatag"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovaga USB qurilmaga kirishga ruxsat berilsinmi?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilova dasturiga USB jihoziga kirish uchun ruxsat berilsinmi?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasiga USB qurilmaga kirish uchun ruxsat berilsinmi?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"USB qurilma ulanganda <xliff:g id="ACTIVITY">%1$s</xliff:g> ochilsinmi?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"USB jihoz ulanganda <xliff:g id="ACTIVITY">%1$s</xliff:g> ochilsinmi?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Bu USB jihoz bilan ishlash uchun dastur o‘rnatilmagan.Ushbu jihoz haqida: <xliff:g id="URL">%1$s</xliff:g>"</string>
@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Rad etish"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ovoz balandligini boshqaradi"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Aslini tiklash uchun bosing."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"SystemUI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Batareya foizi ko‘rsatilsin"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Holat panelida soat soniyalari ko‘rsatilsin. Bu batareya resursiga ta’sir qilishi mumkin."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Tezkor sozlamalarni qayta tartiblash"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Tezkor sozlamalarda yorqinlikni ko‘rsatish"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Tepaga surib, ekranni bo‘lish uchun tezlatkichni yoqish"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Umumiy ma’lumot tugmasini tepaga surish orqali ekranni bo‘lish ishorasini yoqish"</string>
     <string name="experimental" msgid="6198182315536726162">"Tajribaviy"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth yoqilsinmi?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Klaviaturani planshetingizga ulash uchun Bluetooth xizmatini yoqishingiz kerak."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Tugmalar kodi yordamida klaviatura tugmalarini navigatsiya paneliga qo‘shish mumkin. Ular bosilganda tanlangan klaviatura tugmasining bosilishini taqlid qiladi. Tugmalar kodi uchun klaviatura tugmasi va rasm tanlanishi kerak."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Klaviatura tugmasini tanlang"</string>
     <string name="preview" msgid="9077832302472282938">"Oldindan ko‘rish"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Fragmentlar qo‘shish uchun torting"</string>
 </resources>
