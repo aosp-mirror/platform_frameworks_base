@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"បដិសេធ"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> គឺជាប្រអប់សម្លេង"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"ប៉ះដើម្បីស្តារច្បាប់ដើម។"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"អ្នកកំពុងប្រើប្រវត្តិរូបការងាររបស់អ្នក"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"កម្មវិធីសម្រួល UI ប្រព័ន្ធ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"បង្ហាញភាគរយថាមពលថ្មដែលបានបង្កប់"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"បង្ហាញវិនាទីនៅលើរបារស្ថានភាពអាចនឹងប៉ះពាល់ដល់ថាមពលថ្ម។"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"រៀបចំការកំណត់រហ័សឡើងវិញ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"បង្ហាញកម្រិតពន្លឺនៅក្នុងការកំណត់រហ័ស"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"បើកដំណើរការឧបករណ៍បង្កើនល្បឿនការអូសទៅលើដើម្បីបំបែកអេក្រង់"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"បើកដំណើរការកាយវិការដើម្បីបំបែកអេក្រង់ដោយអូសទៅលើចាប់ពីប៊ូតុងទិដ្ឋភាព"</string>
     <string name="experimental" msgid="6198182315536726162">"ពិសោធន៍"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"បើកប៊្លូធូសឬ?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ដើម្បីភ្ជាប់ក្តារចុចរបស់អ្នកជាមួយនឹងថេប្លេតរបស់អ្នក អ្នកត្រូវតែបើកប៊្លូធូសជាមុនសិន។"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"ប៊ូតុងលេខកូដគ្រាប់ចុចអនុញ្ញាតឲ្យមានការបន្ថែមគ្រាប់ចុចនៃក្តារចុចទៅក្នុងរបាររុករក។ នៅពេលចុចប៊ូតុងទាំងនោះ ពួកវាបង្កើតមុខងារឲ្យគ្រាប់ចុចនៃក្តារចុចដែលបានជ្រើស។ សូមជ្រើសរើសគ្រាប់ចុចសម្រាប់ប៊ូតុងជាមុនសិន មុនពេលដែលរូបភាពត្រូវបានបង្ហាញនៅលើប៊ូតុង។"</string>
     <string name="select_keycode" msgid="7413765103381924584">"ជ្រើសប៊ូតុងក្តារចុច"</string>
     <string name="preview" msgid="9077832302472282938">"មើលជាមុន"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"អូសដើម្បីបន្ថែមចំណងជើង"</string>
 </resources>

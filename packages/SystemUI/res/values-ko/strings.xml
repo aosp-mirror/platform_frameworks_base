@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"거부"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"직장 프로필을 사용하고 있습니다."</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"시스템 UI 튜너"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"내장형 배터리 잔량 비율 표시"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"상태 표시줄에 시계 초 단위를 표시합니다. 배터리 수명에 영향을 줄 수도 있습니다."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"빠른 설정 재정렬"</string>
     <string name="show_brightness" msgid="6613930842805942519">"빠른 설정에서 밝기 표시"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"위로 스와이프하여 창 분할하기 사용 설정"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"최근 사용 버튼에서 위로 스와이프하기 동작으로 창 분할 모드를 사용 설정합니다."</string>
     <string name="experimental" msgid="6198182315536726162">"베타"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"블루투스를 켜시겠습니까?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"키보드를 태블릿에 연결하려면 먼저 블루투스를 켜야 합니다."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"키 코드 버튼을 사용하면 키보드 키를 탐색 메뉴에 추가할 수 있습니다. 키 코드 버튼을 누르면 선택된 키보드 키가 에뮬레이션됩니다. 먼저 버튼에 대해 키를 선택하고 그다음 버튼에 표시될 이미지를 선택해야 합니다."</string>
     <string name="select_keycode" msgid="7413765103381924584">"키보드 버튼 선택"</string>
     <string name="preview" msgid="9077832302472282938">"미리보기"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"드래그하여 타일 추가"</string>
 </resources>

@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ငြင်းပယ်သည်"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အသံဒိုင်ယာလော့ခ်ဖြစ်သည်"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"မူရင်းအားပြန်လည်သိမ်းဆည်းရန် ထိပါ။"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">"၊ "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"သင်သည် အလုပ်ပရိုဖိုင်းအား သုံးနေသည်"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"စနစ် UI ဖမ်းစက်"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"မြုတ်ထားသည့် ဘတ်ထရီ ရာခိုင်နှုန်းကို ပြပါ"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"အခြေအနေပြနေရာမှာ နာရီ စက္ကန့်များကို ပြပါ။ ဘက်ထရီ သက်တမ်းကို အကျိုးသက်ရောက်နိုင်တယ်။"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"အမြန် ဆက်တင်များကို ပြန်စီစဉ်ရန်"</string>
     <string name="show_brightness" msgid="6613930842805942519">"အမြန် ဆက်တင်များထဲက တောက်ပမှုကို ပြရန်"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"မျက်နှာပြင်ခွဲကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲခြင်း လုပ်ဆောင်ချက်ကိုဖွင့်ပါ"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"ခြုံကြည့်သည့်ခလုတ်မှ အပေါ်သို့ပွတ်ဆွဲခြင်းဖြင့် မျက်နှာပြင်ခွဲကြည့်ရန် လက်အမူအယာကိုဖွင့်ပါ"</string>
     <string name="experimental" msgid="6198182315536726162">"စမ်းသပ်ရေး"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ဘလူးတုသ် ဖွင့်ရမလား။"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"ကီးကုဒ်ခလုတ်များသည် ကီးဘုတ်ခလုတ်များကို ရွှေ့လျားရန်ဘားတန်းသို့ ပေါင်းထည့်ရန်ခွင့်ပြုသည်။ နှိပ်လိုက်လျှင် ၎င်းသည် ရွေးချယ်ထားသည့် ကီးဘုတ်ခလုတ်အတိုင်း လုပ်ဆောင်ပါသည်။ ပထမဦးစွာ ခလုတ်အတွက် ကီးကိုရွေးချယ်ပြီး ခလုတ်ပေါ်တွင် ပြမည့်ပုံကို ဆက်လက်ရွေးချယ်ရပါမည်။"</string>
     <string name="select_keycode" msgid="7413765103381924584">"ကီးဘုတ်ခလုတ်ကို ရွေးချယ်ပါ"</string>
     <string name="preview" msgid="9077832302472282938">"အစမ်းကြည့်ပါ"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"အချပ်များကိုထည့်ရန် ဖိဆွဲပါ"</string>
 </resources>

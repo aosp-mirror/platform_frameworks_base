@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"अस्वीकार गर्नुहोस्"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद हो"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल पुनर्स्थापना गर्न छुनुहोस्।"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"तपाईँले कार्य प्रोफाइल प्रयोग गर्दै हुनुहुन्छ"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"प्रणाली UI ट्युनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"इम्बेड गरिएको ब्याट्री प्रतिशत देखाउनुहोस्"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"वस्तुस्थिति पट्टीको घडीमा सेकेन्ड देखाउनुहोस्। ब्याट्री आयु प्रभावित हुन सक्छ।"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"द्रुत सेटिङहरू पुनः व्यवस्थित गर्नुहोस्"</string>
     <string name="show_brightness" msgid="6613930842805942519">"द्रुत सेटिङहरूमा उज्यालो देखाउनुहोस्"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"विभाजित-स्क्रिनको स्वाइप-अप एक्सेलेटर सक्रिय गर्नुहोस्"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"परिदृश्य बटनदेखि माथि स्वाइप गरी विभाजित-स्क्रिन प्रविष्ट गर्न गेस्चरलाई सक्रिय गर्नुहोस्"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लुटुथ सक्रिय पार्ने हो?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आफ्नो ट्याब्लेटसँग किबोर्ड जोड्न, पहिले तपाईँले ब्लुटुथ सक्रिय गर्नुपर्छ।"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Keycode बटनहरूले किबोर्ड कुञ्जीहरूलाई नेभिगेशन पट्टीमा थपिने अनुमति दिन्छ। थिच्दा तिनीहरूले चयन गरिएको किबोर्ड कुञ्जी अनुकरण गर्छन्। सुरुमा बटनका लागि कुञ्जी चयन गर्नुपर्छ, त्यसपछि बटनमा छवि देखिनुपर्छ।"</string>
     <string name="select_keycode" msgid="7413765103381924584">"किबोर्ड बटन चयन गर्नुहोस्"</string>
     <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइलहरू थप्न तान्नुहोस्"</string>
 </resources>

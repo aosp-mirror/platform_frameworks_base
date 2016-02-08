@@ -413,7 +413,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Zavrni"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> je pogovorno okno glede prostornine"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Dotaknite se, če želite obnoviti izvirnik."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Uporabljate delovni profil"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Uglaševalnik uporabniškega vmesnika sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži odstotek napolnjenosti vgraj. akumulatorja"</string>
@@ -449,6 +448,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Prikaže sekunde pri uri v vrstici stanja. To lahko vpliva na čas delovanja pri akumulatorskem napajanju."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Preuredi hitre nastavitve"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Prikaz svetlosti v hitrih nastavitvah"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Omogočanje pospeš. za razdeljeni zaslon z vlečenjem navzgor"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Omogočanje poteze za zagon razdeljenega zaslona, tako da uporabnik od gumba za pregled povleče s prstom navzgor"</string>
     <string name="experimental" msgid="6198182315536726162">"Poskusno"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želite vklopiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Če želite povezati tipkovnico in tablični računalnik, vklopite Bluetooth."</string>
@@ -521,4 +522,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Gumbi za kode tipk omogočajo dodajanje tipk tipkovnice v vrstico za krmarjenje. Ko jih pritisnete, posnemajo izbrano tipko tipkovnice. Najprej je treba izbrati tipko za gumb, nato pa sliko, ki bo prikazana na gumbu."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Izbira gumba tipkovnice"</string>
     <string name="preview" msgid="9077832302472282938">"Predogled"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Povlecite, če želite dodati ploščice"</string>
 </resources>

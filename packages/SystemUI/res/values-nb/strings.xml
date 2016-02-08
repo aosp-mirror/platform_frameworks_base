@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Ikke tillat"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er volumdialogen"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Trykk for å gå tilbake til den opprinnelige volumdialogen."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">"&amp;quot;, &amp;quot; "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruker jobbprofilen din"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis prosent for det innebygde batteriet"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statusfeltet på klokken. Det kan påvirke batteritiden."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omorganiser hurtiginnstillingene"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i hurtiginnstillingene"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Slå på delt skjerm ved å sveipe opp med akseleratoren"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Slå på bevegelsen for å åpne delt skjerm ved å sveipe opp fra Oversikt-knappen"</string>
     <string name="experimental" msgid="6198182315536726162">"På forsøksstadiet"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå på Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"For å koble tastaturet til nettbrettet ditt må du først slå på Bluetooth."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Du kan bruke nøkkelkodeknapper for å legge tastaturtaster direkte på navigasjonsraden. Når du trykker på disse knappene, fungerer de på samme måte som de valgte tastaturtastene. Du må først velge hvilken tast hver knapp skal fungere som, og deretter et bilde som vises på knappen."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Velg tastaturtast"</string>
     <string name="preview" msgid="9077832302472282938">"Forhåndsvisning"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til fliser"</string>
 </resources>

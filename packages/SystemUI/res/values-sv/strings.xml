@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Neka"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> används som volymkontroll"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryck här om du vill återställa den ursprungliga appen."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du använder din jobbprofil"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Inställningar för systemgränssnitt"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Visa inbäddad batteriprocent"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Visa klocksekunder i statusfältet. Detta kan påverka batteritiden."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ordna snabbinställningarna"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Visa ljusstyrka i snabbinställningarna"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Aktivera accelerator för delad skärm när du sveper uppåt"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktivera en rörelse som delar skärmen när du sveper uppåt från knappen Översikt"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentella"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vill du aktivera Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Om du vill ansluta tangentbordet till surfplattan måste du först aktivera Bluetooth."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Med knappar för tangentkod kan tangenter läggas till i navigeringsfältet. När du trycker på dem förvandlas de till den valda tangenten. Först måste du välja en tangent för knappen och därefter en bild som ska visas på knappen."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Välj tangentbordsknapp"</string>
     <string name="preview" msgid="9077832302472282938">"Förhandsgranskning"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Lägg till rutor genom att dra"</string>
 </resources>

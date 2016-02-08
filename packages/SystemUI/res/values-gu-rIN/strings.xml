@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"નકારો"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> એ વૉલ્યૂમ સંવાદ છે"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"મૂળને પુનઃસ્થાપિત કરવા માટે ટચ કરો."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"તમે તમારી કાર્ય પ્રોફાઇલનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"સિસ્ટમ UI ટ્યૂનર"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"એમ્બેડ કરેલ બૅટરી ટકા બતાવો"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ઘડિયાળ સેકન્ડ સ્થિતિ બારમાં બતાવો. બૅટરીની આવરદા પર અસર કરી શકે છે."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ઝડપી સેટિંગ્સને ફરીથી ગોઠવો"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ઝડપી સેટિંગ્સમાં તેજ બતાવો"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"સ્પ્લિટ-સ્ક્રીન સ્વાઇપ-અપ ઍક્સલરેટર સક્ષમ કરો"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"વિહંગાવલોકન બટનમાંથી સ્વાઇપ કરીને સ્પ્લિટ-સ્ક્રીનમાં દાખલ થવા માટે હાવભાવ સક્ષમ કરો"</string>
     <string name="experimental" msgid="6198182315536726162">"પ્રાયોગિક"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ચાલુ કરવુ છે?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"તમારા ટેબ્લેટ સાથે કીબોર્ડ કનેક્ટ કરવા માટે, તમારે પહેલાં Bluetooth ચાલુ કરવાની જરૂર પડશે."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"કીકોડ બટન કીબોર્ડની કીઝને નેવિગેશન બારમાં ઉમેરવાની મંજૂરી આપે છે. જ્યારે દબાવવામાં આવે ત્યારે તે પસંદ કરેલ કીબોર્ડની કીનું અનુસરણ કરે છે. બટન માટે પહેલા કીબોર્ડની કીઝને પસંદ કરવી આવશ્યક છે, તે પછી બટન પર બતાવવામાં આવેલ છબી પસંદ કરવી આવશ્યક છે."</string>
     <string name="select_keycode" msgid="7413765103381924584">"કીબોર્ડ બટન પસંદ કરો"</string>
     <string name="preview" msgid="9077832302472282938">"પૂર્વાવલોકન કરો"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ટાઇલ્સ ઉમેરવા માટે ખેંચો"</string>
 </resources>

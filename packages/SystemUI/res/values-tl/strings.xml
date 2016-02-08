@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tanggihan"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"Ang <xliff:g id="APP_NAME">%1$s</xliff:g> ang volume dialog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Pindutin upang ibalik ang orihinal."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Ginagamit mo ang iyong profile sa trabaho"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Tuner ng System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Ipakita ang naka-embed na porsyento ng baterya"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ipakita ang mga segundo ng orasan sa status bar. Maaaring makaapekto sa tagal ng baterya."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ayusing Muli ang Mga Mabilisang Setting"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Ipakita ang liwanag sa Mga Mabilisang Setting"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"I-enable ang split-screen na swipe-up accelerator"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"I-enable ang gesture upang makapasok sa split-screen sa pamamagitan ng pagsa-swipe pataas mula sa button ng Pangkalahatang-ideya"</string>
     <string name="experimental" msgid="6198182315536726162">"Pang-eksperimento"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"I-on ang Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Upang ikonekta ang iyong keyboard sa iyong tablet, kailangan mo munang i-on ang Bluetooth."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Nagbibigay-daan ang mga button na Keycode na maidagdag ang mga keyboard key sa Navigation Bar. Kapag pinindot, ginagaya ng mga ito ang napiling keyboard key. Una, dapat munang piliin ang key para sa button, kasunod ng larawan na ipapakita sa button."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Pumili ng Button na Keyboard"</string>
     <string name="preview" msgid="9077832302472282938">"I-preview"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Mag-drag upang magdagdag ng mga tile"</string>
 </resources>
