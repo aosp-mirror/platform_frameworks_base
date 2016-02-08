@@ -13,14 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label">Shell</string>
 
     <!-- Title of notification indicating a bugreport is being generated. [CHAR LIMIT=50] -->
-    <string name="bugreport_in_progress_title">Bug report is being generated</string>
+    <string name="bugreport_in_progress_title">Bug report <xliff:g id="id">#%d</xliff:g> is being generated</string>
     <!-- Title of notification indicating a bugreport has been successfully captured. [CHAR LIMIT=50] -->
-    <string name="bugreport_finished_title">Bug report captured</string>
+    <string name="bugreport_finished_title">Bug report <xliff:g id="id">#%d</xliff:g> captured</string>
     <!-- Title of notification indicating a bugreport is being updated before it can be shared. [CHAR LIMIT=50] -->
     <string name="bugreport_updating_title">Adding details to the bug report</string>
     <!-- Content notification indicating a bugreport is being updated before it can be shared, asking the user to wait [CHAR LIMIT=50] -->
@@ -53,12 +52,12 @@
     <string name="bugreport_screenshot_action">Screenshot</string>
 
     <!-- Toast message sent when the a screenshot for the bug report was taken successfully. -->
-    <string name="bugreport_screenshot_taken">Screenshot taken succesfully.</string>
+    <string name="bugreport_screenshot_taken">Screenshot taken successfully.</string>
     <!-- Toast message sent when the a screenshot for the bug report was not taken due to an error. -->
     <string name="bugreport_screenshot_failed">Screenshot could not be taken.</string>
 
     <!--  Title of the dialog asking for user-defined bug report details like name, title, and description. -->
-    <string name="bugreport_info_dialog_title">Bug report details</string>
+    <string name="bugreport_info_dialog_title">Bug report <xliff:g id="id">#%d</xliff:g> details</string>
 
     <!-- Text of the hint asking for the bug report name, which when set will define a suffix in the
          bug report file names. [CHAR LIMIT=30] -->
