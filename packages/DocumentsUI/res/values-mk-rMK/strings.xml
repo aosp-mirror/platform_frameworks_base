@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Приказ на список"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Подреди по"</string>
     <string name="menu_search" msgid="3816712084502856974">"Пребарај"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Поставки на меморија"</string>
     <string name="menu_open" msgid="432922957274920903">"Отвори"</string>
     <string name="menu_save" msgid="2394743337684426338">"Зачувај"</string>
     <string name="menu_share" msgid="3075149983979628146">"Сподели"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Сокриј корени"</string>
     <string name="save_error" msgid="6167009778003223664">"Документот не успеа да се зачува"</string>
     <string name="create_error" msgid="3735649141335444215">"Не успеа да се создаде папка"</string>
-    <string name="query_error" msgid="1222448261663503501">"Барањето за документи не успеа"</string>
+    <string name="query_error" msgid="5999895349602476581">"Во моментов не може да се вчита содржина."</string>
     <string name="root_recent" msgid="4470053704320518133">"Последни"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> слободен простор"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Услуги на складирање"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Повеќе апликации"</string>
     <string name="empty" msgid="7858882803708117596">"Нема ставки"</string>
     <string name="no_results" msgid="6622510343880730446">"Нема совпаѓања во %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Датотеката не се отвора"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Датотеката не може да се отвори"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Некои документи не може да се избришат"</string>
     <string name="share_via" msgid="8966594246261344259">"Сподели преку"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Се копираат датотеки"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Се подготвува за копирање…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Се подготвува за преместување…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Се подготвува за бришење…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one">Не може да копира <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
-      <item quantity="other">Не може да копираат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
+      <item quantity="other">Не може да копира <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one">Не можеше да се премести <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
-      <item quantity="other">Не можеше да се преместат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one">Не може да премести <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
+      <item quantity="other">Не може да премести <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="one">Не можеше да се избрише <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
-      <item quantity="other">Не можеше да се избришат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="one">Не може да избрише <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
+      <item quantity="other">Не може да избрише <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Допрете за да ги погледнете деталите"</string>
     <string name="close" msgid="3043722427445528732">"Затвори"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Датотекиве не се ископирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Овие датотеки не се преместија: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Датотекиве не се ископирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Датотекиве не се преместени: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Овие датотеки беа конвертирани во друг формат: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Копирана е <xliff:g id="COUNT_1">%1$d</xliff:g> датотека на таблата со исечоци.</item>

@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Списъчен изглед"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Сортиране по"</string>
     <string name="menu_search" msgid="3816712084502856974">"Търсене"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Настройки на хранилището"</string>
     <string name="menu_open" msgid="432922957274920903">"Отваряне"</string>
     <string name="menu_save" msgid="2394743337684426338">"Запазване"</string>
     <string name="menu_share" msgid="3075149983979628146">"Споделяне"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Скриване на основните елементи"</string>
     <string name="save_error" msgid="6167009778003223664">"Запазването на документа не бе успешно"</string>
     <string name="create_error" msgid="3735649141335444215">"Създаването на папката не бе успешно"</string>
-    <string name="query_error" msgid="1222448261663503501">"Заявката за документи не бе успешна"</string>
+    <string name="query_error" msgid="5999895349602476581">"Понастоящем съдържанието не може да се зареди"</string>
     <string name="root_recent" msgid="4470053704320518133">"Скорошни"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Свободно: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Услуги за съхранение"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Още приложения"</string>
     <string name="empty" msgid="7858882803708117596">"Няма елементи"</string>
     <string name="no_results" msgid="6622510343880730446">"В/ъв „%1$s“ няма съответствия"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Файлът не може да се отвори"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Файлът не може да се отвори"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Някои документи не могат да бъдат изтрити"</string>
     <string name="share_via" msgid="8966594246261344259">"Споделяне чрез"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Файловете се копират"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Подготвя се за копиране…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Преместването се подготвя…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Подготвя се за изтриване..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файла не можаха да се копират</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл не можа да се копира</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файла не можаха да бъдат преместени</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл не можа да бъде преместен</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> файла не можаха да бъдат изтрити</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> файл не можа да бъде изтрит</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Докоснете, за да видите подробности"</string>
     <string name="close" msgid="3043722427445528732">"Затваряне"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Следните файлове не бяха копирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Следните файлове не бяха преместени: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Следните файлове не бяха копирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Следните файлове не бяха преместени: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Следните файлове бяха преобразувани в друг формат: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">Копирахте <xliff:g id="COUNT_1">%1$d</xliff:g> файла в буферната памет.</item>

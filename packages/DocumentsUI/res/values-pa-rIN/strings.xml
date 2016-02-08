@@ -53,7 +53,8 @@
     <string name="drawer_close" msgid="7602734368552123318">"ਰੂਟਸ ਲੁਕਾਓ"</string>
     <string name="save_error" msgid="6167009778003223664">"ਦਸਾਤਵੇਜ਼ ਸੁਰੱਖਿਅਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"</string>
     <string name="create_error" msgid="3735649141335444215">"ਫੋਲਡਰ ਬਣਾਉਣ ਲਈ ਅਸਫਲ"</string>
-    <string name="query_error" msgid="1222448261663503501">"ਦਸਤਾਵੇਜ਼ਾਂ ਦੀ ਪੁੱਛਗਿੱਛ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"</string>
+    <!-- no translation found for query_error (5999895349602476581) -->
+    <skip />
     <string name="root_recent" msgid="4470053704320518133">"ਹਾਲੀਆ"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ਖਾਲੀ"</string>
     <string name="root_type_service" msgid="2178854894416775409">"ਸਟੋਰੇਜ ਸੇਵਾਵਾਂ"</string>
@@ -62,7 +63,8 @@
     <string name="root_type_apps" msgid="8838065367985945189">"ਹੋਰ ਐਪਸ"</string>
     <string name="empty" msgid="7858882803708117596">"ਕੋਈ ਆਈਟਮਾਂ ਨਹੀਂ"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s ਵਿੱਚ ਕੋਈ ਮੇਲ ਨਹੀਂ"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ਫਾਈਲ ਨਹੀਂ ਖੋਲ੍ਹ ਸਕਦਾ"</string>
+    <!-- no translation found for toast_no_application (4632640357724698144) -->
+    <skip />
     <string name="toast_failed_delete" msgid="2180678019407244069">"ਕੁਝ ਦਸਤਾਵੇਜ਼ ਮਿਟਾਉਣ ਵਿੱਚ ਅਸਮਰੱਥ"</string>
     <string name="share_via" msgid="8966594246261344259">"ਇਸ ਰਾਹੀਂ ਸ਼ੇਅਰ ਕਰੋ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ਫਾਈਲਾਂ ਕਾਪੀ ਕਰ ਰਿਹਾ ਹੈ"</string>
@@ -84,22 +86,15 @@
     <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ਮੂਵ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"ਮਿਟਾਉਣ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one"> <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾ ਸਕਿਆ</item>
-      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾ ਸਕਿਆ</item>
-    </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਿਆ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕਰ ਸਕਿਆ</item>
-    </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
+    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
+    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
     <string name="notification_touch_for_details" msgid="6268189413228855582">"ਵੇਰਵਿਆਂ ਨੂੰ ਵੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="close" msgid="3043722427445528732">"ਬੰਦ ਕਰੋ"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਨਹੀਂ ਬਣਾਈ ਗਈ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"ਇਹਨਾਂ ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਨਹੀਂ ਕੀਤਾ ਗਿਆ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
+    <skip />
+    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
+    <skip />
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ਇਹ ਫ਼ਾਈਲਾਂ ਕਿਸੇ ਹੋਰ ਫੌਰਮੈਟ ਵਿੱਚ ਤਬਦੀਲ ਕੀਤੀਆਂ ਗਈਆਂ ਸਨ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">ਕਲਿੱਪਬੋਰਡ ਵਿੱਚ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਦੀ ਪ੍ਰਤੀਲਿਪੀ ਬਣਾਈ ਗਈ।</item>
