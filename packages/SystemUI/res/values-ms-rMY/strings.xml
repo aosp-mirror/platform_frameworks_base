@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Tolak"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ialah dialog kelantangan"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Sentuh untuk memulihkan yang asal."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Anda sedang menggunakan profil kerja"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Penala UI Sistem"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Tunjukkan peratusan bateri terbenam"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Tunjukkan saat jam dalam bar status. Mungkin menjejaskan hayat bateri."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Susun Semula Tetapan Pantas"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Tunjukkan kecerahan dalam Tetapan Pantas"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Dayakan pemecut leret ke atas untuk memasuki skrin terpisah"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Dayakan gerak isyarat untuk memasuki skrin terpisah dengan meleret ke atas daripada butang Ikhtisar"</string>
     <string name="experimental" msgid="6198182315536726162">"Percubaan"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Hidupkan Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Untuk menyambungkan papan kekunci anda dengan tablet, anda perlu menghidupkan Bluetooth terlebih dahulu."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Butang Kod Kunci membolehkan kunci papan kekunci ditambahkan pada Bar Navigasi. Apabila ditekan, butang ini meniru kunci papan kekunci yang dipilih. Mula-mula, kunci mesti dipilih untuk butang tersebut, diikuti dengan imej yang hendak dipaparkan pada butang."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Pilih Butang Papan Kekunci"</string>
     <string name="preview" msgid="9077832302472282938">"Pratonton"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Seret untuk menambahkan jubin"</string>
 </resources>

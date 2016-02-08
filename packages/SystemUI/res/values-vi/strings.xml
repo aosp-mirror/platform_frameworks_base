@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Từ chối"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> là hộp thoại khối lượng"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Chạm để khôi phục bản gốc."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Bộ điều hướng giao diện người dùng hệ thống"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Hiển thị tỷ lệ phần trăm pin được nhúng"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Hiển thị giây đồng hồ trong thanh trạng thái. Có thể ảnh hưởng đến thời lượng pin."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Sắp xếp lại Cài đặt nhanh"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Hiển thị độ sáng trong Cài đặt nhanh"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Bật trình tăng tốc vuốt lên ở chế độ chia đôi màn hình"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Cho phép cử chỉ truy cập chế độ chia đôi màn hình bằng cách vuốt lên từ nút Tổng quan"</string>
     <string name="experimental" msgid="6198182315536726162">"Thử nghiệm"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bật Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Để kết nối bàn phím với máy tính bảng, trước tiên, bạn phải bật Bluetooth."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Các nút mã phím cho phép thêm các phím trên bàn phím vào Thanh điều hướng. Khi bạn nhấn, các nút này sẽ mô phỏng phím trên bàn phím được chọn. Trước tiên, bạn phải chọn phím cho nút, sau đó chọn một hình ảnh để hiển thị trên nút."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Chọn nút trên bàn phím"</string>
     <string name="preview" msgid="9077832302472282938">"Xem trước"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Kéo để thêm ô"</string>
 </resources>

@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Afvis"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> er dialogboksen for lydstyrke"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Tryk for at gendanne originalen."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruger din arbejdsprofil"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Vis procent for det indbyggede batteri"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statuslinjen. Dette kan påvirke batteriets levetid."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omarranger Hurtige indstillinger"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i Hurtige indstillinger"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Aktivér bevægelsen stryg opad for at dele skærmen"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktivér bevægelse for at dele skærmen ved at stryge opad fra knappen Oversigt"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimentel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Tastekodeknapper gør det muligt at føje tastaturtaster til navigationslinjen. Når der trykkes på dem, efterligner de den valgte tastaturtast. Først vælges tasten til knappen, og derefter vælges det billede, der skal vises på knappen."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Vælg tastaturknap"</string>
     <string name="preview" msgid="9077832302472282938">"Eksempelvisning"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Træk for at tilføje felter"</string>
 </resources>

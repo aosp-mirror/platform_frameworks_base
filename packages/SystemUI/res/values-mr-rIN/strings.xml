@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"नकार द्या"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद आहे"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आपण आपले कार्य प्रोफाईल वापरत आहात"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टीम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेडेड बॅटरी टक्केवारी दर्शवा"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"स्टेटस बारमध्‍ये घड्‍याळ सेकंद दर्शवा. कदाचित बॅटरी आयुष्‍य प्रभावित होऊ शकते."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"द्रुत सेटिंग्जची पुनर्रचना करा"</string>
     <string name="show_brightness" msgid="6613930842805942519">"द्रुत सेटिंग्जमध्‍ये चमक दर्शवा"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"विभाजित-स्क्रीन स्वाइप-अप त्वरक सक्षम करा"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"विहंगावलोकन बटणावरून वर स्वाइप करून विभाजित-स्क्रीन प्रविष्ट करण्यासाठी जेश्चर सक्षम करा"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रायोगिक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटुथ सुरू करायचे?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"आपला कीबोर्ड आपल्या टॅब्लेटसह कनेक्ट करण्यासाठी, आपल्याला प्रथम ब्लूटुथ चालू करणे आवश्यक आहे."</string>
@@ -502,7 +503,7 @@
     <string name="nav_bar" msgid="1993221402773877607">"नॅव्हिगेशन बार"</string>
     <string name="start" msgid="6873794757232879664">"प्रारंभ"</string>
     <string name="center" msgid="4327473927066010960">"मध्यवर्ती"</string>
-    <string name="end" msgid="125797972524818282">"समाप्ती"</string>
+    <string name="end" msgid="125797972524818282">"शेवटच्या"</string>
     <string name="space" msgid="804232271282109749">"स्पेसर"</string>
     <string name="menu_ime" msgid="4943221416525250684">"मेनू / कीबोर्ड स्विचर"</string>
     <string name="select_button" msgid="1597989540662710653">"जोडण्यासाठी बटण निवडा"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"कीकोड बटणे नेव्हिगेशन बारमध्ये कीबोर्ड की ना जोडण्यासाठी अनुमती देतात. दाबल्यानंतर ते निवडलेल्या कीबोर्ड की चे अनुकरण करतात. बटणासाठी प्रथम की त्यानंतर बटणावर दर्शविली जाण्यासाठी प्रतिमा निवडणे आवश्यक आहे."</string>
     <string name="select_keycode" msgid="7413765103381924584">"कीबोर्ड बटण निवडा"</string>
     <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइल जोडण्यासाठी ड्रॅग करा"</string>
 </resources>

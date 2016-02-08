@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"நிராகரி"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"ஒலியளவு செய்தி: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"அசலை மீட்டமைக்கத் தொடவும்."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"பணி சுயவிவரத்தைப் பயன்படுத்துகிறீர்கள்"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"உள்ளிணைந்த பேட்டரி சதவீதத்தைக் காட்டு"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"நிலைப் பட்டியில் கடிகார வினாடிகளைக் காட்டும். பேட்டரியின் ஆயுளைக் குறைக்கலாம்."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"விரைவு அமைப்புகளை மறுவரிசைப்படுத்து"</string>
     <string name="show_brightness" msgid="6613930842805942519">"விரைவு அமைப்புகளில் ஒளிர்வுப் பட்டியைக் காட்டு"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"மேலே ஸ்வைப் செய்வதன் மூலம் திரைப் பிரிப்பை இயக்கு"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"மேலோட்டப் பார்வை பொத்தானிலிருந்து மேலே ஸ்வைப் செய்வதன் மூலம், திரைப் பிரிப்பைச் செயலாக்குவதற்கான சைகையை இயக்கும்"</string>
     <string name="experimental" msgid="6198182315536726162">"சோதனை முயற்சி"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"புளூடூத்தை இயக்கவா?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"உங்கள் டேப்லெட்டுடன் விசைப்பலகையை இணைக்க, முதலில் புளூடூத்தை இயக்க வேண்டும்."</string>
@@ -513,10 +514,11 @@
     <string name="no_home_message" msgid="5408485011659260911">"இந்தச் சாதனத்தில் வழிசெலுத்த, முகப்புப் பொத்தான் தேவை. சேமிக்கும் முன், முகப்புப் பொத்தானைச் சேர்க்கவும்."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"பொத்தானின் அகலத்தை மாற்று"</string>
     <string name="clipboard" msgid="1313879395099896312">"கிளிப்போர்டு"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"கிளிப்ஃபோர்டில் உருப்படிகளை இழுத்து விடுவதற்கு கிளிப்போர்டு அனுமதிக்கும். கிளிப்போர்டிலிருந்து உருப்படிகளை வெளியேயும் இழுத்து விடலாம்."</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"கிளிப்ஃபோர்டில் உருப்படிகளை இழுத்து விடுவதற்கு கிளிப்போர்டு அனுமதிக்கும். கிளிப்போர்டில் உள்ள உருப்படிகளை வெளியேயும் இழுத்து விடலாம்."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"தனிப்பயன் வழிசெலுத்தல் பொத்தான்"</string>
     <string name="keycode" msgid="7335281375728356499">"விசைக்குறியீடு"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"விசைக்குறியீட்டுப் பொத்தான்கள் மூலம் விசைப்பலகை விசைகளை வழிசெலுத்தல் பட்டியில் சேர்க்கலாம். அழுத்தும் போது, தேர்ந்தெடுத்த விசைப்பலகை விசையானது செயல்படும். பொத்தானுக்கான விசையை முதலில் தேர்ந்தெடுக்க வேண்டும், பிறகு பொத்தானில் காட்ட வேண்டிய படத்தைத் தேர்வுசெய்யவும்."</string>
+    <string name="keycode_description" msgid="1403795192716828949">"விசைக்குறியீட்டுப் பொத்தான்கள் மூலம் விசைப்பலகை விசைகளை வழிசெலுத்தல் பட்டியில் சேர்க்கலாம். அழுத்தும் போது, தேர்ந்தெடுத்த விசைப்பலகை விசையாக அது செயல்படும். பொத்தானுக்கான விசையை முதலில் தேர்ந்தெடுக்க வேண்டும், பிறகு பொத்தானில் காட்ட வேண்டிய படத்தைத் தேர்வுசெய்யவும்."</string>
     <string name="select_keycode" msgid="7413765103381924584">"விசைப்பலகைப் பொத்தானைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="preview" msgid="9077832302472282938">"மாதிரிக்காட்சி"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"கட்டங்களைச் சேர்க்க, இழுக்கவும்"</string>
 </resources>

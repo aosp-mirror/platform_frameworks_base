@@ -412,7 +412,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Одбиј"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> је дијалог за јачину звука"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Додирните да бисте вратили оригинал."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Користите профил за Work"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Тјунер за кориснички интерфејс система"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Приказуј уграђени проценат батерије"</string>
@@ -448,6 +447,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Секунде на сату се приказују на статусној траци. То може да утиче на трајање батерије."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Преуреди Брза подешавања"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Прикажи осветљеност у Брзим подешавањима"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Омогући убрзавач за превлачење нагоре за подељени екран"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Омогућава покрет за прелазак на подељени екран превлачењем нагоре од дугмета Преглед"</string>
     <string name="experimental" msgid="6198182315536726162">"Експериментално"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Желите ли да укључите Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Да бисте повезали тастатуру са таблетом, прво морате да укључите Bluetooth."</string>
@@ -520,4 +521,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Дугмад за кодове тастера омогућава да се на траку за навигацију додају тастери на тастатури. Када притиснете дугме, симулира се изабрани тастер на тастатури. Прво морате да изаберете тастер за дугме, па слику коју ће се приказивати на дугмету."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Изаберите дугме за тастатуру"</string>
     <string name="preview" msgid="9077832302472282938">"Преглед"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Превуците да бисте додали плочице"</string>
 </resources>

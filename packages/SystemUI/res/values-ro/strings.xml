@@ -412,7 +412,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Refuzați"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> afișează caseta de dialog pentru volum"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Atingeți pentru a reveni la setarea inițială."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Acum folosiți profilul de serviciu"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Afișați procentajul bateriei încorporat"</string>
@@ -448,6 +447,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Afișează secundele pe ceas în bara de stare. Poate afecta autonomia bateriei."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Rearanjați Setările rapide"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Afișați luminozitatea în Setările rapide"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Activați acceleratorul pentru accesarea ecranului împărțit prin glisarea în sus"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Activați gestul de accesare a ecranului împărțit prin glisarea în sus de la butonul Recente"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimentale"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Activați Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Pentru a conecta tastatura la tabletă, mai întâi trebuie să activați Bluetooth."</string>
@@ -520,4 +521,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Folosind butoanele cu coduri de taste puteți să adăugați taste de la tastatură în Bara de navigare. Când le apăsați, acestea simulează tasta selectată de la tastatură. Mai întâi, trebuie să selectați o tastă pentru un buton, apoi o imagine care să apară pe buton."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Selectați butonul de la tastatură"</string>
     <string name="preview" msgid="9077832302472282938">"Previzualizare"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Trageți pentru a adăuga sectoare"</string>
 </resources>

@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Weier"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> is die volumedialoog"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Raak om die oorspronklike terug te stel."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Jy gebruik tans jou werkprofiel"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Stelsel-UI-ontvanger"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Wys persentasie van ingebedde battery"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Wys horlosiesekondes op die statusbalk. Sal batterylewe dalk beïnvloed."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Herrangskik Kitsinstellings"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Wys helderheid in Kitsinstellings"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Aktiveer versneller om skerm te verdeel deur op te swiep"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Aktiveer gebaar om skerm te verdeel deur van die Oorsig-knoppie af op te swiep"</string>
     <string name="experimental" msgid="6198182315536726162">"Eksperimenteel"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Skakel Bluetooth aan?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Jy moet Bluetooth aanskakel om jou sleutelbord aan jou tablet te koppel."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Sleutelbordknoppies maak dit moontlik dat sleutelbordsleutels by die navigasiebalk gevoeg kan word. Wanneer hulle gedruk word, doen hulle dieselfde as die gekose sleutelbordsleutel. Eers moet die sleutel vir die knoppie gekies word, gevolg deur \'n prent wat op die knoppie gewys sal word."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Kies Sleutelbordknoppie"</string>
     <string name="preview" msgid="9077832302472282938">"Voorskou"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Sleep om teëls by te voeg"</string>
 </resources>

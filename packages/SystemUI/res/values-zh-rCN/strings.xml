@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒绝"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”已用作音量控制对话框"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"触摸即可恢复原始设置。"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">"、 "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"您当前正在使用工作资料"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"系统界面调谐器"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"嵌入式显示电池电量百分比 显示嵌入的电池电量百分比"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在状态栏中显示时钟的秒数。这可能会影响电池的续航时间。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快捷设置"</string>
     <string name="show_brightness" msgid="6613930842805942519">"在快捷设置中显示亮度栏"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"启用分屏向上滑动加速器"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"启用通过从“概览”按钮向上滑动的手势进入分屏模式"</string>
     <string name="experimental" msgid="6198182315536726162">"实验性"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要开启蓝牙吗？"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"要将您的键盘连接到平板电脑，您必须先开启蓝牙。"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"您可以利用“键码”按钮将键盘按键添加到导航栏中。只要按下这些按钮，按钮即可模仿所选键盘按键执行相应的操作。要使用这项功能，您必须先为按钮选择相应的按键，然后再选择要在按钮上显示的图片。"</string>
     <string name="select_keycode" msgid="7413765103381924584">"选择键盘按钮"</string>
     <string name="preview" msgid="9077832302472282938">"预览"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖动即可添加图块"</string>
 </resources>
