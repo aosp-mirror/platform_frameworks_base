@@ -96,6 +96,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -178,18 +179,6 @@ public class SyncManager {
     private static final int SYNC_MONITOR_PROGRESS_THRESHOLD_BYTES = 10; // 10 bytes
 
     /**
-     * How long to delay each queued {@link SyncHandler} message that may have occurred before boot
-     * or befor the device became provisioned.
-     */
-    private static final long PER_SYNC_BOOT_DELAY_MILLIS = 1000L;  // 1 second
-
-    /**
-     * The maximum amount of time we're willing to delay syncs out of boot, after device has been
-     * provisioned, etc.
-     */
-    private static final long MAX_SYNC_BOOT_DELAY_MILLIS = 60000L;  // 1 minute
-
-    /**
      * If a previously scheduled sync becomes ready and we are low on storage, it gets
      * pushed back for this amount of time.
      */
@@ -242,12 +231,24 @@ public class SyncManager {
     private SparseArray<SyncOperation> mScheduledSyncs = new SparseArray<SyncOperation>(32);
     private final Random mRand;
 
-    private int getUnusedJobId() {
-        synchronized (mScheduledSyncs) {
-            int newJobId = mRand.nextInt(Integer.MAX_VALUE);
-            while (mScheduledSyncs.indexOfKey(newJobId) >= 0) {
-                newJobId = mRand.nextInt(Integer.MAX_VALUE);
+    private boolean isJobIdInUseLockedH(int jobId) {
+        if (mScheduledSyncs.indexOfKey(jobId) >= 0) {
+            return true;
+        }
+        for (ActiveSyncContext asc: mActiveSyncContexts) {
+            if (asc.mSyncOperation.jobId == jobId) {
+                return true;
             }
+        }
+        return false;
+    }
+
+    private int getUnusedJobIdH() {
+        synchronized (mScheduledSyncs) {
+            int newJobId;
+            do {
+                newJobId = mRand.nextInt(Integer.MAX_VALUE);
+            } while (isJobIdInUseLockedH(newJobId));
             return newJobId;
         }
     }
@@ -425,6 +426,35 @@ public class SyncManager {
         }
     }
 
+    /**
+     * Cancel all unnecessary jobs. This function will be run once after every boot.
+     */
+    private void cleanupJobs() {
+        // O(n^2) in number of jobs, so we run this on the background thread.
+        mSyncHandler.postAtFrontOfQueue(new Runnable() {
+            @Override
+            public void run() {
+                List<SyncOperation> ops = getAllPendingSyncsFromCache();
+                Set<String> cleanedKeys = new HashSet<String>();
+                for (SyncOperation opx: ops) {
+                    if (cleanedKeys.contains(opx.key)) {
+                        continue;
+                    }
+                    cleanedKeys.add(opx.key);
+                    for (SyncOperation opy: ops) {
+                        if (opx == opy) {
+                            continue;
+                        }
+                        if (opx.key.equals(opy.key)) {
+                            removeSyncOperationFromCache(opy.jobId);
+                            mJobScheduler.cancel(opy.jobId);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     private synchronized void verifyJobScheduler() {
         if (mJobScheduler != null) {
             return;
@@ -449,6 +479,7 @@ public class SyncManager {
                 }
             }
         }
+        cleanupJobs();
     }
 
     private JobScheduler getJobScheduler() {
@@ -722,7 +753,6 @@ public class SyncManager {
                              String requestedAuthority, Bundle extras, long beforeRuntimeMillis,
                              long runtimeMillis, boolean onlyThoseWithUnkownSyncableState) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
-        EndPoint ep = new EndPoint(requestedAccount,requestedAuthority, userId);
         if (extras == null) {
             extras = new Bundle();
         }
@@ -1197,7 +1227,18 @@ public class SyncManager {
         }
 
         // Check if duplicate syncs are pending. If found, keep one with least expected run time.
-        if (!syncOperation.isReasonPeriodic()) {
+        if (!syncOperation.isPeriodic) {
+            // Check currently running syncs
+            for (ActiveSyncContext asc: mActiveSyncContexts) {
+                if (asc.mSyncOperation.key.equals(syncOperation.key)) {
+                    if (isLoggable) {
+                        Log.v(TAG, "Duplicate sync is already running. Not scheduling "
+                                + syncOperation);
+                    }
+                    return;
+                }
+            }
+
             int duplicatesCount = 0;
             long now = SystemClock.elapsedRealtime();
             syncOperation.expectedRuntime = now + minDelay;
@@ -1240,14 +1281,16 @@ public class SyncManager {
             }
         }
 
-        syncOperation.jobId = getUnusedJobId();
+        // Syncs that are re-scheduled shouldn't get a new job id.
+        if (syncOperation.jobId == SyncOperation.NO_JOB_ID) {
+            syncOperation.jobId = getUnusedJobIdH();
+        }
         addSyncOperationToCache(syncOperation);
 
         if (isLoggable) {
-            Slog.v(TAG, "scheduling sync operation " + syncOperation.target.toString());
+            Slog.v(TAG, "scheduling sync operation " + syncOperation.toString());
         }
 
-        // This is done to give preference to syncs that are not pushed back.
         int priority = syncOperation.findPriority();
 
         final int networkType = syncOperation.isNotAllowedOnMetered() ?
@@ -1343,7 +1386,7 @@ public class SyncManager {
                 Log.d(TAG, "retrying sync operation as a two-way sync because an upload-only sync "
                         + "encountered an error: " + operation);
             }
-            scheduleSyncOperationH(operation, 0 /* immediately */);
+            scheduleSyncOperationH(operation);
         } else if (syncResult.tooManyRetries) {
             // If this sync aborted because the internal sync loop retried too many times then
             //   don't reschedule. Otherwise we risk getting into a retry loop.
@@ -1357,7 +1400,7 @@ public class SyncManager {
                 Log.d(TAG, "retrying sync operation because even though it had an error "
                         + "it achieved some success");
             }
-            scheduleSyncOperationH(operation, 0 /* immediately */);
+            scheduleSyncOperationH(operation);
         } else if (syncResult.syncAlreadyInProgress) {
             if (isLoggable) {
                 Log.d(TAG, "retrying sync operation that failed because there was already a "
@@ -2207,7 +2250,8 @@ public class SyncManager {
             synchronized (this) {
                 if (!mBootCompleted || !mProvisioned) {
                     if (msg.what == MESSAGE_START_SYNC) {
-                        deferSyncH((SyncOperation) msg.obj, 60*1000 /* 1 minute */);
+                        SyncOperation op = (SyncOperation) msg.obj;
+                        addSyncOperationToCache(op);
                     }
                     // Need to copy the message bc looper will recycle it.
                     Message m = Message.obtain(msg);
@@ -2272,21 +2316,24 @@ public class SyncManager {
 
                     case MESSAGE_STOP_SYNC:
                         op = (SyncOperation) msg.obj;
-                        boolean reschedule = msg.arg1 != 0;
-                        boolean applyBackoff = msg.arg2 != 0;
                         if (isLoggable) {
-                            Slog.v(TAG, "Stop sync received. Reschedule: " + reschedule
-                                    + "Backoff: " + applyBackoff);
-                        }
-                        if (applyBackoff) {
-                            increaseBackoffSetting(op.target);
-                        }
-                        if (reschedule) {
-                            scheduleSyncOperationH(op);
+                            Slog.v(TAG, "Stop sync received.");
                         }
                         ActiveSyncContext asc = findActiveSyncContextH(op.jobId);
                         if (asc != null) {
                             runSyncFinishedOrCanceledH(null /* no result */, asc);
+                            boolean reschedule = msg.arg1 != 0;
+                            boolean applyBackoff = msg.arg2 != 0;
+                            if (isLoggable) {
+                                Slog.v(TAG, "Stopping sync. Reschedule: " + reschedule
+                                        + "Backoff: " + applyBackoff);
+                            }
+                            if (applyBackoff) {
+                                increaseBackoffSetting(op.target);
+                            }
+                            if (reschedule) {
+                                deferStoppedSyncH(op, 0);
+                            }
                         }
                         break;
 
@@ -2414,10 +2461,21 @@ public class SyncManager {
 
         /**
          * Defer the specified SyncOperation by rescheduling it on the JobScheduler with some
-         * delay.
+         * delay. This is equivalent to a failure. If this is a periodic sync, a delayed one-off
+         * sync will be scheduled.
          */
         private void deferSyncH(SyncOperation op, long delay) {
             mSyncJobService.callJobFinished(op.jobId, false);
+            if (op.isPeriodic) {
+                scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
+            } else {
+                removeSyncOperationFromCache(op.jobId);
+                scheduleSyncOperationH(op, delay);
+            }
+        }
+
+        /* Same as deferSyncH, but assumes that job is no longer running on JobScheduler. */
+        private void deferStoppedSyncH(SyncOperation op, long delay) {
             if (op.isPeriodic) {
                 scheduleSyncOperationH(op.createOneTimeSyncOperation(), delay);
             } else {
@@ -2431,9 +2489,7 @@ public class SyncManager {
          */
         private void deferActiveSyncH(ActiveSyncContext asc) {
             SyncOperation op = asc.mSyncOperation;
-
-            mSyncHandler.obtainMessage(MESSAGE_STOP_SYNC, 0 /* no reschedule */,
-                    0 /* no backoff */, op).sendToTarget();
+            runSyncFinishedOrCanceledH(null, asc);
             deferSyncH(op, SYNC_DELAY_ON_CONFLICT);
         }
 
@@ -2467,6 +2523,7 @@ public class SyncManager {
                 // Check for adapter delays.
                 if (isAdapterDelayed(op.target)) {
                     deferSyncH(op, 0 /* No minimum delay */);
+                    return;
                 }
             } else {
                 // Remove SyncOperation entry from mScheduledSyncs cache for non periodic jobs.
@@ -2567,10 +2624,10 @@ public class SyncManager {
                     Slog.v(TAG, "updating period " + syncOperation + " to " + pollFrequencyMillis
                             + " and flex to " + flexMillis);
                 }
-                removePeriodicSyncInternalH(syncOperation);
-                syncOperation.periodMillis = pollFrequencyMillis;
-                syncOperation.flexMillis = flexMillis;
-                scheduleSyncOperationH(syncOperation);
+                SyncOperation newOp = new SyncOperation(syncOperation, pollFrequencyMillis,
+                        flexMillis);
+                newOp.jobId = syncOperation.jobId;
+                scheduleSyncOperationH(newOp);
             }
         }
 
@@ -2614,9 +2671,8 @@ public class SyncManager {
             SyncOperation op = new SyncOperation(target, syncAdapterInfo.uid,
                     syncAdapterInfo.componentName.getPackageName(), SyncOperation.REASON_PERIODIC,
                     SyncStorageEngine.SOURCE_PERIODIC, extras,
-                    syncAdapterInfo.type.allowParallelSyncs(), true, SyncOperation.NO_JOB_ID);
-            op.periodMillis = pollFrequencyMillis;
-            op.flexMillis = flexMillis;
+                    syncAdapterInfo.type.allowParallelSyncs(), true, SyncOperation.NO_JOB_ID,
+                    pollFrequencyMillis, flexMillis);
             scheduleSyncOperationH(op);
             mSyncStorageEngine.reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         }
@@ -2816,10 +2872,19 @@ public class SyncManager {
          * Should be called when a one-off instance of a periodic sync completes successfully.
          */
         private void reschedulePeriodicSyncH(SyncOperation syncOperation) {
-            removeSyncOperationFromCache(syncOperation.sourcePeriodicId);
-            getJobScheduler().cancel(syncOperation.sourcePeriodicId);
-            SyncOperation periodic = syncOperation.createPeriodicSyncOperation();
-            scheduleSyncOperationH(periodic);
+            // Ensure that the periodic sync wasn't removed.
+            SyncOperation periodicSync = null;
+            List<SyncOperation> ops = getAllPendingSyncsFromCache();
+            for (SyncOperation op: ops) {
+                if (op.isPeriodic && syncOperation.matchesPeriodicOperation(op)) {
+                    periodicSync = op;
+                    break;
+                }
+            }
+            if (periodicSync == null) {
+                return;
+            }
+            scheduleSyncOperationH(periodicSync);
         }
 
         private void runSyncFinishedOrCanceledH(SyncResult syncResult,
