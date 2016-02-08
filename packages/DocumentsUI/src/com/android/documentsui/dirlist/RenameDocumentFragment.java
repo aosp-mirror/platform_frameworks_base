@@ -36,6 +36,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -47,6 +48,7 @@ import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.R;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.model.DocumentInfo;
+
 /**
  * Dialog to rename file or directory.
  */
@@ -68,8 +70,7 @@ public class RenameDocumentFragment extends DialogFragment {
         View view = dialogInflater.inflate(R.layout.dialog_file_name, null, false);
 
         final EditText editText = (EditText) view.findViewById(android.R.id.text1);
-        editText.setText(mDocument.displayName);
-
+        fillWithFileName(editText, mDocument.displayName);
         builder.setTitle(R.string.menu_rename);
         builder.setView(view);
 
@@ -91,9 +92,9 @@ public class RenameDocumentFragment extends DialogFragment {
                     @Override
                     public boolean onEditorAction(
                             TextView view, int actionId, @Nullable KeyEvent event) {
-                        if (event != null
+                        if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
-                                && event.hasNoModifiers()) {
+                                && event.hasNoModifiers())) {
                             renameDocuments(editText.getText().toString());
                             dialog.dismiss();
                             return true;
@@ -105,10 +106,39 @@ public class RenameDocumentFragment extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * Validates if string is a proper document name.
+     * Checks if string is not empty. More rules might be added later.
+     * @param docName string representing document name
+     * @returns true if string is a valid name.
+     **/
+    private boolean isValidDocumentName(String docName) {
+        return !docName.isEmpty();
+    }
+
+    /**
+     * Fills text field with the file name and selects the name without extension.
+     *
+     * @param editText text field to be filled
+     * @param name full name of the file
+     */
+    private void fillWithFileName(EditText editText, String name) {
+        editText.setText(name);
+        int separatorIndex = name.indexOf(".");
+        editText.setSelection(0, separatorIndex == -1 ? name.length() : separatorIndex);
+    }
+
     private void renameDocuments(String newDisplayName) {
         BaseActivity activity = (BaseActivity) getActivity();
 
-        new RenameDocumentsTask(activity, newDisplayName).execute(mDocument);
+        if (isValidDocumentName(newDisplayName)) {
+            new RenameDocumentsTask(activity, newDisplayName).execute(mDocument);
+        } else {
+            Log.w(TAG, "Failed to rename file - invalid name:" + newDisplayName);
+            Snackbars.makeSnackbar(getActivity(), R.string.rename_error,
+                    Snackbar.LENGTH_SHORT).show();
+        }
+
     }
 
     private class RenameDocumentsTask extends AsyncTask<DocumentInfo, Void, DocumentInfo> {

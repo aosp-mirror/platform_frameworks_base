@@ -36,6 +36,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -86,9 +87,9 @@ public class CreateDirectoryFragment extends DialogFragment {
                     @Override
                     public boolean onEditorAction(
                             TextView view, int actionId, @Nullable KeyEvent event) {
-                        if (event != null
+                        if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
-                                && event.hasNoModifiers()) {
+                                && event.hasNoModifiers())) {
                             createDirectory(editText.getText().toString());
                             dialog.dismiss();
                             return true;
