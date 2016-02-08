@@ -991,9 +991,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void unlockUserKey(int userId, int serialNumber, byte[] token) {
+    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
         try {
-            mMountService.unlockUserKey(userId, serialNumber, token);
+            mMountService.unlockUserKey(userId, serialNumber, token, secret);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

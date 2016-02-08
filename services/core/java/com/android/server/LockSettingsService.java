@@ -62,6 +62,10 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.LockSettingsStorage.CredentialHash;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -510,9 +514,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void unlockUser(int userId, byte[] token) {
+    private void unlockUser(int userId, byte[] token, byte[] secret) {
         try {
-            ActivityManagerNative.getDefault().unlockUser(userId, token);
+            ActivityManagerNative.getDefault().unlockUser(userId, token, secret);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -560,6 +564,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePatternHash(null, userId);
             setKeystorePassword(null, userId);
+            clearUserKeyProtection(userId);
             return;
         }
 
@@ -573,6 +578,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, pattern, userId);
         if (enrolledHandle != null) {
             mStorage.writePatternHash(enrolledHandle, userId);
+            setUserKeyProtection(userId, pattern, verifyPattern(pattern, 0, userId));
         } else {
             throw new RemoteException("Failed to enroll pattern");
         }
@@ -588,6 +594,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             getGateKeeperService().clearSecureUserId(userId);
             mStorage.writePasswordHash(null, userId);
             setKeystorePassword(null, userId);
+            clearUserKeyProtection(userId);
             return;
         }
 
@@ -601,6 +608,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         byte[] enrolledHandle = enrollCredential(currentHandle, savedCredential, password, userId);
         if (enrolledHandle != null) {
             mStorage.writePasswordHash(enrolledHandle, userId);
+            setUserKeyProtection(userId, password, verifyPassword(password, 0, userId));
         } else {
             throw new RemoteException("Failed to enroll password");
         }
@@ -631,6 +639,48 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "Throttled while enrolling a password");
         }
         return hash;
+    }
+
+    private void setUserKeyProtection(int userId, String credential, VerifyCredentialResponse vcr)
+            throws RemoteException {
+        if (vcr == null) {
+            throw new RemoteException("Null response verifying a credential we just set");
+        }
+        if (vcr.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+            throw new RemoteException("Non-OK response verifying a credential we just set: "
+                + vcr.getResponseCode());
+        }
+        byte[] token = vcr.getPayload();
+        if (token == null) {
+            throw new RemoteException("Empty payload verifying a credential we just set");
+        }
+        changeUserKey(userId, token, secretFromCredential(credential));
+    }
+
+    private void clearUserKeyProtection(int userId) throws RemoteException {
+        changeUserKey(userId, null, null);
+    }
+
+    private static byte[] secretFromCredential(String credential) throws RemoteException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            // Personalize the hash
+            byte[] personalization = "Android FBE credential hash"
+                    .getBytes(StandardCharsets.UTF_8);
+            // Pad it to the block size of the hash function
+            personalization = Arrays.copyOf(personalization, 128);
+            digest.update(personalization);
+            digest.update(credential.getBytes(StandardCharsets.UTF_8));
+            return digest.digest();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("NoSuchAlgorithmException for SHA-512");
+        }
+    }
+
+    private void changeUserKey(int userId, byte[] token, byte[] secret)
+            throws RemoteException {
+        final UserInfo userInfo = UserManager.get(mContext).getUserInfo(userId);
+        getMountService().changeUserKey(userId, userInfo.serialNumber, token, null, secret);
     }
 
     @Override
@@ -742,11 +792,11 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (Arrays.equals(hash, storedHash.hash)) {
                 unlockKeystore(credentialUtil.adjustForKeystore(credential), userId);
 
-                // TODO: pass through a meaningful token from gatekeeper to
-                // unlock credential keys; for now pass through a stub value to
-                // indicate that we came from a user challenge.
-                final byte[] token = String.valueOf(userId).getBytes();
-                unlockUser(userId, token);
+                // Users with legacy credentials don't have credential-backed
+                // FBE keys, so just pass through a fake token/secret
+                Slog.i(TAG, "Unlocking user with fake token: " + userId);
+                final byte[] fakeToken = String.valueOf(userId).getBytes();
+                unlockUser(userId, fakeToken, fakeToken);
 
                 // migrate credential to GateKeeper
                 credentialUtil.setCredential(credential, null, userId);
@@ -786,11 +836,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             // credential has matched
             unlockKeystore(credential, userId);
 
-            // TODO: pass through a meaningful token from gatekeeper to
-            // unlock credential keys; for now pass through a stub value to
-            // indicate that we came from a user challenge.
-            final byte[] token = String.valueOf(userId).getBytes();
-            unlockUser(userId, token);
+            Slog.i(TAG, "Unlocking user " + userId +
+                " with token length " + response.getPayload().length);
+            unlockUser(userId, response.getPayload(), secretFromCredential(credential));
 
             UserInfo info = UserManager.get(mContext).getUserInfo(userId);
             if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {

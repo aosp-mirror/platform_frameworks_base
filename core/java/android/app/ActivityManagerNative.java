@@ -2080,7 +2080,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             int userId = data.readInt();
             byte[] token = data.createByteArray();
-            boolean result = unlockUser(userId, token);
+            byte[] secret = data.createByteArray();
+            boolean result = unlockUser(userId, token, secret);
             reply.writeNoException();
             reply.writeInt(result ? 1 : 0);
             return true;
@@ -5571,12 +5572,13 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
-    public boolean unlockUser(int userId, byte[] token) throws RemoteException {
+    public boolean unlockUser(int userId, byte[] token, byte[] secret) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(userId);
         data.writeByteArray(token);
+        data.writeByteArray(secret);
         mRemote.transact(IActivityManager.UNLOCK_USER_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean result = reply.readInt() != 0;
