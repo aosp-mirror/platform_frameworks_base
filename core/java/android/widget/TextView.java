@@ -4101,36 +4101,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Parcelable superState = super.onSaveInstanceState();
 
         // Save state if we are forced to
-        boolean save = mFreezesText;
-        int start = 0;
-        int end = 0;
+        final boolean freezesText = getFreezesText();
+        boolean hasSelection = false;
+        int start = -1;
+        int end = -1;
 
         if (mText != null) {
             start = getSelectionStart();
             end = getSelectionEnd();
             if (start >= 0 || end >= 0) {
                 // Or save state if there is a selection
-                save = true;
+                hasSelection = true;
             }
         }
 
-        if (save) {
+        if (freezesText || hasSelection) {
             SavedState ss = new SavedState(superState);
-            // XXX Should also save the current scroll position!
-            ss.selStart = start;
-            ss.selEnd = end;
 
-            if (mText instanceof Spanned) {
-                Spannable sp = new SpannableStringBuilder(mText);
+            if (freezesText) {
+                if (mText instanceof Spanned) {
+                    final Spannable sp = new SpannableStringBuilder(mText);
 
-                if (mEditor != null) {
-                    removeMisspelledSpans(sp);
-                    sp.removeSpan(mEditor.mSuggestionRangeSpan);
+                    if (mEditor != null) {
+                        removeMisspelledSpans(sp);
+                        sp.removeSpan(mEditor.mSuggestionRangeSpan);
+                    }
+
+                    ss.text = sp;
+                } else {
+                    ss.text = mText.toString();
                 }
+            }
 
-                ss.text = sp;
-            } else {
-                ss.text = mText.toString();
+            if (hasSelection) {
+                // XXX Should also save the current scroll position!
+                ss.selStart = start;
+                ss.selEnd = end;
             }
 
             if (isFocused() && start >= 0 && end >= 0) {
@@ -4224,7 +4230,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * position.  By default this is false, not saving the text.  Set to true
      * if the text in the text view is not being saved somewhere else in
      * persistent storage (such as in a content provider) so that if the
-     * view is later thawed the user will not lose their data.
+     * view is later thawed the user will not lose their data. For
+     * {@link android.widget.EditText} it is always enabled, regardless of
+     * the value of the attribute.
      *
      * @param freezesText Controls whether a frozen icicle should include the
      * entire text data: true to include it, false to not.
@@ -4238,7 +4246,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Return whether this text view is including its entire text contents
-     * in frozen icicles.
+     * in frozen icicles. For {@link android.widget.EditText} it always returns true.
      *
      * @return Returns true if text is included, false if it isn't.
      *
@@ -10111,8 +10119,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link View#onSaveInstanceState}.
      */
     public static class SavedState extends BaseSavedState {
-        int selStart;
-        int selEnd;
+        int selStart = -1;
+        int selEnd = -1;
         CharSequence text;
         boolean frozenWithFocus;
         CharSequence error;

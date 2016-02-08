@@ -65,6 +65,11 @@ public class EditText extends TextView {
     }
 
     @Override
+    public boolean getFreezesText() {
+        return true;
+    }
+
+    @Override
     protected boolean getDefaultEditable() {
         return true;
     }
