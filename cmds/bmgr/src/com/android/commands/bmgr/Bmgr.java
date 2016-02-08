@@ -23,11 +23,15 @@ import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageInfo;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public final class Bmgr {
     IBackupManager mBmgr;
@@ -36,7 +40,9 @@ public final class Bmgr {
     static final String BMGR_NOT_RUNNING_ERR =
             "Error: Could not access the Backup Manager.  Is the system running?";
     static final String TRANSPORT_NOT_RUNNING_ERR =
-        "Error: Could not access the backup transport.  Is the system running?";
+            "Error: Could not access the backup transport.  Is the system running?";
+    static final String PM_NOT_RUNNING_ERR =
+            "Error: Could not access the Package Manager.  Is the system running?";
 
     private String[] mArgs;
     private int mNextArg;
@@ -203,19 +209,20 @@ public final class Bmgr {
         @Override
         public void onUpdate(String currentPackage, BackupProgress backupProgress) {
             System.out.println(
-                "onUpdate: " + currentPackage + " with progress: " + backupProgress.bytesTransferred
+                "Package " + currentPackage + " with progress: " + backupProgress.bytesTransferred
                     + "/" + backupProgress.bytesExpected);
         }
 
         @Override
         public void onResult(String currentPackage, int status) {
-            System.out.println("onResult: " + currentPackage + " with result: "
+            System.out.println("Package " + currentPackage + " with result: "
                     + convertBackupStatusToString(status));
         }
 
         @Override
         public void backupFinished(int status) {
-            System.out.println("backupFinished: " + convertBackupStatusToString(status));
+            System.out.println("Backup finished with result: "
+                    + convertBackupStatusToString(status));
             synchronized (this) {
                 done = true;
                 this.notify();
@@ -251,31 +258,83 @@ public final class Bmgr {
                 return "Transport rejected package";
             case BackupManager.ERROR_AGENT_FAILURE:
                 return "Agent error";
+            case BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED:
+                return "Size quota exceeded";
             default:
                 return "Unknown error";
         }
     }
 
+    private void backupNowAllPackages() {
+        int userId = UserHandle.USER_SYSTEM;
+        IPackageManager mPm =
+                IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        if (mPm == null) {
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return;
+        }
+        List<PackageInfo> installedPackages = null;
+        try {
+            installedPackages =  mPm.getInstalledPackages(0, userId).getList();
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+        if (installedPackages != null) {
+            List<String> packages = new ArrayList<>();
+            for (PackageInfo pi : installedPackages) {
+                try {
+                    if (mBmgr.isAppEligibleForBackup(pi.packageName)) {
+                        packages.add(pi.packageName);
+                    }
+                } catch (RemoteException e) {
+                    System.err.println(e.toString());
+                    System.err.println(BMGR_NOT_RUNNING_ERR);
+                }
+            }
+            backupNowPackages(packages);
+        }
+    }
+
+    private void backupNowPackages(List<String> packages) {
+        try {
+            BackupObserver observer = new BackupObserver();
+            int err = mBmgr.requestBackup(packages.toArray(new String[packages.size()]), observer);
+            if (err == 0) {
+                // Off and running -- wait for the backup to complete
+                observer.waitForCompletion();
+            } else {
+                System.err.println("Unable to run backup");
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
     private void doBackupNow() {
         String pkg;
+        boolean backupAll = false;
         ArrayList<String> allPkgs = new ArrayList<String>();
         while ((pkg = nextArg()) != null) {
-            allPkgs.add(pkg);
-        }
-        if (allPkgs.size() > 0) {
-            try {
-                BackupObserver observer = new BackupObserver();
-                int err = mBmgr.requestBackup(allPkgs.toArray(new String[allPkgs.size()]), observer);
-                if (err == 0) {
-                    // Off and running -- wait for the backup to complete
-                    observer.waitForCompletion();
-                } else {
-                    System.err.println("Unable to run backup");
-                }
-            } catch (RemoteException e) {
-                System.err.println(e.toString());
-                System.err.println(BMGR_NOT_RUNNING_ERR);
+            if (pkg.equals("--all")) {
+                backupAll = true;
+            } else {
+                allPkgs.add(pkg);
             }
+        }
+        if (backupAll) {
+            if (allPkgs.size() == 0) {
+                System.out.println("Running backup for all packages.");
+                backupNowAllPackages();
+            } else {
+                System.err.println("Provide only '--all' flag or list of packages.");
+            }
+        } else if (allPkgs.size() > 0) {
+            System.out.println("Running backup for " + allPkgs.size() +" requested packages.");
+            backupNowPackages(allPkgs);
+        } else {
+            System.err.println("Provide '--all' flag or list of packages.");
         }
     }
 
@@ -568,6 +627,7 @@ public final class Bmgr {
         System.err.println("       bmgr run");
         System.err.println("       bmgr wipe TRANSPORT PACKAGE");
         System.err.println("       bmgr fullbackup PACKAGE...");
+        System.err.println("       bmgr backupnow --all|PACKAGE...");
         System.err.println("");
         System.err.println("The 'backup' command schedules a backup pass for the named package.");
         System.err.println("Note that the backup pass will effectively be a no-op if the package");
@@ -620,6 +680,7 @@ public final class Bmgr {
         System.err.println("packages.  The data is sent via the currently active transport.");
         System.err.println("");
         System.err.println("The 'backupnow' command runs an immediate backup for one or more packages.");
+        System.err.println("    --all flag runs backup for all eligible packages.");
         System.err.println("For each package it will run key/value or full data backup ");
         System.err.println("depending on the package's manifest declarations.");
         System.err.println("The data is sent via the currently active transport.");
