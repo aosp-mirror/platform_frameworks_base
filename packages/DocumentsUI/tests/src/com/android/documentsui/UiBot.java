@@ -24,6 +24,7 @@ import static junit.framework.Assert.assertFalse;
 import android.content.Context;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
+import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObject2;
@@ -32,6 +33,7 @@ import android.support.test.uiautomator.UiScrollable;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.inputmethod.InputMethodManager;
 
 import junit.framework.Assert;
@@ -188,6 +190,14 @@ class UiBot {
     }
     void assertSnackbar(int id) {
         assertNotNull(getSnackbar(mContext.getString(id)));
+    }
+
+    void openDocument(String label) throws UiObjectNotFoundException {
+        int toolType = Configurator.getInstance().getToolType();
+        Configurator.getInstance().setToolType(MotionEvent.TOOL_TYPE_FINGER);
+        UiObject doc = findDocument(label);
+        doc.click();
+        Configurator.getInstance().setToolType(toolType);
     }
 
     void clickDocument(String label) throws UiObjectNotFoundException {
