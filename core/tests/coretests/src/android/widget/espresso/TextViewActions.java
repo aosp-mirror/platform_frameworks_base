@@ -17,6 +17,10 @@
 package android.widget.espresso;
 
 import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
+
+import org.hamcrest.core.Is;
+import org.hamcrest.core.IsInstanceOf;
+
 import android.graphics.Rect;
 import android.support.test.espresso.PerformException;
 import android.support.test.espresso.ViewAction;
@@ -29,6 +33,7 @@ import android.text.Layout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Editor;
+import android.widget.Editor.HandleView;
 import android.widget.TextView;
 
 /**
@@ -311,15 +316,84 @@ public final class TextViewActions {
      * @param endIndex The index of the TextView's text to end the drag at
      */
     public static ViewAction dragHandle(TextView textView, Handle handleType, int endIndex) {
-        final int currentOffset = handleType == Handle.SELECTION_START ?
-                textView.getSelectionStart() : textView.getSelectionEnd();
+        return dragHandle(textView, handleType, endIndex, true);
+    }
+
+    /**
+     * Returns an action that tap then drags on the handle from the current position to endIndex on
+     * the TextView.<br>
+     * <br>
+     * View constraints:
+     * <ul>
+     * <li>must be a TextView's drag-handle displayed on screen
+     * <ul>
+     *
+     * @param textView TextView the handle is on
+     * @param handleType Type of the handle
+     * @param endIndex The index of the TextView's text to end the drag at
+     * @param primary whether to use primary direction to get coordinate form index when endIndex is
+     * at a direction boundary.
+     */
+    public static ViewAction dragHandle(TextView textView, Handle handleType, int endIndex,
+            boolean primary) {
         return actionWithAssertions(
                 new DragAction(
                         DragAction.Drag.TAP,
-                        new HandleCoordinates(textView, handleType, currentOffset),
-                        new HandleCoordinates(textView, handleType, endIndex),
+                        new CurrentHandleCoordinates(textView),
+                        new HandleCoordinates(textView, handleType, endIndex, primary),
                         Press.FINGER,
                         Editor.HandleView.class));
+    }
+
+    /**
+     * A provider of the x, y coordinates of the handle dragging point.
+     */
+    private static final class CurrentHandleCoordinates implements CoordinatesProvider {
+        // Must be larger than Editor#LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS.
+        private final TextView mTextView;
+        private final String mActionDescription;
+
+
+        public CurrentHandleCoordinates(TextView textView) {
+            mTextView = textView;
+            mActionDescription = "Could not locate handle.";
+        }
+
+        @Override
+        public float[] calculateCoordinates(View view) {
+            try {
+                return locateHandle(view);
+            } catch (StringIndexOutOfBoundsException e) {
+                throw new PerformException.Builder()
+                        .withActionDescription(mActionDescription)
+                        .withViewDescription(HumanReadables.describe(view))
+                        .withCause(e)
+                        .build();
+            }
+        }
+
+        private float[] locateHandle(View view) {
+            final Rect bounds = new Rect();
+            view.getBoundsOnScreen(bounds);
+            final Rect visibleDisplayBounds = new Rect();
+            mTextView.getWindowVisibleDisplayFrame(visibleDisplayBounds);
+            visibleDisplayBounds.right -= 1;
+            visibleDisplayBounds.bottom -= 1;
+            if (!visibleDisplayBounds.intersect(bounds)) {
+                throw new PerformException.Builder()
+                        .withActionDescription(mActionDescription
+                                + " The handle is entirely out of the visible display frame of"
+                                + "the TextView's window.")
+                        .withViewDescription(HumanReadables.describe(view))
+                        .build();
+            }
+            final float dragPointX = Math.max(Math.min(bounds.centerX(),
+                    visibleDisplayBounds.right), visibleDisplayBounds.left);
+            final float verticalOffset = bounds.height() * 0.7f;
+            final float dragPointY = Math.max(Math.min(bounds.top + verticalOffset,
+                    visibleDisplayBounds.bottom), visibleDisplayBounds.top);
+            return new float[] {dragPointX, dragPointY};
+        }
     }
 
     /**
@@ -332,14 +406,17 @@ public final class TextViewActions {
         private final TextView mTextView;
         private final Handle mHandleType;
         private final int mIndex;
+        private final boolean mPrimary;
         private final String mActionDescription;
 
-        public HandleCoordinates(TextView textView, Handle handleType, int index) {
+        public HandleCoordinates(TextView textView, Handle handleType, int index, boolean primary) {
             mTextView = textView;
             mHandleType = handleType;
             mIndex = index;
+            mPrimary = primary;
             mActionDescription = "Could not locate " + handleType.toString()
-                    + " handle that points text index: " + index;
+                    + " handle that points text index: " + index
+                    + " (" + (primary ? "primary" : "secondary" ) + ")";
         }
 
         @Override
@@ -356,17 +433,26 @@ public final class TextViewActions {
         }
 
         private float[] locateHandlePointsTextIndex(View view) {
+            if (!(view instanceof HandleView)) {
+                throw new PerformException.Builder()
+                        .withActionDescription(mActionDescription + " The view is not a HandleView")
+                        .withViewDescription(HumanReadables.describe(view))
+                        .build();
+            }
+            final HandleView handleView = (HandleView) view;
             final int currentOffset = mHandleType == Handle.SELECTION_START ?
                     mTextView.getSelectionStart() : mTextView.getSelectionEnd();
 
             final Layout layout = mTextView.getLayout();
+
             final int currentLine = layout.getLineForOffset(currentOffset);
             final int targetLine = layout.getLineForOffset(mIndex);
-
+            final float currentX = handleView.getHorizontal(layout, currentOffset);
+            final float currentY = layout.getLineTop(currentLine);
             final float[] currentCoordinates =
-                    (new TextCoordinates(currentOffset)).calculateCoordinates(mTextView);
+                    TextCoordinates.convertToScreenCoordinates(mTextView, currentX, currentY);
             final float[] targetCoordinates =
-                    (new TextCoordinates(mIndex)).calculateCoordinates(mTextView);
+                    (new TextCoordinates(mIndex, mPrimary)).calculateCoordinates(mTextView);
             final Rect bounds = new Rect();
             view.getBoundsOnScreen(bounds);
             final Rect visibleDisplayBounds = new Rect();
@@ -403,17 +489,24 @@ public final class TextViewActions {
     private static final class TextCoordinates implements CoordinatesProvider {
 
         private final int mIndex;
+        private final boolean mPrimary;
         private final String mActionDescription;
 
         public TextCoordinates(int index) {
+            this(index, true);
+        }
+
+        public TextCoordinates(int index, boolean primary) {
             mIndex = index;
-            mActionDescription = "Could not locate text at index: " + mIndex;
+            mPrimary = primary;
+            mActionDescription = "Could not locate text at index: " + mIndex
+                    + " (" + (primary ? "primary" : "secondary" ) + ")";
         }
 
         @Override
         public float[] calculateCoordinates(View view) {
             try {
-                return locateTextAtIndex((TextView) view, mIndex);
+                return locateTextAtIndex((TextView) view, mIndex, mPrimary);
             } catch (ClassCastException e) {
                 throw new PerformException.Builder()
                         .withActionDescription(mActionDescription)
@@ -432,19 +525,30 @@ public final class TextViewActions {
         /**
          * @throws StringIndexOutOfBoundsException
          */
-        private float[] locateTextAtIndex(TextView textView, int index) {
+        private float[] locateTextAtIndex(TextView textView, int index, boolean primary) {
             if (index < 0 || index > textView.getText().length()) {
                 throw new StringIndexOutOfBoundsException(index);
             }
-            final int[] xy = new int[2];
-            textView.getLocationOnScreen(xy);
             final Layout layout = textView.getLayout();
             final int line = layout.getLineForOffset(index);
-            final float x = textView.getTotalPaddingLeft() - textView.getScrollX()
-                    + layout.getPrimaryHorizontal(index);
-            final float y = textView.getTotalPaddingTop() - textView.getScrollY()
-                    + layout.getLineTop(line);
-            return new float[]{x + xy[0], y + xy[1]};
+            return convertToScreenCoordinates(textView,
+                    (primary ? layout.getPrimaryHorizontal(index)
+                            : layout.getSecondaryHorizontal(index)),
+                    layout.getLineTop(line));
+        }
+
+        /**
+         * Convert TextView's local coordinates to on screen coordinates.
+         * @param textView the TextView
+         * @param x local horizontal coordinate
+         * @param y local vertical coordinate
+         * @return
+         */
+        public static float[] convertToScreenCoordinates(TextView textView, float x, float y) {
+            final int[] xy = new int[2];
+            textView.getLocationOnScreen(xy);
+            return new float[]{ x + textView.getTotalPaddingLeft() - textView.getScrollX() + xy[0],
+                    y + textView.getTotalPaddingTop() - textView.getScrollY() + xy[1] };
         }
     }
 }
