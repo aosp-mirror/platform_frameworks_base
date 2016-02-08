@@ -20340,8 +20340,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean unlockUser(int userId, byte[] token) {
-        return mUserController.unlockUser(userId, token);
+    public boolean unlockUser(int userId, byte[] token, byte[] secret) {
+        return mUserController.unlockUser(userId, token, secret);
     }
 
     @Override

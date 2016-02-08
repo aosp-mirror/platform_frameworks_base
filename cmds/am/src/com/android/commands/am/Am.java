@@ -1126,14 +1126,19 @@ public class Am extends BaseCommand {
         }
     }
 
+    private byte[] argToBytes(String arg) {
+        if (arg.equals("!")) {
+            return null;
+        } else {
+            return HexDump.hexStringToByteArray(arg);
+        }
+    }
+
     private void runUnlockUser() throws Exception {
         int userId = Integer.parseInt(nextArgRequired());
-        String tokenHex = nextArg();
-        byte[] token = null;
-        if (tokenHex != null) {
-            token = HexDump.hexStringToByteArray(tokenHex);
-        }
-        boolean success = mAm.unlockUser(userId, token);
+        byte[] token = argToBytes(nextArgRequired());
+        byte[] secret = argToBytes(nextArgRequired());
+        boolean success = mAm.unlockUser(userId, token, secret);
         if (success) {
             System.out.println("Success: user unlocked");
         } else {
