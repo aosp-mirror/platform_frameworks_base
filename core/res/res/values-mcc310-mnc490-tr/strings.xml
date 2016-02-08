@@ -23,7 +23,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2780619740658228275">"Kablosuz ağ üzerinden telefon etmek ve ileti göndermek için ilk önce operatörünüzden bu hizmeti ayarlamasını isteyin. Sonra tekrar Ayarlar\'dan Kablosuz çağrı özelliğini açın."</item>
+    <item msgid="2780619740658228275">"Kablosuz ağ üzerinden telefon etmek ve ileti göndermek için ilk önce operatörünüzden bu hizmeti ayarlamasını isteyin. Sonra, Ayarlar\'dan Kablosuz çağrı özelliğini tekrar açın."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4633656294483906293">"Operatörünüze kaydolun"</item>
