@@ -26,7 +26,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.security.InvalidParameterException;
 
 /**
- * A class containing a GPS satellite Navigation Message.
+ * A class containing a GNSS satellite Navigation Message.
  */
 public final class GnssNavigationMessage implements Parcelable {
 
@@ -84,7 +84,7 @@ public final class GnssNavigationMessage implements Parcelable {
     // End enumerations in sync with gps.h
 
     private byte mType;
-    private byte mPrn;
+    private short mSvid;
     private short mMessageId;
     private short mSubmessageId;
     private byte[] mData;
@@ -99,7 +99,7 @@ public final class GnssNavigationMessage implements Parcelable {
      */
     public void set(GnssNavigationMessage navigationMessage) {
         mType = navigationMessage.mType;
-        mPrn = navigationMessage.mPrn;
+        mSvid = navigationMessage.mSvid;
         mMessageId = navigationMessage.mMessageId;
         mSubmessageId = navigationMessage.mSubmessageId;
         mData = navigationMessage.mData;
@@ -153,15 +153,15 @@ public final class GnssNavigationMessage implements Parcelable {
      * Gets the Pseudo-random number.
      * Range: [1, 32].
      */
-    public byte getPrn() {
-        return mPrn;
+    public short getSvid() {
+        return mSvid;
     }
 
     /**
      * Sets the Pseud-random number.
      */
-    public void setPrn(byte value) {
-        mPrn = value;
+    public void setSvid(short value) {
+        mSvid = value;
     }
 
     /**
@@ -256,7 +256,7 @@ public final class GnssNavigationMessage implements Parcelable {
             GnssNavigationMessage navigationMessage = new GnssNavigationMessage();
 
             navigationMessage.setType(parcel.readByte());
-            navigationMessage.setPrn(parcel.readByte());
+            navigationMessage.setSvid((short) parcel.readInt());
             navigationMessage.setMessageId((short) parcel.readInt());
             navigationMessage.setSubmessageId((short) parcel.readInt());
 
@@ -281,9 +281,10 @@ public final class GnssNavigationMessage implements Parcelable {
         }
     };
 
+    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeByte(mType);
-        parcel.writeByte(mPrn);
+        parcel.writeInt(mSvid);
         parcel.writeInt(mMessageId);
         parcel.writeInt(mSubmessageId);
         parcel.writeInt(mData.length);
@@ -302,7 +303,7 @@ public final class GnssNavigationMessage implements Parcelable {
         StringBuilder builder = new StringBuilder("GnssNavigationMessage:\n");
 
         builder.append(String.format(format, "Type", getTypeString()));
-        builder.append(String.format(format, "Prn", mPrn));
+        builder.append(String.format(format, "Svid", mSvid));
         builder.append(String.format(format, "Status", getStatusString()));
         builder.append(String.format(format, "MessageId", mMessageId));
         builder.append(String.format(format, "SubmessageId", mSubmessageId));
@@ -321,7 +322,7 @@ public final class GnssNavigationMessage implements Parcelable {
 
     private void initialize() {
         mType = MESSAGE_TYPE_UNKNOWN;
-        mPrn = 0;
+        mSvid = 0;
         mMessageId = -1;
         mSubmessageId = -1;
         mData = EMPTY_ARRAY;

@@ -19192,7 +19192,6 @@ package android.location {
     method public double getElevationUncertaintyInDeg();
     method public byte getLossOfLock();
     method public byte getMultipathIndicator();
-    method public byte getPrn();
     method public double getPseudorangeInMeters();
     method public double getPseudorangeRateCarrierInMetersPerSec();
     method public double getPseudorangeRateCarrierUncertaintyInMetersPerSec();
@@ -19203,6 +19202,7 @@ package android.location {
     method public long getReceivedGpsTowUncertaintyInNs();
     method public double getSnrInDb();
     method public short getState();
+    method public short getSvid();
     method public short getTimeFromLastBitInMs();
     method public double getTimeOffsetInNs();
     method public boolean hasAzimuthInDeg();
@@ -19262,7 +19262,6 @@ package android.location {
     method public void setElevationUncertaintyInDeg(double);
     method public void setLossOfLock(byte);
     method public void setMultipathIndicator(byte);
-    method public void setPrn(byte);
     method public void setPseudorangeInMeters(double);
     method public void setPseudorangeRateCarrierInMetersPerSec(double);
     method public void setPseudorangeRateCarrierUncertaintyInMetersPerSec(double);
@@ -19273,6 +19272,7 @@ package android.location {
     method public void setReceivedGpsTowUncertaintyInNs(long);
     method public void setSnrInDb(double);
     method public void setState(short);
+    method public void setSvid(short);
     method public void setTimeFromLastBitInMs(short);
     method public void setTimeOffsetInNs(double);
     method public void setUsedInFix(boolean);
@@ -19327,17 +19327,17 @@ package android.location {
     method public int describeContents();
     method public byte[] getData();
     method public short getMessageId();
-    method public byte getPrn();
     method public short getStatus();
     method public short getSubmessageId();
+    method public short getSvid();
     method public byte getType();
     method public void reset();
     method public void set(android.location.GnssNavigationMessage);
     method public void setData(byte[]);
     method public void setMessageId(short);
-    method public void setPrn(byte);
     method public void setStatus(short);
     method public void setSubmessageId(short);
+    method public void setSvid(short);
     method public void setType(byte);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessage> CREATOR;
@@ -19383,8 +19383,8 @@ package android.location {
     method public int getConstellationType(int);
     method public float getElevation(int);
     method public int getNumSatellites();
-    method public int getPrn(int);
     method public float getSnr(int);
+    method public int getSvid(int);
     method public boolean hasAlmanac(int);
     method public boolean hasEphemeris(int);
     method public boolean usedInFix(int);

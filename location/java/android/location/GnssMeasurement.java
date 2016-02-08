@@ -28,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class GnssMeasurement implements Parcelable {
     private int mFlags;
-    private byte mPrn;
+    private short mSvid;
     private double mTimeOffsetInNs;
     private short mState;
     private long mReceivedGpsTowInNs;
@@ -198,7 +198,7 @@ public final class GnssMeasurement implements Parcelable {
      */
     public void set(GnssMeasurement measurement) {
         mFlags = measurement.mFlags;
-        mPrn = measurement.mPrn;
+        mSvid = measurement.mSvid;
         mTimeOffsetInNs = measurement.mTimeOffsetInNs;
         mState = measurement.mState;
         mReceivedGpsTowInNs = measurement.mReceivedGpsTowInNs;
@@ -248,15 +248,15 @@ public final class GnssMeasurement implements Parcelable {
      * Gets the Pseudo-random number (PRN).
      * Range: [1, 32]
      */
-    public byte getPrn() {
-        return mPrn;
+    public short getSvid() {
+        return mSvid;
     }
 
     /**
      * Sets the Pseud-random number (PRN).
      */
-    public void setPrn(byte value) {
-        mPrn = value;
+    public void setSvid(short value) {
+        mSvid = value;
     }
 
     /**
@@ -1210,7 +1210,7 @@ public final class GnssMeasurement implements Parcelable {
             GnssMeasurement gnssMeasurement = new GnssMeasurement();
 
             gnssMeasurement.mFlags = parcel.readInt();
-            gnssMeasurement.mPrn = parcel.readByte();
+            gnssMeasurement.mSvid = (short) parcel.readInt();
             gnssMeasurement.mTimeOffsetInNs = parcel.readDouble();
             gnssMeasurement.mState = (short) parcel.readInt();
             gnssMeasurement.mReceivedGpsTowInNs = parcel.readLong();
@@ -1253,9 +1253,10 @@ public final class GnssMeasurement implements Parcelable {
         }
     };
 
+    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mFlags);
-        parcel.writeByte(mPrn);
+        parcel.writeInt(mSvid);
         parcel.writeDouble(mTimeOffsetInNs);
         parcel.writeInt(mState);
         parcel.writeLong(mReceivedGpsTowInNs);
@@ -1301,7 +1302,7 @@ public final class GnssMeasurement implements Parcelable {
         final String formatWithUncertainty = "   %-29s = %-25s   %-40s = %s\n";
         StringBuilder builder = new StringBuilder("GnssMeasurement:\n");
 
-        builder.append(String.format(format, "Prn", mPrn));
+        builder.append(String.format(format, "Svid", mSvid));
 
         builder.append(String.format(format, "TimeOffsetInNs", mTimeOffsetInNs));
 
@@ -1422,7 +1423,7 @@ public final class GnssMeasurement implements Parcelable {
 
     private void initialize() {
         mFlags = HAS_NO_FLAGS;
-        setPrn(Byte.MIN_VALUE);
+        setSvid((short) 0);
         setTimeOffsetInNs(Long.MIN_VALUE);
         setState(STATE_UNKNOWN);
         setReceivedGpsTowInNs(Long.MIN_VALUE);
