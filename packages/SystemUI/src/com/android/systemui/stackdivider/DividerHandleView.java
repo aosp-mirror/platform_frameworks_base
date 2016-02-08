@@ -73,6 +73,7 @@ public class DividerHandleView extends ImageButton {
     private int mCurrentWidth;
     private int mCurrentHeight;
     private AnimatorSet mAnimator;
+    private boolean mTouching;
 
     public DividerHandleView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -86,6 +87,9 @@ public class DividerHandleView extends ImageButton {
     }
 
     public void setTouching(boolean touching, boolean animate) {
+        if (touching == mTouching) {
+            return;
+        }
         if (mAnimator != null) {
             mAnimator.cancel();
             mAnimator = null;
@@ -103,6 +107,7 @@ public class DividerHandleView extends ImageButton {
             animateToTarget(touching ? mCircleDiameter : mWidth,
                     touching ? mCircleDiameter : mHeight, touching);
         }
+        mTouching = touching;
     }
 
     private void animateToTarget(int targetWidth, int targetHeight, boolean touching) {

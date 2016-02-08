@@ -100,6 +100,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final int[] mTempInt2 = new int[2];
     private boolean mMoving;
     private int mTouchSlop;
+    private boolean mBackgroundLifted;
 
     private int mDividerInsets;
     private int mDisplayWidth;
@@ -210,8 +211,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mDockSide = mWindowManagerProxy.getDockSide();
         initializeSnapAlgorithm();
         mWindowManagerProxy.setResizing(true);
-        mWindowManager.setSlippery(false);
         if (touching) {
+            mWindowManager.setSlippery(false);
             liftBackground();
         }
         return mDockSide != WindowManager.DOCKED_INVALID;
@@ -389,6 +390,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     private void liftBackground() {
+        if (mBackgroundLifted) {
+            return;
+        }
         if (isHorizontalDivision()) {
             mBackground.animate().scaleY(1.4f);
         } else {
@@ -407,9 +411,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setDuration(TOUCH_ANIMATION_DURATION)
                 .translationZ(mTouchElevation)
                 .start();
+        mBackgroundLifted = true;
     }
 
     private void releaseBackground() {
+        if (!mBackgroundLifted) {
+            return;
+        }
         mBackground.animate()
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
@@ -422,6 +430,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
                 .translationZ(0)
                 .start();
+        mBackgroundLifted = false;
     }
 
     @Override
@@ -485,7 +494,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
 
         // Make sure shadows are updated
-        mBackground.invalidate();
+        if (mBackground.getZ() > 0f) {
+            mBackground.invalidate();
+        }
 
         mLastResizeRect.set(mDockedRect);
         if (taskPosition != TASK_POSITION_SAME) {

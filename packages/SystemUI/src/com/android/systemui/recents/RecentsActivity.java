@@ -205,7 +205,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
                 ? stack.indexOfStackTask(launchTarget)
                 : 0;
         boolean hasNavBarScrim = (taskCount > 0) && !config.hasTransposedNavBar;
-        boolean animateNavBarScrim = true;
+        boolean animateNavBarScrim = !launchState.launchedWhileDocking;
         mScrimViews.prepareEnterRecentsAnimation(hasNavBarScrim, animateNavBarScrim);
 
         // Keep track of whether we launched from the nav bar button or via alt-tab
@@ -460,13 +460,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // wait on the system to send a signal that was never queued.
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
-        launchState.launchedFromHome = false;
-        launchState.launchedFromSearchHome = false;
-        launchState.launchedFromAppWithThumbnail = false;
-        launchState.launchedToTaskId = -1;
-        launchState.launchedWithAltTab = false;
-        launchState.launchedHasConfigurationChanged = false;
-        launchState.launchedViaDragGesture = false;
+        launchState.reset();
 
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
     }
