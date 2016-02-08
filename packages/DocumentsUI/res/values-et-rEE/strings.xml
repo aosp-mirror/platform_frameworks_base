@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Loendikuva"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Sortimisalus:"</string>
     <string name="menu_search" msgid="3816712084502856974">"Otsing"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Salvestusruumi seaded"</string>
     <string name="menu_open" msgid="432922957274920903">"Ava"</string>
     <string name="menu_save" msgid="2394743337684426338">"Salvesta"</string>
     <string name="menu_share" msgid="3075149983979628146">"Jaga"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Peida juured"</string>
     <string name="save_error" msgid="6167009778003223664">"Dokumendi salvestamine ebaõnnestus"</string>
     <string name="create_error" msgid="3735649141335444215">"Kausta loomine ebaõnnestus"</string>
-    <string name="query_error" msgid="1222448261663503501">"Dokumentide päring ebaõnnestus"</string>
+    <string name="query_error" msgid="5999895349602476581">"Sisu ei saa praegu laadida"</string>
     <string name="root_recent" msgid="4470053704320518133">"Hiljutised"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> on vaba"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Mäluruumi teenused"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Rohkem rakendusi"</string>
     <string name="empty" msgid="7858882803708117596">"Üksusi ei ole"</string>
     <string name="no_results" msgid="6622510343880730446">"Otsing %1$s ei andnud vasteid"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Faili ei saa avada"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Faili ei saa avada"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Mõnda dokumenti ei õnnestu kustutada"</string>
     <string name="share_via" msgid="8966594246261344259">"Jagage teenusega"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Failide kopeerimine"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Kopeerimise ettevalmistamine …"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Teisaldamise ettevalmistamine …"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Kustutamise ettevalmistamine …"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> faili ei saanud kopeerida</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> faili ei saanud kopeerida</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> faili ei saanud teisaldada</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> faili ei saanud teisaldada</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> faili ei õnnestunud kustutada</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> faili ei õnnestunud kustutada</item>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> faili ei saanud kustutada</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> faili ei saanud kustutada</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Puudutage üksikasjade vaatamiseks"</string>
     <string name="close" msgid="3043722427445528732">"Sule"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Neid faile ei kopeeritud: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Neid faile ei teisaldatud: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Neid faile ei kopeeritud: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Neid faile ei teisaldatud: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Need failid teisendati teise vormingusse: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> faili kopeeriti lõikelauale.</item>

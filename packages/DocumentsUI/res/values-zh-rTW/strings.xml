@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"清單檢視"</string>
     <string name="menu_sort" msgid="7677740407158414452">"排序依據"</string>
     <string name="menu_search" msgid="3816712084502856974">"搜尋"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Storage 設定"</string>
     <string name="menu_open" msgid="432922957274920903">"開啟"</string>
     <string name="menu_save" msgid="2394743337684426338">"儲存"</string>
     <string name="menu_share" msgid="3075149983979628146">"共用"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"隱藏根目錄"</string>
     <string name="save_error" msgid="6167009778003223664">"無法儲存文件"</string>
     <string name="create_error" msgid="3735649141335444215">"無法建立資料夾"</string>
-    <string name="query_error" msgid="1222448261663503501">"無法查詢文件"</string>
+    <string name="query_error" msgid="5999895349602476581">"目前無法載入內容"</string>
     <string name="root_recent" msgid="4470053704320518133">"最近"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"可用空間：<xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"儲存空間服務"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"更多應用程式"</string>
     <string name="empty" msgid="7858882803708117596">"沒有任何項目"</string>
     <string name="no_results" msgid="6622510343880730446">"沒有與「%1$s」相符的結果"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"無法開啟檔案"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"無法開啟檔案"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"無法刪除部分文件"</string>
     <string name="share_via" msgid="8966594246261344259">"分享方式："</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"複製檔案"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"正在準備複製…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"準備移動…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"正在準備刪除…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="other">無法複製 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
       <item quantity="one">無法複製 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="other">無法移動 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
       <item quantity="one">無法移動 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="other">無法刪除 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案</item>
       <item quantity="one">無法刪除 <xliff:g id="COUNT_0">%1$d</xliff:g> 個檔案</item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="6268189413228855582">"輕按即可查看詳細資訊"</string>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"輕觸即可查看詳細資訊"</string>
     <string name="close" msgid="3043722427445528732">"關閉"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"未複製這些檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"未移動以下檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"未複製下列檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"未移動下列檔案：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"下列檔案已轉換成其他格式：<xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">已將 <xliff:g id="COUNT_1">%1$d</xliff:g> 個檔案複製到剪貼簿。</item>

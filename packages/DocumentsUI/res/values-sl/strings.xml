@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Pogled seznama"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Razvrsti glede na"</string>
     <string name="menu_search" msgid="3816712084502856974">"Iskanje"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Nastavitve shrambe"</string>
     <string name="menu_open" msgid="432922957274920903">"Odpri"</string>
     <string name="menu_save" msgid="2394743337684426338">"Shrani"</string>
     <string name="menu_share" msgid="3075149983979628146">"Skupna raba"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Skrij korene"</string>
     <string name="save_error" msgid="6167009778003223664">"Dokumenta ni bilo mogoče shraniti"</string>
     <string name="create_error" msgid="3735649141335444215">"Mape ni bilo mogoče ustvariti"</string>
-    <string name="query_error" msgid="1222448261663503501">"Poizvedba za dokumente ni uspela"</string>
+    <string name="query_error" msgid="5999895349602476581">"Vsebine trenutno ni mogoče naložiti"</string>
     <string name="root_recent" msgid="4470053704320518133">"Nedavno"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Prosto: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Storitve shrambe"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Več aplikacij"</string>
     <string name="empty" msgid="7858882803708117596">"Ni elementov"</string>
     <string name="no_results" msgid="6622510343880730446">"Tukaj ni ujemanj: %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Datoteke ni mogoče odpreti"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Datoteke ni mogoče odpreti"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nekaterih dokumentov ni mogoče izbrisati"</string>
     <string name="share_via" msgid="8966594246261344259">"Deli z drugimi prek"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiranje datotek"</string>
@@ -91,19 +90,19 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravljanje na kopiranje …"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprava na premikanje …"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Pripravljanje na izbris …"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče kopirati</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče kopirati</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče premakniti</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče premakniti</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> datoteke ni bilo mogoče izbrisati</item>
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče izbrisati</item>
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> datotek ni bilo mogoče izbrisati</item>
@@ -111,8 +110,8 @@
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Dotaknite se za prikaz podrobnosti"</string>
     <string name="close" msgid="3043722427445528732">"Zapri"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Te datoteke niso bile kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Te datoteke niso bile premaknjene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Te datoteke niso bile kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Te datoteke niso bile premaknjene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Te datoteke so bile spremenjene v drugo obliko zapisa: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">V odložišče je bila kopirana <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka.</item>

@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Visualização em lista"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Classificar por"</string>
     <string name="menu_search" msgid="3816712084502856974">"Pesquisar"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Configurações de armazenamento"</string>
     <string name="menu_open" msgid="432922957274920903">"Abrir"</string>
     <string name="menu_save" msgid="2394743337684426338">"Salvar"</string>
     <string name="menu_share" msgid="3075149983979628146">"Compartilhar"</string>
@@ -54,7 +53,8 @@
     <string name="drawer_close" msgid="7602734368552123318">"Ocultar raízes"</string>
     <string name="save_error" msgid="6167009778003223664">"Falha ao salvar o documento"</string>
     <string name="create_error" msgid="3735649141335444215">"Falha ao criar a pasta"</string>
-    <string name="query_error" msgid="1222448261663503501">"Falha ao consultar documentos"</string>
+    <!-- no translation found for query_error (5999895349602476581) -->
+    <skip />
     <string name="root_recent" msgid="4470053704320518133">"Recentes"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> livres"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Serviços de armazenamento"</string>
@@ -63,7 +63,8 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Mais apps"</string>
     <string name="empty" msgid="7858882803708117596">"Nenhum item"</string>
     <string name="no_results" msgid="6622510343880730446">"Nenhum resultado em %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Não é possível abrir o arquivo"</string>
+    <!-- no translation found for toast_no_application (4632640357724698144) -->
+    <skip />
     <string name="toast_failed_delete" msgid="2180678019407244069">"Não foi possível excluir alguns documentos"</string>
     <string name="share_via" msgid="8966594246261344259">"Compartilhar via"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Copiando arquivos"</string>
@@ -85,22 +86,15 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Preparando para copiar..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Preparando para mover..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Preparando-se para excluir..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one">Não foi possível copiar <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos</item>
-      <item quantity="other">Não foi possível copiar <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos</item>
-    </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one">Não foi possível mover <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos</item>
-      <item quantity="other">Não foi possível mover <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos</item>
-    </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="one">Não foi possível excluir <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos</item>
-      <item quantity="other">Não foi possível excluir <xliff:g id="COUNT_1">%1$d</xliff:g> arquivos</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
+    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
+    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Tocar para ver detalhes"</string>
     <string name="close" msgid="3043722427445528732">"Fechar"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Estes arquivos não foram copiados: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Estes arquivos não foram movidos: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
+    <skip />
+    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
+    <skip />
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Esses arquivos foram convertidos em outro formato: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> arquivos copiados para a área de transferência.</item>

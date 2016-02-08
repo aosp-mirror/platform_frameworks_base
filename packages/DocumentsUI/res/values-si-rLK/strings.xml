@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"ලැයිස්තු පෙනුම"</string>
     <string name="menu_sort" msgid="7677740407158414452">"අනුපිළිවෙලට සකසා ඇත්තේ"</string>
     <string name="menu_search" msgid="3816712084502856974">"සෙවීම"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"ගබඩා සැකසීම්"</string>
     <string name="menu_open" msgid="432922957274920903">"විවෘත කරන්න"</string>
     <string name="menu_save" msgid="2394743337684426338">"සුරකින්න"</string>
     <string name="menu_share" msgid="3075149983979628146">"බෙදාගන්න"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"මුල් සඟවන්න"</string>
     <string name="save_error" msgid="6167009778003223664">"ලේඛනය සුරැකීමට අපොහොසත් විය"</string>
     <string name="create_error" msgid="3735649141335444215">"ෆෝල්ඩරය සැදීම අසාර්ථක විය"</string>
-    <string name="query_error" msgid="1222448261663503501">"ලේඛන විමසුම අසාර්ථක විය"</string>
+    <string name="query_error" msgid="5999895349602476581">"මේ මොහොතේ අන්තර්ගතය පූරණය කිරීමට නොහැකිය"</string>
     <string name="root_recent" msgid="4470053704320518133">"මෑත"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ඉතිරියි"</string>
     <string name="root_type_service" msgid="2178854894416775409">"ආචයන සේවා"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"තවත් යෙදුම්"</string>
     <string name="empty" msgid="7858882803708117596">"අයිතම නැත"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s හි තරඟ නැත"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"ගොනුව විවෘත කළ නොහැක"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"ගොනුව විවෘත කළ නොහැකිය"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"සමහර ලේඛන මැකීමට නොහැකි විය"</string>
     <string name="share_via" msgid="8966594246261344259">"හරහා බෙදාගන්න"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ගොනු පිටපත් කරමින්"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"පිටපතක් සඳහා සූදානම් කරමින්..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"ගෙන යාම සඳහා පිළියෙළ කරමින් ..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"මැකීම සඳහා සූදානම් කරමින්..."</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
-      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කළ නොහැකි විය</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් පිටපත් කළ නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් පිටපත් කළ නොහැකි විය</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යාමට නොහැකි විය</item>
-      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් ගෙන යාමට නොහැකි විය</item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් ගෙන යාමට නොහැකි විය</item>
+      <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් ගෙන යාමට නොහැකි විය</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
       <item quantity="other">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට නොහැකි විය</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"විස්තර බැලීමට තට්ටු කරන්න"</string>
     <string name="close" msgid="3043722427445528732">"වසන්න"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"මෙම ගොනු ගෙන නොයන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"මෙම ගොනු පිටපත් නොකරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"මෙම ගොනු ගෙන නොයන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"මෙම ගොනු වෙනත් ආකෘතියකට පරිවර්තනය කරන ලදී: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">පසුරු පුවරුවට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරන ලදි.</item>

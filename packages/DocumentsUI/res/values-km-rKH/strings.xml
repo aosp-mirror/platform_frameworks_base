@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"ទិដ្ឋភាព​បញ្ជី"</string>
     <string name="menu_sort" msgid="7677740407158414452">"តម្រៀប​តាម"</string>
     <string name="menu_search" msgid="3816712084502856974">"ស្វែងរក"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"កំណត់ការផ្ទុក"</string>
     <string name="menu_open" msgid="432922957274920903">"បើក"</string>
     <string name="menu_save" msgid="2394743337684426338">"រក្សាទុក"</string>
     <string name="menu_share" msgid="3075149983979628146">"ចែករំលែក​"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"លាក់ roots"</string>
     <string name="save_error" msgid="6167009778003223664">"បាន​បរាជ័យ​ក្នុង​ការ​រក្សា​ទុក​ឯកសារ"</string>
     <string name="create_error" msgid="3735649141335444215">"បាន​បរាជ័យ​ក្នុង​ការ​បង្កើត​ថត"</string>
-    <string name="query_error" msgid="1222448261663503501">"បាន​បរាជ័យ​ក្នុង​ការ​​ច្រោះ​ឯកសារ"</string>
+    <string name="query_error" msgid="5999895349602476581">"មិនអាចដំណើរការមាតិកាបានទេនៅពេលនេះ"</string>
     <string name="root_recent" msgid="4470053704320518133">"ថ្មីៗ"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"ទំនេរ <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"សេវាកម្ម​ផ្ដល់​ឧបករណ៍​ផ្ទុក"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"កម្ម​វិធី​​ច្រើន​ទៀត"</string>
     <string name="empty" msgid="7858882803708117596">"គ្មានធាតុ​"</string>
     <string name="no_results" msgid="6622510343880730446">"មិនមានការប្រកួតនៅក្នុង %1$s ទេ"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"មិន​អាច​បើក​ឯកសារ"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"មិនអាចបើកឯកសារបានទេ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"មិន​អាច​លុប​ឯកសារ​មួយ​ចំនួន"</string>
     <string name="share_via" msgid="8966594246261344259">"ចែករំលែក​តាម"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"កំពុងថតចម្លងឯកសារ"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"កំពុងរៀបចំចម្លង…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"កំពុងរៀបចំផ្លាស់ទី…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"កំពុងរៀបចំលុប…"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other">មិនអាចចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">មិនអាចចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other">មិនអាចថតចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> ច្បាប់</item>
+      <item quantity="one">មិនអាចថតចម្លងឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> ច្បាប់</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
-      <item quantity="other">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g></item>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> ច្បាប់</item>
+      <item quantity="one">មិនអាចផ្លាស់ទីឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> ច្បាប់</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="other">មិនអាចលុបឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> បានទេ</item>
-      <item quantity="one">មិនអាចលុបឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> បានទេ</item>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other">មិនអាចលុបឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> ច្បាប់</item>
+      <item quantity="one">មិនអាចលុបឯកសារ <xliff:g id="COUNT_0">%1$d</xliff:g> ច្បាប់</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"ប៉ះដើម្បីមើលព័ត៌មានលម្អិត"</string>
     <string name="close" msgid="3043722427445528732">"បិទ"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"ឯកសារទាំងនេះមិនបានចម្លងទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"ឯកសារទាំងនេះមិនអាចផ្លាស់ទីបានទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"ឯកសារទាំងនេះមិនត្រូវបានថតចម្លងទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"ឯកសារទាំងនេះមិនត្រូវបានផ្លាស់ទីទេ៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ឯកសារទាំងនេះត្រូវបានបម្លែងទៅជាទម្រង់ផ្សេង៖ <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">បានចម្លងឯកសារ <xliff:g id="COUNT_1">%1$d</xliff:g> ទៅតម្បៀតខ្ទាស់។</item>

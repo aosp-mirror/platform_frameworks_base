@@ -36,8 +36,7 @@
     <skip />
     <!-- no translation found for menu_search (3816712084502856974) -->
     <skip />
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Postavke pohrane"</string>
     <!-- no translation found for menu_open (432922957274920903) -->
     <skip />
     <!-- no translation found for menu_save (2394743337684426338) -->
@@ -90,7 +89,7 @@
     <skip />
     <!-- no translation found for create_error (3735649141335444215) -->
     <skip />
-    <!-- no translation found for query_error (1222448261663503501) -->
+    <!-- no translation found for query_error (5999895349602476581) -->
     <skip />
     <!-- no translation found for root_recent (4470053704320518133) -->
     <skip />
@@ -107,7 +106,7 @@
     <!-- no translation found for empty (7858882803708117596) -->
     <skip />
     <string name="no_results" msgid="6622510343880730446">"Nema rezultata u %1$s"</string>
-    <!-- no translation found for toast_no_application (1339885974067891667) -->
+    <!-- no translation found for toast_no_application (4632640357724698144) -->
     <skip />
     <!-- no translation found for toast_failed_delete (2180678019407244069) -->
     <skip />
@@ -129,18 +128,14 @@
     <!-- no translation found for move_preparing (2772219441375531410) -->
     <skip />
     <string name="delete_preparing" msgid="5655813182533491992">"Pripremanje za brisanje…"</string>
-    <!-- no translation found for copy_error_notification_title (5267616889076217261) -->
-    <!-- no translation found for move_error_notification_title (2779299594174898891) -->
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
-      <item quantity="one">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku</item>
-      <item quantity="few">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke</item>
-      <item quantity="other">Nije bilo moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka</item>
-    </plurals>
+    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
+    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
+    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Dodirnite za prikaz detalja"</string>
     <string name="close" msgid="3043722427445528732">"Zatvori"</string>
-    <!-- no translation found for copy_failure_alert_content (3715575000297709082) -->
+    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
     <skip />
-    <!-- no translation found for move_failure_alert_content (7151140279020481180) -->
+    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
     <skip />
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su pretvorene u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <!-- no translation found for clipboard_files_clipped (855459017537058539) -->

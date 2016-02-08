@@ -26,8 +26,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Listvy"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Sortera efter"</string>
     <string name="menu_search" msgid="3816712084502856974">"Sök"</string>
-    <!-- no translation found for menu_settings (8239065133341597825) -->
-    <skip />
+    <string name="menu_settings" msgid="8239065133341597825">"Lagringsinställningar"</string>
     <string name="menu_open" msgid="432922957274920903">"Öppna"</string>
     <string name="menu_save" msgid="2394743337684426338">"Spara"</string>
     <string name="menu_share" msgid="3075149983979628146">"Dela"</string>
@@ -54,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Dölj rötter"</string>
     <string name="save_error" msgid="6167009778003223664">"Det gick inte att spara dokumentet"</string>
     <string name="create_error" msgid="3735649141335444215">"Det gick inte att skapa mappen"</string>
-    <string name="query_error" msgid="1222448261663503501">"Det gick inte att söka efter dokument"</string>
+    <string name="query_error" msgid="5999895349602476581">"Det går inte att läsa in innehållet just nu"</string>
     <string name="root_recent" msgid="4470053704320518133">"Senaste"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ledigt"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Lagringstjänster"</string>
@@ -63,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Fler appar"</string>
     <string name="empty" msgid="7858882803708117596">"Inga objekt"</string>
     <string name="no_results" msgid="6622510343880730446">"Det finns inga träffar i %1$s"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Det går inte att öppna filen"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"Det går inte att öppna filen"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Det gick inte att ta bort vissa dokument"</string>
     <string name="share_via" msgid="8966594246261344259">"Dela via"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopierar filer"</string>
@@ -85,22 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Kopieringen förbereds …"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Förbereder för att flytta …"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Radering förbereds …"</string>
-    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer gick inte att kopiera</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> fil gick inte att kopiera</item>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other">Det gick inte att kopiera <xliff:g id="COUNT_1">%1$d</xliff:g> filer</item>
+      <item quantity="one">Det gick inte att kopiera <xliff:g id="COUNT_0">%1$d</xliff:g> fil</item>
     </plurals>
-    <plurals name="move_error_notification_title" formatted="false" msgid="2779299594174898891">
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="other">Det gick inte att flytta <xliff:g id="COUNT_1">%1$d</xliff:g> filer</item>
       <item quantity="one">Det gick inte att flytta <xliff:g id="COUNT_0">%1$d</xliff:g> fil</item>
     </plurals>
-    <plurals name="delete_error_notification_title" formatted="false" msgid="7600379830348969563">
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
       <item quantity="other">Det gick inte att radera <xliff:g id="COUNT_1">%1$d</xliff:g> filer</item>
       <item quantity="one">Det gick inte att radera <xliff:g id="COUNT_0">%1$d</xliff:g> fil</item>
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Tryck om du vill visa informationen"</string>
     <string name="close" msgid="3043722427445528732">"Stäng"</string>
-    <string name="copy_failure_alert_content" msgid="3715575000297709082">"Följande filer kopierades inte: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <string name="move_failure_alert_content" msgid="7151140279020481180">"Följande filer har inte flyttats: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Följande filer kopierades inte: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Följande filer flyttades inte: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Filerna konverterades till ett annat format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> filer har kopierats till Urklipp.</item>
