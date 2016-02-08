@@ -38,7 +38,6 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
-import android.view.inputmethod.InputMethodSubtypeArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -122,7 +121,7 @@ public final class InputMethodInfo implements Parcelable {
      * @param context The Context in which we are parsing the input method.
      * @param service The ResolveInfo returned from the package manager about
      * this input method's component.
-     * @param additionalSubtypes additional subtypes being added to this InputMethodInfo
+     * @param additionalSubtypesMap additional subtypes being added to this InputMethodInfo
      * @hide
      */
     public InputMethodInfo(Context context, ResolveInfo service,
