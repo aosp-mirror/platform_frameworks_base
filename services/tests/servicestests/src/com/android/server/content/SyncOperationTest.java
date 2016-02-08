@@ -145,14 +145,10 @@ public class SyncOperationTest extends AndroidTestCase {
                 "provider", 0);
         Bundle extras = new Bundle();
         SyncOperation periodic = new SyncOperation(ep, 0, "package", 0, 0, extras, false, true,
-                SyncOperation.NO_JOB_ID);
-        periodic.periodMillis = 60000;
-        periodic.flexMillis = 10000;
+                SyncOperation.NO_JOB_ID, 60000, 10000);
         SyncOperation oneoff = periodic.createOneTimeSyncOperation();
         assertFalse("Conversion to oneoff sync failed.", oneoff.isPeriodic);
-        SyncOperation recreated = oneoff.createPeriodicSyncOperation();
-        assertTrue("Conversion to periodic sync failed.", oneoff.isPeriodic);
-        assertEquals("Period not restored", periodic.periodMillis, recreated.periodMillis);
-        assertEquals("Flex not restored", periodic.flexMillis, recreated.flexMillis);
+        assertEquals("Period not restored", periodic.periodMillis, oneoff.periodMillis);
+        assertEquals("Flex not restored", periodic.flexMillis, oneoff.flexMillis);
     }
 }

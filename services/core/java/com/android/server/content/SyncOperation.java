@@ -79,9 +79,9 @@ public class SyncOperation {
     public final String key;
 
     /** Poll frequency of periodic sync in milliseconds */
-    public long periodMillis;
+    public final long periodMillis;
     /** Flex time of periodic sync in milliseconds */
-    public long flexMillis;
+    public final long flexMillis;
     /** Descriptive string key for this operation */
     public String wakeLockName;
     /**
@@ -89,6 +89,9 @@ public class SyncOperation {
      * is kept, others are discarded.
      */
     public long expectedRuntime;
+
+    /** Stores the number of times this sync operation failed and had to be retried. */
+    int retries;
 
     /** jobId of the JobScheduler job corresponding to this sync */
     public int jobId;
@@ -103,23 +106,32 @@ public class SyncOperation {
     private SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
                           int reason, int source, Bundle extras, boolean allowParallelSyncs) {
         this(info, owningUid, owningPackage, reason, source, extras, allowParallelSyncs, false,
-                NO_JOB_ID);
+                NO_JOB_ID, 0, 0);
+    }
+
+    public SyncOperation(SyncOperation op, long periodMillis, long flexMillis) {
+        this(op.target, op.owningUid, op.owningPackage, op.reason, op.syncSource,
+                new Bundle(op.extras), op.allowParallelSyncs, op.isPeriodic, op.sourcePeriodicId,
+                periodMillis, flexMillis);
     }
 
     public SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
                          int reason, int source, Bundle extras, boolean allowParallelSyncs,
-                         boolean isPeriodic, int sourcePeriodicId) {
+                         boolean isPeriodic, int sourcePeriodicId, long periodMillis,
+                         long flexMillis) {
         this.target = info;
         this.owningUid = owningUid;
         this.owningPackage = owningPackage;
         this.reason = reason;
         this.syncSource = source;
         this.extras = new Bundle(extras);
-        cleanBundle(this.extras);
         this.allowParallelSyncs = allowParallelSyncs;
         this.isPeriodic = isPeriodic;
         this.sourcePeriodicId = sourcePeriodicId;
-        this.key = toKey(target, extras);
+        this.periodMillis = periodMillis;
+        this.flexMillis = flexMillis;
+        this.jobId = NO_JOB_ID;
+        this.key = toKey();
     }
 
     /* Get a one off sync operation instance from a periodic sync. */
@@ -128,18 +140,8 @@ public class SyncOperation {
             return null;
         }
         SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, syncSource,
-                new Bundle(extras), allowParallelSyncs, false, jobId /* sourcePeriodicId */);
-        // Copied to help us recreate the periodic sync from this one off sync.
-        op.periodMillis = periodMillis;
-        op.flexMillis = flexMillis;
-        return op;
-    }
-
-    public SyncOperation createPeriodicSyncOperation() {
-        SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, syncSource,
-                new Bundle(extras), allowParallelSyncs, true, NO_JOB_ID);
-        op.periodMillis = periodMillis;
-        op.flexMillis = flexMillis;
+                new Bundle(extras), allowParallelSyncs, false, jobId /* sourcePeriodicId */,
+                periodMillis, flexMillis);
         return op;
     }
 
@@ -224,6 +226,7 @@ public class SyncOperation {
         jobInfoExtras.putLong("periodMillis", periodMillis);
         jobInfoExtras.putLong("flexMillis", flexMillis);
         jobInfoExtras.putLong("expectedRuntime", expectedRuntime);
+        jobInfoExtras.putInt("retries", retries);
         return jobInfoExtras;
     }
 
@@ -240,6 +243,7 @@ public class SyncOperation {
         int initiatedBy;
         Bundle extras;
         boolean allowParallelSyncs, isPeriodic;
+        long periodMillis, flexMillis;
 
         if (!jobExtras.getBoolean("SyncManagerJob", false)) {
             return null;
@@ -256,6 +260,8 @@ public class SyncOperation {
         allowParallelSyncs = jobExtras.getBoolean("allowParallelSyncs", false);
         isPeriodic = jobExtras.getBoolean("isPeriodic", false);
         initiatedBy = jobExtras.getInt("sourcePeriodicId", NO_JOB_ID);
+        periodMillis = jobExtras.getLong("periodMillis");
+        flexMillis = jobExtras.getLong("flexMillis");
         extras = new Bundle();
 
         PersistableBundle syncExtras = jobExtras.getPersistableBundle("syncExtras");
@@ -277,35 +283,11 @@ public class SyncOperation {
         SyncStorageEngine.EndPoint target =
                 new SyncStorageEngine.EndPoint(account, provider, userId);
         SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, source,
-                extras, allowParallelSyncs, isPeriodic, initiatedBy);
+                extras, allowParallelSyncs, isPeriodic, initiatedBy, periodMillis, flexMillis);
         op.jobId = jobExtras.getInt("jobId");
-        op.periodMillis = jobExtras.getLong("periodMillis");
-        op.flexMillis = jobExtras.getLong("flexMillis");
         op.expectedRuntime = jobExtras.getLong("expectedRuntime");
+        op.retries = jobExtras.getInt("retries");
         return op;
-    }
-
-    /**
-     * Make sure the bundle attached to this SyncOperation doesn't have unnecessary
-     * flags set.
-     * @param bundle to clean.
-     */
-    private void cleanBundle(Bundle bundle) {
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_UPLOAD);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_MANUAL);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_EXPEDITED);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISALLOW_METERED);
-    }
-
-    private void removeFalseExtra(Bundle bundle, String extraName) {
-        if (!bundle.getBoolean(extraName, false)) {
-            bundle.remove(extraName);
-        }
     }
 
     /**
@@ -326,6 +308,12 @@ public class SyncOperation {
         return reason == REASON_PERIODIC;
     }
 
+    boolean matchesPeriodicOperation(SyncOperation other) {
+        return target.matchesSpec(other.target)
+                && SyncManager.syncExtrasEquals(extras, other.extras, true)
+                && periodMillis == other.periodMillis && flexMillis == other.flexMillis;
+    }
+
     boolean isDerivedFromFailedPeriodicSync() {
         return sourcePeriodicId != NO_JOB_ID;
     }
@@ -339,15 +327,18 @@ public class SyncOperation {
         return 0;
     }
 
-    static String toKey(SyncStorageEngine.EndPoint info, Bundle extras) {
+    private String toKey() {
         StringBuilder sb = new StringBuilder();
-        sb.append("provider: ").append(info.provider);
-        sb.append(" account {name=" + info.account.name
+        sb.append("provider: ").append(target.provider);
+        sb.append(" account {name=" + target.account.name
                 + ", user="
-                + info.userId
+                + target.userId
                 + ", type="
-                + info.account.type
+                + target.account.type
                 + "}");
+        sb.append(" isPeriodic: ").append(isPeriodic);
+        sb.append(" period: ").append(periodMillis);
+        sb.append(" flex: ").append(flexMillis);
         sb.append(" extras: ");
         extrasToStringBuilder(extras, sb);
         return sb.toString();
@@ -360,7 +351,9 @@ public class SyncOperation {
 
     String dump(PackageManager pm, boolean useOneLine) {
         StringBuilder sb = new StringBuilder();
-        sb.append(target.account.name)
+        sb.append("JobId: ").append(jobId)
+                .append(", ")
+                .append(target.account.name)
                 .append(" u")
                 .append(target.userId).append(" (")
                 .append(target.account.type)
