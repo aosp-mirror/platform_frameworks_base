@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Жок"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> үндү катуулатуу диалогу"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Түпнусканы калыбына келтирүү үчүн тийип коюңуз."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Жумуш профилиңизди колдонуп жатасыз"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Батарянын кубатнын деңгээли пайыз менен көрсөтлсүн"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Абал тилкесинен сааттын секунддары көрсөтүлсүн. Батареянын кубаты көбүрөөк сарпталышы мүмкүн."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ыкчам жөндөөлөрдү кайра коюу"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Ыкчам жөндөөлөрдөн жарык деңгээлин көрсөтүү"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Өйдө серпип экранды бөлүүчү ылдамдаткычты иштетүү"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Сереп баскычынан өйдө серпип, экранды бөлүү режимин киргизүү үчүн жаңсоону иштетиңиз"</string>
     <string name="experimental" msgid="6198182315536726162">"Сынамык"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth күйгүзүлсүнбү?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Баскычтобуңузду планшетиңизге туташтыруу үчүн, адегенде Bluetooth\'ту күйгүзүшүңүз керек."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"Бул баскычтын жардамы менен баскычтоптогу баскычтарды чабыттоо тилкесине кошууга болот. Ал үчүн баскычты жана тийиштүү баскычтын көрүнүшүн тандаңыз."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Баскычтоптогу баскычты тандоо"</string>
     <string name="preview" msgid="9077832302472282938">"Алдын ала көрүү"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Тайлдарды кошуу үчүн сүйрөңүз"</string>
 </resources>

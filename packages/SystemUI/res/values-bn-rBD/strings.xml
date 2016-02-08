@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"প্রত্যাখ্যান করুন"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> হল ভলিউম ডায়লগ"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"আসলটি পুনঃস্থাপন করতে স্পর্শ করুন৷"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"আপনি আপনার কাজের প্রোফাইল ব্যবহার করছেন"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"সিস্টেম UI টিউনার"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"এম্বেড করা ব্যাটারির শতকরা হার দেখায়"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"দ্রুত সেটিংসে পুনরায় সাজান"</string>
     <string name="show_brightness" msgid="6613930842805942519">"দ্রুত সেটিংসে উজ্জ্বলতা দেখান"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"অ্যাকসেলেটর উপরের দিকে সোয়াইপ করে বিভক্ত-স্ক্রীন সক্ষম করুন"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"\'এক নজরে\' বোতাম থেকে উপরের দিকে সোয়াইপ করে, বিভক্ত-স্ক্রীনে প্রবেশ করতে অঙ্গভঙ্গি সক্ষম করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"কীকোড বোতামগুলি নেভিগেশান দন্ডে কীবোর্ডের কীগুলি যোগ করার অনুমতি দেয়। চাপ দেওয়ার সময়ে সেগুলি নির্বাচিত কীবোর্ডের কী কে অনুকরণ করে। বোতামে দেখানো হয়েছে এমন একটি চিত্রকে অনুসরণ করে অবশ্যই প্রথমে বোতামের জন্য কী নির্বাচন করতে হবে।"</string>
     <string name="select_keycode" msgid="7413765103381924584">"কীবোর্ডের বোতাম নির্বাচন করুন"</string>
     <string name="preview" msgid="9077832302472282938">"পূর্বরূপ দেখুন"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"টাইলগুলি যোগ করার জন্য টেনে আনুন"</string>
 </resources>

@@ -793,8 +793,6 @@
     <skip />
     <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
     <skip />
-    <!-- no translation found for group_summary_concadenation (6846402378100148789) -->
-    <skip />
     <!-- no translation found for managed_profile_foreground_toast (5421487114739245972) -->
     <skip />
     <!-- no translation found for system_ui_tuner (708224127392452018) -->
@@ -865,6 +863,8 @@
     <skip />
     <!-- no translation found for show_brightness (6613930842805942519) -->
     <skip />
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Uključi akcelerator za dijeljenje ekrana prevlačenjem nagore"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Uključite pokrete prstima da biste ušli u podijeljeni ekran tako što ćete od dugmeta Pregled prevući prstom prema gore"</string>
     <!-- no translation found for experimental (6198182315536726162) -->
     <skip />
     <!-- no translation found for enable_bluetooth_title (5027037706500635269) -->
@@ -970,19 +970,20 @@
     <string name="end" msgid="125797972524818282">"Kraj"</string>
     <string name="space" msgid="804232271282109749">"Razmaknica"</string>
     <string name="menu_ime" msgid="4943221416525250684">"Izbornik / Prebacivač tipkovn."</string>
-    <string name="select_button" msgid="1597989540662710653">"Odaberite gumb koji želite dodati"</string>
-    <string name="add_button" msgid="4134946063432258161">"Dodaj gumb"</string>
+    <string name="select_button" msgid="1597989540662710653">"Odaberite dugme koje želite dodati"</string>
+    <string name="add_button" msgid="4134946063432258161">"Dodaj dugme"</string>
     <string name="save" msgid="2311877285724540644">"Sačuvaj"</string>
     <!-- no translation found for reset (2448168080964209908) -->
     <skip />
-    <string name="no_home_title" msgid="1563808595146071549">"Gumb za početak nije pronađen."</string>
-    <string name="no_home_message" msgid="5408485011659260911">"Gumb za početak je neophodan za navigaciju ovim uređajem. Dodajte gumb za početak prije pohranjivanja."</string>
-    <string name="adjust_button_width" msgid="6138616087197632947">"Podesite širinu gumba"</string>
+    <string name="no_home_title" msgid="1563808595146071549">"Dugme za početak nije pronađeno."</string>
+    <string name="no_home_message" msgid="5408485011659260911">"Dugme za početak je neophodno za navigaciju ovim uređajem. Dodajte dugme za početak prije pohranjivanja."</string>
+    <string name="adjust_button_width" msgid="6138616087197632947">"Podesite širinu dugmeta"</string>
     <string name="clipboard" msgid="1313879395099896312">"Međumemorija"</string>
     <string name="clipboard_description" msgid="3819919243940546364">"Međumorija omogućava direktno prebacivanje sadržaja u nju. Sadržaj se isto tako može povući direktno iz međumemorije ako ga ima."</string>
-    <string name="accessibility_key" msgid="5701989859305675896">"Prilagođeni gumb za navigaciju"</string>
+    <string name="accessibility_key" msgid="5701989859305675896">"Prilagođeno dugme za navigaciju"</string>
     <string name="keycode" msgid="7335281375728356499">"Kod tipke"</string>
-    <string name="keycode_description" msgid="1403795192716828949">"Gumbovi za kodiranje tipki omogućavaju da se tipke sa tipkovnice dodaju u navigacionu traku. Kada se pritisnu, oni oponašaju izabranu tipku tastature. Kao prvo, tipka mora biti izabrana za dugme, a nakon toga se bira slika koja će biti prikazana na njemu."</string>
-    <string name="select_keycode" msgid="7413765103381924584">"Odaberite tipku na tastaturi"</string>
+    <string name="keycode_description" msgid="1403795192716828949">"Dugmad za kodiranje tipki omogućavaju da se tipke sa tipkovnice dodaju u navigacionu traku. Kada se pritisnu, oni oponašaju izabranu tipku tastature. Kao prvo, tipka mora biti izabrana za dugme, a nakon toga se bira slika koja će biti prikazana na njemu."</string>
+    <string name="select_keycode" msgid="7413765103381924584">"Odaberite dugme na tastaturi"</string>
     <string name="preview" msgid="9077832302472282938">"Pregledaj"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Povucite da biste dodali polja"</string>
 </resources>

@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"अस्वीकार करें"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> वॉल्यूम संवाद है"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल वॉल्यूम को फिर से लाने के लिए स्पर्श करें."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"आप अपनी कार्य प्रोफ़ाइल का उपयोग कर रहे हैं"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"सिस्टम UI ट्यूनर"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"एम्बेड किया गया बैटरी प्रतिशत दिखाएं"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"स्थिति बार में घड़ी के सेकंड दिखाएं. इससे बैटरी के जीवनकाल पर प्रभाव पड़ सकता है."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"त्वरित सेटिंग को पुन: व्यवस्थित करें"</string>
     <string name="show_brightness" msgid="6613930842805942519">"त्वरित सेटिंग में स्क्रीन की रोशनी दिखाएं"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"ऊपर स्वाइप करके स्क्रीन विभाजन की त्वरित सुविधा सक्षम करें"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"अवलोकन बटन से ऊपर स्वाइप करके स्क्रीन विभाजन में आने का हावभाव सक्षम करें"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रयोगात्मक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटूथ चालू करें?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"अपने कीबोर्ड को अपने टैबलेट से कनेक्ट करने के लिए, आपको पहले ब्लूटूथ चालू करना होगा."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"कुंजी कोड बटन कीबोर्ड कुंजियों को मार्गदर्शक बार में जोड़ने देती हैं. दबाए जाने पर वे चयनित कीबोर्ड कुंजी का अनुकरण करते हैं. सबसे पहले, बटन के लिए कुंजी का चयन करना चाहिए, उसके बाद बटन पर दिखाए जाने वाले चित्र का चयन करना चाहिए."</string>
     <string name="select_keycode" msgid="7413765103381924584">"कीबोर्ड बटन चुनें"</string>
     <string name="preview" msgid="9077832302472282938">"पूर्वावलोकन"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइलों को जोड़ने के लिए खींचें"</string>
 </resources>

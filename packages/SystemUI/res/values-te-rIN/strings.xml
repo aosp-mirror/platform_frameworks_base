@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"తిరస్కరించు"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">", "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"సిస్టమ్ UI ట్యూనర్"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"పొందుపరిచిన బ్యాటరీ శాతం చూపు"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"స్థితి పట్టీలో గడియారం సెకన్లు చూపుతుంది. బ్యాటరీ శక్తి ప్రభావితం చేయవచ్చు."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"శీఘ్ర సెట్టింగ్‌ల ఏర్పాటు క్రమం మార్చు"</string>
     <string name="show_brightness" msgid="6613930842805942519">"శీఘ్ర సెట్టింగ్‌ల్లో ప్రకాశం చూపు"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"పైకి స్వైప్ చేయడం ద్వారా స్క్రీన్ విభజన యాక్సిలరేటర్‌ను ప్రారంభించు"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"స్థూలదృష్టి బటన్ నుండి పైకి స్వైప్ చేయడం ద్వారా స్క్రీన్ విభజనలోకి ప్రవేశించడానికి సంజ్ఞను ప్రారంభిస్తుంది"</string>
     <string name="experimental" msgid="6198182315536726162">"ప్రయోగాత్మకం"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"బ్లూటూత్ ఆన్ చేయాలా?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"మీ కీబోర్డ్‌ను మీ టాబ్లెట్‌తో కనెక్ట్ చేయడానికి, మీరు ముందుగా బ్లూటూత్ ఆన్ చేయాలి."</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"కీకోడ్ బటన్‌లు నావిగేషన్ బార్‌లో కీబోర్డ్ కీలను జోడించడానికి అనుమతిస్తాయి. నొక్కినప్పుడు అవి ఎంచుకోబడిన కీబోర్డ్ కీ చర్యను పునరుత్పాదిస్తాయి. ముందుగా బటన్ కోసం తప్పనిసరిగా కీని ఎంచుకోవాలి, తర్వాత బటన్‌పై చూపాల్సిన చిత్రాన్ని ఎంచుకోవాలి."</string>
     <string name="select_keycode" msgid="7413765103381924584">"కీబోర్డ్ బటన్‌ను ఎంచుకోండి"</string>
     <string name="preview" msgid="9077832302472282938">"పరిదృశ్యం"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"టైల్‌లను జోడించడానికి లాగండి"</string>
 </resources>

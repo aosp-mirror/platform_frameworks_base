@@ -411,7 +411,6 @@
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"مسترد کریں"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> والیوم ڈائلاگ ہے"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"اصل کو بحال کرنے کیلئے ٹچ کریں۔"</string>
-    <string name="group_summary_concadenation" msgid="6846402378100148789">"، "</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"آپ اپنا دفتری پروفائل استعمال کر رہے ہیں۔"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"‏سسٹم UI ٹیونر"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"سرایت کردہ بیٹری کی فیصد دکھائیں"</string>
@@ -447,6 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"گھڑی کے سیکنڈز اسٹیٹس بار میں دکھائیں۔ اس کا بیٹری کی زندگی پر اثر پڑ سکتا ہے۔"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"فوری ترتیبات کو دوبارہ ترتیب دیں"</string>
     <string name="show_brightness" msgid="6613930842805942519">"فوری ترتیبات میں چمکیلا پن دکھائیں"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"سپلٹ اسکرین کیلئے سوائپ اپ ایکسلریٹر فعال کریں"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"مجموعی جائزہ بٹن سے سوائپ اپ کرکے سپلٹ اسکرین میں داخل ہونے کیلئے اشارہ فعال کریں"</string>
     <string name="experimental" msgid="6198182315536726162">"تجرباتی"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"بلوٹوتھ آن کریں؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"اپنے کی بورڈ کو اپنے ٹیبلٹ کے ساتھ منسلک کرنے کیلئے پہلے آپ کو اپنا بلو ٹوتھ آن کرنا ہو گا۔"</string>
@@ -519,4 +520,5 @@
     <string name="keycode_description" msgid="1403795192716828949">"کی کوڈ بٹنز نیویگیشن بار میں کی بورڈ کلیدوں کو شامل ہونے کی اجازت دیتے ہیں۔ دبائے جانے پر یہ منتخب کردہ کی بورڈ کلید کی نقل کرتے ہیں۔ بٹن کیلئے پہلے کلید منتخب ہونی چاہیئے، اس کے بعد بٹن پر دکھائے جانے کیلئے ایک تصویر۔"</string>
     <string name="select_keycode" msgid="7413765103381924584">"کی بورڈ بٹن منتخب کریں"</string>
     <string name="preview" msgid="9077832302472282938">"پیش منظر"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ٹائٹلز شامل کرنے کیلئے گھسیٹیں"</string>
 </resources>
