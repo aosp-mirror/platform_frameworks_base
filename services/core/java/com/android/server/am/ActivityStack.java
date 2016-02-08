@@ -1564,7 +1564,7 @@ final class ActivityStack {
                             resumeNextActivity = false;
                         }
                     } else {
-                        makeVisible(starting, r);
+                        makeVisibleIfNeeded(starting, r);
                     }
                     // Aggregate current change flags.
                     configChanges |= r.configChangeFlags;
@@ -1722,28 +1722,30 @@ final class ActivityStack {
         return behindFullscreenActivity;
     }
 
-    private void makeVisible(ActivityRecord starting, ActivityRecord r) {
+    private void makeVisibleIfNeeded(ActivityRecord starting, ActivityRecord r) {
+
         // This activity is not currently visible, but is running. Tell it to become visible.
-        r.visible = true;
-        if (r.state != ActivityState.RESUMED && r != starting) {
-            // If this activity is paused, tell it to now show its window.
-            if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
-                    "Making visible and scheduling visibility: " + r);
-            try {
-                if (mTranslucentActivityWaiting != null) {
-                    r.updateOptionsLocked(r.returningOptions);
-                    mUndrawnActivitiesBelowTopTranslucent.add(r);
-                }
-                setVisible(r, true);
-                r.sleeping = false;
-                r.app.pendingUiClean = true;
-                r.app.thread.scheduleWindowVisibility(r.appToken, true);
-                r.stopFreezingScreenLocked(false);
-            } catch (Exception e) {
-                // Just skip on any failure; we'll make it
-                // visible when it next restarts.
-                Slog.w(TAG, "Exception thrown making visibile: " + r.intent.getComponent(), e);
+        if (r.state == ActivityState.RESUMED || r == starting) {
+            return;
+        }
+
+        // If this activity is paused, tell it to now show its window.
+        if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
+                "Making visible and scheduling visibility: " + r);
+        try {
+            if (mTranslucentActivityWaiting != null) {
+                r.updateOptionsLocked(r.returningOptions);
+                mUndrawnActivitiesBelowTopTranslucent.add(r);
             }
+            setVisible(r, true);
+            r.sleeping = false;
+            r.app.pendingUiClean = true;
+            r.app.thread.scheduleWindowVisibility(r.appToken, true);
+            r.stopFreezingScreenLocked(false);
+        } catch (Exception e) {
+            // Just skip on any failure; we'll make it
+            // visible when it next restarts.
+            Slog.w(TAG, "Exception thrown making visibile: " + r.intent.getComponent(), e);
         }
     }
 
