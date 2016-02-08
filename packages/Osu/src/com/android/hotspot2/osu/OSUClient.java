@@ -72,7 +72,7 @@ public class OSUClient {
     public void provision(OSUManager osuManager, Network network, KeyManager km)
             throws IOException, GeneralSecurityException {
         try (HTTPHandler httpHandler = new HTTPHandler(StandardCharsets.UTF_8,
-                OSUSocketFactory.getSocketFactory(mKeyStore, null, OSUManager.FLOW_PROVISIONING,
+                OSUSocketFactory.getSocketFactory(mKeyStore, null, OSUManager.FlowType.Provisioning,
                         network, mURL, km, true))) {
 
             SPVerifier spVerifier = new SPVerifier(mOSUInfo);
@@ -160,7 +160,7 @@ public class OSUClient {
             } else {
                 try (ESTHandler estHandler = new ESTHandler((GetCertData) provResponse.
                         getCommandData(), network, osuManager.getOMADMAdapter(),
-                        km, mKeyStore, null, OSUManager.FLOW_PROVISIONING)) {
+                        km, mKeyStore, null, OSUManager.FlowType.Provisioning)) {
                     estHandler.execute(false);
                     certs.put(OSUCertType.CA, estHandler.getCACerts());
                     certs.put(OSUCertType.Client, estHandler.getClientCerts());
@@ -202,7 +202,7 @@ public class OSUClient {
     }
 
     public void remediate(OSUManager osuManager, Network network, KeyManager km, HomeSP homeSP,
-                          int flowType)
+                          OSUManager.FlowType flowType)
             throws IOException, GeneralSecurityException {
         try (HTTPHandler httpHandler = createHandler(network, homeSP, km, flowType)) {
             URL redirectURL = osuManager.prepareUserInput(homeSP.getFriendlyName());
@@ -245,7 +245,7 @@ public class OSUClient {
                 }
 
                 if (pddResponse.getExecCommand() == ExecCommand.Browser) {
-                    if (flowType == OSUManager.FLOW_POLICY) {
+                    if (flowType == OSUManager.FlowType.Policy) {
                         throw new IOException("Browser launch requested in policy flow");
                     }
                     String webURL = ((BrowserURI) pddResponse.getCommandData()).getURI();
@@ -350,14 +350,15 @@ public class OSUClient {
                 osuManager.remediationComplete(homeSP, mods, certs, clientKey);
             } catch (IOException | GeneralSecurityException e) {
                 osuManager.provisioningFailed(homeSP.getFriendlyName(), e.getMessage(), homeSP,
-                        OSUManager.FLOW_REMEDIATION);
+                        OSUManager.FlowType.Remediation);
                 error = OSUError.CommandFailed;
             }
         }
     }
 
-    private HTTPHandler createHandler(Network network, HomeSP homeSP,
-                                      KeyManager km, int flowType) throws GeneralSecurityException, IOException {
+    private HTTPHandler createHandler(Network network, HomeSP homeSP, KeyManager km,
+                                      OSUManager.FlowType flowType)
+            throws GeneralSecurityException, IOException {
         Credential credential = homeSP.getCredential();
 
         Log.d(TAG, "Credential method " + credential.getEAPMethod().getEAPMethodID());
@@ -366,7 +367,7 @@ public class OSUClient {
                 String user;
                 byte[] password;
                 UpdateInfo subscriptionUpdate;
-                if (flowType == OSUManager.FLOW_POLICY) {
+                if (flowType == OSUManager.FlowType.Policy) {
                     subscriptionUpdate = homeSP.getPolicy() != null ?
                             homeSP.getPolicy().getPolicyUpdate() : null;
                 } else {
@@ -438,7 +439,7 @@ public class OSUClient {
         for (String urlString : urls) {
             URL url = new URL(urlString);
             HTTPHandler httpHandler = new HTTPHandler(StandardCharsets.UTF_8,
-                    OSUSocketFactory.getSocketFactory(ks, null, OSUManager.FLOW_PROVISIONING,
+                    OSUSocketFactory.getSocketFactory(ks, null, OSUManager.FlowType.Provisioning,
                             network, url, km, false));
 
             certs.add((X509Certificate) certFactory.generateCertificate(httpHandler.doGet(url)));

@@ -75,7 +75,8 @@ public class OSUSocketFactory {
         }
     }
 
-    public static OSUSocketFactory getSocketFactory(KeyStore ks, HomeSP homeSP, int flowType,
+    public static OSUSocketFactory getSocketFactory(KeyStore ks, HomeSP homeSP,
+                                                    OSUManager.FlowType flowType,
                                                     Network network, URL url, KeyManager km,
                                                     boolean enforceSecurity)
             throws GeneralSecurityException, IOException {
@@ -86,7 +87,8 @@ public class OSUSocketFactory {
         return new OSUSocketFactory(ks, homeSP, flowType, network, url, km);
     }
 
-    private OSUSocketFactory(KeyStore ks, HomeSP homeSP, int flowType, Network network,
+    private OSUSocketFactory(KeyStore ks, HomeSP homeSP, OSUManager.FlowType flowType,
+                             Network network,
                              URL url, KeyManager km) throws GeneralSecurityException, IOException {
         mNetwork = network;
         mKeyManager = km;
@@ -215,10 +217,10 @@ public class OSUSocketFactory {
     private static class WFATrustManager implements X509TrustManager {
         private final KeyStore mKeyStore;
         private final HomeSP mHomeSP;
-        private final int mFlowType;
+        private final OSUManager.FlowType mFlowType;
         private X509Certificate[] mTrustChain;
 
-        private WFATrustManager(KeyStore ks, HomeSP homeSP, int flowType)
+        private WFATrustManager(KeyStore ks, HomeSP homeSP, OSUManager.FlowType flowType)
                 throws CertificateException {
             mKeyStore = ks;
             mHomeSP = homeSP;
@@ -248,7 +250,7 @@ public class OSUSocketFactory {
                         trustAnchors.add(new TrustAnchor(cert, null));
                     }
                 } else {
-                    String prefix = mFlowType == OSUManager.FLOW_REMEDIATION ?
+                    String prefix = mFlowType == OSUManager.FlowType.Remediation ?
                             OSUManager.CERT_REM_ALIAS : OSUManager.CERT_POLICY_ALIAS;
 
                     X509Certificate cert = getCert(mKeyStore, prefix + mHomeSP.getFQDN());

@@ -2,13 +2,13 @@ package com.android.hotspot2.osu;
 
 import android.content.Context;
 import android.net.Network;
-import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.util.Log;
 
 import com.android.anqp.Constants;
+import com.android.anqp.HSIconFileElement;
 import com.android.anqp.OSUProvider;
 import com.android.hotspot2.AppBridge;
 import com.android.hotspot2.OMADMAdapter;
@@ -36,11 +36,8 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -50,6 +47,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.KeyManager;
@@ -61,7 +60,6 @@ public class OSUManager {
     private static final boolean MATCH_BSSID = false;
 
     private static final String KEYSTORE_FILE = "passpoint.ks";
-    private static final String WFA_CA_LOC = "/etc/security/wfa";
 
     private static final String OSU_COUNT = "osu-count";
     private static final String SP_NAME = "sp-name";
@@ -74,9 +72,7 @@ public class OSUManager {
     private static final long REMEDIATION_TIMEOUT = 120000L;
     // How many scan result batches to hang on to
 
-    public static final int FLOW_PROVISIONING = 1;
-    public static final int FLOW_REMEDIATION = 2;
-    public static final int FLOW_POLICY = 3;
+    public enum FlowType {Provisioning, Remediation, Policy}
 
     public static final String CERT_WFA_ALIAS = "wfa-root-";
     public static final String CERT_REM_ALIAS = "rem-";
@@ -85,13 +81,14 @@ public class OSUManager {
     public static final String CERT_CLT_CERT_ALIAS = "clt-";
     public static final String CERT_CLT_KEY_ALIAS = "prv-";
     public static final String CERT_CLT_CA_ALIAS = "aaa-";
+    private static final long THREAD_TIMEOUT = 10;             // Seconds
 
     // Preferred icon parameters
-    private static final Set<String> ICON_TYPES =
-            new HashSet<>(Arrays.asList("image/png", "image/jpeg"));
-    private static final int ICON_WIDTH = 64;
-    private static final int ICON_HEIGHT = 64;
     public static final Locale LOCALE = java.util.Locale.getDefault();
+
+    private final Object mFlowLock = new Object();
+    private final LinkedBlockingQueue<FlowWorker> mWorkQueue = new LinkedBlockingQueue<>();
+    private FlowRunner mFlowThread;
 
     private final WifiNetworkAdapter mWifiNetworkAdapter;
 
@@ -102,10 +99,10 @@ public class OSUManager {
     private final Set<String> mOSUSSIDs = new HashSet<>();
     private final Map<OSUProvider, OSUInfo> mOSUMap = new HashMap<>();
     private final KeyStore mKeyStore;
-    private RedirectListener mRedirectListener;
+    private volatile RedirectListener mRedirectListener;
     private final AtomicInteger mOSUSequence = new AtomicInteger();
-    private OSUThread mProvisioningThread;
-    private final Map<String, OSUThread> mServiceThreads = new HashMap<>();
+    private volatile Network mActiveNetwork;
+    private volatile FlowWorker mRemediationFlow;
     private volatile OSUInfo mPendingOSU;
     private volatile Integer mOSUNwkID;
 
@@ -214,60 +211,35 @@ public class OSUManager {
         }
     }
 
-    private static Set<X509Certificate> readCertsFromDisk(String dir) throws CertificateException {
-        Set<X509Certificate> certs = new HashSet<>();
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        File caDir = new File(dir);
-        File[] certFiles = caDir.listFiles();
-        if (certFiles != null) {
-            for (File certFile : certFiles) {
-                try {
-                    try (FileInputStream in = new FileInputStream(certFile)) {
-                        Certificate cert = certFactory.generateCertificate(in);
-                        if (cert instanceof X509Certificate) {
-                            certs.add((X509Certificate) cert);
-                        }
-                    }
-                } catch (CertificateException | IOException e) {
-                            /* Ignore */
-                }
-            }
-        }
-        return certs;
-    }
-
     public KeyStore getKeyStore() {
         return mKeyStore;
     }
 
-    private static class OSUThread extends Thread {
+    private static class FlowWorker implements Runnable {
         private final OSUClient mOSUClient;
         private final OSUManager mOSUManager;
         private final HomeSP mHomeSP;
         private final String mSpName;
-        private final int mFlowType;
+        private final FlowType mFlowType;
         private final KeyManager mKeyManager;
         private final long mLaunchTime;
-        private final Object mLock = new Object();
-        private boolean mLocalAddressSet;
-        private Network mNetwork;
+        private final Network mNetwork;
 
-        private OSUThread(OSUInfo osuInfo, OSUManager osuManager, KeyManager km)
+        private FlowWorker(Network network, OSUInfo osuInfo, OSUManager osuManager, KeyManager km)
                 throws MalformedURLException {
+            mNetwork = network;
             mOSUClient = new OSUClient(osuInfo, osuManager.getKeyStore());
             mOSUManager = osuManager;
             mHomeSP = null;
             mSpName = osuInfo.getName(LOCALE);
-            mFlowType = FLOW_PROVISIONING;
+            mFlowType = FlowType.Provisioning;
             mKeyManager = km;
             mLaunchTime = System.currentTimeMillis();
-
-            setDaemon(true);
-            setName("OSU Client Thread");
         }
 
-        private OSUThread(String osuURL, OSUManager osuManager, KeyManager km, HomeSP homeSP,
-                          int flowType) throws MalformedURLException {
+        private FlowWorker(Network network, String osuURL, OSUManager osuManager, KeyManager km,
+                           HomeSP homeSP, FlowType flowType) throws MalformedURLException {
+            mNetwork = network;
             mOSUClient = new OSUClient(osuURL, osuManager.getKeyStore());
             mOSUManager = osuManager;
             mHomeSP = homeSP;
@@ -275,57 +247,87 @@ public class OSUManager {
             mFlowType = flowType;
             mKeyManager = km;
             mLaunchTime = System.currentTimeMillis();
-
-            setDaemon(true);
-            setName("OSU Client Thread");
         }
 
         public long getLaunchTime() {
             return mLaunchTime;
         }
 
-        private void connect(Network network) {
-            synchronized (mLock) {
-                mNetwork = network;
-                mLocalAddressSet = true;
-                mLock.notifyAll();
-            }
-            Log.d(TAG, "Client notified...");
+        private Network getNetwork() {
+            return mNetwork;
         }
 
         @Override
         public void run() {
-            Log.d(TAG, mFlowType + "-" + getName() + " running.");
-            Network network;
-            synchronized (mLock) {
-                while (!mLocalAddressSet) {
-                    try {
-                        mLock.wait();
-                    } catch (InterruptedException ie) {
-                        /**/
-                    }
-                    Log.d(TAG, "OSU Thread running...");
-                }
-                network = mNetwork;
-            }
-
-            if (network == null) {
-                Log.d(TAG, "Association failed, exiting OSU flow");
-                mOSUManager.provisioningFailed(mSpName, "Network cannot be reached",
-                        mHomeSP, mFlowType);
-                return;
-            }
-
-            Log.d(TAG, "OSU SSID Associated at " + network.toString());
+            Log.d(TAG, "OSU SSID Associated at " + mNetwork);
             try {
-                if (mFlowType == FLOW_PROVISIONING) {
-                    mOSUClient.provision(mOSUManager, network, mKeyManager);
+                if (mFlowType == FlowType.Provisioning) {
+                    mOSUClient.provision(mOSUManager, mNetwork, mKeyManager);
                 } else {
-                    mOSUClient.remediate(mOSUManager, network, mKeyManager, mHomeSP, mFlowType);
+                    mOSUClient.remediate(mOSUManager, mNetwork, mKeyManager, mHomeSP, mFlowType);
                 }
             } catch (Throwable t) {
                 Log.w(TAG, "OSU flow failed: " + t, t);
                 mOSUManager.provisioningFailed(mSpName, t.getMessage(), mHomeSP, mFlowType);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return mFlowType + " for " + mSpName;
+        }
+    }
+
+    private static class FlowRunner extends Thread {
+        private final LinkedBlockingQueue<FlowWorker> mWorkQueue;
+        private final OSUManager mOSUManager;
+
+        private FlowRunner(LinkedBlockingQueue<FlowWorker> workQueue, OSUManager osuManager) {
+            mWorkQueue = workQueue;
+            mOSUManager = osuManager;
+            setDaemon(true);
+            setName("OSU Client Thread");
+        }
+
+        @Override
+        public void run() {
+            for (;;) {
+                FlowWorker flowWorker;
+                try {
+                    flowWorker = mWorkQueue.poll(THREAD_TIMEOUT, TimeUnit.SECONDS);
+                } catch (InterruptedException ie) {
+                    flowWorker = null;
+                }
+                if (flowWorker == null) {
+                    if (mOSUManager.serviceThreadExit()) {
+                        return;
+                    } else {
+                        continue;
+                    }
+                }
+                Log.d(TAG, "Starting " + flowWorker);
+                flowWorker.run();
+            }
+        }
+    }
+
+    private void startOsuFlow(FlowWorker flowWorker) {
+        synchronized (mFlowLock) {
+            mWorkQueue.offer(flowWorker);
+            if (mFlowThread == null) {
+                mFlowThread = new FlowRunner(mWorkQueue, this);
+                mFlowThread.start();
+            }
+        }
+    }
+
+    private boolean serviceThreadExit() {
+        synchronized (mFlowLock) {
+            if (mWorkQueue.isEmpty()) {
+                mFlowThread = null;
+                return true;
+            } else {
+                return false;
             }
         }
     }
@@ -437,7 +439,7 @@ public class OSUManager {
 
         if (config != null &&
                 bssidMatch(selection) &&
-                Utils.unquote(config.SSID).equals(selection.getSSID())) {
+                Utils.unquote(config.SSID).equals(selection.getOsuSsid())) {
 
             try {
                 // Go straight to provisioning if the network is already selected.
@@ -476,9 +478,9 @@ public class OSUManager {
             int current = mOSUMap.size();
             mOSUMap.clear();
             mOSUCache.clearAll();
-            mIconCache.clear();
+            mIconCache.tick(true);
             if (current > 0) {
-                notifyOSUCount(0);
+                notifyOSUCount();
             }
         }
     }
@@ -495,11 +497,12 @@ public class OSUManager {
     public void setActiveNetwork(WifiConfiguration wifiConfiguration, Network network) {
         Log.d(TAG, "Network change: " + network + ", cfg " +
                 (wifiConfiguration != null ? wifiConfiguration.SSID : "-") + ", osu " + mPendingOSU);
+        mActiveNetwork = network;
         if (mPendingOSU != null &&
                 wifiConfiguration != null &&
                 network != null &&
                 bssidMatch(mPendingOSU) &&
-                Utils.unquote(wifiConfiguration.SSID).equals(mPendingOSU.getSSID())) {
+                Utils.unquote(wifiConfiguration.SSID).equals(mPendingOSU.getOsuSsid())) {
 
             try {
                 Log.d(TAG, "New network " + network + ", current OSU " + mPendingOSU);
@@ -510,26 +513,12 @@ public class OSUManager {
             } finally {
                 mPendingOSU = null;
             }
-            return;
         }
 
-        /*
-        // !!! Hack to force start remediation at connection time
-        else if (wifiConfiguration != null && wifiConfiguration.isPasspoint()) {
-            HomeSP homeSP = mWifiConfigStore.getHomeSPForConfig(wifiConfiguration);
-            if (homeSP != null && homeSP.getSubscriptionUpdate() != null) {
-                if (!mServiceThreads.containsKey(homeSP.getFQDN())) {
-                    try {
-                        remediate(homeSP);
-                    } catch (IOException ioe) {
-                        Log.w(TAG, "Failed to remediate: " + ioe);
-                    }
-                }
-            }
-        }
-        */
-        else if (wifiConfiguration == null) {
-            mServiceThreads.clear();
+        if (mRemediationFlow != null && network != null &&
+                mRemediationFlow.getNetwork().netId == network.netId) {
+            startOsuFlow(mRemediationFlow);
+            mRemediationFlow = null;
         }
     }
 
@@ -546,24 +535,7 @@ public class OSUManager {
      */
     private void initiateProvisioning(OSUInfo osuInfo, Network network)
             throws IOException {
-        synchronized (mWifiNetworkAdapter) {
-            if (mProvisioningThread != null) {
-                mProvisioningThread.connect(null);
-                mProvisioningThread = null;
-            }
-            if (mRedirectListener != null) {
-                mRedirectListener.abort();
-                mRedirectListener = null;
-            }
-            if (osuInfo != null) {
-                //new ConnMonitor().start();
-                mProvisioningThread = new OSUThread(osuInfo, this, getKeyManager(null, mKeyStore));
-                mProvisioningThread.start();
-                //mWifiNetworkAdapter.associate(osuInfo.getSSID(),
-                //        osuInfo.getBSSID(), osuInfo.getOSUProvider().getOsuNai());
-                mProvisioningThread.connect(network);
-            }
-        }
+        startOsuFlow(new FlowWorker(network, osuInfo, this, getKeyManager(null, mKeyStore)));
     }
 
     /**
@@ -584,27 +556,12 @@ public class OSUManager {
         }
     }
 
-    public void tickleIconCache(boolean all) {
-        mIconCache.tickle(all);
-
-        if (all) {
-            synchronized (mOSUMap) {
-                int current = mOSUMap.size();
-                mOSUMap.clear();
-                mOSUCache.clearAll();
-                mIconCache.clear();
-                if (current > 0) {
-                    notifyOSUCount(0);
-                }
-            }
-        }
-    }
-
     public void pushScanResults(Collection<ScanResult> scanResults) {
         Map<OSUProvider, ScanResult> results = mOSUCache.pushScanResults(scanResults);
         if (results != null) {
             updateOSUInfoCache(results);
         }
+        mIconCache.tick(false);
     }
 
     private void updateOSUInfoCache(Map<OSUProvider, ScanResult> results) {
@@ -613,9 +570,20 @@ public class OSUManager {
             OSUInfo existing = mOSUMap.get(entry.getKey());
             long bssid = Utils.parseMac(entry.getValue().BSSID);
 
-            if (existing == null || existing.getBSSID() != bssid) {
+            if (existing == null) {
                 osus.put(entry.getKey(), new OSUInfo(entry.getValue(), entry.getKey().getSSID(),
                         entry.getKey(), mOSUSequence.getAndIncrement()));
+            } else if (existing.getBSSID() != bssid) {
+                HSIconFileElement icon = mIconCache.getIcon(existing);
+                if (icon != null && icon.equals(existing.getIconFileElement())) {
+                    OSUInfo osuInfo = new OSUInfo(entry.getValue(), entry.getKey().getSSID(),
+                            entry.getKey(), existing.getOsuID());
+                    osuInfo.setIconFileElement(icon, existing.getIconFileName());
+                    osus.put(entry.getKey(), osuInfo);
+                } else {
+                    osus.put(entry.getKey(), new OSUInfo(entry.getValue(), entry.getKey().getSSID(),
+                            entry.getKey(), mOSUSequence.getAndIncrement()));
+                }
             } else {
                 // Maintain existing entries.
                 osus.put(entry.getKey(), existing);
@@ -627,46 +595,35 @@ public class OSUManager {
 
         mOSUSSIDs.clear();
         for (OSUInfo osuInfo : mOSUMap.values()) {
-            mOSUSSIDs.add(osuInfo.getSSID());
+            mOSUSSIDs.add(osuInfo.getOsuSsid());
         }
 
-        if (mOSUMap.isEmpty()) {
-            notifyOSUCount(0);
-        }
-        initiateIconQueries();
-        Log.d(TAG, "Latest (app) OSU info: " + mOSUMap);
-    }
+        int mods = mIconCache.resolveIcons(mOSUMap.values());
 
-    public void iconResults(List<OSUInfo> osuInfos) {
-        int newIcons = 0;
-        for (OSUInfo osuInfo : osuInfos) {
-            if (osuInfo.getIconStatus() == OSUInfo.IconStatus.Available) {
-                newIcons++;
-            }
-        }
-        if (newIcons > 0) {
-            int count = 0;
-            for (OSUInfo existing : mOSUMap.values()) {
-                if (existing.getIconStatus() == OSUInfo.IconStatus.Available) {
-                    count++;
-                }
-            }
-            Log.d(TAG, "Icon results for " + count + " OSUs");
-            notifyOSUCount(count);
+        if (mOSUMap.isEmpty() || mods > 0) {
+            notifyOSUCount();
         }
     }
 
-    private void notifyOSUCount(int count) {
+    public void notifyIconReceived(long bssid, String fileName, byte[] data) {
+        if (mIconCache.notifyIconReceived(bssid, fileName, data) > 0) {
+            notifyOSUCount();
+        }
+    }
+
+    public void doIconQuery(long bssid, String fileName) {
+        mWifiNetworkAdapter.doIconQuery(bssid, fileName);
+    }
+
+    private void notifyOSUCount() {
+        int count = 0;
+        for (OSUInfo existing : mOSUMap.values()) {
+            if (existing.getIconStatus() == OSUInfo.IconStatus.Available) {
+                count++;
+            }
+        }
+        Log.d(TAG, "Latest OSU info: " + count + " with icons, map " + mOSUMap);
         mAppBridge.showOsuCount(count, getAvailableOSUs());
-    }
-
-    private void initiateIconQueries() {
-        for (OSUInfo osuInfo : mOSUMap.values()) {
-            if (osuInfo.getIconStatus() == OSUInfo.IconStatus.NotQueried) {
-                mIconCache.startIconQuery(osuInfo,
-                        osuInfo.getIconInfo(LOCALE, ICON_TYPES, ICON_WIDTH, ICON_HEIGHT));
-            }
-        }
     }
 
     public void deauth(long bssid, boolean ess, int delay, String url) throws MalformedURLException {
@@ -681,14 +638,11 @@ public class OSUManager {
     }
 
     // !!! Consistently check passpoint match.
-    // !!! Convert to a one-thread thread-pool
     public void wnmRemediate(long bssid, String url, PasspointMatch match)
             throws IOException, SAXException {
-        WifiConfiguration config = mWifiNetworkAdapter.getActiveWifiConfig();
-        HomeSP homeSP = MOManager.buildSP(config.getMoTree());
+        HomeSP homeSP = mWifiNetworkAdapter.getCurrentSP();
         if (homeSP == null) {
-            throw new IOException("Remediation request for unidentified Passpoint network " +
-                    config.networkId);
+            throw new IOException("Remediation request on unidentified Passpoint network ");
         }
         Network network = mWifiNetworkAdapter.getCurrentNetwork();
         if (network == null) {
@@ -700,7 +654,14 @@ public class OSUManager {
         }
         Log.d(TAG, "WNM Remediation on " + network.netId + " FQDN " + homeSP.getFQDN());
 
-        doRemediate(url, network, homeSP, false);
+        FlowWorker flowWorker = new FlowWorker(network, url, this,
+                getKeyManager(homeSP, mKeyStore), homeSP, FlowType.Remediation);
+
+        if (wifiInfo.getNetworkId() == mActiveNetwork.netId) {
+            startOsuFlow(flowWorker);
+        } else {
+            mRemediationFlow = flowWorker;
+        }
     }
 
     public void remediate(HomeSP homeSP, boolean policy) throws IOException, SAXException {
@@ -720,8 +681,7 @@ public class OSUManager {
                     throw new IOException("Failed to determine current network");
                 }
 
-                WifiConfiguration config = mWifiNetworkAdapter.getActivePasspointNetwork();
-                HomeSP activeSP = MOManager.buildSP(config.getMoTree());
+                HomeSP activeSP = mWifiNetworkAdapter.getCurrentSP();
 
                 if (activeSP == null || !activeSP.getFQDN().equals(homeSP.getFQDN())) {
                     throw new IOException("Remediation restricted to HomeSP");
@@ -761,39 +721,14 @@ public class OSUManager {
 
     private void doRemediate(String url, Network network, HomeSP homeSP, boolean policy)
             throws IOException {
-        synchronized (mWifiNetworkAdapter) {
-            OSUThread existing = mServiceThreads.get(homeSP.getFQDN());
-            if (existing != null) {
-                if (System.currentTimeMillis() - existing.getLaunchTime() > REMEDIATION_TIMEOUT) {
-                    throw new IOException("Ignoring recurring remediation request");
-                } else {
-                    existing.connect(null);
-                }
-            }
 
-            try {
-                OSUThread osuThread = new OSUThread(url, this,
-                        getKeyManager(homeSP, mKeyStore),
-                        homeSP, policy ? FLOW_POLICY : FLOW_REMEDIATION);
-                osuThread.start();
-                osuThread.connect(network);
-                mServiceThreads.put(homeSP.getFQDN(), osuThread);
-            } catch (MalformedURLException me) {
-                throw new IOException("Failed to start remediation: " + me);
-            }
-        }
+        startOsuFlow(new FlowWorker(network, url, this,
+                getKeyManager(homeSP, mKeyStore),
+                homeSP, policy ? FlowType.Policy : FlowType.Remediation));
     }
 
     public MOTree getMOTree(HomeSP homeSP) throws IOException {
         return mWifiNetworkAdapter.getMOTree(homeSP);
-    }
-
-    public void notifyIconReceived(long bssid, String fileName, byte[] data) {
-        mIconCache.notifyIconReceived(bssid, fileName, data);
-    }
-
-    public void doIconQuery(long bssid, String fileName) {
-        mWifiNetworkAdapter.doIconQuery(bssid, fileName);
     }
 
     protected URL prepareUserInput(String spName) throws IOException {
@@ -804,7 +739,6 @@ public class OSUManager {
     protected boolean startUserInput(URL target, Network network) throws IOException {
         mRedirectListener.startService();
         mWifiNetworkAdapter.launchBrowser(target, network, mRedirectListener.getURL());
-
         return mRedirectListener.waitForUser();
     }
 
@@ -821,26 +755,11 @@ public class OSUManager {
         return null;
     }
 
-    public void provisioningFailed(String spName, String message, HomeSP homeSP,
-                                   int flowType) {
-        synchronized (mWifiNetworkAdapter) {
-            switch (flowType) {
-                case FLOW_PROVISIONING:
-                    mProvisioningThread = null;
-                    if (mRedirectListener != null) {
-                        mRedirectListener.abort();
-                        mRedirectListener = null;
-                    }
-                    break;
-                case FLOW_REMEDIATION:
-                case FLOW_POLICY:
-                    mServiceThreads.remove(homeSP.getFQDN());
-                    if (mServiceThreads.isEmpty() && mRedirectListener != null) {
-                        mRedirectListener.abort();
-                        mRedirectListener = null;
-                    }
-                    break;
-            }
+    public void provisioningFailed(String spName, String message,
+                                   HomeSP homeSP, FlowType flowType) {
+        if (mRedirectListener != null) {
+            mRedirectListener.abort();
+            mRedirectListener = null;
         }
         notifyUser(OSUOperationStatus.ProvisioningFailure, message, spName);
     }
@@ -848,25 +767,28 @@ public class OSUManager {
     public void provisioningComplete(OSUInfo osuInfo,
                                      MOData moData, Map<OSUCertType, List<X509Certificate>> certs,
                                      PrivateKey privateKey, Network osuNetwork) {
-        synchronized (mWifiNetworkAdapter) {
-            mProvisioningThread = null;
-        }
         try {
-            Log.d("ZXZ", "MOTree.toXML: " + moData.getMOTree().toXml());
-            HomeSP homeSP = mWifiNetworkAdapter.addSP(moData.getMOTree());
+            String xml = moData.getMOTree().toXml();
+            HomeSP homeSP = MOManager.buildSP(xml);
 
             Integer spNwk = mWifiNetworkAdapter.addNetwork(homeSP, certs, privateKey, osuNetwork);
             if (spNwk == null) {
                 notifyUser(OSUOperationStatus.ProvisioningFailure,
                         "Failed to save network configuration", osuInfo.getName(LOCALE));
-                mWifiNetworkAdapter.removeSP(homeSP.getFQDN());
             } else {
+                if (mWifiNetworkAdapter.addSP(xml) < 0) {
+                    mWifiNetworkAdapter.deleteNetwork(spNwk);
+                    Log.e(TAG, "Failed to provision: " + homeSP.getFQDN());
+                    notifyUser(OSUOperationStatus.ProvisioningFailure, "Failed to add MO",
+                            osuInfo.getName(LOCALE));
+                    return;
+                }
                 Set<X509Certificate> rootCerts = OSUSocketFactory.getRootCerts(mKeyStore);
                 X509Certificate remCert = getCert(certs, OSUCertType.Remediation);
                 X509Certificate polCert = getCert(certs, OSUCertType.Policy);
                 if (privateKey != null) {
                     X509Certificate cltCert = getCert(certs, OSUCertType.Client);
-                    mKeyStore.setKeyEntry(CERT_CLT_KEY_ALIAS + homeSP,
+                    mKeyStore.setKeyEntry(CERT_CLT_KEY_ALIAS + homeSP.getFQDN(),
                             privateKey.getEncoded(),
                             new X509Certificate[]{cltCert});
                     mKeyStore.setCertificateEntry(CERT_CLT_CERT_ALIAS, cltCert);
@@ -921,7 +843,15 @@ public class OSUManager {
 
     public void spDeleted(String fqdn) {
         int count = deleteCerts(mKeyStore, fqdn,
-                CERT_REM_ALIAS, CERT_POLICY_ALIAS, CERT_SHARED_ALIAS);
+                CERT_REM_ALIAS, CERT_POLICY_ALIAS, CERT_SHARED_ALIAS, CERT_CLT_CERT_ALIAS);
+
+        try {
+            if (mKeyStore.getKey(CERT_CLT_KEY_ALIAS + fqdn, null) != null) {
+                mKeyStore.deleteEntry(CERT_CLT_KEY_ALIAS + fqdn);
+            }
+        } catch (GeneralSecurityException e) {
+                /**/
+        }
 
         if (count > 0) {
             try (FileOutputStream out = new FileOutputStream(KEYSTORE_FILE)) {
@@ -954,7 +884,11 @@ public class OSUManager {
                                     PrivateKey privateKey)
             throws IOException, GeneralSecurityException {
 
-        HomeSP altSP = mWifiNetworkAdapter.modifySP(homeSP, mods);
+        HomeSP altSP = null;
+        if (mWifiNetworkAdapter.modifySP(homeSP, mods) > 0) {
+            altSP = MOManager.modifySP(homeSP, mWifiNetworkAdapter.getMOTree(homeSP), mods);
+        }
+
         X509Certificate caCert = null;
         List<X509Certificate> clientCerts = null;
         if (certs != null) {
@@ -964,7 +898,7 @@ public class OSUManager {
         }
         if (altSP != null || certs != null) {
             if (altSP == null) {
-                altSP = homeSP;     // No MO mods, only certs and key
+                altSP = homeSP;
             }
             mWifiNetworkAdapter.updateNetwork(altSP, caCert, clientCerts, privateKey);
         }
