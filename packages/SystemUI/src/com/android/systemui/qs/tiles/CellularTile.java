@@ -136,6 +136,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         return MetricsEvent.QS_CELLULAR;
     }
 
+    @Override
+    public boolean isAvailable() {
+        return mController.hasMobileDataFeature();
+    }
+
     // Remove the period from the network name
     public static String removeTrailingPeriod(String string) {
         if (string == null) return null;
@@ -144,10 +149,6 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             return string.substring(0, length - 1);
         }
         return string;
-    }
-
-    public static boolean isSupported(Host host) {
-        return host.getNetworkController().hasMobileDataFeature();
     }
 
     private static final class CallbackInfo {

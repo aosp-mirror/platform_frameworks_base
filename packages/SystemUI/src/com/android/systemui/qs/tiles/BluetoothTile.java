@@ -146,8 +146,9 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         }
     }
 
-    public static boolean isSupported(Host host) {
-        return host.getBluetoothController().isBluetoothSupported();
+    @Override
+    public boolean isAvailable() {
+        return mController.isBluetoothSupported();
     }
 
     private final BluetoothController.Callback mCallback = new BluetoothController.Callback() {
