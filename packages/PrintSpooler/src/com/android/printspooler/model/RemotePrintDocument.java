@@ -282,12 +282,10 @@ public final class RemotePrintDocument {
             Log.i(LOG_TAG, "[CALLED] cancel()");
         }
 
-        if (mState == STATE_CANCELING) {
-            return;
-        }
+        mNextCommand = null;
 
         if (mState != STATE_UPDATING) {
-            throw new IllegalStateException("Cannot cancel in state:" + stateToString(mState));
+            return;
         }
 
         mState = STATE_CANCELING;
@@ -568,6 +566,8 @@ public final class RemotePrintDocument {
                         Log.w(LOG_TAG, "Error while canceling", re);
                     }
                 }
+            } else if (isCanceling()) {
+                // Nothing to do
             } else {
                 canceled();
 
