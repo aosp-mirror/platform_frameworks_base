@@ -52411,7 +52411,7 @@ package java.net {
     method protected abstract void connect(java.net.InetAddress, int) throws java.io.IOException;
     method protected abstract void connect(java.net.SocketAddress, int) throws java.io.IOException;
     method protected abstract void create(boolean) throws java.io.IOException;
-    method public java.io.FileDescriptor getFileDescriptor();
+    method protected java.io.FileDescriptor getFileDescriptor();
     method protected java.net.InetAddress getInetAddress();
     method protected abstract java.io.InputStream getInputStream() throws java.io.IOException;
     method protected int getLocalPort();
