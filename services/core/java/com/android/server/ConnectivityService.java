@@ -1804,11 +1804,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void updateMtu(LinkProperties newLp, LinkProperties oldLp) {
         final String iface = newLp.getInterfaceName();
         final int mtu = newLp.getMtu();
+        if (oldLp == null && mtu == 0) {
+            // Silently ignore unset MTU value.
+            return;
+        }
         if (oldLp != null && newLp.isIdenticalMtu(oldLp)) {
             if (VDBG) log("identical MTU - not setting");
             return;
         }
-
         if (LinkProperties.isValidMtu(mtu, newLp.hasGlobalIPv6Address()) == false) {
             if (mtu != 0) loge("Unexpected mtu value: " + mtu + ", " + iface);
             return;
