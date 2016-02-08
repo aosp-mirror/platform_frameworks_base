@@ -219,8 +219,8 @@ public abstract class BaseActivity extends Activity
     void onStackRestored(boolean restored, boolean external) {}
 
     void onRootPicked(RootInfo root) {
-        // Skip refreshing if root didn't change
-        if(root.equals(getCurrentRoot())) {
+        // Skip refreshing if root nor directory didn't change
+        if (root.equals(getCurrentRoot()) && mState.stack.size() == 1) {
             return;
         }
 
