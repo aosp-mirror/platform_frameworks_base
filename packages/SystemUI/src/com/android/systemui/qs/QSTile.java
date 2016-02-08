@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.qs.QSTile.State;
 import com.android.systemui.qs.external.TileServices;
+import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -112,6 +113,15 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
     public DetailAdapter getDetailAdapter() {
         return null; // optional
+    }
+
+    /**
+     * Is a startup check whether this device currently supports this tile.
+     * Should not be used to conditionally hide tiles.  Only checked on tile
+     * creation or whether should be shown in edit screen.
+     */
+    public boolean isAvailable() {
+        return true;
     }
 
     public interface DetailAdapter {
@@ -392,6 +402,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         TileServices getTileServices();
         DisplayController getDisplayController();
         void removeTile(String tileSpec);
+        ManagedProfileController getManagedProfileController();
 
 
         public interface Callback {

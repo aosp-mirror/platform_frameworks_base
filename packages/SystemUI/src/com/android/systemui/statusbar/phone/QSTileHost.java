@@ -109,6 +109,8 @@ public final class QSTileHost implements QSTile.Host, Tunable {
 
     private final List<Callback> mCallbacks = new ArrayList<>();
     private final DisplayController mDisplayController;
+    private final AutoTileManager mAutoTiles;
+    private final ManagedProfileController mProfileController;
     private View mHeader;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
@@ -136,6 +138,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         mBattery = battery;
         mIconController = iconController;
         mDisplayController = new DisplayController(mContext);
+        mProfileController = new ManagedProfileController(this);
 
         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -144,6 +147,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
 
         mServices = new TileServices(this, mLooper);
 
+        mAutoTiles = new AutoTileManager(context, this);
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
     }
 
@@ -156,6 +160,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     }
 
     public void destroy() {
+        mAutoTiles.destroy();
         TunerService.get(mContext).removeTunable(this);
     }
 
@@ -290,6 +295,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         return mDisplayController;
     }
 
+    public ManagedProfileController getManagedProfileController() {
+        return mProfileController;
+    }
+
     @Override
     public void onTuningChanged(String key, String newValue) {
         if (!TILES_SETTING.equals(key)) {
@@ -315,7 +324,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
                 if (DEBUG) Log.d(TAG, "Creating tile: " + tileSpec);
                 try {
                     QSTile<?> tile = createTile(tileSpec);
-                    if (tile != null) {
+                    if (tile != null && tile.isAvailable()) {
                         tile.setTileSpec(tileSpec);
                         newTiles.put(tileSpec, tile);
                     }
@@ -337,6 +346,16 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     public void removeTile(String tileSpec) {
         ArrayList<String> specs = new ArrayList<>(mTileSpecs);
         specs.remove(tileSpec);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
+                TextUtils.join(",", specs), ActivityManager.getCurrentUser());
+    }
+
+    public void addTile(String spec) {
+        if (mTileSpecs.contains(spec)) {
+            return;
+        }
+        ArrayList<String> specs = new ArrayList<>(mTileSpecs);
+        specs.add(spec);
         Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
                 TextUtils.join(",", specs), ActivityManager.getCurrentUser());
     }
@@ -387,14 +406,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     }
 
     public QSTile<?> createTile(String tileSpec) {
-        if (tileSpec.equals("wifi")) return WifiTile.isSupported(this)
-                ? new WifiTile(this) : null;
-        else if (tileSpec.equals("bt")) return BluetoothTile.isSupported(this)
-                ? new BluetoothTile(this) : null;
-        else if (tileSpec.equals("cell")) return CellularTile.isSupported(this)
-                ? new CellularTile(this) : null;
-        else if (tileSpec.equals("dnd")) return DndTile.isSupported(this)
-                ? new DndTile(this) : null;
+        if (tileSpec.equals("wifi")) return new WifiTile(this);
+        else if (tileSpec.equals("bt")) return new BluetoothTile(this);
+        else if (tileSpec.equals("cell")) return new CellularTile(this);
+        else if (tileSpec.equals("dnd")) return new DndTile(this);
         else if (tileSpec.equals("inversion")) return new ColorInversionTile(this);
         else if (tileSpec.equals("airplane")) return new AirplaneModeTile(this);
         else if (tileSpec.equals("work")) return new WorkModeTile(this);

@@ -55,14 +55,14 @@ public class TileQueryHelper {
     private void addSystemTiles(QSTileHost host) {
         boolean hasColorMod = host.getDisplayController().isEnabled();
         String possible = mContext.getString(R.string.quick_settings_tiles_default)
-                + ",hotspot,inversion,saver" + (hasColorMod ? ",colors" : "");
+                + ",hotspot,inversion,saver,work" + (hasColorMod ? ",colors" : "");
         String[] possibleTiles = possible.split(",");
         final Handler qsHandler = new Handler(host.getLooper());
         final Handler mainHandler = new Handler(Looper.getMainLooper());
         for (int i = 0; i < possibleTiles.length; i++) {
             final String spec = possibleTiles[i];
             final QSTile<?> tile = host.createTile(spec);
-            if (tile == null) {
+            if (tile == null || !tile.isAvailable()) {
                 continue;
             }
             tile.setListening(true);
