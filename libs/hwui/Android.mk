@@ -324,4 +324,6 @@ ifeq (true, $(HWUI_NEW_OPS))
         tests/microbench/FrameBuilderBench.cpp
 endif
 
+LOCAL_CLANG := true # workaround gcc bug
+
 include $(BUILD_EXECUTABLE)
