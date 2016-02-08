@@ -1031,16 +1031,11 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM ካርድ አክል"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"የተንቀሳቃሽ ስልክ አውታረ መረብ ለመድረስ መሣሪያዎን ዳግም ያስጀምሩት።"</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"ዳግም ጀምር"</string>
-    <!-- no translation found for carrier_app_dialog_message (7066156088266319533) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_button (7900235513678617329) -->
-    <skip />
-    <!-- no translation found for carrier_app_dialog_not_now (6361378684292268027) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_title (8921767385872554621) -->
-    <skip />
-    <!-- no translation found for carrier_app_notification_text (1132487343346050225) -->
-    <skip />
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"የእርስዎ ሲም በአግባቡ እንዲሠራ ለማድረግ ከእርስዎ አገልግሎት አቅራቢ መተግበሪያ መጫን እና መክፈት አለብዎት።"</string>
+    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"መተግበሪያውን ያግኙ"</string>
+    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"አሁን አይደለም"</string>
+    <string name="carrier_app_notification_title" msgid="8921767385872554621">"አዲስ ሲም ገብቷል"</string>
+    <string name="carrier_app_notification_text" msgid="1132487343346050225">"ለማዋቀር መታ ያድርጉ"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ጊዜ አዘጋጅ"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ውሂብ አዘጋጅ"</string>
     <string name="date_time_set" msgid="5777075614321087758">"አዘጋጅ"</string>
@@ -1466,7 +1461,7 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ስራ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ይህን ማያ ገጽ ለመንቀል ተመለስን እና አጠቃላይ እይታን በተመሳሳይ ይንኳቸውና ይያዟቸው።"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ይህን ማያ ገጽ ለመንቀል አጠቃላይ እይታን ይንኩትና ይያዙት።"</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"መተግበሪያ ተያይዟል፦ በዚህ መሣሪያ ላይ ማላቀቅ አይፈቀድም።"</string>
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"መተግበሪያ ተሰክቷል፦ በዚህ መሣሪያ ላይ ማላቀቅ አይፈቀድም።"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ማያ ገጽ ተሰክቷል"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ማያ ገጽ ተነቅሏል"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ከመንቀል በፊት ፒን ጠይቅ"</string>

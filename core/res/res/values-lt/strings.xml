@@ -924,7 +924,7 @@
     <string name="aerr_application" msgid="250320989337856518">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ sustabdyta"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> sustabdytas"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ vis sustabdoma"</string>
-    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> vis sustabdomas"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ vis sustabdomas"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Paleisti programą iš naujo"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Nustatyti ir paleisti programą iš naujo"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Siųsti atsiliepimą"</string>
@@ -936,7 +936,7 @@
     <string name="anr_activity_application" msgid="8493290105678066167">"„<xliff:g id="APPLICATION">%2$s</xliff:g>“ neatsako"</string>
     <string name="anr_activity_process" msgid="1622382268908620314">"„<xliff:g id="ACTIVITY">%1$s</xliff:g>“ neatsako"</string>
     <string name="anr_application_process" msgid="6417199034861140083">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako"</string>
-    <string name="anr_process" msgid="6156880875555921105">"Procesas <xliff:g id="PROCESS">%1$s</xliff:g> neatsako"</string>
+    <string name="anr_process" msgid="6156880875555921105">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako"</string>
     <string name="force_close" msgid="8346072094521265605">"Gerai"</string>
     <string name="report" msgid="4060218260984795706">"Pranešti"</string>
     <string name="wait" msgid="7147118217226317732">"Palaukti"</string>
