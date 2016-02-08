@@ -783,7 +783,7 @@ final class UserController {
         return result;
     }
 
-    boolean unlockUser(final int userId, byte[] token) {
+    boolean unlockUser(final int userId, byte[] token, byte[] secret) {
         if (mService.checkCallingPermission(INTERACT_ACROSS_USERS_FULL)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: unlockUser() from pid="
@@ -796,7 +796,7 @@ final class UserController {
 
         final long binderToken = Binder.clearCallingIdentity();
         try {
-            return unlockUserCleared(userId, token);
+            return unlockUserCleared(userId, token, secret);
         } finally {
             Binder.restoreCallingIdentity(binderToken);
         }
@@ -810,10 +810,10 @@ final class UserController {
      */
     boolean maybeUnlockUser(final int userId) {
         // Try unlocking storage using empty token
-        return unlockUserCleared(userId, null);
+        return unlockUserCleared(userId, null, null);
     }
 
-    boolean unlockUserCleared(final int userId, byte[] token) {
+    boolean unlockUserCleared(final int userId, byte[] token, byte[] secret) {
         synchronized (mService) {
             // Bail if already running unlocked
             final UserState uss = mStartedUsers.get(userId);
@@ -824,7 +824,7 @@ final class UserController {
             final UserInfo userInfo = getUserInfo(userId);
             final IMountService mountService = getMountService();
             try {
-                mountService.unlockUserKey(userId, userInfo.serialNumber, token);
+                mountService.unlockUserKey(userId, userInfo.serialNumber, token, secret);
             } catch (RemoteException | RuntimeException e) {
                 Slog.w(TAG, "Failed to unlock: " + e.getMessage());
                 return false;
