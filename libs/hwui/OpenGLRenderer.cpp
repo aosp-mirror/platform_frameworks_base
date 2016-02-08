@@ -1949,7 +1949,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
     }
 }
 
-void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
+void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const glyph_t* glyphs,
         int count, const float* positions,
         FontRenderer& fontRenderer, int alpha, float x, float y) {
     mCaches.textureState().activateTexture(0);
@@ -1963,7 +1963,7 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     //       if shader-based correction is enabled
     mCaches.dropShadowCache.setFontRenderer(fontRenderer);
     ShadowTexture* texture = mCaches.dropShadowCache.get(
-            paint, text, count, textShadow.radius, positions);
+            paint, glyphs, count, textShadow.radius, positions);
     // If the drop shadow exceeds the max texture size or couldn't be
     // allocated, skip drawing
     if (!texture) return;
@@ -2084,14 +2084,14 @@ void OpenGLRenderer::setProjectionPathMask(LinearAllocator& allocator, const SkP
     mState.setProjectionPathMask(allocator, path);
 }
 
-void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,
+void OpenGLRenderer::drawText(const glyph_t* glyphs, int bytesCount, int count, float x, float y,
         const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
         DrawOpMode drawOpMode) {
 
     if (drawOpMode == DrawOpMode::kImmediate) {
         // The checks for corner-case ignorable text and quick rejection is only done for immediate
         // drawing as ops from DeferredDisplayList are already filtered for these
-        if (text == nullptr || count == 0 || mState.currentlyIgnored() || canSkipText(paint) ||
+        if (glyphs == nullptr || count == 0 || mState.currentlyIgnored() || canSkipText(paint) ||
                 quickRejectSetupScissor(bounds)) {
             return;
         }
@@ -2115,7 +2115,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
 
     if (CC_UNLIKELY(PaintUtils::hasTextShadow(paint))) {
         fontRenderer.setFont(paint, SkMatrix::I());
-        drawTextShadow(paint, text, count, positions, fontRenderer,
+        drawTextShadow(paint, glyphs, count, positions, fontRenderer,
                 alpha, oldX, oldY);
     }
 
@@ -2156,10 +2156,10 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
-        status = fontRenderer.renderPosText(&paintCopy, clip, text, count, x, y,
+        status = fontRenderer.renderPosText(&paintCopy, clip, glyphs, count, x, y,
                 positions, hasActiveLayer ? &layerBounds : nullptr, &functor, forceFinish);
     } else {
-        status = fontRenderer.renderPosText(paint, clip, text, count, x, y,
+        status = fontRenderer.renderPosText(paint, clip, glyphs, count, x, y,
                 positions, hasActiveLayer ? &layerBounds : nullptr, &functor, forceFinish);
     }
 
@@ -2173,9 +2173,9 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     mDirty = true;
 }
 
-void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
+void OpenGLRenderer::drawTextOnPath(const glyph_t* glyphs, int bytesCount, int count,
         const SkPath* path, float hOffset, float vOffset, const SkPaint* paint) {
-    if (text == nullptr || count == 0 || mState.currentlyIgnored() || canSkipText(paint)) {
+    if (glyphs == nullptr || count == 0 || mState.currentlyIgnored() || canSkipText(paint)) {
         return;
     }
 
@@ -2198,7 +2198,7 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     const Rect* clip = &writableSnapshot()->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-    if (fontRenderer.renderTextOnPath(paint, clip, text, count, path,
+    if (fontRenderer.renderTextOnPath(paint, clip, glyphs, count, path,
             hOffset, vOffset, hasLayer() ? &bounds : nullptr, &functor)) {
         dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
         mDirty = true;

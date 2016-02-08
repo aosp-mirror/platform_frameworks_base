@@ -21,29 +21,31 @@
 #include "utils/Blur.h"
 #include "tests/common/TestUtils.h"
 
-#include <SkBlurDrawLooper.h>
 #include <SkPaint.h>
 
 using namespace android;
 using namespace android::uirenderer;
 
 RENDERTHREAD_TEST(TextDropShadowCache, addRemove) {
+    SkPaint paint;
+    paint.setTextSize(20);
+
     GammaFontRenderer gammaFontRenderer;
     FontRenderer& fontRenderer = gammaFontRenderer.getFontRenderer();
-    TextDropShadowCache cache(5000);
+    fontRenderer.setFont(&paint, SkMatrix::I());
+    TextDropShadowCache cache(MB(5));
     cache.setFontRenderer(fontRenderer);
 
-    SkPaint paint;
-    paint.setLooper(SkBlurDrawLooper::Create((SkColor)0xFFFFFFFF,
-            Blur::convertRadiusToSigma(10), 10, 10))->unref();
-    std::string msg("This is a test");
-    std::unique_ptr<float[]> positions(new float[msg.length()]);
-    for (size_t i = 0; i < msg.length(); i++) {
-        positions[i] = i * 10.0f;
-    }
-    fontRenderer.setFont(&paint, SkMatrix::I());
-    ShadowTexture* texture = cache.get(&paint, msg.c_str(), msg.length(),
-            10.0f, positions.get());
+    std::vector<glyph_t> glyphs;
+    std::vector<float> positions;
+    float totalAdvance;
+    uirenderer::Rect bounds;
+    TestUtils::layoutTextUnscaled(paint, "This is a test",
+            &glyphs, &positions, &totalAdvance, &bounds);
+    EXPECT_TRUE(bounds.contains(5, -10, 100, 0)) << "Expect input to be nontrivially sized";
+
+    ShadowTexture* texture = cache.get(&paint, glyphs.data(), glyphs.size(), 10, positions.data());
+
     ASSERT_TRUE(texture);
     ASSERT_FALSE(texture->cleanup);
     ASSERT_EQ((uint32_t) texture->objectSize(), cache.getSize());

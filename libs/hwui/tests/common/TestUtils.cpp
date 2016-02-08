@@ -58,27 +58,22 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     return layerUpdater;
 }
 
-void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
-        const SkPaint& paint, float x, float y) {
-    // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
-    LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
-            "must use glyph encoding");
+void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
+        std::vector<glyph_t>* outGlyphs, std::vector<float>* outPositions,
+        float* outTotalAdvance, Rect* outBounds) {
+    Rect bounds;
+    float totalAdvance = 0;
     SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
     SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
-
-    float totalAdvance = 0;
-    std::vector<glyph_t> glyphs;
-    std::vector<float> positions;
-    Rect bounds;
     while (*text != '\0') {
         SkUnichar unichar = SkUTF8_NextUnichar(&text);
         glyph_t glyph = autoCache.getCache()->unicharToGlyph(unichar);
         autoCache.getCache()->unicharToGlyph(unichar);
 
         // push glyph and its relative position
-        glyphs.push_back(glyph);
-        positions.push_back(totalAdvance);
-        positions.push_back(0);
+        outGlyphs->push_back(glyph);
+        outPositions->push_back(totalAdvance);
+        outPositions->push_back(0);
 
         // compute bounds
         SkGlyph skGlyph = autoCache.getCache()->getUnicharMetrics(unichar);
@@ -91,6 +86,23 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
         paint.getTextWidths(&glyph, sizeof(glyph), &skWidth, NULL);
         totalAdvance += skWidth;
     }
+    *outBounds = bounds;
+    *outTotalAdvance = totalAdvance;
+}
+
+void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
+        const SkPaint& paint, float x, float y) {
+    // drawing text requires GlyphID TextEncoding (which JNI layer would have done)
+    LOG_ALWAYS_FATAL_IF(paint.getTextEncoding() != SkPaint::kGlyphID_TextEncoding,
+            "must use glyph encoding");
+    SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
+    SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
+
+    std::vector<glyph_t> glyphs;
+    std::vector<float> positions;
+    float totalAdvance;
+    Rect bounds;
+    layoutTextUnscaled(paint, text, &glyphs, &positions, &totalAdvance, &bounds);
 
     // apply alignment via x parameter (which JNI layer would have done)
     if (paint.getTextAlign() == SkPaint::kCenter_Align) {
