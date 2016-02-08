@@ -557,7 +557,7 @@ void FontRenderer::setFont(const SkPaint* paint, const SkMatrix& matrix) {
     mCurrentFont = Font::create(this, paint, matrix);
 }
 
-FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, const char *text,
+FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, const glyph_t *glyphs,
         int numGlyphs, float radius, const float* positions) {
     checkInit();
 
@@ -577,7 +577,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     mBounds = nullptr;
 
     Rect bounds;
-    mCurrentFont->measure(paint, text, numGlyphs, &bounds, positions);
+    mCurrentFont->measure(paint, glyphs, numGlyphs, &bounds, positions);
 
     uint32_t intRadius = Blur::convertRadiusToInt(radius);
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * intRadius;
@@ -609,7 +609,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
         // text has non-whitespace, so draw and blur to create the shadow
         // NOTE: bounds.isEmpty() can't be used here, since vertical coordinates are inverted
         // TODO: don't draw pure whitespace in the first place, and avoid needing this check
-        mCurrentFont->render(paint, text, numGlyphs, penX, penY,
+        mCurrentFont->render(paint, glyphs, numGlyphs, penX, penY,
                 Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, nullptr, positions);
 
         // Unbind any PBO we might have used
@@ -643,17 +643,17 @@ void FontRenderer::finishRender() {
     issueDrawCommand();
 }
 
-void FontRenderer::precache(const SkPaint* paint, const char* text, int numGlyphs,
+void FontRenderer::precache(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
         const SkMatrix& matrix) {
     Font* font = Font::create(this, paint, matrix);
-    font->precache(paint, text, numGlyphs);
+    font->precache(paint, glyphs, numGlyphs);
 }
 
 void FontRenderer::endPrecaching() {
     checkTextureUpdate();
 }
 
-bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
+bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
         int numGlyphs, int x, int y, const float* positions,
         Rect* bounds, TextDrawFunctor* functor, bool forceFinish) {
     if (!mCurrentFont) {
@@ -662,7 +662,7 @@ bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const c
     }
 
     initRender(clip, bounds, functor);
-    mCurrentFont->render(paint, text, numGlyphs, x, y, positions);
+    mCurrentFont->render(paint, glyphs, numGlyphs, x, y, positions);
 
     if (forceFinish) {
         finishRender();
@@ -671,7 +671,7 @@ bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const c
     return mDrawn;
 }
 
-bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
+bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const glyph_t* glyphs,
         int numGlyphs, const SkPath* path, float hOffset, float vOffset,
         Rect* bounds, TextDrawFunctor* functor) {
     if (!mCurrentFont) {
@@ -680,7 +680,7 @@ bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, cons
     }
 
     initRender(clip, bounds, functor);
-    mCurrentFont->render(paint, text, numGlyphs, path, hOffset, vOffset);
+    mCurrentFont->render(paint, glyphs, numGlyphs, path, hOffset, vOffset);
     finishRender();
 
     return mDrawn;

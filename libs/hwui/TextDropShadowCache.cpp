@@ -37,9 +37,9 @@ hash_t ShadowText::hash() const {
     hash = JenkinsHashMix(hash, flags);
     hash = JenkinsHashMix(hash, android::hash_type(italicStyle));
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
-    if (text) {
+    if (glyphs) {
         hash = JenkinsHashMixShorts(
-            hash, reinterpret_cast<const uint16_t*>(text), glyphCount);
+            hash, reinterpret_cast<const uint16_t*>(glyphs), glyphCount);
     }
     if (positions) {
         for (uint32_t i = 0; i < glyphCount * 2; i++) {
@@ -71,11 +71,11 @@ int ShadowText::compare(const ShadowText& lhs, const ShadowText& rhs) {
     if (lhs.scaleX < rhs.scaleX) return -1;
     if (lhs.scaleX > rhs.scaleX) return +1;
 
-    if (lhs.text != rhs.text) {
-        if (!lhs.text) return -1;
-        if (!rhs.text) return +1;
+    if (lhs.glyphs != rhs.glyphs) {
+        if (!lhs.glyphs) return -1;
+        if (!rhs.glyphs) return +1;
 
-        deltaInt = memcmp(lhs.text, rhs.text, lhs.glyphCount * sizeof(glyph_t));
+        deltaInt = memcmp(lhs.glyphs, rhs.glyphs, lhs.glyphCount * sizeof(glyph_t));
         if (deltaInt != 0) return deltaInt;
     }
 
@@ -145,7 +145,7 @@ void TextDropShadowCache::clear() {
     mCache.clear();
 }
 
-ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* glyphs, int numGlyphs,
+ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const glyph_t* glyphs, int numGlyphs,
         float radius, const float* positions) {
     ShadowText entry(paint, radius, numGlyphs, glyphs, positions);
     ShadowTexture* texture = mCache.get(entry);
