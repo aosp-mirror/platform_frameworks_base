@@ -40,6 +40,12 @@ public class SettingsDrawerAdapter extends BaseAdapter {
     void updateCategories() {
         List<DashboardCategory> categories = mActivity.getDashboardCategories();
         mItems.clear();
+        // Spacer.
+        mItems.add(null);
+        Item tile = new Item();
+        tile.label = mActivity.getString(R.string.home);
+        tile.icon = Icon.createWithResource(mActivity, R.drawable.home);
+        mItems.add(tile);
         for (int i = 0; i < categories.size(); i++) {
             Item category = new Item();
             category.icon = null;
@@ -47,7 +53,7 @@ public class SettingsDrawerAdapter extends BaseAdapter {
             category.label = dashboardCategory.title;
             mItems.add(category);
             for (int j = 0; j < dashboardCategory.tiles.size(); j++) {
-                Item tile = new Item();
+                tile = new Item();
                 Tile dashboardTile = dashboardCategory.tiles.get(j);
                 tile.label = dashboardTile.title;
                 tile.icon = dashboardTile.icon;
@@ -79,12 +85,22 @@ public class SettingsDrawerAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        return mItems.get(position).icon != null;
+        return mItems.get(position) != null && mItems.get(position).icon != null;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Item item = mItems.get(position);
+        if (item == null) {
+            if (convertView == null || convertView.getId() != R.id.spacer) {
+                convertView = LayoutInflater.from(mActivity).inflate(R.layout.drawer_spacer,
+                        parent, false);
+            }
+            return convertView;
+        }
+        if (convertView != null && convertView.getId() == R.id.spacer) {
+            convertView = null;
+        }
         boolean isTile = item.icon != null;
         if (convertView == null || (isTile != (convertView.getId() == R.id.tile_item))) {
             convertView = LayoutInflater.from(mActivity).inflate(isTile ? R.layout.drawer_item

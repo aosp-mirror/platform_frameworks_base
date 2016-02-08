@@ -22,6 +22,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -63,6 +64,7 @@ public class ProfileSelectDialog extends DialogFragment implements OnClickListen
         UserHandle user = mSelectedTile.userHandle.get(which);
         // Show menu on top level items.
         mSelectedTile.intent.putExtra(SettingsDrawerActivity.EXTRA_SHOW_MENU, true);
+        mSelectedTile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         getActivity().startActivityAsUser(mSelectedTile.intent, user);
         ((SettingsDrawerActivity) getActivity()).onProfileTileOpen();
     }

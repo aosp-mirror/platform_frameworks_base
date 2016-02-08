@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.util.Pair;
@@ -34,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toolbar;
@@ -66,6 +68,8 @@ public class SettingsDrawerActivity extends Activity {
 
         long startTime = System.currentTimeMillis();
 
+        getWindow().addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        getWindow().addFlags(LayoutParams.FLAG_TRANSLUCENT_STATUS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.setContentView(R.layout.settings_with_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -93,6 +97,16 @@ public class SettingsDrawerActivity extends Activity {
         });
         if (DEBUG_TIMING) Log.d(TAG, "onCreate took " + (System.currentTimeMillis() - startTime)
                 + " ms");
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mShowingMenu) {
+            // If we are showing the menu, then we are a top level activity and the back should
+            // kick back to settings home.
+            openTile(null);
+        }
+        super.onBackPressed();
     }
 
     @Override
@@ -217,7 +231,9 @@ public class SettingsDrawerActivity extends Activity {
     public boolean openTile(Tile tile) {
         closeDrawer();
         if (tile == null) {
-            return false;
+            startActivity(new Intent(Settings.ACTION_SETTINGS).addFlags(
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK));
+            return true;
         }
         int numUserHandles = tile.userHandle.size();
         if (numUserHandles > 1) {
@@ -226,10 +242,12 @@ public class SettingsDrawerActivity extends Activity {
         } else if (numUserHandles == 1) {
             // Show menu on top level items.
             tile.intent.putExtra(EXTRA_SHOW_MENU, true);
+            tile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivityAsUser(tile.intent, tile.userHandle.get(0));
         } else {
             // Show menu on top level items.
             tile.intent.putExtra(EXTRA_SHOW_MENU, true);
+            tile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(tile.intent);
         }
         return true;
