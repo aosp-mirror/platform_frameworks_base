@@ -4531,10 +4531,12 @@ package android.app {
     method public void noteStateNotSaved();
     method public android.view.View onCreateView(android.view.View, java.lang.String, android.content.Context, android.util.AttributeSet);
     method public void reportLoaderStart();
-    method public void restoreAllState(android.os.Parcelable, java.util.List<android.app.Fragment>);
+    method public deprecated void restoreAllState(android.os.Parcelable, java.util.List<android.app.Fragment>);
+    method public void restoreAllState(android.os.Parcelable, android.app.FragmentManagerNonConfig);
     method public void restoreLoaderNonConfig(android.util.ArrayMap<java.lang.String, android.app.LoaderManager>);
     method public android.util.ArrayMap<java.lang.String, android.app.LoaderManager> retainLoaderNonConfig();
-    method public java.util.List<android.app.Fragment> retainNonConfig();
+    method public android.app.FragmentManagerNonConfig retainNestedNonConfig();
+    method public deprecated java.util.List<android.app.Fragment> retainNonConfig();
     method public android.os.Parcelable saveAllState();
   }
 
@@ -4594,6 +4596,9 @@ package android.app {
     method public abstract void onBackStackChanged();
   }
 
+  public class FragmentManagerNonConfig {
+  }
+
   public abstract class FragmentTransaction {
     ctor public FragmentTransaction();
     method public abstract android.app.FragmentTransaction add(android.app.Fragment, java.lang.String);
@@ -4604,6 +4609,8 @@ package android.app {
     method public abstract android.app.FragmentTransaction attach(android.app.Fragment);
     method public abstract int commit();
     method public abstract int commitAllowingStateLoss();
+    method public abstract void commitNow();
+    method public abstract void commitNowAllowingStateLoss();
     method public abstract android.app.FragmentTransaction detach(android.app.Fragment);
     method public abstract android.app.FragmentTransaction disallowAddToBackStack();
     method public abstract android.app.FragmentTransaction hide(android.app.Fragment);

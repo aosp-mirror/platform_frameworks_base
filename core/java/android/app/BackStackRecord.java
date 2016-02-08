@@ -667,6 +667,18 @@ final class BackStackRecord extends FragmentTransaction implements
         return commitInternal(true);
     }
 
+    @Override
+    public void commitNow() {
+        disallowAddToBackStack();
+        mManager.execSingleAction(this, false);
+    }
+
+    @Override
+    public void commitNowAllowingStateLoss() {
+        disallowAddToBackStack();
+        mManager.execSingleAction(this, true);
+    }
+
     int commitInternal(boolean allowStateLoss) {
         if (mCommitted) {
             throw new IllegalStateException("commit already called");

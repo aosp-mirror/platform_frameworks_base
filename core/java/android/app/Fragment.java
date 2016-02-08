@@ -97,35 +97,34 @@ final class FragmentState implements Parcelable {
         mSavedFragmentState = in.readBundle();
     }
 
-    public Fragment instantiate(FragmentHostCallback host, Fragment parent) {
-        if (mInstance != null) {
-            return mInstance;
+    public Fragment instantiate(FragmentHostCallback host, Fragment parent,
+            FragmentManagerNonConfig childNonConfig) {
+        if (mInstance == null) {
+            final Context context = host.getContext();
+            if (mArguments != null) {
+                mArguments.setClassLoader(context.getClassLoader());
+            }
+
+            mInstance = Fragment.instantiate(context, mClassName, mArguments);
+
+            if (mSavedFragmentState != null) {
+                mSavedFragmentState.setClassLoader(context.getClassLoader());
+                mInstance.mSavedFragmentState = mSavedFragmentState;
+            }
+            mInstance.setIndex(mIndex, parent);
+            mInstance.mFromLayout = mFromLayout;
+            mInstance.mRestored = true;
+            mInstance.mFragmentId = mFragmentId;
+            mInstance.mContainerId = mContainerId;
+            mInstance.mTag = mTag;
+            mInstance.mRetainInstance = mRetainInstance;
+            mInstance.mDetached = mDetached;
+            mInstance.mHidden = mHidden;
+            mInstance.mFragmentManager = host.mFragmentManager;
+            if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
+                    "Instantiated fragment " + mInstance);
         }
-
-        final Context context = host.getContext();
-        if (mArguments != null) {
-            mArguments.setClassLoader(context.getClassLoader());
-        }
-
-        mInstance = Fragment.instantiate(context, mClassName, mArguments);
-
-        if (mSavedFragmentState != null) {
-            mSavedFragmentState.setClassLoader(context.getClassLoader());
-            mInstance.mSavedFragmentState = mSavedFragmentState;
-        }
-        mInstance.setIndex(mIndex, parent);
-        mInstance.mFromLayout = mFromLayout;
-        mInstance.mRestored = true;
-        mInstance.mFragmentId = mFragmentId;
-        mInstance.mContainerId = mContainerId;
-        mInstance.mTag = mTag;
-        mInstance.mRetainInstance = mRetainInstance;
-        mInstance.mDetached = mDetached;
-        mInstance.mHidden = mHidden;
-        mInstance.mFragmentManager = host.mFragmentManager;
-        if (FragmentManagerImpl.DEBUG) Log.v(FragmentManagerImpl.TAG,
-                "Instantiated fragment " + mInstance);
-
+        mInstance.mChildNonConfig = childNonConfig;
         return mInstance;
     }
 
@@ -432,6 +431,10 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
 
     // Private fragment manager for child fragments inside of this one.
     FragmentManagerImpl mChildFragmentManager;
+
+    // For use when restoring fragment state and descendant fragments are retained.
+    // This state is set by FragmentState.instantiate and cleared in onCreate.
+    FragmentManagerNonConfig mChildNonConfig;
 
     // If this Fragment is contained in another Fragment, this is that container.
     Fragment mParentFragment;
@@ -975,10 +978,6 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * </ul>
      */
     public void setRetainInstance(boolean retain) {
-        if (retain && mParentFragment != null) {
-            throw new IllegalStateException(
-                    "Can't retain fragements that are nested in other fragments");
-        }
         mRetainInstance = retain;
     }
 
@@ -1436,7 +1435,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
                     if (mChildFragmentManager == null) {
                         instantiateChildFragmentManager();
                     }
-                    mChildFragmentManager.restoreAllState(p, null);
+                    mChildFragmentManager.restoreAllState(p, mChildNonConfig);
+                    mChildNonConfig = null;
                     mChildFragmentManager.dispatchCreate();
                 }
             }
