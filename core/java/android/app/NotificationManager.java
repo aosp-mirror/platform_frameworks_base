@@ -646,14 +646,23 @@ public class NotificationManager
          * PRIORITY_SENDERS_ANY, PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED */
         public final int priorityMessageSenders;
 
+        /**
+         * @hide
+         */
         public static final int SUPPRESSED_EFFECTS_UNSET = -1;
-        public static final int SUPPRESSED_EFFECT_LIGHTS = 1 << 0;
-        public static final int SUPPRESSED_EFFECT_PEEK = 1 << 1;
-        public static final int SUPPRESSED_EFFECT_SCREEN_ON = 1 << 2;
+        /**
+         * Whether notification suppressed by DND should not interruption visually when the screen
+         * is off.
+         */
+        public static final int SUPPRESSED_EFFECT_SCREEN_OFF = 1 << 0;
+        /**
+         * Whether notification suppressed by DND should not interruption visually when the screen
+         * is on.
+         */
+        public static final int SUPPRESSED_EFFECT_SCREEN_ON = 1 << 1;
 
         private static final int[] ALL_SUPPRESSED_EFFECTS = {
-                SUPPRESSED_EFFECT_LIGHTS,
-                SUPPRESSED_EFFECT_PEEK,
+                SUPPRESSED_EFFECT_SCREEN_OFF,
                 SUPPRESSED_EFFECT_SCREEN_ON,
         };
 
@@ -762,8 +771,7 @@ public class NotificationManager
 
         private static String effectToString(int effect) {
             switch (effect) {
-                case SUPPRESSED_EFFECT_LIGHTS: return "SUPPRESSED_EFFECT_LIGHTS";
-                case SUPPRESSED_EFFECT_PEEK: return "SUPPRESSED_EFFECT_PEEK";
+                case SUPPRESSED_EFFECT_SCREEN_OFF: return "SUPPRESSED_EFFECT_SCREEN_OFF";
                 case SUPPRESSED_EFFECT_SCREEN_ON: return "SUPPRESSED_EFFECT_SCREEN_ON";
                 case SUPPRESSED_EFFECTS_UNSET: return "SUPPRESSED_EFFECTS_UNSET";
                 default: return "UNKNOWN_" + effect;
