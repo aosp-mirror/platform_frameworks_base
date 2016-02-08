@@ -584,7 +584,7 @@ class Task implements DimLayer.DimLayerUser {
             final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
-                if (!resizingWindows.contains(win)) {
+                if (win.mHasSurface && !resizingWindows.contains(win)) {
                     if (DEBUG_RESIZE) Slog.d(TAG, "resizeWindows: Resizing " + win);
                     resizingWindows.add(win);
                 }
