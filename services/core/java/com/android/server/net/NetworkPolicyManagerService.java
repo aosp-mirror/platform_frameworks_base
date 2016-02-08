@@ -760,9 +760,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (policy == null && meteredHint) {
                     // policy doesn't exist, and AP is hinting that it's
                     // metered: create an inferred policy.
-                    policy = new NetworkPolicy(template, CYCLE_NONE, Time.TIMEZONE_UTC,
-                            WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER,
-                            meteredHint, true);
+                    policy = newWifiPolicy(template, meteredHint);
                     addNetworkPolicyLocked(policy);
 
                 } else if (policy != null && policy.inferred) {
@@ -777,6 +775,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
     };
+
+    static NetworkPolicy newWifiPolicy(NetworkTemplate template, boolean metered) {
+        return new NetworkPolicy(template, CYCLE_NONE, Time.TIMEZONE_UTC,
+                WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER, SNOOZE_NEVER,
+                metered, true);
+    }
 
     /**
      * Observer that watches for {@link INetworkManagementService} alerts.
@@ -2154,7 +2158,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ResultReceiver resultReceiver) throws RemoteException {
-        (new NetworkPolicyManagerShellCommand(this)).exec(
+        (new NetworkPolicyManagerShellCommand(mContext, this)).exec(
                 this, in, out, err, args, resultReceiver);
     }
 
