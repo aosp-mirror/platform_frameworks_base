@@ -438,7 +438,7 @@ public class BugreportProgressService extends Service {
                 mContext.getString(R.string.bugreport_screenshot_action),
                 screenshotPendingIntent).build();
 
-        final String title = mContext.getString(R.string.bugreport_in_progress_title);
+        final String title = mContext.getString(R.string.bugreport_in_progress_title, info.pid);
 
         final String name =
                 info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
@@ -880,7 +880,7 @@ public class BugreportProgressService extends Service {
         shareIntent.putExtra(EXTRA_PID, info.pid);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title = context.getString(R.string.bugreport_finished_title);
+        final String title = context.getString(R.string.bugreport_finished_title, info.pid);
         final Notification.Builder builder = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setContentTitle(title)
@@ -1232,7 +1232,7 @@ public class BugreportProgressService extends Service {
 
                 mDialog = new AlertDialog.Builder(context)
                         .setView(view)
-                        .setTitle(context.getString(R.string.bugreport_info_dialog_title))
+                        .setTitle(context.getString(R.string.bugreport_info_dialog_title, pid))
                         .setCancelable(false)
                         .setPositiveButton(context.getString(com.android.internal.R.string.ok),
                                 null)
