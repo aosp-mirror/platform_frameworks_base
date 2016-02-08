@@ -4430,7 +4430,9 @@ i
              inside of its frozen icicle in addition to meta-data such as
              the current cursor position.  By default this is disabled;
              it can be useful when the contents of a text view is not stored
-             in a persistent place such as a content provider. -->
+             in a persistent place such as a content provider. For
+             {@link android.widget.EditText} it is always enabled, regardless
+             of the value of the attribute. -->
         <attr name="freezesText" format="boolean" />
         <!-- If set, causes words that are longer than the view is wide
              to be ellipsized instead of broken in the middle.
