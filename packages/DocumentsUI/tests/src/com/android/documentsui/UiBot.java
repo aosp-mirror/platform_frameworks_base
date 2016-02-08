@@ -258,6 +258,10 @@ class UiBot {
         mDevice.wait(Until.gone(SNACK_DELETE), mTimeout * 2);
     }
 
+    void waitForDocument(String label) throws UiObjectNotFoundException {
+        findDocument(label).waitForExists(mTimeout);
+    }
+
     void switchViewMode() {
         UiObject2 mode = menuGridMode();
         if (mode != null) {
