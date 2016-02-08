@@ -52154,7 +52154,6 @@ package java.net {
 
   public class InetAddress implements java.io.Serializable {
     method public byte[] getAddress();
-    method public byte[] getAddressInternal();
     method public static java.net.InetAddress[] getAllByName(java.lang.String) throws java.net.UnknownHostException;
     method public static java.net.InetAddress getByAddress(java.lang.String, byte[]) throws java.net.UnknownHostException;
     method public static java.net.InetAddress getByAddress(byte[]) throws java.net.UnknownHostException;
