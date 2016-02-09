@@ -438,11 +438,7 @@ public final class TvInputManagerService extends SystemService {
         for (SessionState state : userState.sessionStateMap.values()) {
             if (state.session != null) {
                 try {
-                    if (state.isRecordingSession) {
-                        state.session.disconnect();
-                    } else {
-                        state.session.release();
-                    }
+                    state.session.release();
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in release", e);
                 }
@@ -643,11 +639,7 @@ public final class TvInputManagerService extends SystemService {
                 if (sessionToken == userState.mainSessionToken) {
                     setMainLocked(sessionToken, false, callingUid, userId);
                 }
-                if (sessionState.isRecordingSession) {
-                    sessionState.session.disconnect();
-                } else {
-                    sessionState.session.release();
-                }
+                sessionState.session.release();
             }
         } catch (RemoteException | SessionNotFoundException e) {
             Slog.e(TAG, "error in releaseSession", e);
@@ -1279,6 +1271,9 @@ public final class TvInputManagerService extends SystemService {
 
                         UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
+                        if (sessionState.isRecordingSession) {
+                            return;
+                        }
 
                         // Log the start of watch.
                         SomeArgs args = SomeArgs.obtain();
@@ -1555,26 +1550,6 @@ public final class TvInputManagerService extends SystemService {
                                 .timeShiftEnablePositionTracking(enable);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in timeShiftEnablePositionTracking", e);
-                    }
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void connect(IBinder sessionToken, final Uri channelUri, Bundle params, int userId) {
-            final int callingUid = Binder.getCallingUid();
-            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "connect");
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mLock) {
-                    try {
-                        getSessionLocked(sessionToken, callingUid, resolvedUserId).connect(
-                                channelUri, params);
-                    } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in connect", e);
                     }
                 }
             } finally {
@@ -2544,36 +2519,18 @@ public final class TvInputManagerService extends SystemService {
 
         // For the recording session only
         @Override
-        public void onConnected() {
+        public void onTuned() {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slog.d(TAG, "onConnected()");
+                    Slog.d(TAG, "onTuned()");
                 }
                 if (mSessionState.session == null || mSessionState.client == null) {
                     return;
                 }
                 try {
-                    mSessionState.client.onConnected(mSessionState.seq);
+                    mSessionState.client.onTuned(mSessionState.seq);
                 } catch (RemoteException e) {
-                    Slog.e(TAG, "error in onConnected", e);
-                }
-            }
-        }
-
-        // For the recording session only
-        @Override
-        public void onRecordingStarted() {
-            synchronized (mLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "onRecordingStarted()");
-                }
-                if (mSessionState.session == null || mSessionState.client == null) {
-                    return;
-                }
-                try {
-                    mSessionState.client.onRecordingStarted(mSessionState.seq);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "error in onRecordingStarted", e);
+                    Slog.e(TAG, "error in onTuned", e);
                 }
             }
         }

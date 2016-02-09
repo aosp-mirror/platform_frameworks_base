@@ -1545,7 +1545,7 @@ public abstract class TvInputService extends Service {
         private final List<Runnable> mPendingActions = new ArrayList<>();
 
         /**
-         * Creates a new Recording Session for TV program recording.
+         * Creates a new RecordingSession.
          *
          * @param context The context of the application
          */
@@ -1554,51 +1554,37 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Informs the application that recording session has been connected.
-         */
-        public void notifyConnected() {
-            executeOrPostRunnableOnMainThread(new Runnable() {
-                @MainThread
-                @Override
-                public void run() {
-                    try {
-                        if (DEBUG) Log.d(TAG, "notifyConnected");
-                        if (mSessionCallback != null) {
-                            mSessionCallback.onConnected();
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyConnected", e);
-                    }
-                }
-            });
-        }
-
-        /**
-         * Informs the application that recording has started.
-         */
-        public void notifyRecordingStarted() {
-            executeOrPostRunnableOnMainThread(new Runnable() {
-                @MainThread
-                @Override
-                public void run() {
-                    try {
-                        if (DEBUG) Log.d(TAG, "notifyRecordingStarted");
-                        if (mSessionCallback != null) {
-                            mSessionCallback.onRecordingStarted();
-                        }
-                    } catch (RemoteException e) {
-                        Log.w(TAG, "error in notifyRecordingStarted", e);
-                    }
-                }
-            });
-        }
-
-        /**
-         * Informs the application that recording has stopped successfully. Each TV input service
-         * should create a new data entry in the recorded programs table upon completion of the
-         * recording and send its URI.
+         * Informs the application that this recording session has been tuned to the given channel
+         * and is ready to start recording.
          *
-         * @param recordedProgramUri The URI of the new recorded program.
+         * <p>Upon receiving a call to {@link #onTune(Uri)}, the session is expected to tune to the
+         * passed channel and call this method to indicate that it is now available for immediate
+         * recording. When {@link #onStartRecording(Uri)} is called, recording must start with
+         * minimal delay.
+         */
+        public void notifyTuned() {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTuned");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTuned();
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTuned", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Informs the application that this recording session has stopped recording and created a
+         * new data entry in the {@link TvContract.RecordedPrograms} table that describes the newly
+         * recorded program.
+         *
+         * @param recordedProgramUri The URI of the newly recorded program.
          */
         public void notifyRecordingStopped(final Uri recordedProgramUri) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1618,12 +1604,12 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends an error to the application at any moment.
+         * Informs the application that there is an error. It may be called at any time after this
+         * recording session is created until {@link #onRelease()} is called.
          *
          * @param error The error code. Should be one of the followings.
          * <ul>
          * <li>{@link TvInputManager#RECORDING_ERROR_UNKNOWN}
-         * <li>{@link TvInputManager#RECORDING_ERROR_CONNECTION_FAILED}
          * <li>{@link TvInputManager#RECORDING_ERROR_INSUFFICIENT_SPACE}
          * <li>{@link TvInputManager#RECORDING_ERROR_RESOURCE_BUSY}
          * </ul>
@@ -1672,32 +1658,39 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when the recording session is connected.
+         * Called when the application requests to tune to a given channel for TV program recording.
          *
-         * @param channelUri The URI of the channel.
+         * <p>The application may call this method before starting or after stopping recording, but
+         * not during recording.
+         *
+         * <p>The session must call {@link #notifyTuned()} if the tune request was fulfilled, or
+         * {@link #notifyError(int)} otherwise.
+         *
+         * @param channelUri The URI of a channel.
          */
-        public abstract void onConnect(Uri channelUri);
+        public abstract void onTune(Uri channelUri);
 
         /**
-         * Called when the recording session is connected.
+         * Called when the application requests to tune to a given channel for TV program recording.
          *
-         * @param channelUri The URI of the channel.
+         * <p>The application may call this method before starting or after stopping recording, but
+         * not during recording.
+         *
+         * <p>The session must call {@link #notifyTuned()} if the tune request was fulfilled, or
+         * {@link #notifyError(int)} otherwise.
+         *
+         * @param channelUri The URI of a channel.
          * @param params Extra parameters.
          * @hide
          */
         @SystemApi
-        public void onConnect(Uri channelUri, Bundle params) {
-            onConnect(channelUri);
+        public void onTune(Uri channelUri, Bundle params) {
+            onTune(channelUri);
         }
 
         /**
-         * Called when the application requests to disconnect the current recording session.
-         */
-        public abstract void onDisconnect();
-
-        /**
-         * Called when the application requests to start recording. Recording must start
-         * immediately.
+         * Called when the application requests to start TV program recording. Recording must start
+         * immediately when this method is called.
          *
          * <p>The application may supply the URI for a TV program as a hint for filling in program
          * specific data fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
@@ -1706,8 +1699,8 @@ public abstract class TvInputService extends Service {
          * recording can span across multiple TV programs. In either case, the application must call
          * {@link TvRecordingClient#stopRecording()} to stop the recording.
          *
-         * <p>The session must call either {@link #notifyRecordingStarted()} or
-         * {@link #notifyError(int)}.
+         * <p>The session must call {@link #notifyError(int)} if the start request cannot be
+         * fulfilled.
          *
          * @param programHint The URI for the TV program to record as a hint, built by
          *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
@@ -1715,12 +1708,24 @@ public abstract class TvInputService extends Service {
         public abstract void onStartRecording(@Nullable Uri programHint);
 
         /**
-         * Called when the application requests to stop recording. Recording must stop immediately.
+         * Called when the application requests to stop TV program recording. Recording must stop
+         * immediately when this method is called.
          *
-         * <p>The session must call either {@link #notifyRecordingStopped(Uri)} or
-         * {@link #notifyError(int)}.
+         * <p>The session must create a new data entry in the
+         * {@link android.media.tv.TvContract.RecordedPrograms} table that describes the newly
+         * recorded program and call {@link #notifyRecordingStopped(Uri)} with the URI to that
+         * entry.
+         * If the stop request cannot be fulfilled, the session must call {@link #notifyError(int)}.
+         *
          */
         public abstract void onStopRecording();
+
+
+        /**
+         * Called when the application requests to release all the resources held by this recording
+         * session.
+         */
+        public abstract void onRelease();
 
         /**
          * Processes a private command sent from the application to the TV input. This can be used
@@ -1738,19 +1743,19 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onConnect(Uri, Bundle)}.
+         * Calls {@link #onTune(Uri, Bundle)}.
          *
          */
-        void connect(Uri channelUri, Bundle params) {
-            onConnect(channelUri, params);
+        void tune(Uri channelUri, Bundle params) {
+            onTune(channelUri, params);
         }
 
         /**
-         * Calls {@link #onDisconnect()}.
+         * Calls {@link #onRelease()}.
          *
          */
-        void disconnect() {
-            onDisconnect();
+        void release() {
+            onRelease();
         }
 
         /**

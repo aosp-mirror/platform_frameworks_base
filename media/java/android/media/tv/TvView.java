@@ -539,8 +539,8 @@ public class TvView extends ViewGroup {
     }
 
     /**
-     * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
-     * TvInputService.Session.appPrivateCommand()} on the current TvView.
+     * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)} for the current
+     * session.
      *
      * @param action The name of the private command to send. This <em>must</em> be a scoped name,
      *            i.e. prefixed with a package name you own, so that different developers will not
