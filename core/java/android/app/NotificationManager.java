@@ -16,6 +16,8 @@
 
 package android.app;
 
+import com.android.internal.util.Preconditions;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -37,6 +39,7 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.IConditionListener;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
@@ -498,6 +501,25 @@ public class NotificationManager
         INotificationManager service = getService();
         try {
             return service.removeAutomaticZenRules(packageName);
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
+    public int getImportance(String topicId) {
+        Preconditions.checkNotNull(topicId);
+        INotificationManager service = getService();
+        try {
+            return service.getTopicImportance(mContext.getPackageName(), topicId);
+        } catch (RemoteException e) {
+        }
+        return NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+    }
+
+    public boolean areNotificationsEnabled() {
+        INotificationManager service = getService();
+        try {
+            return service.areNotificationsEnabled(mContext.getPackageName());
         } catch (RemoteException e) {
         }
         return false;

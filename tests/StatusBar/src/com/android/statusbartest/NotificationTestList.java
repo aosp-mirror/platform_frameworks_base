@@ -37,6 +37,7 @@ import android.os.PowerManager;
 
 // private NM API
 import android.app.INotificationManager;
+import android.widget.Toast;
 
 public class NotificationTestList extends TestActivity
 {
@@ -230,6 +231,30 @@ public class NotificationTestList extends TestActivity
                             .build();
 
                     mNM.notify(73, n);
+                }
+            },
+
+            new Test("Is blocked?") {
+                public void run() {
+                    Toast.makeText(NotificationTestList.this,
+                            "package enabled? " + mNM.areNotificationsEnabled(),
+                            Toast.LENGTH_LONG).show();
+                }
+            },
+
+            new Test("Topic banana importance?") {
+                public void run() {
+                    Toast.makeText(NotificationTestList.this,
+                            "bananas importance? " + mNM.getImportance("bananas"),
+                            Toast.LENGTH_LONG).show();
+                }
+            },
+
+            new Test("Topic garbage importance?") {
+                public void run() {
+                    Toast.makeText(NotificationTestList.this,
+                            "garbage importance? " + mNM.getImportance("garbage"),
+                            Toast.LENGTH_LONG).show();
                 }
             },
 
