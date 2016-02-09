@@ -1014,9 +1014,12 @@ public class AudioRecord implements AudioRouting
      * Reads audio data from the audio hardware for recording into a byte array.
      * The format specified in the AudioRecord constructor should be
      * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
+     * The format can be {@link AudioFormat#ENCODING_PCM_16BIT}, but this is deprecated.
      * @param audioData the array to which the recorded audio data is written.
-     * @param offsetInBytes index in audioData from which the data is written expressed in bytes.
+     * @param offsetInBytes index in audioData to which the data is written expressed in bytes.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInBytes the number of requested bytes.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
      *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
      *     is read.
@@ -1025,7 +1028,8 @@ public class AudioRecord implements AudioRouting
      * @return the number of bytes that were read or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
-     *    The number of bytes will not exceed sizeInBytes.
+     *    The number of bytes will be a multiple of the frame size in bytes
+     *    not to exceed sizeInBytes.
      */
     public int read(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @ReadMode int readMode) {
@@ -1053,12 +1057,14 @@ public class AudioRecord implements AudioRouting
      * The format specified in the AudioRecord constructor should be
      * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
      * @param audioData the array to which the recorded audio data is written.
-     * @param offsetInShorts index in audioData from which the data is written expressed in shorts.
+     * @param offsetInShorts index in audioData to which the data is written expressed in shorts.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInShorts the number of requested shorts.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @return the number of shorts that were read or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
-     *    The number of shorts will not exceed sizeInShorts.
+     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
      */
     public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts) {
         return read(audioData, offsetInShorts, sizeInShorts, READ_BLOCKING);
@@ -1070,7 +1076,9 @@ public class AudioRecord implements AudioRouting
      * {@link AudioFormat#ENCODING_PCM_16BIT} to correspond to the data in the array.
      * @param audioData the array to which the recorded audio data is written.
      * @param offsetInShorts index in audioData from which the data is written expressed in shorts.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInShorts the number of requested shorts.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
      *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
      *     is read.
@@ -1079,7 +1087,7 @@ public class AudioRecord implements AudioRouting
      * @return the number of shorts that were read or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
-     *    The number of shorts will not exceed sizeInShorts.
+     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
      */
     public int read(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @ReadMode int readMode) {
@@ -1108,7 +1116,9 @@ public class AudioRecord implements AudioRouting
      * {@link AudioFormat#ENCODING_PCM_FLOAT} to correspond to the data in the array.
      * @param audioData the array to which the recorded audio data is written.
      * @param offsetInFloats index in audioData from which the data is written.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInFloats the number of requested floats.
+     *        Must not be negative, or cause the data access to go out of bounds of the array.
      * @param readMode one of {@link #READ_BLOCKING}, {@link #READ_NON_BLOCKING}.
      *     <br>With {@link #READ_BLOCKING}, the read will block until all the requested data
      *     is read.
@@ -1117,7 +1127,7 @@ public class AudioRecord implements AudioRouting
      * @return the number of floats that were read or {@link #ERROR_INVALID_OPERATION}
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
-     *    The number of floats will not exceed sizeInFloats.
+     *    The number of floats will be a multiple of the channel count not to exceed sizeInFloats.
      */
     public int read(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @ReadMode int readMode) {
@@ -1154,6 +1164,7 @@ public class AudioRecord implements AudioRouting
      * The representation of the data in the buffer will depend on the format specified in
      * the AudioRecord constructor, and will be native endian.
      * @param audioBuffer the direct buffer to which the recorded audio data is written.
+     * Data is written to audioBuffer.position().
      * @param sizeInBytes the number of requested bytes. It is recommended but not enforced
      *    that the number of bytes requested be a multiple of the frame size (sample size in
      *    bytes multiplied by the channel count).
@@ -1161,7 +1172,7 @@ public class AudioRecord implements AudioRouting
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
      *    The number of bytes will not exceed sizeInBytes.
-     *    The number of bytes read will truncated to be a multiple of the frame size.
+     *    The number of bytes read will be truncated to be a multiple of the frame size.
      */
     public int read(@NonNull ByteBuffer audioBuffer, int sizeInBytes) {
         return read(audioBuffer, sizeInBytes, READ_BLOCKING);
@@ -1175,6 +1186,7 @@ public class AudioRecord implements AudioRouting
      * The representation of the data in the buffer will depend on the format specified in
      * the AudioRecord constructor, and will be native endian.
      * @param audioBuffer the direct buffer to which the recorded audio data is written.
+     * Data is written to audioBuffer.position().
      * @param sizeInBytes the number of requested bytes. It is recommended but not enforced
      *    that the number of bytes requested be a multiple of the frame size (sample size in
      *    bytes multiplied by the channel count).
@@ -1187,7 +1199,7 @@ public class AudioRecord implements AudioRouting
      *    if the object wasn't properly initialized, or {@link #ERROR_BAD_VALUE} if
      *    the parameters don't resolve to valid data and indexes.
      *    The number of bytes will not exceed sizeInBytes.
-     *    The number of bytes read will truncated to be a multiple of the frame size.
+     *    The number of bytes read will be truncated to be a multiple of the frame size.
      */
     public int read(@NonNull ByteBuffer audioBuffer, int sizeInBytes, @ReadMode int readMode) {
         if (mState != STATE_INITIALIZED) {
