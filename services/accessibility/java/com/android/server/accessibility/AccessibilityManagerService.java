@@ -128,6 +128,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private static final int WAIT_WINDOWS_TIMEOUT_MILLIS = 5000;
 
+    // TODO: Restructure service initialization so services aren't connected before all of
+    //       their capabilities are ready.
+    private static final int WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS = 1000;
+
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
 
@@ -793,6 +797,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     void setMotionEventInjector(MotionEventInjector motionEventInjector) {
         synchronized (mLock) {
             mMotionEventInjector = motionEventInjector;
+            // We may be waiting on this object being set
+            mLock.notifyAll();
         }
     }
 
@@ -2654,10 +2660,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         @Override
         public void sendMotionEvents(int sequence, ParceledListSlice events) {
             synchronized (mLock) {
-                if (mSecurityPolicy.canPerformGestures(this) && (mMotionEventInjector != null)) {
-                    mMotionEventInjector.injectEvents((List<MotionEvent>) events.getList(),
-                            mServiceInterface, sequence);
-                    return;
+                if (mSecurityPolicy.canPerformGestures(this)) {
+                    final long endMillis =
+                            SystemClock.uptimeMillis() + WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS;
+                    while ((mMotionEventInjector == null)
+                            && (SystemClock.uptimeMillis() < endMillis)) {
+                        try {
+                            mLock.wait(endMillis - SystemClock.uptimeMillis());
+                        } catch (InterruptedException ie) {
+                            /* ignore */
+                        }
+                    }
+                    if (mMotionEventInjector != null) {
+                        mMotionEventInjector.injectEvents((List<MotionEvent>) events.getList(),
+                                mServiceInterface, sequence);
+                        return;
+                    } else {
+                        Slog.e(LOG_TAG, "MotionEventInjector installation timed out");
+                    }
                 }
             }
             try {
