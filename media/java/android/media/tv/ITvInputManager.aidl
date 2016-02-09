@@ -88,7 +88,7 @@ interface ITvInputManager {
 
     // For the recording session
     void connect(in IBinder sessionToken, in Uri channelUri, in Bundle params, int userId);
-    void startRecording(in IBinder sessionToken, int userId);
+    void startRecording(in IBinder sessionToken, in Uri programHint, int userId);
     void stopRecording(in IBinder sessionToken, int userId);
 
     // For TV input hardware binding
