@@ -282,9 +282,6 @@
     <!-- The padding between freeform workspace tasks -->
     <dimen name="recents_freeform_workspace_task_padding">8dp</dimen>
 
-    <!-- Space reserved for the cards behind the top card in the top stack -->
-    <dimen name="top_stack_peek_amount">12dp</dimen>
-
     <!-- Space reserved for the cards behind the top card in the bottom stack -->
     <dimen name="bottom_stack_peek_amount">12dp</dimen>
 
@@ -294,9 +291,6 @@
 
     <!-- The height of the area before the bottom stack in which the notifications slow down -->
     <dimen name="bottom_stack_slow_down_length">12dp</dimen>
-
-    <!-- The height of the area before the top stack in which the notifications slow down -->
-    <dimen name="top_stack_slow_down_length">12dp</dimen>
 
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">0.5dp</dimen>
