@@ -1,0 +1,86 @@
+page.title=Reducing Network Battery Drain
+page.article=true
+
+page.tags=battery
+page.metaDescription=Learn how to optimize your app to reduce battery drain and use network resources efficiently.
+
+@jd:body
+
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/fEEulSk1kNY?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+<p>
+  Requests that your app makes to the network are a major cause of battery drain because they turn
+  on the power-hungry mobile or Wi-Fi radios. Beyond the power needed to send and receive packets,
+  these radios expend extra power just turning on and keeping awake. Something as simple as a
+  network request every 15 seconds can keep the mobile radio on continuously and quickly use up
+  battery power.
+</p>
+
+<p>
+  This lesson shows you how to tag your app's source code to categorize, visualize and color
+  your network requests according to how they are initiated. From there, each category
+  identifies areas of your app that you can make more battery-efficient.
+</p>
+
+
+<h2>Performance Actions</h2>
+
+<dl>
+  <dt>
+    <strong><a href="gather-data.html">
+        Collecting Network Traffic Data</a></strong>
+  </dt>
+  <dd>
+    Learn how to instrument your app's code and gather data on its use of network resources.
+  </dd>
+
+  <dt>
+    <strong><a href="analyze-data.html">
+        Analyzing Network Traffic Data</a></strong>
+  </dt>
+  <dd>
+    Learn how to analyze your app's use of network resources in response to user actions
+    and optimize it to reduce power consumption.
+  </dd>
+
+  <dt>
+    <strong><a href="action-user-traffic.html">
+        Optimizing User-Initiated Network Use</a></strong>
+  </dt>
+  <dd>
+    Learn how to optimize your app's use of network resources in response to user actions
+    to reduce power consumption.
+  </dd>
+
+  <dt>
+    <strong><a href="action-app-traffic.html">
+        Optimizing App-Initiated Network Use</a></strong>
+  </dt>
+  <dd>
+    Learn how to optimize your app's requests for network resources to reduce
+    power consumption.
+  </dd>
+
+  <dt>
+    <strong><a href="action-server-traffic.html">
+        Optimizing Server-Initiated Network Use</a></strong>
+  </dt>
+  <dd>
+    Learn how to optimize your app's requests for network resources and to reduce
+    power consumption.
+  </dd>
+
+  <dt>
+    <strong><a href="action-any-traffic.html">
+        Optimizing General Network Use</a></strong>
+  </dt>
+  <dd>
+    Learn how to optimize your app's requests for network resources and to reduce
+    power consumption.
+  </dd>
+
+</dl>
