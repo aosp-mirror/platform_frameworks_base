@@ -84,7 +84,7 @@
             Starting an Activity
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html"
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html">
             Pausing and Resuming an Activity
           </a>
           </li>
