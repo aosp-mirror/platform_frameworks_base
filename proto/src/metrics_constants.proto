@@ -362,5 +362,12 @@ message MetricsEvent {
 
     // Logged when a user dismisses a task in overview
     OVERVIEW_DISMISS = 289;
+
+    // Logged when the user modifying the notification importance slider.
+    ACTION_MODIFY_IMPORTANCE_SLIDER = 290;
+
+    // Logged when the user saves a modification to notification importance. Negative numbers
+    // indicate the user lowered the importance; positive means they increased it.
+    ACTION_SAVE_IMPORTANCE = 291;
   }
 }
