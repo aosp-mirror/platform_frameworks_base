@@ -16,14 +16,22 @@
 
 package com.android.server.net;
 
+import static android.net.wifi.WifiInfo.removeDoubleQuotes;
+import static com.android.server.net.NetworkPolicyManagerService.newWifiPolicy;
 import static com.android.server.net.NetworkPolicyManagerService.TAG;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import android.content.Context;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkPolicy;
+import android.net.NetworkTemplate;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ShellCommand;
@@ -31,10 +39,12 @@ import android.util.Log;
 
 class NetworkPolicyManagerShellCommand extends ShellCommand {
 
-    final INetworkPolicyManager mInterface;
+    private final INetworkPolicyManager mInterface;
+    private final WifiManager mWifiManager;
 
-    NetworkPolicyManagerShellCommand(INetworkPolicyManager service) {
+    NetworkPolicyManagerShellCommand(Context context, INetworkPolicyManager service) {
         mInterface = service;
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
 
     @Override
@@ -100,7 +110,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         switch(type) {
             case "metered-network":
-                return getNonMobileMeteredNetwork();
+                return getMeteredWifiNetwork();
             case "restrict-background":
                 return getRestrictBackground();
         }
@@ -117,7 +127,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         switch(type) {
             case "metered-network":
-                return setNonMobileMeteredNetwork();
+                return setMeteredWifiNetwork();
             case "restrict-background":
                 return setRestrictBackground();
         }
@@ -134,9 +144,9 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         switch(type) {
             case "metered-networks":
-                return listNonMobileMeteredNetworks();
+                return listMeteredWifiNetworks();
             case "restrict-background-whitelist":
-                return runListRestrictBackgroundWhitelist();
+                return listRestrictBackgroundWhitelist();
         }
         pw.println("Error: unknown list type '" + type + "'");
         return -1;
@@ -172,7 +182,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return -1;
     }
 
-    private int runListRestrictBackgroundWhitelist() throws RemoteException {
+    private int listRestrictBackgroundWhitelist() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final int[] uids = mInterface.getRestrictBackgroundWhitelistedUids();
         pw.print("Restrict background whitelisted UIDs: ");
@@ -238,11 +248,11 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int listNonMobileMeteredNetworks() throws RemoteException {
+    private int listMeteredWifiNetworks() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final String arg = getNextArg();
         final Boolean filter = arg == null ? null : Boolean.valueOf(arg);
-        for (NetworkPolicy policy : getNonMobilePolicies()) {
+        for (NetworkPolicy policy : getWifiPolicies()) {
             if (filter != null && filter.booleanValue() != policy.metered) {
                 continue;
             }
@@ -253,14 +263,14 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int getNonMobileMeteredNetwork() throws RemoteException {
+    private int getMeteredWifiNetwork() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final String id = getNextArg();
         if (id == null) {
             pw.println("Error: didn't specify ID");
             return -1;
         }
-        final List<NetworkPolicy> policies = getNonMobilePolicies();
+        final List<NetworkPolicy> policies = getWifiPolicies();
         for (NetworkPolicy policy: policies) {
             if (id.equals(getNetworkId(policy))) {
                 pw.println(policy.metered);
@@ -270,7 +280,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int setNonMobileMeteredNetwork() throws RemoteException {
+    private int setMeteredWifiNetwork() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
         final String id = getNextArg();
         if (id == null) {
@@ -285,6 +295,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         final boolean metered = Boolean.valueOf(arg);
         final NetworkPolicy[] policies = mInterface.getNetworkPolicies(null);
         boolean changed = false;
+        // First try to find a policy with such id
         for (NetworkPolicy policy : policies) {
             if (policy.template.isMatchRuleMobile() || policy.metered == metered) {
                 continue;
@@ -298,24 +309,57 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         }
         if (changed) {
             mInterface.setNetworkPolicies(policies);
+            return 0;
+        }
+        // Policy not found: check if there is a saved wi-fi with such id.
+        for (WifiConfiguration config : mWifiManager.getConfiguredNetworks()) {
+            final String ssid = removeDoubleQuotes(config.SSID);
+            if (id.equals(ssid)) {
+                final NetworkPolicy policy = newPolicy(ssid);
+                Log.i(TAG, "Creating new policy for " + ssid + ": " + policy);
+                final NetworkPolicy[] newPolicies = new NetworkPolicy[policies.length + 1];
+                System.arraycopy(policies, 0, newPolicies, 0, policies.length);
+                newPolicies[newPolicies.length - 1] = policy;
+                mInterface.setNetworkPolicies(newPolicies);
+            }
         }
         return 0;
     }
 
-    private List<NetworkPolicy> getNonMobilePolicies() throws RemoteException {
+    private List<NetworkPolicy> getWifiPolicies() throws RemoteException {
+        // First gets a list of saved wi-fi networks.
+        final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+        final Set<String> ssids = new HashSet<>(configs.size());
+        for (WifiConfiguration config : configs) {
+            ssids.add(removeDoubleQuotes(config.SSID));
+        }
+
+        // Then gets the saved policies.
         final NetworkPolicy[] policies = mInterface.getNetworkPolicies(null);
-        final List<NetworkPolicy> nonMobilePolicies = new ArrayList<NetworkPolicy>(policies.length);
+        final List<NetworkPolicy> wifiPolicies = new ArrayList<NetworkPolicy>(policies.length);
         for (NetworkPolicy policy: policies) {
             if (!policy.template.isMatchRuleMobile()) {
-                nonMobilePolicies.add(policy);
+                wifiPolicies.add(policy);
+                final String netId = getNetworkId(policy);
+                ssids.remove(netId);
             }
         }
-        return nonMobilePolicies;
+        // Finally, creates new default policies for saved WI-FIs not policied yet.
+        for (String ssid : ssids) {
+            final NetworkPolicy policy = newPolicy(ssid);
+            wifiPolicies.add(policy);
+        }
+        return wifiPolicies;
+    }
+
+    private NetworkPolicy newPolicy(String ssid) {
+        final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(ssid);
+        final NetworkPolicy policy = newWifiPolicy(template, false);
+        return policy;
     }
 
     private String getNetworkId(NetworkPolicy policy) {
-        // ids are typically enclosed on double quotes (")
-        return policy.template.getNetworkId().replaceAll("^\"|\"$", "");
+        return removeDoubleQuotes(policy.template.getNetworkId());
     }
 
     private int getNextBooleanArg() {
