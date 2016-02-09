@@ -460,6 +460,11 @@ public interface WindowManagerPolicy {
 
         /** Unregister a system listener for touch events */
         void unregisterPointerEventListener(PointerEventListener listener);
+
+        /**
+         * @return The content insets of the docked divider window.
+         */
+        int getDockedDividerInsetsLw();
     }
 
     public interface PointerEventListener {

@@ -9619,6 +9619,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 && !appWindow.mTask.inFreeformWorkspace();
     }
 
+    @Override
+    public int getDockedDividerInsetsLw() {
+        return getDefaultDisplayContentLocked().getDockedDividerController().getContentInsets();
+    }
+
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);
