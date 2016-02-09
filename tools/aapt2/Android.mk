@@ -43,6 +43,9 @@ sources := \
 	link/TableMerger.cpp \
 	link/XmlReferenceLinker.cpp \
 	process/SymbolTable.cpp \
+	proto/ProtoHelpers.cpp \
+	proto/TableProtoDeserializer.cpp \
+	proto/TableProtoSerializer.cpp \
 	unflatten/BinaryResourceParser.cpp \
 	unflatten/ResChunkPullParser.cpp \
 	util/BigBuffer.cpp \
@@ -67,13 +70,14 @@ sources := \
 	xml/XmlPullParser.cpp \
 	xml/XmlUtil.cpp
 
+sources += Format.proto
+
 testSources := \
 	compile/IdAssigner_test.cpp \
 	compile/PseudolocaleGenerator_test.cpp \
 	compile/Pseudolocalizer_test.cpp \
 	compile/XmlIdCollector_test.cpp \
 	filter/ConfigFilter_test.cpp \
-	flatten/FileExportWriter_test.cpp \
 	flatten/TableFlattener_test.cpp \
 	flatten/XmlFlattener_test.cpp \
 	link/AutoVersioner_test.cpp \
@@ -83,7 +87,7 @@ testSources := \
 	link/TableMerger_test.cpp \
 	link/XmlReferenceLinker_test.cpp \
 	process/SymbolTable_test.cpp \
-	unflatten/FileExportHeaderReader_test.cpp \
+	proto/TableProtoSerializer_test.cpp \
 	util/BigBuffer_test.cpp \
 	util/Maybe_test.cpp \
 	util/StringPiece_test.cpp \
@@ -105,6 +109,7 @@ testSources := \
 
 toolSources := \
 	compile/Compile.cpp \
+	dump/Dump.cpp \
 	link/Link.cpp
 
 hostLdLibs :=
@@ -119,6 +124,9 @@ hostStaticLibs := \
 	libpng \
 	libbase
 
+hostSharedLibs := \
+	libprotobuf-cpp-lite
+
 ifneq ($(strip $(USE_MINGW)),)
 	hostStaticLibs += libz
 else
@@ -127,20 +135,22 @@ endif
 
 cFlags := -Wall -Werror -Wno-unused-parameter -UNDEBUG
 cppFlags := -std=c++11 -Wno-missing-field-initializers -fno-exceptions -fno-rtti
+protoIncludes := $(call generated-sources-dir-for,STATIC_LIBRARIES,libaapt2,HOST)
 
 # ==========================================================
 # Build the host static library: libaapt2
 # ==========================================================
 include $(CLEAR_VARS)
+LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 LOCAL_MODULE := libaapt2
 
 LOCAL_SRC_FILES := $(sources)
 LOCAL_STATIC_LIBRARIES += $(hostStaticLibs)
 LOCAL_CFLAGS += $(cFlags)
 LOCAL_CPPFLAGS += $(cppFlags)
+LOCAL_C_INCLUDES += $(protoIncludes)
 
 include $(BUILD_HOST_STATIC_LIBRARY)
-
 
 # ==========================================================
 # Build the host tests: libaapt2_tests
@@ -152,9 +162,11 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(testSources)
 
 LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
+LOCAL_SHARED_LIBRARIES += $(hostSharedLibs)
 LOCAL_LDLIBS += $(hostLdLibs)
 LOCAL_CFLAGS += $(cFlags)
 LOCAL_CPPFLAGS += $(cppFlags)
+LOCAL_C_INCLUDES += $(protoIncludes)
 
 include $(BUILD_HOST_NATIVE_TEST)
 
@@ -167,9 +179,11 @@ LOCAL_MODULE := aapt2
 LOCAL_SRC_FILES := $(main) $(toolSources)
 
 LOCAL_STATIC_LIBRARIES += libaapt2 $(hostStaticLibs)
+LOCAL_SHARED_LIBRARIES += $(hostSharedLibs)
 LOCAL_LDLIBS += $(hostLdLibs)
 LOCAL_CFLAGS += $(cFlags)
 LOCAL_CPPFLAGS += $(cppFlags)
+LOCAL_C_INCLUDES += $(protoIncludes)
 
 include $(BUILD_HOST_EXECUTABLE)
 

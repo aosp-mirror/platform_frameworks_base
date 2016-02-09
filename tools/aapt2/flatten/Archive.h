@@ -22,6 +22,7 @@
 #include "util/Files.h"
 #include "util/StringPiece.h"
 
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -40,13 +41,18 @@ struct ArchiveEntry {
     size_t uncompressedSize;
 };
 
-struct IArchiveWriter {
+struct IArchiveWriter : public google::protobuf::io::CopyingOutputStream {
     virtual ~IArchiveWriter() = default;
 
     virtual bool startEntry(const StringPiece& path, uint32_t flags) = 0;
     virtual bool writeEntry(const BigBuffer& buffer) = 0;
     virtual bool writeEntry(const void* data, size_t len) = 0;
     virtual bool finishEntry() = 0;
+
+    // CopyingOutputStream implementations.
+    bool Write(const void* buffer, int size) override {
+        return writeEntry(buffer, size);
+    }
 };
 
 std::unique_ptr<IArchiveWriter> createDirectoryArchiveWriter(IDiagnostics* diag,
