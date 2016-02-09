@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
-import static com.android.documentsui.UiTestEnvironment.TIMEOUT;
 
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
@@ -25,142 +24,141 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 @LargeTest
-public class RenameDocumentUiTest extends InstrumentationTestCase {
+public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
 
     private static final String TAG = "RenamDocumentUiTest";
 
     private final String newName = "kitties.log";
 
-    private UiTestEnvironment mHelper;
+    public RenameDocumentUiTest() {
+        super(FilesActivity.class);
+    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mHelper = new UiTestEnvironment(getInstrumentation());
-        mHelper.launch();
-        mHelper.initTestFiles();
-        mHelper.bot().openRoot(ROOT_0_ID);
+        initTestFiles();
+        bot.openRoot(ROOT_0_ID);
     }
 
     public void testRenameEnabled_SingleSelection() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().assertMenuEnabled(R.string.menu_rename, true);
+        bot.selectDocument(fileName1);
+        bot.openOverflowMenu();
+        bot.assertMenuEnabled(R.string.menu_rename, true);
 
         // Dismiss more options window
-        mHelper.device().pressBack();
+        device.pressBack();
     }
 
     public void testNoRenameSupport_SingleSelection() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileNameNoRename);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().assertMenuEnabled(R.string.menu_rename, false);
+        bot.selectDocument(fileNameNoRename);
+        bot.openOverflowMenu();
+        bot.assertMenuEnabled(R.string.menu_rename, false);
 
         // Dismiss more options window
-        mHelper.device().pressBack();
+        device.pressBack();
     }
 
     public void testOneHasRenameSupport_MultipleSelection() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().selectDocument(UiTestEnvironment.fileNameNoRename);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().assertMenuEnabled(R.string.menu_rename, false);
+        bot.selectDocument(fileName1);
+        bot.selectDocument(fileNameNoRename);
+        bot.openOverflowMenu();
+        bot.assertMenuEnabled(R.string.menu_rename, false);
 
         // Dismiss more options window
-        mHelper.device().pressBack();
+        device.pressBack();
     }
 
     public void testRenameDisabled_MultipleSelection() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName2);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().assertMenuEnabled(R.string.menu_rename, false);
+        bot.selectDocument(fileName1);
+        bot.selectDocument(fileName2);
+        bot.openOverflowMenu();
+        bot.assertMenuEnabled(R.string.menu_rename, false);
 
         // Dismiss more options window
-        mHelper.device().pressBack();
+        device.pressBack();
     }
 
     public void testRenameFile_OkButton() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().openDialog(R.string.menu_rename);
-        mHelper.bot().setDialogText(newName);
-        mHelper.bot().dismissKeyboardIfPresent();
+        bot.selectDocument(fileName1);
+        bot.openOverflowMenu();
+        bot.openDialog(R.string.menu_rename);
+        bot.setDialogText(newName);
+        bot.dismissKeyboardIfPresent();
 
-        mHelper.device().waitForIdle(TIMEOUT);
-        mHelper.bot().findRenameDialogOkButton().click();
-        mHelper.device().waitForIdle(TIMEOUT);
+        device.waitForIdle(TIMEOUT);
+        bot.findRenameDialogOkButton().click();
+        device.waitForIdle(TIMEOUT);
 
-        mHelper.bot().assertDocument(UiTestEnvironment.fileName1, false);
-        mHelper.bot().assertDocument(newName, true);
-        mHelper.bot().assertDocumentsCount(mHelper.getDocumentsCountDir0());
+        bot.assertDocument(fileName1, false);
+        bot.assertDocument(newName, true);
+        bot.assertDocumentsCount(4);
     }
 
     public void testRenameFile_Enter() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().openDialog(R.string.menu_rename);
-        mHelper.bot().setDialogText(newName);
+        bot.selectDocument(fileName1);
+        bot.openOverflowMenu();
+        bot.openDialog(R.string.menu_rename);
+        bot.setDialogText(newName);
 
         pressEnter();
 
-        mHelper.bot().assertDocument(UiTestEnvironment.fileName1, false);
-        mHelper.bot().assertDocument(newName, true);
-        mHelper.bot().assertDocumentsCount(mHelper.getDocumentsCountDir0());
+        bot.assertDocument(fileName1, false);
+        bot.assertDocument(newName, true);
+        bot.assertDocumentsCount(4);
     }
 
     public void testRenameFile_Cancel() throws Exception {
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().openDialog(R.string.menu_rename);
-        mHelper.bot().setDialogText(newName);
-        mHelper.bot().dismissKeyboardIfPresent();
+        bot.selectDocument(fileName1);
+        bot.openOverflowMenu();
+        bot.openDialog(R.string.menu_rename);
+        bot.setDialogText(newName);
+        bot.dismissKeyboardIfPresent();
 
-        mHelper.device().waitForIdle(TIMEOUT);
-        mHelper.bot().findRenameDialogCancelButton().click();
-        mHelper.device().waitForIdle(TIMEOUT);
+        device.waitForIdle(TIMEOUT);
+        bot.findRenameDialogCancelButton().click();
+        device.waitForIdle(TIMEOUT);
 
-        mHelper.bot().assertDocument(UiTestEnvironment.fileName1, true);
-        mHelper.bot().assertDocument(newName, false);
-        mHelper.bot().assertDocumentsCount(mHelper.getDocumentsCountDir0());
+        bot.assertDocument(fileName1, true);
+        bot.assertDocument(newName, false);
+        bot.assertDocumentsCount(4);
     }
 
     public void testRenameDir() throws Exception {
         String oldName = "Dir1";
         String newName = "Dir123";
 
-        mHelper.bot().selectDocument(oldName);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().openDialog(R.string.menu_rename);
-        mHelper.bot().setDialogText(newName);
+        bot.selectDocument(oldName);
+        bot.openOverflowMenu();
+        bot.openDialog(R.string.menu_rename);
+        bot.setDialogText(newName);
 
         pressEnter();
 
-        mHelper.bot().assertDocument(oldName, false);
-        mHelper.bot().assertDocument(newName, true);
-        mHelper.bot().assertDocumentsCount(mHelper.getDocumentsCountDir0());
+        bot.assertDocument(oldName, false);
+        bot.assertDocument(newName, true);
+        bot.assertDocumentsCount(4);
     }
 
     public void testRename_NameExists() throws Exception {
         // Check that document with the new name exists
-        mHelper.bot().assertDocument(UiTestEnvironment.fileName2, true);
-        mHelper.bot().selectDocument(UiTestEnvironment.fileName1);
-        mHelper.bot().openOverflowMenu();
-        mHelper.bot().openDialog(R.string.menu_rename);
-        mHelper.bot().setDialogText(UiTestEnvironment.fileName2);
+        bot.assertDocument(fileName2, true);
+        bot.selectDocument(fileName1);
+        bot.openOverflowMenu();
+        bot.openDialog(R.string.menu_rename);
+        bot.setDialogText(fileName2);
 
         pressEnter();
 
-        mHelper.bot().assertSnackbar(R.string.rename_error);
-        mHelper.bot().assertDocument(UiTestEnvironment.fileName1, true);
-        mHelper.bot().assertDocument(UiTestEnvironment.fileName2, true);
-        mHelper.bot().assertDocumentsCount(mHelper.getDocumentsCountDir0());
+        bot.assertSnackbar(R.string.rename_error);
+        bot.assertDocument(fileName1, true);
+        bot.assertDocument(fileName2, true);
+        bot.assertDocumentsCount(4);
     }
 
     private void pressEnter() {
-        mHelper.device().waitForIdle(TIMEOUT);
-        mHelper.device().pressEnter();
-        mHelper.device().waitForIdle(TIMEOUT);
+        device.waitForIdle(TIMEOUT);
+        device.pressEnter();
+        device.waitForIdle(TIMEOUT);
     }
-
 }

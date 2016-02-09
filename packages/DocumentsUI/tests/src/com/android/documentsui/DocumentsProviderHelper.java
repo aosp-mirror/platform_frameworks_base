@@ -92,7 +92,8 @@ public class DocumentsProviderHelper {
             Uri uri = DocumentsContract.createDocument(mClient, parentUri, mimeType, name);
             return uri;
         } catch (RemoteException e) {
-            throw new RuntimeException("Couldn't create document: " + name + " with mimetype " + mimeType, e);
+            throw new RuntimeException("Couldn't create document: " + name + " with mimetype "
+                    + mimeType, e);
         }
     }
 
