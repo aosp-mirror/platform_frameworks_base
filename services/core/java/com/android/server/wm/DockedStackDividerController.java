@@ -72,6 +72,10 @@ public class DockedStackDividerController implements DimLayerUser {
         return mDividerWindowWidth - 2 * mDividerInsets;
     }
 
+    int getContentInsets() {
+        return mDividerInsets;
+    }
+
     void setResizing(boolean resizing) {
         mResizing = resizing;
     }
