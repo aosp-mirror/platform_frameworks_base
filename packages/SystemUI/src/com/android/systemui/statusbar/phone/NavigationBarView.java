@@ -738,9 +738,9 @@ public class NavigationBarView extends LinearLayout {
                 + (offscreen ? " OFFSCREEN!" : ""));
 
         pw.println(String.format("      mCurrentView: id=%s (%dx%d) %s",
-                        getResourceName(mCurrentView.getId()),
-                        mCurrentView.getWidth(), mCurrentView.getHeight(),
-                        visibilityToString(mCurrentView.getVisibility())));
+                        getResourceName(getCurrentView().getId()),
+                        getCurrentView().getWidth(), getCurrentView().getHeight(),
+                        visibilityToString(getCurrentView().getVisibility())));
 
         pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s",
                         mDisabledFlags,
