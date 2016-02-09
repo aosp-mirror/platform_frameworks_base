@@ -1774,6 +1774,7 @@ public class AudioTrack implements AudioRouting
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
+     * The format can be {@link AudioFormat#ENCODING_PCM_16BIT}, but this is deprecated.
      * <p>
      * In streaming mode, the write will normally block until all the data has been enqueued for
      * playback, and will return a full transfer count.  However, if the track is stopped or paused
@@ -1786,7 +1787,9 @@ public class AudioTrack implements AudioRouting
      * @param audioData the array that holds the data to play.
      * @param offsetInBytes the offset expressed in bytes in audioData where the data to write
      *    starts.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInBytes the number of bytes to write in audioData after the offset.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @return zero or the positive number of bytes that were written, or
      *    {@link #ERROR_INVALID_OPERATION}
      *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
@@ -1795,6 +1798,8 @@ public class AudioTrack implements AudioRouting
      *    needs to be recreated.
      *    The dead object error code is not returned if some data was successfully transferred.
      *    In this case, the error is returned at the next write().
+     *    The number of bytes will be a multiple of the frame size in bytes
+     *    not to exceed sizeInBytes.
      *
      * This is equivalent to {@link #write(byte[], int, int, int)} with <code>writeMode</code>
      * set to  {@link #WRITE_BLOCKING}.
@@ -1808,6 +1813,7 @@ public class AudioTrack implements AudioRouting
      * or copies audio data for later playback (static buffer mode).
      * The format specified in the AudioTrack constructor should be
      * {@link AudioFormat#ENCODING_PCM_8BIT} to correspond to the data in the array.
+     * The format can be {@link AudioFormat#ENCODING_PCM_16BIT}, but this is deprecated.
      * <p>
      * In streaming mode, the blocking behavior depends on the write mode.  If the write mode is
      * {@link #WRITE_BLOCKING}, the write will normally block until all the data has been enqueued
@@ -1823,7 +1829,9 @@ public class AudioTrack implements AudioRouting
      * @param audioData the array that holds the data to play.
      * @param offsetInBytes the offset expressed in bytes in audioData where the data to write
      *    starts.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInBytes the number of bytes to write in audioData after the offset.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
      *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
@@ -1838,6 +1846,8 @@ public class AudioTrack implements AudioRouting
      *    needs to be recreated.
      *    The dead object error code is not returned if some data was successfully transferred.
      *    In this case, the error is returned at the next write().
+     *    The number of bytes will be a multiple of the frame size in bytes
+     *    not to exceed sizeInBytes.
      */
     public int write(@NonNull byte[] audioData, int offsetInBytes, int sizeInBytes,
             @WriteMode int writeMode) {
@@ -1887,7 +1897,9 @@ public class AudioTrack implements AudioRouting
      * @param audioData the array that holds the data to play.
      * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
      *     starts.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @return zero or the positive number of shorts that were written, or
      *    {@link #ERROR_INVALID_OPERATION}
      *    if the track isn't properly initialized, or {@link #ERROR_BAD_VALUE} if
@@ -1896,6 +1908,7 @@ public class AudioTrack implements AudioRouting
      *    needs to be recreated.
      *    The dead object error code is not returned if some data was successfully transferred.
      *    In this case, the error is returned at the next write().
+     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
      *
      * This is equivalent to {@link #write(short[], int, int, int)} with <code>writeMode</code>
      * set to  {@link #WRITE_BLOCKING}.
@@ -1923,7 +1936,9 @@ public class AudioTrack implements AudioRouting
      * @param audioData the array that holds the data to write.
      * @param offsetInShorts the offset expressed in shorts in audioData where the data to write
      *     starts.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInShorts the number of shorts to read in audioData after the offset.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
      *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
@@ -1938,6 +1953,7 @@ public class AudioTrack implements AudioRouting
      *    needs to be recreated.
      *    The dead object error code is not returned if some data was successfully transferred.
      *    In this case, the error is returned at the next write().
+     *    The number of shorts will be a multiple of the channel count not to exceed sizeInShorts.
      */
     public int write(@NonNull short[] audioData, int offsetInShorts, int sizeInShorts,
             @WriteMode int writeMode) {
@@ -1999,7 +2015,9 @@ public class AudioTrack implements AudioRouting
      *     to provide samples values within the nominal range.
      * @param offsetInFloats the offset, expressed as a number of floats,
      *     in audioData where the data to write starts.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param sizeInFloats the number of floats to write in audioData after the offset.
+     *    Must not be negative, or cause the data access to go out of bounds of the array.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
      *     <br>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
@@ -2014,6 +2032,7 @@ public class AudioTrack implements AudioRouting
      *    needs to be recreated.
      *    The dead object error code is not returned if some data was successfully transferred.
      *    In this case, the error is returned at the next write().
+     *    The number of floats will be a multiple of the channel count not to exceed sizeInFloats.
      */
     public int write(@NonNull float[] audioData, int offsetInFloats, int sizeInFloats,
             @WriteMode int writeMode) {
@@ -2075,7 +2094,9 @@ public class AudioTrack implements AudioRouting
      *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
      *     have been advanced to reflect the amount of data that was successfully written to
      *     the AudioTrack.
-     * @param sizeInBytes number of bytes to write.
+     * @param sizeInBytes number of bytes to write.  It is recommended but not enforced
+     *     that the number of bytes requested be a multiple of the frame size (sample size in
+     *     bytes multiplied by the channel count).
      *     <BR>Note this may differ from <code>audioData.remaining()</code>, but cannot exceed it.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}. It has no
      *     effect in static mode.
@@ -2142,7 +2163,9 @@ public class AudioTrack implements AudioRouting
      *     <BR>Note that upon return, the buffer position (<code>audioData.position()</code>) will
      *     have been advanced to reflect the amount of data that was successfully written to
      *     the AudioTrack.
-     * @param sizeInBytes number of bytes to write.
+     * @param sizeInBytes number of bytes to write.  It is recommended but not enforced
+     *     that the number of bytes requested be a multiple of the frame size (sample size in
+     *     bytes multiplied by the channel count).
      *     <BR>Note this may differ from <code>audioData.remaining()</code>, but cannot exceed it.
      * @param writeMode one of {@link #WRITE_BLOCKING}, {@link #WRITE_NON_BLOCKING}.
      *     <BR>With {@link #WRITE_BLOCKING}, the write will block until all data has been written
