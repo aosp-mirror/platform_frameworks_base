@@ -35,6 +35,8 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -51,6 +53,7 @@ public class NotificationGuts extends LinearLayout {
     private SeekBar mSeekBar;
     private Notification.Topic mTopic;
     private INotificationManager mINotificationManager;
+    private int mStartingImportance;
 
     public NotificationGuts(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -103,6 +106,7 @@ public class NotificationGuts extends LinearLayout {
 
     void bindImportance(final StatusBarNotification sbn, final ExpandableNotificationRow row,
             final int importance) {
+        mStartingImportance = importance;
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         mTopic = sbn.getNotification().getTopic() == null
@@ -151,6 +155,7 @@ public class NotificationGuts extends LinearLayout {
                 }
                 updateTitleAndSummary(progress);
                 if (fromUser) {
+                    MetricsLogger.action(mContext, MetricsEvent.ACTION_MODIFY_IMPORTANCE_SLIDER);
                     if (appUsesTopics) {
                         mApplyToTopic.setVisibility(View.VISIBLE);
                         mApplyToTopic.setText(
@@ -205,6 +210,8 @@ public class NotificationGuts extends LinearLayout {
 
     void saveImportance(final StatusBarNotification sbn) {
         int progress = mSeekBar.getProgress();
+        MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
+                progress - mStartingImportance);
         try {
             mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(),
                     mApplyToTopic.isChecked() ? mTopic : null, progress);
