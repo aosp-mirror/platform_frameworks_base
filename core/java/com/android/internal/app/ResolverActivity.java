@@ -392,12 +392,7 @@ public class ResolverActivity extends Activity {
         final DisplayResolveInfo dri = mAdapter.getOtherProfile();
         if (dri != null) {
             mProfileView.setVisibility(View.VISIBLE);
-            final ImageView icon = (ImageView) mProfileView.findViewById(R.id.icon);
-            final TextView text = (TextView) mProfileView.findViewById(R.id.text1);
-            if (!dri.hasDisplayIcon()) {
-                new LoadIconIntoViewTask(dri, icon).execute();
-            }
-            icon.setImageDrawable(dri.getDisplayIcon());
+            final TextView text = (TextView) mProfileView.findViewById(R.id.profile_button);
             text.setText(dri.getDisplayLabel());
         } else {
             mProfileView.setVisibility(View.GONE);
