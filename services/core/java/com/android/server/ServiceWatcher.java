@@ -92,9 +92,8 @@ public class ServiceWatcher implements ServiceConnection {
             String pkg = initialPackageNames.get(i);
             try {
                 HashSet<Signature> set = new HashSet<Signature>();
-                Signature[] sigs = pm.getPackageInfo(pkg,
-                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE
-                                | PackageManager.GET_SIGNATURES).signatures;
+                Signature[] sigs = pm.getPackageInfo(pkg, PackageManager.MATCH_SYSTEM_ONLY
+                        | PackageManager.GET_SIGNATURES).signatures;
                 set.addAll(Arrays.asList(sigs));
                 sigSets.add(set);
             } catch (NameNotFoundException e) {

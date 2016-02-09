@@ -447,7 +447,8 @@ public final class LoadedApk {
         IPackageManager pm = ActivityThread.getPackageManager();
         android.content.pm.PackageInfo pi;
         try {
-            pi = pm.getPackageInfo(mPackageName, 0, UserHandle.myUserId());
+            pi = pm.getPackageInfo(mPackageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                    UserHandle.myUserId());
         } catch (RemoteException e) {
             throw new IllegalStateException("Unable to get package info for "
                     + mPackageName + "; is system dying?", e);
