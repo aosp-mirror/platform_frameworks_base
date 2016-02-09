@@ -58,6 +58,8 @@ public final class KeymasterDefs {
     public static final int KM_TAG_BLOB_USAGE_REQUIREMENTS = KM_ENUM | 705;
 
     public static final int KM_TAG_RSA_PUBLIC_EXPONENT = KM_ULONG | 200;
+    public static final int KM_TAG_INCLUDE_UNIQUE_ID = KM_BOOL | 202;
+
     public static final int KM_TAG_ACTIVE_DATETIME = KM_DATE | 400;
     public static final int KM_TAG_ORIGINATION_EXPIRE_DATETIME = KM_DATE | 401;
     public static final int KM_TAG_USAGE_EXPIRE_DATETIME = KM_DATE | 402;
@@ -74,11 +76,12 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
     public static final int KM_TAG_APPLICATION_ID = KM_BYTES | 601;
 
-    public static final int KM_TAG_APPLICATION_DATA = KM_BYTES | 700;
     public static final int KM_TAG_CREATION_DATETIME = KM_DATE | 701;
     public static final int KM_TAG_ORIGIN = KM_ENUM | 702;
     public static final int KM_TAG_ROLLBACK_RESISTANT = KM_BOOL | 703;
     public static final int KM_TAG_ROOT_OF_TRUST = KM_BYTES | 704;
+    public static final int KM_TAG_UNIQUE_ID = KM_BYTES | 707;
+    public static final int KM_TAG_ATTESTATION_CHALLENGE = KM_BYTES | 708;
 
     public static final int KM_TAG_ASSOCIATED_DATA = KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = KM_BYTES | 1001;
