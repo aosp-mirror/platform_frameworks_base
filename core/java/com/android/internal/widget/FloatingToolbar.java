@@ -747,7 +747,7 @@ public final class FloatingToolbar {
         }
 
         /**
-         * Opens the floating toolbar overflow.
+         * Closes the floating toolbar overflow.
          * This method should not be called if menu items have not been laid out with
          * {@link #layoutMenuItems(java.util.List, MenuItem.OnMenuItemClickListener, int)}.
          *
