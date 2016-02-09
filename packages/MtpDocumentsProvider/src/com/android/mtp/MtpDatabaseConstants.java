@@ -78,14 +78,6 @@ class MtpDatabaseConstants {
     static final int ROW_STATE_INVALIDATED = 1;
 
     /**
-     * The state represents the raw has a valid object handle but it may be going to be mapped with
-     * another rows invalidated. After fetching all documents under the parent, the database tries
-     * to map the pending documents and the invalidated documents in order to keep old document ID
-     * alive.
-     */
-    static final int ROW_STATE_PENDING = 2;
-
-    /**
      * Mapping mode that uses MTP identifier to find corresponding rows.
      */
     static final int MAP_BY_MTP_IDENTIFIER = 0;
