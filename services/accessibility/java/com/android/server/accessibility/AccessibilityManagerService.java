@@ -52,7 +52,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -654,7 +653,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             userState.mUiAutomationFlags = flags;
             userState.mIsAccessibilityEnabled = true;
             userState.mInstalledServices.add(accessibilityServiceInfo);
-            if (userState.isUiAutomationSuppressingOtherServices()) {
+            if ((flags & UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES) == 0) {
                 // Set the temporary state.
                 userState.mIsTouchExplorationEnabled = false;
                 userState.mIsEnhancedWebAccessibilityEnabled = false;
