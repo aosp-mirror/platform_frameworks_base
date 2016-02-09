@@ -1851,8 +1851,7 @@ public class Editor {
         updateCursorPosition(0, top, middle, layout.getPrimaryHorizontal(offset, clamped));
 
         if (mCursorCount == 2) {
-            updateCursorPosition(1, middle, bottom,
-                    layout.getSecondaryHorizontal(offset, clamped));
+            updateCursorPosition(1, middle, bottom, layout.getSecondaryHorizontal(offset, clamped));
         }
     }
 
@@ -2151,18 +2150,57 @@ public class Editor {
         return mSelectionModifierCursorController;
     }
 
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public Drawable[] getCursorDrawable() {
+        return mCursorDrawable;
+    }
+
     private void updateCursorPosition(int cursorIndex, int top, int bottom, float horizontal) {
         if (mCursorDrawable[cursorIndex] == null)
             mCursorDrawable[cursorIndex] = mTextView.getContext().getDrawable(
                     mTextView.mCursorDrawableRes);
-
-        if (mTempRect == null) mTempRect = new Rect();
-        mCursorDrawable[cursorIndex].getPadding(mTempRect);
-        final int width = mCursorDrawable[cursorIndex].getIntrinsicWidth();
-        horizontal = Math.max(0.5f, horizontal - 0.5f);
-        final int left = (int) (horizontal) - mTempRect.left;
-        mCursorDrawable[cursorIndex].setBounds(left, top - mTempRect.top, left + width,
+        final Drawable drawable = mCursorDrawable[cursorIndex];
+        final int left = clampCursorHorizontalPosition(drawable, horizontal);
+        final int width = drawable.getIntrinsicWidth();
+        drawable.setBounds(left, top - mTempRect.top, left + width,
                 bottom + mTempRect.bottom);
+    }
+
+    /**
+     * Return clamped position for the cursor. If the cursor is within the boundaries of the view,
+     * then it is offset with the left padding of the cursor drawable. If the cursor is at
+     * the beginning or the end of the text then its drawable edge is aligned with left or right of
+     * the view boundary.
+     *
+     * @param drawable   Cursor drawable.
+     * @param horizontal Horizontal position for the cursor.
+     * @return The clamped horizontal position for the cursor.
+     */
+    private final int clampCursorHorizontalPosition(final Drawable drawable, float
+            horizontal) {
+        horizontal = Math.max(0.5f, horizontal - 0.5f);
+        if (mTempRect == null) mTempRect = new Rect();
+        drawable.getPadding(mTempRect);
+        int scrollX = mTextView.getScrollX();
+        float horizontalDiff = horizontal - scrollX;
+        int viewClippedWidth = mTextView.getWidth() - mTextView.getCompoundPaddingLeft()
+                - mTextView.getCompoundPaddingRight();
+
+        final int left;
+        if (horizontalDiff >= (viewClippedWidth - 1f)) {
+            // at the rightmost position
+            final int cursorWidth = drawable.getIntrinsicWidth();
+            left = viewClippedWidth + scrollX - (cursorWidth - mTempRect.right);
+        } else if (Math.abs(horizontalDiff) <= 1f) {
+            // at the leftmost position
+            left = scrollX - mTempRect.left;
+        } else {
+            left = (int) horizontal - mTempRect.left;
+        }
+        return left;
     }
 
     /**
@@ -3919,8 +3957,8 @@ public class Editor {
             final Layout layout = mTextView.getLayout();
             if (layout != null && oldDrawable != mDrawable && isShowing()) {
                 // Update popup window position.
-                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX -
-                        getHorizontalOffset() + getCursorOffset());
+                mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX -
+                        getHorizontalOffset() + getCursorOffset();
                 mPositionX += mTextView.viewportToContentHorizontalOffset();
                 mPositionHasChanged = true;
                 updatePosition(mLastParentX, mLastParentY, false, false);
@@ -4049,8 +4087,8 @@ public class Editor {
                 final int line = layout.getLineForOffset(offset);
                 mPrevLine = line;
 
-                mPositionX = (int) (layout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX -
-                        getHorizontalOffset() + getCursorOffset());
+                mPositionX = getCursorHorizontalPosition(layout, offset) - mHotspotX -
+                        getHorizontalOffset() + getCursorOffset();
                 mPositionY = layout.getLineBottom(line);
 
                 // Take TextView's padding and scroll into account.
@@ -4060,6 +4098,17 @@ public class Editor {
                 mPreviousOffset = offset;
                 mPositionHasChanged = true;
             }
+        }
+
+        /**
+         * Return the clamped horizontal position for the first cursor.
+         *
+         * @param layout Text layout.
+         * @param offset Character offset for the cursor.
+         * @return The clamped horizontal position for the cursor.
+         */
+        int getCursorHorizontalPosition(Layout layout, int offset) {
+            return (int) (layout.getPrimaryHorizontal(offset) - 0.5f);
         }
 
         public void updatePosition(int parentPositionX, int parentPositionY,
@@ -4297,6 +4346,16 @@ public class Editor {
                 offset += (cursor.getIntrinsicWidth() - mTempRect.left - mTempRect.right) / 2;
             }
             return offset;
+        }
+
+        @Override
+        int getCursorHorizontalPosition(Layout layout, int offset) {
+            final Drawable drawable = mCursorCount > 0 ? mCursorDrawable[0] : null;
+            if (drawable != null) {
+                final float horizontal = layout.getPrimaryHorizontal(offset);
+                return clampCursorHorizontalPosition(drawable, horizontal) + mTempRect.left;
+            }
+            return super.getCursorHorizontalPosition(layout, offset);
         }
 
         @Override
