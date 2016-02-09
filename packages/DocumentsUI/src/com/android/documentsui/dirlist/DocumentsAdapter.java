@@ -27,7 +27,6 @@ import android.util.SparseArray;
 
 import com.android.documentsui.State;
 
-import java.nio.channels.UnsupportedAddressTypeException;
 import java.util.List;
 
 /**
@@ -87,7 +86,7 @@ abstract class DocumentsAdapter
      * we adjust sizes.
      */
     GridLayoutManager.SpanSizeLookup createSpanSizeLookup() {
-        throw new UnsupportedAddressTypeException();
+        throw new UnsupportedOperationException();
     }
 
     static boolean isDirectory(Cursor cursor) {
