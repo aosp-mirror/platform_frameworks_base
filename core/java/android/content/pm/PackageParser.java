@@ -337,7 +337,7 @@ public class PackageParser {
 
         public final boolean coreApp;
         public final boolean multiArch;
-        public final String abiOverride;
+        public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
 
         public PackageLite(String codePath, ApkLite baseApk, String[] splitNames,
@@ -354,7 +354,7 @@ public class PackageParser {
             this.splitRevisionCodes = splitRevisionCodes;
             this.coreApp = baseApk.coreApp;
             this.multiArch = baseApk.multiArch;
-            this.abiOverride = baseApk.abiOverride;
+            this.use32bitAbi = baseApk.use32bitAbi;
             this.extractNativeLibs = baseApk.extractNativeLibs;
         }
 
@@ -382,12 +382,12 @@ public class PackageParser {
         public final Signature[] signatures;
         public final boolean coreApp;
         public final boolean multiArch;
-        public final String abiOverride;
+        public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
 
         public ApkLite(String codePath, String packageName, String splitName, int versionCode,
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
-                Signature[] signatures, boolean coreApp, boolean multiArch, String abiOverride,
+                Signature[] signatures, boolean coreApp, boolean multiArch, boolean use32bitAbi,
                 boolean extractNativeLibs) {
             this.codePath = codePath;
             this.packageName = packageName;
@@ -399,7 +399,7 @@ public class PackageParser {
             this.signatures = signatures;
             this.coreApp = coreApp;
             this.multiArch = multiArch;
-            this.abiOverride = abiOverride;
+            this.use32bitAbi = use32bitAbi;
             this.extractNativeLibs = extractNativeLibs;
         }
     }
@@ -843,8 +843,7 @@ public class PackageParser {
             }
 
             pkg.setCodePath(packageDir.getAbsolutePath());
-            pkg.setCpuAbiOverride(lite.abiOverride);
-
+            pkg.setUse32bitAbi(lite.use32bitAbi);
             return pkg;
         } finally {
             IoUtils.closeQuietly(assets);
@@ -875,7 +874,7 @@ public class PackageParser {
         try {
             final Package pkg = parseBaseApk(apkFile, assets, flags);
             pkg.setCodePath(apkFile.getAbsolutePath());
-            pkg.setCpuAbiOverride(lite.abiOverride);
+            pkg.setUse32bitAbi(lite.use32bitAbi);
             return pkg;
         } finally {
             IoUtils.closeQuietly(assets);
@@ -1380,7 +1379,7 @@ public class PackageParser {
         int revisionCode = 0;
         boolean coreApp = false;
         boolean multiArch = false;
-        String abiOverride = null;
+        boolean use32bitAbi = false;
         boolean extractNativeLibs = true;
 
         for (int i = 0; i < attrs.getAttributeCount(); i++) {
@@ -1421,8 +1420,8 @@ public class PackageParser {
                     if ("multiArch".equals(attr)) {
                         multiArch = attrs.getAttributeBooleanValue(i, false);
                     }
-                    if ("abiOverride".equals(attr)) {
-                        abiOverride = attrs.getAttributeValue(i);
+                    if ("use32bitAbi".equals(attr)) {
+                        use32bitAbi = attrs.getAttributeBooleanValue(i, false);
                     }
                     if ("extractNativeLibs".equals(attr)) {
                         extractNativeLibs = attrs.getAttributeBooleanValue(i, true);
@@ -1433,7 +1432,7 @@ public class PackageParser {
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, versionCode,
                 revisionCode, installLocation, verifiers, signatures, coreApp, multiArch,
-                abiOverride, extractNativeLibs);
+                use32bitAbi, extractNativeLibs);
     }
 
     /**
@@ -4740,6 +4739,12 @@ public class PackageParser {
          * and prods fields out of {@code this.applicationInfo}.
          */
         public String cpuAbiOverride;
+        /**
+         * The install time abi override to choose 32bit abi's when multiple abi's
+         * are present. This is only meaningfull for multiarch applications.
+         * The use32bitAbi attribute is ignored if cpuAbiOverride is also set.
+         */
+        public boolean use32bitAbi;
 
         public Package(String packageName) {
             this.packageName = packageName;
@@ -4872,12 +4877,12 @@ public class PackageParser {
             }
         }
 
-        public void setCpuAbiOverride(String cpuAbiOverride) {
-            this.cpuAbiOverride = cpuAbiOverride;
+        public void setUse32bitAbi(bool use32bitAbi) {
+            this.use32bitAbi = use32bitAbi;
             if (childPackages != null) {
                 final int packageCount = childPackages.size();
                 for (int i = 0; i < packageCount; i++) {
-                    childPackages.get(i).cpuAbiOverride = cpuAbiOverride;
+                    childPackages.get(i).use32bitAbi = use32bitAbi;
                 }
             }
         }
