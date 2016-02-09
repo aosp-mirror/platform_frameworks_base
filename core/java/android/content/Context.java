@@ -2534,6 +2534,17 @@ public abstract class Context {
     }
 
     /**
+     * Same as {@link #bindService(Intent, ServiceConnection, int, UserHandle)}, but with an
+     * explicit non-null Handler to run the ServiceConnection callbacks on.
+     *
+     * @hide
+     */
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            Handler handler, UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Disconnect from an application service.  You will no longer receive
      * calls as the service is restarted, and the service is now allowed to
      * stop at any time.
