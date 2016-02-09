@@ -20,11 +20,13 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LocaleList;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import android.view.inputmethod.InputMethodSubtype;
@@ -230,7 +232,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_EN_US, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_EN_US))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(autoSubtype, result.get(0));
         }
@@ -251,8 +256,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_EN_US, imi);
-            assertEquals(1, result.size());
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_EN_US))
+                                    .getResources(),
+                            imi);
             verifyEquality(nonAutoEnUS, result.get(0));
         }
 
@@ -271,7 +278,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_EN_GB, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_EN_GB))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnGB, result.get(0));
         }
@@ -292,7 +302,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_FR, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_FR))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
         }
@@ -309,7 +322,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_FR_CA, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_FR_CA))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
         }
@@ -327,7 +343,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_JA_JP, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_JA_JP))
+                                    .getResources(),
+                            imi);
             assertEquals(3, result.size());
             verifyEquality(nonAutoJa, result.get(0));
             verifyEquality(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, result.get(1));
@@ -344,7 +363,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_FIL_PH, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_FIL_PH))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFil, result.get(0));
         }
@@ -361,7 +383,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_FI, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_FI))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoJa, result.get(0));
         }
@@ -376,7 +401,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_IN, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_IN))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
         }
@@ -389,7 +417,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_ID, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_ID))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
         }
@@ -402,7 +433,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_IN, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_IN))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
         }
@@ -415,7 +449,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "com.android.apps.inputmethod.latin", "DummyLatinIme", !IS_AUX, IS_DEFAULT,
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
-                    callGetImplicitlyApplicableSubtypesLockedWithLocale(LOCALE_ID, imi);
+                    InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
+                            createTargetContextWithLocales(new LocaleList(LOCALE_ID))
+                                    .getResources(),
+                            imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
         }
@@ -568,24 +605,11 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    private ArrayList<InputMethodSubtype> callGetImplicitlyApplicableSubtypesLockedWithLocale(
-            final Locale locale, final InputMethodInfo imi) {
-        final Context context = getInstrumentation().getTargetContext();
-        final Locale initialLocale = context.getResources().getConfiguration().locale;
-        try {
-            context.getResources().getConfiguration().setLocale(locale);
-            return InputMethodUtils.getImplicitlyApplicableSubtypesLocked(context.getResources(),
-                    imi);
-        } finally {
-            context.getResources().getConfiguration().setLocale(initialLocale);
-        }
-    }
-
     private void assertDefaultEnabledImes(final ArrayList<InputMethodInfo> preinstalledImes,
             final Locale systemLocale, final boolean isSystemReady, String... expectedImeNames) {
-        final Context context = getInstrumentation().getTargetContext();
-        final String[] actualImeNames = getPackageNames(callGetDefaultEnabledImesWithLocale(
-                context, isSystemReady, preinstalledImes, systemLocale));
+        final Context context = createTargetContextWithLocales(new LocaleList(systemLocale));
+        final String[] actualImeNames = getPackageNames(
+                InputMethodUtils.getDefaultEnabledImes(context, isSystemReady, preinstalledImes));
         assertEquals(expectedImeNames.length, actualImeNames.length);
         for (int i = 0; i < expectedImeNames.length; ++i) {
             assertEquals(expectedImeNames[i], actualImeNames[i]);
@@ -606,16 +630,12 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    private static ArrayList<InputMethodInfo> callGetDefaultEnabledImesWithLocale(
-            final Context context, final boolean isSystemReady,
-            final ArrayList<InputMethodInfo> imis, final Locale locale) {
-        final Locale initialLocale = context.getResources().getConfiguration().locale;
-        try {
-            context.getResources().getConfiguration().setLocale(locale);
-            return InputMethodUtils.getDefaultEnabledImes(context, isSystemReady, imis);
-        } finally {
-            context.getResources().getConfiguration().setLocale(initialLocale);
-        }
+    private Context createTargetContextWithLocales(final LocaleList locales) {
+        final Configuration resourceConfiguration = new Configuration();
+        resourceConfiguration.setLocales(locales);
+        return getInstrumentation()
+                .getTargetContext()
+                .createConfigurationContext(resourceConfiguration);
     }
 
     private String[] getPackageNames(final ArrayList<InputMethodInfo> imis) {
