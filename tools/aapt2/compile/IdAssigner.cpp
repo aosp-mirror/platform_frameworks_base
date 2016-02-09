@@ -64,14 +64,12 @@ bool IdAssigner::consume(IAaptContext* context, ResourceTable* table) {
                     // Mark entry ID as taken.
                     if (!usedEntryIds.insert(entry->id.value()).second) {
                         // This ID existed before!
-                        ResourceNameRef nameRef =
-                                { package->name, type->type, entry->name };
-                        ResourceId takenId(package->id.value(), type->id.value(),
-                                           entry->id.value());
+                        ResourceNameRef nameRef(package->name, type->type, entry->name);
                         context->getDiagnostics()->error(DiagMessage()
                                                          << "resource '" << nameRef << "' "
-                                                         << "has duplicate ID '"
-                                                         << takenId << "'");
+                                                         << "has duplicate entry ID "
+                                                         << std::hex << (int) entry->id.value()
+                                                         << std::dec);
                         return false;
                     }
                 }

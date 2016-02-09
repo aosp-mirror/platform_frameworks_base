@@ -24,14 +24,16 @@
 #include "compile/PseudolocaleGenerator.h"
 #include "compile/XmlIdCollector.h"
 #include "flatten/Archive.h"
-#include "flatten/FileExportWriter.h"
-#include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
+#include "proto/ProtoSerialize.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 #include "xml/XmlPullParser.h"
+
+#include <google/protobuf/io/zero_copy_stream_impl_lite.h>
+#include <google/protobuf/io/coded_stream.h>
 
 #include <dirent.h>
 #include <fstream>
@@ -232,34 +234,95 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         }
     }
 
-    // Assign IDs to prepare the table for flattening.
-    IdAssigner idAssigner;
-    if (!idAssigner.consume(context, &table)) {
-        return false;
-    }
-
-    // Flatten the table.
-    BigBuffer buffer(1024);
-    TableFlattenerOptions tableFlattenerOptions;
-    tableFlattenerOptions.useExtendedChunks = true;
-    TableFlattener flattener(&buffer, tableFlattenerOptions);
-    if (!flattener.consume(context, &table)) {
-        return false;
-    }
-
+    // Create the file/zip entry.
     if (!writer->startEntry(outputPath, 0)) {
         context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to open");
         return false;
     }
 
-    if (writer->writeEntry(buffer)) {
-        if (writer->finishEntry()) {
-            return true;
+    std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(&table);
+
+    // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream interface.
+    {
+        google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
+
+        if (!pbTable->SerializeToZeroCopyStream(&adaptor)) {
+            context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
+            return false;
         }
     }
 
-    context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-    return false;
+    if (!writer->finishEntry()) {
+        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to finish entry");
+        return false;
+    }
+    return true;
+}
+
+static bool writeHeaderAndBufferToWriter(const StringPiece& outputPath, const ResourceFile& file,
+                                         const BigBuffer& buffer, IArchiveWriter* writer,
+                                         IDiagnostics* diag) {
+    // Start the entry so we can write the header.
+    if (!writer->startEntry(outputPath, 0)) {
+        diag->error(DiagMessage(outputPath) << "failed to open file");
+        return false;
+    }
+
+    // Create the header.
+    std::unique_ptr<pb::CompiledFile> pbCompiledFile = serializeCompiledFileToPb(file);
+
+    {
+        // The stream must be destroyed before we finish the entry, or else
+        // some data won't be flushed.
+        // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
+        // interface.
+        google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
+        CompiledFileOutputStream outputStream(&adaptor, pbCompiledFile.get());
+        for (const BigBuffer::Block& block : buffer) {
+            if (!outputStream.Write(block.buffer.get(), block.size)) {
+                diag->error(DiagMessage(outputPath) << "failed to write data");
+                return false;
+            }
+        }
+    }
+
+    if (!writer->finishEntry()) {
+        diag->error(DiagMessage(outputPath) << "failed to finish writing data");
+        return false;
+    }
+    return true;
+}
+
+static bool writeHeaderAndMmapToWriter(const StringPiece& outputPath, const ResourceFile& file,
+                                       const android::FileMap& map, IArchiveWriter* writer,
+                                       IDiagnostics* diag) {
+    // Start the entry so we can write the header.
+    if (!writer->startEntry(outputPath, 0)) {
+        diag->error(DiagMessage(outputPath) << "failed to open file");
+        return false;
+    }
+
+    // Create the header.
+    std::unique_ptr<pb::CompiledFile> pbCompiledFile = serializeCompiledFileToPb(file);
+
+    {
+        // The stream must be destroyed before we finish the entry, or else
+        // some data won't be flushed.
+        // Wrap our IArchiveWriter with an adaptor that implements the ZeroCopyOutputStream
+        // interface.
+        google::protobuf::io::CopyingOutputStreamAdaptor adaptor(writer);
+        CompiledFileOutputStream outputStream(&adaptor, pbCompiledFile.get());
+        if (!outputStream.Write(map.getDataPtr(), map.getDataLength())) {
+            diag->error(DiagMessage(outputPath) << "failed to write data");
+            return false;
+        }
+    }
+
+    if (!writer->finishEntry()) {
+        diag->error(DiagMessage(outputPath) << "failed to finish writing data");
+        return false;
+    }
+    return true;
 }
 
 static bool compileXml(IAaptContext* context, const CompileOptions& options,
@@ -267,7 +330,6 @@ static bool compileXml(IAaptContext* context, const CompileOptions& options,
                        const std::string& outputPath) {
 
     std::unique_ptr<xml::XmlResource> xmlRes;
-
     {
         std::ifstream fin(pathData.source.path, std::ifstream::binary);
         if (!fin) {
@@ -295,30 +357,18 @@ static bool compileXml(IAaptContext* context, const CompileOptions& options,
     xmlRes->file.source = pathData.source;
 
     BigBuffer buffer(1024);
-    ChunkWriter fileExportWriter = wrapBufferWithFileExportHeader(&buffer, &xmlRes->file);
-
     XmlFlattenerOptions xmlFlattenerOptions;
     xmlFlattenerOptions.keepRawValues = true;
-    XmlFlattener flattener(fileExportWriter.getBuffer(), xmlFlattenerOptions);
+    XmlFlattener flattener(&buffer, xmlFlattenerOptions);
     if (!flattener.consume(context, xmlRes.get())) {
         return false;
     }
 
-    fileExportWriter.finish();
-
-    if (!writer->startEntry(outputPath, 0)) {
-        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to open");
+    if (!writeHeaderAndBufferToWriter(outputPath, xmlRes->file, buffer, writer,
+                                      context->getDiagnostics())) {
         return false;
     }
-
-    if (writer->writeEntry(buffer)) {
-        if (writer->finishEntry()) {
-            return true;
-        }
-    }
-
-    context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-    return false;
+    return true;
 }
 
 static bool compilePng(IAaptContext* context, const CompileOptions& options,
@@ -330,8 +380,6 @@ static bool compilePng(IAaptContext* context, const CompileOptions& options,
     resFile.config = pathData.config;
     resFile.source = pathData.source;
 
-    ChunkWriter fileExportWriter = wrapBufferWithFileExportHeader(&buffer, &resFile);
-
     {
         std::ifstream fin(pathData.source.path, std::ifstream::binary);
         if (!fin) {
@@ -340,26 +388,16 @@ static bool compilePng(IAaptContext* context, const CompileOptions& options,
         }
 
         Png png(context->getDiagnostics());
-        if (!png.process(pathData.source, &fin, fileExportWriter.getBuffer(), {})) {
+        if (!png.process(pathData.source, &fin, &buffer, {})) {
             return false;
         }
     }
 
-    fileExportWriter.finish();
-
-    if (!writer->startEntry(outputPath, 0)) {
-        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to open");
+    if (!writeHeaderAndBufferToWriter(outputPath, resFile, buffer, writer,
+                                      context->getDiagnostics())) {
         return false;
     }
-
-    if (writer->writeEntry(buffer)) {
-        if (writer->finishEntry()) {
-            return true;
-        }
-    }
-
-    context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-    return false;
+    return true;
 }
 
 static bool compileFile(IAaptContext* context, const CompileOptions& options,
@@ -371,8 +409,6 @@ static bool compileFile(IAaptContext* context, const CompileOptions& options,
     resFile.config = pathData.config;
     resFile.source = pathData.source;
 
-    ChunkWriter fileExportWriter = wrapBufferWithFileExportHeader(&buffer, &resFile);
-
     std::string errorStr;
     Maybe<android::FileMap> f = file::mmapPath(pathData.source.path, &errorStr);
     if (!f) {
@@ -380,35 +416,10 @@ static bool compileFile(IAaptContext* context, const CompileOptions& options,
         return false;
     }
 
-    if (!writer->startEntry(outputPath, 0)) {
-        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to open");
+    if (!writeHeaderAndMmapToWriter(outputPath, resFile, f.value(), writer,
+                                    context->getDiagnostics())) {
         return false;
     }
-
-    // Manually set the size and don't call finish(). This is because we are not copying from
-    // the buffer the entire file.
-    fileExportWriter.getChunkHeader()->size =
-            util::hostToDevice32(buffer.size() + f.value().getDataLength());
-
-    if (!writer->writeEntry(buffer)) {
-        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-        return false;
-    }
-
-    // Only write if we have something to write. This is because mmap fails with length of 0,
-    // but we still want to compile the file to get the resource ID.
-    if (f.value().getDataPtr() && f.value().getDataLength() > 0) {
-        if (!writer->writeEntry(f.value().getDataPtr(), f.value().getDataLength())) {
-            context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-            return false;
-        }
-    }
-
-    if (!writer->finishEntry()) {
-        context->getDiagnostics()->error(DiagMessage(outputPath) << "failed to write");
-        return false;
-    }
-
     return true;
 }
 

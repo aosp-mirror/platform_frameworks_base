@@ -19,8 +19,6 @@
 #include "ResourceValues.h"
 #include "Source.h"
 #include "ValueVisitor.h"
-
-#include "flatten/ResourceTypeExtensions.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "unflatten/ResChunkPullParser.h"
 #include "util/Util.h"
@@ -35,6 +33,8 @@
 namespace aapt {
 
 using namespace android;
+
+namespace {
 
 /*
  * Visitor that converts a reference's resource ID to a resource name,
@@ -66,6 +66,8 @@ public:
     }
 };
 
+} // namespace
+
 BinaryResourceParser::BinaryResourceParser(IAaptContext* context, ResourceTable* table,
                                            const Source& source, const void* data, size_t len) :
         mContext(context), mTable(table), mSource(source), mData(data), mDataLen(len) {
@@ -95,106 +97,6 @@ bool BinaryResourceParser::parse() {
         return false;
     }
     return !error;
-}
-
-Maybe<Reference> BinaryResourceParser::getSymbol(const void* data) {
-    if (!mSymbolEntries || mSymbolEntryCount == 0) {
-        return {};
-    }
-
-    if ((uintptr_t) data < (uintptr_t) mData) {
-        return {};
-    }
-
-    // We only support 32 bit offsets right now.
-    const uintptr_t offset = (uintptr_t) data - (uintptr_t) mData;
-    if (offset > std::numeric_limits<uint32_t>::max()) {
-        return {};
-    }
-
-    for (size_t i = 0; i < mSymbolEntryCount; i++) {
-        if (util::deviceToHost32(mSymbolEntries[i].offset) == offset) {
-            // This offset is a symbol!
-            const StringPiece16 str = util::getString(
-                    mSymbolPool, util::deviceToHost32(mSymbolEntries[i].name.index));
-
-            ResourceNameRef nameRef;
-            bool privateRef = false;
-            if (!ResourceUtils::parseResourceName(str, &nameRef, &privateRef)) {
-                return {};
-            }
-
-            // Since we scan the symbol table in order, we can start looking for the
-            // next symbol from this point.
-            mSymbolEntryCount -= i + 1;
-            mSymbolEntries += i + 1;
-
-            Reference ref(nameRef);
-            ref.privateReference = privateRef;
-            return Maybe<Reference>(std::move(ref));
-        }
-    }
-    return {};
-}
-
-/**
- * Parses the SymbolTable_header, which is present on non-final resource tables
- * after the compile phase.
- *
- * | SymbolTable_header |
- * |--------------------|
- * |SymbolTable_entry 0 |
- * |SymbolTable_entry 1 |
- * | ...                |
- * |SymbolTable_entry n |
- * |--------------------|
- *
- */
-bool BinaryResourceParser::parseSymbolTable(const ResChunk_header* chunk) {
-    const SymbolTable_header* header = convertTo<SymbolTable_header>(chunk);
-    if (!header) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "corrupt SymbolTable_header");
-        return false;
-    }
-
-    const uint32_t entrySizeBytes =
-            util::deviceToHost32(header->count) * sizeof(SymbolTable_entry);
-    if (entrySizeBytes > getChunkDataLen(&header->header)) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "SymbolTable_header data section too long");
-        return false;
-    }
-
-    mSymbolEntries = (const SymbolTable_entry*) getChunkData(&header->header);
-    mSymbolEntryCount = util::deviceToHost32(header->count);
-
-    // Skip over the symbol entries and parse the StringPool chunk that should be next.
-    ResChunkPullParser parser(getChunkData(&header->header) + entrySizeBytes,
-                              getChunkDataLen(&header->header) - entrySizeBytes);
-    if (!ResChunkPullParser::isGoodEvent(parser.next())) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "failed to parse chunk in SymbolTable: "
-                                          << parser.getLastError());
-        return false;
-    }
-
-    const ResChunk_header* nextChunk = parser.getChunk();
-    if (util::deviceToHost16(nextChunk->type) != android::RES_STRING_POOL_TYPE) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "expected string pool in SymbolTable but got "
-                                          << "chunk of type "
-                                          << (int) util::deviceToHost16(nextChunk->type));
-        return false;
-    }
-
-    if (mSymbolPool.setTo(nextChunk, util::deviceToHost32(nextChunk->size)) != NO_ERROR) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "corrupt string pool in SymbolTable: "
-                                          << mSymbolPool.getError());
-        return false;
-    }
-    return true;
 }
 
 /**
@@ -229,24 +131,6 @@ bool BinaryResourceParser::parseTable(const ResChunk_header* chunk) {
                                                  << "unexpected string pool in ResTable");
             }
             break;
-
-        case RES_TABLE_SYMBOL_TABLE_TYPE:
-            if (!parseSymbolTable(parser.getChunk())) {
-                return false;
-            }
-            break;
-
-        case RES_TABLE_SOURCE_POOL_TYPE: {
-            status_t err = mSourcePool.setTo(getChunkData(parser.getChunk()),
-                                             getChunkDataLen(parser.getChunk()));
-            if (err != NO_ERROR) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "corrupt source string pool in ResTable: "
-                                                  << mSourcePool.getError());
-                return false;
-            }
-            break;
-        }
 
         case android::RES_TABLE_PACKAGE_TYPE:
             if (!parsePackage(parser.getChunk())) {
@@ -350,12 +234,6 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
             }
             break;
 
-        case RES_TABLE_PUBLIC_TYPE:
-            if (!parsePublic(package, parser.getChunk())) {
-                return false;
-            }
-            break;
-
         default:
             mContext->getDiagnostics()
                     ->warn(DiagMessage(mSource)
@@ -375,97 +253,7 @@ bool BinaryResourceParser::parsePackage(const ResChunk_header* chunk) {
     // Now go through the table and change local resource ID references to
     // symbolic references.
     ReferenceIdToNameVisitor visitor(&mIdIndex);
-    for (auto& package : mTable->packages) {
-        for (auto& type : package->types) {
-            for (auto& entry : type->entries) {
-                for (auto& configValue : entry->values) {
-                    configValue.value->accept(&visitor);
-                }
-            }
-        }
-    }
-    return true;
-}
-
-bool BinaryResourceParser::parsePublic(const ResourceTablePackage* package,
-                                       const ResChunk_header* chunk) {
-    const Public_header* header = convertTo<Public_header>(chunk);
-    if (!header) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "corrupt Public_header chunk");
-        return false;
-    }
-
-    if (header->typeId == 0) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "invalid type ID "
-                                          << (int) header->typeId);
-        return false;
-    }
-
-    StringPiece16 typeStr16 = util::getString(mTypePool, header->typeId - 1);
-    const ResourceType* parsedType = parseResourceType(typeStr16);
-    if (!parsedType) {
-        mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                          << "invalid type '" << typeStr16 << "'");
-        return false;
-    }
-
-    const uintptr_t chunkEnd = (uintptr_t) chunk + util::deviceToHost32(chunk->size);
-    const Public_entry* entry = (const Public_entry*) getChunkData(&header->header);
-    for (uint32_t i = 0; i < util::deviceToHost32(header->count); i++) {
-        if ((uintptr_t) entry + sizeof(*entry) > chunkEnd) {
-            mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                              << "Public_entry data section is too long");
-            return false;
-        }
-
-        const ResourceId resId(package->id.value(), header->typeId,
-                               util::deviceToHost16(entry->entryId));
-
-        const ResourceName name(package->name, *parsedType,
-                                util::getString(mKeyPool, entry->key.index).toString());
-
-        Symbol symbol;
-        if (mSourcePool.getError() == NO_ERROR) {
-            symbol.source.path = util::utf16ToUtf8(util::getString(
-                    mSourcePool, util::deviceToHost32(entry->source.path.index)));
-            symbol.source.line = util::deviceToHost32(entry->source.line);
-        }
-
-        StringPiece16 comment = util::getString(mSourcePool,
-                                                util::deviceToHost32(entry->source.comment.index));
-        if (!comment.empty()) {
-            symbol.comment = comment.toString();
-        }
-
-        switch (util::deviceToHost16(entry->state)) {
-        case Public_entry::kPrivate:
-            symbol.state = SymbolState::kPrivate;
-            break;
-
-        case Public_entry::kPublic:
-            symbol.state = SymbolState::kPublic;
-            break;
-
-        case Public_entry::kUndefined:
-            symbol.state = SymbolState::kUndefined;
-            break;
-        }
-
-        if (!mTable->setSymbolStateAllowMangled(name, resId, symbol, mContext->getDiagnostics())) {
-            return false;
-        }
-
-        // Add this resource name->id mapping to the index so
-        // that we can resolve all ID references to name references.
-        auto cacheIter = mIdIndex.find(resId);
-        if (cacheIter == mIdIndex.end()) {
-            mIdIndex.insert({ resId, name });
-        }
-
-        entry++;
-    }
+    visitAllValuesInTable(mTable, &visitor);
     return true;
 }
 
@@ -545,25 +333,12 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
         const ResourceId resId(package->id.value(), type->id, static_cast<uint16_t>(it.index()));
 
         std::unique_ptr<Value> resourceValue;
-        const ResTable_entry_source* sourceBlock = nullptr;
-
         if (entry->flags & ResTable_entry::FLAG_COMPLEX) {
             const ResTable_map_entry* mapEntry = static_cast<const ResTable_map_entry*>(entry);
-            if (util::deviceToHost32(mapEntry->size) - sizeof(*mapEntry) == sizeof(*sourceBlock)) {
-                const uint8_t* data = (const uint8_t*) mapEntry;
-                data += util::deviceToHost32(mapEntry->size) - sizeof(*sourceBlock);
-                sourceBlock = (const ResTable_entry_source*) data;
-            }
 
             // TODO(adamlesinski): Check that the entry count is valid.
             resourceValue = parseMapEntry(name, config, mapEntry);
         } else {
-            if (util::deviceToHost32(entry->size) - sizeof(*entry) == sizeof(*sourceBlock)) {
-                const uint8_t* data = (const uint8_t*) entry;
-                data += util::deviceToHost32(entry->size) - sizeof(*sourceBlock);
-                sourceBlock = (const ResTable_entry_source*) data;
-            }
-
             const Res_value* value = (const Res_value*)(
                     (const uint8_t*) entry + util::deviceToHost32(entry->size));
             resourceValue = parseValue(name, config, value, entry->flags);
@@ -577,30 +352,6 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
             return false;
         }
 
-        Source source = mSource;
-        if (sourceBlock) {
-            StringPiece path = util::getString8(mSourcePool,
-                                                util::deviceToHost32(sourceBlock->path.index));
-            if (!path.empty()) {
-                source.path = path.toString();
-            }
-            source.line = util::deviceToHost32(sourceBlock->line);
-
-            if (Style* style = valueCast<Style>(resourceValue.get())) {
-                // The parent's source is the same as the resource itself, set it here.
-                if (style->parent) {
-                    style->parent.value().setSource(source);
-                }
-            }
-        }
-
-        StringPiece16 comment = util::getString(mSourcePool,
-                                                util::deviceToHost32(sourceBlock->comment.index));
-        if (!comment.empty()) {
-            resourceValue->setComment(comment);
-        }
-
-        resourceValue->setSource(source);
         if (!mTable->addResourceAllowMangled(name, config, std::move(resourceValue),
                                              mContext->getDiagnostics())) {
             return false;
@@ -674,26 +425,15 @@ std::unique_ptr<Item> BinaryResourceParser::parseValue(const ResourceNameRef& na
         const Reference::Type type = (value->dataType == Res_value::TYPE_REFERENCE) ?
                 Reference::Type::kResource : Reference::Type::kAttribute;
 
-        if (data != 0) {
-            // This is a normal reference.
-            return util::make_unique<Reference>(data, type);
+        if (data == 0) {
+            // A reference of 0, must be the magic @null reference.
+            Res_value nullType = {};
+            nullType.dataType = Res_value::TYPE_REFERENCE;
+            return util::make_unique<BinaryPrimitive>(nullType);
         }
 
-        // This reference has an invalid ID. Check if it is an unresolved symbol.
-        if (Maybe<Reference> ref = getSymbol(&value->data)) {
-            ref.value().referenceType = type;
-            return util::make_unique<Reference>(std::move(ref.value()));
-        }
-
-        // This is not an unresolved symbol, so it must be the magic @null reference.
-        Res_value nullType = {};
-        nullType.dataType = Res_value::TYPE_REFERENCE;
-        return util::make_unique<BinaryPrimitive>(nullType);
-    }
-
-    if (value->dataType == ExtendedTypes::TYPE_RAW_STRING) {
-        return util::make_unique<RawString>(mTable->stringPool.makeRef(
-                util::getString(mValuePool, data), StringPool::Context{ 1, config }));
+        // This is a normal reference.
+        return util::make_unique<Reference>(data, type);
     }
 
     // Treat this as a raw binary primitive.
@@ -712,8 +452,6 @@ std::unique_ptr<Value> BinaryResourceParser::parseMapEntry(const ResourceNameRef
             return parseAttr(name, config, map);
         case ResourceType::kArray:
             return parseArray(name, config, map);
-        case ResourceType::kStyleable:
-            return parseStyleable(name, config, map);
         case ResourceType::kPlurals:
             return parsePlural(name, config, map);
         default:
@@ -727,51 +465,23 @@ std::unique_ptr<Style> BinaryResourceParser::parseStyle(const ResourceNameRef& n
                                                         const ConfigDescription& config,
                                                         const ResTable_map_entry* map) {
     std::unique_ptr<Style> style = util::make_unique<Style>();
-    if (util::deviceToHost32(map->parent.ident) == 0) {
-        // The parent is either not set or it is an unresolved symbol.
-        // Check to see if it is a symbol.
-        style->parent = getSymbol(&map->parent.ident);
-
-    } else {
-         // The parent is a regular reference to a resource.
+    if (util::deviceToHost32(map->parent.ident) != 0) {
+        // The parent is a regular reference to a resource.
         style->parent = Reference(util::deviceToHost32(map->parent.ident));
     }
 
     for (const ResTable_map& mapEntry : map) {
         if (Res_INTERNALID(util::deviceToHost32(mapEntry.name.ident))) {
-            if (style->entries.empty()) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "out-of-sequence meta data in style");
-                return {};
-            }
-            collectMetaData(mapEntry, &style->entries.back().key);
             continue;
         }
 
-        style->entries.emplace_back();
-        Style::Entry& styleEntry = style->entries.back();
-
-        if (util::deviceToHost32(mapEntry.name.ident) == 0) {
-            // The map entry's key (attribute) is not set. This must be
-            // a symbol reference, so resolve it.
-            Maybe<Reference> symbol = getSymbol(&mapEntry.name.ident);
-            if (!symbol) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "unresolved style attribute");
-                return {};
-            }
-            styleEntry.key = std::move(symbol.value());
-
-        } else {
-            // The map entry's key (attribute) is a regular reference.
-            styleEntry.key.id = ResourceId(util::deviceToHost32(mapEntry.name.ident));
-        }
-
-        // Parse the attribute's value.
+        Style::Entry styleEntry;
+        styleEntry.key = Reference(util::deviceToHost32(mapEntry.name.ident));
         styleEntry.value = parseValue(name, config, &mapEntry.value, 0);
         if (!styleEntry.value) {
             return {};
         }
+        style->entries.push_back(std::move(styleEntry));
     }
     return style;
 }
@@ -807,22 +517,7 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
         if (attr->typeMask & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) {
             Attribute::Symbol symbol;
             symbol.value = util::deviceToHost32(mapEntry.value.data);
-            if (util::deviceToHost32(mapEntry.name.ident) == 0) {
-                // The map entry's key (id) is not set. This must be
-                // a symbol reference, so resolve it.
-                Maybe<Reference> ref = getSymbol(&mapEntry.name.ident);
-                if (!ref) {
-                    mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                      << "unresolved attribute symbol");
-                    return {};
-                }
-                symbol.symbol = std::move(ref.value());
-
-            } else {
-                // The map entry's key (id) is a regular reference.
-                symbol.symbol.id = ResourceId(util::deviceToHost32(mapEntry.name.ident));
-            }
-
+            symbol.symbol = Reference(util::deviceToHost32(mapEntry.name.ident));
             attr->symbols.push_back(std::move(symbol));
         }
     }
@@ -831,114 +526,25 @@ std::unique_ptr<Attribute> BinaryResourceParser::parseAttr(const ResourceNameRef
     return attr;
 }
 
-static bool isMetaDataEntry(const ResTable_map& mapEntry) {
-    switch (util::deviceToHost32(mapEntry.name.ident)) {
-    case ExtendedResTableMapTypes::ATTR_SOURCE_PATH:
-    case ExtendedResTableMapTypes::ATTR_SOURCE_LINE:
-    case ExtendedResTableMapTypes::ATTR_COMMENT:
-        return true;
-    }
-    return false;
-}
-
-bool BinaryResourceParser::collectMetaData(const ResTable_map& mapEntry, Value* value) {
-    switch (util::deviceToHost32(mapEntry.name.ident)) {
-    case ExtendedResTableMapTypes::ATTR_SOURCE_PATH:
-        value->setSource(Source(util::getString8(mSourcePool,
-                                                 util::deviceToHost32(mapEntry.value.data))));
-        return true;
-        break;
-
-    case ExtendedResTableMapTypes::ATTR_SOURCE_LINE:
-        value->setSource(value->getSource().withLine(util::deviceToHost32(mapEntry.value.data)));
-        return true;
-        break;
-
-    case ExtendedResTableMapTypes::ATTR_COMMENT:
-        value->setComment(util::getString(mSourcePool, util::deviceToHost32(mapEntry.value.data)));
-        return true;
-        break;
-    }
-    return false;
-}
-
 std::unique_ptr<Array> BinaryResourceParser::parseArray(const ResourceNameRef& name,
                                                         const ConfigDescription& config,
                                                         const ResTable_map_entry* map) {
     std::unique_ptr<Array> array = util::make_unique<Array>();
-    Source source;
     for (const ResTable_map& mapEntry : map) {
-        if (isMetaDataEntry(mapEntry)) {
-            if (array->items.empty()) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "out-of-sequence meta data in array");
-                return {};
-            }
-            collectMetaData(mapEntry, array->items.back().get());
-            continue;
-        }
-
         array->items.push_back(parseValue(name, config, &mapEntry.value, 0));
     }
     return array;
-}
-
-std::unique_ptr<Styleable> BinaryResourceParser::parseStyleable(const ResourceNameRef& name,
-                                                                const ConfigDescription& config,
-                                                                const ResTable_map_entry* map) {
-    std::unique_ptr<Styleable> styleable = util::make_unique<Styleable>();
-    for (const ResTable_map& mapEntry : map) {
-        if (isMetaDataEntry(mapEntry)) {
-            if (styleable->entries.empty()) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "out-of-sequence meta data in styleable");
-                return {};
-            }
-            collectMetaData(mapEntry, &styleable->entries.back());
-            continue;
-        }
-
-        if (util::deviceToHost32(mapEntry.name.ident) == 0) {
-            // The map entry's key (attribute) is not set. This must be
-            // a symbol reference, so resolve it.
-            Maybe<Reference> ref = getSymbol(&mapEntry.name.ident);
-            if (!ref) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "unresolved styleable symbol");
-                return {};
-            }
-            styleable->entries.emplace_back(std::move(ref.value()));
-
-        } else {
-            // The map entry's key (attribute) is a regular reference.
-            styleable->entries.emplace_back(util::deviceToHost32(mapEntry.name.ident));
-        }
-    }
-    return styleable;
 }
 
 std::unique_ptr<Plural> BinaryResourceParser::parsePlural(const ResourceNameRef& name,
                                                           const ConfigDescription& config,
                                                           const ResTable_map_entry* map) {
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
-    Item* lastEntry = nullptr;
     for (const ResTable_map& mapEntry : map) {
-        if (isMetaDataEntry(mapEntry)) {
-            if (!lastEntry) {
-                mContext->getDiagnostics()->error(DiagMessage(mSource)
-                                                  << "out-of-sequence meta data in plural");
-                return {};
-            }
-            collectMetaData(mapEntry, lastEntry);
-            continue;
-        }
-
         std::unique_ptr<Item> item = parseValue(name, config, &mapEntry.value, 0);
         if (!item) {
             return {};
         }
-
-        lastEntry = item.get();
 
         switch (util::deviceToHost32(mapEntry.name.ident)) {
             case ResTable_map::ATTR_ZERO:

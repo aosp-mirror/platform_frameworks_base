@@ -19,6 +19,7 @@
 #include "Flags.h"
 #include "Locale.h"
 #include "NameMangler.h"
+#include "ResourceUtils.h"
 #include "compile/IdAssigner.h"
 #include "filter/ConfigFilter.h"
 #include "flatten/Archive.h"
@@ -35,11 +36,13 @@
 #include "link/TableMerger.h"
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
+#include "proto/ProtoSerialize.h"
 #include "unflatten/BinaryResourceParser.h"
-#include "unflatten/FileExportHeaderReader.h"
 #include "util/Files.h"
 #include "util/StringPiece.h"
 #include "xml/XmlDom.h"
+
+#include <google/protobuf/io/coded_stream.h>
 
 #include <fstream>
 #include <sys/stat.h>
@@ -144,6 +147,22 @@ public:
         return table;
     }
 
+    std::unique_ptr<ResourceTable> loadTableFromPb(const Source& source,
+                                                   const void* data, size_t len) {
+        pb::ResourceTable pbTable;
+        if (!pbTable.ParseFromArray(data, len)) {
+            mContext->getDiagnostics()->error(DiagMessage(source) << "invalid compiled table");
+            return {};
+        }
+
+        std::unique_ptr<ResourceTable> table = deserializeTableFromPb(pbTable, source,
+                                                                      mContext->getDiagnostics());
+        if (!table) {
+            return {};
+        }
+        return table;
+    }
+
     /**
      * Inflates an XML file from the source path.
      */
@@ -161,18 +180,16 @@ public:
             const Source& source,
             const void* data, size_t len,
             IDiagnostics* diag) {
-        std::string errorStr;
-        ssize_t offset = getWrappedDataOffset(data, len, &errorStr);
-        if (offset < 0) {
-            diag->error(DiagMessage(source) << errorStr);
+        CompiledFileInputStream inputStream(data, len);
+        if (!inputStream.CompiledFile()) {
+            diag->error(DiagMessage(source) << "invalid compiled file header");
             return {};
         }
 
-        std::unique_ptr<xml::XmlResource> xmlRes = xml::inflate(
-                reinterpret_cast<const uint8_t*>(data) + static_cast<size_t>(offset),
-                len - static_cast<size_t>(offset),
-                diag,
-                source);
+        const uint8_t* xmlData = reinterpret_cast<const uint8_t*>(inputStream.data());
+        const size_t xmlDataLen = inputStream.size();
+
+        std::unique_ptr<xml::XmlResource> xmlRes = xml::inflate(xmlData, xmlDataLen, diag, source);
         if (!xmlRes) {
             return {};
         }
@@ -182,11 +199,16 @@ public:
     static std::unique_ptr<ResourceFile> loadFileExportHeader(const Source& source,
                                                               const void* data, size_t len,
                                                               IDiagnostics* diag) {
-        std::unique_ptr<ResourceFile> resFile = util::make_unique<ResourceFile>();
-        std::string errorStr;
-        ssize_t offset = unwrapFileExportHeader(data, len, resFile.get(), &errorStr);
-        if (offset < 0) {
-            diag->error(DiagMessage(source) << errorStr);
+        CompiledFileInputStream inputStream(data, len);
+        const pb::CompiledFile* pbFile = inputStream.CompiledFile();
+        if (!pbFile) {
+            diag->error(DiagMessage(source) << "invalid compiled file header");
+            return {};
+        }
+
+        std::unique_ptr<ResourceFile> resFile = deserializeCompiledFileFromPb(*pbFile, source,
+                                                                              diag);
+        if (!resFile) {
             return {};
         }
         return resFile;
@@ -214,16 +236,16 @@ public:
             return false;
         }
 
-        std::string errorStr;
-        ssize_t offset = getWrappedDataOffset(data->data(), data->size(), &errorStr);
-        if (offset < 0) {
-            mContext->getDiagnostics()->error(DiagMessage(file->getSource()) << errorStr);
+        CompiledFileInputStream inputStream(data->data(), data->size());
+        if (!inputStream.CompiledFile()) {
+            mContext->getDiagnostics()->error(DiagMessage(file->getSource())
+                                              << "invalid compiled file header");
             return false;
         }
 
         if (writer->startEntry(outPath, getCompressionFlags(outPath))) {
-            if (writer->writeEntry(reinterpret_cast<const uint8_t*>(data->data()) + offset,
-                                   data->size() - static_cast<size_t>(offset))) {
+            if (writer->writeEntry(reinterpret_cast<const uint8_t*>(inputStream.data()),
+                                   inputStream.size())) {
                 if (writer->finishEntry()) {
                     return true;
                 }
@@ -307,9 +329,7 @@ public:
 
     bool flattenTable(ResourceTable* table, IArchiveWriter* writer) {
         BigBuffer buffer(1024);
-        TableFlattenerOptions options = {};
-        options.useExtendedChunks = mOptions.staticLib;
-        TableFlattener flattener(&buffer, options);
+        TableFlattener flattener(&buffer);
         if (!flattener.consume(mContext, table)) {
             return false;
         }
@@ -445,8 +465,8 @@ public:
             return false;
         }
 
-        std::unique_ptr<ResourceTable> table = loadTable(file->getSource(), data->data(),
-                                                         data->size());
+        std::unique_ptr<ResourceTable> table = loadTableFromPb(file->getSource(), data->data(),
+                                                               data->size());
         if (!table) {
             return false;
         }

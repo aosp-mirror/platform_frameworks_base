@@ -38,9 +38,7 @@ public:
 
     ::testing::AssertionResult flatten(ResourceTable* table, ResTable* outTable) {
         BigBuffer buffer(1024);
-        TableFlattenerOptions options = {};
-        options.useExtendedChunks = true;
-        TableFlattener flattener(&buffer, options);
+        TableFlattener flattener(&buffer);
         if (!flattener.consume(mContext.get(), table)) {
             return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
         }
@@ -54,9 +52,7 @@ public:
 
     ::testing::AssertionResult flatten(ResourceTable* table, ResourceTable* outTable) {
         BigBuffer buffer(1024);
-        TableFlattenerOptions options = {};
-        options.useExtendedChunks = true;
-        TableFlattener flattener(&buffer, options);
+        TableFlattener flattener(&buffer);
         if (!flattener.consume(mContext.get(), table)) {
             return ::testing::AssertionFailure() << "failed to flatten ResourceTable";
         }
@@ -210,58 +206,6 @@ TEST_F(TableFlattenerTest, FlattenEntriesWithGapsInIds) {
                            Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
 }
 
-TEST_F(TableFlattenerTest, FlattenUnlinkedTable) {
-    std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
-            .setPackageId(u"com.app.test", 0x7f)
-            .addValue(u"@com.app.test:integer/one", ResourceId(0x7f020000),
-                      test::buildReference(u"@android:integer/foo"))
-            .addValue(u"@com.app.test:style/Theme", ResourceId(0x7f030000), test::StyleBuilder()
-                    .setParent(u"@android:style/Theme.Material")
-                    .addItem(u"@android:attr/background", {})
-                    .addItem(u"@android:attr/colorAccent",
-                             test::buildReference(u"@com.app.test:color/green"))
-                    .build())
-            .build();
-
-    {
-        // Need access to stringPool to make RawString.
-        Style* style = test::getValue<Style>(table.get(), u"@com.app.test:style/Theme");
-        style->entries[0].value = util::make_unique<RawString>(table->stringPool.makeRef(u"foo"));
-    }
-
-    ResourceTable finalTable;
-    ASSERT_TRUE(flatten(table.get(), &finalTable));
-
-    Reference* ref = test::getValue<Reference>(&finalTable, u"@com.app.test:integer/one");
-    ASSERT_NE(ref, nullptr);
-    AAPT_ASSERT_TRUE(ref->name);
-    EXPECT_EQ(ref->name.value(), test::parseNameOrDie(u"@android:integer/foo"));
-
-    Style* style = test::getValue<Style>(&finalTable, u"@com.app.test:style/Theme");
-    ASSERT_NE(style, nullptr);
-    AAPT_ASSERT_TRUE(style->parent);
-    AAPT_ASSERT_TRUE(style->parent.value().name);
-    EXPECT_EQ(style->parent.value().name.value(),
-              test::parseNameOrDie(u"@android:style/Theme.Material"));
-
-    ASSERT_EQ(2u, style->entries.size());
-
-    AAPT_ASSERT_TRUE(style->entries[0].key.name);
-    EXPECT_EQ(style->entries[0].key.name.value(),
-              test::parseNameOrDie(u"@android:attr/background"));
-    RawString* raw = valueCast<RawString>(style->entries[0].value.get());
-    ASSERT_NE(raw, nullptr);
-    EXPECT_EQ(*raw->value, u"foo");
-
-    AAPT_ASSERT_TRUE(style->entries[1].key.name);
-    EXPECT_EQ(style->entries[1].key.name.value(),
-              test::parseNameOrDie(u"@android:attr/colorAccent"));
-    ref = valueCast<Reference>(style->entries[1].value.get());
-    ASSERT_NE(ref, nullptr);
-    AAPT_ASSERT_TRUE(ref->name);
-    EXPECT_EQ(ref->name.value(), test::parseNameOrDie(u"@com.app.test:color/green"));
-}
-
 TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
     Attribute attr(false);
     attr.typeMask = android::ResTable_map::TYPE_INTEGER;
@@ -282,35 +226,6 @@ TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
     EXPECT_EQ(attr.typeMask, actualAttr->typeMask);
     EXPECT_EQ(attr.minInt, actualAttr->minInt);
     EXPECT_EQ(attr.maxInt, actualAttr->maxInt);
-}
-
-TEST_F(TableFlattenerTest, FlattenSourceAndCommentsForChildrenOfCompoundValues) {
-    Style style;
-    Reference key(test::parseNameOrDie(u"@android:attr/foo"));
-    key.id = ResourceId(0x01010000);
-    key.setSource(Source("test").withLine(2));
-    key.setComment(StringPiece16(u"comment"));
-    style.entries.push_back(Style::Entry{ key, util::make_unique<Id>() });
-
-    test::ResourceTableBuilder builder = test::ResourceTableBuilder();
-    std::unique_ptr<ResourceTable> table = builder
-            .setPackageId(u"android", 0x01)
-            .addValue(u"@android:attr/foo", ResourceId(0x01010000),
-                      test::AttributeBuilder().build())
-            .addValue(u"@android:style/foo", ResourceId(0x01020000),
-                      std::unique_ptr<Style>(style.clone(builder.getStringPool())))
-            .build();
-
-    ResourceTable result;
-    ASSERT_TRUE(flatten(table.get(), &result));
-
-    Style* actualStyle = test::getValue<Style>(&result, u"@android:style/foo");
-    ASSERT_NE(nullptr, actualStyle);
-    ASSERT_EQ(1u, actualStyle->entries.size());
-
-    Reference* actualKey = &actualStyle->entries[0].key;
-    EXPECT_EQ(key.getSource(), actualKey->getSource());
-    EXPECT_EQ(key.getComment(), actualKey->getComment());
 }
 
 } // namespace aapt

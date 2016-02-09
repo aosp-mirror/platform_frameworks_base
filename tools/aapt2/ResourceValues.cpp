@@ -19,7 +19,6 @@
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
 #include "util/Util.h"
-#include "flatten/ResourceTypeExtensions.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <limits>
@@ -47,7 +46,7 @@ RawString* RawString::clone(StringPool* newPool) const {
 }
 
 bool RawString::flatten(android::Res_value* outValue) const {
-    outValue->dataType = ExtendedTypes::TYPE_RAW_STRING;
+    outValue->dataType = android::Res_value::TYPE_STRING;
     outValue->data = util::hostToDevice32(static_cast<uint32_t>(value.getIndex()));
     return true;
 }

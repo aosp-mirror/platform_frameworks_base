@@ -24,28 +24,15 @@ namespace aapt {
 class BigBuffer;
 class ResourceTable;
 
-struct TableFlattenerOptions {
-    /**
-     * Specifies whether to output extended chunks, like
-     * source information and missing symbol entries. Default
-     * is false.
-     *
-     * Set this to true when emitting intermediate resource table.
-     */
-    bool useExtendedChunks = false;
-};
-
 class TableFlattener : public IResourceTableConsumer {
 public:
-    TableFlattener(BigBuffer* buffer, TableFlattenerOptions options) :
-            mBuffer(buffer), mOptions(options) {
+    TableFlattener(BigBuffer* buffer) : mBuffer(buffer) {
     }
 
     bool consume(IAaptContext* context, ResourceTable* table) override;
 
 private:
     BigBuffer* mBuffer;
-    TableFlattenerOptions mOptions;
 };
 
 } // namespace aapt

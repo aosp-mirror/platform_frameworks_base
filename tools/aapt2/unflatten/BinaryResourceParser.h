@@ -55,14 +55,8 @@ public:
     bool parse();
 
 private:
-    // Helper method to retrieve the symbol name for a given table offset specified
-    // as a pointer.
-    Maybe<Reference> getSymbol(const void* data);
-
     bool parseTable(const android::ResChunk_header* chunk);
-    bool parseSymbolTable(const android::ResChunk_header* chunk);
     bool parsePackage(const android::ResChunk_header* chunk);
-    bool parsePublic(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
     bool parseTypeSpec(const android::ResChunk_header* chunk);
     bool parseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
 
@@ -87,10 +81,6 @@ private:
                                         const ConfigDescription& config,
                                         const android::ResTable_map_entry* map);
 
-    std::unique_ptr<Styleable> parseStyleable(const ResourceNameRef& name,
-                                              const ConfigDescription& config,
-                                              const android::ResTable_map_entry* map);
-
     /**
      * If the mapEntry is a special type that denotes meta data (source, comment), then it is
      * read and added to the Value.
@@ -105,23 +95,6 @@ private:
 
     const void* mData;
     const size_t mDataLen;
-
-    // The array of symbol entries. Each element points to an offset
-    // in the table and an index into the symbol table string pool.
-    const SymbolTable_entry* mSymbolEntries = nullptr;
-
-    // Number of symbol entries.
-    size_t mSymbolEntryCount = 0;
-
-    // The symbol table string pool. Holds the names of symbols
-    // referenced in this table but not defined nor resolved to an
-    // ID.
-    android::ResStringPool mSymbolPool;
-
-    // The source string pool. Resource entries may have an extra
-    // field that points into this string pool, which denotes where
-    // the resource was parsed from originally.
-    android::ResStringPool mSourcePool;
 
     // The standard value string pool for resource values.
     android::ResStringPool mValuePool;

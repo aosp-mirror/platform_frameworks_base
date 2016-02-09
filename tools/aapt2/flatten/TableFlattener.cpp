@@ -51,157 +51,49 @@ static void strcpy16_htod(uint16_t* dst, size_t len, const StringPiece16& src) {
     dst[i] = 0;
 }
 
+static bool cmpStyleEntries(const Style::Entry& a, const Style::Entry& b) {
+   if (a.key.id) {
+       if (b.key.id) {
+           return a.key.id.value() < b.key.id.value();
+       }
+       return true;
+   } else if (!b.key.id) {
+       return a.key.name.value() < b.key.name.value();
+   }
+   return false;
+}
+
 struct FlatEntry {
     ResourceEntry* entry;
     Value* value;
 
     // The entry string pool index to the entry's name.
     uint32_t entryKey;
-
-    // The source string pool index to the source file path.
-    uint32_t sourcePathKey;
-    uint32_t sourceLine;
-
-    // The source string pool index to the comment.
-    uint32_t commentKey;
 };
 
-class SymbolWriter {
+class MapFlattenVisitor : public RawValueVisitor {
 public:
-    struct Entry {
-        StringPool::Ref name;
-        size_t offset;
-    };
-
-    std::vector<Entry> symbols;
-
-    explicit SymbolWriter(StringPool* pool) : mPool(pool) {
-    }
-
-    void addSymbol(const Reference& ref, size_t offset) {
-        const ResourceName& name = ref.name.value();
-        std::u16string fullName;
-        if (ref.privateReference) {
-            fullName += u"*";
-        }
-
-        if (!name.package.empty()) {
-            fullName += name.package + u":";
-        }
-        fullName += toString(name.type).toString() + u"/" + name.entry;
-        symbols.push_back(Entry{ mPool->makeRef(fullName), offset });
-    }
-
-    void shiftAllOffsets(size_t offset) {
-        for (Entry& entry : symbols) {
-            entry.offset += offset;
-        }
-    }
-
-private:
-    StringPool* mPool;
-};
-
-struct MapFlattenVisitor : public RawValueVisitor {
     using RawValueVisitor::visit;
 
-    SymbolWriter* mSymbols;
-    FlatEntry* mEntry;
-    BigBuffer* mBuffer;
-    StringPool* mSourcePool;
-    StringPool* mCommentPool;
-    bool mUseExtendedChunks;
-
-    size_t mEntryCount = 0;
-    const Reference* mParent = nullptr;
-
-    MapFlattenVisitor(SymbolWriter* symbols, FlatEntry* entry, BigBuffer* buffer,
-                      StringPool* sourcePool, StringPool* commentPool,
-                      bool useExtendedChunks) :
-            mSymbols(symbols), mEntry(entry), mBuffer(buffer), mSourcePool(sourcePool),
-            mCommentPool(commentPool), mUseExtendedChunks(useExtendedChunks) {
-    }
-
-    void flattenKey(Reference* key, ResTable_map* outEntry) {
-        if (!key->id || (key->privateReference && mUseExtendedChunks)) {
-            assert(key->name && "reference must have a name");
-
-            outEntry->name.ident = util::hostToDevice32(0);
-            mSymbols->addSymbol(*key, (mBuffer->size() - sizeof(ResTable_map)) +
-                                    offsetof(ResTable_map, name));
-        } else {
-            outEntry->name.ident = util::hostToDevice32(key->id.value().id);
-        }
-    }
-
-    void flattenValue(Item* value, ResTable_map* outEntry) {
-        bool privateRef = false;
-        if (Reference* ref = valueCast<Reference>(value)) {
-            privateRef = ref->privateReference && mUseExtendedChunks;
-            if (!ref->id || privateRef) {
-                assert(ref->name && "reference must have a name");
-
-                mSymbols->addSymbol(*ref, (mBuffer->size() - sizeof(ResTable_map)) +
-                                        offsetof(ResTable_map, value) + offsetof(Res_value, data));
-            }
-        }
-
-        bool result = value->flatten(&outEntry->value);
-        if (privateRef) {
-            outEntry->value.data = 0;
-        }
-        assert(result && "flatten failed");
-    }
-
-    void flattenEntry(Reference* key, Item* value) {
-        ResTable_map* outEntry = mBuffer->nextBlock<ResTable_map>();
-        flattenKey(key, outEntry);
-        flattenValue(value, outEntry);
-        outEntry->value.size = util::hostToDevice16(sizeof(outEntry->value));
-        mEntryCount++;
-    }
-
-    void flattenMetaData(Value* value) {
-        if (!mUseExtendedChunks) {
-            return;
-        }
-
-        Reference key(ResourceId{ ExtendedResTableMapTypes::ATTR_SOURCE_PATH });
-        StringPool::Ref sourcePathRef = mSourcePool->makeRef(
-                util::utf8ToUtf16(value->getSource().path));
-        BinaryPrimitive val(Res_value::TYPE_INT_DEC,
-                            static_cast<uint32_t>(sourcePathRef.getIndex()));
-        flattenEntry(&key, &val);
-
-        if (value->getSource().line) {
-            key.id = ResourceId(ExtendedResTableMapTypes::ATTR_SOURCE_LINE);
-            val.value.data = static_cast<uint32_t>(value->getSource().line.value());
-            flattenEntry(&key, &val);
-        }
-
-        if (!value->getComment().empty()) {
-            key.id = ResourceId(ExtendedResTableMapTypes::ATTR_COMMENT);
-            StringPool::Ref commentRef = mCommentPool->makeRef(value->getComment());
-            val.value.data = static_cast<uint32_t>(commentRef.getIndex());
-            flattenEntry(&key, &val);
-        }
+    MapFlattenVisitor(ResTable_entry_ext* outEntry, BigBuffer* buffer) :
+            mOutEntry(outEntry), mBuffer(buffer) {
     }
 
     void visit(Attribute* attr) override {
         {
-            Reference key(ResourceId{ ResTable_map::ATTR_TYPE });
+            Reference key = Reference(ResTable_map::ATTR_TYPE);
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, attr->typeMask);
             flattenEntry(&key, &val);
         }
 
         if (attr->minInt != std::numeric_limits<int32_t>::min()) {
-            Reference key(ResourceId{ ResTable_map::ATTR_MIN });
+            Reference key = Reference(ResTable_map::ATTR_MIN);
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->minInt));
             flattenEntry(&key, &val);
         }
 
         if (attr->maxInt != std::numeric_limits<int32_t>::max()) {
-            Reference key(ResourceId{ ResTable_map::ATTR_MAX });
+            Reference key = Reference(ResTable_map::ATTR_MAX);
             BinaryPrimitive val(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(attr->maxInt));
             flattenEntry(&key, &val);
         }
@@ -212,22 +104,11 @@ struct MapFlattenVisitor : public RawValueVisitor {
         }
     }
 
-    static bool cmpStyleEntries(const Style::Entry& a, const Style::Entry& b) {
-        if (a.key.id) {
-            if (b.key.id) {
-                return a.key.id.value() < b.key.id.value();
-            }
-            return true;
-        } else if (!b.key.id) {
-            return a.key.name.value() < b.key.name.value();
-        }
-        return false;
-    }
-
     void visit(Style* style) override {
         if (style->parent) {
-            // Parents are treated a bit differently, so record the existence and move on.
-            mParent = &style->parent.value();
+            const Reference& parentRef = style->parent.value();
+            assert(parentRef.id && "parent has no ID");
+            mOutEntry->parent.ident = util::hostToDevice32(parentRef.id.value().id);
         }
 
         // Sort the style.
@@ -235,7 +116,6 @@ struct MapFlattenVisitor : public RawValueVisitor {
 
         for (Style::Entry& entry : style->entries) {
             flattenEntry(&entry.key, entry.value.get());
-            flattenMetaData(&entry.key);
         }
     }
 
@@ -243,8 +123,8 @@ struct MapFlattenVisitor : public RawValueVisitor {
         for (auto& attrRef : styleable->entries) {
             BinaryPrimitive val(Res_value{});
             flattenEntry(&attrRef, &val);
-            flattenMetaData(&attrRef);
         }
+
     }
 
     void visit(Array* array) override {
@@ -253,7 +133,6 @@ struct MapFlattenVisitor : public RawValueVisitor {
             flattenValue(item.get(), outEntry);
             outEntry->value.size = util::hostToDevice16(sizeof(outEntry->value));
             mEntryCount++;
-            flattenMetaData(item.get());
         }
     }
 
@@ -297,18 +176,45 @@ struct MapFlattenVisitor : public RawValueVisitor {
 
             Reference key(q);
             flattenEntry(&key, plural->values[i].get());
-            flattenMetaData(plural->values[i].get());
         }
     }
+
+    /**
+     * Call this after visiting a Value. This will finish any work that
+     * needs to be done to prepare the entry.
+     */
+    void finish() {
+        mOutEntry->count = util::hostToDevice32(mEntryCount);
+    }
+
+private:
+    void flattenKey(Reference* key, ResTable_map* outEntry) {
+        assert(key->id && "key has no ID");
+        outEntry->name.ident = util::hostToDevice32(key->id.value().id);
+    }
+
+    void flattenValue(Item* value, ResTable_map* outEntry) {
+        bool result = value->flatten(&outEntry->value);
+        assert(result && "flatten failed");
+    }
+
+    void flattenEntry(Reference* key, Item* value) {
+        ResTable_map* outEntry = mBuffer->nextBlock<ResTable_map>();
+        flattenKey(key, outEntry);
+        flattenValue(value, outEntry);
+        outEntry->value.size = util::hostToDevice16(sizeof(outEntry->value));
+        mEntryCount++;
+    }
+
+    ResTable_entry_ext* mOutEntry;
+    BigBuffer* mBuffer;
+    size_t mEntryCount = 0;
 };
 
 class PackageFlattener {
 public:
-    PackageFlattener(IDiagnostics* diag, TableFlattenerOptions options,
-                     ResourceTablePackage* package, SymbolWriter* symbolWriter,
-                     StringPool* sourcePool) :
-            mDiag(diag), mOptions(options), mPackage(package), mSymbols(symbolWriter),
-            mSourcePool(sourcePool) {
+    PackageFlattener(IDiagnostics* diag, ResourceTablePackage* package) :
+            mDiag(diag), mPackage(package) {
     }
 
     bool flattenPackage(BigBuffer* buffer) {
@@ -337,9 +243,6 @@ public:
         pkgHeader->keyStrings = util::hostToDevice32(pkgWriter.size());
         StringPool::flattenUtf16(pkgWriter.getBuffer(), mKeyPool);
 
-        // Add the ResTable_package header/type/key strings to the offset.
-        mSymbols->shiftAllOffsets(pkgWriter.size());
-
         // Append the types.
         buffer->appendBuffer(std::move(typeBuffer));
 
@@ -349,12 +252,9 @@ public:
 
 private:
     IDiagnostics* mDiag;
-    TableFlattenerOptions mOptions;
     ResourceTablePackage* mPackage;
     StringPool mTypePool;
     StringPool mKeyPool;
-    SymbolWriter* mSymbols;
-    StringPool* mSourcePool;
 
     template <typename T, bool IsItem>
     T* writeEntry(FlatEntry* entry, BigBuffer* buffer) {
@@ -376,62 +276,24 @@ private:
             outEntry->flags |= ResTable_entry::FLAG_COMPLEX;
         }
 
-        outEntry->key.index = util::hostToDevice32(entry->entryKey);
-        outEntry->size = sizeof(T);
-
-        if (mOptions.useExtendedChunks) {
-            // Write the extra source block. This will be ignored by the Android runtime.
-            ResTable_entry_source* sourceBlock = buffer->nextBlock<ResTable_entry_source>();
-            sourceBlock->path.index = util::hostToDevice32(entry->sourcePathKey);
-            sourceBlock->line = util::hostToDevice32(entry->sourceLine);
-            sourceBlock->comment.index = util::hostToDevice32(entry->commentKey);
-            outEntry->size += sizeof(*sourceBlock);
-        }
-
         outEntry->flags = util::hostToDevice16(outEntry->flags);
-        outEntry->size = util::hostToDevice16(outEntry->size);
+        outEntry->key.index = util::hostToDevice32(entry->entryKey);
+        outEntry->size = util::hostToDevice16(sizeof(T));
         return result;
     }
 
     bool flattenValue(FlatEntry* entry, BigBuffer* buffer) {
         if (Item* item = valueCast<Item>(entry->value)) {
             writeEntry<ResTable_entry, true>(entry, buffer);
-            bool privateRef = false;
-            if (Reference* ref = valueCast<Reference>(entry->value)) {
-                // If there is no ID or the reference is private and we allow extended chunks,
-                // write out a 0 and mark the symbol table with the name of the reference.
-                privateRef = (ref->privateReference && mOptions.useExtendedChunks);
-                if (!ref->id || privateRef) {
-                    assert(ref->name && "reference must have at least a name");
-                    mSymbols->addSymbol(*ref, buffer->size() + offsetof(Res_value, data));
-                }
-            }
             Res_value* outValue = buffer->nextBlock<Res_value>();
             bool result = item->flatten(outValue);
             assert(result && "flatten failed");
-            if (privateRef) {
-                // Force the value of 0 so we look up the symbol at unflatten time.
-                outValue->data = 0;
-            }
             outValue->size = util::hostToDevice16(sizeof(*outValue));
         } else {
-            const size_t beforeEntry = buffer->size();
             ResTable_entry_ext* outEntry = writeEntry<ResTable_entry_ext, false>(entry, buffer);
-            MapFlattenVisitor visitor(mSymbols, entry, buffer, mSourcePool, mSourcePool,
-                                      mOptions.useExtendedChunks);
+            MapFlattenVisitor visitor(outEntry, buffer);
             entry->value->accept(&visitor);
-            outEntry->count = util::hostToDevice32(visitor.mEntryCount);
-            if (visitor.mParent) {
-                const bool forceSymbol = visitor.mParent->privateReference &&
-                        mOptions.useExtendedChunks;
-                if (!visitor.mParent->id || forceSymbol) {
-                    assert(visitor.mParent->name && "reference must have a name");
-                    mSymbols->addSymbol(*visitor.mParent,
-                                        beforeEntry + offsetof(ResTable_entry_ext, parent));
-                } else {
-                    outEntry->parent.ident = util::hostToDevice32(visitor.mParent->id.value().id);
-                }
-            }
+            visitor.finish();
         }
         return true;
     }
@@ -480,7 +342,7 @@ private:
     std::vector<ResourceTableType*> collectAndSortTypes() {
         std::vector<ResourceTableType*> sortedTypes;
         for (auto& type : mPackage->types) {
-            if (type->type == ResourceType::kStyleable && !mOptions.useExtendedChunks) {
+            if (type->type == ResourceType::kStyleable) {
                 // Styleables aren't real Resource Types, they are represented in the R.java
                 // file.
                 continue;
@@ -551,52 +413,6 @@ private:
         return true;
     }
 
-    bool flattenPublic(ResourceTableType* type, std::vector<ResourceEntry*>* sortedEntries,
-                       BigBuffer* buffer) {
-        ChunkWriter publicWriter(buffer);
-        Public_header* publicHeader = publicWriter.startChunk<Public_header>(RES_TABLE_PUBLIC_TYPE);
-        publicHeader->typeId = type->id.value();
-
-        for (ResourceEntry* entry : *sortedEntries) {
-            if (entry->symbolStatus.state != SymbolState::kUndefined) {
-                // Write the public status of this entry.
-                Public_entry* publicEntry = publicWriter.nextBlock<Public_entry>();
-                publicEntry->entryId = util::hostToDevice32(entry->id.value());
-                publicEntry->key.index = util::hostToDevice32(mKeyPool.makeRef(
-                        entry->name).getIndex());
-                publicEntry->source.path.index = util::hostToDevice32(mSourcePool->makeRef(
-                        util::utf8ToUtf16(entry->symbolStatus.source.path)).getIndex());
-                if (entry->symbolStatus.source.line) {
-                    publicEntry->source.line = util::hostToDevice32(
-                            entry->symbolStatus.source.line.value());
-                }
-                publicEntry->source.comment.index = util::hostToDevice32(mSourcePool->makeRef(
-                        entry->symbolStatus.comment).getIndex());
-
-                switch (entry->symbolStatus.state) {
-                case SymbolState::kPrivate:
-                    publicEntry->state = Public_entry::kPrivate;
-                    break;
-
-                case SymbolState::kPublic:
-                    publicEntry->state = Public_entry::kPublic;
-                    break;
-
-                case SymbolState::kUndefined:
-                    publicEntry->state = Public_entry::kUndefined;
-                    break;
-                }
-
-                // Don't hostToDevice until the last step.
-                publicHeader->count += 1;
-            }
-        }
-
-        publicHeader->count = util::hostToDevice32(publicHeader->count);
-        publicWriter.finish();
-        return true;
-    }
-
     bool flattenTypes(BigBuffer* buffer) {
         // Sort the types by their IDs. They will be inserted into the StringPool in this order.
         std::vector<ResourceTableType*> sortedTypes = collectAndSortTypes();
@@ -620,12 +436,6 @@ private:
                 return false;
             }
 
-            if (mOptions.useExtendedChunks) {
-                if (!flattenPublic(type, &sortedEntries, buffer)) {
-                    return false;
-                }
-            }
-
             // The binary resource table lists resource entries for each configuration.
             // We store them inverted, where a resource entry lists the values for each
             // configuration available. Here we reverse this to match the binary table.
@@ -635,26 +445,8 @@ private:
 
                 // Group values by configuration.
                 for (auto& configValue : entry->values) {
-                    Value* value = configValue.value.get();
-
-                    const StringPool::Ref sourceRef = mSourcePool->makeRef(
-                            util::utf8ToUtf16(value->getSource().path));
-
-                    uint32_t lineNumber = 0;
-                    if (value->getSource().line) {
-                        lineNumber = value->getSource().line.value();
-                    }
-
-                    const StringPool::Ref commentRef = mSourcePool->makeRef(value->getComment());
-
-                    configToEntryListMap[configValue.config]
-                            .push_back(FlatEntry{
-                                    entry,
-                                    value,
-                                    keyIndex,
-                                    (uint32_t) sourceRef.getIndex(),
-                                    lineNumber,
-                                    (uint32_t) commentRef.getIndex() });
+                    configToEntryListMap[configValue.config].push_back(FlatEntry{
+                            entry, configValue.value.get(), keyIndex });
                 }
             }
 
@@ -692,86 +484,18 @@ bool TableFlattener::consume(IAaptContext* context, ResourceTable* table) {
     // Flatten the values string pool.
     StringPool::flattenUtf8(tableWriter.getBuffer(), table->stringPool);
 
-    // If we have a reference to a symbol that doesn't exist, we don't know its resource ID.
-    // We encode the name of the symbol along with the offset of where to include the resource ID
-    // once it is found.
-    StringPool symbolPool;
-    std::vector<SymbolWriter::Entry> symbolOffsets;
-
-    // String pool holding the source paths of each value.
-    StringPool sourcePool;
-
     BigBuffer packageBuffer(1024);
 
     // Flatten each package.
     for (auto& package : table->packages) {
-        const size_t beforePackageSize = packageBuffer.size();
-
-        // All packages will share a single global symbol pool.
-        SymbolWriter packageSymbolWriter(&symbolPool);
-
-        PackageFlattener flattener(context->getDiagnostics(), mOptions, package.get(),
-                                   &packageSymbolWriter, &sourcePool);
+        PackageFlattener flattener(context->getDiagnostics(), package.get());
         if (!flattener.flattenPackage(&packageBuffer)) {
             return false;
         }
-
-        // The symbols are offset only from their own Package start. Offset them from the
-        // start of the packageBuffer.
-        packageSymbolWriter.shiftAllOffsets(beforePackageSize);
-
-        // Extract all the symbols to offset
-        symbolOffsets.insert(symbolOffsets.end(),
-                             std::make_move_iterator(packageSymbolWriter.symbols.begin()),
-                             std::make_move_iterator(packageSymbolWriter.symbols.end()));
     }
-
-    SymbolTable_entry* symbolEntryData = nullptr;
-    if (mOptions.useExtendedChunks) {
-        if (!symbolOffsets.empty()) {
-            // Sort the offsets so we can scan them linearly.
-            std::sort(symbolOffsets.begin(), symbolOffsets.end(),
-                      [](const SymbolWriter::Entry& a, const SymbolWriter::Entry& b) -> bool {
-                          return a.offset < b.offset;
-                      });
-
-            // Write the Symbol header.
-            ChunkWriter symbolWriter(tableWriter.getBuffer());
-            SymbolTable_header* symbolHeader = symbolWriter.startChunk<SymbolTable_header>(
-                    RES_TABLE_SYMBOL_TABLE_TYPE);
-            symbolHeader->count = util::hostToDevice32(symbolOffsets.size());
-
-            symbolEntryData = symbolWriter.nextBlock<SymbolTable_entry>(symbolOffsets.size());
-            StringPool::flattenUtf8(symbolWriter.getBuffer(), symbolPool);
-            symbolWriter.finish();
-        }
-
-        if (sourcePool.size() > 0) {
-            // Write out source pool.
-            ChunkWriter srcWriter(tableWriter.getBuffer());
-            srcWriter.startChunk<ResChunk_header>(RES_TABLE_SOURCE_POOL_TYPE);
-            StringPool::flattenUtf8(srcWriter.getBuffer(), sourcePool);
-            srcWriter.finish();
-        }
-    }
-
-    const size_t beforePackagesSize = tableWriter.size();
 
     // Finally merge all the packages into the main buffer.
     tableWriter.getBuffer()->appendBuffer(std::move(packageBuffer));
-
-    // Update the offsets to their final values.
-    if (symbolEntryData) {
-        for (SymbolWriter::Entry& entry : symbolOffsets) {
-            symbolEntryData->name.index = util::hostToDevice32(entry.name.getIndex());
-
-            // The symbols were all calculated with the packageBuffer offset. We need to
-            // add the beginning of the output buffer.
-            symbolEntryData->offset = util::hostToDevice32(entry.offset + beforePackagesSize);
-            symbolEntryData++;
-        }
-    }
-
     tableWriter.finish();
     return true;
 }
