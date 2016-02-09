@@ -429,15 +429,15 @@ public final class InputMethodInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if the IME is marked to be Encryption-Aware.
+     * @return {@code true} if the {@link android.inputmethodservice.InputMethodService} is marked
+     * to be Encryption-Aware.
      * @hide
      */
     public boolean isEncryptionAware() {
-        if (mService == null || mService.serviceInfo == null ||
-                mService.serviceInfo.applicationInfo == null) {
+        if (mService == null || mService.serviceInfo == null) {
             return false;
         }
-        return mService.serviceInfo.applicationInfo.isEncryptionAware();
+        return mService.serviceInfo.encryptionAware;
     }
 
     public void dump(Printer pw, String prefix) {
@@ -446,13 +446,6 @@ public final class InputMethodInfo implements Parcelable {
                 + " mSupportsSwitchingToNextInputMethod=" + mSupportsSwitchingToNextInputMethod);
         pw.println(prefix + "mIsDefaultResId=0x"
                 + Integer.toHexString(mIsDefaultResId));
-        if (mService != null && mService.serviceInfo != null &&
-                mService.serviceInfo.applicationInfo != null) {
-            pw.println(" encryptionAware=" +
-                    mService.serviceInfo.applicationInfo.isEncryptionAware());
-        } else {
-            pw.println(" encryptionAware=unknown");
-        }
         pw.println(prefix + "Service:");
         mService.dump(pw, prefix + "  ");
     }
