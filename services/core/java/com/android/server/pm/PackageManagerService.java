@@ -14397,7 +14397,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
 
         PackageSetting ps;
-        int removeUser = -1;
 
         synchronized (mPackages) {
             ps = mSettings.mPackages.get(packageName);
@@ -14412,7 +14411,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
                             + ((user == null) ? UserHandle.USER_ALL : user));
                 }
-                if (!clearPackageStateForUser(ps, removeUser, outInfo)) {
+                final int removedUserId = (user != null) ? user.getIdentifier()
+                        : UserHandle.USER_ALL;
+                if (!clearPackageStateForUser(ps, removedUserId, outInfo)) {
                     return false;
                 }
                 markPackageUninstalledForUserLPw(ps, user);
@@ -14436,9 +14437,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (ps.isAnyInstalled(sUserManager.getUserIds()) || keepUninstalledPackage) {
                     // Other user still have this package installed, so all
                     // we need to do is clear this user's data and save that
-                // it is uninstalled.
-                if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                    if (!clearPackageStateForUser(ps, removeUser, outInfo)) {
+                    // it is uninstalled.
+                    if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
+                    if (!clearPackageStateForUser(ps, user.getIdentifier(), outInfo)) {
                         return false;
                     }
                     scheduleWritePackageRestrictionsLocked(user);
@@ -14455,7 +14456,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // we need to do is clear this user's data and save that
                 // it is uninstalled.
                 if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                if (!clearPackageStateForUser(ps, removeUser, outInfo)) {
+                if (!clearPackageStateForUser(ps, user.getIdentifier(), outInfo)) {
                     return false;
                 }
                 scheduleWritePackageRestrictionsLocked(user);
