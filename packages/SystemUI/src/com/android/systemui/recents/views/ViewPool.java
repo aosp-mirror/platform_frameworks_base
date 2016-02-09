@@ -29,8 +29,8 @@ public class ViewPool<V, T> {
     /* An interface to the consumer of a view pool */
     public interface ViewPoolConsumer<V, T> {
         public V createView(Context context);
-        public void prepareViewToEnterPool(V v);
-        public void prepareViewToLeavePool(V v, T prepareData, boolean isNewView);
+        public void onReturnViewToPool(V v);
+        public void onPickUpViewFromPool(V v, T prepareData, boolean isNewView);
         public boolean hasPreferredData(V v, T preferredData);
     }
 
@@ -46,7 +46,7 @@ public class ViewPool<V, T> {
 
     /** Returns a view into the pool */
     void returnViewToPool(V v) {
-        mViewCreator.prepareViewToEnterPool(v);
+        mViewCreator.onReturnViewToPool(v);
         mPool.push(v);
     }
 
@@ -73,7 +73,7 @@ public class ViewPool<V, T> {
                 v = mPool.pop();
             }
         }
-        mViewCreator.prepareViewToLeavePool(v, prepareData, isNewView);
+        mViewCreator.onPickUpViewFromPool(v, prepareData, isNewView);
         return v;
     }
 
