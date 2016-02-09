@@ -1704,7 +1704,7 @@ public abstract class TvInputService extends Service {
          * A non-null {@code programHint} implies the started recording should be of that specific
          * program, whereas null {@code programHint} does not impose such a requirement and the
          * recording can span across multiple TV programs. In either case, the application must call
-         * {@link #stopRecording()} to stop the recording.
+         * {@link TvRecordingClient#stopRecording()} to stop the recording.
          *
          * <p>The session must call either {@link #notifyRecordingStarted()} or
          * {@link #notifyError(int)}.
