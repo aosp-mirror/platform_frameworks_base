@@ -1960,32 +1960,32 @@ results."
 
           <li class="nav-section">
             <div class="nav-section-header">
-              <a href="<?cs var:toroot ?>training/app/battery/network/index.html">
+              <a href="<?cs var:toroot ?>training/performance/battery/network/index.html">
                 Reducing Network Battery Drain
               </a>
             </div>
             <ul>
-              <li><a href="<?cs var:toroot ?>training/app/battery/network/gather-data.html">
+              <li><a href="<?cs var:toroot ?>training/performance/battery/network/gather-data.html">
                 Collecting Network Traffic Data
               </a>
               </li>
-              <li><a href="<?cs var:toroot ?>training/app/battery/network/analyze-data.html">
+              <li><a href="<?cs var:toroot ?>training/performance/battery/network/analyze-data.html">
                 Analyzing Network Traffic Data
               </a>
               </li>
-              <li><a href="<?cs var:toroot ?>training/app/battery/network/action-user-traffic.html">
+              <li><a href="<?cs var:toroot ?>training/performance/battery/network/action-user-traffic.html">
                 Optimizing User-Initiated Network Use
               </a>
               </li>
-              <li><a href="<?cs var:toroot ?>training/app/battery/network/action-app-traffic.html">
+              <li><a href="<?cs var:toroot ?>training/performance/battery/network/action-app-traffic.html">
                 Optimizing App-Initiated Network Use
               </a>
               </li>
-              <li><a href="<?cs var:toroot ?>training/app/battery/network/action-server-traffic.html">
+              <li><a href="<?cs var:toroot ?>training/performance/battery/network/action-server-traffic.html">
                 Optimizing Server-Initiated Network Use
               </a>
               </li>
-              <li><a href="<?cs var:toroot ?>training/app/battery/network/action-any-traffic.html">
+              <li><a href="<?cs var:toroot ?>training/performance/battery/network/action-any-traffic.html">
                 Optimizing General Network Use
               </a>
               </li>
