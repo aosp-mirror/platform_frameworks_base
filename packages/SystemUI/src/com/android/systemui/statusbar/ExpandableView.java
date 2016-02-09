@@ -399,6 +399,10 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
+    public boolean mustStayOnScreen() {
+        return false;
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */

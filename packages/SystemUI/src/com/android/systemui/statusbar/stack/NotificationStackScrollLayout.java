@@ -75,7 +75,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
-    private static final String TAG = "NotificationStackScrollLayout";
+    private static final String TAG = "StackScroller";
     private static final boolean DEBUG = false;
     private static final float RUBBER_BAND_FACTOR_NORMAL = 0.35f;
     private static final float RUBBER_BAND_FACTOR_AFTER_EXPAND = 0.15f;
@@ -136,7 +136,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private StackScrollState mCurrentStackScrollState = new StackScrollState(this);
     private AmbientState mAmbientState = new AmbientState();
     private NotificationGroupManager mGroupManager;
-    private ArrayList<View> mChildrenToAddAnimated = new ArrayList<>();
+    private HashSet<View> mChildrenToAddAnimated = new HashSet<>();
     private ArrayList<View> mAddedHeadsUpChildren = new ArrayList<>();
     private ArrayList<View> mChildrenToRemoveAnimated = new ArrayList<>();
     private ArrayList<View> mSnappedBackChildren = new ArrayList<>();
@@ -474,6 +474,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
     private void updateChildren() {
+        updateScrollStateForAddedChildren();
         mAmbientState.setScrollY(mOwnScrollY);
         mStackScrollAlgorithm.getStackScrollState(mAmbientState, mCurrentStackScrollState);
         if (!isCurrentlyAnimating() && !mNeedsAnimation) {
@@ -481,6 +482,28 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             startAnimationToState();
         }
+    }
+
+    private void updateScrollStateForAddedChildren() {
+        if (mChildrenToAddAnimated.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (mChildrenToAddAnimated.contains(child)) {
+                int startingPosition = getPositionInLinearLayout(child);
+                int padding = child.needsIncreasedPadding()
+                        ? mIncreasedPaddingBetweenElements :
+                        mPaddingBetweenElements;
+                int childHeight = getIntrinsicHeight(child) + padding;
+                if (startingPosition < mOwnScrollY) {
+                    // This child starts off screen, so let's keep it offscreen to keep the others visible
+
+                    mOwnScrollY += childHeight;
+                }
+            }
+        }
+        clampScrollPosition();
     }
 
     private void requestChildrenUpdate() {
@@ -1648,12 +1671,17 @@ public class NotificationStackScrollLayout extends ViewGroup
                 bottom = (int) (lastView.getTranslationY() + lastView.getActualHeight());
                 bottom = Math.min(bottom, getHeight());
             }
-        } else if (mPhoneStatusBar.getBarState() == StatusBarState.KEYGUARD) {
-            top = mTopPadding;
+        } else {
+            top = (int) (mTopPadding + mStackTranslation);
             bottom = top;
         }
-        mBackgroundBounds.top = Math.max(0, top);
-        mBackgroundBounds.bottom = Math.min(getHeight(), bottom);
+        if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD) {
+            mBackgroundBounds.top = (int) Math.max(mTopPadding + mStackTranslation, top);
+        } else {
+            // otherwise the animation from the shade to the keyguard will jump as it's maxed
+            mBackgroundBounds.top = Math.max(0, top);
+        }
+        mBackgroundBounds.bottom = Math.min(getHeight(), Math.max(bottom, top));
     }
 
     private ActivatableNotificationView getFirstPinnedHeadsUp() {
@@ -3204,6 +3232,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             mAnimationRunning = animationRunning;
         }
+    }
+
+    public boolean isExpanded() {
+        return mIsExpanded;
     }
 
     /**
