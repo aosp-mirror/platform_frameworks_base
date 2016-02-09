@@ -33,10 +33,11 @@ interface ISoundTriggerService {
 
     void deleteSoundModel(in ParcelUuid soundModelId);
 
-    void startRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback);
+    int startRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback,
+         in SoundTrigger.RecognitionConfig config);
 
     /**
      * Stops recognition.
      */
-    void stopRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback);
+    int stopRecognition(in ParcelUuid soundModelId, in IRecognitionStatusCallback callback);
 }

@@ -16,7 +16,13 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <string name="enroll">Enroll</string>
-    <string name="reenroll">Re-enroll</string>
-    <string name="unenroll">Un-enroll</string>
+    <string name="enroll">Load</string>
+    <string name="reenroll">Re-load</string>
+    <string name="unenroll">Un-load</string>
+    <string name="start_recog">Start</string>
+    <string name="stop_recog">Stop</string>
+    <string name="model_one">Model One</string>
+    <string name="model_two">Model Two</string>
+    <string name="model_three">Model Three</string>
+    <string name="none">Debug messages appear here:</string>
 </resources>

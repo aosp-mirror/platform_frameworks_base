@@ -54,6 +54,7 @@ public class SoundTriggerDbHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_ST_SOUND_MODEL = "CREATE TABLE "
             + GenericSoundModelContract.TABLE + "("
             + GenericSoundModelContract.KEY_MODEL_UUID + " TEXT PRIMARY KEY,"
+            + GenericSoundModelContract.KEY_VENDOR_UUID + " TEXT,"
             + GenericSoundModelContract.KEY_DATA + " BLOB" + " )";
 
 
