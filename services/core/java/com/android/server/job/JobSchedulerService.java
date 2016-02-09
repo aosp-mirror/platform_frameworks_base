@@ -1024,7 +1024,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             final IPackageManager pm = AppGlobals.getPackageManager();
             final ComponentName service = job.getService();
             try {
-                ServiceInfo si = pm.getServiceInfo(service, 0, UserHandle.getUserId(uid));
+                ServiceInfo si = pm.getServiceInfo(service,
+                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, UserHandle.getUserId(uid));
                 if (si == null) {
                     throw new IllegalArgumentException("No such service " + service);
                 }
