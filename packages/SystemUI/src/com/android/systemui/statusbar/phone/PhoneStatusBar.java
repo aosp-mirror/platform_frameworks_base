@@ -519,7 +519,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     protected boolean mStartedGoingToSleep;
 
-    private static final int VISIBLE_LOCATIONS = StackViewState.LOCATION_FIRST_CARD
+    private static final int VISIBLE_LOCATIONS = StackViewState.LOCATION_FIRST_HUN
             | StackViewState.LOCATION_MAIN_AREA;
 
     private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =

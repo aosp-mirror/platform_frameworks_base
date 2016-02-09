@@ -24,12 +24,11 @@ public class StackViewState extends ViewState {
     // These are flags such that we can create masks for filtering.
 
     public static final int LOCATION_UNKNOWN = 0x00;
-    public static final int LOCATION_FIRST_CARD = 0x01;
-    public static final int LOCATION_TOP_STACK_HIDDEN = 0x02;
-    public static final int LOCATION_TOP_STACK_PEEKING = 0x04;
-    public static final int LOCATION_MAIN_AREA = 0x08;
-    public static final int LOCATION_BOTTOM_STACK_PEEKING = 0x10;
-    public static final int LOCATION_BOTTOM_STACK_HIDDEN = 0x20;
+    public static final int LOCATION_FIRST_HUN = 0x01;
+    public static final int LOCATION_HIDDEN_TOP = 0x02;
+    public static final int LOCATION_MAIN_AREA = 0x04;
+    public static final int LOCATION_BOTTOM_STACK_PEEKING = 0x08;
+    public static final int LOCATION_BOTTOM_STACK_HIDDEN = 0x10;
     /** The view isn't layouted at all. */
     public static final int LOCATION_GONE = 0x40;
 
