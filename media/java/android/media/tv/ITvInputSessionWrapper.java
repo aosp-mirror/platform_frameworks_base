@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.media.PlaybackParams;
@@ -220,7 +221,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_START_RECORDING: {
-                mTvInputRecordingSessionImpl.startRecording();
+                mTvInputRecordingSessionImpl.startRecording((Uri) msg.obj);
                 break;
             }
             case DO_STOP_RECORDING: {
@@ -366,8 +367,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void startRecording() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_START_RECORDING));
+    public void startRecording(@Nullable Uri programHint) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_START_RECORDING, programHint));
     }
 
     @Override

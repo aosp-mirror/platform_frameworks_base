@@ -58,6 +58,6 @@ oneway interface ITvInputSession {
     // For the recording session
     void connect(in Uri channelUri, in Bundle params);
     void disconnect();
-    void startRecording();
+    void startRecording(in Uri programHint);
     void stopRecording();
 }
