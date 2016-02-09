@@ -29,4 +29,8 @@ abstract class Utils {
     static Date cloneIfNotNull(Date value) {
         return (value != null) ? (Date) value.clone() : null;
     }
+
+    static byte[] cloneIfNotNull(byte[] value) {
+        return (value != null) ? value.clone() : null;
+    }
 }

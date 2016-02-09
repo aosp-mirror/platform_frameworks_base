@@ -19,6 +19,7 @@ package android.security;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterBlob;
 import android.security.keymaster.OperationResult;
 import android.security.KeystoreArguments;
@@ -74,4 +75,5 @@ interface IKeystoreService {
     int addAuthToken(in byte[] authToken);
     int onUserAdded(int userId, int parentId);
     int onUserRemoved(int userId);
+    int attestKey(String alias, in KeymasterArguments params, out KeymasterCertificateChain chain);
 }
