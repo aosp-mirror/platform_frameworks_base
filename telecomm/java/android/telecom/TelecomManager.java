@@ -774,9 +774,9 @@ public class TelecomManager {
     }
 
     /**
-     * Register a {@link PhoneAccount} for use by the system. When registering
-     * {@link PhoneAccount}s, existing registrations will be overwritten if the
-     * {@link PhoneAccountHandle} matches that of a {@link PhoneAccount} which is already
+     * Register a {@link PhoneAccount} for use by the system that will be stored in Device Encrypted
+     * storage. When registering {@link PhoneAccount}s, existing registrations will be overwritten
+     * if the {@link PhoneAccountHandle} matches that of a {@link PhoneAccount} which is already
      * registered. Once registered, the {@link PhoneAccount} is listed to the user as an option
      * when placing calls. The user may still need to enable the {@link PhoneAccount} within
      * the phone app settings before the account is usable.
@@ -1166,11 +1166,16 @@ public class TelecomManager {
     /**
      * Registers a new incoming call. A {@link ConnectionService} should invoke this method when it
      * has an incoming call. The specified {@link PhoneAccountHandle} must have been registered
-     * with {@link #registerPhoneAccount}. Once invoked, this method will cause the system to bind
-     * to the {@link ConnectionService} associated with the {@link PhoneAccountHandle} and request
-     * additional information about the call (See
-     * {@link ConnectionService#onCreateIncomingConnection}) before starting the incoming call UI.
-     *
+     * with {@link #registerPhoneAccount} and the user must have enabled the corresponding
+     * {@link PhoneAccount}. This can be checked using {@link #getPhoneAccount}. Once invoked, this
+     * method will cause the system to bind to the {@link ConnectionService} associated with the
+     * {@link PhoneAccountHandle} and request additional information about the call
+     * (See {@link ConnectionService#onCreateIncomingConnection}) before starting the incoming
+     * call UI.
+     * <p>
+     * A {@link SecurityException} will be thrown if either the {@link PhoneAccountHandle} does not
+     * correspond to a registered {@link PhoneAccount} or the associated {@link PhoneAccount} is not
+     * currently enabled by the user.
      * @param phoneAccount A {@link PhoneAccountHandle} registered with
      *            {@link #registerPhoneAccount}.
      * @param extras A bundle that will be passed through to
