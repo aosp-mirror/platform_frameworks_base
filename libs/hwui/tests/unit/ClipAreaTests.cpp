@@ -133,7 +133,7 @@ TEST(ClipArea, serializeClip) {
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::Rectangle, serializedClip->mode);
         auto clipRect = reinterpret_cast<const ClipRect*>(serializedClip);
-        ASSERT_EQ(Rect(200, 200), clipRect->rect);
+        EXPECT_EQ(Rect(200, 200), clipRect->rect);
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
     }
@@ -147,7 +147,10 @@ TEST(ClipArea, serializeClip) {
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::RectangleList, serializedClip->mode);
         auto clipRectList = reinterpret_cast<const ClipRectList*>(serializedClip);
-        ASSERT_EQ(2, clipRectList->rectList.getTransformedRectanglesCount());
+        EXPECT_EQ(2, clipRectList->rectList.getTransformedRectanglesCount());
+        EXPECT_FALSE(clipRectList->rect.isEmpty());
+        EXPECT_FLOAT_EQ(199.87817f, clipRectList->rect.right)
+            << "Right side should be clipped by rotated rect";
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
     }
@@ -161,8 +164,9 @@ TEST(ClipArea, serializeClip) {
         ASSERT_NE(nullptr, serializedClip);
         ASSERT_EQ(ClipMode::Region, serializedClip->mode);
         auto clipRegion = reinterpret_cast<const ClipRegion*>(serializedClip);
-        ASSERT_EQ(SkIRect::MakeWH(200, 200), clipRegion->region.getBounds())
+        EXPECT_EQ(SkIRect::MakeWH(200, 200), clipRegion->region.getBounds())
                 << "Clip region should be 200x200";
+        EXPECT_EQ(Rect(200, 200), clipRegion->rect);
         EXPECT_EQ(serializedClip, area.serializeClip(allocator))
                 << "Requery of clip on unmodified ClipArea must return same pointer.";
     }
