@@ -528,6 +528,13 @@
 
     <dimen name="battery_margin_bottom">0dp</dimen>
 
+    <!-- Padding at the end of the view that displays the mobile signal icons. If the view is
+         empty, then this padding will not be added to that view. -->
+    <dimen name="mobile_signal_group_end_padding">0dp</dimen>
+
+    <!-- Padding between the mobile data type and the strength indicator. -->
+    <dimen name="mobile_data_icon_start_padding">0dp</dimen>
+
     <!-- Extra padding between the mobile data type icon and the strength indicator when the data
          type icon is wide. -->
     <dimen name="wide_type_icon_start_padding">2dp</dimen>

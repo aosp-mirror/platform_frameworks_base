@@ -90,6 +90,8 @@ public class SignalClusterView
     View mWifiSignalSpacer;
     LinearLayout mMobileSignalGroup;
 
+    private final int mMobileSignalGroupEndPadding;
+    private final int mMobileDataIconStartPadding;
     private final int mWideTypeIconStartPadding;
     private final int mSecondaryTelephonyPadding;
     private final int mEndPadding;
@@ -113,6 +115,10 @@ public class SignalClusterView
         super(context, attrs, defStyle);
 
         Resources res = getResources();
+        mMobileSignalGroupEndPadding =
+                res.getDimensionPixelSize(R.dimen.mobile_signal_group_end_padding);
+        mMobileDataIconStartPadding =
+                res.getDimensionPixelSize(R.dimen.mobile_data_icon_start_padding);
         mWideTypeIconStartPadding = res.getDimensionPixelSize(R.dimen.wide_type_icon_start_padding);
         mSecondaryTelephonyPadding = res.getDimensionPixelSize(R.dimen.secondary_telephony_padding);
         mEndPadding = res.getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
@@ -206,6 +212,10 @@ public class SignalClusterView
         for (PhoneState state : mPhoneStates) {
             mMobileSignalGroup.addView(state.mMobileGroup);
         }
+
+        int endPadding = mMobileSignalGroup.getChildCount() > 0 ? mMobileSignalGroupEndPadding : 0;
+        mMobileSignalGroup.setPaddingRelative(0, 0, endPadding, 0);
+
         TunerService.get(mContext).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
 
         apply();
@@ -577,9 +587,11 @@ public class SignalClusterView
             // When this isn't next to wifi, give it some extra padding between the signals.
             mMobileGroup.setPaddingRelative(isSecondaryIcon ? mSecondaryTelephonyPadding : 0,
                     0, 0, 0);
-            mMobile.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0,
+            mMobile.setPaddingRelative(
+                    mIsMobileTypeIconWide ? mWideTypeIconStartPadding : mMobileDataIconStartPadding,
                     0, 0, 0);
-            mMobileDark.setPaddingRelative(mIsMobileTypeIconWide ? mWideTypeIconStartPadding : 0,
+            mMobileDark.setPaddingRelative(
+                    mIsMobileTypeIconWide ? mWideTypeIconStartPadding : mMobileDataIconStartPadding,
                     0, 0, 0);
 
             if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d typ=%d",
@@ -592,12 +604,19 @@ public class SignalClusterView
 
         private void updateAnimatableIcon(ImageView view, int resId) {
             maybeStopAnimatableDrawable(view);
-            view.setImageResource(resId);
+            setIconForView(view, resId);
             maybeStartAnimatableDrawable(view);
         }
 
         private void maybeStopAnimatableDrawable(ImageView view) {
             Drawable drawable = view.getDrawable();
+
+            // Check if the icon has been scaled. If it has retrieve the actual drawable out of the
+            // wrapper.
+            if (drawable instanceof ScalingDrawableWrapper) {
+                drawable = ((ScalingDrawableWrapper) drawable).getDrawable();
+            }
+
             if (drawable instanceof Animatable) {
                 Animatable ad = (Animatable) drawable;
                 if (ad.isRunning()) {
@@ -608,6 +627,13 @@ public class SignalClusterView
 
         private void maybeStartAnimatableDrawable(ImageView view) {
             Drawable drawable = view.getDrawable();
+
+            // Check if the icon has been scaled. If it has retrieve the actual drawable out of the
+            // wrapper.
+            if (drawable instanceof ScalingDrawableWrapper) {
+                drawable = ((ScalingDrawableWrapper) drawable).getDrawable();
+            }
+
             if (drawable instanceof Animatable) {
                 Animatable ad = (Animatable) drawable;
                 if (!ad.isRunning()) {
