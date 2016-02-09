@@ -23,6 +23,7 @@ import android.content.Context;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
+import android.view.ViewDebug;
 import android.widget.OverScroller;
 
 import com.android.systemui.Interpolators;
@@ -63,6 +64,7 @@ public class TaskStackViewScroller {
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
     TaskStackViewScrollerCallbacks mCb;
 
+    @ViewDebug.ExportedProperty(category="recents")
     float mStackScrollP;
     float mFlingDownScrollP;
     int mFlingDownY;

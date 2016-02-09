@@ -35,6 +35,7 @@ import android.util.IntProperty;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.Toast;
@@ -106,30 +107,42 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
                 }
             };
 
+    @ViewDebug.ExportedProperty(category="recents")
     float mTaskProgress;
+    @ViewDebug.ExportedProperty(category="recents")
     float mMaxDimScale;
+    @ViewDebug.ExportedProperty(category="recents")
     int mDimAlpha;
     AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(3f);
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
     Paint mDimLayerPaint = new Paint();
     float mActionButtonTranslationZ;
 
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="task_")
     Task mTask;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mTaskDataLoaded;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mClipViewInStack = true;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mTouchExplorationEnabled;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mIsDisabledInSafeMode;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="view_bounds_")
     AnimateableViewBounds mViewBounds;
 
     private AnimatorSet mTransformAnimation;
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
 
     View mContent;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="thumbnail_")
     TaskViewThumbnail mThumbnailView;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="header_")
     TaskViewHeader mHeaderView;
     View mActionButtonView;
     TaskViewCallbacks mCb;
 
+    @ViewDebug.ExportedProperty(category="recents")
     Point mDownTouchPos = new Point();
 
     private Toast mDisabledAppToast;

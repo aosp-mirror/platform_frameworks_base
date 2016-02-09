@@ -31,6 +31,7 @@ import android.graphics.Region;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewDebug;
 
 import com.android.systemui.R;
 import com.android.systemui.recents.model.Task;
@@ -49,9 +50,12 @@ public class TaskViewThumbnail extends View {
     private Task mTask;
 
     // Drawing
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mThumbnailRect = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mTaskViewRect = new Rect();
     int mCornerRadius;
+    @ViewDebug.ExportedProperty(category="recents")
     float mDimAlpha;
     Matrix mScaleMatrix = new Matrix();
     Paint mDrawPaint = new Paint();
@@ -62,12 +66,15 @@ public class TaskViewThumbnail extends View {
     // Task bar clipping, the top of this thumbnail can be clipped against the opaque header
     // bar that overlaps this thumbnail
     View mTaskBar;
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mClipRect = new Rect();
 
     // Visibility optimization, if the thumbnail height is less than the height of the header
     // bar for the task view, then just mark this thumbnail view as invisible
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mInvisible;
 
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mDisabledInSafeMode;
 
     public TaskViewThumbnail(Context context) {

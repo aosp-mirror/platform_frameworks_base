@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.ViewDebug;
 
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -48,11 +49,17 @@ public class Task {
 
     /* The Task Key represents the unique primary key for the task */
     public static class TaskKey {
+        @ViewDebug.ExportedProperty(category="recents")
         public final int id;
+        @ViewDebug.ExportedProperty(category="recents")
         public int stackId;
+        @ViewDebug.ExportedProperty(category="recents")
         public final Intent baseIntent;
+        @ViewDebug.ExportedProperty(category="recents")
         public final int userId;
+        @ViewDebug.ExportedProperty(category="recents")
         public long firstActiveTime;
+        @ViewDebug.ExportedProperty(category="recents")
         public long lastActiveTime;
 
         private int mHashCode;
@@ -105,17 +112,21 @@ public class Task {
         }
     }
 
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="key_")
     public TaskKey key;
 
     /**
      * The group will be computed separately from the initialization of the task
      */
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="group_")
     public TaskGrouping group;
     /**
      * The affiliationTaskId is the task id of the parent task or itself if it is not affiliated
      * with any task.
      */
+    @ViewDebug.ExportedProperty(category="recents")
     public int affiliationTaskId;
+    @ViewDebug.ExportedProperty(category="recents")
     public int affiliationColor;
 
     /**
@@ -124,16 +135,23 @@ public class Task {
      */
     public Drawable icon;
     public Bitmap thumbnail;
+    @ViewDebug.ExportedProperty(category="recents")
     public String title;
+    @ViewDebug.ExportedProperty(category="recents")
     public String contentDescription;
+    @ViewDebug.ExportedProperty(category="recents")
     public String dismissDescription;
+    @ViewDebug.ExportedProperty(category="recents")
     public int colorPrimary;
+    @ViewDebug.ExportedProperty(category="recents")
     public int colorBackground;
+    @ViewDebug.ExportedProperty(category="recents")
     public boolean useLightOnPrimaryColor;
 
     /**
      * The bounds of the task, used only if it is a freeform task.
      */
+    @ViewDebug.ExportedProperty(category="recents")
     public Rect bounds;
 
     /**
@@ -144,8 +162,11 @@ public class Task {
     /**
      * The state isLaunchTarget will be set for the correct task upon launching Recents.
      */
+    @ViewDebug.ExportedProperty(category="recents")
     public boolean isLaunchTarget;
+    @ViewDebug.ExportedProperty(category="recents")
     public boolean isHistorical;
+    @ViewDebug.ExportedProperty(category="recents")
     public boolean isSystemApp;
 
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();

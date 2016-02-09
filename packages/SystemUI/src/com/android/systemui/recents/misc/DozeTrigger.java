@@ -17,6 +17,7 @@
 package com.android.systemui.recents.misc;
 
 import android.os.Handler;
+import android.view.ViewDebug;
 
 /**
  * A dozer is a class that fires a trigger after it falls asleep.
@@ -26,8 +27,11 @@ public class DozeTrigger {
 
     Handler mHandler;
 
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mIsDozing;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mHasTriggered;
+    @ViewDebug.ExportedProperty(category="recents")
     int mDozeDurationMilliseconds;
     Runnable mOnSleepRunnable;
 

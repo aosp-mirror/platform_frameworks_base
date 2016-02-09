@@ -36,6 +36,7 @@ import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewDebug;
 import android.view.ViewStub;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -149,9 +150,11 @@ public class TaskViewHeader extends FrameLayout
     ProgressBar mFocusTimerIndicator;
 
     // Header drawables
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mTaskViewRect = new Rect();
     int mCornerRadius;
     int mHighlightHeight;
+    @ViewDebug.ExportedProperty(category="recents")
     float mDimAlpha;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
