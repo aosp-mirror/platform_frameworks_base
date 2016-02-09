@@ -3703,9 +3703,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private ViewPropertyAnimator mAnimator = null;
 
     /**
-     * List of FrameStatsObservers pending registration when mAttachInfo is null.
+     * List of registered FrameMetricsObservers.
      */
-    private ArrayList<FrameStatsObserver> mPendingFrameStatsObservers;
+    private ArrayList<FrameMetricsObserver> mFrameMetricsObservers;
 
     /**
      * Flag indicating that a drag can cross window boundaries.  When
@@ -5479,19 +5479,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void addFrameStatsObserver(FrameStatsObserver fso) {
+    public void addFrameMetricsListener(Window window, Window.FrameMetricsListener listener,
+            Handler handler) {
         if (mAttachInfo != null) {
             if (mAttachInfo.mHardwareRenderer != null) {
-                mAttachInfo.mHardwareRenderer.addFrameStatsObserver(fso);
+                if (mFrameMetricsObservers == null) {
+                    mFrameMetricsObservers = new ArrayList<>();
+                }
+
+                FrameMetricsObserver fmo = new FrameMetricsObserver(window,
+                        handler.getLooper(), listener);
+                mFrameMetricsObservers.add(fmo);
+                mAttachInfo.mHardwareRenderer.addFrameMetricsObserver(fmo);
             } else {
                 Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
             }
         } else {
-            if (mPendingFrameStatsObservers == null) {
-                mPendingFrameStatsObservers = new ArrayList<>();
+            if (mFrameMetricsObservers == null) {
+                mFrameMetricsObservers = new ArrayList<>();
             }
 
-            mPendingFrameStatsObservers.add(fso);
+            FrameMetricsObserver fmo = new FrameMetricsObserver(window,
+                    handler.getLooper(), listener);
+            mFrameMetricsObservers.add(fmo);
         }
     }
 
@@ -5500,30 +5510,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void removeFrameStatsObserver(FrameStatsObserver fso) {
+    public void removeFrameMetricsListener(Window.FrameMetricsListener listener) {
         ThreadedRenderer renderer = getHardwareRenderer();
-
-        if (mPendingFrameStatsObservers != null) {
-            mPendingFrameStatsObservers.remove(fso);
+        FrameMetricsObserver fmo = findFrameMetricsObserver(listener);
+        if (fmo == null) {
+            throw new IllegalArgumentException("attempt to remove FrameMetricsListener that was never added");
         }
 
-        if (renderer != null) {
-            renderer.removeFrameStatsObserver(fso);
+        if (mFrameMetricsObservers != null) {
+            mFrameMetricsObservers.remove(fmo);
+            if (renderer != null) {
+                renderer.removeFrameMetricsObserver(fmo);
+            }
         }
     }
 
-    private void registerPendingFrameStatsObservers() {
-        if (mPendingFrameStatsObservers != null) {
+    private void registerPendingFrameMetricsObservers() {
+        if (mFrameMetricsObservers != null) {
             ThreadedRenderer renderer = getHardwareRenderer();
             if (renderer != null) {
-                for (FrameStatsObserver fso : mPendingFrameStatsObservers) {
-                    renderer.addFrameStatsObserver(fso);
+                for (FrameMetricsObserver fmo : mFrameMetricsObservers) {
+                    renderer.addFrameMetricsObserver(fmo);
                 }
             } else {
                 Log.w(VIEW_LOG_TAG, "View not hardware-accelerated. Unable to observe frame stats");
             }
-            mPendingFrameStatsObservers = null;
         }
+    }
+
+    private FrameMetricsObserver findFrameMetricsObserver(Window.FrameMetricsListener listener) {
+        for (int i = 0; i < mFrameMetricsObservers.size(); i++) {
+            FrameMetricsObserver observer = mFrameMetricsObservers.get(i);
+            if (observer.mListener == listener) {
+                return observer;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -15160,7 +15183,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mFloatingTreeObserver = null;
         }
 
-        registerPendingFrameStatsObservers();
+        registerPendingFrameMetricsObservers();
 
         if ((mPrivateFlags&PFLAG_SCROLL_CONTAINER) != 0) {
             mAttachInfo.mScrollContainers.add(this);
