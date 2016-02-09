@@ -1,0 +1,100 @@
+page.title=Optimizing General Network Use
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#compress-data">Compress Data</a>
+  <li><a href="#cache-locally">Cache Files Locally</a></li>
+  <li><a href="#pre-fetch">Optimize Pre-Fetch Cache Size</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>
+  In general, reducing the amount of network traffic helps reduce battery drain.
+  In addition to the battery-optimization techniques of the previous lessons,
+  you should look at these general-purpose techniques and see if you can apply
+  them to your app.
+</p>
+
+<p>
+  This lesson briefly covers techniques that you can use to lower network traffic and
+  consequently reduce the battery drain caused by your app.
+</p>
+
+<h2 id="compress-data">Compress Data</h2>
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/IwxIIUypnTE?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: right; margin: 0 0 20px 20px;"></iframe>
+
+
+<p>
+  Reducing the amount of data sent or received over a network connection also
+  reduces the duration of the connection, which conserves battery. You can:
+</p>
+
+<ul>
+  <li>Compress data, using a compression technique such as GZIP compression.</li>
+
+  <li>Use succinct data protocols. While JSON and XML offer human-readability, and
+    language-flexibility, they are bandwidth-heavy formats, with
+    high serialization costs in the Android platform. Binary serialization formats,
+    such as <a href="https://developers.google.com/protocol-buffers/">Protocol Buffers</a> or
+    <a href="https://google.github.io/flatbuffers/">FlatBuffers</a> offer a smaller on-the-wire
+    packet size, as well as faster encoding and decoding time. If your application transfers a lot
+    of serialized data on a regular basis, these formats can yield benefits for decoding time and
+    transfer size.
+  </li>
+</ul>
+
+
+<h2 id="cache-locally">Cache Files Locally</h2>
+
+<iframe width="448" height="252"
+    src="//www.youtube.com/embed/7lxVqqWwTb0?autohide=1&amp;showinfo=0"
+    frameborder="0" allowfullscreen=""
+    style="float: left; margin: 0 20px 20px 0;"></iframe>
+
+
+<p>
+  Your app can avoid downloading duplicate data by caching. Always cache static resources,
+  including on-demand downloads such as full size images, and cache them for as long as reasonably
+  possible.
+</p>
+
+<p>
+  For example, you should consider this approach for a networked app that displays data from
+  user-initiated network requests as the primary content on the screen. When the user opens this
+  screen the first time, the app should display a splash screen. Subsequent loads should initially
+  load with the data that was cached from the last network request. The screen reloads with
+  new data once the network request is complete.
+</p>
+
+<p>
+  To learn about caching, watch the video. To implement caching in your app, see <a href=
+  "{@docRoot}training/efficient-downloads/redundant_redundant.html#LocalCache">Cache Files
+  Locally</a>.
+</p>
+
+
+<h2 id="pre-fetch">Optimize Pre-Fetch Cache Size</h2>
+
+<p>
+  Optimize pre-fetch cache size based on local file system size and current network connectivity.
+  You can use the connectivity manager to determine what type of networks (Wi-FI, LTE, HSPAP, EDGE,
+  GPRS) are active and modify your pre-fetching routines to minimize battery load.
+</p>
+
+<p>
+  For more information, see
+  <a href="{@docRoot}training/efficient-downloads/connectivity_patterns.html#Bandwidth">Use
+  Modifying your Download Patterns Based on the Connectivity Type</a>.
+</p>
