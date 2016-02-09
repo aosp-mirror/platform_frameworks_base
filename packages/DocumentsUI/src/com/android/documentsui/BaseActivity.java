@@ -539,7 +539,8 @@ public abstract class BaseActivity extends Activity
         // Do some "do what a I want" drawer fiddling, but don't
         // do it if user already hit back recently and we recently
         // did some fiddling.
-        if ((System.currentTimeMillis() - mDrawerLastFiddled) > DRAWER_NO_FIDDLE_DELAY) {
+        if (mDrawer.isPresent()
+                && (System.currentTimeMillis() - mDrawerLastFiddled) > DRAWER_NO_FIDDLE_DELAY) {
             // Close drawer if it is open.
             if (mDrawer.isOpen()) {
                 mDrawer.setOpen(false);

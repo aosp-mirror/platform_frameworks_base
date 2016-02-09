@@ -16,34 +16,17 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.StubProvider.DEFAULT_AUTHORITY;
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 
-import android.app.Instrumentation;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.Configurator;
-import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.Until;
-import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
-import android.view.MotionEvent;
-
-import com.android.documentsui.model.RootInfo;
 
 @LargeTest
 public class DownloadsActivityUiTest extends ActivityTest<DownloadsActivity> {
-
-    private static final int TIMEOUT = 5000;
-    private static final String TAG = "DownloadsActivityUiTest";
-    private static final String TARGET_PKG = "com.android.documentsui";
-    private static final String LAUNCHER_PKG = "com.android.launcher";
 
     public DownloadsActivityUiTest() {
         super(DownloadsActivity.class);
@@ -107,5 +90,12 @@ public class DownloadsActivityUiTest extends ActivityTest<DownloadsActivity> {
         bot.clickDocument("file1.png");
         device.waitForIdle();
         assertNotNull(bot.menuShare());
+    }
+
+    public void testClosesOnBack() throws Exception {
+        DownloadsActivity activity = getActivity();
+        device.pressBack();
+        device.wait(Until.gone(By.text(ROOT_0_ID)), TIMEOUT);  // wait for the window to go away
+        assertTrue(activity.isDestroyed());
     }
 }

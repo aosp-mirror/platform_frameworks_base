@@ -21,6 +21,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertFalse;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.BySelector;
