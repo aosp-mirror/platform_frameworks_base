@@ -339,7 +339,7 @@ public class Environment {
      * <p>
      * Writing to this path requires the
      * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission,
-     * and starting in read access requires the
+     * and starting in {@link android.os.Build.VERSION_CODES#KITKAT}, read access requires the
      * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission,
      * which is automatically granted if you hold the write permission.
      * <p>
