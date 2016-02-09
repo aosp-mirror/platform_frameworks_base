@@ -191,21 +191,27 @@ public class TaskStackViewScroller {
         stopScroller();
         stopBoundScrollAnimation();
 
-        mFinalAnimatedScroll = newScroll;
-        mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, getStackScroll(), newScroll);
-        mScrollAnimator.setDuration(mContext.getResources().getInteger(
-                R.integer.recents_animate_task_stack_scroll_duration));
-        mScrollAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        mScrollAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (postRunnable != null) {
-                    postRunnable.run();
+        if (Float.compare(mStackScrollP, newScroll) != 0) {
+            mFinalAnimatedScroll = newScroll;
+            mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, getStackScroll(), newScroll);
+            mScrollAnimator.setDuration(mContext.getResources().getInteger(
+                    R.integer.recents_animate_task_stack_scroll_duration));
+            mScrollAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            mScrollAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (postRunnable != null) {
+                        postRunnable.run();
+                    }
+                    mScrollAnimator.removeAllListeners();
                 }
-                mScrollAnimator.removeAllListeners();
+            });
+            mScrollAnimator.start();
+        } else {
+            if (postRunnable != null) {
+                postRunnable.run();
             }
-        });
-        mScrollAnimator.start();
+        }
     }
 
     /** Aborts any current stack scrolls */

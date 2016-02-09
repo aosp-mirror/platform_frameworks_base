@@ -457,7 +457,7 @@ public class TaskStackLayoutAlgorithm {
                             launchTaskIndex - 1));
                 }
             } else {
-                float offsetPct = (float) (mTaskRect.height() / 2) / mStackRect.height();
+                float offsetPct = (float) (mTaskRect.height() / 3) / mStackRect.height();
                 float normX = mUnfocusedCurveInterpolator.getX(offsetPct);
                 mInitialScrollP = Math.max(mMinScrollP, Math.min(mMaxScrollP,
                         launchTaskIndex - mUnfocusedRange.getAbsoluteX(normX)));
