@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.provider.BaseColumns;
 import android.util.ArraySet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1020,22 +1021,28 @@ public final class TvContract {
          *
          * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
          * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
-         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty.
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty. Use
+         * {@link Genres#encode} to create a text that can be stored in this column. Use
+         * {@link Genres#decode} to get the broadcast genre strings from the text stored in the
+         * column.
          *
          * <p>Type: TEXT
+         * @see Genres#encode
+         * @see Genres#decode
          */
         public static final String COLUMN_BROADCAST_GENRE = "broadcast_genre";
 
         /**
          * The comma-separated canonical genre string of this TV program.
          *
-         * <p>Canonical genres are defined in {@link Genres}. Use
-         * {@link Genres#encode Genres.encode()} to create a text that can be stored in this column.
-         * Use {@link Genres#decode Genres.decode()} to get the canonical genre strings from the
-         * text stored in this column.
+         * <p>Canonical genres are defined in {@link Genres}. Use {@link Genres#encode} to create a
+         * text that can be stored in this column. Use {@link Genres#decode} to get the canonical
+         * genre strings from the text stored in the column.
          *
          * <p>Type: TEXT
          * @see Genres
+         * @see Genres#encode
+         * @see Genres#decode
          */
         public static final String COLUMN_CANONICAL_GENRE = "canonical_genre";
 
@@ -1303,34 +1310,86 @@ public final class TvContract {
                 CANONICAL_GENRES.add(TECH_SCIENCE);
             }
 
+            private static final char DOUBLE_QUOTE = '"';
+            private static final char COMMA = ',';
+
             private Genres() {}
 
             /**
-             * Encodes canonical genre strings to a text that can be put into the database.
+             * Encodes genre strings to a text that can be put into the database.
              *
-             * @param genres Canonical genre strings. Use the strings defined in this class.
+             * @param genres Genre strings.
              * @return an encoded genre string that can be inserted into the
-             *         {@link #COLUMN_CANONICAL_GENRE} column.
+             *         {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
              */
             public static String encode(String... genres) {
                 StringBuilder sb = new StringBuilder();
                 String separator = "";
                 for (String genre : genres) {
-                    sb.append(separator).append(genre);
-                    separator = ",";
+                    sb.append(separator).append(encodeToCsv(genre));
+                    separator = COMMA;
+                }
+                return sb.toString();
+            }
+
+            private static String encodeToCsv(String genre) {
+                StringBuilder sb = new StringBuilder();
+                int length = genre.length();
+                for (int i = 0; i < length; ++i) {
+                    char c = genre.charAt(i);
+                    switch (c) {
+                        case DOUBLE_QUOTE:
+                            sb.append(DOUBLE_QUOTE);
+                            break;
+                        case COMMA:
+                            sb.append(DOUBLE_QUOTE);
+                            break;
+                    }
+                    sb.append(c);
                 }
                 return sb.toString();
             }
 
             /**
-             * Decodes the canonical genre strings from the text stored in the database.
+             * Decodes the genre strings from the text stored in the database.
              *
              * @param genres The encoded genre string retrieved from the
-             *            {@link #COLUMN_CANONICAL_GENRE} column.
-             * @return canonical genre strings.
+             *            {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
+             * @return genre strings.
              */
             public static String[] decode(String genres) {
-                return genres.split("\\s*,\\s*");
+                StringBuilder sb = new StringBuilder();
+                List<String> results = new ArrayList<>();
+                int length = genres.length();
+                boolean escape = false;
+                for (int i = 0; i < length; ++i) {
+                    char c = genres.charAt(i);
+                    switch (c) {
+                        case DOUBLE_QUOTE:
+                            if (!escape) {
+                                escape = true;
+                                continue;
+                            }
+                            break;
+                        case COMMA:
+                            if (!escape) {
+                                String string = sb.toString().trim();
+                                if (string.length() > 0) {
+                                    results.add(string);
+                                }
+                                sb = new StringBuilder();
+                                continue;
+                            }
+                            break;
+                    }
+                    sb.append(c);
+                    escape = false;
+                }
+                String string = sb.toString().trim();
+                if (string.length() > 0) {
+                    results.add(string);
+                }
+                return results.toArray(new String[results.size()]);
             }
 
             /**
@@ -1441,7 +1500,10 @@ public final class TvContract {
          *
          * <p>Use the same language appeared in the underlying broadcast standard, if applicable.
          * (For example, one can refer to the genre strings used in Genre Descriptor of ATSC A/65 or
-         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty.
+         * Content Descriptor of ETSI EN 300 468, if appropriate.) Otherwise, leave empty. Use
+         * {@link Genres#encode Genres.encode()} to create a text that can be stored in this column.
+         * Use {@link Genres#decode Genres.decode()} to get the broadcast genre strings from the
+         * text stored in the column.
          *
          * <p>Type: TEXT
          * @see Programs#COLUMN_BROADCAST_GENRE
@@ -1454,7 +1516,7 @@ public final class TvContract {
          * <p>Canonical genres are defined in {@link Programs.Genres}. Use
          * {@link Programs.Genres#encode Genres.encode()} to create a text that can be stored in
          * this column. Use {@link Programs.Genres#decode Genres.decode()} to get the canonical
-         * genre strings from the text stored in this column.
+         * genre strings from the text stored in the column.
          *
          * <p>Type: TEXT
          * @see Programs#COLUMN_CANONICAL_GENRE
