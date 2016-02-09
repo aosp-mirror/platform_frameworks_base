@@ -63,14 +63,15 @@ public class RecentLocationApps {
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         List<AppOpsManager.PackageOps> appOps = aoManager.getPackagesForOps(LOCATION_OPS);
 
+        final int appOpsCount = appOps != null ? appOps.size() : 0;
+
         // Process the AppOps list and generate a preference list.
-        ArrayList<Request> requests = new ArrayList<>(appOps.size());
+        ArrayList<Request> requests = new ArrayList<>(appOpsCount);
         final long now = System.currentTimeMillis();
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         final List<UserHandle> profiles = um.getUserProfiles();
 
-        final int appOpsN = appOps.size();
-        for (int i = 0; i < appOpsN; ++i) {
+        for (int i = 0; i < appOpsCount; ++i) {
             AppOpsManager.PackageOps ops = appOps.get(i);
             // Don't show the Android System in the list - it's not actionable for the user.
             // Also don't show apps belonging to background users except managed users.
