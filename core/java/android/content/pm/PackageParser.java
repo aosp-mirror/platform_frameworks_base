@@ -4877,7 +4877,7 @@ public class PackageParser {
             }
         }
 
-        public void setUse32bitAbi(bool use32bitAbi) {
+        public void setUse32bitAbi(boolean use32bitAbi) {
             this.use32bitAbi = use32bitAbi;
             if (childPackages != null) {
                 final int packageCount = childPackages.size();
