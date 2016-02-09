@@ -568,17 +568,17 @@ void RenderProxy::serializeDisplayListTree() {
     post(task);
 }
 
-CREATE_BRIDGE2(addFrameStatsObserver, CanvasContext* context,
-        FrameStatsObserver* frameStatsObserver) {
-   args->context->addFrameStatsObserver(args->frameStatsObserver);
+CREATE_BRIDGE2(addFrameMetricsObserver, CanvasContext* context,
+        FrameMetricsObserver* frameStatsObserver) {
+   args->context->addFrameMetricsObserver(args->frameStatsObserver);
    if (args->frameStatsObserver != nullptr) {
        args->frameStatsObserver->decStrong(args->context);
    }
    return nullptr;
 }
 
-void RenderProxy::addFrameStatsObserver(FrameStatsObserver* observer) {
-    SETUP_TASK(addFrameStatsObserver);
+void RenderProxy::addFrameMetricsObserver(FrameMetricsObserver* observer) {
+    SETUP_TASK(addFrameMetricsObserver);
     args->context = mContext;
     args->frameStatsObserver = observer;
     if (observer != nullptr) {
@@ -587,33 +587,23 @@ void RenderProxy::addFrameStatsObserver(FrameStatsObserver* observer) {
     post(task);
 }
 
-CREATE_BRIDGE2(removeFrameStatsObserver, CanvasContext* context,
-        FrameStatsObserver* frameStatsObserver) {
-   args->context->removeFrameStatsObserver(args->frameStatsObserver);
+CREATE_BRIDGE2(removeFrameMetricsObserver, CanvasContext* context,
+        FrameMetricsObserver* frameStatsObserver) {
+   args->context->removeFrameMetricsObserver(args->frameStatsObserver);
    if (args->frameStatsObserver != nullptr) {
        args->frameStatsObserver->decStrong(args->context);
    }
    return nullptr;
 }
 
-void RenderProxy::removeFrameStatsObserver(FrameStatsObserver* observer) {
-    SETUP_TASK(removeFrameStatsObserver);
+void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observer) {
+    SETUP_TASK(removeFrameMetricsObserver);
     args->context = mContext;
     args->frameStatsObserver = observer;
     if (observer != nullptr) {
         observer->incStrong(mContext);
     }
     post(task);
-}
-
-CREATE_BRIDGE1(getDroppedFrameReportCount, CanvasContext* context) {
-    return (void*) args->context->getDroppedFrameReportCount();
-}
-
-long RenderProxy::getDroppedFrameReportCount() {
-    SETUP_TASK(getDroppedFrameReportCount);
-    args->context = mContext;
-    return (long) postAndWait(task);
 }
 
 void RenderProxy::post(RenderTask* task) {

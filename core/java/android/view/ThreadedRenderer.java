@@ -354,8 +354,6 @@ public final class ThreadedRenderer {
     private boolean mEnabled;
     private boolean mRequested = true;
 
-    private HashSet<FrameStatsObserver> mFrameStatsObservers;
-
     ThreadedRenderer(Context context, boolean translucent) {
         final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
         mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
@@ -964,29 +962,14 @@ public final class ThreadedRenderer {
         }
     }
 
-    void addFrameStatsObserver(FrameStatsObserver fso) {
-        if (mFrameStatsObservers == null) {
-            mFrameStatsObservers = new HashSet<>();
-        }
-
-        long nativeFso = nAddFrameStatsObserver(mNativeProxy, fso);
-        fso.mRenderer = this;
-        fso.mNative = new VirtualRefBasePtr(nativeFso);
-        mFrameStatsObservers.add(fso);
+    void addFrameMetricsObserver(FrameMetricsObserver observer) {
+        long nativeObserver = nAddFrameMetricsObserver(mNativeProxy, observer);
+        observer.mNative = new VirtualRefBasePtr(nativeObserver);
     }
 
-    void removeFrameStatsObserver(FrameStatsObserver fso) {
-        if (!mFrameStatsObservers.remove(fso)) {
-            throw new IllegalArgumentException("attempt to remove FrameStatsObserver that was never added");
-        }
-
-        nRemoveFrameStatsObserver(mNativeProxy, fso.mNative.get());
-        fso.mRenderer = null;
-        fso.mNative = null;
-    }
-
-    long getDroppedFrameReportCount() {
-        return nGetDroppedFrameReportCount(mNativeProxy);
+    void removeFrameMetricsObserver(FrameMetricsObserver observer) {
+        nRemoveFrameMetricsObserver(mNativeProxy, observer.mNative.get());
+        observer.mNative = null;
     }
 
     static native void setupShadersDiskCache(String cacheFile);
@@ -1044,7 +1027,6 @@ public final class ThreadedRenderer {
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
              int top, int right, int bottom);
 
-    private static native long nAddFrameStatsObserver(long nativeProxy, FrameStatsObserver fso);
-    private static native void nRemoveFrameStatsObserver(long nativeProxy, long nativeFso);
-    private static native long nGetDroppedFrameReportCount(long nativeProxy);
+    private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
+    private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
 }
