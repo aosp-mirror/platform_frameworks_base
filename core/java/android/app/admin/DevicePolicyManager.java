@@ -3023,13 +3023,39 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
+     */
+    public void reportFailedFingerprintAttempt(int userHandle) {
+        if (mService != null) {
+            try {
+                mService.reportFailedFingerprintAttempt(userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void reportSuccessfulFingerprintAttempt(int userHandle) {
+        if (mService != null) {
+            try {
+                mService.reportSuccessfulFingerprintAttempt(userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
+            }
+        }
+    }
+
+    /**
      * Should be called when keyguard has been dismissed.
      * @hide
      */
-    public void reportKeyguardDismissed() {
+    public void reportKeyguardDismissed(int userHandle) {
         if (mService != null) {
             try {
-                mService.reportKeyguardDismissed();
+                mService.reportKeyguardDismissed(userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
@@ -3040,10 +3066,10 @@ public class DevicePolicyManager {
      * Should be called when keyguard view has been shown to the user.
      * @hide
      */
-    public void reportKeyguardSecured() {
+    public void reportKeyguardSecured(int userHandle) {
         if (mService != null) {
             try {
-                mService.reportKeyguardSecured();
+                mService.reportKeyguardSecured(userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }

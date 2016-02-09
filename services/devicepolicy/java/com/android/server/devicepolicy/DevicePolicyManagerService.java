@@ -4486,7 +4486,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (mInjector.securityLogIsLoggingEnabled()) {
-            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 0);
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 0,
+                    /*method strength*/ 1);
         }
     }
 
@@ -4516,23 +4517,50 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (mInjector.securityLogIsLoggingEnabled()) {
-            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 1);
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 1,
+                    /*method strength*/ 1);
         }
     }
 
     @Override
-    public void reportKeyguardDismissed() {
+    public void reportFailedFingerprintAttempt(int userHandle) {
+        enforceFullCrossUsersPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+        if (mInjector.securityLogIsLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 0,
+                    /*method strength*/ 0);
+        }
+    }
+
+    @Override
+    public void reportSuccessfulFingerprintAttempt(int userHandle) {
+        enforceFullCrossUsersPermission(userHandle);
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+        if (mInjector.securityLogIsLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT, /*result*/ 1,
+                    /*method strength*/ 0);
+        }
+    }
+
+    @Override
+    public void reportKeyguardDismissed(int userHandle) {
+        enforceFullCrossUsersPermission(userHandle);
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+
         if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_DISMISSED);
         }
     }
 
     @Override
-    public void reportKeyguardSecured() {
+    public void reportKeyguardSecured(int userHandle) {
+        enforceFullCrossUsersPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+
         if (mInjector.securityLogIsLoggingEnabled()) {
             SecurityLog.writeEvent(SecurityLog.TAG_KEYGUARD_SECURED);
         }
