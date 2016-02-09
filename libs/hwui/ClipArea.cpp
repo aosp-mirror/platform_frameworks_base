@@ -361,17 +361,21 @@ const ClipBase* ClipArea::serializeClip(LinearAllocator& allocator) {
             "expect RectangleList to be trivially destructible");
 
     if (mLastSerialization == nullptr) {
+        ClipBase* serialization;
         switch (mMode) {
         case ClipMode::Rectangle:
-            mLastSerialization = allocator.create<ClipRect>(mClipRect);
+            serialization = allocator.create<ClipRect>(mClipRect);
             break;
         case ClipMode::RectangleList:
-            mLastSerialization = allocator.create<ClipRectList>(mRectangleList);
+            serialization = allocator.create<ClipRectList>(mRectangleList);
+            serialization->rect = mRectangleList.calculateBounds();
             break;
         case ClipMode::Region:
-            mLastSerialization = allocator.create<ClipRegion>(mClipRegion);
+            serialization = allocator.create<ClipRegion>(mClipRegion);
+            serialization->rect.set(mClipRegion.getBounds());
             break;
         }
+        mLastSerialization = serialization;
     }
     return mLastSerialization;
 }
