@@ -39,6 +39,7 @@ import static android.service.notification.NotificationListenerService.SUPPRESSE
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -2001,6 +2002,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void setImportanceFromAssistant(INotificationListener token, String key,
                 int importance, CharSequence explanation) throws RemoteException {
+            if (importance == IMPORTANCE_NONE) {
+                throw new IllegalArgumentException("blocking not allowed: key=" + key);
+            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
