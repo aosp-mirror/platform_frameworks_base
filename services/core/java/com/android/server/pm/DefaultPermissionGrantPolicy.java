@@ -262,6 +262,7 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(setupPackage, PHONE_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupPackage, CONTACTS_PERMISSIONS, userId);
                 grantRuntimePermissionsLPw(setupPackage, LOCATION_PERMISSIONS, userId);
+                grantRuntimePermissionsLPw(setupPackage, CAMERA_PERMISSIONS, userId);
             }
 
             // Camera
