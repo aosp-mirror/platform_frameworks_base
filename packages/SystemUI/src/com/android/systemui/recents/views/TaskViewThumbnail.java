@@ -21,6 +21,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -39,6 +41,10 @@ import com.android.systemui.recents.model.Task;
  * alpha of the thumbnail image.
  */
 public class TaskViewThumbnail extends View {
+
+
+    private static final ColorMatrix TMP_FILTER_COLOR_MATRIX = new ColorMatrix();
+    private static final ColorMatrix TMP_BRIGHTNESS_COLOR_MATRIX = new ColorMatrix();
 
     private Task mTask;
 
@@ -61,6 +67,8 @@ public class TaskViewThumbnail extends View {
     // Visibility optimization, if the thumbnail height is less than the height of the header
     // bar for the task view, then just mark this thumbnail view as invisible
     boolean mInvisible;
+
+    boolean mDisabledInSafeMode;
 
     public TaskViewThumbnail(Context context) {
         this(context, null);
@@ -160,10 +168,27 @@ public class TaskViewThumbnail extends View {
         }
         int mul = (int) ((1.0f - mDimAlpha) * 255);
         if (mBitmapShader != null) {
-            mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
-            mDrawPaint.setColorFilter(mLightingColorFilter);
-            mDrawPaint.setColor(0xFFffffff);
-            mBgFillPaint.setColorFilter(mLightingColorFilter);
+            if (mDisabledInSafeMode) {
+                // Brightness: C-new = C-old*(1-amount) + amount
+                TMP_FILTER_COLOR_MATRIX.setSaturation(0);
+                float scale = 1f - mDimAlpha;
+                float[] mat = TMP_BRIGHTNESS_COLOR_MATRIX.getArray();
+                mat[0] = scale;
+                mat[6] = scale;
+                mat[12] = scale;
+                mat[4] = mDimAlpha;
+                mat[9] = mDimAlpha;
+                mat[14] = mDimAlpha;
+                TMP_FILTER_COLOR_MATRIX.preConcat(TMP_BRIGHTNESS_COLOR_MATRIX);
+                ColorMatrixColorFilter filter = new ColorMatrixColorFilter(TMP_FILTER_COLOR_MATRIX);
+                mDrawPaint.setColorFilter(filter);
+                mBgFillPaint.setColorFilter(filter);
+            } else {
+                mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
+                mDrawPaint.setColorFilter(mLightingColorFilter);
+                mDrawPaint.setColor(0xFFffffff);
+                mBgFillPaint.setColorFilter(mLightingColorFilter);
+            }
         } else {
             int grey = mul;
             mDrawPaint.setColorFilter(null);
@@ -229,8 +254,9 @@ public class TaskViewThumbnail extends View {
     }
 
     /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t) {
+    void rebindToTask(Task t, boolean disabledInSafeMode) {
         mTask = t;
+        mDisabledInSafeMode = disabledInSafeMode;
         if (t.thumbnail != null) {
             setThumbnail(t.thumbnail);
             if (t.colorBackground != 0) {

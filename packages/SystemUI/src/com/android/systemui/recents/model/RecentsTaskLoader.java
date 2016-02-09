@@ -572,7 +572,7 @@ public class RecentsTaskLoader {
      * Returns the activity info for the given task key, retrieving one from the system if the
      * task key is expired.
      */
-    private ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
+    ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ComponentName cn = taskKey.getComponent();
         ActivityInfo activityInfo = mActivityInfoCache.get(cn);

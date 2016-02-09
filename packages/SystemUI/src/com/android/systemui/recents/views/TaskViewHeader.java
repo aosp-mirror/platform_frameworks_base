@@ -74,6 +74,8 @@ public class TaskViewHeader extends FrameLayout
 
         private Paint mHighlightPaint = new Paint();
         private Paint mBackgroundPaint = new Paint();
+        private int mColor;
+        private float mDimAlpha;
 
         public HighlightColorDrawable() {
             mBackgroundPaint.setColor(Color.argb(255, 0, 0, 0));
@@ -83,15 +85,19 @@ public class TaskViewHeader extends FrameLayout
         }
 
         public void setColorAndDim(int color, float dimAlpha) {
-            mBackgroundPaint.setColor(color);
+            if (mColor != color || Float.compare(mDimAlpha, dimAlpha) != 0) {
+                mColor = color;
+                mDimAlpha = dimAlpha;
+                mBackgroundPaint.setColor(color);
 
-            ColorUtils.colorToHSL(color, mTmpHSL);
-            // TODO: Consider using the saturation of the color to adjust the lightness as well
-            mTmpHSL[2] = Math.min(1f,
-                    mTmpHSL[2] + HIGHLIGHT_LIGHTNESS_INCREMENT * (1.0f - dimAlpha));
-            mHighlightPaint.setColor(ColorUtils.HSLToColor(mTmpHSL));
+                ColorUtils.colorToHSL(color, mTmpHSL);
+                // TODO: Consider using the saturation of the color to adjust the lightness as well
+                mTmpHSL[2] = Math.min(1f,
+                        mTmpHSL[2] + HIGHLIGHT_LIGHTNESS_INCREMENT * (1.0f - dimAlpha));
+                mHighlightPaint.setColor(ColorUtils.HSLToColor(mTmpHSL));
 
-            invalidateSelf();
+                invalidateSelf();
+            }
         }
 
         @Override
@@ -120,6 +126,10 @@ public class TaskViewHeader extends FrameLayout
         @Override
         public int getOpacity() {
             return PixelFormat.OPAQUE;
+        }
+
+        public int getColor() {
+            return mColor;
         }
     }
 
@@ -153,6 +163,7 @@ public class TaskViewHeader extends FrameLayout
     Drawable mDarkInfoIcon;
     int mTaskBarViewLightTextColor;
     int mTaskBarViewDarkTextColor;
+    int mDisabledTaskBarBackgroundColor;
     int mMoveTaskTargetStackId = INVALID_STACK_ID;
 
     // Header background
@@ -195,6 +206,8 @@ public class TaskViewHeader extends FrameLayout
         mDarkFullscreenIcon = context.getDrawable(R.drawable.recents_move_task_fullscreen_dark);
         mLightInfoIcon = context.getDrawable(R.drawable.recents_info_light);
         mDarkInfoIcon = context.getDrawable(R.drawable.recents_info_dark);
+        mDisabledTaskBarBackgroundColor =
+                context.getColor(R.color.recents_task_bar_disabled_background_color);
 
         // Configure the background and dim
         mBackground = new HighlightColorDrawable();
@@ -331,17 +344,17 @@ public class TaskViewHeader extends FrameLayout
      */
     void setDimAlpha(float dimAlpha) {
         mDimAlpha = dimAlpha;
-        updateBackgroundColor(dimAlpha);
+        updateBackgroundColor(mBackground.getColor(), dimAlpha);
     }
 
     /**
      * Updates the background and highlight colors for this header.
      */
-    private void updateBackgroundColor(float dimAlpha) {
+    private void updateBackgroundColor(int color, float dimAlpha) {
         if (mTask != null) {
-            mBackground.setColorAndDim(mTask.colorPrimary, dimAlpha);
+            mBackground.setColorAndDim(color, dimAlpha);
             // TODO: Consider using the saturation of the color to adjust the lightness as well
-            ColorUtils.colorToHSL(mTask.colorPrimary, mTmpHSL);
+            ColorUtils.colorToHSL(color, mTmpHSL);
             mTmpHSL[2] = Math.min(1f, mTmpHSL[2] + OVERLAY_LIGHTNESS_INCREMENT * (1.0f - dimAlpha));
             mOverlayBackground.setColorAndDim(ColorUtils.HSLToColor(mTmpHSL), dimAlpha);
             mDimLayerPaint.setAlpha((int) (dimAlpha * 255));
@@ -350,12 +363,15 @@ public class TaskViewHeader extends FrameLayout
     }
 
     /** Binds the bar view to the task */
-    public void rebindToTask(Task t, boolean touchExplorationEnabled) {
+    public void rebindToTask(Task t, boolean touchExplorationEnabled, boolean disabledInSafeMode) {
         mTask = t;
 
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
         // otherwise, we fall back to the application icon
-        updateBackgroundColor(mDimAlpha);
+        int primaryColor = disabledInSafeMode
+                ? mDisabledTaskBarBackgroundColor
+                : t.colorPrimary;
+        updateBackgroundColor(primaryColor, mDimAlpha);
         if (t.icon != null) {
             mIconView.setImageDrawable(t.icon);
         }

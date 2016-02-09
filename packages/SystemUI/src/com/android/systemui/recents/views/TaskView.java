@@ -37,6 +37,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -117,6 +118,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     boolean mTaskDataLoaded;
     boolean mClipViewInStack = true;
     boolean mTouchExplorationEnabled;
+    boolean mIsDisabledInSafeMode;
     AnimateableViewBounds mViewBounds;
 
     private AnimatorSet mTransformAnimation;
@@ -129,6 +131,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     TaskViewCallbacks mCb;
 
     Point mDownTouchPos = new Point();
+
+    private Toast mDisabledAppToast;
 
     public TaskView(Context context) {
         this(context, null);
@@ -549,15 +553,17 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /**** TaskCallbacks Implementation ****/
 
     public void onTaskBound(Task t) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         mTask = t;
         mTask.addCallback(this);
+        mIsDisabledInSafeMode = !mTask.isSystemApp && ssp.isInSafeMode();
     }
 
     @Override
     public void onTaskDataLoaded(Task task) {
         // Bind each of the views to the new task data
-        mThumbnailView.rebindToTask(mTask);
-        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled);
+        mThumbnailView.rebindToTask(mTask, mIsDisabledInSafeMode);
+        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
         mTaskDataLoaded = true;
     }
 
@@ -572,13 +578,24 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @Override
     public void onTaskStackIdChanged() {
-        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled);
+        mHeaderView.rebindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
     }
 
     /**** View.OnClickListener Implementation ****/
 
     @Override
      public void onClick(final View v) {
+        if (mIsDisabledInSafeMode) {
+            Context context = getContext();
+            String msg = context.getString(R.string.recents_launch_disabled_message, mTask.title);
+            if (mDisabledAppToast != null) {
+                mDisabledAppToast.cancel();
+            }
+            mDisabledAppToast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+            mDisabledAppToast.show();
+            return;
+        }
+
         boolean screenPinningRequested = false;
         if (v == mActionButtonView) {
             // Reset the translation of the action button before we animate it out

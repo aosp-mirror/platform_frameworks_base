@@ -18,6 +18,7 @@ package com.android.systemui.recents.model;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -189,11 +190,14 @@ public class RecentsTaskLoadPlan {
             Bitmap thumbnail = loader.getAndUpdateThumbnail(taskKey, false);
             int activityColor = loader.getActivityPrimaryColor(t.taskDescription);
             int backgroundColor = loader.getActivityBackgroundColor(t.taskDescription);
+            boolean isSystemApp = (loader.getAndUpdateActivityInfo(taskKey).applicationInfo.flags
+                    & ApplicationInfo.FLAG_SYSTEM) != 0;
 
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, contentDescription, dismissDescription, activityColor,
-                    backgroundColor, !isStackTask, isLaunchTarget, t.bounds, t.taskDescription);
+                    backgroundColor, !isStackTask, isLaunchTarget, isSystemApp, t.bounds,
+                    t.taskDescription);
 
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);

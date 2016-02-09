@@ -146,6 +146,7 @@ public class Task {
      */
     public boolean isLaunchTarget;
     public boolean isHistorical;
+    public boolean isSystemApp;
 
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
@@ -156,7 +157,7 @@ public class Task {
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
                 Bitmap thumbnail, String title, String contentDescription,
                 String dismissDescription, int colorPrimary, int colorBackground,
-                boolean isHistorical, boolean isLaunchTarget, Rect bounds,
+                boolean isHistorical, boolean isLaunchTarget, boolean isSystemApp, Rect bounds,
                 ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
@@ -176,6 +177,7 @@ public class Task {
         this.taskDescription = taskDescription;
         this.isLaunchTarget = isLaunchTarget;
         this.isHistorical = isHistorical;
+        this.isSystemApp = isSystemApp;
     }
 
     /** Copies the other task. */
@@ -195,6 +197,7 @@ public class Task {
         this.bounds = o.bounds;
         this.isLaunchTarget = o.isLaunchTarget;
         this.isHistorical = o.isHistorical;
+        this.isSystemApp = o.isSystemApp;
     }
 
     /**
