@@ -876,17 +876,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         msgView.setText(msg);
         imageView.setImageResource(drawable);
 
-        content.animate().cancel();  // cancel any ongoing animations
-
-        content.setAlpha(0);
         mEmptyView.setVisibility(View.VISIBLE);
         mRecView.setVisibility(View.GONE);
-
-        // fade in the content, so it looks purdy like
-        content.animate()
-                .alpha(1f)
-                .setDuration(EMPTY_REVEAL_DURATION)
-                .setListener(null);
     }
 
     private void showDirectory() {
