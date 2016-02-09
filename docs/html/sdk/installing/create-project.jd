@@ -190,8 +190,8 @@ with complete source files for each of them as shown in figure 6.</p>
         <li>Select a <strong>Theme</strong>. This setting specifies which standard Android
         <a href="{@docRoot}design/style/themes.html">visual style</a> is applied to your
         application. Select activity template. For more information about Android code templates, see
-        <a href="{@docRoot}tools/projects/templates.html">Using Code Templates</a>Leave the <strong>
-        Create activity</strong> option checked so you can start your
+        <a href="{@docRoot}tools/projects/templates.html">Using Code Templates</a>. Leave the
+        <strong>Create activity</strong> option checked so you can start your
         application with some essential components. </li>
 
         <li>Click the check box for the required Support Libraries then click <strong>Next</strong>.</li>
