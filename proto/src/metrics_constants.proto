@@ -1693,13 +1693,13 @@ message MetricsEvent {
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
     // GMS: TBD
-    ACTION_OVERVIEW_PAGE = 276;
+    OVERVIEW_PAGE = 276;
 
     // ACTION: Overview > Select app
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
     // GMS: TBD
-    ACTION_OVERVIEW_SELECT = 277;
+    OVERVIEW_SELECT = 277;
 
     // ACTION: View emergency info
     // CATEGORY: GLOBAL_SYSTEM_UI
@@ -1753,5 +1753,14 @@ message MetricsEvent {
     // OS: N
     // GMS: TBD
     ACTION_WINDOW_UNDOCK_LONGPRESS = 286;
+
+    // Logged when the user scrolls through overview manually
+    OVERVIEW_SCROLL = 287;
+
+    // Logged when the overview times out automatically selecting an app
+    OVERVIEW_SELECT_TIMEOUT = 288;
+
+    // Logged when a user dismisses a task in overview
+    OVERVIEW_DISMISS = 289;
   }
 }

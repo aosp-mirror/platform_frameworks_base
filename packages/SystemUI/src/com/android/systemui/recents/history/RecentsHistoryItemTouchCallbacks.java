@@ -21,6 +21,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.DeleteTaskDataEvent;
@@ -72,6 +73,8 @@ public class RecentsHistoryItemTouchCallbacks extends ItemTouchHelper.SimpleCall
             // Keep track of deletions by swiping within history
             MetricsLogger.histogram(mContext, "overview_task_dismissed_source",
                     Constants.Metrics.DismissSourceHistorySwipeGesture);
+            MetricsLogger.action(mContext, MetricsEvent.OVERVIEW_DISMISS,
+                    taskRow.task.key.getComponent().toString());
         }
     }
 }

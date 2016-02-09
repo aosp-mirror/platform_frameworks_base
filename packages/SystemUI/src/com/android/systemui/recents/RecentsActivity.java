@@ -240,11 +240,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     /**
      * Dismisses recents if we are already visible and the intent is to toggle the recents view.
      */
-    boolean dismissRecentsToFocusedTask() {
+    boolean dismissRecentsToFocusedTask(int logCategory) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we have a focused Task, launch that Task now
-            if (mRecentsView.launchFocusedTask()) return true;
+            if (mRecentsView.launchFocusedTask(logCategory)) return true;
         }
         return false;
     }
@@ -270,7 +270,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isRecentsTopMost(ssp.getTopMostTask(), null)) {
             // If we have a focused Task, launch that Task now
-            if (mRecentsView.launchFocusedTask()) return true;
+            if (mRecentsView.launchFocusedTask(0 /* logCategory */)) return true;
             // If none of the other cases apply, then just go Home
             dismissRecentsToHome(true /* animateTaskViews */);
             return true;
@@ -360,7 +360,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mIterateTrigger = new DozeTrigger(mFocusTimerDuration, new Runnable() {
             @Override
             public void run() {
-                dismissRecentsToFocusedTask();
+                dismissRecentsToFocusedTask(MetricsEvent.OVERVIEW_SELECT_TIMEOUT);
             }
         });
 
@@ -634,7 +634,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // Focus the next task
             EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
 
-            MetricsLogger.action(this, MetricsEvent.ACTION_OVERVIEW_PAGE);
+            MetricsLogger.action(this, MetricsEvent.OVERVIEW_PAGE);
         }
     }
 

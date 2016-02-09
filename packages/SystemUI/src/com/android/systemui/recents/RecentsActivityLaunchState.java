@@ -66,8 +66,9 @@ public class RecentsActivityLaunchState {
      */
     public int getInitialFocusTaskIndex(int numTasks) {
         RecentsDebugFlags debugFlags = Recents.getDebugFlags();
+        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
         if (launchedFromAppWithThumbnail) {
-            if (debugFlags.isFastToggleRecentsEnabled()) {
+            if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
                 // If fast toggling, focus the front most task so that the next tap will focus the
                 // N-1 task
                 return numTasks - 1;
@@ -76,7 +77,7 @@ public class RecentsActivityLaunchState {
             // If coming from another app, focus the next task
             return numTasks - 2;
         } else {
-            if (debugFlags.isFastToggleRecentsEnabled()) {
+            if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
                 // If fast toggling, defer focusing until the next tap (which will automatically
                 // focus the front most task)
                 return -1;
