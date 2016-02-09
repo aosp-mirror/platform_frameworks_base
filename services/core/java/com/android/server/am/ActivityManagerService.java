@@ -10722,6 +10722,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return;
         }
 
+        // We're only interested in providers that are encryption unaware, and
+        // we don't care about uninstalled apps, since there's no way they're
+        // running at this point.
+        final int matchFlags = GET_PROVIDERS | MATCH_ENCRYPTION_UNAWARE
+                | MATCH_DEBUG_TRIAGED_MISSING;
+
         synchronized (this) {
             final int NP = mProcessNames.getMap().size();
             for (int ip = 0; ip < NP; ip++) {
@@ -10736,8 +10742,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             final String pkgName = app.pkgList.keyAt(ig);
                             final PackageInfo pkgInfo = AppGlobals.getPackageManager()
-                                    .getPackageInfo(pkgName,
-                                            GET_PROVIDERS | MATCH_ENCRYPTION_UNAWARE, userId);
+                                    .getPackageInfo(pkgName, matchFlags, userId);
                             if (pkgInfo != null && !ArrayUtils.isEmpty(pkgInfo.providers)) {
                                 for (ProviderInfo provInfo : pkgInfo.providers) {
                                     Log.v(TAG, "Installing " + provInfo);

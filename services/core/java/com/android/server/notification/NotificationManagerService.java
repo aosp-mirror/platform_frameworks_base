@@ -3480,7 +3480,8 @@ public class NotificationManagerService extends SystemService {
         try {
             // TODO: it might be faster to return a boolean from package manager rather than the
             // whole application info. Revisit and make the API change.
-            ai = AppGlobals.getPackageManager().getApplicationInfo(pkg, 0, userId);
+            ai = AppGlobals.getPackageManager().getApplicationInfo(pkg,
+                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             if (ai == null) {
                 Slog.w(TAG, "No application info for package " + pkg + " and user " + userId);
                 return false;
