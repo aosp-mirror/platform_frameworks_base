@@ -20,7 +20,7 @@
 #include "DamageAccumulator.h"
 #include "FrameInfo.h"
 #include "FrameInfoVisualizer.h"
-#include "FrameStatsReporter.h"
+#include "FrameMetricsReporter.h"
 #include "IContextFactory.h"
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
@@ -142,26 +142,26 @@ public:
         return mRenderThread.renderState();
     }
 
-    void addFrameStatsObserver(FrameStatsObserver* observer) {
-        if (mFrameStatsReporter.get() == nullptr) {
-            mFrameStatsReporter.reset(new FrameStatsReporter());
+    void addFrameMetricsObserver(FrameMetricsObserver* observer) {
+        if (mFrameMetricsReporter.get() == nullptr) {
+            mFrameMetricsReporter.reset(new FrameMetricsReporter());
         }
 
-        mFrameStatsReporter->addObserver(observer);
+        mFrameMetricsReporter->addObserver(observer);
     }
 
-    void removeFrameStatsObserver(FrameStatsObserver* observer) {
-        if (mFrameStatsReporter.get() != nullptr) {
-            mFrameStatsReporter->removeObserver(observer);
-            if (!mFrameStatsReporter->hasObservers()) {
-                mFrameStatsReporter.reset(nullptr);
+    void removeFrameMetricsObserver(FrameMetricsObserver* observer) {
+        if (mFrameMetricsReporter.get() != nullptr) {
+            mFrameMetricsReporter->removeObserver(observer);
+            if (!mFrameMetricsReporter->hasObservers()) {
+                mFrameMetricsReporter.reset(nullptr);
             }
         }
     }
 
     long getDroppedFrameReportCount() {
-        if (mFrameStatsReporter.get() != nullptr) {
-            return mFrameStatsReporter->getDroppedReports();
+        if (mFrameMetricsReporter.get() != nullptr) {
+            return mFrameMetricsReporter->getDroppedReports();
         }
 
         return 0;
@@ -215,7 +215,7 @@ private:
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;
-    std::unique_ptr<FrameStatsReporter> mFrameStatsReporter;
+    std::unique_ptr<FrameMetricsReporter> mFrameMetricsReporter;
 
     std::set<RenderNode*> mPrefetechedLayers;
 

@@ -34,6 +34,7 @@ import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -604,6 +605,34 @@ public abstract class Window {
         void onRestrictedCaptionAreaChanged(Rect rect);
     }
 
+    /**
+     * Callback for clients that want frame timing information for each
+     * frame rendered by the Window.
+     */
+    public interface FrameMetricsListener {
+        /**
+         * Called when information is available for the previously rendered frame.
+         *
+         * Reports can be dropped if this callback takes too
+         * long to execute, as the report producer cannot wait for the consumer to
+         * complete.
+         *
+         * It is highly recommended that clients copy the passed in FrameMetrics
+         * via {@link FrameMetrics#FrameMetrics(FrameMetrics)} within this method and defer
+         * additional computation or storage to another thread to avoid unnecessarily
+         * dropping reports.
+         *
+         * @param window The {@link Window} on which the frame was displayed.
+         * @param frameMetrics the available metrics. This object is reused on every call
+         * and thus <strong>this reference is not valid outside the scope of this method</strong>.
+         * @param dropCountSinceLastInvocation the number of reports dropped since the last time
+         * this callback was invoked.
+         */
+        void onMetricsAvailable(Window window, FrameMetrics frameMetrics,
+                int dropCountSinceLastInvocation);
+    }
+
+
     public Window(Context context) {
         mContext = context;
         mFeatures = mLocalFeatures = getDefaultFeatures(context);
@@ -798,33 +827,28 @@ public abstract class Window {
      * Set an observer to collect frame stats for each frame rendererd in this window.
      *
      * Must be in hardware rendering mode.
-     * @hide
      */
-    public final void addFrameStatsObserver(@NonNull FrameStatsObserver fso) {
+    public final void addFrameMetricsListener(@NonNull FrameMetricsListener listener,
+            Handler handler) {
         final View decorView = getDecorView();
         if (decorView == null) {
             throw new IllegalStateException("can't observe a Window without an attached view");
         }
 
-        if (fso == null) {
-            throw new NullPointerException("FrameStatsObserver cannot be null");
+        if (listener == null) {
+            throw new NullPointerException("listener cannot be null");
         }
 
-        if (fso.isRegistered()) {
-            throw new IllegalStateException("FrameStatsObserver already registered on a Window.");
-        }
-
-        decorView.addFrameStatsObserver(fso);
+        decorView.addFrameMetricsListener(this, listener, handler);
     }
 
     /**
      * Remove observer and stop listening to frame stats for this window.
-     * @hide
      */
-    public final void removeFrameStatsObserver(FrameStatsObserver fso) {
+    public final void removeFrameMetricsListener(FrameMetricsListener listener) {
         final View decorView = getDecorView();
         if (decorView != null) {
-            getDecorView().removeFrameStatsObserver(fso);
+            getDecorView().removeFrameMetricsListener(listener);
         }
     }
 
