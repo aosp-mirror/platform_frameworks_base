@@ -45,16 +45,8 @@ import java.io.File;
  * is no need to derive from this class; you can simply declare it in your
  * manifest, and use the NDK APIs from there.
  *
- * <p>A typical manifest would look like:
- *
- * {@sample development/ndk/platforms/android-9/samples/native-activity/AndroidManifest.xml
- *      manifest}
- *
- * <p>A very simple example of native code that is run by NativeActivity
- * follows.  This reads input events from the user and uses OpenGLES to
- * draw into the native activity's window.
- *
- * {@sample development/ndk/platforms/android-9/samples/native-activity/jni/main.c all}
+ * <p>A <a href="https://github.com/googlesamples/android-ndk/tree/master/native-activity">sample
+ * native activity</a> is available in the NDK samples.
  */
 public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         InputQueue.Callback, OnGlobalLayoutListener {
