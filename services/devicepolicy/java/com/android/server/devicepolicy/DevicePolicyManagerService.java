@@ -32,6 +32,7 @@ import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -2841,16 +2842,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private boolean isAdminApiLevelMOrBelow(@NonNull ComponentName who, int userHandle) {
-        DeviceAdminInfo adminInfo = findAdmin(who, userHandle, false);
-        return adminInfo.getActivityInfo().applicationInfo.targetSdkVersion
-                <= Build.VERSION_CODES.M;
-    }
-
     @Override
     public boolean isSeparateProfileChallengeAllowed(int userHandle) {
         ComponentName profileOwner = getProfileOwner(userHandle);
-        return profileOwner != null && !isAdminApiLevelMOrBelow(profileOwner, userHandle);
+        try {
+            // Profile challenge is supported on N or newer release.
+            return profileOwner != null &&
+                    getTargetSdk(profileOwner.getPackageName(), userHandle) > Build.VERSION_CODES.M;
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     @Override
@@ -4195,6 +4196,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            try {
+                if (getTargetSdk(who.getPackageName(), userHandle) >= Build.VERSION_CODES.N) {
+                    if (installerPackage != null &&
+                            !isPackageInstalledForUser(installerPackage, userHandle)) {
+                        throw new IllegalArgumentException("Package " + installerPackage
+                                + " is not installed on the current user");
+                    }
+                }
+            } catch (RemoteException e) {
+            }
             DevicePolicyData policy = getUserData(userHandle);
             policy.mDelegatedCertInstallerPackage = installerPackage;
             saveSettingsLocked(userHandle);
@@ -6096,6 +6107,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (packageName != null && !isPackageInstalledForUser(packageName, userHandle)) {
+                throw new IllegalArgumentException("Package " + packageName + " is not installed "
+                        + "on the current user");
+            }
             DevicePolicyData policy = getUserData(userHandle);
             policy.mApplicationRestrictionsManagingPackage = packageName;
             saveSettingsLocked(userHandle);
