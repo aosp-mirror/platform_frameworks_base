@@ -308,6 +308,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public String getServicesSystemSharedLibraryPackageName() {
+        return null;
+    }
+
+    @Override
     public FeatureInfo[] getSystemAvailableFeatures() {
         return new FeatureInfo[0];
     }
