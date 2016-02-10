@@ -32,7 +32,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.Shared;
@@ -107,7 +106,7 @@ final class GridDocumentHolder extends DocumentHolder {
         if (mHideTitles) {
             mTitle.setVisibility(View.GONE);
         } else {
-            mTitle.setText(docDisplayName);
+            mTitle.setText(docDisplayName, TextView.BufferType.SPANNABLE);
             mTitle.setVisibility(View.VISIBLE);
         }
 

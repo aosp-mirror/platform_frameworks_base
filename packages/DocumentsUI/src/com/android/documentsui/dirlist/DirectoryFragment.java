@@ -267,12 +267,12 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mSelectionManager.addCallback(selectionListener);
 
-        // Make sure this is done after the RecyclerView is set up.
-        mFocusManager = new FocusManager(mRecView);
-
         mModel = new Model();
         mModel.addUpdateListener(mAdapter);
         mModel.addUpdateListener(mModelUpdateListener);
+
+        // Make sure this is done after the RecyclerView is set up.
+        mFocusManager = new FocusManager(context, mRecView, mModel);
 
         mType = getArguments().getInt(EXTRA_TYPE);
 
