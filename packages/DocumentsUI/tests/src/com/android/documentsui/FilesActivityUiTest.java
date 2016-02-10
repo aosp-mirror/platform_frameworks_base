@@ -16,33 +16,14 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.StubProvider.DEFAULT_AUTHORITY;
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
-import android.app.Instrumentation;
-import android.content.ContentProviderClient;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.RemoteException;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.Configurator;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.Until;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
-import android.view.MotionEvent;
-
-import com.android.documentsui.model.RootInfo;
 
 @LargeTest
 public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
-
-    private static final int TIMEOUT = 5000;
-    private static final String TAG = "FilesActivityUiTest";
-    private static final String TARGET_PKG = "com.android.documentsui";
-    private static final String LAUNCHER_PKG = "com.android.launcher";
 
     public FilesActivityUiTest() {
         super(FilesActivity.class);
