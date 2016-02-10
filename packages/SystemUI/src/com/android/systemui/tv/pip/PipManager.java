@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -53,12 +54,16 @@ public class PipManager {
 
     private static final int MAX_RUNNING_TASKS_COUNT = 10;
 
-    private static final int STATE_NO_PIP = 0;
-    private static final int STATE_PIP_OVERLAY = 1;
-    private static final int STATE_PIP_MENU = 2;
+    public static final int STATE_NO_PIP = 0;
+    public static final int STATE_PIP_OVERLAY = 1;
+    public static final int STATE_PIP_MENU = 2;
 
     private static final int TASK_ID_NO_PIP = -1;
     private static final int INVALID_RESOURCE_TYPE = -1;
+
+    public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH = 0x1;
+    public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH = 0x2;
+    private int mSuspendPipResizingReason;
 
     private Context mContext;
     private IActivityManager mActivityManager;
@@ -87,7 +92,8 @@ public class PipManager {
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
-            showPipOverlay(false);
+            // Set state to overlay so we show it when the pinned stack animation ends.
+            mState = STATE_PIP_OVERLAY;
             launchPipOnboardingActivityIfNeeded();
         }
     };
@@ -103,6 +109,23 @@ public class PipManager {
         @Override
         public void run() {
             movePipToFullscreen();
+        }
+    };
+    private final Runnable mOnPinnedStackAnimationEnded = new Runnable() {
+        @Override
+        public void run() {
+            if (mState == STATE_PIP_OVERLAY) {
+                showPipOverlay();
+            } else if (mState == STATE_PIP_MENU) {
+                showPipMenu();
+            }
+        }
+    };
+
+    private final Runnable mResizePinnedStackRunnable = new Runnable() {
+        @Override
+        public void run() {
+            resizePinnedStack(mState);
         }
     };
 
@@ -164,7 +187,7 @@ public class PipManager {
         if (!hasPipTasks()) {
             startPip();
         } else if (mState == STATE_PIP_OVERLAY) {
-            showPipMenu();
+            resizePinnedStack(STATE_PIP_MENU);
         }
     }
 
@@ -210,11 +233,7 @@ public class PipManager {
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onMoveToFullscreen();
         }
-        try {
-            mActivityManager.moveTasksToFullscreenStack(PINNED_STACK_ID, true);
-        } catch (RemoteException e) {
-            Log.e(TAG, "moveTasksToFullscreenStack failed", e);
-        }
+        resizePinnedStack(mState);
     }
 
     /**
@@ -222,17 +241,75 @@ public class PipManager {
      * stack to the default PIP bound {@link com.android.internal.R.string
      * .config_defaultPictureInPictureBounds}.
      */
-    public void showPipOverlay(boolean resizeStack) {
+    private void showPipOverlay() {
         if (DEBUG) Log.d(TAG, "showPipOverlay()");
         mState = STATE_PIP_OVERLAY;
         Intent intent = new Intent(mContext, PipOverlayActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchStackId(PINNED_STACK_ID);
-        if (resizeStack) {
-            options.setLaunchBounds(mPipBound);
-        }
         mContext.startActivity(intent, options.toBundle());
+    }
+
+    /**
+     * Suspends resizing operation on the Pip until {@link #resumePipResizing} is called
+     * @param reason The reason for suspending resizing operations on the Pip.
+     */
+    public void suspendPipResizing(int reason) {
+        if (DEBUG) Log.d(TAG,
+                "suspendPipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+        mSuspendPipResizingReason |= reason;
+    }
+
+    /**
+     * Resumes resizing operation on the Pip that was previously suspended.
+     * @param reason The reason resizing operations on the Pip was suspended.
+     */
+    public void resumePipResizing(int reason) {
+        if ((mSuspendPipResizingReason & reason) == 0) {
+            return;
+        }
+        if (DEBUG) Log.d(TAG,
+                "resumePipResizing() reason=" + reason + " callers=" + Debug.getCallers(2));
+        mSuspendPipResizingReason &= ~reason;
+        mHandler.post(mResizePinnedStackRunnable);
+    }
+
+    /**
+     * Resize the Pip to the appropriate size for the input state.
+     * @param state In Pip state also used to determine the new size for the Pip.
+     */
+    public void resizePinnedStack(int state) {
+        if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
+        mState = state;
+        Rect bounds;
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onPipResizeAboutToStart();
+        }
+        switch (mState) {
+            case STATE_PIP_MENU:
+                bounds = mMenuModePipBound;
+                break;
+            case STATE_NO_PIP:
+                bounds = null;
+                break;
+            default:
+                bounds = mPipBound;
+                break;
+        }
+
+        if (mSuspendPipResizingReason != 0) {
+            if (DEBUG) Log.d(TAG,
+                    "resizePinnedStack() deferring mSuspendPipResizingReason=" +
+                            mSuspendPipResizingReason);
+            return;
+        }
+
+        try {
+            mActivityManager.resizeStack(PINNED_STACK_ID, bounds, true, true, true);
+        } catch (RemoteException e) {
+            Log.e(TAG, "showPipMenu failed", e);
+        }
     }
 
     /**
@@ -240,7 +317,7 @@ public class PipManager {
      * stack to the centered PIP bound {@link com.android.internal.R.string
      * .config_centeredPictureInPictureBounds}.
      */
-    public void showPipMenu() {
+    private void showPipMenu() {
         if (DEBUG) Log.d(TAG, "showPipMenu()");
         mState = STATE_PIP_MENU;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -250,20 +327,13 @@ public class PipManager {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchStackId(PINNED_STACK_ID);
-        options.setLaunchBounds(mMenuModePipBound);
         mContext.startActivity(intent, options.toBundle());
     }
 
-    /**
-     * Adds {@link Listener}.
-     */
     public void addListener(Listener listener) {
         mListeners.add(listener);
     }
 
-    /**
-     * Removes {@link Listener}.
-     */
     public void removeListener(Listener listener) {
         mListeners.remove(listener);
     }
@@ -338,13 +408,21 @@ public class PipManager {
         @Override
         public void onActivityPinned()  throws RemoteException {
             // Post the message back to the UI thread.
+            if (DEBUG) Log.d(TAG, "onActivityPinned()");
             mHandler.post(mOnActivityPinnedRunnable);
         }
 
         @Override
         public void onPinnedActivityRestartAttempt() {
             // Post the message back to the UI thread.
+            if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
             mHandler.post(mOnPinnedActivityRestartAttempt);
+        }
+
+        @Override
+        public void onPinnedStackAnimationEnded() {
+            if (DEBUG) Log.d(TAG, "onPinnedStackAnimationEnded()");
+            mHandler.post(mOnPinnedStackAnimationEnded);
         }
     }
 
@@ -352,18 +430,14 @@ public class PipManager {
      * A listener interface to receive notification on changes in PIP.
      */
     public interface Listener {
-        /**
-         * Invoked when a PIPed activity is closed.
-         */
+        /** Invoked when a PIPed activity is closed. */
         void onPipActivityClosed();
-        /**
-         * Invoked when the PIP menu gets shown.
-         */
+        /** Invoked when the PIP menu gets shown. */
         void onShowPipMenu();
-        /**
-         * Invoked when the PIPed activity is returned back to the fullscreen.
-         */
+        /** Invoked when the PIPed activity is returned back to the fullscreen. */
         void onMoveToFullscreen();
+        /** Invoked when we are above to start resizing the Pip. */
+        void onPipResizeAboutToStart();
     }
 
     /**

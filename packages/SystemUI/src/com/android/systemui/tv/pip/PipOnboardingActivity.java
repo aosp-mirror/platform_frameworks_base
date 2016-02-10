@@ -62,4 +62,8 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
     public void onMoveToFullscreen() {
         finish();
     }
+
+    @Override
+    public void onPipResizeAboutToStart() {
+    }
 }
