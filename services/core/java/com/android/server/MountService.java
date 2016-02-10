@@ -1473,7 +1473,7 @@ class MountService extends IMountService.Stub
         }
 
         mSettingsFile = new AtomicFile(
-                new File(Environment.getSystemSecureDirectory(), "storage.xml"));
+                new File(Environment.getDataSystemDirectory(), "storage.xml"));
 
         synchronized (mLock) {
             readSettingsLocked();
