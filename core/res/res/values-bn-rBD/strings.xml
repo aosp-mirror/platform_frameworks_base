@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s প্রশাসক অক্ষম করেছেন। আরো জানতে তাদের সাথে যোগাযোগ করুন।"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"আপনার নতুন বার্তা আছে"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"দেখার জন্য SMS অ্যাপ্লিকেশান খুলুন"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"কিছু ক্রিয়াকলাপ উপলব্ধ নাও হতে পারে"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"অবিরত রাখতে স্পর্শ করুন"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"ব্যবহারকারীর প্রোফাইল লক করা আছে"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"কিছু ক্রিয়াকলাপ সীমিত হতে পারে"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"আনলক করতে আলতো চাপ দিন"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"ব্যবহারকারির ডেটা লক করা হয়েছে"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> এর সাথে সংযুক্ত হয়েছে"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ফাইলগুলি দেখতে আলতো চাপ দিন"</string>
     <string name="pin_target" msgid="3052256031352291362">"পিন করুন"</string>

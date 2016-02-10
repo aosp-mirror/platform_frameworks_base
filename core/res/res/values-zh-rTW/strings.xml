@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"這個套件已由「%1$s」管理員停用。請與對方聯絡以瞭解詳情。"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新訊息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"開啟簡訊應用程式來查看內容"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"部分功能可能無法使用"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"輕觸即可繼續作業"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"使用者個人資料目前處於鎖定狀態"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"部分功能可能受到鎖定"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"輕按即可解鎖"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"使用者資料已鎖定"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"已連線至 <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"輕觸即可查看檔案"</string>
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>

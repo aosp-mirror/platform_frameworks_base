@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Deaktiveret af %1$s administrator. Kontakt vedkommende for at få flere oplysninger."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Du har nye beskeder"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Åbn sms-appen for at se beskeden"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Nogle funktioner er muligvis ikke tilgængelige"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Tryk for at fortsætte"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Brugerprofilen er låst"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Nogle funktioner er begrænsede"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Tryk for at låse op"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Brugerdataene er låst"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Tilsluttet <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tryk for at se filer"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fastgør"</string>

@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Çaktivizuar nga administratori i %1$s. Kontaktoje për të mësuar më shumë."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ke mesazhe të reja"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Hap aplikacionin SMS për ta parë"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Disa funksione mund të mos jenë të disponueshme"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Preke për të vazhduar"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profili i përdoruesit i kyçur"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Disa funksione mund të jenë të kufizuara"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Trokit për të shkyçur"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Të dhënat e përdoruesit të kyçura"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"U lidh me <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Trokit për të parë skedarët"</string>
     <string name="pin_target" msgid="3052256031352291362">"Gozhdo"</string>

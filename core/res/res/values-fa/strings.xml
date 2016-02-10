@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"‏سرپرست %1$s آن را غیرفعال کرده است. برای اطلاعات بیشتر با او تماس بگیرید."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"پیام‌های جدیدی دارید"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"برای مشاهده، برنامه پیامک را باز کنید"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"شاید برخی عملکردها دردسترس نباشند"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"برای ادامه لمس کنید"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"نمایه کاربر قفل است"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ممکن است برخی از عملکردها محدود باشند"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"برای باز کردن قفل، ضربه بزنید"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"داده‌های کاربر قفل هستند"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"به <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> متصل شد"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"برای دیدن فایل‌ها، ضربه بزنید"</string>
     <string name="pin_target" msgid="3052256031352291362">"پین کردن"</string>

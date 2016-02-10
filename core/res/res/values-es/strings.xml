@@ -1559,9 +1559,9 @@
     <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tienes mensajes nuevos"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Abre la aplicación de SMS para ver el mensaje"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Algunas funciones no disponibles"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Toca para continuar"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Perfil de usuario bloqueado"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Algunas funciones limitadas"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Toca para desbloquear"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Datos de usuario bloqueados"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toca para ver archivos"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fijar"</string>

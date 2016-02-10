@@ -349,8 +349,8 @@
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Consente all\'applicazione di aggiungere, rimuovere, modificare gli eventi che puoi modificare sul tablet, inclusi quelli di amici o colleghi. Ciò potrebbe consentire all\'applicazione di inviare messaggi apparentemente provenienti dai proprietari del calendario o di modificare eventi all\'insaputa dei proprietari."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Consente all\'app di aggiungere, rimuovere o modificare eventi che è possibile modificare sulla TV, inclusi quelli di amici o colleghi. L\'app potrebbe inviare messaggi apparentemente provenienti dai proprietari del calendario o modificare eventi all\'insaputa dei proprietari."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Consente all\'applicazione di aggiungere, rimuovere, modificare gli eventi che puoi modificare sul telefono, inclusi quelli di amici o colleghi. Ciò potrebbe consentire all\'applicazione di inviare messaggi apparentemente provenienti dai proprietari del calendario o di modificare eventi all\'insaputa dei proprietari."</string>
-    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesso a comandi aggiuntivi del provider di localizz."</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Consente all\'app di accedere a ulteriori comandi del fornitore di posizione. Ciò potrebbe consentire all\'app di interferire con il funzionamento del GPS o di altre fonti di localizzazione."</string>
+    <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesso a comandi aggiuntivi provider di geolocalizz."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Consente all\'app di accedere a ulteriori comandi del fornitore di posizione. Ciò potrebbe consentire all\'app di interferire con il funzionamento del GPS o di altre fonti di geolocalizzazione."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"accesso alla posizione esatta (basata su GPS e rete)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Consente all\'applicazione di ottenere la tua posizione esatta utilizzando il sistema GPS (Global Positioning System) o fonti di geolocalizzazione delle reti come ripetitori di telefonia mobile e Wi-Fi. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul dispositivo per poter essere utilizzati dall\'applicazione. Le applicazioni potrebbero utilizzare questa autorizzazione per stabilire la tua posizione e potrebbero consumare ulteriore batteria."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accesso alla posizione approssimativa (basata sulla rete)"</string>
@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Disattivato dall\'amministratore di %1$s. Contattalo per ulteriori informazioni."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Hai nuovi messaggi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Apri l\'app SMS per la visualizzazione"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Alcune funzioni potrebbero non essere disponibili"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Tocca per continuare"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profilo utente bloccato"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Funzioni potenzial. limitate"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Tocca per sbloccare"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Dati utente bloccati"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connesso a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tocca per visualizzare i file"</string>
     <string name="pin_target" msgid="3052256031352291362">"Blocca"</string>

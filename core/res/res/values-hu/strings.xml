@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"A(z) %1$s szervezet rendszergazdája letiltotta. További információért vegye fel vele a kapcsolatot."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Új üzenetei érkeztek"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"SMS-alkalmazás megnyitása a megtekintéshez"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Néhány funkció nem használható"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Érintse meg a folytatáshoz"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Felhasználói profil zárolva"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Egyes funkciók korlátozva lehetnek"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Koppintson a feloldáshoz"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Felhasználói adatok zárolva"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Csatlakoztatva a(z) <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> eszközhöz"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Koppintson ide a fájlok megtekintéséhez"</string>
     <string name="pin_target" msgid="3052256031352291362">"Rögzítés"</string>

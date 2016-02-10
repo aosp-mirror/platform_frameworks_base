@@ -1557,9 +1557,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Imezimwa na msimamizi wa %1$s. Wasiliana naye ili upate maelezo zaidi."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Una ujumbe mpya"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Fungua programu ya SMS ili uweze kuangalia"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Huenda baadhi ya vipengele visipatikane"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Gusa ili uendelee"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Wasifu wa mtumiaji umefungwa"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Huenda baadhi ya utendaji ukawekewa vikwazo"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Gonga ili ufungue"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Data ya mtumiaji imefungwa"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Imeunganishwa na <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Gonga ili uangalie faili"</string>
     <string name="pin_target" msgid="3052256031352291362">"Bandika"</string>

@@ -1574,9 +1574,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Dezactivat de administratorul companiei %1$s. Contactați-l pentru a afla mai multe."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Aveți mesaje noi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Deschideți aplicația pentru SMS-uri ca să vizualizați"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Este posibil ca unele funcții să nu fie disponibile"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Atingeți pentru a continua"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil utilizator: blocat"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Este posibil ca unele funcții să fie limitate"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Atingeți pentru a debloca"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Datele utilizatorului: blocate"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectat la <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Atingeți pentru a vedea fișierele"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fixați"</string>
