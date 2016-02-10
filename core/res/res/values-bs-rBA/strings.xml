@@ -397,7 +397,7 @@
     <skip />
     <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
     <skip />
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Ta opcija vam omogućava minimalno ometanje sustava kad uređaj ne reagira ili je prespor ili kada su vam potrebni svi odjeljci izvještaja. Ne izrađuje se snimka ekrana i ne možete unijeti više detalja."</string>
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Koristite ovu opciju za minimalno ometanje sistema kad uređaj ne reaguje ili je prespor, ili kada su vam potrebni svi odjeljci izvještaja. Opcija ne uzima snimku ekrana i ne dozvoljava unošenje više detalja."</string>
     <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <!-- no translation found for global_action_toggle_silent_mode (8219525344246810925) -->
     <skip />
@@ -1694,7 +1694,7 @@
     <!-- no translation found for noApplications (2991814273936504689) -->
     <skip />
     <string name="aerr_application" msgid="250320989337856518">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> je zaustavljena"</string>
-    <string name="aerr_process" msgid="6201597323218674729">"Aplikacija <xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljena"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljen"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> se stalno zaustavlja"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> se stalno zaustavlja"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Ponovo pokreni aplikaciju"</string>
@@ -2854,8 +2854,8 @@
     <skip />
     <!-- no translation found for locale_search_menu (2560710726687249178) -->
     <skip />
-    <string name="work_mode_off_title" msgid="8954725060677558855">"Radni način je ISKLJUČEN"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"Omogućava radnom profilu da funkcioniše, uključujući aplikacije, sinhronizaciju u pozadini i povezane funkcije."</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Radni način rada je ISKLJUČEN"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Omogući radnom profilu da funkcionira, uključujući aplikacije, sinhronizaciju u pozadini i povezane funkcije."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
     <string name="suspended_package_title" msgid="3408150347778524435">"%1$s – onemogućeno"</string>
     <string name="suspended_package_message" msgid="6341091587106868601">"Onemogućio administrator (%1$s). Obratite mu se za više informacija."</string>
