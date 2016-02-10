@@ -17,6 +17,7 @@
 package android.test.mock;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -803,6 +804,12 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public String[] getSystemSharedLibraryNames() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public @Nullable String getServicesSystemSharedLibraryPackageName() {
         throw new UnsupportedOperationException();
     }
 

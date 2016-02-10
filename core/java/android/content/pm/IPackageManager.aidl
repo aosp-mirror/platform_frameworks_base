@@ -534,4 +534,6 @@ interface IPackageManager {
     boolean isEphemeralApplication(String packageName, int userId);
 
     boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
+
+    String getServicesSystemSharedLibraryPackageName();
 }
