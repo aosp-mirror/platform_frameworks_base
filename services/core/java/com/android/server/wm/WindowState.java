@@ -2085,7 +2085,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mTmpRect;
     }
 
-    private int getStackId() {
+    @Override
+    public int getStackId() {
         final TaskStack stack = getStack();
         if (stack == null) {
             return INVALID_STACK_ID;

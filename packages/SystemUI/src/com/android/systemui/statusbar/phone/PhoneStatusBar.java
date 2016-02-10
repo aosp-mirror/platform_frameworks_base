@@ -69,6 +69,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
@@ -296,6 +297,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     BrightnessMirrorController mBrightnessMirrorController;
     AccessibilityController mAccessibilityController;
     FingerprintUnlockController mFingerprintUnlockController;
+    LightStatusBarController mLightStatusBarController;
 
     int mNaturalBarHeight = -1;
 
@@ -361,6 +363,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // tracking calls to View.setSystemUiVisibility()
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+    private final Rect mLastFullscreenStackBounds = new Rect();
+    private final Rect mLastDockedStackBounds = new Rect();
 
     // last value sent to window manager
     private int mLastDispatchedSystemUiVisibility = ~View.SYSTEM_UI_FLAG_VISIBLE;
@@ -855,6 +859,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mAccessibilityController = new AccessibilityController(mContext);
         mKeyguardBottomArea.setAccessibilityController(mAccessibilityController);
         mNextAlarmController = new NextAlarmController(mContext);
+        mLightStatusBarController = new LightStatusBarController(mIconController,
+                mBatteryController);
         mKeyguardMonitor = new KeyguardMonitor(mContext);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor,
@@ -1072,6 +1078,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mFingerprintUnlockController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mRemoteInputController.addCallback(mStatusBarKeyguardViewManager);
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
+        mLightStatusBarController.setFingerprintUnlockController(mFingerprintUnlockController);
     }
 
     @Override
@@ -2513,7 +2520,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override // CommandQueue
-    public void setSystemUiVisibility(int vis, int mask) {
+    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
+            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
         final int oldVal = mSystemUiVisibility;
         final int newVal = (oldVal&~mask) | (vis&mask);
         final int diff = newVal ^ oldVal;
@@ -2522,6 +2530,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 Integer.toHexString(vis), Integer.toHexString(mask),
                 Integer.toHexString(oldVal), Integer.toHexString(newVal),
                 Integer.toHexString(diff)));
+        boolean sbModeChanged = false;
         if (diff != 0) {
             // we never set the recents bit via this method, so save the prior state to prevent
             // clobbering the bit below
@@ -2555,7 +2564,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     oldVal, newVal, mNavigationBarView.getBarTransitions(),
                     View.NAVIGATION_BAR_TRANSIENT, View.NAVIGATION_BAR_TRANSLUCENT,
                     View.NAVIGATION_BAR_TRANSPARENT);
-            final boolean sbModeChanged = sbMode != -1;
+            sbModeChanged = sbMode != -1;
             final boolean nbModeChanged = nbMode != -1;
             boolean checkBarModes = false;
             if (sbModeChanged && sbMode != mStatusBarMode) {
@@ -2582,18 +2591,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mSystemUiVisibility &= ~View.NAVIGATION_BAR_UNHIDE;
             }
 
-            if ((diff & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0 || sbModeChanged) {
-                boolean isTransparentBar = (mStatusBarMode == MODE_TRANSPARENT
-                        || mStatusBarMode == MODE_LIGHTS_OUT_TRANSPARENT);
-                boolean allowLight = isTransparentBar && !mBatteryController.isPowerSave();
-                boolean light = (vis & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0;
-                boolean animate = mFingerprintUnlockController == null
-                        || (mFingerprintUnlockController.getMode()
-                                != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                        && mFingerprintUnlockController.getMode()
-                                != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK);
-                mIconController.setIconsDark(allowLight && light, animate);
-            }
             // restore the recents bit
             if (wasRecentsVisible) {
                 mSystemUiVisibility |= View.RECENT_APPS_VISIBLE;
@@ -2602,6 +2599,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // send updated sysui visibility to window manager
             notifyUiVisibilityChanged(mSystemUiVisibility);
         }
+
+        mLightStatusBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
+                mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
     }
 
     private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
@@ -2729,9 +2729,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void setLightsOn(boolean on) {
         Log.v(TAG, "setLightsOn(" + on + ")");
         if (on) {
-            setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            setSystemUiVisibility(0, 0, 0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
+                    mLastFullscreenStackBounds, mLastDockedStackBounds);
         } else {
-            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE, 0, 0,
+                    View.SYSTEM_UI_FLAG_LOW_PROFILE, mLastFullscreenStackBounds,
+                    mLastDockedStackBounds);
         }
     }
 

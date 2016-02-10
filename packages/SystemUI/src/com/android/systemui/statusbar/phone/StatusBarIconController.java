@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
@@ -58,8 +59,8 @@ import java.util.ArrayList;
 public class StatusBarIconController extends StatusBarIconList implements Tunable {
 
     public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
-
     public static final String ICON_BLACKLIST = "icon_blacklist";
+    public static final int DEFAULT_ICON_TINT = Color.WHITE;
 
     private Context mContext;
     private PhoneStatusBar mPhoneStatusBar;
@@ -79,8 +80,11 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
     private int mIconSize;
     private int mIconHPadding;
 
-    private int mIconTint = Color.WHITE;
+    private int mIconTint = DEFAULT_ICON_TINT;
     private float mDarkIntensity;
+    private final Rect mTintArea = new Rect();
+    private static final Rect sTmpRect = new Rect();
+    private static final int[] sTmpInt2 = new int[2];
 
     private boolean mTransitionPending;
     private boolean mTintChangePending;
@@ -395,6 +399,21 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         }
     }
 
+    /**
+     * Sets the dark area so {@link #setIconsDark} only affects the icons in the specified area.
+     *
+     * @param darkArea the area in which icons should change it's tint, in logical screen
+     *                 coordinates
+     */
+    public void setIconsDarkArea(Rect darkArea) {
+        if (darkArea == null && mTintArea.isEmpty()) {
+            return;
+        }
+        mTintArea.set(darkArea);
+        applyIconTint();
+        mNotificationIconAreaController.setTintArea(darkArea);
+    }
+
     public void setIconsDark(boolean dark, boolean animate) {
         if (!animate) {
             setIconTintInternal(dark ? 1.0f : 0.0f);
@@ -446,14 +465,60 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         mPendingDarkIntensity = darkIntensity;
     }
 
+    /**
+     * @return the tint to apply to {@param view} depending on the desired tint {@param color} and
+     *         the screen {@param tintArea} in which to apply that tint
+     */
+    public static int getTint(Rect tintArea, View view, int color) {
+        if (isInArea(tintArea, view)) {
+            return color;
+        } else {
+            return DEFAULT_ICON_TINT;
+        }
+    }
+
+    /**
+     * @return the dark intensity to apply to {@param view} depending on the desired dark
+     *         {@param intensity} and the screen {@param tintArea} in which to apply that intensity
+     */
+    public static float getDarkIntensity(Rect tintArea, View view, float intensity) {
+        if (isInArea(tintArea, view)) {
+            return intensity;
+        } else {
+            return 0f;
+        }
+    }
+
+    /**
+     * @return true if more than half of the {@param view} area are in {@param area}, false
+     *         otherwise
+     */
+    private static boolean isInArea(Rect area, View view) {
+        if (area.isEmpty()) {
+            return true;
+        }
+        sTmpRect.set(area);
+        view.getLocationOnScreen(sTmpInt2);
+        int left = sTmpInt2[0];
+
+        int intersectStart = Math.max(left, area.left);
+        int intersectEnd = Math.min(left + view.getWidth(), area.right);
+        int intersectAmount = Math.max(0, intersectEnd - intersectStart);
+
+        boolean coversFullStatusBar = area.top <= 0;
+        boolean majorityOfWidth = 2 * intersectAmount > view.getWidth();
+        return majorityOfWidth && coversFullStatusBar;
+    }
+
     private void applyIconTint() {
         for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
             StatusBarIconView v = (StatusBarIconView) mStatusIcons.getChildAt(i);
-            v.setImageTintList(ColorStateList.valueOf(mIconTint));
+            v.setImageTintList(ColorStateList.valueOf(getTint(mTintArea, v, mIconTint)));
         }
-        mSignalCluster.setIconTint(mIconTint, mDarkIntensity);
-        mBatteryMeterView.setDarkIntensity(mDarkIntensity);
-        mClock.setTextColor(mIconTint);
+        mSignalCluster.setIconTint(mIconTint, mDarkIntensity, mTintArea);
+        mBatteryMeterView.setDarkIntensity(
+                isInArea(mTintArea, mBatteryMeterView) ? mDarkIntensity : 0);
+        mClock.setTextColor(getTint(mTintArea, mClock, mIconTint));
     }
 
     public void appTransitionPending() {

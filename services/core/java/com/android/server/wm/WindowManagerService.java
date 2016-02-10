@@ -4863,6 +4863,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
     public void getStackBounds(int stackId, Rect bounds) {
         synchronized (mWindowMap) {
             final TaskStack stack = mStackIdToStack.get(stackId);

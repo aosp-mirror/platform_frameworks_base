@@ -20,6 +20,7 @@ import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -70,6 +71,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     private Object mLock = new Object();
     // encompasses lights-out mode and other flags defined on View
     private int mSystemUiVisibility = 0;
+    private int mFullscreenStackSysUiVisibility;
+    private int mDockedStackSysUiVisibility;
+    private final Rect mFullscreenStackBounds = new Rect();
+    private final Rect mDockedStackBounds = new Rect();
     private boolean mMenuVisible = false;
     private int mImeWindowVis = 0;
     private int mImeBackDisposition;
@@ -185,6 +190,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 } catch (RemoteException e) {
                 }
             }
+        }
+
+        @Override
+        public void topAppWindowChanged(boolean menuVisible) {
+            StatusBarManagerService.this.topAppWindowChanged(menuVisible);
+        }
+
+        @Override
+        public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
+                int mask,
+                Rect fullscreenBounds, Rect dockedBounds, String cause) {
+            StatusBarManagerService.this.setSystemUiVisibility(vis, fullscreenStackVis,
+                    dockedStackVis, mask, fullscreenBounds, dockedBounds, cause);
         }
     };
 
@@ -390,8 +408,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
      * response to a window with {@link android.view.WindowManager.LayoutParams#needsMenuKey} set
      * to {@link android.view.WindowManager.LayoutParams#NEEDS_MENU_SET_TRUE}.
      */
-    @Override
-    public void topAppWindowChanged(final boolean menuVisible) {
+    private void topAppWindowChanged(final boolean menuVisible) {
         enforceStatusBar();
 
         if (SPEW) Slog.d(TAG, (menuVisible?"showing":"hiding") + " MENU key");
@@ -399,15 +416,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         synchronized(mLock) {
             mMenuVisible = menuVisible;
             mHandler.post(new Runnable() {
-                    public void run() {
-                        if (mBar != null) {
-                            try {
-                                mBar.topAppWindowChanged(menuVisible);
-                            } catch (RemoteException ex) {
-                            }
+                public void run() {
+                    if (mBar != null) {
+                        try {
+                            mBar.topAppWindowChanged(menuVisible);
+                        } catch (RemoteException ex) {
                         }
                     }
-                });
+                }
+            });
         }
     }
 
@@ -443,13 +460,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
 
     @Override
     public void setSystemUiVisibility(int vis, int mask, String cause) {
+        setSystemUiVisibility(vis, 0, 0, mask, mFullscreenStackBounds, mDockedStackBounds, cause);
+    }
+
+    private void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
+            Rect fullscreenBounds, Rect dockedBounds, String cause) {
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
         if (SPEW) Slog.d(TAG, "setSystemUiVisibility(0x" + Integer.toHexString(vis) + ")");
 
         synchronized (mLock) {
-            updateUiVisibilityLocked(vis, mask);
+            updateUiVisibilityLocked(vis, fullscreenStackVis, dockedStackVis, mask,
+                    fullscreenBounds, dockedBounds);
             disableLocked(
                     mCurrentUserId,
                     vis & StatusBarManager.DISABLE_MASK,
@@ -458,14 +481,25 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
-    private void updateUiVisibilityLocked(final int vis, final int mask) {
-        if (mSystemUiVisibility != vis) {
+    private void updateUiVisibilityLocked(final int vis,
+            final int fullscreenStackVis, final int dockedStackVis, final int mask,
+            final Rect fullscreenBounds, final Rect dockedBounds) {
+        if (mSystemUiVisibility != vis
+                || mFullscreenStackSysUiVisibility != fullscreenStackVis
+                || mDockedStackSysUiVisibility != dockedStackVis
+                || !mFullscreenStackBounds.equals(fullscreenBounds)
+                || !mDockedStackBounds.equals(dockedBounds)) {
             mSystemUiVisibility = vis;
+            mFullscreenStackSysUiVisibility = fullscreenStackVis;
+            mDockedStackSysUiVisibility = dockedStackVis;
+            mFullscreenStackBounds.set(fullscreenBounds);
+            mDockedStackBounds.set(dockedBounds);
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mBar != null) {
                             try {
-                                mBar.setSystemUiVisibility(vis, mask);
+                                mBar.setSystemUiVisibility(vis, fullscreenStackVis, dockedStackVis,
+                                        mask, fullscreenBounds, dockedBounds);
                             } catch (RemoteException ex) {
                             }
                         }
@@ -617,7 +651,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     // ================================================================================
     @Override
     public void registerStatusBar(IStatusBar bar, List<String> iconSlots,
-            List<StatusBarIcon> iconList, int switches[], List<IBinder> binders) {
+            List<StatusBarIcon> iconList, int switches[], List<IBinder> binders,
+            Rect fullscreenStackBounds, Rect dockedStackBounds) {
         enforceStatusBarService();
 
         Slog.i(TAG, "registerStatusBar bar=" + bar);
@@ -636,7 +671,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             switches[4] = mImeBackDisposition;
             switches[5] = mShowImeSwitcher ? 1 : 0;
             switches[6] = gatherDisableActionsLocked(mCurrentUserId, 2);
+            switches[7] = mFullscreenStackSysUiVisibility;
+            switches[8] = mDockedStackSysUiVisibility;
             binders.add(mImeToken);
+            fullscreenStackBounds.set(mFullscreenStackBounds);
+            dockedStackBounds.set(mDockedStackBounds);
         }
     }
 

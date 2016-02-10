@@ -38,6 +38,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
@@ -116,7 +117,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
         ExpandableNotificationRow.OnExpandClickListener {
     public static final String TAG = "StatusBar";
-    public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_REMOTE_INPUT =
@@ -639,12 +640,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Connect in to the status bar manager service
         mCommandQueue = new CommandQueue(this);
 
-        int[] switches = new int[8];
+        int[] switches = new int[9];
         ArrayList<IBinder> binders = new ArrayList<IBinder>();
         ArrayList<String> iconSlots = new ArrayList<>();
         ArrayList<StatusBarIcon> icons = new ArrayList<>();
+        Rect fullscreenStackBounds = new Rect();
+        Rect dockedStackBounds = new Rect();
         try {
-            mBarService.registerStatusBar(mCommandQueue, iconSlots, icons, switches, binders);
+            mBarService.registerStatusBar(mCommandQueue, iconSlots, icons, switches, binders,
+                    fullscreenStackBounds, dockedStackBounds);
         } catch (RemoteException ex) {
             // If the system process isn't there we're doomed anyway.
         }
@@ -653,7 +657,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mSettingsObserver.onChange(false); // set up
         disable(switches[0], switches[6], false /* animate */);
-        setSystemUiVisibility(switches[1], 0xffffffff);
+        setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
+                fullscreenStackBounds, dockedStackBounds);
         topAppWindowChanged(switches[2] != 0);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(binders.get(0), switches[3], switches[4], switches[5] != 0);

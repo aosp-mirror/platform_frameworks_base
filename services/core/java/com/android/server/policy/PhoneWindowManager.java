@@ -18,6 +18,8 @@ package com.android.server.policy;
 
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -32,6 +34,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityManagerNative;
@@ -135,6 +138,7 @@ import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
+import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.File;
 import java.io.FileReader;
@@ -280,6 +284,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     DreamManagerInternal mDreamManagerInternal;
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
+    StatusBarManagerInternal mStatusBarManagerInternal;
     boolean mPreloadedRecentApps;
     final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
@@ -488,6 +493,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mResettingSystemUiFlags = 0;
     // Bits that we are currently always keeping cleared.
     int mForceClearedSystemUiFlags = 0;
+    int mLastFullscreenStackSysUiFlags;
+    int mLastDockedStackSysUiFlags;
+    final Rect mNonDockedStackBounds = new Rect();
+    final Rect mDockedStackBounds = new Rect();
+    final Rect mLastNonDockedStackBounds = new Rect();
+    final Rect mLastDockedStackBounds = new Rect();
+
     // What we last reported to system UI about whether the compatibility
     // menu needs to be displayed.
     boolean mLastFocusNeedsMenu = false;
@@ -508,6 +520,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     WindowState mTopFullscreenOpaqueWindowState;
     WindowState mTopFullscreenOpaqueOrDimmingWindowState;
+    WindowState mTopDockedOpaqueWindowState;
+    WindowState mTopDockedOpaqueOrDimmingWindowState;
     HashSet<IApplicationToken> mAppsToBeHidden = new HashSet<IApplicationToken>();
     HashSet<IApplicationToken> mAppsThatDismissKeyguard = new HashSet<IApplicationToken>();
     boolean mTopIsFullscreen;
@@ -841,6 +855,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         ServiceManager.getService("statusbar"));
             }
             return mStatusBarService;
+        }
+    }
+
+    StatusBarManagerInternal getStatusBarManagerInternal() {
+        synchronized (mServiceAquireLock) {
+            if (mStatusBarManagerInternal == null) {
+                mStatusBarManagerInternal =
+                        LocalServices.getService(StatusBarManagerInternal.class);
+            }
+            return mStatusBarManagerInternal;
         }
     }
 
@@ -4552,6 +4576,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
         mTopFullscreenOpaqueOrDimmingWindowState = null;
+        mTopDockedOpaqueWindowState = null;
+        mTopDockedOpaqueOrDimmingWindowState = null;
         mAppsToBeHidden.clear();
         mAppsThatDismissKeyguard.clear();
         mForceStatusBar = false;
@@ -4597,7 +4623,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && attrs.type < FIRST_SYSTEM_WINDOW;
         final boolean showWhenLocked = (fl & FLAG_SHOW_WHEN_LOCKED) != 0;
         final boolean dismissKeyguard = (fl & FLAG_DISMISS_KEYGUARD) != 0;
-
+        final int stackId = win.getStackId();
         if (mTopFullscreenOpaqueWindowState == null &&
                 win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()) {
             if ((fl & FLAG_FORCE_NOT_FULLSCREEN) != 0) {
@@ -4646,9 +4672,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 } else {
                     mAppsToBeHidden.add(appToken);
                 }
-                if (attrs.x == 0 && attrs.y == 0
-                        && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
-                        && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
+                if (isFullscreen(attrs) && StackId.normallyFullscreenWindows(stackId)) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
                     mTopFullscreenOpaqueWindowState = win;
                     if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
@@ -4692,11 +4716,37 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mWinShowWhenLocked = win;
             }
         }
-        if (mTopFullscreenOpaqueOrDimmingWindowState == null
-                && win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()
-                && win.isDimming()) {
+
+        // Keep track of the window if it's dimming but not necessarily fullscreen.
+        final boolean reallyVisible = win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw();
+        if (mTopFullscreenOpaqueOrDimmingWindowState == null &&  reallyVisible
+                && win.isDimming() && StackId.normallyFullscreenWindows(stackId)) {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
+
+        // We need to keep track of the top "fullscreen" opaque window for the docked stack
+        // separately, because both the "real fullscreen" opaque window and the one for the docked
+        // stack can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
+        if (mTopDockedOpaqueWindowState == null && reallyVisible && appWindow && attached == null
+                && isFullscreen(attrs) && stackId == DOCKED_STACK_ID) {
+            mTopDockedOpaqueWindowState = win;
+            if (mTopDockedOpaqueOrDimmingWindowState == null) {
+                mTopDockedOpaqueOrDimmingWindowState = win;
+            }
+        }
+
+        // Also keep track of any windows that are dimming but not necessarily fullscreen in the
+        // docked stack.
+        if (mTopDockedOpaqueOrDimmingWindowState == null && reallyVisible && win.isDimming()
+                && stackId == DOCKED_STACK_ID) {
+            mTopDockedOpaqueOrDimmingWindowState = win;
+        }
+    }
+
+    private boolean isFullscreen(WindowManager.LayoutParams attrs) {
+        return attrs.x == 0 && attrs.y == 0
+                && attrs.width == WindowManager.LayoutParams.MATCH_PARENT
+                && attrs.height == WindowManager.LayoutParams.MATCH_PARENT;
     }
 
     /** {@inheritDoc} */
@@ -6838,42 +6888,52 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             tmpVisibility |= StatusBarManager.DISABLE_RECENT;
         }
 
-        tmpVisibility = updateLightStatusBarLw(tmpVisibility);
+        final int fullscreenVisibility = updateLightStatusBarLw(0 /* vis */,
+                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState);
+        final int dockedVisibility = updateLightStatusBarLw(0 /* vis */,
+                mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState);
+        mWindowManagerFuncs.getStackBounds(HOME_STACK_ID, mNonDockedStackBounds);
+        mWindowManagerFuncs.getStackBounds(DOCKED_STACK_ID, mDockedStackBounds);
         final int visibility = updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int diff = visibility ^ mLastSystemUiFlags;
+        final int fullscreenDiff = fullscreenVisibility ^ mLastFullscreenStackSysUiFlags;
+        final int dockedDiff = dockedVisibility ^ mLastDockedStackSysUiFlags;
         final boolean needsMenu = win.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
-        if (diff == 0 && mLastFocusNeedsMenu == needsMenu
-                && mFocusedApp == win.getAppToken()) {
+        if (diff == 0 && fullscreenDiff == 0 && dockedDiff == 0 && mLastFocusNeedsMenu == needsMenu
+                && mFocusedApp == win.getAppToken()
+                && mLastNonDockedStackBounds.equals(mNonDockedStackBounds)
+                && mLastDockedStackBounds.equals(mDockedStackBounds)) {
             return 0;
         }
         mLastSystemUiFlags = visibility;
+        mLastFullscreenStackSysUiFlags = fullscreenVisibility;
+        mLastDockedStackSysUiFlags = dockedVisibility;
         mLastFocusNeedsMenu = needsMenu;
         mFocusedApp = win.getAppToken();
+        final Rect fullscreenStackBounds = new Rect(mNonDockedStackBounds);
+        final Rect dockedStackBounds = new Rect(mDockedStackBounds);
         mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.setSystemUiVisibility(visibility, 0xffffffff, win.toString());
-                            statusbar.topAppWindowChanged(needsMenu);
-                        }
-                    } catch (RemoteException e) {
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
+                    StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+                    if (statusbar != null) {
+                        statusbar.setSystemUiVisibility(visibility, fullscreenVisibility,
+                                dockedVisibility, 0xffffffff, fullscreenStackBounds,
+                                dockedStackBounds, win.toString());
+                        statusbar.topAppWindowChanged(needsMenu);
                     }
                 }
             });
         return diff;
     }
 
-    private int updateLightStatusBarLw(int vis) {
+    private int updateLightStatusBarLw(int vis, WindowState opaque, WindowState opaqueOrDimming) {
         WindowState statusColorWin = isStatusBarKeyguard() && !mHideLockScreen
                 ? mStatusBar
-                : mTopFullscreenOpaqueOrDimmingWindowState;
+                : opaqueOrDimming;
 
         if (statusColorWin != null) {
-            if (statusColorWin == mTopFullscreenOpaqueWindowState) {
+            if (statusColorWin == opaque) {
                 // If the top fullscreen-or-dimming window is also the top fullscreen, respect
                 // its light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
