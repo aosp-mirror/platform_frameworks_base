@@ -193,6 +193,11 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mRecView.setItemAnimator(new DirectoryItemAnimator(getActivity()));
 
+        // Make the RecyclerView unfocusable. This is needed in order for the focus search code in
+        // FocusManager to work correctly. Setting android:focusable=false in the layout xml doesn't
+        // work, for some reason.
+        mRecView.setFocusable(false);
+
         // TODO: Add a divider between views (which might use RecyclerView.ItemDecoration).
         if (DEBUG_ENABLE_DND) {
             setupDragAndDropOnDirectoryView(mRecView);

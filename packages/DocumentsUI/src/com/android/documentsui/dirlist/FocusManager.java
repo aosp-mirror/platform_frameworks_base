@@ -16,7 +16,7 @@
 
 package com.android.documentsui.dirlist;
 
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,14 +32,14 @@ class FocusManager implements View.OnFocusChangeListener {
 
     private RecyclerView mView;
     private RecyclerView.Adapter<?> mAdapter;
-    private LinearLayoutManager mLayout;
+    private GridLayoutManager mLayout;
 
     private int mLastFocusPosition = RecyclerView.NO_POSITION;
 
     public FocusManager(RecyclerView view) {
         mView = view;
         mAdapter = view.getAdapter();
-        mLayout = (LinearLayoutManager) view.getLayoutManager();
+        mLayout = (GridLayoutManager) view.getLayoutManager();
     }
 
     /**
@@ -134,12 +134,27 @@ class FocusManager implements View.OnFocusChangeListener {
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 searchDir = View.FOCUS_DOWN;
                 break;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                searchDir = View.FOCUS_LEFT;
-                break;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                searchDir = View.FOCUS_RIGHT;
-                break;
+        }
+
+        if (inGridMode()) {
+            int currentPosition = mView.getChildAdapterPosition(view);
+            // Left and right arrow keys only work in grid mode.
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                    if (currentPosition > 0) {
+                        // Stop backward focus search at the first item, otherwise focus will wrap
+                        // around to the last visible item.
+                        searchDir = View.FOCUS_BACKWARD;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    if (currentPosition < mAdapter.getItemCount() - 1) {
+                        // Stop forward focus search at the last item, otherwise focus will wrap
+                        // around to the first visible item.
+                        searchDir = View.FOCUS_FORWARD;
+                    }
+                    break;
+            }
         }
 
         if (searchDir != -1) {
@@ -237,5 +252,12 @@ class FocusManager implements View.OnFocusChangeListener {
                         }
                     });
         }
+    }
+
+    /**
+     * @return Whether the layout manager is currently in a grid-configuration.
+     */
+    private boolean inGridMode() {
+        return mLayout.getSpanCount() > 1;
     }
 }
