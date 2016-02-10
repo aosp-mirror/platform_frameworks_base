@@ -24,6 +24,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
+import android.os.UserHandle;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
@@ -116,14 +117,14 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
             }
         }
 
-        Mockito.when(mMockPm.queryBroadcastReceivers(
+        Mockito.when(mMockPm.queryBroadcastReceiversAsUser(
                 Mockito.argThat(new ArgumentMatcher<Intent>() {
                     @Override
                     public boolean matches(Object object) {
                         Intent intent = (Intent) object;
                         return NetworkScoreManager.ACTION_SCORE_NETWORKS.equals(intent.getAction());
                     }
-                }), Mockito.eq(0)))
+                }), Mockito.eq(0), Mockito.eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(receivers);
     }
 
