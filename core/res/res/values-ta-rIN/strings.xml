@@ -1031,7 +1031,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"சிம் கார்டு சேர்க்கப்பட்டது"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"செல்லுலார் நெட்வொர்க்கை அணுக உங்கள் சாதனத்தை மறுதொடக்கம் செய்யவும்."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"மறுதொடக்கம்"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"புதிய சிம் சரியாக இயங்குவதற்கு, நீங்கள் பயன்படுத்தும் மொபைல் நிறுவனத்திலிருந்து பயன்பாட்டை நிறுவி, திறக்கவும்."</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"புதிய சிம் சரியாக இயங்குவதற்கு, நீங்கள் பயன்படுத்தும் மொபைல் நிறுவனத்திலிருந்து ஒரு பயன்பாட்டை நிறுவி, திறக்க வேண்டும்."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"பயன்பாட்டைப் பெறுக"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"இப்போது வேண்டாம்"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"புதிய சிம் செருகப்பட்டது"</string>
@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s நிர்வாகி முடக்கியுள்ளார். மேலும் அறிய, அவரைத் தொடர்புகொள்ளவும்."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"புதிய செய்திகள் வந்துள்ளன"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"பார்க்க, SMS பயன்பாட்டைத் திறக்கவும்"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"சில செயல்பாடு கிடைக்காமல் போகலாம்"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"தொடர, தொடவும்"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"பயனர் சுயவிவரம் பூட்டப்பட்டது"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"சில செயல்பாடு வரம்பிடப்பட்டிருக்கலாம்"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"திறக்க, தட்டவும்"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"பயனர் தரவு பூட்டப்பட்டது"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> உடன் இணைக்கப்பட்டது"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
     <string name="pin_target" msgid="3052256031352291362">"பின் செய்"</string>

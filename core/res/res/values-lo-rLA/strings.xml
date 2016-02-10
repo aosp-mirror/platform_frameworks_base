@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"ຖືກປິດໃຊ້ໂດຍຜູ້ເບິ່ງແຍງລະບົບ %1$s. ກະລຸນາຕິດຕໍ່ຫາພວກເຂົາເພື່ອສຶກສາເພີ່ມເຕີມ."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ທ່ານມີຂໍ້ຄວາມໃໝ່"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ເປີດແອັບ SMS ເພື່ອເບິ່ງ"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"ບາງຟັງຊັນອາດບໍ່ສາມາດໃຊ້ໄດ້"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"ແຕະເພື່ອສືບຕໍ່"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"ໂປຣໄຟລ໌ຜູ້ໃຊ້ຖືກລັອກໄວ້ແລ້ວ"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ບາງຄວາມສາມາດນຳໃຊ້ອາດຈະຖືກຈຳກັດ"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"ແຕະເພື່ອປົດລັອກ"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"ລັອກຂໍ້ມູນຜູ້ໃຊ້ແລ້ວ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"ເຊື່ອມຕໍ່ກັບ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ແລ້ວ"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ແຕະເພື່ອເບິ່ງໄຟລ໌"</string>
     <string name="pin_target" msgid="3052256031352291362">"ປັກໝຸດ"</string>

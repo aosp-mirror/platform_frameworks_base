@@ -1593,9 +1593,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Onemogočil skrbnik %1$s. Za več informacij se obrnite nanj."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Imate nova sporočila."</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Za ogled odprite aplikacijo za SMS-je"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Nek. funk. morda niso na voljo"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Dotaknite se za nadaljevanje"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil uporabnika zaklenjen"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Nekatere funkcije bodo omejene"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Dotaknite se, da odklenete"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Uporabniški podatki zaklenjeni"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Vzpostavljena povezava z napravo <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dotaknite se, če si želite ogledati datoteke"</string>
     <string name="pin_target" msgid="3052256031352291362">"Pripenjanje"</string>

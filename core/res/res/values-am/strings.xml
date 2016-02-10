@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"በ%1$s አስተዳዳሪ ተሰናክሏል። የበለጠ ለመረዳት ያነጋግሯቸው።"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልእክቶች አለዎት"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ለመመልከት የኤስኤምኤስ መተግበሪያ ይክፈቱ"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"አንዳንድ ተግባሮች ላይገኙ ይችላሉ"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"ለመቀጠል ይንኩ"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"የተጠቃሚ መገለጫ ተቆልፏል"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"አንዳንድ ተግባሮች የተገደቡ ሊሆኑ ይችላሉ"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"ለመክፈት መታ ያድርጉ"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"የተጠቃሚ ውሂብ ተቆልፏል"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"ከ<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ፋይሎችን ለመመልከት መታ ያድርጉ"</string>
     <string name="pin_target" msgid="3052256031352291362">"ፒን"</string>

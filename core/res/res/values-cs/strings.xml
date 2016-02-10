@@ -1593,9 +1593,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Zakázáno administrátorem zařízení %1$s. Chcete-li získat další informace, kontaktujte jej."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Máte nové zprávy"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Zobrazíte je v aplikaci pro SMS"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Některé funkce nemusí být k dispozici"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Pokračujte klepnutím"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Uživatelský profil je uzamčen"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Funkce mohou být omezeny"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Klepnutím je odemknete"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Uživatelská data jsou uzamčena"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Připojeno k zařízení <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Klepnutím zobrazíte soubory"</string>
     <string name="pin_target" msgid="3052256031352291362">"Připnout"</string>

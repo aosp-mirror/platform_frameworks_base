@@ -32,8 +32,7 @@
     <skip />
     <!-- no translation found for petabyteShort (5637816680144990219) -->
     <skip />
-    <!-- no translation found for fileSizeSuffix (8897567456150907538) -->
-    <skip />
+    <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <!-- no translation found for durationDays (6652371460511178259) -->
     <skip />
     <!-- no translation found for durationDayHours (2713107458736744435) -->
@@ -102,7 +101,11 @@
     <skip />
     <!-- no translation found for enablePin (209412020907207950) -->
     <skip />
-    <!-- no translation found for pinpuk_attempts (1251012001539225582) -->
+    <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
+      <item quantity="one">Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj prije nego se SIM kartica zaključa.</item>
+      <item quantity="few">Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja prije nego se SIM kartica zaključa.</item>
+      <item quantity="other">Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja prije nego se SIM kartica zaključa.</item>
+    </plurals>
     <!-- no translation found for imei (2625429890869005782) -->
     <skip />
     <!-- no translation found for meid (4841221237681254195) -->
@@ -219,24 +222,17 @@
     <skip />
     <!-- no translation found for roamingTextSearching (8360141885972279963) -->
     <skip />
-    <!-- no translation found for wfcRegErrorTitle (2301376280632110664) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi pozivanje"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
   </string-array>
-    <!-- no translation found for wfcSpnFormat (8211621332478306568) -->
-    <skip />
-    <!-- no translation found for wfcDataSpnFormat (1118052028767666883) -->
-    <skip />
-    <!-- no translation found for wifi_calling_off_summary (8720659586041656098) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_preferred_summary (1994113411286935263) -->
-    <skip />
-    <!-- no translation found for wfc_mode_cellular_preferred_summary (5920549484600758786) -->
-    <skip />
-    <!-- no translation found for wfc_mode_wifi_only_summary (2379919155237869320) -->
-    <skip />
+    <string name="wfcSpnFormat" msgid="8211621332478306568">"%s"</string>
+    <string name="wfcDataSpnFormat" msgid="1118052028767666883">"%s"</string>
+    <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Isključeno"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Prednost ima Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Prednost ima mobilna mreža"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Samo Wi-Fi"</string>
     <!-- no translation found for cfTemplateNotForwarded (1683685883841272560) -->
     <skip />
     <!-- no translation found for cfTemplateForwarded (1302922117498590521) -->
@@ -303,8 +299,7 @@
     <skip />
     <!-- no translation found for ssl_ca_cert_noti_by_unknown (4475437862189850602) -->
     <skip />
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (550758088185764312) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Od strane administratora vašeg profila za Work"</string>
     <!-- no translation found for ssl_ca_cert_noti_managed (4030263497686867141) -->
     <skip />
     <!-- no translation found for work_profile_deleted (5005572078641980632) -->
@@ -313,8 +308,7 @@
     <skip />
     <!-- no translation found for work_profile_deleted_details (226615743462361248) -->
     <skip />
-    <!-- no translation found for work_profile_deleted_description_dpm_wipe (6019770344820507579) -->
-    <skip />
+    <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"Profil za Work više nije dostupan na ovom uređaju."</string>
     <!-- no translation found for factory_reset_warning (5423253125642394387) -->
     <skip />
     <!-- no translation found for factory_reset_message (4905025204141900666) -->
@@ -343,18 +337,12 @@
     <skip />
     <!-- no translation found for silent_mode_ring (8592241816194074353) -->
     <skip />
-    <!-- no translation found for reboot_to_update_title (6212636802536823850) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_prepare (6305853831955310890) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_package (3871302324500927291) -->
-    <skip />
-    <!-- no translation found for reboot_to_update_reboot (6428441000951565185) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_title (4142355915340627490) -->
-    <skip />
-    <!-- no translation found for reboot_to_reset_message (2432077491101416345) -->
-    <skip />
+    <string name="reboot_to_update_title" msgid="6212636802536823850">"Ažuriranje sistema Android"</string>
+    <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Priprema za ažuriranje..."</string>
+    <string name="reboot_to_update_package" msgid="3871302324500927291">"Obrađuje se paket ažuriranja..."</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Ponovno se pokreće..."</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Vraćanje na tvorničke postavke"</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"Ponovno se pokreće..."</string>
     <!-- no translation found for shutdown_progress (2281079257329981203) -->
     <skip />
     <!-- no translation found for shutdown_confirm (3385745179555731470) -->
@@ -397,7 +385,7 @@
     <skip />
     <!-- no translation found for bugreport_option_full_title (6354382025840076439) -->
     <skip />
-    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Ta opcija vam omogućava minimalno ometanje sustava kad uređaj ne reagira ili je prespor ili kada su vam potrebni svi odjeljci izvještaja. Ne izrađuje se snimka ekrana i ne možete unijeti više detalja."</string>
+    <string name="bugreport_option_full_summary" msgid="6687306111256813257">"Koristite ovu opciju za minimalno ometanje sistema kad uređaj ne reaguje ili je prespor, ili kada su vam potrebni svi odjeljci izvještaja. Opcija ne uzima snimku ekrana i ne dozvoljava unošenje više detalja."</string>
     <!-- no translation found for bugreport_countdown (6878900193900090368) -->
     <!-- no translation found for global_action_toggle_silent_mode (8219525344246810925) -->
     <skip />
@@ -413,10 +401,8 @@
     <skip />
     <!-- no translation found for global_action_settings (1756531602592545966) -->
     <skip />
-    <!-- no translation found for global_action_assist (3892832961594295030) -->
-    <skip />
-    <!-- no translation found for global_action_voice_assist (7751191495200504480) -->
-    <skip />
+    <string name="global_action_assist" msgid="3892832961594295030">"Pomoć"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Glasovna pomoć"</string>
     <!-- no translation found for global_action_lockdown (8751542514724332873) -->
     <skip />
     <!-- no translation found for status_bar_notification_info_overflow (5301981741705354993) -->
@@ -434,42 +420,28 @@
     <skip />
     <!-- no translation found for managed_profile_label (6260850669674791528) -->
     <skip />
-    <!-- no translation found for permgrouplab_contacts (3657758145679177612) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_contacts (6951499528303668046) -->
-    <skip />
-    <!-- no translation found for permgrouplab_location (7275582855722310164) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_location (1346617465127855033) -->
-    <skip />
+    <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakti"</string>
+    <string name="permgroupdesc_contacts" msgid="6951499528303668046">"pristupa vašim kontaktima"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupa lokaciji ovog uređaja"</string>
     <!-- no translation found for permgrouplab_calendar (5863508437783683902) -->
     <skip />
-    <!-- no translation found for permgroupdesc_calendar (3889615280211184106) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sms (228308803364967808) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sms (4656988620100940350) -->
-    <skip />
+    <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupa vašem kalendaru"</string>
+    <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"šalje i pregleda SMS poruke"</string>
     <!-- no translation found for permgrouplab_storage (1971118770546336966) -->
     <skip />
-    <!-- no translation found for permgroupdesc_storage (637758554581589203) -->
-    <skip />
+    <string name="permgroupdesc_storage" msgid="637758554581589203">"pristupa slikama, medijskim datotekama i datotekama na vašem uređaju"</string>
     <!-- no translation found for permgrouplab_microphone (171539900250043464) -->
     <skip />
-    <!-- no translation found for permgroupdesc_microphone (4988812113943554584) -->
-    <skip />
+    <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snima zvuk"</string>
     <!-- no translation found for permgrouplab_camera (4820372495894586615) -->
     <skip />
-    <!-- no translation found for permgroupdesc_camera (3250611594678347720) -->
-    <skip />
-    <!-- no translation found for permgrouplab_phone (5229115638567440675) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_phone (6234224354060641055) -->
-    <skip />
-    <!-- no translation found for permgrouplab_sensors (416037179223226722) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_sensors (7147968539346634043) -->
-    <skip />
+    <string name="permgroupdesc_camera" msgid="3250611594678347720">"slika i snima video zapise"</string>
+    <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"poziva i upravlja pozivima"</string>
+    <string name="permgrouplab_sensors" msgid="416037179223226722">"Tjelesni senzori"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"pristupa podacima senzora o vašim vitalnim funkcijama"</string>
     <!-- no translation found for capability_title_canRetrieveWindowContent (3901717936930170320) -->
     <skip />
     <!-- no translation found for capability_desc_canRetrieveWindowContent (3772225008605310672) -->
@@ -498,8 +470,7 @@
     <skip />
     <!-- no translation found for permdesc_statusBar (8434669549504290975) -->
     <skip />
-    <!-- no translation found for permlab_statusBarService (4826835508226139688) -->
-    <skip />
+    <string name="permlab_statusBarService" msgid="4826835508226139688">"funkcionisanje u vidu statusne trake"</string>
     <!-- no translation found for permdesc_statusBarService (716113660795976060) -->
     <skip />
     <!-- no translation found for permlab_expandStatusBar (1148198785937489264) -->
@@ -534,8 +505,7 @@
     <skip />
     <!-- no translation found for permdesc_subscribedFeedsRead (5557058907906144505) -->
     <skip />
-    <!-- no translation found for permlab_sendSms (7544599214260982981) -->
-    <skip />
+    <string name="permlab_sendSms" msgid="7544599214260982981">"slanje i pregledanje SMS poruka"</string>
     <!-- no translation found for permdesc_sendSms (7094729298204937667) -->
     <skip />
     <!-- no translation found for permlab_readSms (8745086572213270480) -->
@@ -554,10 +524,8 @@
     <skip />
     <!-- no translation found for permdesc_getTasks (7454215995847658102) -->
     <skip />
-    <!-- no translation found for permlab_manageProfileAndDeviceOwners (7918181259098220004) -->
-    <skip />
-    <!-- no translation found for permdesc_manageProfileAndDeviceOwners (106894851498657169) -->
-    <skip />
+    <string name="permlab_manageProfileAndDeviceOwners" msgid="7918181259098220004">"upravljanje vlasnicima profila i uređaja"</string>
+    <string name="permdesc_manageProfileAndDeviceOwners" msgid="106894851498657169">"Omogućava aplikaciji da postavi vlasnike profila i vlasnika uređaja."</string>
     <!-- no translation found for permlab_reorderTasks (2018575526934422779) -->
     <skip />
     <!-- no translation found for permdesc_reorderTasks (7734217754877439351) -->
@@ -638,8 +606,7 @@
     <skip />
     <!-- no translation found for permdesc_writeCallLog (683941736352787842) -->
     <skip />
-    <!-- no translation found for permlab_bodySensors (4683341291818520277) -->
-    <skip />
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"pristup tjelesnim senzorima (poput monitora za puls)"</string>
     <!-- no translation found for permdesc_bodySensors (4380015021754180431) -->
     <skip />
     <!-- no translation found for permlab_readCalendar (5972727560257612398) -->
@@ -662,12 +629,10 @@
     <skip />
     <!-- no translation found for permdesc_accessLocationExtraCommands (6078307221056649927) -->
     <skip />
-    <!-- no translation found for permlab_accessFineLocation (251034415460950944) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"pristup preciznoj lokaciji (utvrđena preko mreže i GPS-a)"</string>
     <!-- no translation found for permdesc_accessFineLocation (5295047563564981250) -->
     <skip />
-    <!-- no translation found for permlab_accessCoarseLocation (7715277613928539434) -->
-    <skip />
+    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pristup približnoj lokaciji (utvrđena preko mreže)"</string>
     <!-- no translation found for permdesc_accessCoarseLocation (2538200184373302295) -->
     <skip />
     <!-- no translation found for permlab_modifyAudioSettings (6095859937069146086) -->
@@ -678,8 +643,7 @@
     <skip />
     <!-- no translation found for permdesc_recordAudio (4906839301087980680) -->
     <skip />
-    <!-- no translation found for permlab_sim_communication (2935852302216852065) -->
-    <skip />
+    <string name="permlab_sim_communication" msgid="2935852302216852065">"slanje komandi SIM kartici"</string>
     <!-- no translation found for permdesc_sim_communication (5725159654279639498) -->
     <skip />
     <!-- no translation found for permlab_camera (3616391919559751192) -->
@@ -694,10 +658,8 @@
     <skip />
     <!-- no translation found for permdesc_callPhone (3740797576113760827) -->
     <skip />
-    <!-- no translation found for permlab_accessImsCallService (3574943847181793918) -->
-    <skip />
-    <!-- no translation found for permdesc_accessImsCallService (8992884015198298775) -->
-    <skip />
+    <string name="permlab_accessImsCallService" msgid="3574943847181793918">"pristup usluzi IMS pozivanja"</string>
+    <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Omogućava aplikaciji da koristi IMS uslugu za pozivanje bez vaše intervencije."</string>
     <!-- no translation found for permlab_readPhoneState (9178228524507610486) -->
     <skip />
     <!-- no translation found for permdesc_readPhoneState (1639212771826125528) -->
@@ -750,8 +712,7 @@
     <skip />
     <!-- no translation found for permdesc_accessNetworkState (8318964424675960975) -->
     <skip />
-    <!-- no translation found for permlab_createNetworkSockets (7934516631384168107) -->
-    <skip />
+    <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"ima potpuni pristup mreži"</string>
     <!-- no translation found for permdesc_createNetworkSockets (3403062187779724185) -->
     <skip />
     <!-- no translation found for permlab_changeNetworkState (958884291454327309) -->
@@ -814,44 +775,27 @@
     <skip />
     <!-- no translation found for permdesc_disableKeyguard (6034203065077122992) -->
     <skip />
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_partial (735082772341716043) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_insufficient (4596546021310923214) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_imager_dirty (1087209702421076105) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_fast (6470642383109155969) -->
-    <skip />
-    <!-- no translation found for fingerprint_acquired_too_slow (59250885689661653) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za otiske prstiju"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Omogućava aplikaciji da koristi metode za dodavanje i brisanje šablona otisaka prstiju za upotrebu."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"korišćenje hardvera za otiske prstiju"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Omogućava aplikaciji da za provjeru autentičnosti koristi hardver za otiske prstiju"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Prst je uklonjen prebrzo. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Prst je uklonjen presporo. Pokušajte ponovo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_error_hw_not_available (7955921658939936596) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_no_space (1055819001126053318) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_timeout (3927186043737732875) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_canceled (4402024612660774395) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_lockout (5536934748136933450) -->
-    <skip />
-    <!-- no translation found for fingerprint_error_unable_to_process (6107816084103552441) -->
-    <skip />
-    <!-- no translation found for fingerprint_name_template (5870957565512716938) -->
-    <skip />
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware za otisak prsta nije dostupan."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Otisak prsta se ne može sačuvati. Uklonite postojeći otisak prsta."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Vremensko ograničenje za otisak prsta je isteklo. Pokušajte ponovo."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Radnja sa otiskom prsta je otkazana."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Pokušajte ponovo."</string>
+    <string name="fingerprint_name_template" msgid="5870957565512716938">"Prst <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <!-- no translation found for fingerprint_icon_content_description (2340202869968465936) -->
-    <skip />
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona za otisak prsta"</string>
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
     <skip />
     <!-- no translation found for permdesc_readSyncSettings (2706745674569678644) -->
@@ -952,8 +896,7 @@
     <skip />
     <!-- no translation found for permdesc_accessDrmCertificates (8073288354426159089) -->
     <skip />
-    <!-- no translation found for permlab_handoverStatus (7820353257219300883) -->
-    <skip />
+    <string name="permlab_handoverStatus" msgid="7820353257219300883">"prijem statusa prebacivanja preko Android prebacivanja"</string>
     <!-- no translation found for permdesc_handoverStatus (4788144087245714948) -->
     <skip />
     <!-- no translation found for permlab_removeDrmCertificates (7044888287209892751) -->
@@ -964,18 +907,13 @@
     <skip />
     <!-- no translation found for permdesc_bindCarrierMessagingService (2762882888502113944) -->
     <skip />
-    <!-- no translation found for permlab_bindCarrierServices (3233108656245526783) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierServices (1391552602551084192) -->
-    <skip />
-    <!-- no translation found for permlab_access_notification_policy (4247510821662059671) -->
-    <skip />
-    <!-- no translation found for permdesc_access_notification_policy (3296832375218749580) -->
-    <skip />
+    <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"povezivanje na usluge operatera"</string>
+    <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Omogućava vlasniku povezivanje sa uslugama operatera. Ne bi trebalo biti potrebno za obične aplikacije."</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"pristup opciji Ne ometaj"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Omogućava aplikaciji da čita i upisuje konfiguraciju opcije Ne ometaj."</string>
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
-    <!-- no translation found for policydesc_limitPassword (2502021457917874968) -->
-    <skip />
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrolira dužinu i znakove koji su dozvoljeni u lozinkama za zaključavanje ekrana i PIN kodovima."</string>
     <!-- no translation found for policylab_watchLogin (914130646942199503) -->
     <skip />
     <!-- no translation found for policydesc_watchLogin (3215729294215070072) -->
@@ -984,16 +922,11 @@
     <skip />
     <!-- no translation found for policydesc_watchLogin (5712323091846761073) -->
     <skip />
-    <!-- no translation found for policydesc_watchLogin_secondaryUser (4280246270601044505) -->
-    <skip />
-    <!-- no translation found for policydesc_watchLogin_secondaryUser (3484832653564483250) -->
-    <skip />
-    <!-- no translation found for policydesc_watchLogin_secondaryUser (2185480427217127147) -->
-    <skip />
-    <!-- no translation found for policylab_resetPassword (4934707632423915395) -->
-    <skip />
-    <!-- no translation found for policydesc_resetPassword (1278323891710619128) -->
-    <skip />
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Prati broj neispravnih lozinki koje su unijete za otključavanje ekrana te zaključava tablet ili briše sve podatke ovog korisnika ukoliko je unijeto previše neispravnih lozinki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Prati broj neispravnih lozinki koje su unijete za otključavanje ekrana te zaključava TV ili briše sve podatke ovog korisnika ukoliko je unijeto previše neispravnih lozinki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Prati broj neispravnih lozinki koje su unijete za otključavanje ekrana te zaključava telefon ili briše sve podatke ovog korisnika ukoliko je unijeto previše neispravnih lozinki."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Promijeni zaključavanje ekrana"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mijenja zaključavanje ekrana."</string>
     <!-- no translation found for policylab_forceLock (2274085384704248431) -->
     <skip />
     <!-- no translation found for policydesc_forceLock (1141797588403827138) -->
@@ -1006,22 +939,15 @@
     <skip />
     <!-- no translation found for policydesc_wipeData (5096895604574188391) -->
     <skip />
-    <!-- no translation found for policylab_wipeData_secondaryUser (8362863289455531813) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData_secondaryUser (6336255514635308054) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData_secondaryUser (2086473496848351810) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData_secondaryUser (6787904546711590238) -->
-    <skip />
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Izbriši podatke korisnika"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Bez upozorenja briše podatke ovog korisnika sa ovog tableta."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Bez upozorenja briše podatke ovog korisnika sa ovog TV-a."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Bez upozorenja briše podatke ovog korisnika sa ovog telefona."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (8459859731153370499) -->
-    <skip />
-    <!-- no translation found for policylab_expirePassword (5610055012328825874) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (5367525762204416046) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Postavlja globalni proksi uređaja koji će se koristiti dok su smjernice omogućene. Samo vlasnik uređaja može postaviti globalni proksi."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Postavi isteknuće lozinke za zaključavanje ekrana"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Mijenja koliko često se lozinka za zaključavanje ekrana, PIN ili obrazac moraju promijeniti."</string>
     <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
     <skip />
     <!-- no translation found for policydesc_encryptedStorage (2637732115325316992) -->
@@ -1030,10 +956,8 @@
     <skip />
     <!-- no translation found for policydesc_disableCamera (2306349042834754597) -->
     <skip />
-    <!-- no translation found for policylab_disableKeyguardFeatures (8552277871075367771) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (2044755691354158439) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogući neke funk. zak. ekrana"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Spriječava korištenje nekih funkcija za zaključavanje ekrana."</string>
     <!-- no translation found for phoneTypes:0 (8901098336658710359) -->
     <!-- no translation found for phoneTypes:1 (869923650527136615) -->
     <!-- no translation found for phoneTypes:2 (7897544654242874543) -->
@@ -1237,8 +1161,7 @@
     <skip />
     <!-- no translation found for lockscreen_pattern_instructions (7478703254964810302) -->
     <skip />
-    <!-- no translation found for lockscreen_emergency_call (5298642613417801888) -->
-    <skip />
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Hitni slučaj"</string>
     <!-- no translation found for lockscreen_return_to_call (5244259785500040021) -->
     <skip />
     <!-- no translation found for lockscreen_pattern_correct (9039008650362261237) -->
@@ -1350,13 +1273,10 @@
     <skip />
     <!-- no translation found for lockscreen_access_pattern_cell_added (6756031208359292487) -->
     <skip />
-    <!-- no translation found for lockscreen_access_pattern_cell_added_verbose (7264580781744026939) -->
-    <skip />
+    <string name="lockscreen_access_pattern_cell_added_verbose" msgid="7264580781744026939">"Ćelija <xliff:g id="CELL_INDEX">%1$s</xliff:g> je dodana"</string>
     <!-- no translation found for lockscreen_access_pattern_detected (4988730895554057058) -->
     <skip />
-    <!-- no translation found for lockscreen_access_pattern_area (400813207572953209) -->
-    <!-- no translation found for lockscreen_access_pattern_area () -->
-    <skip />
+    <string name="lockscreen_access_pattern_area" msgid="400813207572953209">"Oblast obrasca."</string>
     <!-- no translation found for keyguard_accessibility_widget_changed (5678624624681400191) -->
     <skip />
     <!-- no translation found for keyguard_accessibility_add_widget (8273277058724924654) -->
@@ -1543,7 +1463,11 @@
     <skip />
     <!-- no translation found for beforeOneMonthDurationPast (909134546836499826) -->
     <skip />
-    <!-- no translation found for last_num_days (5104533550723932025) -->
+    <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
+      <item quantity="one">Prethodni <xliff:g id="COUNT_1">%d</xliff:g> dan</item>
+      <item quantity="few">Prethodna <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+      <item quantity="other">Prethodnih <xliff:g id="COUNT_1">%d</xliff:g> dana</item>
+    </plurals>
     <!-- no translation found for last_month (3959346739979055432) -->
     <skip />
     <!-- no translation found for older (5211975022815554840) -->
@@ -1578,9 +1502,21 @@
     <skip />
     <!-- no translation found for years (6881577717993213522) -->
     <skip />
-    <!-- no translation found for duration_seconds (4527986939729687805) -->
-    <!-- no translation found for duration_minutes (643786953939956125) -->
-    <!-- no translation found for duration_hours (6826233369186668274) -->
+    <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> sekunda</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sekunde</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sekundi</item>
+    </plurals>
+    <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> minuta</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> minute</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minuta</item>
+    </plurals>
+    <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
+      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> sat</item>
+      <item quantity="few"><xliff:g id="COUNT">%d</xliff:g> sata</item>
+      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> sati</item>
+    </plurals>
     <!-- no translation found for VideoView_error_title (3534509135438353077) -->
     <skip />
     <!-- no translation found for VideoView_error_text_invalid_progressive_playback (3186670335938670444) -->
@@ -1694,7 +1630,7 @@
     <!-- no translation found for noApplications (2991814273936504689) -->
     <skip />
     <string name="aerr_application" msgid="250320989337856518">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> je zaustavljena"</string>
-    <string name="aerr_process" msgid="6201597323218674729">"Aplikacija <xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljena"</string>
+    <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> je zaustavljen"</string>
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> se stalno zaustavlja"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> se stalno zaustavlja"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Ponovo pokreni aplikaciju"</string>
@@ -1741,8 +1677,7 @@
     <skip />
     <!-- no translation found for android_upgrading_apk (7904042682111526169) -->
     <skip />
-    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
-    <skip />
+    <string name="android_preparing_apk" msgid="8162599310274079154">"Priprema se <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <!-- no translation found for android_upgrading_starting_apps (451464516346926713) -->
     <skip />
     <!-- no translation found for android_upgrading_complete (1405954754112999229) -->
@@ -1763,14 +1698,10 @@
     <skip />
     <!-- no translation found for new_app_description (1932143598371537340) -->
     <skip />
-    <!-- no translation found for dump_heap_notification (2618183274836056542) -->
-    <skip />
-    <!-- no translation found for dump_heap_notification_detail (2075673362317481664) -->
-    <skip />
-    <!-- no translation found for dump_heap_title (5864292264307651673) -->
-    <skip />
-    <!-- no translation found for dump_heap_text (4809417337240334941) -->
-    <skip />
+    <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> premašuje ograničenje memorije"</string>
+    <string name="dump_heap_notification_detail" msgid="2075673362317481664">"Snimak dinamičkog dijela memorije je napravljen; dodirnite za dijeljenje"</string>
+    <string name="dump_heap_title" msgid="5864292264307651673">"Želite li dijeliti snimak dinamičkog dijela memorije?"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"Proces <xliff:g id="PROC">%1$s</xliff:g> je premašio ograničenje procesne memorije od <xliff:g id="SIZE">%2$s</xliff:g>. Snimak dinamičkog dijela memorije vam je dostupan i možete ga dijeliti sa njegovim programerom. Budite oprezni: ovaj snimak dinamičkog dijela memorije može sadržavati neke vaše lične podatke kojima aplikacija ima pristup."</string>
     <!-- no translation found for sendText (5209874571959469142) -->
     <skip />
     <!-- no translation found for volume_ringtone (6885421406845734650) -->
@@ -1811,26 +1742,30 @@
     <skip />
     <!-- no translation found for ringtone_unknown (5477919988701784788) -->
     <skip />
-    <!-- no translation found for wifi_available (7900333017752027322) -->
-    <!-- no translation found for wifi_available_detailed (1140699367193975606) -->
+    <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
+      <item quantity="one">Wi-Fi mreže su dostupne</item>
+      <item quantity="few">Wi-Fi mreže su dostupne</item>
+      <item quantity="other">Wi-Fi mreže su dostupne</item>
+    </plurals>
+    <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
+      <item quantity="one">Otvorene Wi-Fi mreže su dostupne</item>
+      <item quantity="few">Otvorene Wi-Fi mreže su dostupne</item>
+      <item quantity="other">Otvorene Wi-Fi mreže su dostupne</item>
+    </plurals>
     <!-- no translation found for wifi_available_sign_in (9157196203958866662) -->
     <skip />
-    <!-- no translation found for network_available_sign_in (1848877297365446605) -->
-    <skip />
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Prijavite se na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <!-- no translation found for wifi_no_internet (8451173622563841546) -->
-    <skip />
-    <!-- no translation found for wifi_no_internet_detailed (7593858887662270131) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup Internetu"</string>
+    <string name="wifi_no_internet_detailed" msgid="7593858887662270131">"Dodirnite za opcije"</string>
     <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
     <skip />
     <!-- no translation found for wifi_watchdog_network_disabled_detailed (5548780776418332675) -->
     <skip />
     <!-- no translation found for wifi_connect_alert_title (8455846016001810172) -->
     <skip />
-    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
-    <skip />
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacija %1$s se želi povezati na Wi-Fi mrežu %2$s"</string>
     <!-- no translation found for wifi_connect_default_application (7143109390475484319) -->
     <skip />
     <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
@@ -1928,18 +1863,13 @@
     <skip />
     <!-- no translation found for dlg_ok (7376953167039865701) -->
     <skip />
-    <!-- no translation found for usb_charging_notification_title (4004114449249406402) -->
-    <skip />
-    <!-- no translation found for usb_mtp_notification_title (8396264943589760855) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1347328437083192112) -->
-    <skip />
-    <!-- no translation found for usb_midi_notification_title (4850904915889144654) -->
-    <skip />
+    <string name="usb_charging_notification_title" msgid="4004114449249406402">"USB za punjenje"</string>
+    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB za prijenos datoteka"</string>
+    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB za prijenos slika"</string>
+    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB za MIDI"</string>
     <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
     <skip />
-    <!-- no translation found for usb_notification_message (7347368030849048437) -->
-    <skip />
+    <string name="usb_notification_message" msgid="7347368030849048437">"Dodirnite za više opcija."</string>
     <!-- no translation found for adb_active_notification_title (6729044778949189918) -->
     <skip />
     <!-- no translation found for adb_active_notification_message (1016654627626476142) -->
@@ -1974,92 +1904,53 @@
     <skip />
     <!-- no translation found for candidates_style (4333913089637062257) -->
     <skip />
-    <!-- no translation found for ext_media_checking_notification_title (5734005953288045806) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Priprema se <xliff:g id="NAME">%s</xliff:g>"</string>
     <!-- no translation found for ext_media_checking_notification_message (4747432538578886744) -->
     <skip />
-    <!-- no translation found for ext_media_new_notification_message (7589986898808506239) -->
-    <skip />
-    <!-- no translation found for ext_media_ready_notification_message (4083398150380114462) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_title (8295123366236989588) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (1586311304430052169) -->
-    <skip />
-    <!-- no translation found for ext_media_unsupported_notification_title (3797642322958803257) -->
-    <skip />
-    <!-- no translation found for ext_media_unsupported_notification_message (8789610369456474891) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_title (3206248947375505416) -->
-    <skip />
-    <!-- no translation found for ext_media_badremoval_notification_message (380176703346946313) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (1704840188641749091) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (6471542972147056586) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (640674168454809372) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (4182843895023357756) -->
-    <skip />
-    <!-- no translation found for ext_media_init_action (7952885510091978278) -->
-    <skip />
-    <!-- no translation found for ext_media_unmount_action (1121883233103278199) -->
-    <skip />
-    <!-- no translation found for ext_media_browse_action (8322172381028546087) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_title (620980315821543904) -->
-    <skip />
-    <!-- no translation found for ext_media_missing_message (5761133583368750174) -->
-    <skip />
-    <!-- no translation found for ext_media_move_specific_title (1471100343872375842) -->
-    <skip />
-    <!-- no translation found for ext_media_move_title (1022809140035962662) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_title (8575300932957954671) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (4199002148206265426) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (7613189040358789908) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (1978096440816403360) -->
-    <skip />
-    <!-- no translation found for ext_media_status_removed (6576172423185918739) -->
-    <skip />
-    <!-- no translation found for ext_media_status_unmounted (2551560878416417752) -->
-    <skip />
-    <!-- no translation found for ext_media_status_checking (6193921557423194949) -->
-    <skip />
-    <!-- no translation found for ext_media_status_mounted (7253821726503179202) -->
-    <skip />
-    <!-- no translation found for ext_media_status_mounted_ro (8020978752406021015) -->
-    <skip />
-    <!-- no translation found for ext_media_status_bad_removal (8395398567890329422) -->
-    <skip />
-    <!-- no translation found for ext_media_status_unmountable (805594039236667894) -->
-    <skip />
-    <!-- no translation found for ext_media_status_unsupported (4691436711745681828) -->
-    <skip />
-    <!-- no translation found for ext_media_status_ejecting (5463887263101234174) -->
-    <skip />
-    <!-- no translation found for ext_media_status_formatting (1085079556538644861) -->
-    <skip />
-    <!-- no translation found for ext_media_status_missing (5638633895221670766) -->
-    <skip />
+    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Novi uređaj <xliff:g id="NAME">%s</xliff:g> je otkriven"</string>
+    <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Za prebacivanje slika i medijskih datoteka"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="1586311304430052169">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen. Dodirnite da biste ga popravili."</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Uređaj <xliff:g id="NAME">%s</xliff:g> nije podržan"</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8789610369456474891">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da biste ga postavili u podržanom formatu."</string>
+    <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> je neočekivano uklonjen"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Isključite uređaj <xliff:g id="NAME">%s</xliff:g> prije uklanjanja da biste izbjegli gubitak podataka"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Uređaj <xliff:g id="NAME">%s</xliff:g> je uklonjen"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Uređaj <xliff:g id="NAME">%s</xliff:g> je uklonjen, umjetnite novi"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Još uvijek se izbacuje <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ne uklanjajte"</string>
+    <string name="ext_media_init_action" msgid="7952885510091978278">"Postavi"</string>
+    <string name="ext_media_unmount_action" msgid="1121883233103278199">"Izbaci"</string>
+    <string name="ext_media_browse_action" msgid="8322172381028546087">"Istraži"</string>
+    <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> nedostaje"</string>
+    <string name="ext_media_missing_message" msgid="5761133583368750174">"Ponovo umetnite ovaj uređaj"</string>
+    <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Premješta se <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_title" msgid="1022809140035962662">"Premještanje podataka"</string>
+    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Premještanje je završeno"</string>
+    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Podaci su premješteni na uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Podaci se ne mogu premjestiti"</string>
+    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Podaci su ostali na prvobitnoj lokaciji"</string>
+    <string name="ext_media_status_removed" msgid="6576172423185918739">"Uklonjen je"</string>
+    <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Izbačen je"</string>
+    <string name="ext_media_status_checking" msgid="6193921557423194949">"Provjerava se..."</string>
+    <string name="ext_media_status_mounted" msgid="7253821726503179202">"Spreman je"</string>
+    <string name="ext_media_status_mounted_ro" msgid="8020978752406021015">"Samo za čitanje"</string>
+    <string name="ext_media_status_bad_removal" msgid="8395398567890329422">"Uklonjen je na nebezbedan način"</string>
+    <string name="ext_media_status_unmountable" msgid="805594039236667894">"Oštećen je"</string>
+    <string name="ext_media_status_unsupported" msgid="4691436711745681828">"Nije podržan"</string>
+    <string name="ext_media_status_ejecting" msgid="5463887263101234174">"Izbacuje se..."</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"Formatira se..."</string>
+    <string name="ext_media_status_missing" msgid="5638633895221670766">"Nije ubačen"</string>
     <!-- no translation found for activity_list_empty (1675388330786841066) -->
     <skip />
-    <!-- no translation found for permlab_route_media_output (6243022988998972085) -->
-    <skip />
+    <string name="permlab_route_media_output" msgid="6243022988998972085">"usmjeravanje izlaza medija"</string>
     <!-- no translation found for permdesc_route_media_output (4932818749547244346) -->
     <skip />
-    <!-- no translation found for permlab_readInstallSessions (3713753067455750349) -->
-    <skip />
+    <string name="permlab_readInstallSessions" msgid="3713753067455750349">"čitanje sesija instaliranja"</string>
     <!-- no translation found for permdesc_readInstallSessions (2049771699626019849) -->
     <skip />
-    <!-- no translation found for permlab_requestInstallPackages (5782013576218172577) -->
-    <skip />
-    <!-- no translation found for permdesc_requestInstallPackages (5740101072486783082) -->
-    <skip />
+    <string name="permlab_requestInstallPackages" msgid="5782013576218172577">"zahtijevanje paketa za instaliranje"</string>
+    <string name="permdesc_requestInstallPackages" msgid="5740101072486783082">"Omogućava aplikaciji da zahtijeva instalaciju paketa."</string>
     <!-- no translation found for tutorial_double_tap_to_zoom_message_short (4070433208160063538) -->
     <skip />
     <!-- no translation found for gadget_host_error_inflating (4882004314906466162) -->
@@ -2158,7 +2049,11 @@
     <skip />
     <!-- no translation found for find_on_page (1946799233822820384) -->
     <skip />
-    <!-- no translation found for matches_found (1210884353962081884) -->
+    <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
+      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> od <xliff:g id="TOTAL">%d</xliff:g></item>
+    </plurals>
     <!-- no translation found for action_mode_done (7217581640461922289) -->
     <skip />
     <!-- no translation found for progress_erasing (4521573321524340058) -->
@@ -2233,10 +2128,8 @@
     <skip />
     <!-- no translation found for date_picker_decrement_year_button (4482021813491121717) -->
     <skip />
-    <!-- no translation found for date_picker_prev_month_button (2858244643992056505) -->
-    <skip />
-    <!-- no translation found for date_picker_next_month_button (5559507736887605055) -->
-    <skip />
+    <string name="date_picker_prev_month_button" msgid="2858244643992056505">"Prethodni mjesec"</string>
+    <string name="date_picker_next_month_button" msgid="5559507736887605055">"Sljedeći mjesec"</string>
     <!-- no translation found for keyboardview_keycode_alt (4856868820040051939) -->
     <skip />
     <!-- no translation found for keyboardview_keycode_cancel (1203984017245783244) -->
@@ -2281,12 +2174,9 @@
     <skip />
     <!-- no translation found for storage_sd_card (3282948861378286745) -->
     <skip />
-    <!-- no translation found for storage_sd_card_label (6347111320774379257) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive (6261899683292244209) -->
-    <skip />
-    <!-- no translation found for storage_usb_drive_label (4501418548927759953) -->
-    <skip />
+    <string name="storage_sd_card_label" msgid="6347111320774379257">"<xliff:g id="MANUFACTURER">%s</xliff:g> SD kartica"</string>
+    <string name="storage_usb_drive" msgid="6261899683292244209">"USB disk"</string>
+    <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB disk"</string>
     <!-- no translation found for storage_usb (3017954059538517278) -->
     <skip />
     <!-- no translation found for extract_edit_menu_button (8940478730496610137) -->
@@ -2716,15 +2606,16 @@
     <skip />
     <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
     <skip />
-    <!-- no translation found for restr_pin_countdown (9061246974881224688) -->
+    <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
+      <item quantity="one">Pokušajte ponovo za <xliff:g id="COUNT">%d</xliff:g> sekundu</item>
+      <item quantity="few">Pokušajte ponovo za <xliff:g id="COUNT">%d</xliff:g> sekunde</item>
+      <item quantity="other">Pokušajte ponovo za <xliff:g id="COUNT">%d</xliff:g> sekundi</item>
+    </plurals>
     <!-- no translation found for restr_pin_try_later (973144472490532377) -->
     <skip />
-    <!-- no translation found for immersive_cling_title (8394201622932303336) -->
-    <skip />
-    <!-- no translation found for immersive_cling_description (3482371193207536040) -->
-    <skip />
-    <!-- no translation found for immersive_cling_positive (5016839404568297683) -->
-    <skip />
+    <string name="immersive_cling_title" msgid="8394201622932303336">"Prikazuje se cijeli ekran"</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"Da biste izašli, prevucite nadole odozgo."</string>
+    <string name="immersive_cling_positive" msgid="5016839404568297683">"Jasno mi je"</string>
     <!-- no translation found for done_label (2093726099505892398) -->
     <skip />
     <!-- no translation found for hour_picker_description (6698199186859736512) -->
@@ -2747,8 +2638,7 @@
     <skip />
     <!-- no translation found for lock_to_app_toast_accessible (8239120109365070664) -->
     <skip />
-    <!-- no translation found for lock_to_app_toast_locked (9125176335701699164) -->
-    <skip />
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"Aplikacija je prikačena. Na ovom uređaju nije dozvoljeno otkačinjanje."</string>
     <!-- no translation found for lock_to_app_start (6643342070839862795) -->
     <skip />
     <!-- no translation found for lock_to_app_exit (8598219838213787430) -->
@@ -2761,44 +2651,65 @@
     <skip />
     <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Veličina aplikacije nije promjenjiva, pomičite je s dva prsta."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikacija ne podržava dijeljenje ekrana."</string>
-    <!-- no translation found for package_installed_device_owner (8420696545959087545) -->
-    <skip />
-    <!-- no translation found for package_updated_device_owner (8856631322440187071) -->
-    <skip />
-    <!-- no translation found for package_deleted_device_owner (7650577387493101353) -->
-    <skip />
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalirao je administrator"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Ažurirao je administrator"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Izbrisao je administrator"</string>
     <!-- no translation found for battery_saver_description (1960431123816253034) -->
     <skip />
-    <!-- no translation found for zen_mode_duration_minutes_summary (4367877408072000848) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary_short (6830154222366042597) -->
-    <!-- no translation found for zen_mode_duration_hours_summary (8152974162096743862) -->
-    <!-- no translation found for zen_mode_duration_hours_summary_short (4787552595253082371) -->
-    <!-- no translation found for zen_mode_duration_minutes (5127407202506485571) -->
-    <!-- no translation found for zen_mode_duration_minutes_short (2199350154433426128) -->
-    <!-- no translation found for zen_mode_duration_hours (3938821308277433854) -->
-    <!-- no translation found for zen_mode_duration_hours_short (6748277774662434217) -->
+    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
+      <item quantity="one">%1$d minuta (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%1$d minute (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d minuta (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
+      <item quantity="one">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d min (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
+      <item quantity="one">%1$d sat (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%1$d sata (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d sati (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
+      <item quantity="one">%1$d s (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="few">%1$d s (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d s (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
+      <item quantity="one">%d minuta</item>
+      <item quantity="few">%d minute</item>
+      <item quantity="other">%d minuta</item>
+    </plurals>
+    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
+      <item quantity="one">%d min</item>
+      <item quantity="few">%d min</item>
+      <item quantity="other">%d min</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
+      <item quantity="one">%d sat</item>
+      <item quantity="few">%d sata</item>
+      <item quantity="other">%d sati</item>
+    </plurals>
+    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
+      <item quantity="one">%d s</item>
+      <item quantity="few">%d s</item>
+      <item quantity="other">%d s</item>
+    </plurals>
     <!-- no translation found for zen_mode_until (7336308492289875088) -->
     <skip />
-    <!-- no translation found for zen_mode_alarm (9128205721301330797) -->
-    <skip />
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sljedeći alarm)"</string>
     <!-- no translation found for zen_mode_forever (7420011936770086993) -->
     <skip />
-    <!-- no translation found for zen_mode_forever_dnd (3792132696572189081) -->
-    <skip />
-    <!-- no translation found for zen_mode_rule_name_combination (191109939968076477) -->
-    <skip />
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dok ne isključite opciju Ne ometaj"</string>
+    <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <!-- no translation found for toolbar_collapse_description (2821479483960330739) -->
     <skip />
-    <!-- no translation found for zen_mode_feature_name (5254089399895895004) -->
-    <skip />
-    <!-- no translation found for zen_mode_downtime_feature_name (2626974636779860146) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weeknights_name (3081318299464998143) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_weekends_name (2786495801019345244) -->
-    <skip />
-    <!-- no translation found for zen_mode_default_events_name (8158334939013085363) -->
-    <skip />
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Odmor"</string>
+    <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uveče"</string>
+    <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
     <!-- no translation found for muted_by (6147073845094180001) -->
     <skip />
     <!-- no translation found for system_error_wipe_data (6608165524785354962) -->
@@ -2817,23 +2728,21 @@
     <skip />
     <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
     <skip />
-    <!-- no translation found for notification_work_profile_content_description (4600554564103770764) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_name (7221113987741003817) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_product_name (4971827859165280403) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_open_overflow_description (4797287862999444631) -->
-    <skip />
-    <!-- no translation found for floating_toolbar_close_overflow_description (559796923090723804) -->
-    <skip />
+    <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil za Work"</string>
+    <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ulaz za periferijske uređaje"</string>
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB ulaz za periferijske uređaje"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"Još opcija"</string>
+    <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"Zatvori preklopni meni"</string>
     <!-- no translation found for maximize_button_text (7543285286182446254) -->
     <skip />
     <!-- no translation found for close_button_text (3937902162644062866) -->
     <skip />
-    <!-- no translation found for selected_count (7187339492915744615) -->
+    <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> stavka je odabrana</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> stavke su odabrane</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> stavki je odabrano</item>
+    </plurals>
     <!-- no translation found for default_notification_topic_label (227586145791870829) -->
     <skip />
     <!-- no translation found for importance_from_topic (3572280439880023233) -->
@@ -2854,16 +2763,16 @@
     <skip />
     <!-- no translation found for locale_search_menu (2560710726687249178) -->
     <skip />
-    <string name="work_mode_off_title" msgid="8954725060677558855">"Radni način je ISKLJUČEN"</string>
-    <string name="work_mode_off_message" msgid="3286169091278094476">"Omogućava radnom profilu da funkcioniše, uključujući aplikacije, sinhronizaciju u pozadini i povezane funkcije."</string>
+    <string name="work_mode_off_title" msgid="8954725060677558855">"Radni način rada je ISKLJUČEN"</string>
+    <string name="work_mode_off_message" msgid="3286169091278094476">"Omogući radnom profilu da funkcionira, uključujući aplikacije, sinhronizaciju u pozadini i povezane funkcije."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Uključi"</string>
     <string name="suspended_package_title" msgid="3408150347778524435">"%1$s – onemogućeno"</string>
     <string name="suspended_package_message" msgid="6341091587106868601">"Onemogućio administrator (%1$s). Obratite mu se za više informacija."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Imate nove poruke"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Otvorite SMS aplikaciju da biste pregledali poruke"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Neke funkcije možda neće biti dostupne"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Dodirnite da biste nastavili"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil korisnika je zaključan"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Neke funkcije mogu biti ograničene"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Dodirnite da biste otključali"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Podaci korisnika su zaključani"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Povezan na uređaj <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dodirnite za prikaz fajlova"</string>
     <string name="pin_target" msgid="3052256031352291362">"Zakači"</string>

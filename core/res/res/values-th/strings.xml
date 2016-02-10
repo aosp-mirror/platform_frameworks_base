@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"ผู้ดูแลระบบ %1$s ได้ปิดใช้แล้ว โปรดสอบถามข้อมูลเพิ่มเติมจากเขา"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"คุณมีข้อความใหม่"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"เปิดแอป SMS เพื่อดู"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"บางฟังก์ชันอาจไม่พร้อมใช้งาน"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"แตะเพื่อดำเนินการต่อ"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"โปรไฟล์ผู้ใช้ถูกล็อก"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"อาจมีข้อจำกัดในบางฟังก์ชัน"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"แตะเพื่อปลดล็อก"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"ล็อกข้อมูลผู้ใช้อยู่"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"เชื่อมต่อ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"แตะเพื่อดูไฟล์"</string>
     <string name="pin_target" msgid="3052256031352291362">"ปักหมุด"</string>

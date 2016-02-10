@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"გათიშულია „%1$s“-ის ადმინისტრატორის მიერ. დაუკავშირდით მას მეტის გასაგებად."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"თქვენ ახალი შეტყობინებები გაქვთ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"სანახავად, გახსენით SMS აპი"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"ზოგიერთი ფუნქცია შეიძლება მიუწვდომელი იყოს"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"შეეხეთ გასაგრძელებლად"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"მომხმარებლის პროფილი ჩაკეტილია"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ზოგიერთი ფუნქცია შეიძლება შეიზღუდოს"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"შეეხეთ განსაბლოკად"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"მომხმ.-ის მონაცემები ჩაკეტილია"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"დაკავშირებულია <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-თან"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"შეეხეთ ფაილების სანახავად"</string>
     <string name="pin_target" msgid="3052256031352291362">"ჩამაგრება"</string>

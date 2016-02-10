@@ -1031,7 +1031,7 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SİM kart əlavə edildi"</string>
     <string name="sim_added_message" msgid="7797975656153714319">"Mobil şəbəkəyə giriş üçün cihazınızı sıfırlayın."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Yenidən başlat"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Yeni SIM kartınızın düzgün işləməsi üçün, operatorunuzdan tətbiq yükləməli və açmalısınız."</string>
+    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Yeni SIM kartınızın düzgün işləməsi üçün operatorunuzdan tətbiq yükləməli və açmalısınız."</string>
     <string name="carrier_app_dialog_button" msgid="7900235513678617329">"TƏTBİQİ ƏLDƏ EDİN"</string>
     <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"İNDİ YOX"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Yeni SIM kart taxılıb"</string>
@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s administratoru tərəfindən deaktiv edildi. Ətraflı məlumat üçün onlarla əlaqə saxlayın."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Baxmaq üçün SMS tətbiqini açın"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Bəzi funksiyalar əlçatan olmaya bilər"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Davam etmək üçün toxunun"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"İstifadəçi profili kilidlidir"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Bir neçə funksionallıq məhdudlaşdırıla bilər"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Kilidi açmaq üçün tıklayın"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"İstifadəçi datası kilidlidir"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> məhsuluna bağlandı"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Faylları görmək üçün basın"</string>
     <string name="pin_target" msgid="3052256031352291362">"Pin kod"</string>

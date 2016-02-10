@@ -1555,9 +1555,9 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Dinonaktifkan oleh administrator %1$s. Hubungi administrator untuk mempelajari lebih lanjut."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Ada pesan baru"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Buka aplikasi SMS untuk melihat"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Beberapa fungsi tidak ada"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Sentuh untuk melanjutkan"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil pengguna terkunci"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Beberapa fungsi mungkin terbatas"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Ketuk untuk membuka kunci"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Data pengguna dikunci"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Tersambung ke <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Ketuk untuk melihat file"</string>
     <string name="pin_target" msgid="3052256031352291362">"Pasang pin"</string>
