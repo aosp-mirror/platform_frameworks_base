@@ -53,6 +53,7 @@ import com.android.server.notification.NotificationManagerService.DumpFilter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -547,14 +548,14 @@ abstract public class ManagedServices {
                     loadComponentNamesFromSetting(mConfig.secureSettingName, userIds[i]));
         }
 
-        final ArrayList<ManagedServiceInfo> toRemove = new ArrayList<>();
-        final SparseArray<ArrayList<ComponentName>> toAdd = new SparseArray<>();
+        final ArrayList<ManagedServiceInfo> removableBoundServices = new ArrayList<>();
+        final SparseArray<Set<ComponentName>> toAdd = new SparseArray<>();
 
         synchronized (mMutex) {
-            // Unbind automatically bound services, retain system services.
+            // Potentially unbind automatically bound services, retain system services.
             for (ManagedServiceInfo service : mServices) {
                 if (!service.isSystem && !service.isGuest(this)) {
-                    toRemove.add(service);
+                    removableBoundServices.add(service);
                 }
             }
 
@@ -565,11 +566,11 @@ abstract public class ManagedServices {
                 // decode the list of components
                 final ArraySet<ComponentName> userComponents = componentsByUser.get(userIds[i]);
                 if (null == userComponents) {
-                    toAdd.put(userIds[i], new ArrayList<ComponentName>());
+                    toAdd.put(userIds[i], new HashSet<ComponentName>());
                     continue;
                 }
 
-                final ArrayList<ComponentName> add = new ArrayList<>(userComponents);
+                final Set<ComponentName> add = new HashSet<>(userComponents);
 
                 // Remove components from disabled categories so that those services aren't run.
                 for (Entry<String, Boolean> e : mCategoryEnabled.entrySet()) {
@@ -594,19 +595,26 @@ abstract public class ManagedServices {
             mEnabledServicesPackageNames = newPackages;
         }
 
-        for (ManagedServiceInfo info : toRemove) {
+        for (ManagedServiceInfo info : removableBoundServices) {
             final ComponentName component = info.component;
             final int oldUser = info.userid;
-            Slog.v(TAG, "disabling " + getCaption() + " for user "
-                    + oldUser + ": " + component);
-            unregisterService(component, info.userid);
+            final Set<ComponentName> allowedComponents = toAdd.get(info.userid);
+            if (allowedComponents != null) {
+                if (allowedComponents.contains(component)) {
+                    // Already bound, don't need to bind again.
+                    allowedComponents.remove(component);
+                } else {
+                    // No longer allowed to be bound.
+                    Slog.v(TAG, "disabling " + getCaption() + " for user "
+                            + oldUser + ": " + component);
+                    unregisterService(component, oldUser);
+                }
+            }
         }
 
         for (int i = 0; i < nUserIds; ++i) {
-            final ArrayList<ComponentName> add = toAdd.get(userIds[i]);
-            final int N = add.size();
-            for (int j = 0; j < N; j++) {
-                final ComponentName component = add.get(j);
+            final Set<ComponentName> add = toAdd.get(userIds[i]);
+            for (ComponentName component : add) {
                 Slog.v(TAG, "enabling " + getCaption() + " for user " + userIds[i] + ": "
                         + component);
                 registerService(component, userIds[i]);
