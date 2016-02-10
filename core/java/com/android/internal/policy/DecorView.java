@@ -86,6 +86,7 @@ import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -615,7 +616,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 if (h > 0) {
                     heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                             Math.min(h, heightSize), EXACTLY);
-                } else if ((mWindow.getAttributes().flags & FLAG_FULLSCREEN) == 0) {
+                } else if ((mWindow.getAttributes().flags & FLAG_LAYOUT_IN_SCREEN) == 0) {
                     heightMeasureSpec = MeasureSpec.makeMeasureSpec(
                             heightSize - mFloatingInsets.top - mFloatingInsets.bottom, AT_MOST);
                     mApplyFloatingVerticalInsets = true;
@@ -890,10 +891,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         final WindowManager.LayoutParams attrs = mWindow.getAttributes();
         mFloatingInsets.setEmpty();
-        if ((attrs.flags & FLAG_FULLSCREEN) == 0) {
+        if ((attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0) {
             // For dialog windows we want to make sure they don't go over the status bar or nav bar.
             // We consume the system insets and we will reuse them later during the measure phase.
-            // We allow the app to ignore this and handle insets itself by using FLAG_FULLSCREEN.
+            // We allow the app to ignore this and handle insets itself by using
+            // FLAG_LAYOUT_IN_SCREEN.
             if (attrs.height == WindowManager.LayoutParams.WRAP_CONTENT) {
                 mFloatingInsets.top = insets.getSystemWindowInsetTop();
                 mFloatingInsets.bottom = insets.getSystemWindowInsetBottom();
