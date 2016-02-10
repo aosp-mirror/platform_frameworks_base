@@ -34,6 +34,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.BackupUtils;
 import android.util.Log;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -81,10 +82,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_GLOBAL = "global";
     private static final String KEY_LOCALE = "locale";
     private static final String KEY_LOCK_SETTINGS = "lock_settings";
+    private static final String KEY_SOFTAP_CONFIG = "softap_config";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 4;
+    private static final int STATE_VERSION = 5;
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
@@ -95,22 +97,26 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_WIFI_CONFIG     = 4;
     private static final int STATE_GLOBAL          = 5;
     private static final int STATE_LOCK_SETTINGS   = 6;
+    private static final int STATE_SOFTAP_CONFIG   = 7;
 
-    private static final int STATE_SIZE            = 7; // The current number of state items
+    private static final int STATE_SIZE            = 8; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
-        0,
-        4,              // version 1
-        5,              // version 2 added STATE_WIFI_CONFIG
-        6,              // version 3 added STATE_GLOBAL
-        STATE_SIZE      // version 4 added STATE_LOCK_SETTINGS
+            0,
+            4,              // version 1
+            5,              // version 2 added STATE_WIFI_CONFIG
+            6,              // version 3 added STATE_GLOBAL
+            7,              // version 4 added STATE_LOCK_SETTINGS
+            STATE_SIZE      // version 5 added STATE_SOFTAP_CONFIG
     };
 
     // Versioning of the 'full backup' format
-    private static final int FULL_BACKUP_VERSION = 3;
+    // Increment this version any time a new item is added
+    private static final int FULL_BACKUP_VERSION = 4;
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
     private static final int FULL_BACKUP_ADDED_LOCK_SETTINGS = 3; // added the "lock_settings" entry
+    private static final int FULL_BACKUP_ADDED_SOFTAP_CONF = 4; //added the "softap_config" entry
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -119,8 +125,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SettingsBackupAgent";
 
     private static final String[] PROJECTION = {
-        Settings.NameValueTable.NAME,
-        Settings.NameValueTable.VALUE
+            Settings.NameValueTable.NAME,
+            Settings.NameValueTable.VALUE
     };
 
     private static final String FILE_WIFI_SUPPLICANT = "/data/misc/wifi/wpa_supplicant.conf";
@@ -146,7 +152,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private SettingsHelper mSettingsHelper;
     private WifiManager mWfm;
-    private static String mWifiConfigFile;
+    private String mWifiConfigFile;
 
     // Chain of asynchronous operations used when rewriting the wifi supplicant config file
     WifiDisableRunnable mWifiDisable = null;
@@ -338,7 +344,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                                 }
                                 continue;
                             }
-                            if (! mKnownNetworks.contains(net)) {
+                            if (!mKnownNetworks.contains(net)) {
                                 if (DEBUG_BACKUP) {
                                     Log.v(TAG, "Adding " + net.ssid + " / " + net.key_mgmt);
                                 }
@@ -405,26 +411,30 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
+        byte[] softApConfigData = getSoftAPConfiguration();
 
         long[] stateChecksums = readOldChecksums(oldState);
 
         stateChecksums[STATE_SYSTEM] =
-            writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
+                writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
         stateChecksums[STATE_SECURE] =
-            writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
+                writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
         stateChecksums[STATE_GLOBAL] =
-            writeIfChanged(stateChecksums[STATE_GLOBAL], KEY_GLOBAL, globalSettingsData, data);
+                writeIfChanged(stateChecksums[STATE_GLOBAL], KEY_GLOBAL, globalSettingsData, data);
         stateChecksums[STATE_LOCALE] =
-            writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
+                writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
         stateChecksums[STATE_WIFI_SUPPLICANT] =
-            writeIfChanged(stateChecksums[STATE_WIFI_SUPPLICANT], KEY_WIFI_SUPPLICANT,
-                    wifiSupplicantData, data);
+                writeIfChanged(stateChecksums[STATE_WIFI_SUPPLICANT], KEY_WIFI_SUPPLICANT,
+                        wifiSupplicantData, data);
         stateChecksums[STATE_WIFI_CONFIG] =
-            writeIfChanged(stateChecksums[STATE_WIFI_CONFIG], KEY_WIFI_CONFIG, wifiConfigData,
-                    data);
+                writeIfChanged(stateChecksums[STATE_WIFI_CONFIG], KEY_WIFI_CONFIG, wifiConfigData,
+                        data);
         stateChecksums[STATE_LOCK_SETTINGS] =
-            writeIfChanged(stateChecksums[STATE_LOCK_SETTINGS], KEY_LOCK_SETTINGS,
-                    lockSettingsData, data);
+                writeIfChanged(stateChecksums[STATE_LOCK_SETTINGS], KEY_LOCK_SETTINGS,
+                        lockSettingsData, data);
+        stateChecksums[STATE_SOFTAP_CONFIG] =
+                writeIfChanged(stateChecksums[STATE_SOFTAP_CONFIG], KEY_SOFTAP_CONFIG,
+                        softApConfigData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -503,8 +513,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     restoreWifiSupplicant(FILE_WIFI_SUPPLICANT,
                             restoredSupplicantData, restoredSupplicantData.length);
                     FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
-                            FileUtils.S_IRUSR | FileUtils.S_IWUSR |
-                            FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                            FileUtils.S_IRUSR | FileUtils.S_IWUSR
+                            | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                             Process.myUid(), Process.WIFI_UID);
                 }
                 if (restoredWifiConfigFile != null) {
@@ -516,8 +526,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     Settings.Global.putInt(getContentResolver(),
                             Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, scanAlways);
                 }
-                enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
-                        retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
+                enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED
+                        || retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
             }
         }
     }
@@ -542,27 +552,49 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         while (data.readNextHeader()) {
             final String key = data.getKey();
             final int size = data.getDataSize();
-            if (KEY_SYSTEM.equals(key)) {
-                restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal);
-                mSettingsHelper.applyAudioSettings();
-            } else if (KEY_SECURE.equals(key)) {
-                restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
-            } else if (KEY_GLOBAL.equals(key)) {
-                restoreSettings(data, Settings.Global.CONTENT_URI, null);
-            } else if (KEY_WIFI_SUPPLICANT.equals(key)) {
-                initWifiRestoreIfNecessary();
-                mWifiRestore.incorporateWifiSupplicant(data);
-            } else if (KEY_LOCALE.equals(key)) {
-                byte[] localeData = new byte[size];
-                data.readEntityData(localeData, 0, size);
-                mSettingsHelper.setLocaleData(localeData, size);
-            } else if (KEY_WIFI_CONFIG.equals(key)) {
-                initWifiRestoreIfNecessary();
-                mWifiRestore.incorporateWifiConfigFile(data);
-            } else if (KEY_LOCK_SETTINGS.equals(key)) {
-                restoreLockSettings(data);
-             } else {
-                data.skipEntityData();
+            switch (key) {
+                case KEY_SYSTEM :
+                    restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal);
+                    mSettingsHelper.applyAudioSettings();
+                    break;
+
+                case KEY_SECURE :
+                    restoreSettings(data, Settings.Secure.CONTENT_URI, movedToGlobal);
+                    break;
+
+                case KEY_GLOBAL :
+                    restoreSettings(data, Settings.Global.CONTENT_URI, null);
+                    break;
+
+                case KEY_WIFI_SUPPLICANT :
+                    initWifiRestoreIfNecessary();
+                    mWifiRestore.incorporateWifiSupplicant(data);
+                    break;
+
+                case KEY_LOCALE :
+                    byte[] localeData = new byte[size];
+                    data.readEntityData(localeData, 0, size);
+                    mSettingsHelper.setLocaleData(localeData, size);
+                    break;
+
+                case KEY_WIFI_CONFIG :
+                    initWifiRestoreIfNecessary();
+                    mWifiRestore.incorporateWifiConfigFile(data);
+                    break;
+
+                case KEY_LOCK_SETTINGS :
+                    restoreLockSettings(data);
+                    break;
+
+                case KEY_SOFTAP_CONFIG :
+                    byte[] softapData = new byte[size];
+                    data.readEntityData(softapData, 0, size);
+                    restoreSoftApConfiguration(softapData);
+                    break;
+
+                default :
+                    data.skipEntityData();
+
             }
         }
 
@@ -589,6 +621,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
+        byte[] softApConfigData = getSoftAPConfiguration();
 
         // Write the data to the staging file, then emit that as our tarfile
         // representation of the backed-up settings.
@@ -605,16 +638,22 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, systemSettingsData.length + " bytes of settings data");
             out.writeInt(systemSettingsData.length);
             out.write(systemSettingsData);
-            if (DEBUG_BACKUP) Log.d(TAG, secureSettingsData.length + " bytes of secure settings data");
+            if (DEBUG_BACKUP) {
+                Log.d(TAG, secureSettingsData.length + " bytes of secure settings data");
+            }
             out.writeInt(secureSettingsData.length);
             out.write(secureSettingsData);
-            if (DEBUG_BACKUP) Log.d(TAG, globalSettingsData.length + " bytes of global settings data");
+            if (DEBUG_BACKUP) {
+                Log.d(TAG, globalSettingsData.length + " bytes of global settings data");
+            }
             out.writeInt(globalSettingsData.length);
             out.write(globalSettingsData);
             if (DEBUG_BACKUP) Log.d(TAG, locale.length + " bytes of locale data");
             out.writeInt(locale.length);
             out.write(locale);
-            if (DEBUG_BACKUP) Log.d(TAG, wifiSupplicantData.length + " bytes of wifi supplicant data");
+            if (DEBUG_BACKUP) {
+                Log.d(TAG, wifiSupplicantData.length + " bytes of wifi supplicant data");
+            }
             out.writeInt(wifiSupplicantData.length);
             out.write(wifiSupplicantData);
             if (DEBUG_BACKUP) Log.d(TAG, wifiConfigData.length + " bytes of wifi config data");
@@ -623,6 +662,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, lockSettingsData.length + " bytes of lock settings data");
             out.writeInt(lockSettingsData.length);
             out.write(lockSettingsData);
+            if (DEBUG_BACKUP) Log.d(TAG, softApConfigData.length + " bytes of softap config data");
+            out.writeInt(softApConfigData.length);
+            out.write(softApConfigData);
 
             out.flush();    // also flushes downstream
 
@@ -691,12 +733,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             int retainedWifiState = enableWifi(false);
             restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, buffer, nBytes);
             FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
-                    FileUtils.S_IRUSR | FileUtils.S_IWUSR |
-                    FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                    FileUtils.S_IRUSR | FileUtils.S_IWUSR
+                    | FileUtils.S_IRGRP | FileUtils.S_IWGRP,
                     Process.myUid(), Process.WIFI_UID);
             // retain the previous WIFI state.
-            enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
-                    retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
+            enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED
+                    || retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
 
             // wifi config
             nBytes = in.readInt();
@@ -712,6 +754,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (nBytes > 0) {
                     in.readFully(buffer, 0, nBytes);
                     restoreLockSettings(buffer, nBytes);
+                }
+            }
+            // softap config
+            if (version >= FULL_BACKUP_ADDED_SOFTAP_CONF) {
+                nBytes = in.readInt();
+                if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of softap config data");
+                if (nBytes > buffer.length) buffer = new byte[nBytes];
+                if (nBytes > 0) {
+                    in.readFully(buffer, 0, nBytes);
+                    restoreSoftApConfiguration(buffer);
                 }
             }
 
@@ -904,7 +956,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             settingsHelper.restoreValue(this, cr, contentValues, destination, key, value);
 
             if (DEBUG) {
-                Log.d(TAG, "Restored setting: " + destination + " : "+ key + "=" + value);
+                Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
             }
         }
     }
@@ -1036,12 +1088,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
             //Will truncate read on a very long file,
             //should not happen for a config file
-            byte[] bytes = new byte[(int)file.length()];
+            byte[] bytes = new byte[(int) file.length()];
 
             int offset = 0;
             int numRead = 0;
             while (offset < bytes.length
-                    && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
+                    && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
                 offset += numRead;
             }
 
@@ -1165,6 +1217,28 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
     }
 
+    private byte[] getSoftAPConfiguration() {
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        try {
+            return wifiManager.getWifiApConfiguration().getBytesForBackup();
+        } catch (IOException ioe) {
+            Log.e(TAG, "Failed to marshal SoftAPConfiguration" + ioe.getMessage());
+            return new byte[0];
+        }
+    }
+
+    private void restoreSoftApConfiguration(byte[] data) {
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        try {
+            WifiConfiguration config = WifiConfiguration
+                    .getWifiConfigFromBackup(new DataInputStream(new ByteArrayInputStream(data)));
+            if (DEBUG) Log.d(TAG, "Successfully unMarshaled WifiConfiguration ");
+            wifiManager.setWifiApConfiguration(config);
+        } catch (IOException | BackupUtils.BadVersionException e) {
+            Log.e(TAG, "Failed to unMarshal SoftAPConfiguration " + e.getMessage());
+        }
+    }
+
     /**
      * Write an int in BigEndian into the byte array.
      * @param out byte array
@@ -1186,11 +1260,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private int readInt(byte[] in, int pos) {
-        int result =
-                ((in[pos    ] & 0xFF) << 24) |
-                ((in[pos + 1] & 0xFF) << 16) |
-                ((in[pos + 2] & 0xFF) <<  8) |
-                ((in[pos + 3] & 0xFF) <<  0);
+        int result = ((in[pos] & 0xFF) << 24)
+                | ((in[pos + 1] & 0xFF) << 16)
+                | ((in[pos + 2] & 0xFF) <<  8)
+                | ((in[pos + 3] & 0xFF) <<  0);
         return result;
     }
 
