@@ -18,15 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- no translation found for app_label (3701846017049540910) -->
     <skip />
-    <!-- no translation found for bugreport_in_progress_title (7409917338223386637) -->
+    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
     <skip />
-    <!-- no translation found for bugreport_finished_title (2293711546892863898) -->
+    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
     <skip />
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodavanje detalja u izvještaj o greškama"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Pričekajte..."</string>
     <!-- no translation found for bugreport_finished_text (8389172248433597683) -->
     <skip />
-    <!-- no translation found for bugreport_finished_text (3559904746859400732) -->
+    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
     <skip />
     <!-- no translation found for bugreport_confirm (5130698467795669780) -->
     <skip />
@@ -42,11 +42,11 @@
     <skip />
     <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
     <skip />
-    <!-- no translation found for bugreport_screenshot_taken (7175343181767429088) -->
+    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
     <skip />
     <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
     <skip />
-    <!-- no translation found for bugreport_info_dialog_title (3113549839798564645) -->
+    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
     <skip />
     <!-- no translation found for bugreport_info_name (4414036021935139527) -->
     <skip />
