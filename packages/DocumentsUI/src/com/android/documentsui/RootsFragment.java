@@ -89,7 +89,7 @@ public class RootsFragment extends Fragment {
         final Context context = inflater.getContext();
 
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
-        mList = (ListView) view.findViewById(android.R.id.list);
+        mList = (ListView) view.findViewById(R.id.roots_list);
         mList.setOnItemClickListener(mItemListener);
         mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         return view;
@@ -165,6 +165,13 @@ public class RootsFragment extends Fragment {
                 }
             }
         }
+    }
+
+    /**
+     * Attempts to shift focus back to the navigation drawer.
+     */
+    public void requestFocus() {
+        mList.requestFocus();
     }
 
     private void showAppDetails(ResolveInfo ri) {

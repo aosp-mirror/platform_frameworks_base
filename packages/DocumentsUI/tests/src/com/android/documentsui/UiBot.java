@@ -71,7 +71,7 @@ class UiBot {
     UiObject findRoot(String label) throws UiObjectNotFoundException {
         final UiSelector rootsList = new UiSelector().resourceId(
                 "com.android.documentsui:id/container_roots").childSelector(
-                new UiSelector().resourceId("android:id/list"));
+                new UiSelector().resourceId("com.android.documentsui:id/roots_list"));
 
         // We might need to expand drawer if not visible
         if (!new UiObject(rootsList).waitForExists(mTimeout)) {
@@ -195,6 +195,15 @@ class UiBot {
         assertNotNull(getSnackbar(mContext.getString(id)));
     }
 
+    /**
+     * Asserts that the specified view or one of its descendents has focus.
+     */
+    void assertHasFocus(String resourceName) {
+        UiObject2 candidate = mDevice.findObject(By.res(resourceName));
+        assertNotNull("Expected " + resourceName + " to have focus, but it didn't.",
+            candidate.findObject(By.focused(true)));
+    }
+
     void openDocument(String label) throws UiObjectNotFoundException {
         int toolType = Configurator.getInstance().getToolType();
         Configurator.getInstance().setToolType(MotionEvent.TOOL_TYPE_FINGER);
@@ -309,7 +318,7 @@ class UiBot {
     UiObject findDocument(String label) throws UiObjectNotFoundException {
         final UiSelector docList = new UiSelector().resourceId(
                 "com.android.documentsui:id/container_directory").childSelector(
-                        new UiSelector().resourceId("com.android.documentsui:id/list"));
+                        new UiSelector().resourceId("com.android.documentsui:id/dir_list"));
 
         // Wait for the first list item to appear
         new UiObject(docList.childSelector(new UiSelector())).waitForExists(mTimeout);
@@ -330,7 +339,7 @@ class UiBot {
     UiObject findDocumentsList() {
         return findObject(
                 "com.android.documentsui:id/container_directory",
-                "com.android.documentsui:id/list");
+                "com.android.documentsui:id/dir_list");
     }
 
     UiObject findSearchView() {
@@ -415,5 +424,9 @@ class UiBot {
     void revealApp() {
         mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), mTimeout);
         mDevice.waitForIdle();
+    }
+
+    void pressKey(int keyCode) {
+        mDevice.pressKeyCode(keyCode);
     }
 }
