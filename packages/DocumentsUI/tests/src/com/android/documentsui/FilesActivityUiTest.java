@@ -102,7 +102,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bot.openRoot(ROOT_0_ID);
         mDocsHelper.createDocument(rootDir0, "yummers/sandwich", "Ham & Cheese.sandwich");
 
-        device.waitForIdle();
+        bot.waitForDocument("Ham & Cheese.sandwich");
         bot.assertHasDocuments("file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
     }
 
