@@ -16,6 +16,7 @@
 
 package com.android.documentsui.dirlist;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_BROWSE;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
@@ -24,15 +25,20 @@ import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
 import static com.android.internal.util.Preconditions.checkArgument;
 
+import android.content.Context;
+import android.os.SystemProperties;
+import android.provider.DocumentsContract.Document;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import com.android.documentsui.DocumentsActivity;
+import com.android.documentsui.FilesActivity;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
 import com.android.documentsui.State;
-
-import android.os.SystemProperties;
-import android.provider.DocumentsContract.Document;
-import android.view.Menu;
-import android.view.MenuItem;
+import com.android.documentsui.dirlist.DirectoryFragment.ResultType;
 
 /**
  * Providers support for specializing the DirectoryFragment to the "host" Activity.
@@ -40,20 +46,22 @@ import android.view.MenuItem;
  */
 public abstract class FragmentTuner {
 
+    final Context mContext;
     final State mState;
 
-    public FragmentTuner(State state) {
+    public FragmentTuner(Context context, State state) {
+        mContext = context;
         mState = state;
     }
 
-    public static FragmentTuner pick(State state) {
+    public static FragmentTuner pick(Context context, State state) {
         switch (state.action) {
             case ACTION_BROWSE:
-                return new FilesTuner(state);
+                return new FilesTuner(context, state);
             case ACTION_MANAGE:
-                return new DownloadsTuner(state);
+                return new DownloadsTuner(context, state);
             default:
-                return new DocumentsTuner(state);
+                return new DocumentsTuner(context, state);
         }
     }
 
@@ -76,13 +84,15 @@ public abstract class FragmentTuner {
         return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);
     }
 
+    abstract void onModelLoaded(Model model, @ResultType int resultType);
+
     /**
      * Provides support for Platform specific specializations of DirectoryFragment.
      */
     private static final class DocumentsTuner extends FragmentTuner {
 
-        public DocumentsTuner(State state) {
-            super(state);
+        public DocumentsTuner(Context context, State state) {
+            super(context, state);
         }
 
         @Override
@@ -154,6 +164,16 @@ public abstract class FragmentTuner {
             moveTo.setEnabled(moveEnabled);
             rename.setVisible(false);
         }
+
+        @Override
+        void onModelLoaded(Model model, @ResultType int resultType) {
+            // When launched into empty recents, show drawer
+            if (resultType == DirectoryFragment.TYPE_RECENT_OPEN
+                    && model.isEmpty()
+                    && !mState.hasLocationChanged()) {
+                ((DocumentsActivity) mContext).setRootsDrawerOpen(true);
+            }
+        }
     }
 
     /**
@@ -161,8 +181,8 @@ public abstract class FragmentTuner {
      */
     private static final class DownloadsTuner extends FragmentTuner {
 
-        public DownloadsTuner(State state) {
-            super(state);
+        public DownloadsTuner(Context context, State state) {
+            super(context, state);
         }
 
         @Override
@@ -189,6 +209,9 @@ public abstract class FragmentTuner {
             moveTo.setEnabled(moveEnabled);
             rename.setVisible(false);
         }
+
+        @Override
+        void onModelLoaded(Model model, @ResultType int resultType) {}
     }
 
     /**
@@ -196,8 +219,10 @@ public abstract class FragmentTuner {
      */
     private static final class FilesTuner extends FragmentTuner {
 
-        public FilesTuner(State state) {
-            super(state);
+        private static final String TAG = "FilesTuner";
+
+        public FilesTuner(Context context, State state) {
+            super(context, state);
         }
 
         @Override
@@ -221,9 +246,23 @@ public abstract class FragmentTuner {
 
             Menus.disableHiddenItems(menu, copy, paste);
         }
+
+        @Override
+        void onModelLoaded(Model model, @ResultType int resultType) {
+            if (DEBUG) Log.d(TAG, "Handling model loaded. Has Location shcnage: " + mState.initialiLocationHasChanged());
+            // When launched into empty root, open drawer.
+            if (model.isEmpty() && !mState.initialiLocationHasChanged()) {
+                if (DEBUG) Log.d(TAG, "Showing roots drawer cuz stuffs empty.");
+
+                // This noops on layouts without drawer, so no need to guard.
+                ((FilesActivity) mContext).setRootsDrawerOpen(true);
+            }
+            if (DEBUG) Log.d(TAG, "Donezo.");
+        }
     }
 
     private static boolean isDirectory(String mimeType) {
         return Document.MIME_TYPE_DIR.equals(mimeType);
     }
+
 }

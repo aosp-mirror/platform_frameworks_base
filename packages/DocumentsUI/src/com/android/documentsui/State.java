@@ -16,10 +16,13 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
+
 import android.annotation.IntDef;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.documentsui.model.DocumentInfo;
@@ -34,6 +37,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class State implements android.os.Parcelable {
+
+    private static final String TAG = "State";
 
     public static final int ACTION_OPEN = 1;
     public static final int ACTION_CREATE = 2;
@@ -85,6 +90,8 @@ public class State implements android.os.Parcelable {
     /** Current user navigation stack; empty implies recents. */
     public DocumentStack stack = new DocumentStack();
     private boolean mStackTouched;
+    private boolean mInitialRootChanged;
+    private boolean mInitialDocChanged;
 
     /** Currently active search, overriding any stack. */
     public String currentSearch;
@@ -108,28 +115,42 @@ public class State implements android.os.Parcelable {
     }
 
     public void onRootChanged(RootInfo root) {
+        if (DEBUG) Log.d(TAG, "Root changed to: " + root);
+        if (!mInitialRootChanged && stack.root != null && !root.equals(stack.root)) {
+            mInitialRootChanged = true;
+        }
         stack.root = root;
         stack.clear();
         mStackTouched = true;
     }
 
     public void pushDocument(DocumentInfo info) {
+        if (DEBUG) Log.d(TAG, "Adding doc to stack: " + info);
+        if (!mInitialDocChanged && stack.size() > 0 && !info.equals(stack.peek())) {
+            mInitialDocChanged = true;
+        }
         stack.push(info);
         mStackTouched = true;
     }
 
     public void popDocument() {
+        if (DEBUG) Log.d(TAG, "Popping doc off stack.");
         stack.pop();
         mStackTouched = true;
     }
 
     public void setStack(DocumentStack stack) {
+        if (DEBUG) Log.d(TAG, "Setting the whole darn stack to: " + stack);
         this.stack = stack;
         mStackTouched = true;
     }
 
     public boolean hasLocationChanged() {
         return mStackTouched;
+    }
+
+    public boolean initialiLocationHasChanged() {
+        return mInitialRootChanged || mInitialDocChanged;
     }
 
     @Override
@@ -156,6 +177,8 @@ public class State implements android.os.Parcelable {
         out.writeList(excludedAuthorities);
         out.writeInt(openableOnly ? 1 : 0);
         out.writeInt(mStackTouched ? 1 : 0);
+        out.writeInt(mInitialRootChanged ? 1 : 0);
+        out.writeInt(mInitialDocChanged ? 1 : 0);
     }
 
     public static final ClassLoaderCreator<State> CREATOR = new ClassLoaderCreator<State>() {
@@ -184,6 +207,8 @@ public class State implements android.os.Parcelable {
             in.readList(state.excludedAuthorities, loader);
             state.openableOnly = in.readInt() != 0;
             state.mStackTouched = in.readInt() != 0;
+            state.mInitialRootChanged = in.readInt() != 0;
+            state.mInitialDocChanged = in.readInt() != 0;
             return state;
         }
 

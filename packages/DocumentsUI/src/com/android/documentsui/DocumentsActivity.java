@@ -32,7 +32,6 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -141,8 +140,7 @@ public class DocumentsActivity extends BaseActivity {
         }
     }
 
-    @Override
-    void onStackRestored(boolean restored, boolean external) {
+    private void onStackRestored(boolean restored, boolean external) {
         // Show drawer when no stack restored, but only when requesting
         // non-visual content. However, if we last used an external app,
         // drawer is always shown.
@@ -327,10 +325,6 @@ public class DocumentsActivity extends BaseActivity {
     void onRootPicked(RootInfo root) {
         super.onRootPicked(root);
         mNavigator.revealRootsDrawer(false);
-    }
-
-    public void setRootsDrawerOpen(boolean open) {
-        mNavigator.revealRootsDrawer(open);
     }
 
     @Override
