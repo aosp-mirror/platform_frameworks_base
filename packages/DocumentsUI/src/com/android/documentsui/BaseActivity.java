@@ -42,6 +42,7 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
@@ -82,6 +83,8 @@ public abstract class BaseActivity extends Activity
     // Track the time we opened the drawer in response to back being pressed.
     // We use the time gap to figure out whether to close app or reopen the drawer.
     private long mDrawerLastFiddled;
+
+    private boolean mNavDrawerHasFocus;
 
     public abstract void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
@@ -578,6 +581,54 @@ public abstract class BaseActivity extends Activity
         } catch (FileNotFoundException e) {
             Log.w(mTag, "Failed to restore stack: " + e);
         }
+    }
+
+    /**
+     * Declare a global key handler to route key events when there isn't a specific focus view. This
+     * covers the scenario where a user opens DocumentsUI and just starts typing.
+     *
+     * @param keyCode
+     * @param event
+     * @return
+     */
+    @CallSuper
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (Events.isNavigationKeyCode(keyCode)) {
+            // Forward all unclaimed navigation keystrokes to the DirectoryFragment. This causes any
+            // stray navigation keystrokes focus the content pane, which is probably what the user
+            // is trying to do.
+            DirectoryFragment df = DirectoryFragment.get(getFragmentManager());
+            if (df != null) {
+                df.requestFocus();
+                return true;
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_TAB) {
+            toggleNavDrawerFocus();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * Toggles focus between the navigation drawer and the directory listing. If the drawer isn't
+     * locked, open/close it as appropriate.
+     */
+    void toggleNavDrawerFocus() {
+        if (mNavDrawerHasFocus) {
+            mDrawer.setOpen(false);
+            DirectoryFragment df = DirectoryFragment.get(getFragmentManager());
+            if (df != null) {
+                df.requestFocus();
+            }
+        } else {
+            mDrawer.setOpen(true);
+            RootsFragment rf = RootsFragment.get(getFragmentManager());
+            if (rf != null) {
+                rf.requestFocus();
+            }
+        }
+        mNavDrawerHasFocus = !mNavDrawerHasFocus;
     }
 
     DocumentInfo getRootDocumentBlocking(RootInfo root) {
