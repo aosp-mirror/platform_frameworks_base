@@ -446,8 +446,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"แสดงวินาทีของนาฬิกาในแถบสถานะ อาจส่งผลต่ออายุแบตเตอรี"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"จัดเรียงการตั้งค่าด่วนใหม่"</string>
     <string name="show_brightness" msgid="6613930842805942519">"แสดงความสว่างในการตั้งค่าด่วน"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"เปิดใช้ตัวเร่งการกวาดขึ้นเพื่อแยกหน้าจอ"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"เปิดใช้ท่าทางสัมผัสเพื่อเข้าสู่โหมดแยกหน้าจอโดยกวาดขึ้นจากปุ่มภาพรวม"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"เปิดใช้ตัวเร่งการเลื่อนขึ้นเพื่อแยกหน้าจอ"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"เปิดใช้ท่าทางสัมผัสเพื่อเข้าสู่โหมดแยกหน้าจอโดยเลื่อนขึ้นจากปุ่มภาพรวม"</string>
     <string name="experimental" msgid="6198182315536726162">"ทดสอบ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"เปิดบลูทูธไหม"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"หากต้องการเชื่อมต่อแป้นพิมพ์กับแท็บเล็ต คุณต้องเปิดบลูทูธก่อน"</string>
