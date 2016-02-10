@@ -53,8 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Skryť korene"</string>
     <string name="save_error" msgid="6167009778003223664">"Dokument sa nepodarilo uložiť"</string>
     <string name="create_error" msgid="3735649141335444215">"Priečinok sa nepodarilo vytvoriť"</string>
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"Obsah momentálne nie je možné načítať"</string>
     <string name="root_recent" msgid="4470053704320518133">"Nedávne"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Voľné <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Služby úložiska"</string>
@@ -63,8 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Ďalšie aplikácie"</string>
     <string name="empty" msgid="7858882803708117596">"Žiadne položky"</string>
     <string name="no_results" msgid="6622510343880730446">"Žiadne zhody – %1$s"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"Súbor nie je možné otvoriť"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Niektoré dokumenty sa nepodarilo odstrániť"</string>
     <string name="share_via" msgid="8966594246261344259">"Zdieľať"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopírovanie súborov"</string>
@@ -92,15 +90,28 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Pripravuje sa na kopírovanie..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Prebieha príprava na presunutie…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Príprava na odstránenie…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="few">Nepodarilo sa skopírovať <xliff:g id="COUNT_1">%1$d</xliff:g> súbory</item>
+      <item quantity="many">Nepodarilo sa skopírovať <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
+      <item quantity="other">Nepodarilo sa skopírovať <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="one">Nepodarilo sa skopírovať <xliff:g id="COUNT_0">%1$d</xliff:g> súbor</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> súbory nie je možné presunúť</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%1$d</xliff:g> súboru nie je možné presunúť</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> súborov nie je možné presunúť</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> súbor nie je možné presunúť</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="few">Nepodarilo sa odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súbory</item>
+      <item quantity="many">Nepodarilo sa odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súboru</item>
+      <item quantity="other">Nepodarilo sa odstrániť <xliff:g id="COUNT_1">%1$d</xliff:g> súborov</item>
+      <item quantity="one">Nepodarilo sa odstrániť <xliff:g id="COUNT_0">%1$d</xliff:g> súbor</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Klepnutím zobrazíte podrobnosti"</string>
     <string name="close" msgid="3043722427445528732">"Zavrieť"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Tieto súbory neboli skopírované: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Tieto súbory neboli presunuté: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Tieto súbory boli konvertované do iného formátu: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="few">Do schránky boli skopírované <xliff:g id="COUNT_1">%1$d</xliff:g> súbory.</item>

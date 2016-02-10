@@ -53,8 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"Sakrij osnovne elemente"</string>
     <string name="save_error" msgid="6167009778003223664">"Čuvanje dokumenta nije uspelo"</string>
     <string name="create_error" msgid="3735649141335444215">"Direktorijum nije napravljen"</string>
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"Učitavanje sadržaja trenutno nije moguće"</string>
     <string name="root_recent" msgid="4470053704320518133">"Nedavno"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"Slobodno je <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"Usluge skladištenja"</string>
@@ -63,8 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"Još aplikacija"</string>
     <string name="empty" msgid="7858882803708117596">"Nema stavki"</string>
     <string name="no_results" msgid="6622510343880730446">"Nema podudaranja u %1$s"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"Otvaranje datoteke nije uspelo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nije moguće izbrisati neke dokumente"</string>
     <string name="share_via" msgid="8966594246261344259">"Delite preko"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiranje datoteka"</string>
@@ -89,15 +87,25 @@
     <string name="copy_preparing" msgid="3896202461003039386">"Priprema se kopiranje…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprema se premeštanje..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Priprema se brisanje…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="one">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku</item>
+      <item quantity="few">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke</item>
+      <item quantity="other">Nismo uspeli da kopiramo <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one">Premeštanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke nije uspelo</item>
+      <item quantity="few">Premeštanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke nije uspelo</item>
+      <item quantity="other">Premeštanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka nije uspelo</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="one">Brisanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke nije uspelo</item>
+      <item quantity="few">Brisanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke nije uspelo</item>
+      <item quantity="other">Brisanje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteka nije uspelo</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Dodirnite da biste prikazali detalje"</string>
     <string name="close" msgid="3043722427445528732">"Zatvori"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Sledeće datoteke nisu kopirane: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Sledeće datoteke nisu premeštene: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su konvertovane u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="one">Kopirali ste <xliff:g id="COUNT_1">%1$d</xliff:g> datoteku u privremenu memoriju.</item>

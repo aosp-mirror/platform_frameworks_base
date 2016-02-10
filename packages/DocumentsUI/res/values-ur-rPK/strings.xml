@@ -53,8 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"روٹس کو چھپائیں"</string>
     <string name="save_error" msgid="6167009778003223664">"دستاویز کو محفوظ کرنے میں ناکام ہو گیا۔"</string>
     <string name="create_error" msgid="3735649141335444215">"فولڈر بنانے میں ناکام ہو گیا"</string>
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"اس وقت مواد لوڈ نہیں ہو سکتا"</string>
     <string name="root_recent" msgid="4470053704320518133">"حالیہ"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> خالی"</string>
     <string name="root_type_service" msgid="2178854894416775409">"اسٹوریج سروسز"</string>
@@ -63,8 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"مزید ایپس"</string>
     <string name="empty" msgid="7858882803708117596">"کوئی آئٹمز نہيں ہیں"</string>
     <string name="no_results" msgid="6622510343880730446">"‏%1$s میں کوئی مماثل نہیں"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"فائل نہیں کھل سکتی"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"کچھ دستاویزات کو حذف کرنے سے قاصر"</string>
     <string name="share_via" msgid="8966594246261344259">"اشتراک کریں بذریعہ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"فائلیں کاپی ہو رہی ہیں"</string>
@@ -86,15 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"کاپی کیلئے تیار ہو رہا ہے…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"منتقلی کیلئے تیار ہو رہی ہیں…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"حذف کرنے کیلئے تیاری ہو رہی ہے…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلیں کاپی نہیں ہو سکیں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل کاپی نہیں ہو سکی</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلیں منتقل نہیں ہو سکیں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل منتقل نہیں ہو سکی</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلیں حذف نہیں ہو سکیں</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> فائل حذف نہیں ہو سکی</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"تفصیلات دیکھنے کیلئے تھپتھپائیں"</string>
     <string name="close" msgid="3043722427445528732">"بند کریں"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"یہ فائلیں کاپی نہیں ہوئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"یہ فائلیں منتقل نہیں ہوئیں: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ان فائلوں کو ایک دوسرے فارمیٹ میں تبدیل کیا گیا تھا: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> فائلز کلپ بورڈ پر کاپی کی گئیں۔</item>
