@@ -176,35 +176,37 @@ public class Environment {
         return DIR_VENDOR_ROOT;
     }
 
-    /** {@hide} */
-    @Deprecated
-    public static File getSystemSecureDirectory() {
-        return getDataSystemDirectory();
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public static File getSecureDataDirectory() {
-        return getDataDirectory();
-    }
-
     /**
-     * Return the system directory for a user. This is for use by system services to store
-     * files relating to the user. This directory will be automatically deleted when the user
-     * is removed.
+     * Return the system directory for a user. This is for use by system
+     * services to store files relating to the user. This directory will be
+     * automatically deleted when the user is removed.
      *
+     * @deprecated This directory is valid and still exists, but callers should
+     *             <em>strongly</em> consider switching to
+     *             {@link #getDataSystemCeDirectory(int)} which is protected
+     *             with user credentials or
+     *             {@link #getDataSystemDeDirectory(int)} which supports fast
+     *             user wipe.
      * @hide
      */
+    @Deprecated
     public static File getUserSystemDirectory(int userId) {
         return new File(new File(getDataSystemDirectory(), "users"), Integer.toString(userId));
     }
 
     /**
-     * Returns the config directory for a user. This is for use by system services to store files
-     * relating to the user which should be readable by any app running as that user.
+     * Returns the config directory for a user. This is for use by system
+     * services to store files relating to the user which should be readable by
+     * any app running as that user.
      *
+     * @deprecated This directory is valid and still exists, but callers should
+     *             <em>strongly</em> consider switching to
+     *             {@link #getDataMiscCeDirectory(int)} which is protected with
+     *             user credentials or {@link #getDataMiscDeDirectory(int)}
+     *             which supports fast user wipe.
      * @hide
      */
+    @Deprecated
     public static File getUserConfigDirectory(int userId) {
         return new File(new File(new File(
                 getDataDirectory(), "misc"), "user"), Integer.toString(userId));
@@ -232,13 +234,28 @@ public class Environment {
     }
 
     /** {@hide} */
-    public static File getDataSystemCredentialEncryptedDirectory() {
-        return new File(getDataDirectory(), "system_ce");
+    public static File getDataSystemCeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "system_ce", String.valueOf(userId));
     }
 
     /** {@hide} */
-    public static File getDataSystemCredentialEncryptedDirectory(int userId) {
-        return new File(getDataSystemCredentialEncryptedDirectory(), String.valueOf(userId));
+    public static File getDataSystemDeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "system_de", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataMiscDirectory() {
+        return new File(getDataDirectory(), "misc");
+    }
+
+    /** {@hide} */
+    public static File getDataMiscCeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "misc_ce", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataMiscDeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "misc_de", String.valueOf(userId));
     }
 
     /** {@hide} */
@@ -252,57 +269,37 @@ public class Environment {
     }
 
     /** {@hide} */
-    @Deprecated
-    public static File getDataUserDirectory(String volumeUuid) {
-        return getDataUserCredentialEncryptedDirectory(volumeUuid);
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public static File getDataUserDirectory(String volumeUuid, int userId) {
-        return getDataUserCredentialEncryptedDirectory(volumeUuid, userId);
-    }
-
-    /** {@hide} */
-    @Deprecated
-    public static File getDataUserPackageDirectory(String volumeUuid, int userId,
-            String packageName) {
-        return getDataUserCredentialEncryptedPackageDirectory(volumeUuid, userId, packageName);
-    }
-
-    /** {@hide} */
-    public static File getDataUserCredentialEncryptedDirectory(String volumeUuid) {
+    public static File getDataUserCeDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "user");
     }
 
     /** {@hide} */
-    public static File getDataUserCredentialEncryptedDirectory(String volumeUuid, int userId) {
-        return new File(getDataUserCredentialEncryptedDirectory(volumeUuid),
-                String.valueOf(userId));
+    public static File getDataUserCeDirectory(String volumeUuid, int userId) {
+        return new File(getDataUserCeDirectory(volumeUuid), String.valueOf(userId));
     }
 
     /** {@hide} */
-    public static File getDataUserCredentialEncryptedPackageDirectory(String volumeUuid, int userId,
+    public static File getDataUserCePackageDirectory(String volumeUuid, int userId,
             String packageName) {
         // TODO: keep consistent with installd
-        return new File(getDataUserCredentialEncryptedDirectory(volumeUuid, userId), packageName);
+        return new File(getDataUserCeDirectory(volumeUuid, userId), packageName);
     }
 
     /** {@hide} */
-    public static File getDataUserDeviceEncryptedDirectory(String volumeUuid) {
+    public static File getDataUserDeDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "user_de");
     }
 
     /** {@hide} */
-    public static File getDataUserDeviceEncryptedDirectory(String volumeUuid, int userId) {
-        return new File(getDataUserDeviceEncryptedDirectory(volumeUuid), String.valueOf(userId));
+    public static File getDataUserDeDirectory(String volumeUuid, int userId) {
+        return new File(getDataUserDeDirectory(volumeUuid), String.valueOf(userId));
     }
 
     /** {@hide} */
-    public static File getDataUserDeviceEncryptedPackageDirectory(String volumeUuid, int userId,
+    public static File getDataUserDePackageDirectory(String volumeUuid, int userId,
             String packageName) {
         // TODO: keep consistent with installd
-        return new File(getDataUserDeviceEncryptedDirectory(volumeUuid, userId), packageName);
+        return new File(getDataUserDeDirectory(volumeUuid, userId), packageName);
     }
 
     /**

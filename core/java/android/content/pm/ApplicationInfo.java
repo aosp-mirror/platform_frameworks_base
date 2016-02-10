@@ -1038,10 +1038,10 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
 
         deviceEncryptedDataDir = Environment
-                .getDataUserDeviceEncryptedPackageDirectory(volumeUuid, userId, packageName)
+                .getDataUserDePackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
         credentialEncryptedDataDir = Environment
-                .getDataUserCredentialEncryptedPackageDirectory(volumeUuid, userId, packageName)
+                .getDataUserCePackageDirectory(volumeUuid, userId, packageName)
                 .getAbsolutePath();
 
         if ((privateFlags & PRIVATE_FLAG_FORCE_DEVICE_ENCRYPTED) != 0

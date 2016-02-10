@@ -1044,7 +1044,7 @@ public class BackupManagerService {
 
         // If Encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
-        mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
+        mBaseStateDir = new File(Environment.getDataDirectory(), "backup");
         mBaseStateDir.mkdirs();
         if (!SELinux.restorecon(mBaseStateDir)) {
             Slog.e(TAG, "SELinux restorecon failed on " + mBaseStateDir);

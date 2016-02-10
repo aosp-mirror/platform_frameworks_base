@@ -3809,7 +3809,7 @@ public class AccountManagerService
     }
 
     private static String getDatabaseName(int userId) {
-        File systemDir = Environment.getSystemSecureDirectory();
+        File systemDir = Environment.getDataSystemDirectory();
         File databaseFile = new File(Environment.getUserSystemDirectory(userId), DATABASE_NAME);
         if (userId == 0) {
             // Migrate old file, if it exists, to the new location.

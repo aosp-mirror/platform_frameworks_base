@@ -45,6 +45,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.storage.StorageManager;
 import android.provider.DocumentsContract;
 import android.service.chooser.ChooserTarget;
 import android.service.chooser.ChooserTargetService;
@@ -232,7 +233,7 @@ public class ChooserActivity extends ResolverActivity {
         // the case where we don't have access to credential encrypted storage we just won't
         // have our pinned target info.
         final File prefsFile = new File(new File(
-                Environment.getDataUserCredentialEncryptedPackageDirectory(null,
+                Environment.getDataUserCePackageDirectory(StorageManager.UUID_PRIVATE_INTERNAL,
                         context.getUserId(), context.getPackageName()),
                 "shared_prefs"),
                 PINNED_SHARED_PREFS_NAME + ".xml");

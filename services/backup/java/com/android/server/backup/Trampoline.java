@@ -54,7 +54,7 @@ public class Trampoline extends IBackupManager.Stub {
 
     public Trampoline(Context context) {
         mContext = context;
-        File dir = new File(Environment.getSecureDataDirectory(), "backup");
+        File dir = new File(Environment.getDataDirectory(), "backup");
         dir.mkdirs();
         mSuppressFile = new File(dir, BACKUP_SUPPRESS_FILENAME);
         mGlobalDisable = SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
