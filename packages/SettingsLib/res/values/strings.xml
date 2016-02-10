@@ -416,6 +416,8 @@
     <string name="legacy_dhcp_client">Use legacy DHCP client</string>
     <!-- Setting Checkbox title whether to always keep cellular data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Cellular data always active</string>
+    <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
+    <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
 
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
@@ -456,6 +458,8 @@
     <string name="verify_apps_over_usb_title">Verify apps over USB</string>
     <!-- Summary of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=NONE] -->
     <string name="verify_apps_over_usb_summary">Check apps installed via ADB/ADT for harmful behavior.</string>
+    <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
+    <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
