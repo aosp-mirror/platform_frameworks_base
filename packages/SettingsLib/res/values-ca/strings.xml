@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permet sempre cerca de Wi-Fi en ininerància"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Utilitza el client DHCP heretat"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Dades mòbils sempre actives"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra les opcions de certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Augmenta nivell de registre Wi‑Fi i mostra\'l per SSID RSSI al Selector de Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Si s\'activa, la Wi-Fi serà més agressiva en transferir la connexió de dades al mòbil, si el senyal de la Wi-Fi no és estable"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aquesta configuració només està prevista per a usos de desenvolupament. Pot fer que el dispositiu i que les aplicacions s\'interrompin o tinguin un comportament inadequat."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar possibles comportaments perillosos"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprovació HDCP"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Centelleja si les aplicacions triguen molt al procés principal"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Ubicació del punter"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Superposa les dades dels tocs a la pantalla"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Mostra els tocs"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Mostra la ubicació dels tocs a la pantalla"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Mostra els tocs"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Mostra la ubicació visual dels tocs"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Canvis de superfície"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Actualitza superfícies de finestres en actualitzar-se"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Actualitzacions GPU"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Activa la compatibilitat amb les finestres de format lliure experimentals."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Contrasenya per a còpies d\'ordinador"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Les còpies de seguretat d\'ordinador completes no estan protegides"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Toca per canviar o eliminar la contrasenya per a còpies de seguretat d\'ordinador completes"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Toca per canviar o suprimir la contrasenya per a les còpies de seguretat completes de l\'ordinador"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"S\'ha definit una contrasenya de seguretat nova"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"La contrasenya nova i la confirmació no coincideixen"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Error en definir la contrasenya de seguretat"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"Colors optimitzats per al contingut digital"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Aplicacions inactives"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Inactiva. Toca per activar-la."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Activa. Toca per desactivar-la."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Aplicació inactiva. Toca per activar-la."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aplicació activa. Toca per desactivar-la."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Visualitza i controla els serveis en execució"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Mode nocturn"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"No s\'està carregant"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Plena"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Opció desactivada per l\'administrador"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi axtarışlarına həmişə icazə verin"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Köhnə DHCP klient istifadə edin"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobil data həmişə aktivdir"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Aktiv olanda, Wi‑Fi sianqlı zəif olan zaman, Mobil şəbəkə data bağlantısına nisbətən, Wi‑Fi daha aqressiv olacaq"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu parametrlər yalnız inkişafetdirici istifadə üçün nəzərdə tutulub. Onlar cihaz və tətbiqlərinizin sınması və ya pis işləməsinə səbəb ola bilər."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB üzərindən tətbiqləri yoxlayın"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT vasitəsi ilə quraşdırılmış tətbiqləri zərərli davranış üzrə yoxlayın."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Yerli terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Yerli örtük girişini təklif edən terminal tətbiqi aktiv edin"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP yoxlanılır"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Əsas axında tətbiqlərin əlavə əməliyyatlar etməsi zamanı ekran işartısı olsun"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Pointer yeri"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Cari əlaqə datasını göstərən ekran örtüyü"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Toxunmaları göstər"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Toxunmalar üçün vizual cavab rəylərini göstərin"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Tıklamaları göstərin"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Tıklamalar üçün vizual cavab rəylərini göstərin"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Səth güncəlləşməsini göstər"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Güncəlləmədən sonra bütün ekranda işartı olsun"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU görünüş güncəlləməsini göstər"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Sınaq üçün freeform windows aktiv edir"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Masaüstü rezerv parolu"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Masaüstü tam rezervlər hazırda qorunmayıblar."</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Masaüstünün tam rezevr kopyalanması üçün parolu dəyişmək və ya silmək üçün toxunun"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Masaüstünün tam rezerv kopyalanması üçün parolu dəyişmək və ya silmək üçün basın"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Yeni rezerv parolu ayarlandı"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Yeni parol və parolun təkrarı uyğun gəlmir"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Yedəkləmə parolu xətası"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"Rəqəmsal məzmun üçün optimallaşdırılan rənglər"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"İnaktiv tətbiqlər"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"İnaktiv. Keçid etmək üçün toxunun."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktiv. Keçid etmək üçün toxunun."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Deaktivdir. Keçid etmək üçün basın."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivdir. Keçid etmək üçün basın."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"İşləyən xidmətlər"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Hazırda prosesdə olan xidmətləri görüntüləyin və onlara nəzarət edin"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Gecə rejimi"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Enerji doldurulmur"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Tam"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Administrator tərəfindən deaktiv edildi"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

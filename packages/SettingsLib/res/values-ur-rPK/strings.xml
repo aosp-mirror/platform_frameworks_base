@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏ہمیشہ Wi‑Fi روم اسکینز کی اجازت دیں"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"‏پرانا DHCP کلائنٹ استعمال کریں"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"سیلولر ڈیٹا کو ہمیشہ فعال رکھیں"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏فعال ہونے پر، جب Wi‑Fi سگنل کمزور ہوگا تو Wi‑Fi سیلولر پر ڈیٹا کنکشن بھیجنے کیلئے مزید جارحانہ کاروائی کرے گا۔"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"یہ ترتیبات صرف ڈویلپمنٹ استعمال کے ارادے سے ہیں۔ ان سے آپ کا آلہ اور اس پر موجود ایپلیکیشنز بریک ہو سکتی یا غلط برتاؤ کر سکتی ہیں۔"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏USB پر ایپس کی توثیق کریں"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏نقصان دہ رویے کے مدنظر ADB/ADT کی معرفت انسٹال شدہ ایپس کی جانچ کریں۔"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏HDCP چیکنگ"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"ایپس کے اصل تھریڈ پر طویل اعمال انجام دیتے وقت اسکرین کو فلیش کریں"</string>
     <string name="pointer_location" msgid="6084434787496938001">"پوائنٹر مقام"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"موجودہ ٹچ ڈیٹا دکھانے والا اسکرین اوور لے"</string>
-    <string name="show_touches" msgid="1356420386500834339">"ٹچز دکھائیں"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"ٹچز کیلئے بصری تاثرات دکھائیں"</string>
+    <string name="show_touches" msgid="2642976305235070316">"تھپتھپاہٹیں دکھائیں"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"تھپتھپاہٹوں کیلئے بصری تاثرات دکھائیں"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"سطح کے اپ ڈیٹس دکھائیں"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"اپ ڈیٹ ہونے پر ونڈو کی پوری سطحیں جھلملائیں"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"‏GPU منظر اپ ڈیٹس دکھائیں"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"‏تجرباتی freeform ونڈوز کے لئے سپورٹ فعال کرتا ہے۔"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ڈیسک ٹاپ کا بیک اپ پاس ورڈ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ڈیسک ٹاپ کے مکمل بیک اپس فی الحال محفوظ کیے ہوئے نہیں ہیں"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ڈیسک ٹاپ کے مکمل بیک اپس کیلئے پاس ورڈ کو تبدیل کرنے یا ہٹانے کیلئے ٹچ کریں"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ڈیسک ٹاپ کے مکمل بیک اپس کیلئے پاس ورڈ کو تبدیل کرنے یا ہٹانے کیلئے تھپتھپائیں"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"بیک اپ کا نیا پاس ورڈ سیٹ کر دیا گیا"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"نیا پاس ورڈ اور تصدیق مماثل نہیں ہے"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"بیک اپ پاس ورڈ ترتیب دینے میں ناکامی"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"ڈیجیٹیل مواد کیلئے بہترین کردہ رنگ"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"غیر فعال ایپس"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"غیر فعال۔ ٹوگل کرنے کیلئے ٹچ کریں۔"</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"فعال۔ ٹوگل کرنے کیلئے ٹچ کریں۔"</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"غیر فعال۔ ٹوگل کرنے کیلئے تھپتھپائیں۔"</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال۔ ٹوگل کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"چل رہی سروسز"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"فی الحال چل رہی سروسز دیکھیں اور انہیں کنٹرول کریں"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"رات موڈ"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"چارج نہیں ہو رہا ہے"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"مکمل"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"منتظم نے غیر فعال کر دیا"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

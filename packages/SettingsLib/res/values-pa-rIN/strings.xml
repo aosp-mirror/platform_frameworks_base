@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ Wi‑Fi Roam Scans ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"ਲੀਗੇਸੀ DHCP ਕਲਾਈਂਟ ਵਰਤੋ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ਸੈਲਿਊਲਰ ਡੇਟਾ ਹਮੇਸ਼ਾ ਕਿਰਿਆਸ਼ੀਲ"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਦਿਖਾਓ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, Wi‑Fi Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ਜਦੋਂ ਸਮਰਥਿਤ ਹੋਵੇ, ਤਾਂ Wi‑Fi ਸੈਲਿਊਲਰ ਨੂੰ ਡਾਟਾ ਕਨੈਕਸ਼ਨ ਹੈਂਡ ਓਵਰ ਕਰਨ ਵਿੱਚ ਵੱਧ ਅਗ੍ਰੈਸਿਵ ਹੋ ਜਾਏਗਾ, ਜਦੋਂ Wi‑Fi ਸਿਗਨਲ ਘੱਟ ਹੋਵੇ"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਸ ਨੂੰ ਪ੍ਰਮਾਣਿਤ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਇੰਸਟੌਲ ਕੀਤੇ ਐਪਸ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ਟਰਮੀਨਲ ਐਪ ਨੂੰ ਸਮਰੱਥ ਬਣਾਓ ਜੋ ਸਥਾਨਕ ਸ਼ੈਲ ਪਹੁੰਚ ਆੱਫਰ ਕਰਦਾ ਹੈ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ਜਾਂਚ"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"ਜਦੋਂ ਐਪਸ ਮੇਨ ਥ੍ਰੈਡ ਤੇ ਲੰਮੇ ਓਪਰੇਸ਼ਨ ਕਰਨ ਤਾਂ ਸਕ੍ਰੀਨ ਫਲੈਸ਼ ਕਰੋ"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ਪੌਇੰਟਰ ਨਿਰਧਾਰਿਤ ਸਥਾਨ"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ਸਕ੍ਰੀਨ ਓਵਰਲੇ ਮੌਜੂਦਾ ਟਚ ਡਾਟਾ ਦਿਖਾ ਰਿਹਾ ਹੈ"</string>
-    <string name="show_touches" msgid="1356420386500834339">"ਟਚਸ ਦਿਖਾਓ"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"ਟਚਸ ਲਈ ਵਿਜੁਅਲ ਫੀਡਬੈਕ ਦਿਖਾਓ"</string>
+    <string name="show_touches" msgid="2642976305235070316">"ਟੈਪਾਂ ਵਿਖਾਓ"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"ਟੈਪਾਂ ਲਈ ਨਜ਼ਰ ਸਬੰਧੀ ਪ੍ਰਤੀਕਰਮ ਵਿਖਾਓ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"ਸਰਫਸ ਅਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ਸਮੁੱਚੀ ਵਿੰਡੋ ਸਰਫੇਸਾਂ ਫਲੈਸ਼ ਕਰੋ ਜਦੋਂ ਉਹ ਅਪਡੇਟ ਹੁੰਦੀਆਂ ਹਨ"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ਦ੍ਰਿਸ਼ ਅਪਡੇਟਾਂ ਦਿਖਾਓ"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"ਪ੍ਰਯੋਗਾਤਮਕ freeform windows ਲਈ ਸਮਰਥਨ ਨੂੰ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ।"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ਡੈਸਕਟੌਪ ਬੈਕਅਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ਡੈਸਕਟੌਪ ਪੂਰੇ ਬੈਕਅਪਸ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ਡੈਸਕਟੌਪ ਪੂਰੇ ਬੈਕਅਪਸ ਲਈ ਪਾਸਵਰਡ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਛੋਹਵੋ"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ਡੈਸਕਟਾਪ ਦੇ ਮੁਕੰਮਲ ਬੈਕਅੱਪਾਂ ਲਈ ਪਾਸਵਰਡ ਨੂੰ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ਨਵਾਂ ਬੈਕਅਪ ਪਾਸਵਰਡ ਸੈਟ ਕੀਤਾ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ਨਵਾਂ ਪਾਸਵਰਡ ਅਤੇ ਪੁਸ਼ਟੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦੀ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ਬੈਕਅਪ ਪਾਸਵਰਡ ਸੈਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲਤਾ"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"ਡਿਜੀਟਲ ਸਮੱਗਰੀ ਲਈ ਰੰਗ ਅਨੁਕੂਲ ਕੀਤੇ"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"ਕਿਰਿਆਸ਼ੀਲ ਐਪਸ"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"ਅਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"ਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ਅਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"ਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਦੇਖੋ ਅਤੇ ਇਹਨਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"ਰਾਤ ਮੋਡ"</string>
@@ -309,4 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ਪੂਰੀ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
+    <string name="home" msgid="8263346537524314127">"ਮੁੱਖ ਸਕ੍ਰੀਨ"</string>
 </resources>
