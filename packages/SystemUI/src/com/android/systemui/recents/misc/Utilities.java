@@ -17,6 +17,7 @@
 package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -30,6 +31,7 @@ import android.view.ViewParent;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.views.TaskViewTransform;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -154,9 +156,22 @@ public class Utilities {
      */
     public static void cancelAnimationWithoutCallbacks(Animator animator) {
         if (animator != null) {
-            animator.removeAllListeners();
+            removeAnimationListenersRecursive(animator);
             animator.cancel();
         }
+    }
+
+    /**
+     * Recursively removes all the listeners of all children of this animator
+     */
+    public static void removeAnimationListenersRecursive(Animator animator) {
+        if (animator instanceof AnimatorSet) {
+            ArrayList<Animator> animators = ((AnimatorSet) animator).getChildAnimations();
+            for (int i = animators.size() - 1; i >= 0; i--) {
+                removeAnimationListenersRecursive(animators.get(i));
+            }
+        }
+        animator.removeAllListeners();
     }
 
     /**

@@ -25,6 +25,9 @@ import android.view.ViewOutlineProvider;
 /* An outline provider that has a clip and outline that can be animated. */
 public class AnimateableViewBounds extends ViewOutlineProvider {
 
+    private static final float MIN_ALPHA = 0.1f;
+    private static final float MAX_ALPHA = 0.8f;
+
     View mSourceView;
     @ViewDebug.ExportedProperty(category="recents")
     Rect mClipRect = new Rect();
@@ -36,7 +39,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     int mCornerRadius;
     @ViewDebug.ExportedProperty(category="recents")
     float mAlpha = 1f;
-    final float mMinAlpha = 0.25f;
 
     public AnimateableViewBounds(View source, int cornerRadius) {
         mSourceView = source;
@@ -53,7 +55,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
 
     @Override
     public void getOutline(View view, Outline outline) {
-        outline.setAlpha(mMinAlpha + mAlpha / (1f - mMinAlpha));
+        outline.setAlpha(MIN_ALPHA + mAlpha * (MAX_ALPHA - MIN_ALPHA));
         if (mCornerRadius > 0) {
             outline.setRoundRect(mClipRect.left, mClipRect.top,
                     mSourceView.getWidth() - mClipRect.right,
@@ -66,7 +68,9 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         }
     }
 
-    /** Sets the view outline alpha. */
+    /**
+     * Sets the view outline alpha.
+     */
     void setAlpha(float alpha) {
         if (Float.compare(alpha, mAlpha) != 0) {
             mAlpha = alpha;

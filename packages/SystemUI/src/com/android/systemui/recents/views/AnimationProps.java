@@ -49,6 +49,7 @@ public class AnimationProps {
     public static final int ALPHA = 4;
     public static final int SCALE = 5;
     public static final int BOUNDS = 6;
+    public static final int DIM_ALPHA = 7;
 
     private SparseLongArray mPropStartDelay;
     private SparseLongArray mPropDuration;
