@@ -213,7 +213,6 @@ public class NotificationStackScrollLayout extends ViewGroup
      * animating.
      */
     private boolean mOnlyScrollingInThisMotion;
-    private ViewGroup mScrollView;
     private boolean mInterceptDelegateEnabled;
     private boolean mDelegateToScrollView;
     private boolean mDisallowScrollingInThisMotion;
@@ -281,6 +280,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             setDimAmount((Float) animation.getAnimatedValue());
         }
     };
+    private ViewGroup mQsContainer;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -630,12 +630,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         mLongPressListener = listener;
     }
 
-    public void setScrollView(ViewGroup scrollView) {
-        mScrollView = scrollView;
-    }
-
-    public void setInterceptDelegateEnabled(boolean interceptDelegateEnabled) {
-        mInterceptDelegateEnabled = interceptDelegateEnabled;
+    public void setQsContainer(ViewGroup qsContainer) {
+        mQsContainer = qsContainer;
     }
 
     public void onChildDismissed(View v) {
@@ -883,13 +879,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     public boolean onTouchEvent(MotionEvent ev) {
         boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
                 || ev.getActionMasked()== MotionEvent.ACTION_UP;
-        if (mDelegateToScrollView) {
-            if (isCancelOrUp) {
-                mDelegateToScrollView = false;
-            }
-            transformTouchEvent(ev, this, mScrollView);
-            return mScrollView.onTouchEvent(ev);
-        }
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
         if (mIsExpanded && !mSwipingInProgress && !mOnlyScrollingInThisMotion) {
@@ -927,6 +916,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private boolean onScrollTouch(MotionEvent ev) {
         if (!isScrollingEnabled()) {
+            return false;
+        }
+        if (ev.getY() < mQsContainer.getBottom()) {
             return false;
         }
         initVelocityTrackerIfNotExists();
@@ -1776,15 +1768,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      * account.
      *
      * @param qsHeight the top padding imposed by the quick settings panel
-     * @param scrollY how much the notifications are scrolled inside the QS/notifications scroll
-     *                container
      * @param animate whether to animate the change
      * @param ignoreIntrinsicPadding if true, {@link #getIntrinsicPadding()} is ignored and
      *                               {@code qsHeight} is the final top padding
      */
-    public void updateTopPadding(float qsHeight, int scrollY, boolean animate,
+    public void updateTopPadding(float qsHeight, boolean animate,
             boolean ignoreIntrinsicPadding) {
-        float start = qsHeight - scrollY;
+        float start = qsHeight;
         float stackHeight = getHeight() - start;
         int minStackHeight = getMinStackHeight();
         if (stackHeight <= minStackHeight) {
@@ -1867,15 +1857,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mInterceptDelegateEnabled) {
-            transformTouchEvent(ev, this, mScrollView);
-            if (mScrollView.onInterceptTouchEvent(ev)) {
-                mDelegateToScrollView = true;
-                removeLongPressCallback();
-                return true;
-            }
-            transformTouchEvent(ev, mScrollView, this);
-        }
         initDownStates(ev);
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;

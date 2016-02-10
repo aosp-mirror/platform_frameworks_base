@@ -105,7 +105,6 @@ public class QSContainer extends FrameLayout {
         mHeader.setExpanded((mKeyguardShowing && !mHeaderAnimating)
                 || (mQsExpanded && !mStackScrollerOverscrolling));
         mQSPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
-        setVisibility(mKeyguardShowing && !expandVisually ? View.INVISIBLE : View.VISIBLE);
     }
 
     public BaseStatusBarHeader getHeader() {
