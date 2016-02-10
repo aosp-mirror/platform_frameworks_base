@@ -18,9 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 @LargeTest
