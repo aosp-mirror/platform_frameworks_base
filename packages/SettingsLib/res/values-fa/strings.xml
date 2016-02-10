@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏اسکن‌های رومینگ Wi‑Fi همیشه مجاز است"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"‏استفاده از کلاینت DHCP قدیمی"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"داده سلولی همیشه فعال"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏وقتی فعال است، در شرایط پایین بودن سیگنال، Wi‑Fi برای واگذار کردن اتصال داده به شبکه سلولی فعال‌تر خواهد بود."</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"این تنظیمات فقط برای برنامه‌نویسی در نظر گرفته شده است. ممکن است استفاده از این تنظیمات موجب خرابی یا عملکرد نادرست دستگاه یا برنامه‌های شما شود."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌های نصب شده از طریق USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏بررسی HDCP"</string>
@@ -206,10 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"چشمک زدن صفحه هنگام انجام عملیات طولانی توسط برنامه‌ها در رشته اصلی"</string>
     <string name="pointer_location" msgid="6084434787496938001">"محل اشاره‌گر"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"هم‌پوشانی صفحهٔ نمایش با نمایش داده لمسی فعلی"</string>
-    <!-- no translation found for show_touches (2642976305235070316) -->
-    <skip />
-    <!-- no translation found for show_touches_summary (6101183132903926324) -->
-    <skip />
+    <string name="show_touches" msgid="2642976305235070316">"نمایش ضربه‌ها"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"نمایش بازخورد تصویری برای ضربه‌ها"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"نمایش به‌روزرسانی سطح"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"هنگام به‌روزرسانی سطوح پنجره همه فلش شوند"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"‏نمایش به روزرسانی‌های نمای GPU"</string>
@@ -253,8 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"پشتیبانی برای پنجره‌های آزاد آزمایشی را امکان‌پذیر می‌کند"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"گذرواژه پشتیبان‌گیری محلی"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"پشتیبان‌گیری کامل رایانه درحال حاضر محافظت نمی‌شود"</string>
-    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
-    <skip />
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"برای تغییر یا حذف گذرواژه برای نسخه‌های پشتیبان کامل رایانه‌ای ضربه بزنید"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"گذرواژه جدید نسخهٔ پشتیبان تنظیم شد"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"گذرواژه جدید و تأیید آن با یکدیگر مطابقت ندارند"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"گذرواژه پشتیبان‌گیری تنظیم نشد"</string>
@@ -269,10 +270,8 @@
     <item msgid="5363960654009010371">"رنگ‌های بهینه‌شده برای محتوای دیجیتالی"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"برنامه‌های غیرفعال"</string>
-    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
-    <skip />
-    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
-    <skip />
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"غیرفعال. برای تغییر حالت ضربه بزنید."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"فعال. برای تغییر حالت ضربه بزنید."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"حالت شب"</string>

@@ -165,6 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Selalu izinkan Pemindaian Roaming Wi-Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Gunakan klien DHCP lawas"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Data seluler selalu aktif"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Nonaktifkan volume absolut"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Tampilkan opsi untuk sertifikasi layar nirkabel"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tingkatkan level pencatatan log Wi-Fi, tampilkan per SSID RSSI di Pemilih Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Jika diaktifkan, Wi-Fi akan menjadi lebih agresif dalam mengalihkan sambungan data ke Seluler saat sinyal Wi-Fi lemah"</string>
@@ -185,6 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Setelan ini hanya dimaksudkan untuk penggunaan pengembangan. Setelan dapat menyebabkan perangkat dan aplikasi yang menerapkannya rusak atau tidak berfungsi semestinya."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikasi aplikasi melalui USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Periksa perilaku membahayakan dalam aplikasi yang terpasang melalui ADB/ADT."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Menonaktifkan fitur volume absolut Bluetooth jika terjadi masalah volume dengan perangkat jarak jauh seperti volume yang terlalu keras atau kurangnya kontrol."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal lokal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktifkan aplikasi terminal yang menawarkan akses kerangka lokal"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Pemeriksaan HDCP"</string>
@@ -309,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Tidak mengisi daya"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Penuh"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Dinonaktifkan oleh administrator"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Layar Utama"</string>
 </resources>

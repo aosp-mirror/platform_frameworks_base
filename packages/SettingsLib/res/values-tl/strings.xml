@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Palaging payagan ang Mga Pag-scan sa Roaming ng Wi‑Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Gumamit ng legacy na DHCP client"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Palaging aktibo ang cellular data"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kapag naka-enable, mas magiging agresibo ang Wi‑Fi sa paglipat ng koneksyon ng data sa Cellular, kapag mahina ang signal ng Wi‑Fi"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Nilalayon ang mga setting na ito para sa paggamit sa pag-develop lamang. Maaaring magsanhi ang mga ito ng pagkasira o hindi paggana nang maayos ng iyong device at mga application na nandito."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"I-verify ang mga app sa USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Tingnan kung may nakakahamak na pagkilos sa apps na na-install sa pamamagitan ng ADB/ADT."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal na terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Paganahin ang terminal app na nag-aalok ng lokal na shell access"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Pagsusuring HDCP"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Hindi nagkakarga"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Puno"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Na-disable ng administrator"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Home"</string>
 </resources>

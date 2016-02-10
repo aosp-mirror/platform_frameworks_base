@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"ಹಿಂದಿನ DHCP ಕ್ಲೈಂಟ್ ಬಳಸಿ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ಸೆಲ್ಯುಲರ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ಸಕ್ರಿಯಗೊಂಡರೆ, Wi‑Fi ಸಿಗ್ನಲ್ ದುರ್ಬಲವಾಗಿದ್ದರೂ ಕೂಡ, ಸೆಲ್ಯುಲರ್‌ಗೆ ಡೇಟಾ ಸಂಪರ್ಕವನ್ನು ಹಸ್ತಾಂತರಿಸುವಲ್ಲಿ Wi‑Fi ಹೆಚ್ಚು ಆಕ್ರಮಣಕಾರಿಯಾಗಿರುತ್ತದೆ"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ಮೂಲಕ ಆಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಅಪ್ಲಿಕೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>

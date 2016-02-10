@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ใช้การสแกน Wi-Fi ข้ามเครือข่ายเสมอ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"ใช้ไคลเอ็นต์ DHCP เดิม"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"เปิดใช้ข้อมูลมือถือเสมอ"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"เมื่อเปิดใช้แล้ว Wi-Fi จะส่งผ่านการเชื่อมต่อข้อมูลไปยังเครือข่ายมือถือในทันทีที่พบสัญญาณ Wi-Fi อ่อน"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"การตั้งค่านี้มีไว้เพื่อการพัฒนาเท่านั้น จึงอาจทำให้อุปกรณ์และแอปพลิเคชันที่มีอยู่เสียหายหรือทำงานผิดพลาดได้"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ยืนยันแอปพลิเคชันผ่าน USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ตรวจสอบแอปพลิเคชันที่ติดตั้งผ่าน ADB/ADT เพื่อตรวจดูพฤติกรรมที่เป็นอันตราย"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"การตรวจสอบ HDCP"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ไม่ได้ชาร์จ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"เต็ม"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"ปิดใช้โดยผู้ดูแลระบบ"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"หน้าแรก"</string>
 </resources>

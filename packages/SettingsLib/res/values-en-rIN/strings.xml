@@ -165,6 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Always allow Wi‑Fi Roam Scans"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Use legacy DHCP client"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobile data always active"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disable absolute volume"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Show options for wireless display certification"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Increase Wi‑Fi logging level, show per SSID RSSI in Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"When enabled, Wi‑Fi will be more aggressive in handing over the data connection to Mobile, when Wi‑Fi signal is low"</string>
@@ -185,6 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"These settings are intended for development use only. They can cause your device and the applications on it to break or misbehave."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verify apps over USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Check apps installed via ADB/ADT for harmful behaviour."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Local terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Enable terminal app that offers local shell access"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP checking"</string>
