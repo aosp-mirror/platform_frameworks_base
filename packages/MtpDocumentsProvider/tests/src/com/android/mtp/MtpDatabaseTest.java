@@ -95,7 +95,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals(0, getInt(cursor, COLUMN_DEVICE_ID));
             assertEquals(1, getInt(cursor, COLUMN_STORAGE_ID));
             assertTrue(isNull(cursor, COLUMN_OBJECT_HANDLE));
-            assertEquals(DocumentsContract.Document.MIME_TYPE_DIR, getString(cursor, COLUMN_MIME_TYPE));
+            assertEquals(
+                    DocumentsContract.Document.MIME_TYPE_DIR, getString(cursor, COLUMN_MIME_TYPE));
             assertEquals("Storage", getString(cursor, COLUMN_DISPLAY_NAME));
             assertTrue(isNull(cursor, COLUMN_SUMMARY));
             assertTrue(isNull(cursor, COLUMN_LAST_MODIFIED));
@@ -103,7 +104,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
             assertEquals(0, getInt(cursor, COLUMN_FLAGS));
             assertEquals(1000, getInt(cursor, COLUMN_SIZE));
             assertEquals(
-                    MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE, getInt(cursor, COLUMN_DOCUMENT_TYPE));
+                    MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE,
+                    getInt(cursor, COLUMN_DOCUMENT_TYPE));
 
             cursor.close();
         }
@@ -296,15 +298,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         {
             final Cursor cursor = mDatabase.queryRootDocuments(columns);
-            assertEquals(2, cursor.getCount());
-            cursor.moveToNext();
-            assertEquals(2, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_STORAGE_ID));
-            assertEquals("Storage A", getString(cursor, COLUMN_DISPLAY_NAME));
-            cursor.moveToNext();
-            assertEquals(3, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_STORAGE_ID));
-            assertEquals("Storage B", getString(cursor, COLUMN_DISPLAY_NAME));
+            assertEquals(0, cursor.getCount());
             cursor.close();
         }
 
@@ -314,28 +308,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 new MtpRoot(0, 200, "Storage A", 2000, 0, ""),
                 new MtpRoot(0, 202, "Storage C", 2002, 0, "")
         });
-
-        {
-            final Cursor cursor = mDatabase.queryRootDocuments(columns);
-            assertEquals(3, cursor.getCount());
-            cursor.moveToNext();
-            assertEquals(2, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertEquals(200, getInt(cursor, COLUMN_STORAGE_ID));
-            assertEquals("Storage A", getString(cursor, COLUMN_DISPLAY_NAME));
-            cursor.moveToNext();
-            assertEquals(3, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_STORAGE_ID));
-            assertEquals("Storage B", getString(cursor, COLUMN_DISPLAY_NAME));
-            cursor.moveToNext();
-            assertEquals(4, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertEquals(202, getInt(cursor, COLUMN_STORAGE_ID));
-            assertEquals("Storage C", getString(cursor, COLUMN_DISPLAY_NAME));
-            cursor.close();
-        }
-
         mDatabase.getMapper().stopAddingDocuments("1");
 
         {
+            // After compeleting mapping, Storage A can be obtained with new storage ID.
             final Cursor cursor = mDatabase.queryRootDocuments(columns);
             assertEquals(2, cursor.getCount());
             cursor.moveToNext();
@@ -372,24 +348,9 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestStorage("1");
 
         {
+            // Don't return objects that lost MTP object handles.
             final Cursor cursor = mDatabase.queryChildDocuments(columns, "2");
-            assertEquals(3, cursor.getCount());
-
-            cursor.moveToNext();
-            assertEquals(3, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_OBJECT_HANDLE));
-            assertEquals("note.txt", getString(cursor, COLUMN_DISPLAY_NAME));
-
-            cursor.moveToNext();
-            assertEquals(4, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_OBJECT_HANDLE));
-            assertEquals("image.jpg", getString(cursor, COLUMN_DISPLAY_NAME));
-
-            cursor.moveToNext();
-            assertEquals(5, getInt(cursor, COLUMN_DOCUMENT_ID));
-            assertTrue(isNull(cursor, COLUMN_OBJECT_HANDLE));
-            assertEquals("music.mp3", getString(cursor, COLUMN_DISPLAY_NAME));
-
+            assertEquals(0, cursor.getCount());
             cursor.close();
         }
 
@@ -598,10 +559,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 Root.COLUMN_AVAILABLE_BYTES
         };
 
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", false,  new MtpRoot[0], null, null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
         mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
@@ -701,10 +659,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
     }
 
     public void testReplaceExistingRoots() throws Exception {
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", true, new MtpRoot[0], null, null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        addTestDevice();
 
         // The client code should be able to replace existing rows with new information.
         // Add one.
@@ -802,10 +757,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
     public void testQueryRoots() throws Exception {
         // Add device document.
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", false, new MtpRoot[0], null, null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        addTestDevice();
 
         // It the device does not have storages, it shows a device root.
         {
@@ -930,6 +882,9 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         // The new document should not be mapped with existing invalidated document.
         mDatabase.getMapper().clearMapping();
+        addTestDevice();
+        addTestStorage("1");
+
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.putNewDocument(
                 0,
