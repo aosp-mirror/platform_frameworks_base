@@ -322,7 +322,11 @@ private:
 void NotifyHandler::handleMessage(const Message& message) {
     JNIEnv* env = getenv(mVm);
 
-    jobject target = env->NewLocalRef(mObserver->getObserverReference());
+    ObserverProxy* observer = mObserver.get();
+    LOG_ALWAYS_FATAL_IF(observer == nullptr, "received message with no observer configured");
+    LOG_ALWAYS_FATAL_IF(mBuffer == nullptr, "received message with no data to report");
+
+    jobject target = env->NewLocalRef(observer->getObserverReference());
 
     if (target != nullptr) {
         jlongArray javaBuffer = get_metrics_buffer(env, target);
