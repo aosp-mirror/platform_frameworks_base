@@ -6098,6 +6098,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setApplicationRestrictionsManagingPackage(ComponentName admin, String packageName) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -6113,6 +6115,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public String getApplicationRestrictionsManagingPackage(ComponentName admin) {
+        Preconditions.checkNotNull(admin, "ComponentName is null");
+
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
