@@ -53,8 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"הסתר שורשים"</string>
     <string name="save_error" msgid="6167009778003223664">"שמירת המסמך נכשלה"</string>
     <string name="create_error" msgid="3735649141335444215">"יצירת התיקיה נכשלה"</string>
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"לא ניתן כרגע לטעון תוכן"</string>
     <string name="root_recent" msgid="4470053704320518133">"מהזמן האחרון"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> של שטח פנוי"</string>
     <string name="root_type_service" msgid="2178854894416775409">"שירותי אחסון"</string>
@@ -63,8 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"עוד אפליקציות"</string>
     <string name="empty" msgid="7858882803708117596">"אין פריטים"</string>
     <string name="no_results" msgid="6622510343880730446">"‏אין התאמות ב-%1$s"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"לא ניתן לפתוח את הקובץ"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"לא ניתן למחוק חלק מהמסמכים"</string>
     <string name="share_via" msgid="8966594246261344259">"שתף באמצעות"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"מעתיק קבצים"</string>
@@ -92,15 +90,28 @@
     <string name="copy_preparing" msgid="3896202461003039386">"מתכונן להעתקה..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"מתכונן להעברה…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"מתכונן למחיקה…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="two">לא ניתן היה להעתיק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="many">לא ניתן היה להעתיק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="other">לא ניתן היה להעתיק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="one">לא ניתן היה להעתיק <xliff:g id="COUNT_0">%1$d</xliff:g> קובץ</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="two">לא ניתן היה להעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="many">לא ניתן היה להעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="other">לא ניתן היה להעביר <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="one">לא ניתן היה להעביר <xliff:g id="COUNT_0">%1$d</xliff:g> קובץ</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="two">לא ניתן היה למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="many">לא ניתן היה למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="other">לא ניתן היה למחוק <xliff:g id="COUNT_1">%1$d</xliff:g> קבצים</item>
+      <item quantity="one">לא ניתן היה למחוק <xliff:g id="COUNT_0">%1$d</xliff:g> קובץ</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"הקש כדי להציג פרטים"</string>
     <string name="close" msgid="3043722427445528732">"סגור"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"הקבצים הבאים לא הועתקו: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"הקבצים הבאים לא הועברו: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"הקבצים האלה הומרו לפורמט אחר: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="two"><xliff:g id="COUNT_1">%1$d</xliff:g> קבצים הועתקו אל הלוח.</item>
