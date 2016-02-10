@@ -1265,8 +1265,16 @@ public class NotificationManagerService extends SystemService {
          * Use this when you just want to know if notifications are OK for this package.
          */
         @Override
+        public boolean areNotificationsEnabled(String pkg) {
+            return areNotificationsEnabledForPackage(pkg, Binder.getCallingUid());
+        }
+
+        /**
+         * Use this when you just want to know if notifications are OK for this package.
+         */
+        @Override
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
-            checkCallerIsSystem();
+            checkCallerIsSystemOrSameApp(pkg);
             return (mAppOps.checkOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
                     == AppOpsManager.MODE_ALLOWED) && !isApplicationSuspended(pkg, uid);
         }
@@ -1327,6 +1335,12 @@ public class NotificationManagerService extends SystemService {
             }
             mRankingHelper.setImportance(pkg, uid, topic, importance);
             savePolicyFile();
+        }
+
+        @Override
+        public int getTopicImportance(String pkg, String topicId) {
+            checkCallerIsSystemOrSameApp(pkg);
+            return mRankingHelper.getImportance(pkg, Binder.getCallingUid(), topicId);
         }
 
         @Override

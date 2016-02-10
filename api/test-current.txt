@@ -5225,6 +5225,7 @@ package android.app {
 
   public class NotificationManager {
     method public android.app.AutomaticZenRule addAutomaticZenRule(android.app.AutomaticZenRule);
+    method public boolean areNotificationsEnabled();
     method public void cancel(int);
     method public void cancel(java.lang.String, int);
     method public void cancelAll();
@@ -5232,6 +5233,7 @@ package android.app {
     method public android.app.AutomaticZenRule getAutomaticZenRule(java.lang.String);
     method public java.util.List<android.app.AutomaticZenRule> getAutomaticZenRules();
     method public final int getCurrentInterruptionFilter();
+    method public int getImportance(java.lang.String);
     method public android.app.NotificationManager.Policy getNotificationPolicy();
     method public boolean isNotificationPolicyAccessGranted();
     method public void notify(int, android.app.Notification);
