@@ -1405,25 +1405,35 @@ class ContextImpl extends Context {
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
         warnIfCallingFromSystemProcess();
-        return bindServiceCommon(service, conn, flags, Process.myUserHandle());
+        return bindServiceCommon(service, conn, flags, mMainThread.getHandler(),
+                Process.myUserHandle());
     }
 
     /** @hide */
     @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             UserHandle user) {
-        return bindServiceCommon(service, conn, flags, user);
+        return bindServiceCommon(service, conn, flags, mMainThread.getHandler(), user);
     }
 
-    private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
-            UserHandle user) {
+    /** @hide */
+    @Override
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
+            Handler handler, UserHandle user) {
+        if (handler == null) {
+            throw new IllegalArgumentException("handler must not be null.");
+        }
+        return bindServiceCommon(service, conn, flags, handler, user);
+    }
+
+    private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags, Handler
+            handler, UserHandle user) {
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
         }
         if (mPackageInfo != null) {
-            sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(),
-                    mMainThread.getHandler(), flags);
+            sd = mPackageInfo.getServiceDispatcher(conn, getOuterContext(), handler, flags);
         } else {
             throw new RuntimeException("Not supported in system context");
         }
