@@ -1621,11 +1621,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         mService.removeWindowLocked(win);
                         if (win.mAttrs.type == TYPE_DOCK_DIVIDER) {
                             // The owner of the docked divider died :( We reset the docked stack,
-                            // just in case they have the divider at an unstable position.
+                            // just in case they have the divider at an unstable position. Better
+                            // also reset drag resizing state, because the owner can't do it
+                            // anymore.
                             final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
                             if (stack != null) {
                                 stack.resetDockedStackToMiddle();
                             }
+                            mService.setDockedStackResizing(false);
                         }
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
