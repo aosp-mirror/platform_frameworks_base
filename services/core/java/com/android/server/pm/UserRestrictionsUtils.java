@@ -155,7 +155,7 @@ public class UserRestrictionsUtils {
      */
     public static boolean isValidRestriction(@NonNull String restriction) {
         if (!USER_RESTRICTIONS.contains(restriction)) {
-            Slog.wtf(TAG, "Unknown restriction: " + restriction);
+            Slog.e(TAG, "Unknown restriction: " + restriction);
             return false;
         }
         return true;
