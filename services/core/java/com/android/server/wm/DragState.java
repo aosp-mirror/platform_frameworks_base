@@ -378,7 +378,9 @@ class DragState {
 
     private void cleanUpDragLw() {
         broadcastDragEndedLw();
-        restorePointerIconLw();
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            mService.restorePointerIconLocked(mDisplay, mCurrentX, mCurrentY);
+        }
 
         // stop intercepting input
         unregister();
@@ -416,7 +418,7 @@ class DragState {
 
     void notifyLocationLw(float x, float y) {
         // Tell the affected window
-        WindowState touchedWin = getTouchedWinAtPointLw(x, y);
+        WindowState touchedWin = mService.getTouchableWinAtPointLocked(mDisplay, x, y);
         if (touchedWin == null) {
             if (DEBUG_DRAG) Slog.d(TAG_WM, "No touched win at x=" + x + " y=" + y);
             return;
@@ -459,10 +461,6 @@ class DragState {
             Slog.w(TAG_WM, "can't send drag notification to windows");
         }
         mTargetWindow = touchedWin;
-    }
-
-    WindowState getDropTargetWinLw(float x, float y) {
-        return getTouchedWinAtPointLw(x, y);
     }
 
     // Tell the drop target about the data.  Returns 'true' if we can immediately
@@ -512,75 +510,15 @@ class DragState {
         return false;
     }
 
-    // Find the visible, touch-deliverable window under the given point
-    private WindowState getTouchedWinAtPointLw(float xf, float yf) {
-        WindowState touchedWin = null;
-        final int x = (int) xf;
-        final int y = (int) yf;
-
-        final WindowList windows = mService.getWindowListLocked(mDisplay);
-        if (windows == null) {
-            return null;
-        }
-        final int N = windows.size();
-        for (int i = N - 1; i >= 0; i--) {
-            WindowState child = windows.get(i);
-            final int flags = child.mAttrs.flags;
-            if (!child.isVisibleLw()) {
-                // not visible == don't tell about drags
-                continue;
-            }
-            if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                // not touchable == don't tell about drags
-                continue;
-            }
-
-            child.getVisibleBounds(mTmpRect);
-            if (!mTmpRect.contains(x, y)) {
-                // outside of this window's activity stack == don't tell about drags
-                continue;
-            }
-
-            child.getTouchableRegion(mTmpRegion);
-
-            final int touchFlags = flags &
-                    (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-            if (mTmpRegion.contains(x, y) || touchFlags == 0) {
-                // Found it
-                touchedWin = child;
-                break;
-            }
-        }
-
-        return touchedWin;
-    }
-
     private static DragEvent obtainDragEvent(WindowState win, int action,
             float x, float y, Object localState,
             ClipDescription description, ClipData data,
             IDropPermissions dropPermissions,
             boolean result) {
-        final float winX = translateToWindowX(win, x);
-        final float winY = translateToWindowY(win, y);
+        final float winX = win.translateToWindowX(x);
+        final float winY = win.translateToWindowY(y);
         return DragEvent.obtain(action, winX, winY, localState, description, data,
                 dropPermissions, result);
-    }
-
-    private static float translateToWindowX(WindowState win, float x) {
-        float winX = x - win.mFrame.left;
-        if (win.mEnforceSizeCompat) {
-            winX *= win.mGlobalScale;
-        }
-        return winX;
-    }
-
-    private static float translateToWindowY(WindowState win, float y) {
-        float winY = y - win.mFrame.top;
-        if (win.mEnforceSizeCompat) {
-            winY *= win.mGlobalScale;
-        }
-        return winY;
     }
 
     boolean stepAnimationLocked(long currentTimeMs) {
@@ -636,23 +574,6 @@ class DragState {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
             InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_GRAB);
-        }
-    }
-
-    private void restorePointerIconLw() {
-        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            WindowState touchWin = getTouchedWinAtPointLw(mCurrentX, mCurrentY);
-            if (touchWin != null) {
-                try {
-                    touchWin.mClient.updatePointerIcon(
-                            translateToWindowX(touchWin, mCurrentX),
-                            translateToWindowY(touchWin, mCurrentY));
-                    return;
-                } catch (RemoteException e) {
-                    Slog.w(TAG_WM, "unable to restore pointer icon");
-                }
-            }
-            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_DEFAULT);
         }
     }
 }

@@ -260,4 +260,6 @@ interface IWindowSession {
      * Returns true if the move started successfully; false otherwise.
      */
     boolean startMovingTask(IWindow window, float startX, float startY);
+
+    void updatePointerIcon(IWindow window);
 }
