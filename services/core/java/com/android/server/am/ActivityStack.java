@@ -1127,7 +1127,8 @@ final class ActivityStack {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Executing finish of activity: " + prev);
                 prev = finishCurrentActivityLocked(prev, FINISH_AFTER_VISIBLE, false);
             } else if (prev.app != null) {
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueueing pending stop: " + prev);
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Enqueue pending stop if needed: " + prev
+                        + " wasStopping=" + wasStopping + " visible=" + prev.visible);
                 if (mStackSupervisor.mWaitingVisibleActivities.remove(prev)) {
                     if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG_PAUSE,
                             "Complete pause, no longer waiting: " + prev);
@@ -1142,7 +1143,8 @@ final class ActivityStack {
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.state = ActivityState.STOPPING;
-                } else if (!hasVisibleBehindActivity() || mService.isSleepingOrShuttingDown()) {
+                } else if ((!prev.visible && !hasVisibleBehindActivity())
+                        || mService.isSleepingOrShuttingDown()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
                     addToStopping(prev);
