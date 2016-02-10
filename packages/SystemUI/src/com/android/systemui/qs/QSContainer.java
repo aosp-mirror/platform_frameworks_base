@@ -16,38 +16,19 @@
 
 package com.android.systemui.qs;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import com.android.systemui.Interpolators;
+
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.BaseStatusBarHeader;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
- * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
- *
- * Also manages animations for the QS Header and Panel.
+ * Wrapper view with background which contains {@link QSPanel}
  */
 public class QSContainer extends FrameLayout {
-    private static final String TAG = "QSContainer";
-    private static final boolean DEBUG = false;
 
     private int mHeightOverride = -1;
     private QSPanel mQSPanel;
-    protected BaseStatusBarHeader mHeader;
-    private float mQsExpansion;
-    private boolean mQsExpanded;
-    private boolean mHeaderAnimating;
-    private boolean mKeyguardShowing;
-    private boolean mStackScrollerOverscrolling;
-
-    private long mDelay;
 
     public QSContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -57,7 +38,6 @@ public class QSContainer extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mQSPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
-        mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
     }
 
     @Override
@@ -83,133 +63,14 @@ public class QSContainer extends FrameLayout {
      */
     public int getDesiredHeight() {
         if (mQSPanel.isClosingDetail()) {
-            return mQSPanel.getGridHeight() + mHeader.getCollapsedHeight() + getPaddingBottom();
+            return mQSPanel.getGridHeight() + getPaddingTop() + getPaddingBottom();
         } else {
             return getMeasuredHeight();
         }
     }
 
     private void updateBottom() {
-        int heightOverride = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
-        int height = (int) (mQsExpansion * (heightOverride - mHeader.getCollapsedHeight()))
-                + mHeader.getCollapsedHeight();
+        int height = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
         setBottom(getTop() + height);
     }
-
-    private void updateQsState() {
-        boolean expandVisually = mQsExpanded || mStackScrollerOverscrolling || mHeaderAnimating;
-        mQSPanel.setExpanded(mQsExpanded);
-        mHeader.setVisibility((mQsExpanded || !mKeyguardShowing || mHeaderAnimating)
-                ? View.VISIBLE
-                : View.INVISIBLE);
-        mHeader.setExpanded((mKeyguardShowing && !mHeaderAnimating)
-                || (mQsExpanded && !mStackScrollerOverscrolling));
-        mQSPanel.setVisibility(expandVisually ? View.VISIBLE : View.INVISIBLE);
-        setVisibility(mKeyguardShowing && !expandVisually ? View.INVISIBLE : View.VISIBLE);
-    }
-
-    public BaseStatusBarHeader getHeader() {
-        return mHeader;
-    }
-
-    public QSPanel getQsPanel() {
-        return mQSPanel;
-    }
-
-    public void setHeaderClickable(boolean clickable) {
-        if (DEBUG) Log.d(TAG, "setHeaderClickable " + clickable);
-        mHeader.setClickable(clickable);
-    }
-
-    public void setExpanded(boolean expanded) {
-        if (DEBUG) Log.d(TAG, "setExpanded " + expanded);
-        mQsExpanded = expanded;
-        updateQsState();
-    }
-
-    public void setKeyguardShowing(boolean keyguardShowing) {
-        if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
-        mKeyguardShowing = keyguardShowing;
-        updateQsState();
-    }
-
-    public void setOverscrolling(boolean stackScrollerOverscrolling) {
-        if (DEBUG) Log.d(TAG, "setOverscrolling " + stackScrollerOverscrolling);
-        mStackScrollerOverscrolling = stackScrollerOverscrolling;
-        updateQsState();
-    }
-
-    public void setListening(boolean listening) {
-        if (DEBUG) Log.d(TAG, "setListening " + listening);
-        mQSPanel.setListening(listening);
-        mHeader.setListening(listening);
-    }
-
-    public void setQsExpansion(float expansion, float headerTranslation) {
-        if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + headerTranslation);
-        mQsExpansion = expansion;
-        final float translationScaleY = expansion - 1;
-        if (!mHeaderAnimating) {
-            setTranslationY(mKeyguardShowing ? (translationScaleY * mHeader.getHeight())
-                    : headerTranslation);
-        }
-        mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
-        mQSPanel.setTranslationY(translationScaleY * mQSPanel.getHeight());
-        updateBottom();
-    }
-
-    public void animateHeaderSlidingIn(long delay) {
-        if (DEBUG) Log.d(TAG, "animateHeaderSlidingIn");
-        // If the QS is already expanded we don't need to slide in the header as it's already
-        // visible.
-        if (!mQsExpanded) {
-            mHeaderAnimating = true;
-            mDelay = delay;
-            getViewTreeObserver().addOnPreDrawListener(mStartHeaderSlidingIn);
-        }
-    }
-
-    public void animateHeaderSlidingOut() {
-        if (DEBUG) Log.d(TAG, "animateHeaderSlidingOut");
-        mHeaderAnimating = true;
-        animate().y(-mHeader.getHeight())
-                .setStartDelay(0)
-                .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        animate().setListener(null);
-                        mHeaderAnimating = false;
-                        updateQsState();
-                    }
-                })
-                .start();
-    }
-
-    private final ViewTreeObserver.OnPreDrawListener mStartHeaderSlidingIn
-            = new ViewTreeObserver.OnPreDrawListener() {
-        @Override
-        public boolean onPreDraw() {
-            getViewTreeObserver().removeOnPreDrawListener(this);
-            animate()
-                    .translationY(0f)
-                    .setStartDelay(mDelay)
-                    .setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE)
-                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                    .setListener(mAnimateHeaderSlidingInListener)
-                    .start();
-            setY(-mHeader.getHeight());
-            return true;
-        }
-    };
-
-    private final Animator.AnimatorListener mAnimateHeaderSlidingInListener
-            = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            mHeaderAnimating = false;
-            updateQsState();
-        }
-    };
 }

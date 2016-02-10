@@ -31,12 +31,6 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
-    <include
-        layout="@layout/qs_panel"
-        android:layout_width="@dimen/notification_panel_width"
-        android:layout_height="wrap_content"
-        android:layout_gravity="@integer/notification_panel_layout_gravity" />
-
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -57,6 +51,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+                <include
+                    layout="@layout/qs_panel"
+                    android:layout_marginTop="@dimen/status_bar_header_height_expanded"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
                 <!-- A view to reserve space for the collapsed stack -->
                 <!-- Layout height: notification_min_height + bottom_stack_peek_amount -->
@@ -90,6 +89,12 @@
     <include
             layout="@layout/keyguard_bottom_area"
             android:visibility="gone" />
+
+    <ViewStub
+        android:id="@+id/status_bar_header"
+        android:layout_width="@dimen/notification_panel_width"
+        android:layout_height="@dimen/status_bar_header_height"
+        android:layout_gravity="@integer/notification_panel_layout_gravity" />
 
     <com.android.systemui.statusbar.AlphaOptimizedView
         android:id="@+id/qs_navbar_scrim"
