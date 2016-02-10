@@ -216,7 +216,9 @@ public abstract class BaseActivity extends Activity
         return state;
     }
 
-    void onStackRestored(boolean restored, boolean external) {}
+    public void setRootsDrawerOpen(boolean open) {
+        mNavigator.revealRootsDrawer(open);
+    }
 
     void onRootPicked(RootInfo root) {
         // Skip refreshing if root nor directory didn't change
