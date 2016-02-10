@@ -37,8 +37,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 
-import static com.android.systemui.BatteryMeterDrawable.SHOW_PERCENT_SETTING;
-
 public class TunerFragment extends PreferenceFragment {
 
     private static final String TAG = "TunerFragment";
@@ -50,10 +48,6 @@ public class TunerFragment extends PreferenceFragment {
     private static final String WARNING_TAG = "tuner_warning";
 
     private static final int MENU_REMOVE = Menu.FIRST + 1;
-
-    private final SettingObserver mSettingObserver = new SettingObserver();
-
-    private SwitchPreference mBatteryPct;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,7 +66,6 @@ public class TunerFragment extends PreferenceFragment {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.tuner_prefs);
 
-        mBatteryPct = (SwitchPreference) findPreference(KEY_BATTERY_PCT);
         if (Settings.Secure.getInt(getContext().getContentResolver(), SETTING_SEEN_TUNER_WARNING,
                 0) == 0) {
             if (getFragmentManager().findFragmentByTag(WARNING_TAG) == null) {
@@ -85,9 +78,6 @@ public class TunerFragment extends PreferenceFragment {
     public void onResume() {
         super.onResume();
         getActivity().setTitle(R.string.system_ui_tuner);
-        updateBatteryPct();
-        getContext().getContentResolver().registerContentObserver(
-                System.getUriFor(SHOW_PERCENT_SETTING), false, mSettingObserver);
 
         MetricsLogger.visibility(getContext(), MetricsEvent.TUNER, true);
     }
@@ -95,7 +85,6 @@ public class TunerFragment extends PreferenceFragment {
     @Override
     public void onPause() {
         super.onPause();
-        getContext().getContentResolver().unregisterContentObserver(mSettingObserver);
 
         MetricsLogger.visibility(getContext(), MetricsEvent.TUNER, false);
     }
@@ -122,35 +111,6 @@ public class TunerFragment extends PreferenceFragment {
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private void updateBatteryPct() {
-        mBatteryPct.setOnPreferenceChangeListener(null);
-        mBatteryPct.setChecked(System.getInt(getContext().getContentResolver(),
-                SHOW_PERCENT_SETTING, 0) != 0);
-        mBatteryPct.setOnPreferenceChangeListener(mBatteryPctChange);
-    }
-
-    private final class SettingObserver extends ContentObserver {
-        public SettingObserver() {
-            super(new Handler());
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            super.onChange(selfChange, uri, userId);
-            updateBatteryPct();
-        }
-    }
-
-    private final OnPreferenceChangeListener mBatteryPctChange = new OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object newValue) {
-            final boolean v = (Boolean) newValue;
-            MetricsLogger.action(getContext(), MetricsEvent.TUNER_BATTERY_PERCENTAGE, v);
-            System.putInt(getContext().getContentResolver(), SHOW_PERCENT_SETTING, v ? 1 : 0);
-            return true;
-        }
-    };
 
     public static class TunerWarningFragment extends DialogFragment {
         @Override

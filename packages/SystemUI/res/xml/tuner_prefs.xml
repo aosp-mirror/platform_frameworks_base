@@ -18,18 +18,9 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/system_ui_tuner">
 
-    <com.android.systemui.tuner.TunerSwitch
-        android:key="qs_show_brightness"
-        android:title="@string/show_brightness"
-        sysui:defValue="true" />
-
     <PreferenceScreen
         android:key="status_bar"
         android:title="@string/status_bar" >
-
-        <Preference
-            android:selectable="false"
-            android:summary="@string/tuner_status_bar_explanation" />
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="rotate"
@@ -91,9 +82,10 @@
 
         <!-- other weird signal stuff -->
 
-        <com.android.systemui.tuner.StatusBarSwitch
-            android:key="battery"
-            android:title="@string/battery" />
+        <com.android.systemui.tuner.BatteryPreference
+            android:title="@string/battery"
+            android:summary="%s"
+            android:entries="@array/battery_options" />
 
         <com.android.systemui.tuner.StatusBarSwitch
             android:key="alarm_clock"
@@ -101,12 +93,37 @@
 
         <!-- secure -->
 
-        <com.android.systemui.tuner.StatusBarSwitch
-            android:key="clock"
-            android:title="@string/clock" />
+        <com.android.systemui.tuner.ClockPreference
+            android:title="@string/tuner_time"
+            android:summary="%s"
+            android:entries="@array/clock_options" />
 
     </PreferenceScreen>
 
+    <Preference
+        android:key="color_transform"
+        android:title="@string/color_and_appearance"
+        android:fragment="com.android.systemui.tuner.ColorAndAppearanceFragment" />
+
+    <PreferenceScreen
+        android:key="volume_and_do_not_disturb"
+        android:title="@string/volume_and_do_not_disturb">
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="sysui_show_full_zen"
+            android:title="@string/tuner_full_zen_title" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="sysui_volume_down_silent,sysui_volume_up_silent"
+            android:title="@string/volume_dnd_silent"
+            sysui:defValue="true" />
+
+    </PreferenceScreen>
+
+    <Preference
+        android:key="nav_bar"
+        android:title="@string/nav_bar"
+        android:fragment="com.android.systemui.tuner.NavBarTuner" />
 
     <PreferenceScreen
         android:key="overview"
@@ -123,53 +140,6 @@
             android:summary="@string/overview_nav_bar_gesture_desc" />
 
     </PreferenceScreen>
-
-    <SwitchPreference
-        android:key="battery_pct"
-        android:title="@string/show_battery_percentage"
-        android:summary="@string/show_battery_percentage_summary"
-        android:persistent="false" />
-
-    <com.android.systemui.tuner.TunerSwitch
-        android:key="clock_seconds"
-        android:title="@string/clock_seconds"
-        android:summary="@string/clock_seconds_desc" />
-
-    <Preference
-        android:key="demo_mode"
-        android:title="@string/demo_mode"
-        android:fragment="com.android.systemui.tuner.DemoModeFragment" />
-
-    <Preference
-        android:key="color_transform"
-        android:title="@string/color_and_appearance"
-        android:fragment="com.android.systemui.tuner.ColorAndAppearanceFragment" />
-
-    <PreferenceScreen
-        android:key="volume_and_do_not_disturb"
-        android:title="@string/volume_and_do_not_disturb">
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="sysui_show_full_zen"
-            android:title="@string/tuner_full_zen_title"
-            android:summary="@string/tuner_full_zen_summary" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="sysui_volume_down_silent"
-            android:title="@string/volume_down_silent"
-            sysui:defValue="true" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="sysui_volume_up_silent"
-            android:title="@string/volume_up_silent"
-            sysui:defValue="true" />
-
-    </PreferenceScreen>
-
-    <Preference
-        android:key="nav_bar"
-        android:title="@string/nav_bar"
-        android:fragment="com.android.systemui.tuner.NavBarTuner" />
 
     <!-- Warning, this goes last. -->
     <Preference

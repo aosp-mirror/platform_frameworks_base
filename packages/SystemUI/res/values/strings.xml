@@ -1315,15 +1315,14 @@
     <string name="keyboard_shortcut_group_system_back">Back</string>
 
     <!-- SysUI Tuner: Option to show full do not disturb panel in volume [CHAR LIMIT=60] -->
-    <string name="tuner_full_zen_title">Show do not disturb in volume</string>
-    <!-- SysUI Tuner: Summary of option to show full do not disturb panel in volume [CHAR LIMIT=NONE] -->
-    <string name="tuner_full_zen_summary">Allow full control of do not disturb in the volume dialog.</string>
+    <string name="tuner_full_zen_title">Show with volume controls</string>
 
-    <!-- SysUI Tuner: Label for screen about volume and do not disturb settings [CHAR LIMIT=60] -->
-    <string name="volume_and_do_not_disturb">Volume and Do not disturb</string>
+    <!-- SysUI Tuner: Label for screen about do not disturb settings [CHAR LIMIT=60] -->
+    <string name="volume_and_do_not_disturb">Do not disturb</string>
 
-    <!-- SysUI Tuner: Switch to control volume down behavior [CHAR LIMIT=60] -->
-    <string name="volume_down_silent">Enter do not disturb on volume down</string>
+    <!-- SysUI Tuner: Switch to control whether volume buttons enter/exit do
+         not disturb [CHAR LIMIT=60] -->
+    <string name="volume_dnd_silent">Volume buttons shortcut</string>
 
     <!-- SysUI Tuner: Switch to control volume up behavior [CHAR LIMIT=60] -->
     <string name="volume_up_silent">Exit do not disturb on volume up</string>
@@ -1342,9 +1341,6 @@
 
     <!-- Accessibility description of headset icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_headset">Headset connected</string>
-
-    <!-- Explanation of the status bar section of the tuner [CHAR LIMIT=NONE] -->
-    <string name="tuner_status_bar_explanation">Enable or disable icons from being shown in the status bar.</string>
 
     <!-- Label for quick settings tile for data saver [CHAR LIMIT=30] -->
     <string name="data_saver">Data Saver</string>
@@ -1420,5 +1416,22 @@
 
     <!-- Button to edit the tile ordering of quick settings [CHAR LIMIT=60] -->
     <string name="qs_edit">Edit</string>
+
+    <!-- SysUI Tuner: Options for how clock is displayed [CHAR LIMIT=NONE] -->
+    <string name="tuner_time">Time</string>
+
+    <!-- SysUI Tuner: Options for how clock is displayed [CHAR LIMIT=NONE] -->
+    <string-array name="clock_options">
+        <item>Show hours, minutes, and seconds</item>
+        <item>Show hours and minutes (default)</item>
+        <item>Don\'t show this icon</item>
+    </string-array>
+
+    <!-- SysUI Tuner: Options for how battery is displayed [CHAR LIMIT=NONE] -->
+    <string-array name="battery_options">
+        <item>Always show percentage</item>
+        <item>Show percentage when charging (default)</item>
+        <item>Don\'t show this icon</item>
+    </string-array>
 
 </resources>
