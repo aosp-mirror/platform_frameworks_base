@@ -54,7 +54,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mPipManager.showPipOverlay(true);
+                mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
                 finish();
             }
         });
@@ -62,13 +62,15 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     protected void onDestroy() {
-        mPipManager.removeListener(this);
         super.onDestroy();
+        mPipManager.removeListener(this);
+        mPipManager.resumePipResizing(
+                PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
     }
 
     @Override
     public void onBackPressed() {
-        mPipManager.showPipOverlay(true);
+        mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
         finish();
     }
 
@@ -83,5 +85,12 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     @Override
     public void onMoveToFullscreen() {
         finish();
+    }
+
+    @Override
+    public void onPipResizeAboutToStart() {
+        finish();
+        mPipManager.suspendPipResizing(
+                PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
     }
 }

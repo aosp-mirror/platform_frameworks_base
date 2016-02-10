@@ -318,13 +318,13 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP: {
                 SystemServicesProxy ssp = Recents.getSystemServices();
-                PipManager.getInstance().showPipMenu();
+                PipManager.getInstance().resizePinnedStack(PipManager.STATE_PIP_MENU);
                 ssp.focusPinnedStack();
                 return true;
             }
             case KeyEvent.KEYCODE_DPAD_DOWN: {
                 SystemServicesProxy ssp = Recents.getSystemServices();
-                PipManager.getInstance().showPipOverlay(false);
+                PipManager.getInstance().resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
                 ssp.focusHomeStack();
                 return true;
             }

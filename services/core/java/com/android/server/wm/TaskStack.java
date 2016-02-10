@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
+import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -944,6 +945,13 @@ public class TaskStack implements DimLayer.DimLayerUser,
         synchronized (mService.mWindowMap) {
             mDragResizing = false;
             mService.requestTraversal();
+        }
+        if (mStackId == PINNED_STACK_ID) {
+            try {
+                mService.mActivityManager.notifyPinnedStackAnimationEnded();
+            } catch (RemoteException e) {
+                // I don't believe you...
+            }
         }
     }
 

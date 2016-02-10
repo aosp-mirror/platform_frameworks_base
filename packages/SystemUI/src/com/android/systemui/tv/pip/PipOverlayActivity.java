@@ -19,8 +19,8 @@ package com.android.systemui.tv.pip;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.View;
 
+import android.view.View;
 import com.android.systemui.R;
 
 /**
@@ -30,25 +30,37 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     private static final String TAG = "PipOverlayActivity";
     private static final boolean DEBUG = false;
 
-    private static final long SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS = 2000;
+    private static final long SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS = 4000;
 
     private final PipManager mPipManager = PipManager.getInstance();
     private final Handler mHandler = new Handler();
+    private View mGuideOverlayView;
+    private final Runnable mHideGuideOverlayRunnable = new Runnable() {
+        public void run() {
+            mGuideOverlayView.setVisibility(View.INVISIBLE);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.tv_pip_overlay);
+        mGuideOverlayView = findViewById(R.id.guide_overlay);
         mPipManager.addListener(this);
-        final View overlayView = findViewById(R.id.guide_overlay);
-        // TODO: apply animation
-        overlayView.setVisibility(View.VISIBLE);
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                overlayView.setVisibility(View.INVISIBLE);
-            }
-        }, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mHandler.removeCallbacks(mHideGuideOverlayRunnable);
+        mHandler.postDelayed(mHideGuideOverlayRunnable, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mHandler.removeCallbacks(mHideGuideOverlayRunnable);
+        finish();
     }
 
     @Override
@@ -56,6 +68,8 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
         mPipManager.removeListener(this);
+        mPipManager.resumePipResizing(
+                PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH);
     }
 
     @Override
@@ -71,5 +85,12 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     @Override
     public void onMoveToFullscreen() {
         finish();
+    }
+
+    @Override
+    public void onPipResizeAboutToStart() {
+        finish();
+        mPipManager.suspendPipResizing(
+                PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH);
     }
 }
