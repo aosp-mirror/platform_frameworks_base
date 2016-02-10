@@ -89,8 +89,7 @@
     <skip />
     <!-- no translation found for create_error (3735649141335444215) -->
     <skip />
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"Trenutno nije moguće učitati sadržaj"</string>
     <!-- no translation found for root_recent (4470053704320518133) -->
     <skip />
     <!-- no translation found for root_available_bytes (8568452858617033281) -->
@@ -106,8 +105,7 @@
     <!-- no translation found for empty (7858882803708117596) -->
     <skip />
     <string name="no_results" msgid="6622510343880730446">"Nema rezultata u %1$s"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"Nije moguće otvoriti fajl"</string>
     <!-- no translation found for toast_failed_delete (2180678019407244069) -->
     <skip />
     <!-- no translation found for share_via (8966594246261344259) -->
@@ -128,15 +126,25 @@
     <!-- no translation found for move_preparing (2772219441375531410) -->
     <skip />
     <string name="delete_preparing" msgid="5655813182533491992">"Pripremanje za brisanje…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="one">Nije moguće kopirati <xliff:g id="COUNT_1">%1$d</xliff:g> fajl</item>
+      <item quantity="few">Nije moguće kopirati <xliff:g id="COUNT_1">%1$d</xliff:g> fajla</item>
+      <item quantity="other">Nije moguće kopirati <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="one">Nije moguće premjestiti <xliff:g id="COUNT_1">%1$d</xliff:g> fajl</item>
+      <item quantity="few">Nije moguće premjestiti <xliff:g id="COUNT_1">%1$d</xliff:g> fajla</item>
+      <item quantity="other">Nije moguće premjestiti <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="one">Nije moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> fajl</item>
+      <item quantity="few">Nije moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> fajla</item>
+      <item quantity="other">Nije moguće izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"Dodirnite za prikaz detalja"</string>
     <string name="close" msgid="3043722427445528732">"Zatvori"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"Nisu kopirani sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"Nisu premješteni sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su pretvorene u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
     <!-- no translation found for clipboard_files_cannot_paste (2878324825602325706) -->

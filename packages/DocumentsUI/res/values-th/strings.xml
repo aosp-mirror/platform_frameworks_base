@@ -53,8 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"ซ่อนราก"</string>
     <string name="save_error" msgid="6167009778003223664">"การบันทึกเอกสารล้มเหลว"</string>
     <string name="create_error" msgid="3735649141335444215">"การสร้างโฟลเดอร์ล้มเหลว"</string>
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"โหลดเนื้อหาไม่ได้ในขณะนี้"</string>
     <string name="root_recent" msgid="4470053704320518133">"ล่าสุด"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"ว่าง <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"บริการที่เก็บข้อมูล"</string>
@@ -63,8 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"แอปเพิ่มเติม"</string>
     <string name="empty" msgid="7858882803708117596">"ไม่มีรายการ"</string>
     <string name="no_results" msgid="6622510343880730446">"ไม่พบข้อมูลที่ตรงกันใน %1$s"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"เปิดไฟล์ไม่ได้"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"ไม่สามารถลบเอกสารบางรายการ"</string>
     <string name="share_via" msgid="8966594246261344259">"แชร์ผ่าน"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"กำลังคัดลอกไฟล์"</string>
@@ -86,15 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"กำลังเตรียมการคัดลอก…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"กำลังเตรียมการย้าย…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"กำลังเตรียมลบ…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other">คัดลอกไม่ได้ <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์</item>
+      <item quantity="one">คัดลอกไม่ได้ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other">ย้ายไม่ได้ <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์</item>
+      <item quantity="one">ย้ายไม่ได้ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other">ลบไม่ได้ <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์</item>
+      <item quantity="one">ลบไม่ได้ <xliff:g id="COUNT_0">%1$d</xliff:g> ไฟล์</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"แตะเพื่อดูรายละเอียด"</string>
     <string name="close" msgid="3043722427445528732">"ปิด"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"ไม่ได้คัดลอกไฟล์เหล่านี้: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"ไม่ได้ย้ายไฟล์เหล่านี้: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ไฟล์ต่อไปนี้แปลงเป็นอีกรูปแบบหนึ่งแล้ว: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other">คัดลอก <xliff:g id="COUNT_1">%1$d</xliff:g> ไฟล์ไปยังคลิปบอร์ดแล้ว</item>

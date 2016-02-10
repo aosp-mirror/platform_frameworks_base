@@ -85,8 +85,8 @@
     <string name="move_preparing" msgid="2772219441375531410">"ກຳ​ລັງ​ກະ​ກຽມ​ຍ້າຍ…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"ກຳລັງກະກຽມລຶບ…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
-      <item quantity="other">ບໍ່ສາມາດອັດສຳເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟລ໌ໄດ້</item>
-      <item quantity="one">ບໍ່ສາມາດອັດສຳເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟລ໌ໄດ້</item>
+      <item quantity="other">ບໍ່ສາມາດສຳເນົາ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟລ໌ໄດ້</item>
+      <item quantity="one">ບໍ່ສາມາດສຳເນົາ <xliff:g id="COUNT_0">%1$d</xliff:g> ໄຟລ໌ໄດ້</item>
     </plurals>
     <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
       <item quantity="other">ບໍ່ສາມາດຍ້າຍ <xliff:g id="COUNT_1">%1$d</xliff:g> ໄຟລ໌ໄດ້</item>
@@ -98,7 +98,7 @@
     </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"ແຕະເພື່ອເບິ່ງລາຍລະອຽດ"</string>
     <string name="close" msgid="3043722427445528732">"ປິດ"</string>
-    <string name="copy_failure_alert_content" msgid="4563147454522476183">"ໄຟລ໌ເຫຼົ່ານີ້ບໍ່ໄດ້ຖືກອັດສຳເນົາ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"ໄຟລ໌ເຫຼົ່ານີ້ບໍ່ໄດ້ຖືກສຳເນົາ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"ໄຟລ໌ເຫຼົ່ານີ້ບໍ່ໄດ້ຖືກຍ້າຍ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"ໄຟລ໌ເຫຼົ່ານີ້ໄດ້ຖືກປ່ຽນເປັນຮູບແບບອື່ນແລ້ວ: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">

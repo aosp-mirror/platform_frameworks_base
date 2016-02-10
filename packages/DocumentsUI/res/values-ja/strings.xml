@@ -53,8 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"ルートを非表示にする"</string>
     <string name="save_error" msgid="6167009778003223664">"ドキュメントを保存できませんでした"</string>
     <string name="create_error" msgid="3735649141335444215">"フォルダを作成できませんでした"</string>
-    <!-- no translation found for query_error (5999895349602476581) -->
-    <skip />
+    <string name="query_error" msgid="5999895349602476581">"現在、コンテンツを読み込むことができません"</string>
     <string name="root_recent" msgid="4470053704320518133">"最近"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"空き容量: <xliff:g id="SIZE">%1$s</xliff:g>"</string>
     <string name="root_type_service" msgid="2178854894416775409">"ストレージサービス"</string>
@@ -63,8 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"その他のアプリ"</string>
     <string name="empty" msgid="7858882803708117596">"アイテムがありません"</string>
     <string name="no_results" msgid="6622510343880730446">"該当するものは %1$s にありません"</string>
-    <!-- no translation found for toast_no_application (4632640357724698144) -->
-    <skip />
+    <string name="toast_no_application" msgid="4632640357724698144">"ファイルを開けません"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"一部のドキュメントを削除できません"</string>
     <string name="share_via" msgid="8966594246261344259">"共有ツール"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ファイルのコピー中"</string>
@@ -86,15 +84,22 @@
     <string name="copy_preparing" msgid="3896202461003039386">"コピーの準備をしています…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"移動の準備をしています…"</string>
     <string name="delete_preparing" msgid="5655813182533491992">"削除の準備をしています…"</string>
-    <!-- no translation found for copy_error_notification_title (7160447124922897689) -->
-    <!-- no translation found for move_error_notification_title (2710901971014783012) -->
-    <!-- no translation found for delete_error_notification_title (7228393157786591199) -->
+    <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> 個のファイルをコピーできませんでした</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> 個のファイルをコピーできませんでした</item>
+    </plurals>
+    <plurals name="move_error_notification_title" formatted="false" msgid="2710901971014783012">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> 個のファイルを移動できませんでした</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> 個のファイルを移動できませんでした</item>
+    </plurals>
+    <plurals name="delete_error_notification_title" formatted="false" msgid="7228393157786591199">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> 個のファイルを削除できませんでした</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> 個のファイルを削除できませんでした</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="6268189413228855582">"タップすると詳細が表示されます"</string>
     <string name="close" msgid="3043722427445528732">"閉じる"</string>
-    <!-- no translation found for copy_failure_alert_content (4563147454522476183) -->
-    <skip />
-    <!-- no translation found for move_failure_alert_content (2635075788682922861) -->
-    <skip />
+    <string name="copy_failure_alert_content" msgid="4563147454522476183">"次のファイルをコピーできませんでした: <xliff:g id="LIST">%1$s</xliff:g>"</string>
+    <string name="move_failure_alert_content" msgid="2635075788682922861">"次のファイルを移動できませんでした: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"次のファイルが別の形式に変換されました: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件のファイルをクリップボードにコピーしました。</item>
