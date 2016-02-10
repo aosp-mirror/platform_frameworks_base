@@ -847,6 +847,9 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * to make forward progress from the partial results and avoid waiting for the completed
          * result.</p>
          *
+         * <p>For a particular request, {@link #onCaptureProgressed} may happen before or after
+         * {@link #onCaptureStarted}.</p>
+         *
          * <p>Each request will generate at least {@code 1} partial results, and at most
          * {@link CameraCharacteristics#REQUEST_PARTIAL_RESULT_COUNT} partial results.</p>
          *
