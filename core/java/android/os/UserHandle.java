@@ -130,6 +130,15 @@ public final class UserHandle implements Parcelable {
     }
 
     /**
+     * Returns the user for a given uid.
+     * @param uid A uid for an application running in a particular user.
+     * @return A {@link UserHandle} for that user.
+     */
+    public static UserHandle getUserHandleForUid(int uid) {
+        return of(getUserId(uid));
+    }
+
+    /**
      * Returns the user id for a given uid.
      * @hide
      */
