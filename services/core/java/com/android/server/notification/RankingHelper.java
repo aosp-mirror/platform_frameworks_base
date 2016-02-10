@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -464,6 +465,24 @@ public class RankingHelper implements RankingConfig {
             getOrCreateTopic(r, topic).visibility = visibility;
         }
         updateConfig();
+    }
+
+    /**
+     * Gets the importance of a topic. Unlike {@link #getImportance(String, int, String)}, does not
+     * create package or topic records if they don't exist.
+     */
+    @Override
+    public int getImportance(String packageName, int uid, String topicId) {
+        final String key = recordKey(packageName, uid);
+        Record r = mRecords.get(key);
+        if (r == null) {
+            return Ranking.IMPORTANCE_UNSPECIFIED;
+        }
+        Topic t = r.topics.get(topicId);
+        if (t == null) {
+            return Ranking.IMPORTANCE_UNSPECIFIED;
+        }
+        return t.importance;
     }
 
     /**

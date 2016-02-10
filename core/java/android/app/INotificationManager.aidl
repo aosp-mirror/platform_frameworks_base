@@ -46,6 +46,7 @@ interface INotificationManager
 
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
+    boolean areNotificationsEnabled(String pkg);
 
     ParceledListSlice getTopics(String pkg, int uid);
     void setVisibilityOverride(String pkg, int uid, in Notification.Topic topic, int visibility);
@@ -54,6 +55,7 @@ interface INotificationManager
     int getPriority(String pkg, int uid, in Notification.Topic topic);
     void setImportance(String pkg, int uid, in Notification.Topic topic, int importance);
     int getImportance(String pkg, int uid, in Notification.Topic topic);
+    int getTopicImportance(String pkg, String topicId);
     boolean doesAppUseTopics(String pkg, int uid);
     boolean hasBannedTopics(String pkg, int uid);
 
