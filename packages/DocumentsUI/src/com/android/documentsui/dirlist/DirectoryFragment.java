@@ -211,9 +211,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             final View view = mRecView.getChildAt(i);
             cancelThumbnailTask(view);
         }
-
-        // Clear any outstanding selection
-        mSelectionManager.clearSelection();
     }
 
     @Override
@@ -225,6 +222,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
         final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
+        mStateKey = buildStateKey(root, doc);
 
         mIconHelper = new IconHelper(context, MODE_GRID);
 
@@ -244,6 +242,13 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mRecView.addOnItemTouchListener(mGestureDetector);
 
+        // final here because we'll manually bump the listener iwhen we had an initial selection,
+        // but only after the model is fully loaded.
+        final SelectionModeListener selectionListener = new SelectionModeListener();
+        final Selection initialSelection = state.selectedDocuments.hasDirectoryKey(mStateKey)
+            ? state.selectedDocuments
+            : null;
+
         // TODO: instead of inserting the view into the constructor, extract listener-creation code
         // and set the listener on the view after the fact.  Then the view doesn't need to be passed
         // into the selection manager.
@@ -252,15 +257,16 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 mAdapter,
                 state.allowMultiple
                     ? MultiSelectManager.MODE_MULTIPLE
-                    : MultiSelectManager.MODE_SINGLE);
-        mSelectionManager.addCallback(new SelectionModeListener());
+                    : MultiSelectManager.MODE_SINGLE,
+                initialSelection);
+
+        mSelectionManager.addCallback(selectionListener);
 
         mModel = new Model();
         mModel.addUpdateListener(mAdapter);
         mModel.addUpdateListener(mModelUpdateListener);
 
         mType = getArguments().getInt(EXTRA_TYPE);
-        mStateKey = buildStateKey(root, doc);
 
         mTuner = FragmentTuner.pick(getContext(), state);
         mClipper = new DocumentClipper(context);
@@ -320,6 +326,10 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
                 updateDisplayState();
 
+                if (initialSelection != null) {
+                    selectionListener.onSelectionChanged();
+                }
+
                 // Restore any previous instance state
                 final SparseArray<Parcelable> container = state.dirState.remove(mStateKey);
                 if (container != null && !getArguments().getBoolean(EXTRA_IGNORE_STATE, false)) {
@@ -344,6 +354,18 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         // Kick off loader at least once
         getLoaderManager().restartLoader(LOADER_ID, null, mCallbacks);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        State state = getDisplayState();
+        if (mSelectionManager.hasSelection()) {
+            mSelectionManager.getSelection(state.selectedDocuments);
+            state.selectedDocuments.setDirectoryKey(mStateKey);
+            if (!state.selectedDocuments.isEmpty()) {
+                if (DEBUG) Log.d(TAG, "Persisted selection: " + state.selectedDocuments);
+            }
+        }
     }
 
     @Override

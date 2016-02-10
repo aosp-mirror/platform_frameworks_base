@@ -23,9 +23,12 @@ import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
+import android.annotation.IntDef;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.widget.GridLayoutManager;
@@ -41,12 +44,13 @@ import com.android.documentsui.Events.InputEvent;
 import com.android.documentsui.Events.MotionInputEvent;
 import com.android.documentsui.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,10 +62,13 @@ import java.util.Set;
  */
 public final class MultiSelectManager {
 
-    /** Selection mode for multiple select. **/
+    @IntDef(flag = true, value = {
+            MODE_MULTIPLE,
+            MODE_SINGLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SelectionMode {}
     public static final int MODE_MULTIPLE = 0;
-
-    /** Selection mode for multiple select. **/
     public static final int MODE_SINGLE = 1;
 
     private static final String TAG = "MultiSelectManager";
@@ -79,14 +86,19 @@ public final class MultiSelectManager {
 
 
     /**
-     * @param recyclerView
-     * @param mode Selection mode
+     * @param mode Selection single or multiple selection mode.
+     * @param initialSelection selection state probably preserved in external state.
      */
     public MultiSelectManager(
-            final RecyclerView recyclerView, DocumentsAdapter adapter, int mode) {
-        this(new RuntimeSelectionEnvironment(recyclerView), adapter, mode);
+            final RecyclerView recyclerView,
+            DocumentsAdapter adapter,
+            @SelectionMode int mode,
+            @Nullable Selection initialSelection) {
+
+        this(new RuntimeSelectionEnvironment(recyclerView), adapter, mode, initialSelection);
 
         if (mode == MODE_MULTIPLE) {
+            // TODO: Don't load this on low memory devices.
             mBandManager = new BandController();
         }
 
@@ -116,10 +128,18 @@ public final class MultiSelectManager {
      * @hide
      */
     @VisibleForTesting
-    MultiSelectManager(SelectionEnvironment environment, DocumentsAdapter adapter, int mode) {
+    MultiSelectManager(
+            SelectionEnvironment environment,
+            DocumentsAdapter adapter,
+            @SelectionMode int mode,
+            @Nullable Selection initialSelection) {
+
         mEnvironment = checkNotNull(environment, "'environment' cannot be null.");
         mAdapter = checkNotNull(adapter, "'adapter' cannot be null.");
         mSingleSelect = mode == MODE_SINGLE;
+        if (initialSelection != null) {
+            mSelection.copyFrom(initialSelection);
+        }
 
         mAdapter.registerAdapterDataObserver(
                 new RecyclerView.AdapterDataObserver() {
@@ -200,6 +220,13 @@ public final class MultiSelectManager {
     public Selection getSelection(Selection dest) {
         dest.copyFrom(mSelection);
         return dest;
+    }
+
+    /**
+     * Updates selection to include items in {@code selection}.
+     */
+    public void updateSelection(Selection selection) {
+        setItemsSelected(selection.toList(), true);
     }
 
     /**
@@ -615,7 +642,7 @@ public final class MultiSelectManager {
      * Object representing the current selection. Provides read only access
      * public access, and private write access.
      */
-    public static final class Selection {
+    public static final class Selection implements Parcelable {
 
         // This class tracks selected items by managing two sets: the saved selection, and the total
         // selection. Saved selections are those which have been completed by tapping an item or by
@@ -628,8 +655,9 @@ public final class MultiSelectManager {
         // item A is tapped (and selected), then an in-progress band select covers A then uncovers
         // A, A should still be selected as it has been saved. To ensure this behavior, the saved
         // selection must be tracked separately.
-        private Set<String> mSavedSelection = new HashSet<>();
-        private Set<String> mTotalSelection = new HashSet<>();
+        private Set<String> mSelection = new HashSet<>();
+        private Set<String> mProvisionalSelection = new HashSet<>();
+        private String mDirectoryKey;
 
         @VisibleForTesting
         public Selection(String... ids) {
@@ -643,53 +671,70 @@ public final class MultiSelectManager {
          * @return true if the position is currently selected.
          */
         public boolean contains(@Nullable String id) {
-            return mTotalSelection.contains(id);
+            return mSelection.contains(id) || mProvisionalSelection.contains(id);
         }
 
         /**
          * Returns an unordered array of selected positions.
          */
         public String[] getAll() {
-            return mTotalSelection.toArray(new String[0]);
+            return toList().toArray(new String[0]);
+        }
+
+        /**
+         * Returns an unordered array of selected positions (including any
+         * provisional selections current in effect).
+         */
+        private List<String> toList() {
+            ArrayList<String> selection = new ArrayList<String>(mSelection);
+            selection.addAll(mProvisionalSelection);
+            return selection;
         }
 
         /**
          * @return size of the selection.
          */
         public int size() {
-            return mTotalSelection.size();
+            return mSelection.size() + mProvisionalSelection.size();
         }
 
         /**
          * @return true if the selection is empty.
          */
         public boolean isEmpty() {
-            return mTotalSelection.isEmpty();
+            return mSelection.isEmpty() && mProvisionalSelection.isEmpty();
         }
 
         /**
          * Sets the provisional selection, which is a temporary selection that can be saved,
          * canceled, or adjusted at a later time. When a new provision selection is applied, the old
          * one (if it exists) is abandoned.
-         * @return Array with entry for each position added or removed. Entries which were added
-         *     contain a value of true, and entries which were removed contain a value of false.
+         * @return Map of ids added or removed. Added ids have a value of true, removed are false.
          */
         @VisibleForTesting
-        protected Map<String, Boolean> setProvisionalSelection(Set<String> provisionalSelection) {
+        protected Map<String, Boolean> setProvisionalSelection(Set<String> newSelection) {
             Map<String, Boolean> delta = new HashMap<>();
 
-            for (String id: mTotalSelection) {
+            for (String id: mProvisionalSelection) {
                 // Mark each item that used to be in the selection but is unsaved and not in the new
                 // provisional selection.
-                if (!provisionalSelection.contains(id) && !mSavedSelection.contains(id)) {
+                if (!newSelection.contains(id) && !mSelection.contains(id)) {
                     delta.put(id, false);
                 }
             }
 
-            for (String id: provisionalSelection) {
+            for (String id: mSelection) {
+                // Mark each item that used to be in the selection but is unsaved and not in the new
+                // provisional selection.
+                if (!newSelection.contains(id)) {
+                    delta.put(id, false);
+                }
+            }
+
+            for (String id: newSelection) {
                 // Mark each item that was not previously in the selection but is in the new
                 // provisional selection.
-                if (!mTotalSelection.contains(id)) {
+                if (!mSelection.contains(id) && !mProvisionalSelection.contains(id)) {
                     delta.put(id, true);
                 }
             }
@@ -700,9 +745,9 @@ public final class MultiSelectManager {
             for (Map.Entry<String, Boolean> entry: delta.entrySet()) {
                 String id = entry.getKey();
                 if (entry.getValue()) {
-                    mTotalSelection.add(id);
+                    mProvisionalSelection.add(id);
                 } else {
-                    mTotalSelection.remove(id);
+                    mProvisionalSelection.remove(id);
                 }
             }
 
@@ -716,7 +761,8 @@ public final class MultiSelectManager {
          */
         @VisibleForTesting
         protected void applyProvisionalSelection() {
-            mSavedSelection = new HashSet<>(mTotalSelection);
+            mSelection.addAll(mProvisionalSelection);
+            mProvisionalSelection.clear();
         }
 
         /**
@@ -725,15 +771,14 @@ public final class MultiSelectManager {
          */
         @VisibleForTesting
         void cancelProvisionalSelection() {
-            mTotalSelection = new HashSet<>(mSavedSelection);
+            mProvisionalSelection.clear();
         }
 
         /** @hide */
         @VisibleForTesting
         boolean add(String id) {
-            if (!mTotalSelection.contains(id)) {
-                mTotalSelection.add(id);
-                mSavedSelection.add(id);
+            if (!mSelection.contains(id)) {
+                mSelection.add(id);
                 return true;
             }
             return false;
@@ -742,31 +787,29 @@ public final class MultiSelectManager {
         /** @hide */
         @VisibleForTesting
         boolean remove(String id) {
-            if (mTotalSelection.contains(id)) {
-                mTotalSelection.remove(id);
-                mSavedSelection.remove(id);
+            if (mSelection.contains(id)) {
+                mSelection.remove(id);
                 return true;
             }
             return false;
         }
 
         public void clear() {
-            mSavedSelection.clear();
-            mTotalSelection.clear();
+            mSelection.clear();
         }
 
         /**
          * Trims this selection to be the intersection of itself with the set of given IDs.
          */
         public void intersect(Collection<String> ids) {
-            mSavedSelection.retainAll(ids);
-            mTotalSelection.retainAll(ids);
+            mSelection.retainAll(ids);
+            mProvisionalSelection.retainAll(ids);
         }
 
         @VisibleForTesting
         void copyFrom(Selection source) {
-            mSavedSelection = new HashSet<>(source.mSavedSelection);
-            mTotalSelection = new HashSet<>(source.mTotalSelection);
+            mSelection = new HashSet<>(source.mSelection);
+            mProvisionalSelection = new HashSet<>(source.mProvisionalSelection);
         }
 
         @Override
@@ -775,24 +818,19 @@ public final class MultiSelectManager {
                 return "size=0, items=[]";
             }
 
-            StringBuilder buffer = new StringBuilder(mTotalSelection.size() * 28);
-            buffer.append("{size=")
-                    .append(mTotalSelection.size())
-                    .append(", ")
-                    .append("items=[");
-            for (Iterator<String> i = mTotalSelection.iterator(); i.hasNext(); ) {
-                buffer.append(i.next());
-                if (i.hasNext()) {
-                    buffer.append(", ");
-                }
-            }
-            buffer.append("]}");
+            StringBuilder buffer = new StringBuilder(size() * 28);
+            buffer.append("Selection{")
+                .append("applied{size=" + mSelection.size())
+                .append(", entries=" + mSelection)
+                .append("}, provisional{size=" + mProvisionalSelection.size())
+                .append(", entries=" + mProvisionalSelection)
+                .append("}}");
             return buffer.toString();
         }
 
         @Override
         public int hashCode() {
-            return mSavedSelection.hashCode() ^ mTotalSelection.hashCode();
+            return mSelection.hashCode() ^ mProvisionalSelection.hashCode();
         }
 
         @Override
@@ -805,8 +843,39 @@ public final class MultiSelectManager {
               return false;
           }
 
-          return mSavedSelection.equals(((Selection) that).mSavedSelection) &&
-                  mTotalSelection.equals(((Selection) that).mTotalSelection);
+          return mSelection.equals(((Selection) that).mSelection) &&
+                  mProvisionalSelection.equals(((Selection) that).mProvisionalSelection);
+        }
+
+        /**
+         * Sets the state key for this selection, which allows us to match selections
+         * to particular states (of DirectoryFragment). Basically this lets us avoid
+         * loading a persisted selection in the wrong directory.
+         */
+        public void setDirectoryKey(String key) {
+            mDirectoryKey = key;
+        }
+
+        /**
+         * Sets the state key for this selection, which allows us to match selections
+         * to particular states (of DirectoryFragment). Basically this lets us avoid
+         * loading a persisted selection in the wrong directory.
+         */
+        public boolean hasDirectoryKey(String key) {
+            return key.equals(mDirectoryKey);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            checkState(mDirectoryKey != null);
+            dest.writeString(mDirectoryKey);
+            dest.writeList(new ArrayList<>(mSelection));
+            // We don't include provisional selection since it is
+            // typically coupled to some other runtime state (like a band).
         }
     }
 

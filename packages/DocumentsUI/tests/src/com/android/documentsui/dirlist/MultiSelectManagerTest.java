@@ -50,7 +50,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         mCallback = new TestCallback();
         mEnv = new TestSelectionEnvironment(items);
         mAdapter = new TestDocumentsAdapter(items);
-        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_MULTIPLE);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_MULTIPLE, null);
         mManager.addCallback(mCallback);
     }
 
@@ -174,7 +174,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode() {
-        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE, null);
         mManager.addCallback(mCallback);
         longPress(20);
         tap(13);
@@ -182,7 +182,7 @@ public class MultiSelectManagerTest extends AndroidTestCase {
     }
 
     public void testSingleSelectMode_ShiftTap() {
-        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE);
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE, null);
         mManager.addCallback(mCallback);
         longPress(13);
         shiftTap(20);
@@ -198,24 +198,73 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         provisional.append(2, true);
         s.setProvisionalSelection(getItemIds(provisional));
         assertSelection(items.get(1), items.get(2));
+    }
 
-        provisional.delete(1);
-        provisional.append(3, true);
+    public void testProvisionalSelection_Replace() {
+        Selection s = mManager.getSelection();
+
+        SparseBooleanArray provisional = new SparseBooleanArray();
+        provisional.append(1, true);
+        provisional.append(2, true);
         s.setProvisionalSelection(getItemIds(provisional));
-        assertSelection(items.get(2), items.get(3));
-
-        s.applyProvisionalSelection();
-        assertSelection(items.get(2), items.get(3));
 
         provisional.clear();
         provisional.append(3, true);
         provisional.append(4, true);
         s.setProvisionalSelection(getItemIds(provisional));
-        assertSelection(items.get(2), items.get(3), items.get(4));
+        assertSelection(items.get(3), items.get(4));
+    }
 
-        provisional.delete(3);
+    public void testProvisionalSelection_IntersectsExistingProvisionalSelection() {
+        Selection s = mManager.getSelection();
+
+        SparseBooleanArray provisional = new SparseBooleanArray();
+        provisional.append(1, true);
+        provisional.append(2, true);
         s.setProvisionalSelection(getItemIds(provisional));
-        assertSelection(items.get(2), items.get(3), items.get(4));
+
+        provisional.clear();
+        provisional.append(1, true);
+        s.setProvisionalSelection(getItemIds(provisional));
+        assertSelection(items.get(1));
+    }
+
+    public void testProvisionalSelection_Apply() {
+        Selection s = mManager.getSelection();
+
+        SparseBooleanArray provisional = new SparseBooleanArray();
+        provisional.append(1, true);
+        provisional.append(2, true);
+        s.setProvisionalSelection(getItemIds(provisional));
+        s.applyProvisionalSelection();
+        assertSelection(items.get(1), items.get(2));
+    }
+
+    public void testProvisionalSelection_Cancel() {
+        mManager.toggleSelection(items.get(1));
+        mManager.toggleSelection(items.get(2));
+        Selection s = mManager.getSelection();
+
+        SparseBooleanArray provisional = new SparseBooleanArray();
+        provisional.append(3, true);
+        provisional.append(4, true);
+        s.setProvisionalSelection(getItemIds(provisional));
+        s.cancelProvisionalSelection();
+
+        // Original selection should remain.
+        assertSelection(items.get(1), items.get(2));
+    }
+
+    public void testProvisionalSelection_IntersectsAppliedSelection() {
+        mManager.toggleSelection(items.get(1));
+        mManager.toggleSelection(items.get(2));
+        Selection s = mManager.getSelection();
+
+        SparseBooleanArray provisional = new SparseBooleanArray();
+        provisional.append(2, true);
+        provisional.append(3, true);
+        s.setProvisionalSelection(getItemIds(provisional));
+        assertSelection(items.get(1), items.get(2), items.get(3));
     }
 
     private static Set<String> getItemIds(SparseBooleanArray selection) {
