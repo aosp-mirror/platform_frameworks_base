@@ -448,8 +448,8 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Prikaže sekunde pri uri v vrstici stanja. To lahko vpliva na čas delovanja pri akumulatorskem napajanju."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Preuredi hitre nastavitve"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Prikaz svetlosti v hitrih nastavitvah"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Omogočanje pospeš. za razdeljeni zaslon z vlečenjem navzgor"</string>
-    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Omogočanje poteze za zagon razdeljenega zaslona, tako da uporabnik od gumba za pregled povleče s prstom navzgor"</string>
+    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Omogočanje vklopa razdeljenega zaslona z vlečenjem navzgor"</string>
+    <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Omogočanje poteze za vklop razdeljenega zaslona, tako da uporabnik od gumba za pregled povleče s prstom navzgor"</string>
     <string name="experimental" msgid="6198182315536726162">"Poskusno"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želite vklopiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Če želite povezati tipkovnico in tablični računalnik, vklopite Bluetooth."</string>
