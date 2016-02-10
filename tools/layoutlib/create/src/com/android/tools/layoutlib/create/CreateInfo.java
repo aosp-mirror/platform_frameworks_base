@@ -111,7 +111,7 @@ public final class CreateInfo implements ICreateInfo {
     public Set<String> getExcludedClasses() {
         String[] refactoredClasses = getJavaPkgClasses();
         int count = refactoredClasses.length / 2 + EXCLUDED_CLASSES.length;
-        Set<String> excludedClasses = new HashSet<String>(count);
+        Set<String> excludedClasses = new HashSet<>(count);
         for (int i = 0; i < refactoredClasses.length; i+=2) {
             excludedClasses.add(refactoredClasses[i]);
         }

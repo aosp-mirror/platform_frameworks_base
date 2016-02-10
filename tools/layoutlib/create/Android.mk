@@ -20,7 +20,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under,src)
 
 LOCAL_JAR_MANIFEST := manifest.txt
 LOCAL_STATIC_JAVA_LIBRARIES := \
-	asm-4.0
+	asm-5.0
 
 LOCAL_MODULE := layoutlib_create
 

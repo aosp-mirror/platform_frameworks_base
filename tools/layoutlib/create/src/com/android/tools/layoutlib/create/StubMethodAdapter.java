@@ -50,7 +50,7 @@ class StubMethodAdapter extends MethodVisitor {
 
     public StubMethodAdapter(MethodVisitor mv, String methodName, Type returnType,
             String invokeSignature, boolean isStatic, boolean isNative) {
-        super(Opcodes.ASM4);
+        super(Main.ASM_VERSION);
         mParentVisitor = mv;
         mReturnType = returnType;
         mInvokeSignature = invokeSignature;
@@ -82,7 +82,8 @@ class StubMethodAdapter extends MethodVisitor {
             mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                     "com/android/tools/layoutlib/create/OverrideMethod",
                     "invokeV",
-                    "(Ljava/lang/String;ZLjava/lang/Object;)V");
+                    "(Ljava/lang/String;ZLjava/lang/Object;)V",
+                    false);
             mParentVisitor.visitInsn(Opcodes.RETURN);
             break;
         case Type.BOOLEAN:
@@ -93,7 +94,8 @@ class StubMethodAdapter extends MethodVisitor {
             mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                     "com/android/tools/layoutlib/create/OverrideMethod",
                     "invokeI",
-                    "(Ljava/lang/String;ZLjava/lang/Object;)I");
+                    "(Ljava/lang/String;ZLjava/lang/Object;)I",
+                    false);
             switch(sort) {
             case Type.BOOLEAN:
                 Label l1 = new Label();
@@ -119,21 +121,24 @@ class StubMethodAdapter extends MethodVisitor {
             mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                     "com/android/tools/layoutlib/create/OverrideMethod",
                     "invokeL",
-                    "(Ljava/lang/String;ZLjava/lang/Object;)J");
+                    "(Ljava/lang/String;ZLjava/lang/Object;)J",
+                    false);
             mParentVisitor.visitInsn(Opcodes.LRETURN);
             break;
         case Type.FLOAT:
             mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                     "com/android/tools/layoutlib/create/OverrideMethod",
                     "invokeF",
-                    "(Ljava/lang/String;ZLjava/lang/Object;)F");
+                    "(Ljava/lang/String;ZLjava/lang/Object;)F",
+                    false);
             mParentVisitor.visitInsn(Opcodes.FRETURN);
             break;
         case Type.DOUBLE:
             mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                     "com/android/tools/layoutlib/create/OverrideMethod",
                     "invokeD",
-                    "(Ljava/lang/String;ZLjava/lang/Object;)D");
+                    "(Ljava/lang/String;ZLjava/lang/Object;)D",
+                    false);
             mParentVisitor.visitInsn(Opcodes.DRETURN);
             break;
         case Type.ARRAY:
@@ -141,7 +146,8 @@ class StubMethodAdapter extends MethodVisitor {
             mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
                     "com/android/tools/layoutlib/create/OverrideMethod",
                     "invokeA",
-                    "(Ljava/lang/String;ZLjava/lang/Object;)Ljava/lang/Object;");
+                    "(Ljava/lang/String;ZLjava/lang/Object;)Ljava/lang/Object;",
+                    false);
             mParentVisitor.visitTypeInsn(Opcodes.CHECKCAST, mReturnType.getInternalName());
             mParentVisitor.visitInsn(Opcodes.ARETURN);
             break;
@@ -282,9 +288,9 @@ class StubMethodAdapter extends MethodVisitor {
     }
 
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
         if (mIsInitMethod) {
-            mParentVisitor.visitMethodInsn(opcode, owner, name, desc);
+            mParentVisitor.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 

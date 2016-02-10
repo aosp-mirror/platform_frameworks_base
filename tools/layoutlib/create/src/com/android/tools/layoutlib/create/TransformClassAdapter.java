@@ -49,7 +49,7 @@ class TransformClassAdapter extends ClassVisitor {
     public TransformClassAdapter(Log logger, Set<String> stubMethods,
             Set<String> deleteReturns, String className, ClassVisitor cv,
             boolean stubNativesOnly) {
-        super(Opcodes.ASM4, cv);
+        super(Main.ASM_VERSION, cv);
         mLog = logger;
         mStubMethods = stubMethods;
         mClassName = className;

@@ -58,7 +58,7 @@ public class DelegateClassAdapter extends ClassVisitor {
             ClassVisitor cv,
             String className,
             Set<String> delegateMethods) {
-        super(Opcodes.ASM4, cv);
+        super(Main.ASM_VERSION, cv);
         mLog = log;
         mClassName = className;
         mDelegateMethods = delegateMethods;
