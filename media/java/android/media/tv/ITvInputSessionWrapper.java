@@ -66,10 +66,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_TIME_SHIFT_SEEK_TO = 17;
     private static final int DO_TIME_SHIFT_SET_PLAYBACK_PARAMS = 18;
     private static final int DO_TIME_SHIFT_ENABLE_POSITION_TRACKING = 19;
-    private static final int DO_CONNECT = 20;
-    private static final int DO_DISCONNECT = 21;
-    private static final int DO_START_RECORDING = 22;
-    private static final int DO_STOP_RECORDING = 23;
+    private static final int DO_START_RECORDING = 20;
+    private static final int DO_STOP_RECORDING = 21;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -91,6 +89,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         }
     }
 
+    // For the recording session
     public ITvInputSessionWrapper(Context context,
             TvInputService.RecordingSession recordingSessionImpl) {
         mIsRecordingSession = true;
@@ -100,25 +99,28 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void executeMessage(Message msg) {
-        if (!mIsRecordingSession && mTvInputSessionImpl == null) {
-            return;
-        }
-        if (mIsRecordingSession && mTvInputRecordingSessionImpl == null) {
+        if ((mIsRecordingSession && mTvInputRecordingSessionImpl == null)
+                || (!mIsRecordingSession && mTvInputSessionImpl == null)) {
             return;
         }
 
         long startTime = System.nanoTime();
         switch (msg.what) {
             case DO_RELEASE: {
-                mTvInputSessionImpl.release();
-                mTvInputSessionImpl = null;
-                if (mReceiver != null) {
-                    mReceiver.dispose();
-                    mReceiver = null;
-                }
-                if (mChannel != null) {
-                    mChannel.dispose();
-                    mChannel = null;
+                if (mIsRecordingSession) {
+                    mTvInputRecordingSessionImpl.release();
+                    mTvInputRecordingSessionImpl = null;
+                } else {
+                    mTvInputSessionImpl.release();
+                    mTvInputSessionImpl = null;
+                    if (mReceiver != null) {
+                        mReceiver.dispose();
+                        mReceiver = null;
+                    }
+                    if (mChannel != null) {
+                        mChannel.dispose();
+                        mChannel = null;
+                    }
                 }
                 break;
             }
@@ -142,7 +144,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_TUNE: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.tune((Uri) args.arg1, (Bundle) args.arg2);
+                if (mIsRecordingSession) {
+                    mTvInputRecordingSessionImpl.tune((Uri) args.arg1, (Bundle) args.arg2);
+                } else {
+                    mTvInputSessionImpl.tune((Uri) args.arg1, (Bundle) args.arg2);
+                }
                 args.recycle();
                 break;
             }
@@ -209,17 +215,6 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
                 break;
             }
-            case DO_CONNECT: {
-                SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputRecordingSessionImpl.connect((Uri) args.arg1, (Bundle) args.arg2);
-                args.recycle();
-                break;
-            }
-            case DO_DISCONNECT: {
-                mTvInputRecordingSessionImpl.disconnect();
-                mTvInputRecordingSessionImpl = null;
-                break;
-            }
             case DO_START_RECORDING: {
                 mTvInputRecordingSessionImpl.startRecording((Uri) msg.obj);
                 break;
@@ -251,7 +246,9 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void release() {
-        mTvInputSessionImpl.scheduleOverlayViewCleanup();
+        if (!mIsRecordingSession) {
+            mTvInputSessionImpl.scheduleOverlayViewCleanup();
+        }
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RELEASE));
     }
 
@@ -352,18 +349,6 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     public void timeShiftEnablePositionTracking(boolean enable) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(
                 DO_TIME_SHIFT_ENABLE_POSITION_TRACKING, enable));
-    }
-
-    @Override
-    public void connect(Uri channelUri, Bundle params) {
-        // Clear the pending connect requests.
-        mCaller.removeMessages(DO_CONNECT);
-        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_CONNECT, channelUri, params));
-    }
-
-    @Override
-    public void disconnect() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_DISCONNECT));
     }
 
     @Override

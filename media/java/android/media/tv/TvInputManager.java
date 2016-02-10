@@ -83,110 +83,140 @@ public final class TvInputManager {
     static final int VIDEO_UNAVAILABLE_REASON_END = 4;
 
     /**
-     * A generic reason. Video is not available due to an unspecified error.
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable due to
+     * an unspecified error.
      */
     public static final int VIDEO_UNAVAILABLE_REASON_UNKNOWN = VIDEO_UNAVAILABLE_REASON_START;
     /**
-     * Video is not available because the TV input is in the middle of tuning to a new channel.
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the corresponding TV input is in the middle of tuning to a new channel.
      */
     public static final int VIDEO_UNAVAILABLE_REASON_TUNING = 1;
     /**
-     * Video is not available due to the weak TV signal.
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable due to
+     * weak TV signal.
      */
     public static final int VIDEO_UNAVAILABLE_REASON_WEAK_SIGNAL = 2;
     /**
-     * Video is not available because the TV input stopped the playback temporarily to buffer more
-     * data.
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the corresponding TV input has stopped playback temporarily to buffer more data.
      */
     public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = 3;
     /**
-     * Video is not available because the current program is audio-only.
+     * Reason for {@link TvInputService.Session#notifyVideoUnavailable(int)} and
+     * {@link TvView.TvInputCallback#onVideoUnavailable(String, int)}: Video is unavailable because
+     * the current TV program is audio-only.
      */
     public static final int VIDEO_UNAVAILABLE_REASON_AUDIO_ONLY = VIDEO_UNAVAILABLE_REASON_END;
 
     /**
-     * Status prior to calling {@link TvInputService.Session#notifyTimeShiftStatusChanged}.
+     * Status for {@link TvInputService.Session#notifyTimeShiftStatusChanged(int)} and
+     * {@link TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)}: Unknown status. Also
+     * the status prior to calling {@code notifyTimeShiftStatusChanged}.
      */
     public static final int TIME_SHIFT_STATUS_UNKNOWN = 0;
 
     /**
-     * The TV input does not support time shifting.
+     * Status for {@link TvInputService.Session#notifyTimeShiftStatusChanged(int)} and
+     * {@link TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)}: The current TV input
+     * does not support time shifting.
      */
     public static final int TIME_SHIFT_STATUS_UNSUPPORTED = 1;
 
     /**
-     * Time shifting is currently not available but might work again later.
+     * Status for {@link TvInputService.Session#notifyTimeShiftStatusChanged(int)} and
+     * {@link TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)}: Time shifting is
+     * currently unavailable but might work again later.
      */
     public static final int TIME_SHIFT_STATUS_UNAVAILABLE = 2;
 
     /**
-     * Time shifting is currently available. In this status, the application assumes it can
-     * pause/resume playback, seek to a specified time position and set playback rate and audio
-     * mode.
+     * Status for {@link TvInputService.Session#notifyTimeShiftStatusChanged(int)} and
+     * {@link TvView.TvInputCallback#onTimeShiftStatusChanged(String, int)}: Time shifting is
+     * currently available. In this status, the application assumes it can pause/resume playback,
+     * seek to a specified time position and set playback rate and audio mode.
      */
     public static final int TIME_SHIFT_STATUS_AVAILABLE = 3;
 
+    /**
+     * Value returned by {@link TvInputService.Session#onTimeShiftGetCurrentPosition()} and
+     * {@link TvInputService.Session#onTimeShiftGetStartPosition()} when time shifting has not
+     * yet started.
+     */
     public static final long TIME_SHIFT_INVALID_TIME = Long.MIN_VALUE;
 
     /**
-     * RecordingError when a requested operation cannot be completed due to a problem that does not
-     * fit under any other error code.
+     * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
+     * {@link TvRecordingClient.RecordingCallback#onError(int)}: The requested operation cannot be
+     * completed due to a problem that does not fit under any other error codes.
      */
     public static final int RECORDING_ERROR_UNKNOWN = 0;
 
     /**
-     * RecordingError when an attempt to connect to a recording session has failed or the
-     * established connection has been disconnected without a known reason.
+     * Error for {@link TvRecordingClient.RecordingCallback#onError(int)}: The recording client has
+     * failed to establish a connection to a recording session.
      */
     public static final int RECORDING_ERROR_CONNECTION_FAILED = 1;
 
     /**
-     * RecordingError when recording cannot proceed due to insufficient storage space.
+     * Error for {@link TvRecordingClient.RecordingCallback#onError(int)}: The recording client has
+     * been disconnected from the current recording session.
      */
-    public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 2;
+    public static final int RECORDING_ERROR_DISCONNECTED = 2;
 
     /**
-     * RecordingError when recording cannot proceed because the required recording resource is not
-     * able to be allocated.
+     * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
+     * {@link TvRecordingClient.RecordingCallback#onError(int)}: Recording cannot proceed due to
+     * insufficient storage space.
      */
-    public static final int RECORDING_ERROR_RESOURCE_BUSY = 3;
+    public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 3;
+
+    /**
+     * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
+     * {@link TvRecordingClient.RecordingCallback#onError(int)}: Recording cannot proceed because
+     * a required recording resource was not able to be allocated.
+     */
+    public static final int RECORDING_ERROR_RESOURCE_BUSY = 4;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RECORDING_ERROR_UNKNOWN, RECORDING_ERROR_CONNECTION_FAILED,
-            RECORDING_ERROR_INSUFFICIENT_SPACE, RECORDING_ERROR_RESOURCE_BUSY})
+            RECORDING_ERROR_DISCONNECTED, RECORDING_ERROR_INSUFFICIENT_SPACE,
+            RECORDING_ERROR_RESOURCE_BUSY})
     public @interface RecordingError {}
 
     /**
-     * The TV input is connected.
+     * State for {@link #getInputState(String)} and
+     * {@link TvInputCallback#onInputStateChanged(String, int)}: The input source is connected.
      *
-     * <p>This state indicates that a source device is connected to the input port and is in the
-     * normal operation mode. It is mostly relevant to hardware inputs such as HDMI input.
+     * <p>This state indicates that a source device is connected to the input port and in the normal
+     * operation mode. It is mostly relevant to hardware inputs such as HDMI input.
      * Non-hardware inputs are considered connected all the time.
-     *
-     * @see #getInputState
-     * @see TvInputManager.TvInputCallback#onInputStateChanged
      */
     public static final int INPUT_STATE_CONNECTED = 0;
+
     /**
-     * The TV input is connected but in standby mode.
+     * State for {@link #getInputState(String)} and
+     * {@link TvInputCallback#onInputStateChanged(String, int)}: The input source is connected but
+     * in standby mode.
      *
-     * <p>This state indicates that a source device is connected to the input port but is in standby
-     * or low power mode. It is mostly relevant to hardware inputs such as HDMI inputs and Component
+     * <p>This state indicates that a source device is connected to the input port and in standby or
+     * low power mode. It is mostly relevant to hardware inputs such as HDMI inputs and Component
      * inputs.
-     *
-     * @see #getInputState
-     * @see TvInputManager.TvInputCallback#onInputStateChanged
      */
     public static final int INPUT_STATE_CONNECTED_STANDBY = 1;
+
     /**
-     * The TV input is disconnected.
+     * State for {@link #getInputState(String)} and
+     * {@link TvInputCallback#onInputStateChanged(String, int)}: The input source is disconnected.
      *
      * <p>This state indicates that a source device is disconnected from the input port. It is
      * mostly relevant to hardware inputs such as HDMI input.
      *
-     * @see #getInputState
-     * @see TvInputManager.TvInputCallback#onInputStateChanged
      */
     public static final int INPUT_STATE_DISCONNECTED = 2;
 
@@ -449,33 +479,29 @@ public final class TvInputManager {
         public void onTimeShiftCurrentPositionChanged(Session session, long timeMs) {
         }
 
+        // For the recording session only
         /**
-         * This is called when a recording session initiated by a call to {@link
-         * TvRecordingClient#connect(String, Uri)} has been established.
+         * This is called when the recording session has been tuned to the given channel and is
+         * ready to start recording.
          */
-        void onConnected(Session session) {
+        void onTuned(Session session) {
         }
 
+        // For the recording session only
         /**
-         * This is called when TV program recording on the current channel has started.
+         * This is called when the current recording session has stopped recording and created a
+         * new data entry in the {@link TvContract.RecordedPrograms} table that describes the newly
+         * recorded program.
          *
-         * @param session A {@link TvInputManager.Session} associated with this callback.
-         */
-        void onRecordingStarted(Session session) {
-        }
-
-        /**
-         * This is called when TV program recording on the current channel has stopped. The passed
-         * URI contains information about the new recorded program.
-         *
-         * @param recordedProgramUri The URI for the new recorded program.
-         * @see android.media.tv.TvContract.RecordedPrograms
+         * @param recordedProgramUri The URI for the newly recorded program.
          **/
         void onRecordingStopped(Session session, Uri recordedProgramUri) {
         }
 
+        // For the recording session only
         /**
-         * This is called when an issue has occurred before or during recording.
+         * This is called when an issue has occurred. It may be called at any time after the current
+         * recording session is created until it is released.
          *
          * @param error The error code.
          */
@@ -632,21 +658,11 @@ public final class TvInputManager {
         }
 
         // For the recording session only
-        void postConnected() {
+        void postTuned() {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onConnected(mSession);
-                }
-            });
-        }
-
-        // For the recording session only
-        void postRecordingStarted() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSessionCallback.onRecordingStarted(mSession);
+                    mSessionCallback.onTuned(mSession);
                 }
             });
         }
@@ -998,26 +1014,14 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onConnected(int seq) {
+            public void onTuned(int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postConnected();
-                }
-            }
-
-            @Override
-            public void onRecordingStarted(int seq) {
-                synchronized (mSessionCallbackRecordMap) {
-                    SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
-                    if (record == null) {
-                        Log.e(TAG, "Callback not found for seq " + seq);
-                        return;
-                    }
-                    record.postRecordingStarted();
+                    record.postTuned();
                 }
             }
 
@@ -2007,32 +2011,6 @@ public final class TvInputManager {
             }
             try {
                 mService.timeShiftEnablePositionTracking(mToken, enable, mUserId);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        /**
-         * Connects to a given channel for TV program recording.
-         */
-        void connect(Uri channelUri) {
-            connect(channelUri, null);
-        }
-
-        /**
-         * Tunes to a given channel.
-         *
-         * @param channelUri The URI of a channel.
-         * @param params Extra parameters.
-         */
-        void connect(@NonNull Uri channelUri, Bundle params) {
-            Preconditions.checkNotNull(channelUri);
-            if (mToken == null) {
-                Log.w(TAG, "The session has been already released");
-                return;
-            }
-            try {
-                mService.connect(mToken, channelUri, params, mUserId);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
