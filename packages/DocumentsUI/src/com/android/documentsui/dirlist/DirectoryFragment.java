@@ -27,6 +27,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.google.common.base.Preconditions.checkArgument;
 
+import android.annotation.IntDef;
 import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -100,8 +101,11 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperations;
+
 import com.google.common.collect.Lists;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -111,6 +115,13 @@ import java.util.List;
  */
 public class DirectoryFragment extends Fragment implements DocumentsAdapter.Environment {
 
+    @IntDef(flag = true, value = {
+            TYPE_NORMAL,
+            TYPE_SEARCH,
+            TYPE_RECENT_OPEN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ResultType {}
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
     public static final int TYPE_RECENT_OPEN = 3;
@@ -147,7 +158,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     private RecyclerView mRecView;
     private ListeningGestureDetector mGestureDetector;
 
-    private int mType = TYPE_NORMAL;
+    private @ResultType int mType = TYPE_NORMAL;
     private String mStateKey;
 
     private int mLastSortOrder = SORT_ORDER_UNKNOWN;
@@ -262,7 +273,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         mType = getArguments().getInt(EXTRA_TYPE);
         mStateKey = buildStateKey(root, doc);
 
-        mTuner = FragmentTuner.pick(state);
+        mTuner = FragmentTuner.pick(getContext(), state);
         mClipper = new DocumentClipper(context);
 
         boolean hideGridTitles;
@@ -320,12 +331,6 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
                 updateDisplayState();
 
-                // When launched into empty recents, show drawer
-                if (mType == TYPE_RECENT_OPEN && mModel.isEmpty() && !state.hasLocationChanged() &&
-                        context instanceof DocumentsActivity) {
-                    ((DocumentsActivity) context).setRootsDrawerOpen(true);
-                }
-
                 // Restore any previous instance state
                 final SparseArray<Parcelable> container = state.dirState.remove(mStateKey);
                 if (container != null && !getArguments().getBoolean(EXTRA_IGNORE_STATE, false)) {
@@ -338,6 +343,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 }
 
                 mLastSortOrder = state.derivedSortOrder;
+
+                mTuner.onModelLoaded(mModel, mType);
             }
 
             @Override
