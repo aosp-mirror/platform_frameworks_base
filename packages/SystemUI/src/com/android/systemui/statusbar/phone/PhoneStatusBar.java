@@ -1600,12 +1600,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    protected void updateRowStates() {
-        super.updateRowStates();
-        mNotificationPanel.notifyVisibleChildrenChanged();
-    }
-
-    @Override
     protected void setAreThereNotifications() {
 
         if (SPEW) {
