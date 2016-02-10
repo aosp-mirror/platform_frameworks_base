@@ -128,11 +128,12 @@ static struct {
     // other fields unused by JNI
 } gAudioMixingRuleFields;
 
-static jclass gAttributeMatchCriterionClass;
+static jclass gAudioMixMatchCriterionClass;
 static struct {
     jfieldID    mAttr;
+    jfieldID    mIntProp;
     jfieldID    mRule;
-} gAttributeMatchCriterionFields;
+} gAudioMixMatchCriterionFields;
 
 static jclass gAudioAttributesClass;
 static struct {
@@ -1563,22 +1564,32 @@ static jint convertAudioMixToNative(JNIEnv *env,
     }
 
     for (jint i = 0; i < numCriteria; i++) {
-        AttributeMatchCriterion nCriterion;
+        AudioMixMatchCriterion nCriterion;
 
         jobject jCriterion = env->GetObjectArrayElement(jCriteria, i);
 
-        nCriterion.mRule = env->GetIntField(jCriterion, gAttributeMatchCriterionFields.mRule);
+        nCriterion.mRule = env->GetIntField(jCriterion, gAudioMixMatchCriterionFields.mRule);
 
-        jobject jAttributes = env->GetObjectField(jCriterion, gAttributeMatchCriterionFields.mAttr);
-        if (nCriterion.mRule == RULE_MATCH_ATTRIBUTE_USAGE ||
-                nCriterion.mRule == RULE_EXCLUDE_ATTRIBUTE_USAGE) {
-            nCriterion.mAttr.mUsage = (audio_usage_t)env->GetIntField(jAttributes,
-                                                       gAudioAttributesFields.mUsage);
-        } else {
-            nCriterion.mAttr.mSource = (audio_source_t)env->GetIntField(jAttributes,
-                                                        gAudioAttributesFields.mSource);
+        const uint32_t match_rule = nCriterion.mRule & ~RULE_EXCLUSION_MASK;
+        switch (match_rule) {
+        case RULE_MATCH_UID:
+            nCriterion.mValue.mUid = env->GetIntField(jCriterion,
+                    gAudioMixMatchCriterionFields.mIntProp);
+            break;
+        case RULE_MATCH_ATTRIBUTE_USAGE:
+        case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET: {
+            jobject jAttributes = env->GetObjectField(jCriterion, gAudioMixMatchCriterionFields.mAttr);
+            if (match_rule == RULE_MATCH_ATTRIBUTE_USAGE) {
+                nCriterion.mValue.mUsage = (audio_usage_t)env->GetIntField(jAttributes,
+                        gAudioAttributesFields.mUsage);
+            } else {
+                nCriterion.mValue.mSource = (audio_source_t)env->GetIntField(jAttributes,
+                        gAudioAttributesFields.mSource);
+            }
+            env->DeleteLocalRef(jAttributes);
+            }
+            break;
         }
-        env->DeleteLocalRef(jAttributes);
 
         nAudioMix->mCriteria.add(nCriterion);
         env->DeleteLocalRef(jCriterion);
@@ -1833,12 +1844,14 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioMixingRuleFields.mCriteria = GetFieldIDOrDie(env, audioMixingRuleClass, "mCriteria",
                                                        "Ljava/util/ArrayList;");
 
-    jclass attributeMatchCriterionClass =
-                FindClassOrDie(env, "android/media/audiopolicy/AudioMixingRule$AttributeMatchCriterion");
-    gAttributeMatchCriterionClass = MakeGlobalRefOrDie(env, attributeMatchCriterionClass);
-    gAttributeMatchCriterionFields.mAttr = GetFieldIDOrDie(env, attributeMatchCriterionClass, "mAttr",
+    jclass audioMixMatchCriterionClass =
+                FindClassOrDie(env, "android/media/audiopolicy/AudioMixingRule$AudioMixMatchCriterion");
+    gAudioMixMatchCriterionClass = MakeGlobalRefOrDie(env,audioMixMatchCriterionClass);
+    gAudioMixMatchCriterionFields.mAttr = GetFieldIDOrDie(env, audioMixMatchCriterionClass, "mAttr",
                                                        "Landroid/media/AudioAttributes;");
-    gAttributeMatchCriterionFields.mRule = GetFieldIDOrDie(env, attributeMatchCriterionClass, "mRule",
+    gAudioMixMatchCriterionFields.mIntProp = GetFieldIDOrDie(env, audioMixMatchCriterionClass, "mIntProp",
+                                                       "I");
+    gAudioMixMatchCriterionFields.mRule = GetFieldIDOrDie(env, audioMixMatchCriterionClass, "mRule",
                                                        "I");
 
     jclass audioAttributesClass = FindClassOrDie(env, "android/media/AudioAttributes");
