@@ -305,9 +305,8 @@ public final class TvInputManagerService extends SystemService {
             if (hasHardwarePermission(pm, component)) {
                 ServiceState serviceState = userState.serviceStateMap.get(component);
                 if (serviceState == null) {
-                    // We see this hardware TV input service for the first time; we need to
-                    // prepare the ServiceState object so that we can connect to the service and
-                    // let it add TvInputInfo objects to mInputList if there's any.
+                    // New hardware input found. Create a new ServiceState and connect to the
+                    // service to populate the hardware list.
                     serviceState = new ServiceState(component, userId);
                     userState.serviceStateMap.put(component, serviceState);
                     updateServiceConnectionLocked(component, userId);
@@ -2134,21 +2133,17 @@ public final class TvInputManagerService extends SystemService {
                 }
 
                 if (serviceState.isHardware) {
-                    List<TvInputHardwareInfo> hardwareInfoList =
-                            mTvInputHardwareManager.getHardwareList();
-                    for (TvInputHardwareInfo hardwareInfo : hardwareInfoList) {
+                    serviceState.hardwareInputList.clear();
+                    for (TvInputHardwareInfo hardware : mTvInputHardwareManager.getHardwareList()) {
                         try {
-                            serviceState.service.notifyHardwareAdded(hardwareInfo);
+                            serviceState.service.notifyHardwareAdded(hardware);
                         } catch (RemoteException e) {
                             Slog.e(TAG, "error in notifyHardwareAdded", e);
                         }
                     }
-
-                    List<HdmiDeviceInfo> deviceInfoList =
-                            mTvInputHardwareManager.getHdmiDeviceList();
-                    for (HdmiDeviceInfo deviceInfo : deviceInfoList) {
+                    for (HdmiDeviceInfo device : mTvInputHardwareManager.getHdmiDeviceList()) {
                         try {
-                            serviceState.service.notifyHdmiDeviceAdded(deviceInfo);
+                            serviceState.service.notifyHdmiDeviceAdded(device);
                         } catch (RemoteException e) {
                             Slog.e(TAG, "error in notifyHdmiDeviceAdded", e);
                         }
