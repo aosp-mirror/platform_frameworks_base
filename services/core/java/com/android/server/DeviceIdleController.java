@@ -1262,6 +1262,12 @@ public class DeviceIdleController extends SystemService
         return false;
     }
 
+    public boolean getPowerSaveWhitelistAppInternal(String name) {
+        synchronized (this) {
+            return mPowerSaveWhitelistUserApps.containsKey(name);
+        }
+    }
+
     public String[] getSystemPowerWhitelistExceptIdleInternal() {
         synchronized (this) {
             int size = mPowerSaveWhitelistAppsExceptIdle.size();
@@ -2307,8 +2313,8 @@ public class DeviceIdleController extends SystemService
                             android.Manifest.permission.DEVICE_POWER, null);
                     do {
                         if (arg.length() < 1 || (arg.charAt(0) != '-'
-                                && arg.charAt(0) != '+')) {
-                            pw.println("Package must be prefixed with + or -: " + arg);
+                                && arg.charAt(0) != '+' && arg.charAt(0) != '=')) {
+                            pw.println("Package must be prefixed with +, -, or =: " + arg);
                             return -1;
                         }
                         char op = arg.charAt(0);
@@ -2319,10 +2325,12 @@ public class DeviceIdleController extends SystemService
                             } else {
                                 pw.println("Unknown package: " + pkg);
                             }
-                        } else {
+                        } else if (op == '-') {
                             if (removePowerSaveWhitelistAppInternal(pkg)) {
                                 pw.println("Removed: " + pkg);
                             }
+                        } else {
+                            pw.println(getPowerSaveWhitelistAppInternal(pkg));
                         }
                     } while ((arg=shell.getNextArg()) != null);
                 } else {
