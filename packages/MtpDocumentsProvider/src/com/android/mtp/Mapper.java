@@ -16,8 +16,6 @@
 
 package com.android.mtp;
 
-import static com.android.mtp.MtpDatabaseConstants.*;
-
 import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -26,6 +24,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.mtp.MtpObjectInfo;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -33,6 +32,7 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.android.mtp.MtpDatabaseConstants.*;
 import static com.android.mtp.MtpDatabase.strings;
 
 /**
@@ -75,7 +75,7 @@ class Mapper {
                     extraValuesList,
                     COLUMN_PARENT_DOCUMENT_ID + " IS NULL",
                     EMPTY_ARGS,
-                    COLUMN_DEVICE_ID);
+                    Document.COLUMN_DISPLAY_NAME);
             database.setTransactionSuccessful();
             return changed;
         } finally {
@@ -172,13 +172,16 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            final ContentValues values = new ContentValues();
-            values.putNull(COLUMN_OBJECT_HANDLE);
-            values.putNull(COLUMN_STORAGE_ID);
-            values.put(COLUMN_ROW_STATE, ROW_STATE_INVALIDATED);
-            database.update(TABLE_DOCUMENTS, values, null, null);
-            database.setTransactionSuccessful();
             mMappingMode.clear();
+            // Disconnect all device rows.
+            try {
+                startAddingDocuments(null);
+                stopAddingDocuments(null);
+            } catch (FileNotFoundException exception) {
+                Log.e(MtpDocumentsProvider.TAG, "Unexpected FileNotFoundException.", exception);
+                throw new RuntimeException(exception);
+            }
+            database.setTransactionSuccessful();
         } finally {
             database.endTransaction();
         }
@@ -210,16 +213,20 @@ class Mapper {
             getParentOrHaltMapping(parentDocumentId);
             Preconditions.checkState(!mMappingMode.containsKey(parentDocumentId));
 
-            // Set all documents as invalidated.
+            // Set all valid documents as invalidated.
             final ContentValues values = new ContentValues();
             values.put(COLUMN_ROW_STATE, ROW_STATE_INVALIDATED);
-            database.update(TABLE_DOCUMENTS, values, selection, args);
+            database.update(
+                    TABLE_DOCUMENTS,
+                    values,
+                    selection + " AND " + COLUMN_ROW_STATE + " = ?",
+                    DatabaseUtils.appendSelectionArgs(args, strings(ROW_STATE_VALID)));
 
             // If we have rows that does not have MTP identifier, do heuristic mapping by name.
             final boolean useNameForResolving = DatabaseUtils.queryNumEntries(
                     database,
                     TABLE_DOCUMENTS,
-                    selection + " AND " + COLUMN_STORAGE_ID + " IS NULL",
+                    selection + " AND " + COLUMN_DEVICE_ID + " IS NULL",
                     args) > 0;
             database.setTransactionSuccessful();
             mMappingMode.put(
@@ -270,11 +277,13 @@ class Mapper {
                         TABLE_DOCUMENTS,
                         strings(Document.COLUMN_DOCUMENT_ID),
                         selection + " AND " +
-                        COLUMN_ROW_STATE + "=? AND " +
+                        COLUMN_ROW_STATE + " IN (?, ?) AND " +
                         mappingKey + "=?",
                         DatabaseUtils.appendSelectionArgs(
                                 args,
-                                strings(ROW_STATE_INVALIDATED, values.getAsString(mappingKey))),
+                                strings(ROW_STATE_INVALIDATED,
+                                        ROW_STATE_DISCONNECTED,
+                                        values.getAsString(mappingKey))),
                         null,
                         null,
                         null,
@@ -335,16 +344,27 @@ class Mapper {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
         try {
-            getParentOrHaltMapping(parentId);
+            final Identifier parentIdentifier = getParentOrHaltMapping(parentId);
             Preconditions.checkState(mMappingMode.containsKey(parentId));
             mMappingMode.remove(parentId);
 
             boolean changed = false;
-            // Delete all invalidated rows that cannot be mapped.
-            if (mDatabase.deleteDocumentsAndRootsRecursively(
-                    COLUMN_ROW_STATE + " = ? AND " + selection,
-                    DatabaseUtils.appendSelectionArgs(strings(ROW_STATE_INVALIDATED), args))) {
-                changed = true;
+            // Delete/disconnect all invalidated rows that cannot be mapped.
+            final boolean keepUnmatchedDocument =
+                    parentIdentifier == null ||
+                    parentIdentifier.mDocumentType == DOCUMENT_TYPE_DEVICE;
+            if (keepUnmatchedDocument) {
+                if (mDatabase.disconnectDocumentsRecursively(
+                        COLUMN_ROW_STATE + " = ? AND " + selection,
+                        DatabaseUtils.appendSelectionArgs(strings(ROW_STATE_INVALIDATED), args))) {
+                    changed = true;
+                }
+            } else {
+                if (mDatabase.deleteDocumentsAndRootsRecursively(
+                        COLUMN_ROW_STATE + " = ? AND " + selection,
+                        DatabaseUtils.appendSelectionArgs(strings(ROW_STATE_INVALIDATED), args))) {
+                    changed = true;
+                }
             }
 
             database.setTransactionSuccessful();
@@ -368,7 +388,12 @@ class Mapper {
             return null;
         }
         try {
-            return mDatabase.createIdentifier(parentId);
+            final Identifier identifier = mDatabase.createIdentifier(parentId);
+            if (mDatabase.getRowState(parentId) == ROW_STATE_DISCONNECTED) {
+                throw new FileNotFoundException(
+                        "document: " + parentId + " is in disconnected device.");
+            }
+            return identifier;
         } catch (FileNotFoundException error) {
             mMappingMode.remove(parentId);
             throw error;

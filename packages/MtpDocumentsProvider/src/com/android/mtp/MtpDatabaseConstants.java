@@ -30,7 +30,7 @@ import java.util.Map;
  * Class containing MtpDatabase constants.
  */
 class MtpDatabaseConstants {
-    static final int DATABASE_VERSION = 1;
+    static final int DATABASE_VERSION = 2;
     static final String DATABASE_NAME = "database";
 
     static final int FLAG_DATABASE_IN_MEMORY = 1;
@@ -78,6 +78,12 @@ class MtpDatabaseConstants {
     static final int ROW_STATE_INVALIDATED = 1;
 
     /**
+     * The documents are of device/storage that are disconnected now. The documents are invisible
+     * but their document ID will be reuse when the device/storage is connected again.
+     */
+    static final int ROW_STATE_DISCONNECTED = 2;
+
+    /**
      * Mapping mode that uses MTP identifier to find corresponding rows.
      */
     static final int MAP_BY_MTP_IDENTIFIER = 0;
@@ -113,7 +119,7 @@ class MtpDatabaseConstants {
             "CREATE TABLE " + TABLE_DOCUMENTS + " (" +
             Document.COLUMN_DOCUMENT_ID +
                 " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            COLUMN_DEVICE_ID + " INTEGER NOT NULL," +
+            COLUMN_DEVICE_ID + " INTEGER," +
             COLUMN_STORAGE_ID + " INTEGER," +
             COLUMN_OBJECT_HANDLE + " INTEGER," +
             COLUMN_PARENT_DOCUMENT_ID + " INTEGER," +
