@@ -1,0 +1,121 @@
+page.title=Vulkan Design Guidelines
+@jd:body
+
+<div id="qv-wrapper">
+    <div id="qv">
+      <h2>On this page</h2>
+
+      <ol>
+        <li><a href="#apply">Apply Display Rotation During Rendering</a></li>
+        <li><a href="#minimize">Minimize Render Passes Per Frame</a></li>
+        <li><a href="#choose">Choose Appropriate Memory Types</a></li>
+        <li><a href="#group">Group Descriptor Sets by Frequency</a></li>
+      </ol>
+    </div>
+  </div>
+
+<p>
+Vulkan is unlike earlier graphics APIs in that drivers do not perform certain
+optimizations, such as pipeline reuse, for apps. Instead, apps using Vulkan must
+implement such optimizations themselves. If they do not, they may exhibit worse
+performance than apps running OpenGL ES.
+</p>
+
+<p>
+When apps implement these optimizations themselves, they have the potential
+to do so more successfully than the driver can, because they have access to
+more specific information for a given use case. As a result, skillfully
+optimizing an app that uses Vulkan can yield better performance than if the
+app were using OpenGL ES.
+</p>
+
+<p>
+This page introduces several optimizations that your Android app can implement
+to gain performance boosts from Vulkan.
+</p>
+
+<h2 id="apply">Apply Display Rotation During Rendering</h2>
+
+<p>
+When the upward-facing direction of an app doesn’t match the orientation of the device’s
+display, the compositor rotates the application’s swapchain images so that it
+does match. It performs this rotation as it displays the images, which results
+in more power consumption&mdash;sometimes significantly more&mdash;than if it were not
+rotating them.
+</p>
+
+<p>
+By contrast, rotating swapchain images while generating them results in
+little, if any, additional power consumption. The
+{@code VkSurfaceCapabilitiesKHR::currentTransform} field indicates the rotation
+that the compositor applies to the window. After an app applies that rotation
+during rendering, the app uses the {@code VkSwapchainCreateInfoKHR::preTransform}
+field to report that the rotation is complete.
+</p>
+
+<h2 id="minimize">Minimize Render Passes Per Frame</h2>
+
+<p>
+On most mobile GPU architectures, beginning and ending a render pass is an
+expensive operation. Your app can improve performance by organizing rendering operations into
+as few render passes as possible.
+</p>
+
+<p>
+Different attachment-load and attachment-store ops offer different levels of
+performance. For example, if you do not need to preserve the contents of an attachment, you
+can use the much faster {@code VK_ATTACHMENT_LOAD_OP_CLEAR} or
+{@code VK_ATTACHMENT_LOAD_OP_DONT_CARE} instead of {@code VK_ATTACHMENT_LOAD_OP_LOAD}. Similarly, if
+you don't need to write the attachment's final values to memory for later use, you can use
+{@code VK_ATTACHMENT_STORE_OP_DONT_CARE} to attain much better performance than
+{@code VK_ATTACHMENT_STORE_OP_STORE}.
+</p>
+
+<p>
+Also, in most render passes, your app doesn’t need to load or store the
+depth/stencil attachment. In such cases, you can avoid having to allocate physical memory for
+the attachment by using the {@code VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT}
+flag when creating the attachment image. This bit provides the same benefits as does
+{@code glFramebufferDiscard} in OpenGL ES.
+</p>
+
+<h2 id="choose">Choose Appropriate Memory Types</h2>
+
+<p>
+When allocating device memory, apps must choose a memory type. Memory type
+determines how an app can use the memory, and also describes caching and
+coherence properties of the memory.  Different devices have different memory
+types available; different memory types exhibit different performance
+characteristics.
+</p>
+
+<p>
+An app can use a simple algorithm to pick the best memory type for a given
+use. This algorithm picks the first memory type in the
+{@code VkPhysicalDeviceMemoryProperties::memoryTypes} array that meets two criteria:
+The memory type must be allowed for the buffer
+or image, and must have the minimum properties that the app requires.
+</p>
+
+<p>
+Mobile systems generally don’t have separate physical memory heaps for the
+CPU and GPU. On such systems, {@code VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT} is not as
+significant as it is on systems that have discrete GPUs with their own, dedicated
+memory. An app should not assume this property is required.
+</p>
+
+<h2 id="group">Group Descriptor Sets by Frequency</h2>
+
+<p>
+If you have resource bindings that change at different frequencies, use
+multiple descriptor sets per pipeline rather than rebinding all resources for
+each draw. For example, you can have one set of descriptors for per-scene
+bindings, another set for per-material bindings, and a third set for
+per-mesh-instance bindings.
+</p>
+
+<p>
+Use immediate constants for the highest-frequency changes, such as changes
+executed with each draw call.
+</p>
+
