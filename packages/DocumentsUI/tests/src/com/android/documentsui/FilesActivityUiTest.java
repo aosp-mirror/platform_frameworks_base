@@ -21,6 +21,7 @@ import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.os.RemoteException;
 import android.test.suitebuilder.annotation.LargeTest;
+import android.view.KeyEvent;
 
 @LargeTest
 public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
@@ -114,5 +115,38 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
 
         bot.waitForDeleteSnackbarGone();
         assertFalse(bot.hasDocuments("poodles.text"));
+    }
+
+    // Tests that pressing tab switches focus between the roots and directory listings.
+    public void testKeyboard_tab() throws Exception {
+        bot.pressKey(KeyEvent.KEYCODE_TAB);
+        bot.assertHasFocus("com.android.documentsui:id/roots_list");
+        bot.pressKey(KeyEvent.KEYCODE_TAB);
+        bot.assertHasFocus("com.android.documentsui:id/dir_list");
+    }
+
+    // Tests that arrow keys do not switch focus away from the dir list.
+    public void testKeyboard_arrowsDirList() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            bot.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
+            bot.assertHasFocus("com.android.documentsui:id/dir_list");
+        }
+        for (int i = 0; i < 10; i++) {
+            bot.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+            bot.assertHasFocus("com.android.documentsui:id/dir_list");
+        }
+    }
+
+    // Tests that arrow keys do not switch focus away from the roots list.
+    public void testKeyboard_arrowsRootsList() throws Exception {
+        bot.pressKey(KeyEvent.KEYCODE_TAB);
+        for (int i = 0; i < 10; i++) {
+            bot.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+            bot.assertHasFocus("com.android.documentsui:id/roots_list");
+        }
+        for (int i = 0; i < 10; i++) {
+            bot.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
+            bot.assertHasFocus("com.android.documentsui:id/roots_list");
+        }
     }
 }

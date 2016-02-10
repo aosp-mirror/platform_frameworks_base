@@ -183,7 +183,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mEmptyView = view.findViewById(android.R.id.empty);
 
-        mRecView = (RecyclerView) view.findViewById(R.id.list);
+        mRecView = (RecyclerView) view.findViewById(R.id.dir_list);
         mRecView.setRecyclerListener(
                 new RecyclerListener() {
                     @Override
@@ -263,6 +263,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
         mSelectionManager.addCallback(selectionListener);
 
+        // Make sure this is done after the RecyclerView is set up.
         mFocusManager = new FocusManager(mRecView, mSelectionManager);
 
         mModel = new Model();
@@ -834,6 +835,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     @Override
     public void initDocumentHolder(DocumentHolder holder) {
         holder.addEventListener(mItemEventListener);
+        holder.itemView.setOnFocusChangeListener(mFocusManager);
     }
 
     @Override
@@ -1052,6 +1054,13 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         if (changed) {
             updateDisplayState();
         }
+    }
+
+    /**
+     * Attempts to restore focus on the directory listing.
+     */
+    public void requestFocus() {
+        mFocusManager.restoreLastFocus();
     }
 
     private void setupDragAndDropOnDirectoryView(View view) {
