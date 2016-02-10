@@ -2157,7 +2157,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAnimationState(View child) {
-        updateAnimationState((mAnimationsEnabled || isPinnedHeadsUp(child)) && mIsExpanded, child);
+        updateAnimationState(mAnimationsEnabled && (mIsExpanded || isPinnedHeadsUp(child)), child);
     }
 
 
@@ -2893,13 +2893,23 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public void setDismissView(DismissView dismissView) {
+        int index = -1;
+        if (mDismissView != null) {
+            index = indexOfChild(mDismissView);
+            removeView(mDismissView);
+        }
         mDismissView = dismissView;
-        addView(mDismissView);
+        addView(mDismissView, index);
     }
 
     public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
+        int index = -1;
+        if (mEmptyShadeView != null) {
+            index = indexOfChild(mEmptyShadeView);
+            removeView(mEmptyShadeView);
+        }
         mEmptyShadeView = emptyShadeView;
-        addView(mEmptyShadeView);
+        addView(mEmptyShadeView, index);
     }
 
     public void updateEmptyShadeView(boolean visible) {
