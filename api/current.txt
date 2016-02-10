@@ -5721,6 +5721,7 @@ package android.app {
     method public android.graphics.drawable.Drawable getDrawable();
     method public android.graphics.drawable.Drawable getFastDrawable();
     method public static android.app.WallpaperManager getInstance(android.content.Context);
+    method public android.os.ParcelFileDescriptor getWallpaperFile(int);
     method public android.app.WallpaperInfo getWallpaperInfo();
     method public boolean hasResourceWallpaper(int);
     method public boolean isWallpaperSettingAllowed();

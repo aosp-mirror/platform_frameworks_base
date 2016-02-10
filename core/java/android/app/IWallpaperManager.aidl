@@ -27,7 +27,7 @@ import android.content.ComponentName;
 interface IWallpaperManager {
 
     /**
-     * Set the wallpaper.
+     * Set the wallpaper for the current user.
      *
      * If 'extras' is non-null, on successful return it will contain:
      *   EXTRA_SET_WALLPAPER_ID : integer ID that the new wallpaper will have
@@ -56,10 +56,10 @@ interface IWallpaperManager {
     void setWallpaperComponent(in ComponentName name);
 
     /**
-     * Get the system wallpaper.
+     * Get the wallpaper for a given user.
      */
-    ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb,
-            out Bundle outParams);
+    ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb, int which,
+            out Bundle outParams, int userId);
 
     /**
      * If the current system wallpaper is a live wallpaper component, return the
@@ -71,7 +71,7 @@ interface IWallpaperManager {
     /**
      * Clear the system wallpaper.
      */
-    void clearWallpaper(in String callingPackage);
+    void clearWallpaper(in String callingPackage, int which, int userId);
 
     /**
      * Return whether the current system wallpaper has the given name.
@@ -118,4 +118,10 @@ interface IWallpaperManager {
      * Check whether setting of wallpapers are allowed for the calling user.
      */
     boolean isWallpaperSettingAllowed(in String callingPackage);
+
+    /*
+     * Keyguard: register a callback for being notified that lock-state relevant
+     * wallpaper content has changed.
+     */
+    boolean setLockWallpaperCallback(IWallpaperManagerCallback cb);
 }
