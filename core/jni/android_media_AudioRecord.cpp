@@ -693,11 +693,8 @@ static jint android_media_AudioRecord_get_timestamp(JNIEnv *env, jobject thiz,
         return (jint)AUDIO_JAVA_ERROR;
     }
 
-    // TODO Enable.
-#if 0
-    // get the record timestamp
     ExtendedTimestamp ts;
-    jint status = nativeToJavaStatus(lpRecorder->getExtendedTimestamp(&ts));
+    jint status = nativeToJavaStatus(lpRecorder->getTimestamp(&ts));
 
     if (status == AUDIO_JAVA_SUCCESS) {
         // set the data
@@ -712,9 +709,6 @@ static jint android_media_AudioRecord_get_timestamp(JNIEnv *env, jobject thiz,
         }
     }
     return status;
-#else
-    return (jint)AUDIO_JAVA_INVALID_OPERATION;
-#endif
 }
 
 // ----------------------------------------------------------------------------
