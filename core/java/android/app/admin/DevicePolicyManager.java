@@ -5730,4 +5730,32 @@ public class DevicePolicyManager {
             return false;
         }
     }
+
+    /**
+     * @hide
+     * Returns whether the uninstall for {@code packageName} for the current user is in queue
+     * to be started
+     * @param packageName the package to check for
+     * @return whether the uninstall intent for {@code packageName} is pending
+     */
+    public boolean isUninstallInQueue(String packageName) {
+        try {
+            return mService.isUninstallInQueue(packageName);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     * @param packageName the package containing active DAs to be uninstalled
+     */
+    public void uninstallPackageWithActiveAdmins(String packageName) {
+        try {
+            mService.uninstallPackageWithActiveAdmins(packageName);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+        }
+    }
 }
