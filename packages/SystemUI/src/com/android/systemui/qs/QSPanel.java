@@ -117,6 +117,17 @@ public class QSPanel extends FrameLayout implements Tunable {
         mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
                 R.layout.qs_paged_tile_layout, mQsContainer, false);
         mQsContainer.addView((View) mTileLayout);
+        findViewById(android.R.id.edit).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                mHost.startRunnableDismissingKeyguard(new Runnable() {
+                    @Override
+                    public void run() {
+                        showEdit(v);
+                    }
+                });
+            }
+        });
 
         mFooter = new QSFooter(this, context);
         mQsContainer.addView(mFooter.getView());
@@ -369,19 +380,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         final View.OnLongClickListener longClick = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if (mCustomizePanel != null) {
-                    if (!mCustomizePanel.isCustomizing()) {
-                        int[] loc = new int[2];
-                        getLocationInWindow(loc);
-                        int x = r.tileView.getLeft() + r.tileView.getWidth() / 2 + loc[0];
-                        int y = r.tileView.getTop() + mTileLayout.getOffsetTop(r)
-                                + r.tileView.getHeight() / 2 + loc[1];
-                        mCustomizePanel.show(x, y);
-                    }
-                } else {
-                    r.tile.longClick();
-                }
-                return true;
+                return false;
             }
         };
         r.tileView.init(click, longClick);
@@ -393,6 +392,25 @@ public class QSPanel extends FrameLayout implements Tunable {
         if (mTileLayout != null) {
             mTileLayout.addTile(r);
         }
+    }
+
+
+    private void showEdit(final View v) {
+        v.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mCustomizePanel != null) {
+                    if (!mCustomizePanel.isCustomizing()) {
+                        int[] loc = new int[2];
+                        v.getLocationInWindow(loc);
+                        int x = loc[0];
+                        int y = loc[1];
+                        mCustomizePanel.show(x, y);
+                    }
+                }
+
+            }
+        });
     }
 
     protected void onTileClick(QSTile<?> tile) {
