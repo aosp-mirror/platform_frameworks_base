@@ -46,7 +46,7 @@ import java.util.ArrayList;
  * transition on the affected view targets:</p>
  * <pre>
  *     &lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
- *             android:ordering="sequential"&gt;
+ *             android:transitionOrdering="sequential"&gt;
  *         &lt;fade/&gt;
  *         &lt;changeBounds/&gt;
  *     &lt;/transitionSet&gt;
