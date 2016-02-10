@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.android.internal.widget.PagerAdapter;
 import com.android.internal.widget.ViewPager;
 import com.android.systemui.R;
@@ -27,6 +26,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private PageIndicator mPageIndicator;
 
     private int mNumPages;
+    private View mDecorGroup;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -55,7 +55,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
-        ((LayoutParams) mPageIndicator.getLayoutParams()).isDecor = true;
+        mDecorGroup = findViewById(R.id.page_decor);
+        ((LayoutParams) mDecorGroup.getLayoutParams()).isDecor = true;
 
         mPages.add((TilePage) LayoutInflater.from(mContext)
                 .inflate(R.layout.qs_paged_page, this, false));
@@ -137,7 +138,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 maxHeight = height;
             }
         }
-        setMeasuredDimension(getMeasuredWidth(), maxHeight + mPageIndicator.getMeasuredHeight());
+        setMeasuredDimension(getMeasuredWidth(), maxHeight + mDecorGroup.getMeasuredHeight());
     }
 
     private final Runnable mDistribute = new Runnable() {

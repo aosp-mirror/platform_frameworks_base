@@ -20,11 +20,31 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.android.systemui.qs.PageIndicator
-        android:id="@+id/page_indicator"
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/page_decor"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:gravity="center" />
+        android:layout_gravity="bottom">
+
+        <com.android.systemui.qs.PageIndicator
+            android:id="@+id/page_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@android:id/edit"
+            style="@style/QSBorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:minWidth="88dp"
+            android:textAppearance="@style/TextAppearance.QS.DetailButton"
+            android:textColor="#4DFFFFFF"
+            android:focusable="true"
+            android:text="@string/qs_edit" />
+
+    </FrameLayout>
 
 </com.android.systemui.qs.PagedTileLayout>
