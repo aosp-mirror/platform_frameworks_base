@@ -6851,6 +6851,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param info The info whose drawing order should be populated
      */
     private void populateAccessibilityNodeInfoDrawingOrderInParent(AccessibilityNodeInfo info) {
+        /*
+         * If the view's bounds haven't been set yet, layout has not completed. In that situation,
+         * drawing order may not be well-defined, and some Views with custom drawing order may
+         * not be initialized sufficiently to respond properly getChildDrawingOrder.
+         */
+        if ((mPrivateFlags & PFLAG_HAS_BOUNDS) == 0) {
+            info.setDrawingOrder(0);
+            return;
+        }
         int drawingOrderInParent = 1;
         // Iterate up the hierarchy if parents are not important for a11y
         View viewAtDrawingLevel = this;
