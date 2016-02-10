@@ -370,39 +370,41 @@ public final class MultiSelectManager {
     }
 
     /**
-     * Handle a range selection event.
-     * <li> If the MSM is currently in single-select mode, only the last item in the range will
-     * actually be selected.
-     * <li>If a range selection is not already active, one will be started, and the given range of
-     * items will be selected.  The given startPos becomes the anchor for the range selection.
-     * <li>If a range selection is already active, the anchor is not changed. The range is extended
-     * from its current anchor to endPos.
+     * Starts a range selection. If a range selection is already active, this will start a new range
+     * selection (which will reset the range anchor).
      *
-     * @param startPos
-     * @param endPos
+     * @param pos The anchor position for the selection range.
      */
-    public void selectRange(int startPos, int endPos) {
-        // In single-select mode, just select the last item in the range.
-        if (mSingleSelect) {
-            attemptSelect(mAdapter.getModelId(endPos));
-            return;
-        }
+    void startRangeSelection(int pos) {
+      attemptSelect(mAdapter.getModelId(pos));
+      setSelectionRangeBegin(pos);
+    }
 
-        // In regular (i.e. multi-select) mode
-        if (!isRangeSelectionActive()) {
-            // If a range selection isn't active, start one up
-            attemptSelect(mAdapter.getModelId(startPos));
-            setSelectionRangeBegin(startPos);
-        }
-        // Extend the range selection
-        mRanger.snapSelection(endPos);
+    /**
+     * Sets the end point for the current range selection, started by a call to
+     * {@link #startRangeSelection(int)}. This function should only be called when a range selection
+     * is active (see {@link #isRangeSelectionActive()}. Items in the range [anchor, end] will be
+     * selected.
+     *
+     * @param pos The new end position for the selection range.
+     */
+    void snapRangeSelection(int pos) {
+        checkNotNull(mRanger);
+        mRanger.snapSelection(pos);
         notifySelectionChanged();
+    }
+
+    /**
+     * Stops an in-progress range selection.
+     */
+    void endRangeSelection() {
+        mRanger = null;
     }
 
     /**
      * @return Whether or not there is a current range selection active.
      */
-    private boolean isRangeSelectionActive() {
+    boolean isRangeSelectionActive() {
         return mRanger != null;
     }
 

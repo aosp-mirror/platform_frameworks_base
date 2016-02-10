@@ -33,15 +33,13 @@ class FocusManager implements View.OnFocusChangeListener {
     private RecyclerView mView;
     private RecyclerView.Adapter<?> mAdapter;
     private LinearLayoutManager mLayout;
-    private MultiSelectManager mSelectionManager;
 
     private int mLastFocusPosition = RecyclerView.NO_POSITION;
 
-    public FocusManager(RecyclerView view, MultiSelectManager selectionManager) {
+    public FocusManager(RecyclerView view) {
         mView = view;
         mAdapter = view.getAdapter();
         mLayout = (LinearLayoutManager) view.getLayoutManager();
-        mSelectionManager = selectionManager;
     }
 
     /**
@@ -60,13 +58,6 @@ class FocusManager implements View.OnFocusChangeListener {
 
             if (endPos != RecyclerView.NO_POSITION) {
                 focusItem(endPos);
-                boolean extendSelection = event.isShiftPressed();
-
-                // Handle any necessary adjustments to selection.
-                if (extendSelection) {
-                    int startPos = doc.getAdapterPosition();
-                    mSelectionManager.selectRange(startPos, endPos);
-                }
             }
             // Swallow all navigation keystrokes. Otherwise they go to the app's global
             // key-handler, which will route them back to the DF and cause focus to be reset.
@@ -94,6 +85,13 @@ class FocusManager implements View.OnFocusChangeListener {
             // Focus the first visible item
             focusItem(mLayout.findFirstVisibleItemPosition());
         }
+    }
+
+    /**
+     * @return The adapter position of the last focused item.
+     */
+    public int getFocusPosition() {
+        return mLastFocusPosition;
     }
 
     /**
