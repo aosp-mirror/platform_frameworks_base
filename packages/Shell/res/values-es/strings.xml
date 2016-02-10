@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"Se está generando el informe de errores"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Informe de error registrado"</string>
+    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
+    <skip />
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Añadiendo detalles al informe de errores"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Espera…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Desliza el dedo hacia la izquierda para compartir el informe de error"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca para compartir tu informe de error"</string>
+    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
+    <skip />
     <string name="bugreport_confirm" msgid="5130698467795669780">"Los informes de errores contienen datos de los distintos archivos de registro del sistema, incluida información personal y privada. Comparte los informes de errores únicamente con aplicaciones y usuarios en los que confíes."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostrar este mensaje la próxima vez"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Informes de error"</string>
@@ -30,9 +33,11 @@
     <string name="bugreport_unnamed" msgid="2800582406842092709">"sin nombre"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"Detalles"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"Captura de pantalla"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"La captura de pantalla se ha realizado correctamente."</string>
+    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
+    <skip />
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"No se puede realizar la captura de pantalla."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"Detalles del informe de errores"</string>
+    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
+    <skip />
     <string name="bugreport_info_name" msgid="4414036021935139527">"Nombre de archivo"</string>
     <string name="bugreport_info_title" msgid="5599558206004371052">"Título"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"Descripción completa"</string>

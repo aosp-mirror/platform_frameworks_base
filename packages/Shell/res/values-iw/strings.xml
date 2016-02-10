@@ -17,12 +17,15 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"מעטפת"</string>
-    <string name="bugreport_in_progress_title" msgid="7409917338223386637">"מופק דוח על באג"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"דוח הבאגים צולם"</string>
+    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
+    <skip />
+    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
+    <skip />
     <string name="bugreport_updating_title" msgid="4423539949559634214">"מוסיף פרטים לדוח על הבאג"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"המתן…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"החלק שמאלה כדי לשתף את דוח הבאגים"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"גע כדי לשתף את דוח הבאגים שלך"</string>
+    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
+    <skip />
     <string name="bugreport_confirm" msgid="5130698467795669780">"דוחות על באגים כוללים נתונים מקובצי היומן השונים במערכת, כולל מידע אישי ופרטי. שתף דוחות באגים רק עם אפליקציות ואנשים שאתה סומך עליהם."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"הצג את ההודעה הזו בפעם הבאה"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"דוחות באגים"</string>
@@ -30,9 +33,11 @@
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ללא שם"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"פרטים"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"צילום מסך"</string>
-    <string name="bugreport_screenshot_taken" msgid="7175343181767429088">"צילום המסך בוצע בהצלחה."</string>
+    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
+    <skip />
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"לא ניתן היה לצלם מסך."</string>
-    <string name="bugreport_info_dialog_title" msgid="3113549839798564645">"פרטי דוח על באג"</string>
+    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
+    <skip />
     <string name="bugreport_info_name" msgid="4414036021935139527">"שם קובץ"</string>
     <string name="bugreport_info_title" msgid="5599558206004371052">"כותרת"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"תיאור מפורט"</string>
