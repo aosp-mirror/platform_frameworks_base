@@ -19,15 +19,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/qs_background_primary"
-        android:paddingBottom="8dp">
+        android:paddingBottom="8dp"
+        android:elevation="2dp">
 
     <com.android.systemui.qs.QSPanel
             android:id="@+id/quick_settings_panel"
             android:background="#0000"
-            android:layout_marginTop="@dimen/status_bar_header_height"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-    <include layout="@layout/quick_status_bar_expanded_header" />
-
 </com.android.systemui.qs.QSContainer>
