@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.media.tv.TvInputManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,12 +47,14 @@ public class TvRecordingClient {
     private TvInputManager.Session mSession;
     private MySessionCallback mSessionCallback;
 
+    private boolean mIsRecordingStarted;
+    private boolean mIsTuned;
     private final Queue<Pair<String, Bundle>> mPendingAppPrivateCommands = new ArrayDeque<>();
 
     /**
      * Creates a new TvRecordingClient object.
      *
-     * @param context The application context to create the TvRecordingClient with.
+     * @param context The application context to create a TvRecordingClient with.
      * @param tag A short name for debugging purposes.
      * @param callback The callback to receive recording status changes.
      * @param handler The handler to invoke the callback on.
@@ -64,25 +67,37 @@ public class TvRecordingClient {
     }
 
     /**
-     * Connects to a given input for TV program recording. This will create a new recording session
-     * from the TV input and establishes the connection between the application and the session.
+     * Tunes to a given channel for TV program recording. The first tune request will create a new
+     * recording session for the corresponding TV input and establish the connection between the
+     * application and the session. If recording has already started in the current recording
+     * session, this method throws an exception.
+     *
+     * <p>The application may call this method before starting or after stopping recording, but not
+     * during recording.
      *
      * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onConnected()} or {@link RecordingCallback#onError(int)}.
+     * {@link RecordingCallback#onTuned()} if the tune request was fulfilled, or
+     * {@link RecordingCallback#onError(int)} otherwise.
      *
      * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
      */
-    public void connect(String inputId, Uri channelUri) {
-        connect(inputId, channelUri, null);
+    public void tune(String inputId, Uri channelUri) {
+        tune(inputId, channelUri, null);
     }
 
     /**
-     * Connects to a given input for TV program recording. This will create a new recording session
-     * from the TV input and establishes the connection between the application and the session.
+     * Tunes to a given channel for TV program recording. The first tune request will create a new
+     * recording session for the corresponding TV input and establish the connection between the
+     * application and the session. If recording has already started in the current recording
+     * session, this method throws an exception.
+     *
+     * <p>The application may call this method before starting or after stopping recording, but not
+     * during recording.
      *
      * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onConnected()} or {@link RecordingCallback#onError(int)}.
+     * {@link RecordingCallback#onTuned()} if the tune request was fulfilled, or
+     * {@link RecordingCallback#onError(int)} otherwise.
      *
      * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
@@ -90,14 +105,17 @@ public class TvRecordingClient {
      * @hide
      */
     @SystemApi
-    public void connect(String inputId, Uri channelUri, Bundle params) {
-        if (DEBUG) Log.d(TAG, "connect(" + channelUri + ")");
+    public void tune(String inputId, Uri channelUri, Bundle params) {
+        if (DEBUG) Log.d(TAG, "tune(" + channelUri + ")");
         if (TextUtils.isEmpty(inputId)) {
             throw new IllegalArgumentException("inputId cannot be null or an empty string");
         }
+        if (mIsRecordingStarted) {
+            throw new IllegalStateException("tune failed - recording already started");
+        }
         if (mSessionCallback != null && TextUtils.equals(mSessionCallback.mInputId, inputId)) {
             if (mSession != null) {
-                mSession.connect(channelUri, params);
+                mSession.tune(channelUri, params);
             } else {
                 mSessionCallback.mChannelUri = channelUri;
                 mSessionCallback.mConnectionParams = params;
@@ -112,13 +130,11 @@ public class TvRecordingClient {
     }
 
     /**
-     * Disconnects the established connection between the application and the recording session.
-     *
-     * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onDisconnected()} or {@link RecordingCallback#onError(int)}.
+     * Releases the resources in the current recording session immediately. This may be called at
+     * any time, however if the session is already released, it does nothing.
      */
-    public void disconnect() {
-        if (DEBUG) Log.d(TAG, "disconnect()");
+    public void release() {
+        if (DEBUG) Log.d(TAG, "release()");
         resetInternal();
     }
 
@@ -132,45 +148,57 @@ public class TvRecordingClient {
     }
 
     /**
-     * Starts TV program recording in the current recording session. It is expected that recording
-     * starts immediately after calling this method.
+     * Starts TV program recording in the current recording session. Recording is expected to start
+     * immediately when this method is called. If the current recording session has not yet tuned to
+     * any channel, this method throws an exception.
      *
-     * <p>The application may supply the URI for a TV program as a hint to the corresponding TV
-     * input service for filling in program specific data fields in the
-     * {@link android.media.tv.TvContract.RecordedPrograms} table. A non-null {@code programHint}
-     * implies the started recording should be of that specific program, whereas null
-     * {@code programHint} does not impose such a requirement and the recording can span across
-     * multiple TV programs. In either case, the caller must call {@link #stopRecording()} to stop
-     * the recording.
+     * <p>The application may supply the URI for a TV program as a hint for filling in program
+     * specific data fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
+     * A non-null {@code programHint} implies the started recording should be of that specific
+     * program, whereas null {@code programHint} does not impose such a requirement and the
+     * recording can span across multiple TV programs. In either case, the application must call
+     * {@link TvRecordingClient#stopRecording()} to stop the recording.
      *
-     * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onRecordingStarted()} or {@link RecordingCallback#onError(int)}.
+     * <p>The recording session will respond by calling {@link RecordingCallback#onError(int)} if
+     * the start request cannot be fulfilled.
      *
      * @param programHint The URI for the TV program to record as a hint, built by
-     *            {@link TvContract#buildProgramUri(long)}. Can be null.
+     *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
      */
-    public void startRecording(@Nullable  Uri programHint) {
+    public void startRecording(@Nullable Uri programHint) {
+        if (!mIsTuned) {
+            throw new IllegalStateException("startRecording failed - not yet tuned");
+        }
         if (mSession != null) {
             mSession.startRecording(programHint);
+            mIsRecordingStarted = true;
         }
     }
 
     /**
-     * Stops TV program recording in the current recording session. It is expected that recording
-     * stops immediately after calling this method.
+     * Stops TV program recording in the current recording session. Recording is expected to stop
+     * immediately when this method is called. If recording has not yet started in the current
+     * recording session, this method does nothing.
      *
-     * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onRecordingStopped(Uri)} or {@link RecordingCallback#onError(int)}.
+     * <p>The recording session is expected to create a new data entry in the
+     * {@link android.media.tv.TvContract.RecordedPrograms} table that describes the newly
+     * recorded program and pass the URI to that entry through to
+     * {@link RecordingCallback#onRecordingStopped(Uri)}.
+     * If the stop request cannot be fulfilled, the recording session will respond by calling
+     * {@link RecordingCallback#onError(int)}.
      */
     public void stopRecording() {
+        if (!mIsRecordingStarted) {
+            Log.w(TAG, "stopRecording failed - recording not yet started");
+        }
         if (mSession != null) {
             mSession.stopRecording();
         }
     }
 
     /**
-     * Calls {@link TvInputService.RecordingSession#appPrivateCommand(String, Bundle)
-     * TvInputService.RecordingSession.appPrivateCommand()} on the current TvView.
+     * Calls {@link TvInputService.RecordingSession#appPrivateCommand(String, Bundle)} for the
+     * current recording session.
      *
      * @param action The name of the private command to send. This <em>must</em> be a scoped name,
      *            i.e. prefixed with a package name you own, so that different developers will not
@@ -198,46 +226,31 @@ public class TvRecordingClient {
      */
     public abstract static class RecordingCallback {
         /**
-         * This is called when a recording session initiated by a call to
-         * {@link #connect(String, Uri)} has been established.
+         * This is called when the recording session has been tuned to the given channel and is
+         * ready to start recording.
          */
-        public void onConnected() {
+        public void onTuned() {
         }
 
         /**
-         * This is called when the established connection between the application and the recording
-         * session has been disconnected. Disconnection can be initiated either by an explicit
-         * request (i.e. a call to {@link #disconnect()} or by an error on the TV input service
-         * side.
-         */
-        public void onDisconnected() {
-        }
-
-        /**
-         * This is called when TV program recording on the current channel has started.
-         */
-        public void onRecordingStarted() {
-        }
-
-        /**
-         * This is called when TV program recording on the current channel has stopped. The passed
-         * URI contains information about the new recorded program.
+         * This is called when the current recording session has stopped recording and created a
+         * new data entry in the {@link TvContract.RecordedPrograms} table that describes the newly
+         * recorded program.
          *
-         * @param recordedProgramUri The URI for the new recorded program.
-         * @see android.media.tv.TvContract.RecordedPrograms
+         * @param recordedProgramUri The URI for the newly recorded program.
          */
         public void onRecordingStopped(Uri recordedProgramUri) {
         }
 
         /**
-         * This is called when an issue has occurred before or during recording. If the TV input
-         * service cannot proceed recording due to this error, a call to {@link #onDisconnected()}
-         * is expected to follow.
+         * This is called when an issue has occurred. It may be called at any time after the current
+         * recording session is created until it is released.
          *
          * @param error The error code. Should be one of the followings.
          * <ul>
          * <li>{@link TvInputManager#RECORDING_ERROR_UNKNOWN}
          * <li>{@link TvInputManager#RECORDING_ERROR_CONNECTION_FAILED}
+         * <li>{@link TvInputManager#RECORDING_ERROR_DISCONNECTED}
          * <li>{@link TvInputManager#RECORDING_ERROR_INSUFFICIENT_SPACE}
          * <li>{@link TvInputManager#RECORDING_ERROR_RESOURCE_BUSY}
          * </ul>
@@ -289,7 +302,7 @@ public class TvRecordingClient {
                     mSession.sendAppPrivateCommand(command.first, command.second);
                 }
                 mPendingAppPrivateCommands.clear();
-                mSession.connect(mChannelUri, mConnectionParams);
+                mSession.tune(mChannelUri, mConnectionParams);
             } else {
                 mSessionCallback = null;
                 mCallback.onError(TvInputManager.RECORDING_ERROR_CONNECTION_FAILED);
@@ -297,15 +310,16 @@ public class TvRecordingClient {
         }
 
         @Override
-        void onConnected(TvInputManager.Session session) {
+        void onTuned(TvInputManager.Session session) {
             if (DEBUG) {
-                Log.d(TAG, "onConnected()");
+                Log.d(TAG, "onTuned()");
             }
             if (this != mSessionCallback) {
-                Log.w(TAG, "onConnected - session not created");
+                Log.w(TAG, "onTuned - session not created");
                 return;
             }
-            mCallback.onConnected();
+            mIsTuned = true;
+            mCallback.onTuned();
         }
 
         @Override
@@ -319,19 +333,9 @@ public class TvRecordingClient {
             }
             mSessionCallback = null;
             mSession = null;
-            mCallback.onDisconnected();
-        }
-
-        @Override
-        public void onRecordingStarted(TvInputManager.Session session) {
-            if (DEBUG) {
-                Log.d(TAG, "onRecordingStarted()");
-            }
-            if (this != mSessionCallback) {
-                Log.w(TAG, "onRecordingStarted - session not created");
-                return;
-            }
-            mCallback.onRecordingStarted();
+            mIsTuned = false;
+            mIsRecordingStarted = false;
+            mCallback.onError(TvInputManager.RECORDING_ERROR_DISCONNECTED);
         }
 
         @Override
@@ -343,6 +347,7 @@ public class TvRecordingClient {
                 Log.w(TAG, "onRecordingStopped - session not created");
                 return;
             }
+            mIsRecordingStarted = false;
             mCallback.onRecordingStopped(recordedProgramUri);
         }
 

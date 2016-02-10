@@ -22959,8 +22959,9 @@ package android.media.tv {
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
     field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
     field public static final int RECORDING_ERROR_CONNECTION_FAILED = 1; // 0x1
-    field public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 2; // 0x2
-    field public static final int RECORDING_ERROR_RESOURCE_BUSY = 3; // 0x3
+    field public static final int RECORDING_ERROR_DISCONNECTED = 2; // 0x2
+    field public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 3; // 0x3
+    field public static final int RECORDING_ERROR_RESOURCE_BUSY = 4; // 0x4
     field public static final int RECORDING_ERROR_UNKNOWN = 0; // 0x0
     field public static final long TIME_SHIFT_INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
     field public static final int TIME_SHIFT_STATUS_AVAILABLE = 3; // 0x3
@@ -23003,14 +23004,13 @@ package android.media.tv {
 
   public static abstract class TvInputService.RecordingSession {
     ctor public TvInputService.RecordingSession(android.content.Context);
-    method public void notifyConnected();
     method public void notifyError(int);
-    method public void notifyRecordingStarted();
     method public void notifyRecordingStopped(android.net.Uri);
-    method public abstract void onConnect(android.net.Uri);
-    method public abstract void onDisconnect();
+    method public void notifyTuned();
+    method public abstract void onRelease();
     method public abstract void onStartRecording(android.net.Uri);
     method public abstract void onStopRecording();
+    method public abstract void onTune(android.net.Uri);
   }
 
   public static abstract class TvInputService.Session implements android.view.KeyEvent.Callback {
@@ -23053,19 +23053,17 @@ package android.media.tv {
 
   public class TvRecordingClient {
     ctor public TvRecordingClient(android.content.Context, java.lang.String, android.media.tv.TvRecordingClient.RecordingCallback, android.os.Handler);
-    method public void connect(java.lang.String, android.net.Uri);
-    method public void disconnect();
+    method public void release();
     method public void startRecording(android.net.Uri);
     method public void stopRecording();
+    method public void tune(java.lang.String, android.net.Uri);
   }
 
   public static abstract class TvRecordingClient.RecordingCallback {
     ctor public TvRecordingClient.RecordingCallback();
-    method public void onConnected();
-    method public void onDisconnected();
     method public void onError(int);
-    method public void onRecordingStarted();
     method public void onRecordingStopped(android.net.Uri);
+    method public void onTuned();
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {
