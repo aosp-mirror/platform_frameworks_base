@@ -871,7 +871,6 @@ public final class MultiSelectManager {
         }
 
         public void writeToParcel(Parcel dest, int flags) {
-            checkState(mDirectoryKey != null);
             dest.writeString(mDirectoryKey);
             dest.writeList(new ArrayList<>(mSelection));
             // We don't include provisional selection since it is
