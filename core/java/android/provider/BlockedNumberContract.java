@@ -223,4 +223,98 @@ public class BlockedNumberContract {
         return res != null && res.getBoolean(RES_CAN_BLOCK_NUMBERS, false);
     }
 
+    /**
+     * <p>
+     * The contract between the blockednumber provider and the system.
+     * </p>
+     * <p>This is a wrapper over {@link BlockedNumberContract} that also manages the blocking
+     * behavior when the user contacts emergency services. See
+     * {@link #notifyEmergencyContact(Context)} for details. All methods are protected by
+     * {@link android.Manifest.permission#READ_BLOCKED_NUMBERS} and
+     * {@link android.Manifest.permission#WRITE_BLOCKED_NUMBERS} appropriately which ensure that
+     * only system can access the methods defined here.
+     * </p>
+     * @hide
+     */
+    public static class SystemContract {
+        /**
+         * A protected broadcast intent action for letting components with
+         * {@link android.Manifest.permission#READ_BLOCKED_NUMBERS} know that the block suppressal
+         * status as returned by {@link #getBlockSuppressalStatus(Context)} has been updated.
+         */
+        public static final String ACTION_BLOCK_SUPPRESSAL_STATE_CHANGED =
+                "android.provider.action.BLOCK_SUPPRESSAL_STATE_CHANGED";
+
+        public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
+
+        public static final String METHOD_END_BLOCK_SUPPRESSAL = "end_block_suppressal";
+
+        public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
+
+        public static final String METHOD_GET_BLOCK_SUPPRESSAL_STATUS =
+                "get_block_suppresal_status";
+
+        public static final String RES_IS_BLOCKING_SUPPRESSED = "blocking_suppressed";
+
+        public static final String RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP =
+                "blocking_suppressed_until_timestamp";
+
+        /**
+         * Notifies the provider that emergency services were contacted by the user.
+         * <p> This results in {@link #shouldSystemBlockNumber} returning {@code false} independent
+         * of the contents of the provider for a duration defined by
+         * {@link android.telephony.CarrierConfigManager#KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT}
+         * the provider unless {@link #endBlockSuppressal(Context)} is called.
+         */
+        public static void notifyEmergencyContact(Context context) {
+            context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_NOTIFY_EMERGENCY_CONTACT, null, null);
+        }
+
+        /**
+         * Notifies the provider to disable suppressing blocking. If emergency services were not
+         * contacted recently at all, calling this method is a no-op.
+         */
+        public static void endBlockSuppressal(Context context) {
+            context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_END_BLOCK_SUPPRESSAL, null, null);
+        }
+
+        /**
+         * Returns {@code true} if {@code phoneNumber} is blocked taking
+         * {@link #notifyEmergencyContact(Context)} into consideration. If emergency services have
+         * not been contacted recently, this method is equivalent to
+         * {@link #isBlocked(Context, String)}.
+         */
+        public static boolean shouldSystemBlockNumber(Context context, String phoneNumber) {
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, null);
+            return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+        }
+
+        public static BlockSuppressalStatus getBlockSuppressalStatus(Context context) {
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_GET_BLOCK_SUPPRESSAL_STATUS, null, null);
+            return new BlockSuppressalStatus(res.getBoolean(RES_IS_BLOCKING_SUPPRESSED, false),
+                    res.getLong(RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP, 0));
+        }
+
+        /**
+         * Represents the current status of {@link #shouldSystemBlockNumber(Context, String)}. If
+         * emergency services have been contacted recently, {@link #isSuppressed} is {@code true},
+         *  and blocking is disabled until the timestamp {@link #untilTimestampMillis}.
+         */
+        public static class BlockSuppressalStatus {
+            public final boolean isSuppressed;
+            /**
+             * Timestamp in milliseconds from epoch.
+             */
+            public final long untilTimestampMillis;
+
+            BlockSuppressalStatus(boolean isSuppressed, long untilTimestampMillis) {
+                this.isSuppressed = isSuppressed;
+                this.untilTimestampMillis = untilTimestampMillis;
+            }
+        }
+    }
 }
