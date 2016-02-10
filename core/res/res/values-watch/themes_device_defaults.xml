@@ -25,6 +25,7 @@
     <style name="Theme.DeviceDefault.Light.Dialog" parent="Theme.Micro.Dialog" />
     <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="Theme.Micro.Dialog" />
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
+    <style name="Theme.DeviceDefault.Settings" parent="Theme.Micro" />
     <style name="Theme.DeviceDefault.Wallpaper" parent="Theme.Micro" />
 
 </resources>
