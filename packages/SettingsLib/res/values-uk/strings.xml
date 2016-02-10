@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Завжди шукати мережі Wi-Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Використовувати старий клієнт DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Не вимикати передавання даних"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Примусово перемикатися на мобільну мережу, коли сигнал Wi-Fi слабкий"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ці налаштування застосовуються лише з метою розробки. Вони можуть спричиняти вихід з ладу або неправильне функціонування вашого пристрою чи програм у ньому."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Встановлення через USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Перевіряти безпеку додатків, установлених через ADB/ADT."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальний термінал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Увімк. програму-термінал, що надає локальний доступ до оболонки"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Перевірка HDCP"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Підсвічувати екран під час довгострокових операцій"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Розташування курсора"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Показувати на екрані жести й натискання"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Показувати дотики"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Показувати візуальну реакцію на торкання"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Показувати дотики"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Показувати візуальну реакцію на торкання"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Показ. оновлення поверхні"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Підсвічувати вікна повністю під час оновлення"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Показувати оновл. екрана"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Увімкнуться експериментальні вікна довільного формату."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Пароль резерв.копії на ПК"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Повні резервні копії на комп’ютері наразі не захищені"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Торкніться, щоб змінити чи видалити пароль для повного резервного копіювання на комп’ютер"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Торкніться, щоб змінити або видалити пароль для повного резервного копіювання на комп’ютер"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Новий пароль резервної копії встановлено"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Паролі не збігаються"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Не вдалося зберегти пароль"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"Кольори для цифрового вмісту"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Неактивні додатки"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Неактивний додаток. Торкніться, щоб активувати."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Активний додаток. Торкніться, щоб дезактивувати."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивний додаток. Торкніться, щоб активувати."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активний додаток. Торкніться, щоб дезактивувати."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Запущені служби"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Перегляд і керування запущеними службами"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Нічний режим"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не заряджається"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Акумулятор заряджено"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Вимкнено адміністратором"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

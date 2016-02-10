@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ອະ​ນຸ​ຍາດ​ການ​ສະ​ແກນ​ການ​ໂຣມ Wi‑Fi ​ສະ​ເໝີ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"ໃຊ້​ລູກ​ຄ້າ DHCP ຕຳ​ນານ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ຂໍ້​ມູນ​ມື​ຖື​ເປີດ​ຢູ່​ສະ​ເໝີ"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ເມື່ອ​ເປີດ​ນຳ​ໃຊ້​ແລ້ວ, ເຄືອ​ຂ່າຍ Wi-Fi ຈະ​ຖືກ​ປ່ຽນ​ໄປ​ໃຊ້​ເຄືອ​ຂ່າຍ​ໂທ​ລະ​ສັບ​ແທນ​ຫາກ​ສັນ​ຍານ Wi-Fi ອ່ອນ"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ການ​ຕັ້ງຄ່າ​ເຫຼົ່ານີ້​ແມ່ນ​ມີ​ຈຸດປະສົງ​ເພື່ອ​ການ​ພັດທະນາ​ເທົ່ານັ້ນ. ພວກ​ມັນ​ສາມາດ​ເຮັດ​ໃຫ້​ອຸປະກອນ ແລະ​ແອັບພລິເຄຊັນ​ຂອງ​ທ່ານ​ຢຸດ​ເຮັດ​ວຽກ ຫຼື​ເຮັດ​ວຽກ​ຜິດປົກກະຕິ​ໄດ້."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ຢືນຢັນແອັບຯຜ່ານທາງ USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ກວດສອບແອັບຯທີ່ຕິດຕັ້ງແລ້ວຜ່ານທາງ ADB/ADT ເພື່ອກວດຫາພຶດຕິກຳທີ່ເປັນອັນຕະລາຍ."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal ໃນໂຕເຄື່ອງ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ເປີດນຳໃຊ້ແອັບຯ Terminal ທີ່ໃຫ້ການເຂົ້າເຖິງ shell ໃນໂຕເຄື່ອງໄດ້"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"ການກວດສອບ HDCP"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"ກະພິບໜ້າຈໍເມື່ອມີແອັບຯ ເຮັດວຽກດົນເກີນໄປໃນເທຣດຫຼັກ"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ຕຳແໜ່ງໂຕຊີ້"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ການວາງຊ້ອນໜ້າຈໍກຳລັງ ສະແດງຂໍ້ມູນການສຳພັດໃນປັດຈຸບັນ"</string>
-    <string name="show_touches" msgid="1356420386500834339">"ສະແດງການສຳພັດ"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"ສະແດງການຕອບສະໜອງທາງພາບຂອງການສຳພັດ"</string>
+    <string name="show_touches" msgid="2642976305235070316">"ສະແດງການແຕະ"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"ສະແດງຄໍາຕິຊົມທາງຮູບພາບສຳລັບການແຕະ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"ສະແດງການອັບເດດພື້ນຜິວ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ກະພິບໜ້າຈໍທັງໜ້າເມື່ອມີການອັບເດດ"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"ສະແດງມຸມມອງການອັບເດດ GPU"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"ເປີດໃຊ້ການຮອງຮັບໜ້າຕ່າງຮູບແບບອິດສະຫຼະທີ່ທົດລອງໃຊ້."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ລະຫັດຜ່ານການສຳຮອງຂໍ້ມູນເດັກສະທັອບ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ການ​ສຳຮອງ​ຂໍ້ມູນ​ເຕັມຮູບແບບ​ໃນ​ເດັກສະທັອບ​ຍັງ​ບໍ່​ໄດ້​ຮັບ​ການ​ປ້ອງກັນ​ໃນ​ເວລາ​ນີ້"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ແຕະເພື່ອປ່ຽນ ຫຼືລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັກສະທັອບ"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ແຕະເພື່ອປ່ຽນ ຫຼືລຶບລະຫັດຂອງການສຳຮອງຂໍ້ມູນເຕັມຮູບແບບໃນເດັກສະທັອບ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ຕັ້ງລະຫັດສຳຮອງໃໝ່ແລ້ວ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ລະຫັດຜ່ານໃໝ່ ແລະລະຫັດຢືນຢັນບໍ່ກົງກັນ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ການຕັ້ງລະຫັດສຳຮອງຂໍ້ມູນລົ້ມເຫລວ"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"ສີ​ທີ່​ປັບ​ໃຫ້​ເໝາະ​ສົມ​ສຳ​ລັບ​ເນື້ອ​ໃນ​ດິ​ຈີ​ຕອ​ລ"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"ແອັບ​ບໍ່​ໃຊ້​ງານ​ຢູ່"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"ບໍ່​ໃຊ້​ງານ​ຢູ່. ສຳ​ພັດ​ເພື່ອ​ສະ​ຫຼັບ."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"ໃຊ້​ງານ​ຢູ່. ສຳ​ພັດ​ເພື່ອ​ສະ​ຫຼັບ."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ບໍ່ໄດ້ນຳໃຊ້. ແຕະບໍ່ສັບປ່ຽນ."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"ນຳໃຊ້ຢູ່. ແຕະເພື່ອສັບປ່ຽນ."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ບໍລິການທີ່ເຮັດວຽກຢູ່"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ເບິ່ງ ແລະຈັດການບໍລິການທີ່ກຳລັງເຮັດວຽກຢູ່ໃນປັດຈຸບັນ"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"ໂໝດກາງຄືນ"</string>
@@ -309,4 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ບໍ່ໄດ້ສາກໄຟ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ເຕັມ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"ຖືກປິດໃຊ້ໂດຍຜູ້ເບິ່ງແຍງລະບົບ"</string>
+    <string name="home" msgid="8263346537524314127">"​ໜ້າຫຼັກ"</string>
 </resources>

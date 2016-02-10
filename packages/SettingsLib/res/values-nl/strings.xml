@@ -165,6 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Altijd roamingscans voor wifi toestaan"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Oude DHCP-client gebruiken"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobiele gegevens altijd actief"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Absoluut volume uitschakelen"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Opties weergeven voor certificering van draadloze weergave"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Logniveau voor wifi verhogen, weergeven per SSID RSSI in wifi-kiezer"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Indien ingeschakeld, is wifi agressiever bij het overgeven van de gegevensverbinding aan mobiel wanneer het wifi-signaal zwak is"</string>
@@ -185,6 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Deze instellingen zijn uitsluitend bedoeld voor ontwikkelingsgebruik. Je apparaat en apps kunnen hierdoor vastlopen of anders reageren."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Apps verifiëren via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Apps die zijn geïnstalleerd via ADB/ADT, controleren op schadelijk gedrag"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Hiermee wordt de functie voor absoluut volume van Bluetooth uitgeschakeld in geval van volumeproblemen met externe apparaten, zoals een onacceptabel hoog volume of geen volumeregeling."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokale terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Terminal-app inschakelen die lokale shell-toegang biedt"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-controle"</string>
@@ -206,8 +208,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Knipperend scherm bij lange bewerkingen door apps"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Cursorlocatie"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Schermoverlay met huidige aanraakgegevens"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Aanraakbewerkingen weergeven"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Visuele feedback voor aanraakbewerkingen weergeven"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Tikken weergeven"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Visuele feedback weergeven voor tikken"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Oppervlakupdates weergeven"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Volledige vensteroppervlakken flashen bij updates"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU-weergave-updates weergeven"</string>
@@ -251,7 +253,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Schakelt ondersteuning in voor vensters met experimentele vrije vorm."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Wachtwoord desktopback-up"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Volledige back-ups naar desktops zijn momenteel niet beveiligd"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Raak dit aan om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Tik om het wachtwoord voor volledige back-ups naar desktops te wijzigen of te verwijderen"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nieuw back-upwachtwoord ingesteld"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nieuw wachtwoord en bevestiging komen niet overeen."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Instellen van back-upwachtwoord is mislukt"</string>
@@ -266,8 +268,8 @@
     <item msgid="5363960654009010371">"Kleuren geoptimaliseerd voor digitale content"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Inactieve apps"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Inactief. Tik om te schakelen."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Actief. Tik om te schakelen."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Inactief. Tik om te schakelen."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Actief. Tik om te schakelen."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Actieve services"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Services die momenteel actief zijn, weergeven en beheren"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Nachtmodus"</string>
@@ -309,4 +311,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Wordt niet opgeladen"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Volledig"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Uitgeschakeld door beheerder"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

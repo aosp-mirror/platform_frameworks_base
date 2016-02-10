@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Միշտ թույլատրել Wi‑Fi ռոումինգի որոնումը"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Օգտագործել DHCP ծրագրի ավելի հին տարբերակները"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Բջջային տվյալները՝ միշտ ակտիվացրած"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի վկայագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Եթե այս գործառույթը միացված է, Wi‑Fi-ի թույլ ազդանշանի դեպքում Wi‑Fi ինտերնետից անցումը բջջային ինտերնետին ավելի կտրուկ կլինի"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Այս կարգավորումները միայն ծրագրավորման նպատակների համար են նախատեսված: Դրանք կարող են խանգարել ձեր սարքի կամ ծրագրի աշխատանքին:"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ստուգել հավելվածները USB-ի նկատմամբ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Ստուգեք տեղադրված հավելվածը ADB/ADT-ի միջոցով կասկածելի աշխատանքի պատճառով:"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Տեղային տերմինալ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Միացնել տերմինալային հավելվածը, որն առաջարկում է մուտք տեղային խեցի"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ստուգում"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Լուսավորել էկրանը` ծրագրի գլխավոր շղթայի վրա երկար աշխատելիս"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Նշիչի տեղադրություն"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Էկրանի վերադրումը ցույց է տալիս ընթացիկ հպման տվյալները"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Ցույց տալ հպումները"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Ցուցադրել հպման տեսանելի արձագանքը"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Ցույց տալ հպումները"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Ցույց տալ հպումների տեսանելի արձագանքը"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Ցույց տալ մակերեսի թարմացումները"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Թող պատուհանի ամբողջական մակերեսները առկայծեն, երբ թարմացվում են"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Ցույց տալ GPU տեսքի թարմացումները"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Ակտիվացնում է կամայական ձևի փորձնական պատուհանների աջակցումը:"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Աշխատասեղանի պահուստավորման գաղտնաբառ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Աշխատասեղանի ամբողջական պահուստավորումները այժմ պաշտպանված չեն"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Աշխատասեղանի ամբողջական պահուստավորման համար ընտրել փոխել կամ հեռացնել գաղտնաբառը"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Հպեք՝ աշխատասեղանի ամբողջական պահուստավորման գաղտնաբառը փոխելու կամ հեռացնելու համար"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Պահուստավորման նոր գաղտնաբառը սահմանված է"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Նոր գաղտնաբառը և հաստատումը չեն համընկնում"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Ձախողում գաղտնաբառի պահուստավորման կարգավորման ընթացքում"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"Թվային բովանդակության համար հարմարեցված գույներ"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Միացրած հավելվածներ"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Անջատված: Հպեք՝ փոխարկելու համար:"</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Միացրած: Հպեք՝ փոխարկելու համար:"</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ակտիվ չէ: Հպեք՝ փոխելու համար:"</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Ակտիվ է: Հպեք՝ փոխելու համար:"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Աշխատեցվող ծառայություններ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Դիտել և վերահսկել ընթացիկ աշխատեցվող ծառայությունները"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Գիշերային ռեժիմ"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Լիցքավորված"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Կասեցված է ադմինիստրատորի կողմից"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

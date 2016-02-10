@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vždy povolit Wi-Fi roaming"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Použít starý klient DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobilní data jsou vždy aktivní"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi."</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Pokud je tato možnost zapnuta, bude síť Wi-Fi agresivnější při předávání datového připojení mobilní síti při slabém signálu Wi-Fi."</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Tato nastavení jsou určena pouze pro vývojáře. Mohou způsobit rozbití nebo nesprávné fungování zařízení a nainstalovaných aplikací."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Ověřit aplikace z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrolovat škodlivost aplikací nainstalovaných pomocí nástroje ADB/ADT"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Místní terminál"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivovat terminálovou aplikaci pro místní přístup k prostředí shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrola HDCP"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Rozblikat obrazovku při dlouhých operacích hlavního vlákna"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Umístění ukazatele"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Zobrazit překryvnou vrstvu s aktuálními daty o dotycích"</string>
-    <string name="show_touches" msgid="1356420386500834339">"Zobrazit dotyky"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"Zobrazit vizuální zpětnou vazbu pro dotyky"</string>
+    <string name="show_touches" msgid="2642976305235070316">"Zobrazovat klepnutí"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Zobrazování vizuální zpětné vazby pro klepnutí"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Zobrazit obnovení obsahu"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Rozblikat obsah okna při aktualizaci"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Zobrazit obnovení s GPU"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Aktivuje podporu experimentálních oken s volným tvarem."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Heslo pro zálohy v počítači"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Úplné zálohy v počítači nejsou v současné době chráněny"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"Tuto možnost vyberte, chcete-li změnit nebo odebrat heslo pro úplné zálohy v počítači"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Tuto možnost vyberte, chcete-li změnit nebo odebrat heslo pro úplné zálohy do počítače"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nové heslo pro zálohy je nastaveno"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nové heslo se neshoduje s potvrzením hesla."</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Nastavení hesla pro zálohy selhalo"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"Barvy optimalizované pro digitální obsah"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Neaktivní aplikace"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"Neaktivní. Přepnete klepnutím."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"Aktivní. Přepnete klepnutím."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Neaktivní. Klepnutím možnost přepnete."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivní. Klepnutím možnost přepnete."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Noční režim"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nenabíjí se"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Nabitá"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Zakázáno administrátorem"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>

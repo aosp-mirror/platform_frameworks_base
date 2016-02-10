@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"ಹಿಂದಿನ DHCP ಕ್ಲೈಂಟ್ ಬಳಸಿ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ಸೆಲ್ಯುಲರ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ಸಕ್ರಿಯಗೊಂಡರೆ, Wi‑Fi ಸಿಗ್ನಲ್ ದುರ್ಬಲವಾಗಿದ್ದರೂ ಕೂಡ, ಸೆಲ್ಯುಲರ್‌ಗೆ ಡೇಟಾ ಸಂಪರ್ಕವನ್ನು ಹಸ್ತಾಂತರಿಸುವಲ್ಲಿ Wi‑Fi ಹೆಚ್ಚು ಆಕ್ರಮಣಕಾರಿಯಾಗಿರುತ್ತದೆ"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಅಭಿವೃದ್ಧಿಯ ಬಳಕೆಗೆ ಮಾತ್ರ. ಅವುಗಳು ನಿಮ್ಮ ಸಾಧನ ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌‌ಗಳಿಗೆ ಧಕ್ಕೆ ಮಾಡಬಹುದು ಅಥವಾ ಅವು ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರುವಂತೆ ಮಾಡಬಹುದು."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ಮೂಲಕ ಆಪ್‌ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ಹಾನಿಮಾಡುವಂತಹ ವರ್ತನೆಗಾಗಿ ADB/ADT ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"ಸ್ಥಳೀಯ ಟರ್ಮಿನಲ್"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ಸ್ಥಳೀಯ ಶೆಲ್ ಪ್ರವೇಶವನ್ನು ಒದಗಿಸುವ ಟರ್ಮಿನಲ್ ಅಪ್ಲಿಕೇಶನ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ಪರೀಕ್ಷಿಸುವಿಕೆ"</string>
@@ -206,8 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮುಖ್ಯ ಥ್ರೆಡ್‌ನಲ್ಲಿ ದೀರ್ಘ ಕಾರ್ಯಾಚರಣೆ ನಿರ್ವಹಿಸಿದಾಗ ಪರದೆಯನ್ನು ಫ್ಲ್ಯಾಶ್ ಮಾಡು"</string>
     <string name="pointer_location" msgid="6084434787496938001">"ಪಾಯಿಂಟರ್ ಸ್ಥಾನ"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"ಪ್ರಸ್ತುತ ಸ್ಪರ್ಶ ಡೇಟಾ ತೋರಿಸುವ ಪರದೆಯ ಓವರ್‌ಲೇ"</string>
-    <string name="show_touches" msgid="1356420386500834339">"ಸ್ಪರ್ಶಗಳನ್ನು ತೋರಿಸು"</string>
-    <string name="show_touches_summary" msgid="6684407913145150041">"ಸ್ಪರ್ಶಗಳಿಗಾಗಿ ದೃಶ್ಯ ಪ್ರತ್ಯುತ್ತರವನ್ನು ತೋರಿಸು"</string>
+    <string name="show_touches" msgid="2642976305235070316">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸು"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"ಟ್ಯಾಪ್‌ಗಳಿಗೆ ದೃಶ್ಯ ಪ್ರತಿಕ್ರಿಯೆ ತೋರಿಸು"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"ಸರ್ಫೇಸ್‌‌ ಅಪ್‌ಡೇಟ್‌"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ಅಪ್‌ಡೇಟ್‌ ಆಗುವಾಗ ವಿಂಡೋದ ಸರ್ಫೇಸ್‌ ಫ್ಲ್ಯಾಶ್ ಆಗುತ್ತದೆ"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ವೀಕ್ಷಣೆ ಅಪ್‌ಡೇಟ್‌"</string>
@@ -251,7 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"ಪ್ರಾಯೋಗಿಕ ಮುಕ್ತಸ್ವರೂಪದ ವಿಂಡೊಗಳಿಗೆ ಬೆಂಬಲವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ಡೆಸ್ಕ್‌ಟಾಪ್‌‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌‌ಗಳನ್ನು ಪ್ರಸ್ತುತ ರಕ್ಷಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="local_backup_password_summary_change" msgid="2731163425081172638">"ಡೆಸ್ಕ್‌ಟಾಪ್‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌ಗಳಿಗೆ ಪಾಸ್‌ವರ್ಡ್‌ ಅನ್ನು ಬದಲಾಯಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಸ್ಪರ್ಶಿಸಿ"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ಡೆಸ್ಕ್‌ಟಾಪ್‌ನ ಪೂರ್ಣ ಬ್ಯಾಕಪ್‌ಗಳಿಗೆ ಪಾಸ್‌ವರ್ಡ್‌ ಬದಲಾಯಿಸಲು ಅಥವಾ ತೆಗೆದುಹಾಕಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"ಹೊಸ ಬ್ಯಾಕಪ್ ಪಾಸ್‌ವರ್ಡ್‌ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"ಹೊಸ ಪಾಸ್‌ವರ್ಡ್‌ ಮತ್ತು ದೃಢೀಕರಣ ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"ಬ್ಯಾಕಪ್‌ ಪಾಸ್‌ವರ್ಡ್‌ ಹೊಂದಿಕೆ ವಿಫಲಗೊಂಡಿದೆ"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"ಡಿಜಿಟಲ್ ವಿಷಯಕ್ಕಾಗಿ ಆಪ್ಟಿಮೈಜ್ ಮಾಡಲಾಗಿರುವ ಬಣ್ಣಗಳು"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"ನಿಷ್ಕ್ರಿಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
-    <string name="inactive_app_inactive_summary" msgid="6768756967594202411">"ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ. ಟಾಗಲ್ ಮಾಡಲು ಸ್ಪರ್ಶಿಸಿ."</string>
-    <string name="inactive_app_active_summary" msgid="4512911571954375968">"ಸಕ್ರಿಯವಾಗಿದೆ. ಟಾಗಲ್ ಮಾಡಲು ಸ್ಪರ್ಶಿಸಿ."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ನಿಷ್ಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"ಸಕ್ರಿಯ. ಟಾಗಲ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"ರಾತ್ರಿ ಮೋಡ್"</string>
@@ -309,4 +313,6 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ಚಾರ್ಜ್ ಆಗುತ್ತಿಲ್ಲ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ಭರ್ತಿ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"ನಿರ್ವಾಹಕರಿಂದ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <!-- no translation found for home (8263346537524314127) -->
+    <skip />
 </resources>
