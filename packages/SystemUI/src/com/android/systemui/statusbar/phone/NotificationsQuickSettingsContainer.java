@@ -33,7 +33,7 @@ import com.android.systemui.R;
 public class NotificationsQuickSettingsContainer extends FrameLayout
         implements ViewStub.OnInflateListener {
 
-    private View mScrollView;
+    private View mQsContainer;
     private View mUserSwitcher;
     private View mStackScroller;
     private View mKeyguardStatusBar;
@@ -47,7 +47,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mScrollView = findViewById(R.id.scroll_view);
+        mQsContainer = findViewById(R.id.quick_settings_container);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
         ViewStub userSwitcher = (ViewStub) findViewById(R.id.keyguard_user_switcher);
@@ -58,7 +58,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        reloadWidth(mScrollView);
+        reloadWidth(mQsContainer);
         reloadWidth(mStackScroller);
     }
 
@@ -80,11 +80,11 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
         boolean userSwitcherVisible = mInflated && mUserSwitcher.getVisibility() == View.VISIBLE;
         boolean statusBarVisible = mKeyguardStatusBar.getVisibility() == View.VISIBLE;
 
-        View stackQsTop = mQsExpanded ? mStackScroller : mScrollView;
-        View stackQsBottom = !mQsExpanded ? mStackScroller : mScrollView;
+        View stackQsTop = mQsExpanded ? mStackScroller : mQsContainer;
+        View stackQsBottom = !mQsExpanded ? mStackScroller : mQsContainer;
         // Invert the order of the scroll view and user switcher such that the notifications receive
         // touches first but the panel gets drawn above.
-        if (child == mScrollView) {
+        if (child == mQsContainer) {
             return super.drawChild(canvas, userSwitcherVisible && statusBarVisible ? mUserSwitcher
                     : statusBarVisible ? mKeyguardStatusBar
                     : userSwitcherVisible ? mUserSwitcher
@@ -104,7 +104,7 @@ public class NotificationsQuickSettingsContainer extends FrameLayout
             return super.drawChild(canvas,
                     stackQsTop,
                     drawingTime);
-        }else {
+        } else {
             return super.drawChild(canvas, child, drawingTime);
         }
     }
