@@ -12837,16 +12837,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             // of the package implies that the user actually wants to run that new code,
             // so we enable the package.
             PackageSetting ps = mSettings.mPackages.get(pkgName);
+            final int userId = user.getIdentifier();
             if (ps != null) {
                 if (isSystemApp(newPackage)) {
-                    // NB: implicit assumption that system package upgrades apply to all users
                     if (DEBUG_INSTALL) {
                         Slog.d(TAG, "Implicitly enabling system package on upgrade: " + pkgName);
                     }
+                    // Enable system package for requested users
                     if (res.origUsers != null) {
-                        for (int userHandle : res.origUsers) {
-                            ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
-                                    userHandle, installerPackageName);
+                        for (int origUserId : res.origUsers) {
+                            if (userId == UserHandle.USER_ALL || userId == origUserId) {
+                                ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT,
+                                        origUserId, installerPackageName);
+                            }
                         }
                     }
                     // Also convey the prior install/uninstall state
@@ -12864,7 +12867,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 // It's implied that when a user requests installation, they want the app to be
                 // installed and enabled.
-                int userId = user.getIdentifier();
                 if (userId != UserHandle.USER_ALL) {
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
