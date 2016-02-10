@@ -96,7 +96,7 @@ public class LineBreakBufferedWriter extends PrintWriter {
 
     @Override
     public void write(int c) {
-        if (bufferIndex < bufferSize) {
+        if (bufferIndex < buffer.length) {
             buffer[bufferIndex] = (char)c;
             bufferIndex++;
             if ((char)c == '\n') {
