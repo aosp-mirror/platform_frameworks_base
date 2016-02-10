@@ -1312,6 +1312,7 @@ public final class TvContract {
 
             private static final char DOUBLE_QUOTE = '"';
             private static final char COMMA = ',';
+            private static final String DELIMITER = ",";
 
             private Genres() {}
 
@@ -1327,7 +1328,7 @@ public final class TvContract {
                 String separator = "";
                 for (String genre : genres) {
                     sb.append(separator).append(encodeToCsv(genre));
-                    separator = COMMA;
+                    separator = DELIMITER;
                 }
                 return sb.toString();
             }
