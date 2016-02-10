@@ -92,13 +92,18 @@ public class IpManager extends StateMachine {
          */
 
         // Implementations must call IpManager#completedPreDhcpAction().
+        // TODO: Remove this requirement, perhaps via some
+        // registerForPreDhcpAction()-style mechanism.
         public void onPreDhcpAction() {}
         public void onPostDhcpAction() {}
 
-        // TODO: Kill with fire once DHCP and static configuration are moved
-        // out of WifiStateMachine.
-        public void onIPv4ProvisioningSuccess(DhcpResults dhcpResults) {}
-        public void onIPv4ProvisioningFailure() {}
+        // This is purely advisory and not an indication of provisioning
+        // success or failure.  This is only here for callers that want to
+        // expose DHCPv4 results to other APIs (e.g., WifiInfo#setInetAddress).
+        // DHCPv4 or static IPv4 configuration failure or success can be
+        // determined by whether or not the passed-in DhcpResults object is
+        // null or not.
+        public void onNewDhcpResults(DhcpResults dhcpResults) {}
 
         public void onProvisioningSuccess(LinkProperties newLp) {}
         public void onProvisioningFailure(LinkProperties newLp) {}
@@ -122,6 +127,7 @@ public class IpManager extends StateMachine {
 
     private final Object mLock = new Object();
     private final State mStoppedState = new StoppedState();
+    private final State mStoppingState = new StoppingState();
     private final State mStartedState = new StartedState();
 
     private final Context mContext;
@@ -179,6 +185,8 @@ public class IpManager extends StateMachine {
         // Super simple StateMachine.
         addState(mStoppedState);
         addState(mStartedState);
+        addState(mStoppingState);
+
         setInitialState(mStoppedState);
         setLogRecSize(MAX_LOG_RECORDS);
         super.start();
@@ -203,13 +211,11 @@ public class IpManager extends StateMachine {
 
     public void startProvisioning(StaticIpConfiguration staticIpConfig) {
         getInterfaceIndex();
-
         sendMessage(CMD_START, staticIpConfig);
     }
 
     public void startProvisioning() {
         getInterfaceIndex();
-
         sendMessage(CMD_START);
     }
 
@@ -236,6 +242,42 @@ public class IpManager extends StateMachine {
      * Internals.
      */
 
+    @Override
+    protected String getWhatToString(int what) {
+        // TODO: Investigate switching to reflection.
+        switch (what) {
+            case CMD_STOP:
+                return "CMD_STOP";
+            case CMD_START:
+                return "CMD_START";
+            case CMD_CONFIRM:
+                return "CMD_CONFIRM";
+            case EVENT_PRE_DHCP_ACTION_COMPLETE:
+                return "EVENT_PRE_DHCP_ACTION_COMPLETE";
+            case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
+                return "EVENT_NETLINK_LINKPROPERTIES_CHANGED";
+            case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
+                return "DhcpStateMachine.CMD_PRE_DHCP_ACTION";
+            case DhcpStateMachine.CMD_POST_DHCP_ACTION:
+                return "DhcpStateMachine.CMD_POST_DHCP_ACTION";
+            case DhcpStateMachine.CMD_ON_QUIT:
+                return "DhcpStateMachine.CMD_ON_QUIT";
+        }
+        return "UNKNOWN:" + Integer.toString(what);
+    }
+
+    @Override
+    protected String getLogRecString(Message msg) {
+        final String logLine = String.format(
+                "iface{%s/%d} arg1{%d} arg2{%d} obj{%s}",
+                mInterfaceName, mInterfaceIndex,
+                msg.arg1, msg.arg2, Objects.toString(msg.obj));
+        if (VDBG) {
+            Log.d(TAG, getWhatToString(msg.what) + " " + logLine);
+        }
+        return logLine;
+    }
+
     private void getInterfaceIndex() {
         try {
             mInterfaceIndex = NetworkInterface.getByName(mInterfaceName).getIndex();
@@ -260,16 +302,93 @@ public class IpManager extends StateMachine {
         }
     }
 
+    // For now: use WifiStateMachine's historical notion of provisioned.
+    private static boolean isProvisioned(LinkProperties lp) {
+        // For historical reasons, we should connect even if all we have is
+        // an IPv4 address and nothing else.
+        return lp.isProvisioned() || lp.hasIPv4Address();
+    }
+
+    // TODO: Investigate folding all this into the existing static function
+    // LinkProperties.compareProvisioning() or some other single function that
+    // takes two LinkProperties objects and returns a ProvisioningChange
+    // object that is a correct and complete assessment of what changed, taking
+    // account of the asymmetries described in the comments in this function.
+    // Then switch to using it everywhere (IpReachabilityMonitor, etc.).
+    private static ProvisioningChange compareProvisioning(
+            LinkProperties oldLp, LinkProperties newLp) {
+        ProvisioningChange delta;
+
+        final boolean wasProvisioned = isProvisioned(oldLp);
+        final boolean isProvisioned = isProvisioned(newLp);
+
+        if (!wasProvisioned && isProvisioned) {
+            delta = ProvisioningChange.GAINED_PROVISIONING;
+        } else if (wasProvisioned && isProvisioned) {
+            delta = ProvisioningChange.STILL_PROVISIONED;
+        } else if (!wasProvisioned && !isProvisioned) {
+            delta = ProvisioningChange.STILL_NOT_PROVISIONED;
+        } else {
+            // (wasProvisioned && !isProvisioned)
+            //
+            // Note that this is true even if we lose a configuration element
+            // (e.g., a default gateway) that would not be required to advance
+            // into provisioned state. This is intended: if we have a default
+            // router and we lose it, that's a sure sign of a problem, but if
+            // we connect to a network with no IPv4 DNS servers, we consider
+            // that to be a network without DNS servers and connect anyway.
+            //
+            // See the comment below.
+            delta = ProvisioningChange.LOST_PROVISIONING;
+        }
+
+        // Additionally:
+        //
+        // Partial configurations (e.g., only an IPv4 address with no DNS
+        // servers and no default route) are accepted as long as DHCPv4
+        // succeeds. On such a network, isProvisioned() will always return
+        // false, because the configuration is not complete, but we want to
+        // connect anyway. It might be a disconnected network such as a
+        // Chromecast or a wireless printer, for example.
+        //
+        // Because on such a network isProvisioned() will always return false,
+        // delta will never be LOST_PROVISIONING. So check for loss of
+        // provisioning here too.
+        if ((oldLp.hasIPv4Address() && !newLp.hasIPv4Address()) ||
+                (oldLp.isIPv6Provisioned() && !newLp.isIPv6Provisioned())) {
+            delta = ProvisioningChange.LOST_PROVISIONING;
+        }
+
+        return delta;
+    }
+
+    private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
+        switch (delta) {
+            case GAINED_PROVISIONING:
+                if (VDBG) { Log.d(TAG, "onProvisioningSuccess()"); }
+                mCallback.onProvisioningSuccess(newLp);
+                break;
+
+            case LOST_PROVISIONING:
+                if (VDBG) { Log.d(TAG, "onProvisioningFailure()"); }
+                mCallback.onProvisioningFailure(newLp);
+                break;
+
+            default:
+                if (VDBG) { Log.d(TAG, "onLinkPropertiesChange()"); }
+                mCallback.onLinkPropertiesChange(newLp);
+                break;
+        }
+    }
+
     private ProvisioningChange setLinkProperties(LinkProperties newLp) {
         if (mIpReachabilityMonitor != null) {
             mIpReachabilityMonitor.updateLinkProperties(newLp);
         }
 
-        // TODO: Figure out whether and how to incorporate static configuration
-        // into the notion of provisioning.
         ProvisioningChange delta;
         synchronized (mLock) {
-            delta = LinkProperties.compareProvisioning(mLinkProperties, newLp);
+            delta = compareProvisioning(mLinkProperties, newLp);
             mLinkProperties = new LinkProperties(newLp);
         }
 
@@ -351,15 +470,45 @@ public class IpManager extends StateMachine {
 
     private void handleIPv4Success(DhcpResults dhcpResults) {
         mDhcpResults = new DhcpResults(dhcpResults);
-        setLinkProperties(assembleLinkProperties());
-        mCallback.onIPv4ProvisioningSuccess(dhcpResults);
+        final LinkProperties newLp = assembleLinkProperties();
+        final ProvisioningChange delta = setLinkProperties(newLp);
+
+        if (VDBG) {
+            Log.d(TAG, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
+        }
+        mCallback.onNewDhcpResults(dhcpResults);
+
+        dispatchCallback(delta, newLp);
     }
 
     private void handleIPv4Failure() {
+        // TODO: Figure out to de-dup this and the same code in DhcpClient.
         clearIPv4Address();
         mDhcpResults = null;
-        setLinkProperties(assembleLinkProperties());
-        mCallback.onIPv4ProvisioningFailure();
+        final LinkProperties newLp = assembleLinkProperties();
+        ProvisioningChange delta = setLinkProperties(newLp);
+        // If we've gotten here and we're still not provisioned treat that as
+        // a total loss of provisioning.
+        //
+        // Either (a) static IP configuration failed or (b) DHCPv4 failed AND
+        // there was no usable IPv6 obtained before the DHCPv4 timeout.
+        //
+        // Regardless: GAME OVER.
+        //
+        // TODO: Make the DHCP client not time out and just continue in
+        // exponential backoff. Callers such as Wi-Fi which need a timeout
+        // should implement it themselves.
+        if (delta == ProvisioningChange.STILL_NOT_PROVISIONED) {
+            delta = ProvisioningChange.LOST_PROVISIONING;
+        }
+
+        if (VDBG) { Log.d(TAG, "onNewDhcpResults(null)"); }
+        mCallback.onNewDhcpResults(null);
+
+        dispatchCallback(delta, newLp);
+        if (delta == ProvisioningChange.LOST_PROVISIONING) {
+            transitionTo(mStoppingState);
+        }
     }
 
     class StoppedState extends State {
@@ -391,17 +540,36 @@ public class IpManager extends StateMachine {
                     break;
 
                 case DhcpStateMachine.CMD_ON_QUIT:
-                    // CMD_ON_QUIT is really more like "EVENT_ON_QUIT".
-                    // Shutting down DHCPv4 progresses simultaneously with
-                    // transitioning to StoppedState, so we can receive this
-                    // message after we've already transitioned here.
-                    //
-                    // TODO: Figure out if this is actually useful and if not
-                    // expunge it.
+                    // Everything is already stopped.
+                    Log.e(TAG, "Unexpected CMD_ON_QUIT (already stopped).");
                     break;
 
                 default:
                     return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+    }
+
+    class StoppingState extends State {
+        @Override
+        public void enter() {
+            if (mDhcpStateMachine == null) {
+                // There's no DHCPv4 for which to wait; proceed to stopped.
+                transitionTo(mStoppedState);
+            }
+        }
+
+        @Override
+        public boolean processMessage(Message msg) {
+            switch (msg.what) {
+                case DhcpStateMachine.CMD_ON_QUIT:
+                    mDhcpStateMachine = null;
+                    transitionTo(mStoppedState);
+                    break;
+
+                default:
+                    deferMessage(msg);
             }
             return HANDLED;
         }
@@ -439,7 +607,9 @@ public class IpManager extends StateMachine {
                 if (applyStaticIpConfig()) {
                     handleIPv4Success(new DhcpResults(mStaticIpConfig));
                 } else {
-                    handleIPv4Failure();
+                    if (VDBG) { Log.d(TAG, "onProvisioningFailure()"); }
+                    mCallback.onProvisioningFailure(getLinkProperties());
+                    transitionTo(mStoppingState);
                 }
             } else {
                 // Start DHCPv4.
@@ -457,7 +627,6 @@ public class IpManager extends StateMachine {
             if (mDhcpStateMachine != null) {
                 mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
                 mDhcpStateMachine.doQuit();
-                mDhcpStateMachine = null;
             }
 
             resetLinkProperties();
@@ -500,28 +669,15 @@ public class IpManager extends StateMachine {
                         break;
                     }
                     final ProvisioningChange delta = setLinkProperties(newLp);
-
-                    // NOTE: The only receiver of these callbacks currently
-                    // treats all three of them identically, namely it calls
-                    // IpManager#getLinkProperties() and makes its own determination.
-                    switch (delta) {
-                        case GAINED_PROVISIONING:
-                            mCallback.onProvisioningSuccess(newLp);
-                            break;
-
-                        case LOST_PROVISIONING:
-                            mCallback.onProvisioningFailure(newLp);
-                            break;
-
-                        default:
-                            // TODO: Only notify on STILL_PROVISIONED?
-                            mCallback.onLinkPropertiesChange(newLp);
-                            break;
+                    dispatchCallback(delta, newLp);
+                    if (delta == ProvisioningChange.LOST_PROVISIONING) {
+                        transitionTo(mStoppedState);
                     }
                     break;
                 }
 
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
+                    if (VDBG) { Log.d(TAG, "onPreDhcpAction()"); }
                     mCallback.onPreDhcpAction();
                     break;
 
@@ -529,6 +685,7 @@ public class IpManager extends StateMachine {
                     // Note that onPostDhcpAction() is likely to be
                     // asynchronous, and thus there is no guarantee that we
                     // will be able to observe any of its effects here.
+                    if (VDBG) { Log.d(TAG, "onPostDhcpAction()"); }
                     mCallback.onPostDhcpAction();
 
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
@@ -546,11 +703,9 @@ public class IpManager extends StateMachine {
                 }
 
                 case DhcpStateMachine.CMD_ON_QUIT:
-                    // CMD_ON_QUIT is really more like "EVENT_ON_QUIT".
-                    // Regardless, we ignore it.
-                    //
-                    // TODO: Figure out if this is actually useful and if not
-                    // expunge it.
+                    // DHCPv4 quit early for some reason.
+                    Log.e(TAG, "Unexpected CMD_ON_QUIT.");
+                    mDhcpStateMachine = null;
                     break;
 
                 default:
