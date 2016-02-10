@@ -1001,7 +1001,7 @@ class ActivityStarter {
                 // If the activity is not focusable, we can't resume it, but still would like to
                 // make sure it becomes visible as it starts (this will also trigger entry
                 // animation). An example of this are PIP activities.
-                mTargetStack.ensureActivitiesVisibleLocked(mStartActivity, 0, !PRESERVE_WINDOWS);
+                mTargetStack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
             }
         } else {
             mTargetStack.addRecentActivityLocked(mStartActivity);

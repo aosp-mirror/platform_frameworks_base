@@ -148,6 +148,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBLE_BEHIND;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
@@ -2321,36 +2322,44 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return false;
         }
 
-        moveActivityToStackLocked(r, PINNED_STACK_ID, "moveTopActivityToPinnedStack", null);
-        mWindowManager.animateResizePinnedStack(bounds);
+        moveActivityToPinnedStackLocked(r, "moveTopActivityToPinnedStack", bounds);
         return true;
     }
 
-    void moveActivityToStackLocked(ActivityRecord r, int stackId, String reason, Rect bounds) {
-        final TaskRecord task = r.task;
-        if (task.mActivities.size() == 1) {
-            // There is only one activity in the task. So, we can just move the task over to the
-            // stack without re-parenting the activity in a different task.
-            moveTaskToStackLocked(
-                    task.taskId, stackId, ON_TOP, FORCE_FOCUS, reason, true /* animate */);
-        } else {
-            final ActivityStack stack = getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
-            stack.moveActivityToStack(r);
+    void moveActivityToPinnedStackLocked(ActivityRecord r, String reason, Rect bounds) {
+        mWindowManager.deferSurfaceLayout();
+        try {
+            final TaskRecord task = r.task;
+
+            // Need to make sure the pinned stack exist so we can resize it below...
+            final ActivityStack stack = getStack(PINNED_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
+
+            // Resize the pinned stack to match the current size of the task the activity we are
+            // going to be moving is currently contained in. We do this to have the right starting
+            // animation bounds for the pinned stack to the desired bounds the caller wants.
+            resizeStackLocked(PINNED_STACK_ID, task.mBounds, null /* tempTaskBounds */,
+                    null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS,
+                    true /* allowResizeInDockedMode */);
+
+            if (task.mActivities.size() == 1) {
+                // There is only one activity in the task. So, we can just move the task over to
+                // the stack without re-parenting the activity in a different task.
+                moveTaskToStackLocked(
+                        task.taskId, PINNED_STACK_ID, ON_TOP, FORCE_FOCUS, reason, !ANIMATE);
+            } else {
+                stack.moveActivityToStack(r);
+            }
+        } finally {
+            mWindowManager.continueSurfaceLayout();
         }
 
-        if (bounds != null) {
-            resizeStackLocked(stackId, bounds, null /* tempTaskBounds */,
-                    null /* tempTaskInsetBounds */, !PRESERVE_WINDOWS, true);
-        }
-
-        // The task might have already been running and its visibility needs to be synchronized with
-        // the visibility of the stack / windows.
+        // The task might have already been running and its visibility needs to be synchronized
+        // with the visibility of the stack / windows.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        if (stackId == PINNED_STACK_ID) {
-            mService.notifyActivityPinnedLocked();
-        }
+        mWindowManager.animateResizePinnedStack(bounds);
+        mService.notifyActivityPinnedLocked();
     }
 
     void positionTaskInStackLocked(int taskId, int stackId, int position) {

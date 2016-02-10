@@ -2882,6 +2882,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeInt(isForeground ? 1 : 0);
             return true;
         }
+        case NOTIFY_PINNED_STACK_ANIMATION_ENDED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -6730,6 +6735,16 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return isForeground;
+    };
+
+    @Override
+    public void notifyPinnedStackAnimationEnded() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(NOTIFY_PINNED_STACK_ANIMATION_ENDED_TRANSACTION, data, reply, 0);
+        data.recycle();
+        reply.recycle();
     };
 
     private IBinder mRemote;
