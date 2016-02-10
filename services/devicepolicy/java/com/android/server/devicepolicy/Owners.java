@@ -716,11 +716,11 @@ class Owners {
     }
 
     File getLegacyConfigFileWithTestOverride() {
-        return new File(Environment.getSystemSecureDirectory(), DEVICE_OWNER_XML_LEGACY);
+        return new File(Environment.getDataSystemDirectory(), DEVICE_OWNER_XML_LEGACY);
     }
 
     File getDeviceOwnerFileWithTestOverride() {
-        return new File(Environment.getSystemSecureDirectory(), DEVICE_OWNER_XML);
+        return new File(Environment.getDataSystemDirectory(), DEVICE_OWNER_XML);
     }
 
     File getProfileOwnerFileWithTestOverride(int userId) {

@@ -12724,9 +12724,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         String pkgName = pkg.packageName;
 
         if (DEBUG_INSTALL) Slog.d(TAG, "installNewPackageLI: " + pkg);
-        // TODO: b/23350563
-        final boolean dataDirExists = Environment
-                .getDataUserPackageDirectory(volumeUuid, UserHandle.USER_SYSTEM, pkgName).exists();
 
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
@@ -12752,18 +12749,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     System.currentTimeMillis(), user);
 
             updateSettingsLI(newPackage, installerPackageName, null, null, res, user);
-            prepareAppDataAfterInstall(newPackage);
 
-            // delete the partially installed application. the data directory will have to be
-            // restored if it was already existing
-            if (res.returnCode != PackageManager.INSTALL_SUCCEEDED) {
-                // remove package from internal structures.  Note that we want deletePackageX to
-                // delete the package data and cache directories that it created in
-                // scanPackageLocked, unless those directories existed before we even tried to
-                // install.
+            if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                prepareAppDataAfterInstall(newPackage);
+
+            } else {
+                // Remove package from internal structures, but keep around any
+                // data that might have already existed
                 deletePackageLI(pkgName, UserHandle.ALL, false, null, null,
-                        dataDirExists ? PackageManager.DELETE_KEEP_DATA : 0,
-                                res.removedInfo, true, null);
+                        PackageManager.DELETE_KEEP_DATA, res.removedInfo, true, null);
             }
 
         } catch (PackageManagerException e) {
@@ -17423,8 +17417,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * recycled.
      */
     private void reconcileUsers(String volumeUuid) {
+        // TODO: also reconcile DE directories
         final File[] files = FileUtils
-                .listFilesOrEmpty(Environment.getDataUserDirectory(volumeUuid));
+                .listFilesOrEmpty(Environment.getDataUserCeDirectory(volumeUuid));
         for (File file : files) {
             if (!file.isDirectory()) continue;
 
@@ -17553,8 +17548,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
                 + Integer.toHexString(flags));
 
-        final File ceDir = Environment.getDataUserCredentialEncryptedDirectory(volumeUuid, userId);
-        final File deDir = Environment.getDataUserDeviceEncryptedDirectory(volumeUuid, userId);
+        final File ceDir = Environment.getDataUserCeDirectory(volumeUuid, userId);
+        final File deDir = Environment.getDataUserDeDirectory(volumeUuid, userId);
 
         boolean restoreconNeeded = false;
 
