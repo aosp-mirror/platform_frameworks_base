@@ -2570,6 +2570,11 @@ public class DevicePolicyManager {
      * Delegated certificate installer is a per-user state. The delegated access is persistent until
      * it is later cleared by calling this method with a null value or uninstallling the certificate
      * installer.
+     *<p>
+     * <b>Note:</b>Starting from {@link android.os.Build.VERSION_CODES#N}, if the caller
+     * application's target SDK version is {@link android.os.Build.VERSION_CODES#N} or newer, the
+     * supplied certificate installer package must be installed when calling this API,
+     * otherwise an {@link IllegalArgumentException} will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param installerPackage The package name of the certificate installer which will be given
@@ -3650,6 +3655,9 @@ public class DevicePolicyManager {
      * <p>
      * This permission is persistent until it is later cleared by calling this method with a
      * {@code null} value or uninstalling the managing package.
+     * <p>
+     * The supplied application restriction managing package must be installed when calling this
+     * API, otherwise an {@link IllegalArgumentException} will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package name which will be given access to application restrictions
