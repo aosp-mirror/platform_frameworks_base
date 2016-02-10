@@ -28,15 +28,21 @@ import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_UNKNOWN;
 import static android.telephony.TelephonyManager.getNetworkClass;
+
 import static com.android.internal.util.ArrayUtils.contains;
 
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.BackupUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -47,6 +53,10 @@ import java.util.Objects;
  * @hide
  */
 public class NetworkTemplate implements Parcelable {
+    /**
+     * Current Version of the Backup Serializer.
+     */
+    private static final int BACKUP_VERSION = 1;
 
     public static final int MATCH_MOBILE_ALL = 1;
     @Deprecated
@@ -443,4 +453,31 @@ public class NetworkTemplate implements Parcelable {
             return new NetworkTemplate[size];
         }
     };
+
+    public byte[] getBytesForBackup() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+
+        out.writeInt(BACKUP_VERSION);
+
+        out.writeInt(mMatchRule);
+        BackupUtils.writeString(out, mSubscriberId);
+        BackupUtils.writeString(out, mNetworkId);
+
+        return baos.toByteArray();
+    }
+
+    public static NetworkTemplate getNetworkTemplateFromBackup(DataInputStream in)
+            throws IOException, BackupUtils.BadVersionException {
+        int version = in.readInt();
+        if (version < 1 || version > BACKUP_VERSION) {
+            throw new BackupUtils.BadVersionException("Unknown Backup Serialization Version");
+        }
+
+        int matchRule = in.readInt();
+        String subscriberId = BackupUtils.readString(in);
+        String networkId = BackupUtils.readString(in);
+
+        return new NetworkTemplate(matchRule, subscriberId, networkId);
+    }
 }
