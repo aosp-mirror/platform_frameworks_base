@@ -8941,6 +8941,7 @@ public class Intent implements Parcelable, Cloneable {
                 case ACTION_MEDIA_SCANNER_SCAN_FILE:
                 case ACTION_PACKAGE_NEEDS_VERIFICATION:
                 case ACTION_PACKAGE_VERIFIED:
+                case ACTION_OPEN_EXTERNAL_DIRECTORY: // TODO: temporary until bug 26742218 is fixed
                     // Ignore legacy actions
                     break;
                 default:
