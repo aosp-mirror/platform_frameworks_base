@@ -3494,7 +3494,7 @@ public class BackupManagerService {
          */
         int preflightFullBackup(PackageInfo pkg, IBackupAgent agent);
 
-        long expectedSize();
+        long getExpectedSizeOrErrorCode();
     };
 
     class FullBackupEngine {
@@ -4555,6 +4555,10 @@ public class BackupManagerService {
                     // now wait to get our result back
                     mLatch.await();
                     int totalSize = mResult.get();
+                    // If preflight timeouted, mResult will contain error code.
+                    if (totalSize < 0) {
+                        return totalSize;
+                    }
                     if (MORE_DEBUG) {
                         Slog.v(TAG, "Got preflight response; size=" + totalSize);
                     }
@@ -4600,7 +4604,7 @@ public class BackupManagerService {
             }
 
             @Override
-            public long expectedSize() {
+            public long getExpectedSizeOrErrorCode() {
                 try {
                     mLatch.await();
                     return mResult.get();
@@ -4649,7 +4653,7 @@ public class BackupManagerService {
             }
 
             long expectedSize() {
-                return mPreflight.expectedSize();
+                return mPreflight.getExpectedSizeOrErrorCode();
             }
         }
     }
