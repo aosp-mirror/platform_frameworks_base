@@ -212,8 +212,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         mCallbacks = new Callbacks(mInstallThread.getLooper());
 
         mSessionsFile = new AtomicFile(
-                new File(Environment.getSystemSecureDirectory(), "install_sessions.xml"));
-        mSessionsDir = new File(Environment.getSystemSecureDirectory(), "install_sessions");
+                new File(Environment.getDataSystemDirectory(), "install_sessions.xml"));
+        mSessionsDir = new File(Environment.getDataSystemDirectory(), "install_sessions");
         mSessionsDir.mkdirs();
 
         synchronized (mSessions) {

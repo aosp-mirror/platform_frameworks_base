@@ -52,7 +52,7 @@ public class IntentFirewall {
     static final String TAG = "IntentFirewall";
 
     // e.g. /data/system/ifw or /data/secure/system/ifw
-    private static final File RULES_DIR = new File(Environment.getSystemSecureDirectory(), "ifw");
+    private static final File RULES_DIR = new File(Environment.getDataSystemDirectory(), "ifw");
 
     private static final int LOG_PACKAGES_MAX_LENGTH = 150;
     private static final int LOG_PACKAGES_SUFFICIENT_LENGTH = 125;
