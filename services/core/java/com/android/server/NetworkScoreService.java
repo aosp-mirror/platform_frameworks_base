@@ -234,12 +234,24 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             // safety as scores should never be compared across apps; in practice, Settings should
             // only be allowing valid apps to be set as scorers, so failure here should be rare.
             clearInternal();
+            // Get the scorer that is about to be replaced, if any, so we can notify it directly.
+            NetworkScorerAppData prevScorer = NetworkScorerAppManager.getActiveScorer(mContext);
             boolean result = NetworkScorerAppManager.setActiveScorer(mContext, packageName);
-            if (result) {
+            if (result) { // new scorer successfully set
                 registerPackageReceiverIfNeeded();
                 Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
-                intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                if (prevScorer != null) { // Directly notify the old scorer.
+                    intent.setPackage(prevScorer.mPackageName);
+                    // TODO: Need to update when we support per-user scorers. http://b/23422763
+                    mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+                }
+
+                if (packageName != null) { // Then notify the new scorer
+                    intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
+                    intent.setPackage(packageName);
+                    // TODO: Need to update when we support per-user scorers. http://b/23422763
+                    mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+                }
             }
             return result;
         } finally {
