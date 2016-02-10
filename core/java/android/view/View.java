@@ -10894,6 +10894,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return true;
                 }
             case MotionEvent.ACTION_DOWN:
+                if (mScrollCache.state == ScrollabilityCache.OFF) {
+                    return false;
+                }
                 if (isOnVerticalScrollbarThumb(x, y)) {
                     mScrollCache.mScrollBarDraggingState =
                             ScrollabilityCache.DRAGGING_VERTICAL_SCROLL_BAR;
