@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Se permite întotdeauna scanarea traficului Wi-Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Folosiți vechiul client DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Conexiunea de date mobile este întotdeauna activată"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Când este activată, funcția Wi-Fi va fi mai agresivă la predarea conexiunii de date către mobil când semnalul Wi-Fi este slab"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aceste setări sunt destinate exclusiv utilizării pentru dezvoltare. Din cauza lor, este posibil ca dispozitivul dvs. și aplicațiile de pe acesta să nu mai funcţioneze sau să funcţioneze necorespunzător."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificați aplicațiile prin USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificați aplicațiile instalate utilizând ADB/ADT, pentru a detecta un comportament dăunător."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Aplicație terminal locală"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activați aplicația terminal care oferă acces la shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verificare HDCP"</string>

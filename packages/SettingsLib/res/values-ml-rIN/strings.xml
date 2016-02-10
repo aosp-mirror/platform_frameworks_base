@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"എപ്പോഴും വൈഫൈ റോം സ്‌‌കാൻ അനുവദിക്കൂ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"പഴയ DHCP ക്ലയന്റ് ഉപയോഗിക്കുക"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"സെല്ലുലാർ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"പ്രവർത്തനക്ഷമമായിരിക്കുമ്പോൾ, വൈഫൈ സിഗ്‌നൽ കുറവായിരിക്കുന്ന സമയത്ത് സെല്ലുലാറിലേക്ക് ഡാറ്റ കണക്ഷൻ മുഖേന കൈമാറുന്നതിൽ വൈഫൈ കൂടുതൽ പ്രവർത്തനക്ഷമമാകും"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ഈ ക്രമീകരണങ്ങൾ വികസന ഉപയോഗത്തിന് മാത്രമായുള്ളതാണ്. അവ നിങ്ങളുടെ ഉപകരണവും അതിലെ അപ്ലിക്കേഷനുകളും തകരാറിലാക്കുന്നതിനോ തെറ്റായി പ്രവർത്തിക്കുന്നതിനോ ഇടയാക്കാം."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB വഴി ആപ്സ് പരിശോധിച്ചുറപ്പിക്കൂ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ADB/ADT വഴി ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ പരിശോധിക്കുക."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP പരിശോധന"</string>
@@ -266,8 +270,8 @@
     <item msgid="5363960654009010371">"ഡിജിറ്റൽ ഉള്ളടക്കത്തിനായി വർണ്ണങ്ങൾ ഒപ്റ്റിമൈസ് ചെയ്തു"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"നിഷ്‌ക്രിയ ആപ്പ്‌സ്"</string>
-    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"നിഷ്‌ക്രിയം. ടോഗിൾ ചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
-    <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. ടോഗിൾ ചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"നിഷ്‌ക്രിയം. മാറ്റുന്നതിനു ടാപ്പുചെയ്യുക."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"സജീവം. മാറ്റുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"പ്രവർത്തിക്കുന്ന സേവനങ്ങൾ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"നിലവിൽ പ്രവർത്തിക്കുന്ന സേവങ്ങൾ കാണുക, നിയന്ത്രിക്കുക"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"നൈറ്റ് മോഡ്"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"നിറഞ്ഞു"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"അഡ്‌മിനിസ്ട്രേറ്റർ പ്രവർത്തനരഹിതമാക്കി"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"ഹോം"</string>
 </resources>

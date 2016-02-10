@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi సంచార స్కాన్‌లను ఎల్లప్పుడూ అనుమతించు"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"లెగసీ DHCP క్లయింట్‌ను ఉపయోగించు"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ఎల్లప్పుడూ సెల్యులార్ డేటాను సక్రియంగా ఉంచు"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన ప్రమాణపత్రం కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ప్రారంభించబడినప్పుడు, Wi‑Fi సిగ్నల్ బలహీనంగా ఉంటే డేటా కనెక్షన్‌ను సెల్యులార్‌కి మార్చేలా Wi‑Fiపై మరింత తీవ్ర ఒత్తిడి కలుగుతుంది"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ఈ సెట్టింగ్‌లు అభివృద్ధి వినియోగం కోసం మాత్రమే ఉద్దేశించబడినవి. వీటి వలన మీ పరికరం మరియు దీనిలోని అనువర్తనాలు విచ్ఛిన్నం కావచ్చు లేదా తప్పుగా ప్రవర్తించవచ్చు."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ద్వారా అనువర్తనాలను ధృవీకరించు"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలను తనిఖీ చేయి."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"స్థానిక షెల్ ప్రాప్యతను అందించే టెర్మినల్ అనువర్తనాన్ని ప్రారంభించు"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP తనిఖీ"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ఛార్జ్ కావడం లేదు"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"నిండింది"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"నిర్వాహకుడు నిలిపివేసారు"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"హోమ్"</string>
 </resources>

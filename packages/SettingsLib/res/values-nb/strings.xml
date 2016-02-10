@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillat alltid skanning for Wi-Fi-roaming"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Bruk eldre DHCP-klient"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobildata er alltid aktiv"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Hvis dette slås på, overfører Wi-Fi-nettverket datatilkoblingen til mobil mer aggressivt når Wi-Fi-signalet er lavt"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse innstillingene er bare beregnet for bruk under programutvikling. De kan forårsake problemer med enheten din og tilhørende apper."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Bekreft apper via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT for skadelig adferd."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktiver terminalappen som gir lokal kommandolistetilgang"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontroll"</string>
@@ -206,10 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Skjermblink ved lange apphandlinger på hovedtråd"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Pekerplassering"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Skjermoverlegg viser aktuelle berøringsdata"</string>
-    <!-- no translation found for show_touches (2642976305235070316) -->
-    <skip />
-    <!-- no translation found for show_touches_summary (6101183132903926324) -->
-    <skip />
+    <string name="show_touches" msgid="2642976305235070316">"Vis trykk"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Vis visuell tilbakemelding for trykk"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Vis overflateoppdateringer"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Fremhev hele vindusoverflater når de oppdateres"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Vis GPU-visningsoppdateringer"</string>
@@ -253,8 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Slår på støtte for vinduer i eksperimentelt fritt format."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Passord for sikkerhetskopiering på datamaskin"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Fullstendig sikkerhetskopiering på datamaskin beskyttes ikke for øyeblikket."</string>
-    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
-    <skip />
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Trykk for å endre eller fjerne passordet for fullstendige sikkerhetskopier på datamaskinen"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nytt passord for sikkerhetskopiering er angitt."</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Gjentakelsen av passordet er ikke identisk med det første du skrev inn"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Kunne ikke angi nytt passord for sikkerhetskopiering"</string>
@@ -269,10 +270,8 @@
     <item msgid="5363960654009010371">"Farger som er optimalisert for digitalt innhold"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Inaktive apper"</string>
-    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
-    <skip />
-    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
-    <skip />
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Ikke aktiv. Trykk for å slå av/på."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trykk for å slå av/på."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Aktive tjenester"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Se og kontrollér tjenester som kjører for øyeblikket"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Nattmodus"</string>

@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"一律允許 Wi-Fi 漫遊掃描"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"使用舊版 DHCP 用戶端"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"行動數據連線一律保持啟用狀態"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"啟用時，Wi-Fi 連線在訊號不穩的情況下會更積極轉換成行動數據連線"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"這些設定僅供開發之用，可能導致您的裝置及裝置中的應用程式毀損或運作異常。"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"透過 USB 驗證應用程式"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"透過 ADB/ADT 檢查安裝的應用程式是否出現有害的行為。"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 檢查"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"非充電中"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"電力充足"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"已由管理員停用"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"主畫面"</string>
 </resources>

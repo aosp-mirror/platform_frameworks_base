@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi axtarışlarına həmişə icazə verin"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Köhnə DHCP klient istifadə edin"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobil data həmişə aktivdir"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz displey sertifikatlaşması üçün seçimləri göstərir"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi giriş səviyyəsini qaldırın, Wi‑Fi seçəndə hər SSID RSSI üzrə göstərin"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Aktiv olanda, Wi‑Fi sianqlı zəif olan zaman, Mobil şəbəkə data bağlantısına nisbətən, Wi‑Fi daha aqressiv olacaq"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu parametrlər yalnız inkişafetdirici istifadə üçün nəzərdə tutulub. Onlar cihaz və tətbiqlərinizin sınması və ya pis işləməsinə səbəb ola bilər."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB üzərindən tətbiqləri yoxlayın"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT vasitəsi ilə quraşdırılmış tətbiqləri zərərli davranış üzrə yoxlayın."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Yerli terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Yerli örtük girişini təklif edən terminal tətbiqi aktiv edin"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP yoxlanılır"</string>

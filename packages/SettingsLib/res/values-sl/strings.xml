@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vedno omogoči iskanje omrežij Wi-Fi za gostovanje"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Uporaba starejšega odjemalca DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Prenos podatkov v mobilnih omrežjih je vedno aktiven"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povečaj raven zapis. dnev. za Wi-Fi; v izbir. Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Če je ta možnost omogočena, Wi-Fi odločneje preda podatkovno povezavo mobilnemu omrežju, ko je signal Wi-Fi šibek"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Te nastavitve so namenjene samo za razvijanje in lahko povzročijo prekinitev ali napačno delovanje naprave in aplikacij v njej."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Preveri aplikacije prek USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Preveri, ali so aplikacije, nameščene prek ADB/ADT, škodljive."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogočanje terminalske aplikacije za dostop do lokalne lupine"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Preverjanje HDCP"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Se ne polni"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Poln"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Onemogočil skrbnik"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Začetni zaslon"</string>
 </resources>

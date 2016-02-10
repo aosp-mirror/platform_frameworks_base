@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"हमेशा वाई-फ़ाई रोम स्कैन करने दें"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"लीगेसी DHCP क्‍लाइंट"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"सेल्युलर डेटा हमेशा सक्रिय"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस दिखाई देने के लिए प्रमाणन विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाई-फ़ाई प्रवेश स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"इसके सक्षम होने पर, जब वाई-फ़ाई संकेत कमज़ोर हों तो वाई-फ़ाई, डेटा कनेक्शन को सेल्यूलर पर अधिक बलपूर्वक भेजेगा"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ये सेटिंग केवल विकास संबंधी उपयोग के प्रयोजन से हैं. वे आपके डिवाइस और उस पर स्‍थित ऐप्स  को खराब कर सकती हैं या उनके दुर्व्यवहार का कारण हो सकती हैं."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB पर ऐप्स  सत्यापित करें"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"नुकसानदेह व्यवहार के लिए ADB/ADT के द्वारा इंस्टॉल किए गए ऐप्स  जांचें."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानीय शेल एक्सेस ऑफ़र करने वाला टर्मिनल ऐप्स  सक्षम करें"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP जांच"</string>
@@ -309,6 +313,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूरी"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"व्यवस्थापक के द्वारा अक्षम किया गया"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"होम"</string>
 </resources>

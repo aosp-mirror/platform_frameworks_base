@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Сканирането за роуминг на Wi-Fi да е разрешено винаги"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Наследена клиентска програма за DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Винаги активни клетъчни данни"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"При активиране предаването на връзката за данни от Wi-Fi към мобилната мрежа ще е по-агресивно, когато Wi-Fi сигналът е слаб"</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Тези настройки са предназначени само за програмиране. Те могат да доведат до прекъсване на работата или неправилно функциониране на устройството ви и приложенията в него."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потвържд. на прил. през USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверка на инсталираните чрез ADB/ADT приложения за опасно поведение."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка с HDCP"</string>
@@ -206,10 +210,8 @@
     <string name="strict_mode_summary" msgid="142834318897332338">"Примигване на екрана при дълги операции в главната нишка"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Mестопол. на показалеца"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Насл. на екран показва текущи данни при докосване"</string>
-    <!-- no translation found for show_touches (2642976305235070316) -->
-    <skip />
-    <!-- no translation found for show_touches_summary (6101183132903926324) -->
-    <skip />
+    <string name="show_touches" msgid="2642976305235070316">"Показване на докосванията"</string>
+    <string name="show_touches_summary" msgid="6101183132903926324">"Показване на визуална обр. връзка за докосванията"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Актуал. на повърхн: Показв."</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Примигв. на целите повърхности на прозорците при актуализирането им"</string>
     <string name="show_hw_screen_updates" msgid="5036904558145941590">"Показв. на актуал. на изгледа от GPU"</string>
@@ -253,8 +255,7 @@
     <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Активира поддръжката за експерименталните прозорци в свободна форма."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Наст. комп.: Парола"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Понастоящем пълните резервни копия за настолен компютър не са защитени"</string>
-    <!-- no translation found for local_backup_password_summary_change (5376206246809190364) -->
-    <skip />
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Докоснете, за да промените или премахнете паролата за пълни резервни копия на настолния компютър"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Зададена е нова парола за резервно копие"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Новата парола и въведената за потвърждаване не съвпадат"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Задаването на парола за резервно копие не бе успешно"</string>
@@ -269,10 +270,8 @@
     <item msgid="5363960654009010371">"Цветове, оптимизирани за дигитално съдържание"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="1317817863508274533">"Неактивни приложения"</string>
-    <!-- no translation found for inactive_app_inactive_summary (5091363706699855725) -->
-    <skip />
-    <!-- no translation found for inactive_app_active_summary (4174921824958516106) -->
-    <skip />
+    <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактивно. Докоснете, за да превключите."</string>
+    <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активно. Докоснете, за да превключите."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Изпълнявани услуги:"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Преглед и контрол върху изпълняващите се понастоящем услуги"</string>
     <string name="night_mode_title" msgid="2594133148531256513">"Нощен режим"</string>

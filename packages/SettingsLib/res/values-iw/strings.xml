@@ -165,6 +165,8 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏התר תמיד סריקות נדידה של Wi‑Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"‏השתמש בלקוח DHCP מדור קודם"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"נתונים סלולריים פעילים תמיד"</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏כשתכונה זו מופעלת, Wi-Fi יתנהג בצורה אגרסיבית יותר בעת העברת חיבור הנתונים לרשת הסלולרית כשאות ה-Wi-Fi חלש."</string>
@@ -185,6 +187,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"הגדרות אלה מיועדות לשימוש בפיתוח בלבד. הן עלולות לגרום למכשיר או לאפליקציות המותקנות בו לקרוס או לפעול באופן לא תקין."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏אמת אפליקציות באמצעות USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏בדוק אפליקציות שהותקנו באמצעות ADB/ADT לאיתור התנהגות מזיקה."</string>
+    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
+    <skip />
     <string name="enable_terminal_title" msgid="95572094356054120">"מסוף מקומי"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"הפעל אפליקציית מסוף המציעה גישה מקומית למעטפת"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏בדיקת HDCP"</string>

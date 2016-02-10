@@ -165,6 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ሁልጊዜ የWi‑Fi ማንቀሳቀስ ቅኝቶችን ይፍቀዱ"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"የቆየ የDHCP ደንበኛ ይጠቀሙ"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"የተንቀስቃሽ ስልክ ውሂብ ሁልጊዜ ንቁ"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ፍጹማዊ ድምፅን አሰናክል"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ አማራጮችን አሳይ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"የWi‑Fi ምዝግብ ማስታወሻ አያያዝ ደረጃ ጨምር፣ በWi‑Fi መምረጫ ውስጥ በአንድ SSID RSSI አሳይ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ሲነቃ የWi‑Fi ምልክት ዝቅተኛ ሲሆን Wi‑Fi የውሂብ ግንኙነት ለተንቀሳቃሽ ማስረከብ ላይ ይበልጥ አስገዳጅ ይሆናል"</string>
@@ -185,6 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"እነዚህ ቅንብሮች  የታሰቡት ለግንባታ አጠቃቀም ብቻ ናቸው። መሳሪያህን እና በሱ ላይ ያሉትን መተግበሪያዎች እንዲበለሹ ወይም በትክክል እንዳይሰሩ ሊያደርጉ ይችላሉ።"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"መተግበሪያዎች በUSB በኩል ያረጋግጡ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"በADB/ADT በኩል የተጫኑ መተግበሪያዎች ጎጂ ባህሪ ካላቸው ያረጋግጡ።"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"እንደ ተቀባይነት በሌለው ደረጃ ድምፁ ከፍ ማለት ወይም መቆጣጠር አለመቻል ያሉ ከሩቅ መሣሪያዎች ጋር የድምፅ ችግር በሚኖርበት ጊዜ የብሉቱዝ ፍጹማዊ ድምፅን ባሕሪ ያሰናክላል።"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"አካባቢያዊ ተርሚናል"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"የአካባቢያዊ ሼል መዳረሻ የሚያቀርብ የተርሚናል መተግበሪያ አንቃ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"የHDCP ምልከታ"</string>
@@ -309,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ኃይል  እየሞላ አይደለም"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ሙሉነው"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"በአስተዳዳሪ የተሰናከለ"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"መነሻ"</string>
 </resources>
