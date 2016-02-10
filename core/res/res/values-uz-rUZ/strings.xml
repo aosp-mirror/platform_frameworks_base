@@ -864,7 +864,7 @@
     <string name="Midnight" msgid="5630806906897892201">"Yarim tun"</string>
     <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
     <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
-    <string name="selectAll" msgid="6876518925844129331">"Barchasini tanlash"</string>
+    <string name="selectAll" msgid="6876518925844129331">"Hammasini belgilash"</string>
     <string name="cut" msgid="3092569408438626261">"Kesish"</string>
     <string name="copy" msgid="2681946229533511987">"Nusxa olish"</string>
     <string name="paste" msgid="5629880836805036433">"Joylash"</string>
@@ -977,12 +977,12 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringtonlar"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Noma’lum rington"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="other">Wi-Fi tarmoqlari mavjud emas</item>
-      <item quantity="one">Wi-Fi tarmog‘i mavjud emas</item>
+      <item quantity="other">Wi-Fi tarmoqlari aniqlandi</item>
+      <item quantity="one">Wi-Fi tarmog‘i aniqlandi</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="other">Ochiq Wi-Fi tarmoqlari mavjud</item>
-      <item quantity="one">Ochiq Wi-Fi tarmog‘i mavjud</item>
+      <item quantity="other">Ochiq Wi-Fi tarmoqlari aniqlandi</item>
+      <item quantity="one">Ochiq Wi-Fi tarmog‘i aniqlandi</item>
     </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi tarmoqqa kirish"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Tarmoqqa kirish"</string>
@@ -1153,7 +1153,7 @@
     <string name="submit" msgid="1602335572089911941">"Jo‘natish"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mashina usuli yoqilgan"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Avtomashina rejimidan chiqish uchun bosing."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Modem yoki ulanish nuqtasi - faol"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Modem rejimi yoniq"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Sozlash uchun bosing."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Orqaga"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Keyingi"</string>
@@ -1167,7 +1167,7 @@
     <string name="action_mode_done" msgid="7217581640461922289">"Tayyor"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"USB xotirasi tozalanmoqda…"</string>
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD xotira kartasi tozalanmoqda…"</string>
-    <string name="share" msgid="1778686618230011964">"Bo‘lishish"</string>
+    <string name="share" msgid="1778686618230011964">"Yuborish"</string>
     <string name="find" msgid="4808270900322985960">"Topish"</string>
     <string name="websearch" msgid="4337157977400211589">"Veb qidiruv"</string>
     <string name="find_next" msgid="5742124618942193978">"Keyingisini topish"</string>
@@ -1212,8 +1212,8 @@
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Kiritish"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Ilovani tanlang"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ishga tushmadi"</string>
-    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Bo‘lishish:"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> bilan bo‘lishish"</string>
+    <string name="shareactionprovider_share_with" msgid="806688056141131819">"Ruxsat berish"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> ilovasiga ruxsat berish"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Surish uchun dastak. Bosing va ushlab turing."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Qulfdan chiqarish uchun silang."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Parol kalitlarini eshitish uchun garnitura ulang."</string>
