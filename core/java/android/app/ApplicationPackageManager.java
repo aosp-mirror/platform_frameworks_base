@@ -429,6 +429,16 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /** @hide */
+    @Override
+    public @Nullable String getServicesSystemSharedLibraryPackageName() {
+        try {
+            return mPM.getServicesSystemSharedLibraryPackageName();
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
+        }
+    }
+
     @Override
     public FeatureInfo[] getSystemAvailableFeatures() {
         try {

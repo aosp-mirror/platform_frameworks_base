@@ -3427,6 +3427,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public @Nullable String getServicesSystemSharedLibraryPackageName() {
+        synchronized (mPackages) {
+            SharedLibraryEntry libraryEntry = mSharedLibraries.get(
+                    PackageManager.SYSTEM_SHARED_LIBRARY_SERVICES);
+            if (libraryEntry != null) {
+                return libraryEntry.apk;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public FeatureInfo[] getSystemAvailableFeatures() {
         Collection<FeatureInfo> featSet;
         synchronized (mPackages) {

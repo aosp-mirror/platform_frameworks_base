@@ -2327,6 +2327,28 @@ public abstract class PackageManager {
     public static final int MASK_PERMISSION_FLAGS = 0xFF;
 
     /**
+     * This is a library that contains components apps can invoke. For
+     * example, a services for apps to bind to, or standard chooser UI,
+     * etc. This library is versioned and backwards compatible. Clients
+     * should check its version via {@link android.ext.services.Version
+     * #getVersionCode()} and avoid calling APIs added in later versions.
+     *
+     * @hide
+     */
+    public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
+
+    /**
+     * This is a library that contains components apps can dynamically
+     * load. For example, new widgets, helper classes, etc. This library
+     * is versioned and backwards compatible. Clients should check its
+     * version via {@link android.ext.shared.Version#getVersionCode()}
+     * and avoid calling APIs added in later versions.
+     *
+     * @hide
+     */
+    public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
@@ -3363,6 +3385,15 @@ public abstract class PackageManager {
      *
      */
     public abstract String[] getSystemSharedLibraryNames();
+
+    /**
+     * Get the name of the package hosting the services shared library.
+     *
+     * @return The library host package.
+     *
+     * @hide
+     */
+    public abstract @Nullable String getServicesSystemSharedLibraryPackageName();
 
     /**
      * Get a list of features that are available on the
