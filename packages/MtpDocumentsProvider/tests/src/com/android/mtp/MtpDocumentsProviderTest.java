@@ -29,6 +29,8 @@ import android.provider.DocumentsContract;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
+import com.android.mtp.exceptions.BusyDeviceException;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -523,6 +525,32 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         try (final ParcelFileDescriptor fd = mProvider.openDocument("3", "r", null)) {
             final byte[] readBytes = new byte[1024 * 1024];
             assertEquals(11, Os.read(fd.getFileDescriptor(), readBytes, 0, readBytes.length));
+        }
+    }
+
+    public void testBusyDevice() throws Exception {
+        mMtpManager = new TestMtpManager(getContext()) {
+            @Override
+            void openDevice(int deviceId) throws IOException {
+                throw new BusyDeviceException();
+            }
+        };
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mMtpManager.addValidDevice(new MtpDeviceRecord(
+                0, "Device A", false /* unopened */, new MtpRoot[0], null, null));
+
+        mProvider.resumeRootScanner();
+        mResolver.waitForNotification(ROOTS_URI, 1);
+
+        try (final Cursor cursor = mProvider.queryRoots(null)) {
+            assertEquals(1, cursor.getCount());
+        }
+
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {
+            assertEquals(0, cursor.getCount());
+            assertEquals(
+                    "error_busy_device",
+                    cursor.getExtras().getString(DocumentsContract.EXTRA_ERROR));
         }
     }
 
