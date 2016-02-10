@@ -1823,23 +1823,37 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Helper action to set layout margin on a View.
+     * Helper action to set layout params on a View.
      */
-    private class ViewMarginEndAction extends Action {
-        public ViewMarginEndAction(int viewId, int end) {
+    private class LayoutParamAction extends Action {
+
+        /** Set marginEnd */
+        public static final int LAYOUT_MARGIN_END = 1;
+        /** Set width */
+        public static final int LAYOUT_WIDTH = 2;
+
+        /**
+         * @param viewId ID of the view alter
+         * @param property which layout parameter to alter
+         * @param value new value of the layout parameter
+         */
+        public LayoutParamAction(int viewId, int property, int value) {
             this.viewId = viewId;
-            this.end = end;
+            this.property = property;
+            this.value = value;
         }
 
-        public ViewMarginEndAction(Parcel parcel) {
+        public LayoutParamAction(Parcel parcel) {
             viewId = parcel.readInt();
-            end = parcel.readInt();
+            property = parcel.readInt();
+            value = parcel.readInt();
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
-            dest.writeInt(end);
+            dest.writeInt(property);
+            dest.writeInt(value);
         }
 
         @Override
@@ -1849,17 +1863,31 @@ public class RemoteViews implements Parcelable, Filter {
                 return;
             }
             ViewGroup.LayoutParams layoutParams = target.getLayoutParams();
-            if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
-                ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(end);
-                target.setLayoutParams(layoutParams);
+            if (layoutParams == null) {
+                return;
+            }
+            switch (property) {
+                case LAYOUT_MARGIN_END:
+                    if (layoutParams instanceof ViewGroup.MarginLayoutParams) {
+                        ((ViewGroup.MarginLayoutParams) layoutParams).setMarginEnd(value);
+                        target.setLayoutParams(layoutParams);
+                    }
+                    break;
+                case LAYOUT_WIDTH:
+                    layoutParams.width = value;
+                    target.setLayoutParams(layoutParams);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown property " + property);
             }
         }
 
         public String getActionName() {
-            return "ViewMarginEndAction";
+            return "LayoutParamAction" + property + ".";
         }
 
-        int end;
+        int property;
+        int value;
 
         public final static int TAG = 19;
     }
@@ -2169,8 +2197,8 @@ public class RemoteViews implements Parcelable, Filter {
                         case SetRemoteInputsAction.TAG:
                             mActions.add(new SetRemoteInputsAction(parcel));
                             break;
-                        case ViewMarginEndAction.TAG:
-                            mActions.add(new ViewMarginEndAction(parcel));
+                        case LayoutParamAction.TAG:
+                            mActions.add(new LayoutParamAction(parcel));
                             break;
                         default:
                             throw new ActionException("Tag " + tag + " not found");
@@ -2788,7 +2816,15 @@ public class RemoteViews implements Parcelable, Filter {
      * @param endMargin the left padding in pixels
      */
     public void setViewLayoutMarginEnd(int viewId, int endMargin) {
-        addAction(new ViewMarginEndAction(viewId, endMargin));
+        addAction(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_MARGIN_END, endMargin));
+    }
+
+    /**
+     * Equivalent to setting {@link android.view.ViewGroup.LayoutParams#width}.
+     * @hide
+     */
+    public void setViewLayoutWidth(int viewId, int layoutWidth) {
+        mActions.add(new LayoutParamAction(viewId, LayoutParamAction.LAYOUT_WIDTH, layoutWidth));
     }
 
     /**

@@ -51,6 +51,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
@@ -3281,6 +3282,10 @@ public class Notification implements Parcelable
                     validRemoteInput |= hasValidRemoteInput(action);
 
                     final RemoteViews button = generateActionButton(action);
+                    if (i == N - 1) {
+                        button.setViewLayoutWidth(com.android.internal.R.id.action0,
+                                ViewGroup.LayoutParams.MATCH_PARENT);
+                    }
                     big.addView(R.id.actions, button);
                 }
             }
