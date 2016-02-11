@@ -29062,6 +29062,7 @@ package android.os {
     method public static final int getThreadPriority(int) throws java.lang.IllegalArgumentException;
     method public static final int getUidForName(java.lang.String);
     method public static final boolean is64Bit();
+    method public static boolean isApplicationUid(int);
     method public static final void killProcess(int);
     method public static final int myPid();
     method public static final int myTid();
@@ -29242,6 +29243,7 @@ package android.os {
   public final class UserHandle implements android.os.Parcelable {
     ctor public UserHandle(android.os.Parcel);
     method public int describeContents();
+    method public static android.os.UserHandle getUserHandleForUid(int);
     method public static android.os.UserHandle readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     method public static void writeToParcel(android.os.UserHandle, android.os.Parcel);

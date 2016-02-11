@@ -823,6 +823,16 @@ public class Process {
     }
 
     /**
+     * Returns whether the given uid belongs to an application.
+     * @param uid A kernel uid.
+     * @return Whether the uid corresponds to an application sandbox running in
+     *     a specific user.
+     */
+    public static boolean isApplicationUid(int uid) {
+        return UserHandle.isApp(uid);
+    }
+
+    /**
      * Returns whether the current process is in an isolated sandbox.
      * @hide
      */
