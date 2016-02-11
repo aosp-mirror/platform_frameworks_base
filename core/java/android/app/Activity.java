@@ -4061,11 +4061,16 @@ public class Activity extends ContextThemeWrapper
      *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
      *    Should be >= 0.
      *
+     * @throws IllegalArgumentException if requestCode is negative.
+     *
      * @see #onRequestPermissionsResult(int, String[], int[])
      * @see #checkSelfPermission(String)
      * @see #shouldShowRequestPermissionRationale(String)
      */
     public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        if (requestCode < 0) {
+            throw new IllegalArgumentException("requestCode should be >= 0");
+        }
         if (mHasCurrentPermissionsRequest) {
             Log.w(TAG, "Can reqeust only one set of permissions at a time");
             // Dispatch the callback with empty arrays which means a cancellation.
