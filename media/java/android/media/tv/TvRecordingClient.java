@@ -68,7 +68,7 @@ public class TvRecordingClient {
 
     /**
      * Tunes to a given channel for TV program recording. The first tune request will create a new
-     * recording session for the corresponding TV input and establish the connection between the
+     * recording session for the corresponding TV input and establish a connection between the
      * application and the session. If recording has already started in the current recording
      * session, this method throws an exception.
      *
@@ -88,7 +88,7 @@ public class TvRecordingClient {
 
     /**
      * Tunes to a given channel for TV program recording. The first tune request will create a new
-     * recording session for the corresponding TV input and establish the connection between the
+     * recording session for the corresponding TV input and establish a connection between the
      * application and the session. If recording has already started in the current recording
      * session, this method throws an exception.
      *
@@ -226,6 +226,23 @@ public class TvRecordingClient {
      */
     public abstract static class RecordingCallback {
         /**
+         * This is called when an error occurred while establishing a connection to the recording
+         * session for the corresponding TV input.
+         *
+         * @param inputId The ID of the TV input bound to the current TvRecordingClient.
+         */
+        public void onConnectionFailed(String inputId) {
+        }
+
+        /**
+         * This is called when the connection to the current recording session is lost.
+         *
+         * @param inputId The ID of the TV input bound to the current TvRecordingClient.
+         */
+        public void onDisconnected(String inputId) {
+        }
+
+        /**
          * This is called when the recording session has been tuned to the given channel and is
          * ready to start recording.
          */
@@ -249,8 +266,6 @@ public class TvRecordingClient {
          * @param error The error code. Should be one of the followings.
          * <ul>
          * <li>{@link TvInputManager#RECORDING_ERROR_UNKNOWN}
-         * <li>{@link TvInputManager#RECORDING_ERROR_CONNECTION_FAILED}
-         * <li>{@link TvInputManager#RECORDING_ERROR_DISCONNECTED}
          * <li>{@link TvInputManager#RECORDING_ERROR_INSUFFICIENT_SPACE}
          * <li>{@link TvInputManager#RECORDING_ERROR_RESOURCE_BUSY}
          * </ul>
@@ -305,7 +320,9 @@ public class TvRecordingClient {
                 mSession.tune(mChannelUri, mConnectionParams);
             } else {
                 mSessionCallback = null;
-                mCallback.onError(TvInputManager.RECORDING_ERROR_CONNECTION_FAILED);
+                if (mCallback != null) {
+                    mCallback.onConnectionFailed(mInputId);
+                }
             }
         }
 
@@ -331,11 +348,13 @@ public class TvRecordingClient {
                 Log.w(TAG, "onSessionReleased - session not created");
                 return;
             }
-            mSessionCallback = null;
-            mSession = null;
             mIsTuned = false;
             mIsRecordingStarted = false;
-            mCallback.onError(TvInputManager.RECORDING_ERROR_DISCONNECTED);
+            mSessionCallback = null;
+            mSession = null;
+            if (mCallback != null) {
+                mCallback.onDisconnected(mInputId);
+            }
         }
 
         @Override

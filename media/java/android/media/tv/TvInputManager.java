@@ -157,35 +157,22 @@ public final class TvInputManager {
     public static final int RECORDING_ERROR_UNKNOWN = 0;
 
     /**
-     * Error for {@link TvRecordingClient.RecordingCallback#onError(int)}: The recording client has
-     * failed to establish a connection to a recording session.
-     */
-    public static final int RECORDING_ERROR_CONNECTION_FAILED = 1;
-
-    /**
-     * Error for {@link TvRecordingClient.RecordingCallback#onError(int)}: The recording client has
-     * been disconnected from the current recording session.
-     */
-    public static final int RECORDING_ERROR_DISCONNECTED = 2;
-
-    /**
      * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
      * {@link TvRecordingClient.RecordingCallback#onError(int)}: Recording cannot proceed due to
      * insufficient storage space.
      */
-    public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 3;
+    public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 1;
 
     /**
      * Error for {@link TvInputService.RecordingSession#notifyError(int)} and
      * {@link TvRecordingClient.RecordingCallback#onError(int)}: Recording cannot proceed because
      * a required recording resource was not able to be allocated.
      */
-    public static final int RECORDING_ERROR_RESOURCE_BUSY = 4;
+    public static final int RECORDING_ERROR_RESOURCE_BUSY = 2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RECORDING_ERROR_UNKNOWN, RECORDING_ERROR_CONNECTION_FAILED,
-            RECORDING_ERROR_DISCONNECTED, RECORDING_ERROR_INSUFFICIENT_SPACE,
+    @IntDef({RECORDING_ERROR_UNKNOWN, RECORDING_ERROR_INSUFFICIENT_SPACE,
             RECORDING_ERROR_RESOURCE_BUSY})
     public @interface RecordingError {}
 
