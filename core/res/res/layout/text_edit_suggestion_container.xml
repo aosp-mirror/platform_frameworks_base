@@ -22,8 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:elevation="2dp"
-        android:layout_margin="20dp"
+        android:elevation="@android:dimen/text_edit_floating_toolbar_elevation"
+        android:layout_margin="@android:dimen/text_edit_floating_toolbar_margin"
         android:background="@drawable/text_edit_suggestions_window"
         android:dropDownSelector="@drawable/list_selector_background"
         android:divider="@null">
