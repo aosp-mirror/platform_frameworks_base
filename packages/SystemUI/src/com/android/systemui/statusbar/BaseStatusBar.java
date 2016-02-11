@@ -194,6 +194,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
 
     private UserManager mUserManager;
+    private int mDensity;
 
     // UI-specific methods
 
@@ -633,6 +634,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         mLocale = currentConfig.locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
         mFontScale = currentConfig.fontScale;
+        mDensity = currentConfig.densityDpi;
 
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
 
@@ -813,8 +815,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         final Locale locale = mContext.getResources().getConfiguration().locale;
         final int ld = TextUtils.getLayoutDirectionFromLocale(locale);
         final float fontScale = newConfig.fontScale;
-
-        if (! locale.equals(mLocale) || ld != mLayoutDirection || fontScale != mFontScale) {
+        final int density = newConfig.densityDpi;
+        if (density != mDensity || mFontScale != fontScale) {
+            reInflateViews();
+            mDensity = density;
+            mFontScale = fontScale;
+        }
+        if (! locale.equals(mLocale) || ld != mLayoutDirection) {
             if (DEBUG) {
                 Log.v(TAG, String.format(
                         "config changed locale/LD: %s (%d) -> %s (%d)", mLocale, mLayoutDirection,
@@ -823,6 +830,21 @@ public abstract class BaseStatusBar extends SystemUI implements
             mLocale = locale;
             mLayoutDirection = ld;
             refreshLayout(ld);
+        }
+    }
+
+    protected void reInflateViews() {
+        ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();
+        for (int i = 0; i < activeNotifications.size(); i++) {
+            Entry entry = activeNotifications.get(i);
+            boolean exposedGuts = entry.row.getGuts() == mNotificationGutsExposed;
+            entry.row.reInflateViews();
+            if (exposedGuts) {
+                mNotificationGutsExposed = entry.row.getGuts();
+                bindGuts(entry.row);
+            }
+            entry.cacheContentViews(mContext, null /* updatedNotification */);
+            inflateViews(entry, mStackScroller);
         }
     }
 

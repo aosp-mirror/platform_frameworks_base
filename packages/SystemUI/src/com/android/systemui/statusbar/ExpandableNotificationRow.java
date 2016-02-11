@@ -25,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -50,11 +51,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
-    private final int mNotificationMinHeightLegacy;
-    private final int mMaxHeadsUpHeightLegacy;
-    private final int mMaxHeadsUpHeight;
-    private final int mNotificationMinHeight;
-    private final int mNotificationMaxHeight;
+    private int mNotificationMinHeightLegacy;
+    private int mMaxHeadsUpHeightLegacy;
+    private int mMaxHeadsUpHeight;
+    private int mNotificationMinHeight;
+    private int mNotificationMaxHeight;
 
     /** Does this row contain layouts that can adapt to row expansion */
     private boolean mExpandable;
@@ -507,6 +508,27 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mHeadsUpManager = headsUpManager;
     }
 
+    public void reInflateViews() {
+        initDimens();
+        if (mIsSummaryWithChildren) {
+            removeView(mNotificationHeader);
+            mNotificationHeader = null;
+            recreateNotificationHeader();
+            if (mChildrenContainer != null) {
+                mChildrenContainer.reInflateViews();
+            }
+        }
+        if (mGuts != null) {
+            View oldGuts = mGuts;
+            int index = indexOfChild(oldGuts);
+            removeView(oldGuts);
+            mGuts = (NotificationGuts) LayoutInflater.from(mContext).inflate(
+                    R.layout.notification_guts, this, false);
+            mGuts.setVisibility(oldGuts.getVisibility());
+            addView(mGuts, index);
+        }
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -514,6 +536,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public ExpandableNotificationRow(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFalsingManager = FalsingManager.getInstance(context);
+        initDimens();
+    }
+
+    private void initDimens() {
         mNotificationMinHeightLegacy =  getResources().getDimensionPixelSize(
                 R.dimen.notification_min_height_legacy);
         mNotificationMinHeight =  getResources().getDimensionPixelSize(
