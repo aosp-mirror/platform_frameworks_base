@@ -197,7 +197,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     int mStackId;
 
     private boolean mWindowResizeCallbacksAdded = false;
-
+    private Drawable.Callback mLastBackgroundDrawableCb = null;
     private BackdropFrameRenderer mBackdropFrameRenderer = null;
     private Drawable mResizingBackgroundDrawable;
     private Drawable mCaptionBackgroundDrawable;
@@ -862,6 +862,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         if (getBackground() != drawable) {
             setBackgroundDrawable(drawable);
             if (drawable != null) {
+                mResizingBackgroundDrawable = drawable;
                 drawable.getPadding(mBackgroundPadding);
             } else {
                 mBackgroundPadding.setEmpty();
@@ -1900,6 +1901,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final ThreadedRenderer renderer = getHardwareRenderer();
         if (renderer != null) {
             loadBackgroundDrawablesIfNeeded();
+            if (mResizingBackgroundDrawable != null) {
+                mLastBackgroundDrawableCb = mResizingBackgroundDrawable.getCallback();
+                mResizingBackgroundDrawable.setCallback(null);
+            }
+
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
@@ -1943,6 +1949,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     /** Release the renderer thread which is usually done when the user stops resizing. */
     private void releaseThreadedRenderer() {
+        if (mResizingBackgroundDrawable != null && mLastBackgroundDrawableCb != null) {
+            mResizingBackgroundDrawable.setCallback(mLastBackgroundDrawableCb);
+            mLastBackgroundDrawableCb = null;
+        }
+
         if (mBackdropFrameRenderer != null) {
             mBackdropFrameRenderer.releaseRenderer();
             mBackdropFrameRenderer = null;
