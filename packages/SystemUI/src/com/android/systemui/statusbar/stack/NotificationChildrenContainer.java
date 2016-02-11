@@ -43,16 +43,16 @@ public class NotificationChildrenContainer extends ViewGroup {
     private static final int NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED = 5;
     private static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
 
-    private final int mChildPadding;
-    private final int mDividerHeight;
-    private final int mMaxNotificationHeight;
     private final List<View> mDividers = new ArrayList<>();
     private final List<ExpandableNotificationRow> mChildren = new ArrayList<>();
-    private final int mNotificationHeaderHeight;
-    private final int mNotificationAppearDistance;
-    private final int mNotificatonTopPadding;
     private final HybridNotificationViewManager mHybridViewManager;
-    private final float mCollapsedBottompadding;
+    private int mChildPadding;
+    private int mDividerHeight;
+    private int mMaxNotificationHeight;
+    private int mNotificationHeaderHeight;
+    private int mNotificationAppearDistance;
+    private int mNotificatonTopPadding;
+    private float mCollapsedBottompadding;
     private ViewInvertHelper mOverflowInvertHelper;
     private boolean mChildrenExpanded;
     private ExpandableNotificationRow mNotificationParent;
@@ -76,6 +76,11 @@ public class NotificationChildrenContainer extends ViewGroup {
     public NotificationChildrenContainer(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        initDimens();
+        mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
+    }
+
+    private void initDimens() {
         mChildPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_children_padding);
         mDividerHeight = Math.max(1, getResources().getDimensionPixelSize(
@@ -89,7 +94,6 @@ public class NotificationChildrenContainer extends ViewGroup {
         mNotificatonTopPadding = getResources().getDimensionPixelSize(
                 R.dimen.notification_children_container_top_padding);
         mCollapsedBottompadding = 11.5f * getResources().getDisplayMetrics().density;
-        mHybridViewManager = new HybridNotificationViewManager(getContext(), this);
     }
 
     @Override
@@ -459,6 +463,18 @@ public class NotificationChildrenContainer extends ViewGroup {
     public void setDark(boolean dark, boolean fade, long delay) {
         if (mGroupOverflowContainer != null) {
             mOverflowInvertHelper.setInverted(dark, fade, delay);
+        }
+    }
+
+    public void reInflateViews() {
+        initDimens();
+        for (int i = 0; i < mDividers.size(); i++) {
+            View prevDivider = mDividers.get(i);
+            int index = indexOfChild(prevDivider);
+            removeView(prevDivider);
+            View divider = inflateDivider();
+            addView(divider, index);
+            mDividers.set(i, divider);
         }
     }
 }
