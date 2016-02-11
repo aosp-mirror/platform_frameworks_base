@@ -463,6 +463,7 @@ public class TelecomManager {
         } else {
             mContext = context;
         }
+        android.telecom.Log.initMd5Sum();
     }
 
     /**
