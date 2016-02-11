@@ -83,9 +83,9 @@ void RecordingCanvas::onViewportInitialized() {
 
 void RecordingCanvas::onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {
     if (removed.flags & Snapshot::kFlagIsFboLayer) {
-        addOp(alloc().create_trivial<EndLayerOp>());
+        addOp(new (alloc()) EndLayerOp());
     } else if (removed.flags & Snapshot::kFlagIsLayer) {
-        addOp(alloc().create_trivial<EndUnclippedLayerOp>());
+        addOp(new (alloc()) EndUnclippedLayerOp());
     }
 }
 
@@ -167,7 +167,7 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
         snapshot.resetClip(clip.left, clip.top, clip.right, clip.bottom);
         snapshot.roundRectClipState = nullptr;
 
-        addOp(alloc().create_trivial<BeginLayerOp>(
+        addOp(new (alloc()) BeginLayerOp(
                 unmappedBounds,
                 *previous.transform, // transform to *draw* with
                 previousClip, // clip to *draw* with
@@ -175,7 +175,7 @@ int RecordingCanvas::saveLayer(float left, float top, float right, float bottom,
     } else {
         snapshot.flags |= Snapshot::kFlagIsLayer;
 
-        addOp(alloc().create_trivial<BeginUnclippedLayerOp>(
+        addOp(new (alloc()) BeginUnclippedLayerOp(
                 unmappedBounds,
                 *mState.currentSnapshot()->transform,
                 getRecordedClip(),
@@ -241,7 +241,7 @@ void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 void RecordingCanvas::drawPaint(const SkPaint& paint) {
-    addOp(alloc().create_trivial<RectOp>(
+    addOp(new (alloc()) RectOp(
             mState.getRenderTargetClipBounds(), // OK, since we've not passed transform
             Matrix4::identity(),
             getRecordedClip(),
@@ -261,7 +261,7 @@ void RecordingCanvas::drawPoints(const float* points, int floatCount, const SkPa
     if (floatCount < 2) return;
     floatCount &= ~0x1; // round down to nearest two
 
-    addOp(alloc().create_trivial<PointsOp>(
+    addOp(new (alloc()) PointsOp(
             calcBoundsOfPoints(points, floatCount),
             *mState.currentSnapshot()->transform,
             getRecordedClip(),
@@ -272,7 +272,7 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
     if (floatCount < 4) return;
     floatCount &= ~0x3; // round down to nearest four
 
-    addOp(alloc().create_trivial<LinesOp>(
+    addOp(new (alloc()) LinesOp(
             calcBoundsOfPoints(points, floatCount),
             *mState.currentSnapshot()->transform,
             getRecordedClip(),
@@ -280,7 +280,7 @@ void RecordingCanvas::drawLines(const float* points, int floatCount, const SkPai
 }
 
 void RecordingCanvas::drawRect(float left, float top, float right, float bottom, const SkPaint& paint) {
-    addOp(alloc().create_trivial<RectOp>(
+    addOp(new (alloc()) RectOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -290,7 +290,7 @@ void RecordingCanvas::drawRect(float left, float top, float right, float bottom,
 void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint) {
     if (rects == nullptr) return;
 
-    Vertex* rectData = (Vertex*) mDisplayList->allocator.alloc<Vertex>(vertexCount * sizeof(Vertex));
+    Vertex* rectData = (Vertex*) mDisplayList->allocator.alloc(vertexCount * sizeof(Vertex));
     Vertex* vertex = rectData;
 
     float left = FLT_MAX;
@@ -313,7 +313,7 @@ void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const
         right = std::max(right, r);
         bottom = std::max(bottom, b);
     }
-    addOp(alloc().create_trivial<SimpleRectsOp>(
+    addOp(new (alloc()) SimpleRectsOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -347,7 +347,7 @@ void RecordingCanvas::drawRegion(const SkRegion& region, const SkPaint& paint) {
 }
 void RecordingCanvas::drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint& paint) {
-    addOp(alloc().create_trivial<RoundRectOp>(
+    addOp(new (alloc()) RoundRectOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -367,7 +367,7 @@ void RecordingCanvas::drawRoundRect(
     mDisplayList->ref(ry);
     mDisplayList->ref(paint);
     refBitmapsInShader(paint->value.getShader());
-    addOp(alloc().create_trivial<RoundRectPropsOp>(
+    addOp(new (alloc()) RoundRectPropsOp(
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
             &paint->value,
@@ -389,7 +389,7 @@ void RecordingCanvas::drawCircle(
     mDisplayList->ref(radius);
     mDisplayList->ref(paint);
     refBitmapsInShader(paint->value.getShader());
-    addOp(alloc().create_trivial<CirclePropsOp>(
+    addOp(new (alloc()) CirclePropsOp(
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
             &paint->value,
@@ -397,7 +397,7 @@ void RecordingCanvas::drawCircle(
 }
 
 void RecordingCanvas::drawOval(float left, float top, float right, float bottom, const SkPaint& paint) {
-    addOp(alloc().create_trivial<OvalOp>(
+    addOp(new (alloc()) OvalOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -406,7 +406,7 @@ void RecordingCanvas::drawOval(float left, float top, float right, float bottom,
 
 void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
-    addOp(alloc().create_trivial<ArcOp>(
+    addOp(new (alloc()) ArcOp(
             Rect(left, top, right, bottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -415,7 +415,7 @@ void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
 }
 
 void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
-    addOp(alloc().create_trivial<PathOp>(
+    addOp(new (alloc()) PathOp(
             Rect(path.getBounds()),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -424,7 +424,7 @@ void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
 
 void RecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     mDisplayList->ref(tree);
-    addOp(alloc().create_trivial<VectorDrawableOp>(
+    addOp(new (alloc()) VectorDrawableOp(
             tree,
             Rect(tree->getBounds()),
             *(mState.currentSnapshot()->transform),
@@ -475,7 +475,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
         drawBitmap(&bitmap, paint);
         restore();
     } else {
-        addOp(alloc().create_trivial<BitmapRectOp>(
+        addOp(new (alloc()) BitmapRectOp(
                 Rect(dstLeft, dstTop, dstRight, dstBottom),
                 *(mState.currentSnapshot()->transform),
                 getRecordedClip(),
@@ -487,7 +487,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap& bitmap, float srcLeft, float sr
 void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) {
     int vertexCount = (meshWidth + 1) * (meshHeight + 1);
-    addOp(alloc().create_trivial<BitmapMeshOp>(
+    addOp(new (alloc()) BitmapMeshOp(
             calcBoundsOfPoints(vertices, vertexCount * 2),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -499,7 +499,7 @@ void RecordingCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int 
 void RecordingCanvas::drawNinePatch(const SkBitmap& bitmap, const android::Res_png_9patch& patch,
             float dstLeft, float dstTop, float dstRight, float dstBottom,
             const SkPaint* paint) {
-    addOp(alloc().create_trivial<PatchOp>(
+    addOp(new (alloc()) PatchOp(
             Rect(dstLeft, dstTop, dstRight, dstBottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -515,7 +515,7 @@ void RecordingCanvas::drawText(const uint16_t* glyphs, const float* positions, i
     positions = refBuffer<float>(positions, glyphCount * 2);
 
     // TODO: either must account for text shadow in bounds, or record separate ops for text shadows
-    addOp(alloc().create_trivial<TextOp>(
+    addOp(new (alloc()) TextOp(
             Rect(boundsLeft, boundsTop, boundsRight, boundsBottom),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -527,7 +527,7 @@ void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int glyphCount, con
             float hOffset, float vOffset, const SkPaint& paint) {
     if (!glyphs || glyphCount <= 0 || PaintUtils::paintWillNotDrawText(paint)) return;
     glyphs = refBuffer<glyph_t>(glyphs, glyphCount);
-    addOp(alloc().create_trivial<TextOnPathOp>(
+    addOp(new (alloc()) TextOnPathOp(
             mState.getLocalClipBounds(), // TODO: explicitly define bounds
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -535,7 +535,7 @@ void RecordingCanvas::drawTextOnPath(const uint16_t* glyphs, int glyphCount, con
 }
 
 void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
-    addOp(alloc().create_trivial<BitmapOp>(
+    addOp(new (alloc()) BitmapOp(
             Rect(bitmap->width(), bitmap->height()),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -544,7 +544,7 @@ void RecordingCanvas::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
 
 void RecordingCanvas::drawRenderNode(RenderNode* renderNode) {
     auto&& stagingProps = renderNode->stagingProperties();
-    RenderNodeOp* op = alloc().create_trivial<RenderNodeOp>(
+    RenderNodeOp* op = new (alloc()) RenderNodeOp(
             Rect(stagingProps.getWidth(), stagingProps.getHeight()),
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),
@@ -570,7 +570,7 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
     Matrix4 totalTransform(*(mState.currentSnapshot()->transform));
     totalTransform.multiply(layer->getTransform());
 
-    addOp(alloc().create_trivial<TextureLayerOp>(
+    addOp(new (alloc()) TextureLayerOp(
             Rect(layer->getWidth(), layer->getHeight()),
             totalTransform,
             getRecordedClip(),
@@ -579,7 +579,7 @@ void RecordingCanvas::drawLayer(DeferredLayerUpdater* layerHandle) {
 
 void RecordingCanvas::callDrawGLFunction(Functor* functor) {
     mDisplayList->functors.push_back(functor);
-    addOp(alloc().create_trivial<FunctorOp>(
+    addOp(new (alloc()) FunctorOp(
             mState.getLocalClipBounds(), // TODO: explicitly define bounds
             *(mState.currentSnapshot()->transform),
             getRecordedClip(),

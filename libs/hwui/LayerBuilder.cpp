@@ -64,6 +64,10 @@ protected:
 
 class OpBatch : public BatchBase {
 public:
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
     OpBatch(batchid_t batchId, BakedOpState* op)
             : BatchBase(batchId, op, false) {
     }
@@ -76,6 +80,10 @@ public:
 
 class MergingOpBatch : public BatchBase {
 public:
+    static void* operator new(size_t size, LinearAllocator& allocator) {
+        return allocator.alloc(size);
+    }
+
     MergingOpBatch(batchid_t batchId, BakedOpState* op)
             : BatchBase(batchId, op, true)
             , mClipSideFlags(op->computedState.clipSideFlags) {
@@ -239,7 +247,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
         // put the verts in the frame allocator, since
         //     1) SimpleRectsOps needs verts, not rects
         //     2) even if mClearRects stored verts, std::vectors will move their contents
-        Vertex* const verts = (Vertex*) allocator.alloc<Vertex>(vertCount * sizeof(Vertex));
+        Vertex* const verts = (Vertex*) allocator.alloc(vertCount * sizeof(Vertex));
 
         Vertex* currentVert = verts;
         Rect bounds = mClearRects[0];
@@ -256,7 +264,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
         // Flush all of these clears with a single draw
         SkPaint* paint = allocator.create<SkPaint>();
         paint->setXfermodeMode(SkXfermode::kClear_Mode);
-        SimpleRectsOp* op = allocator.create_trivial<SimpleRectsOp>(bounds,
+        SimpleRectsOp* op = new (allocator) SimpleRectsOp(bounds,
                 Matrix4::identity(), nullptr, paint,
                 verts, vertCount);
         BakedOpState* bakedState = BakedOpState::directConstruct(allocator,
@@ -284,7 +292,7 @@ void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator,
         targetBatch->batchOp(op);
     } else  {
         // new non-merging batch
-        targetBatch = allocator.create<OpBatch>(batchId, op);
+        targetBatch = new (allocator) OpBatch(batchId, op);
         mBatchLookup[batchId] = targetBatch;
         mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);
     }
@@ -315,7 +323,7 @@ void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
         targetBatch->mergeOp(op);
     } else  {
         // new merging batch
-        targetBatch = allocator.create<MergingOpBatch>(batchId, op);
+        targetBatch = new (allocator) MergingOpBatch(batchId, op);
         mMergingBatchLookup[batchId].insert(std::make_pair(mergeId, targetBatch));
 
         mBatches.insert(mBatches.begin() + insertBatchIndex, targetBatch);

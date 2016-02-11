@@ -30,7 +30,7 @@ struct SimplePair {
 TEST(LinearAllocator, create) {
     LinearAllocator la;
     EXPECT_EQ(0u, la.usedSize());
-    la.alloc<char>(64);
+    la.alloc(64);
     // There's some internal tracking as well as padding
     // so the usedSize isn't strictly defined
     EXPECT_LE(64u, la.usedSize());
@@ -50,12 +50,13 @@ TEST(LinearAllocator, dtor) {
             la.create<TestUtils::SignalingDtor>()->setSignal(destroyed + i);
             la.create<SimplePair>();
         }
-        la.alloc<char>(100);
+        la.alloc(100);
         for (int i = 0; i < 5; i++) {
-            la.create<TestUtils::SignalingDtor>(destroyed + 5 + i);
-            la.create_trivial<SimplePair>();
+            auto sd = new (la) TestUtils::SignalingDtor(destroyed + 5 + i);
+            la.autoDestroy(sd);
+            new (la) SimplePair();
         }
-        la.alloc<char>(100);
+        la.alloc(100);
         for (int i = 0; i < 10; i++) {
             EXPECT_EQ(0, destroyed[i]);
         }
@@ -69,7 +70,7 @@ TEST(LinearAllocator, rewind) {
     int destroyed = 0;
     {
         LinearAllocator la;
-        auto addr = la.alloc<char>(100);
+        auto addr = la.alloc(100);
         EXPECT_LE(100u, la.usedSize());
         la.rewindIfLastAlloc(addr, 100);
         EXPECT_GT(16u, la.usedSize());
