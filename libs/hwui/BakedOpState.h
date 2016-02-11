@@ -100,7 +100,7 @@ public:
     static BakedOpState* tryConstruct(LinearAllocator& allocator,
             Snapshot& snapshot, const RecordedOp& recordedOp) {
         if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
-        BakedOpState* bakedState = new (allocator) BakedOpState(
+        BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
                 allocator, snapshot, recordedOp, false);
         if (bakedState->computedState.clippedBounds.isEmpty()) {
             // bounds are empty, so op is rejected
@@ -124,7 +124,7 @@ public:
                 ? (recordedOp.paint && recordedOp.paint->getStyle() != SkPaint::kFill_Style)
                 : true;
 
-        BakedOpState* bakedState = new (allocator) BakedOpState(
+        BakedOpState* bakedState = allocator.create_trivial<BakedOpState>(
                 allocator, snapshot, recordedOp, expandForStroke);
         if (bakedState->computedState.clippedBounds.isEmpty()) {
             // bounds are empty, so op is rejected
@@ -140,16 +140,12 @@ public:
         if (CC_UNLIKELY(snapshot.getRenderTargetClip().isEmpty())) return nullptr;
 
         // clip isn't empty, so construct the op
-        return new (allocator) BakedOpState(allocator, snapshot, shadowOpPtr);
+        return allocator.create_trivial<BakedOpState>(allocator, snapshot, shadowOpPtr);
     }
 
     static BakedOpState* directConstruct(LinearAllocator& allocator,
             const ClipRect* clip, const Rect& dstRect, const RecordedOp& recordedOp) {
-        return new (allocator) BakedOpState(clip, dstRect, recordedOp);
-    }
-
-    static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
+        return allocator.create_trivial<BakedOpState>(clip, dstRect, recordedOp);
     }
 
     // computed state:
@@ -162,6 +158,8 @@ public:
     const RecordedOp* op;
 
 private:
+    friend class LinearAllocator;
+
     BakedOpState(LinearAllocator& allocator, Snapshot& snapshot,
             const RecordedOp& recordedOp, bool expandForStroke)
             : computedState(allocator, snapshot, recordedOp, expandForStroke)
