@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.Nullable;
 import android.view.View;
 
 import static android.text.TextDirectionHeuristics.FIRSTSTRONG_LTR;
@@ -390,14 +391,17 @@ public final class BidiFormatter {
      * @return Input string after applying the above processing. {@code null} if {@code str} is
      *     {@code null}.
      */
-    public String unicodeWrap(String str, TextDirectionHeuristic heuristic, boolean isolate) {
+    public @Nullable String unicodeWrap(@Nullable String str, TextDirectionHeuristic heuristic,
+            boolean isolate) {
+        if (str == null) return null;
         return unicodeWrap((CharSequence) str, heuristic, isolate).toString();
     }
 
     /**
      * @hide
      */
-    public CharSequence unicodeWrap(CharSequence str, TextDirectionHeuristic heuristic, boolean isolate) {
+    public @Nullable CharSequence unicodeWrap(@Nullable CharSequence str,
+            TextDirectionHeuristic heuristic, boolean isolate) {
         if (str == null) return null;
         final boolean isRtl = heuristic.isRtl(str, 0, str.length());
         SpannableStringBuilder result = new SpannableStringBuilder();
