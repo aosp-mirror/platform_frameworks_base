@@ -1464,8 +1464,9 @@ public class VectorDrawable extends Drawable {
             if (mThemeAttrs != null) {
                 return true;
             }
-            boolean fillCanApplyTheme = canGradientApplyTheme(mFillColors);
-            boolean strokeCanApplyTheme = canGradientApplyTheme(mStrokeColors);
+
+            boolean fillCanApplyTheme = canComplexColorApplyTheme(mFillColors);
+            boolean strokeCanApplyTheme = canComplexColorApplyTheme(mStrokeColors);
             if (fillCanApplyTheme || strokeCanApplyTheme) {
                 return true;
             }
@@ -1475,30 +1476,42 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public void applyTheme(Theme t) {
+            // Resolve the theme attributes directly referred by the VectorDrawable.
             if (mThemeAttrs != null) {
                 final TypedArray a = t.resolveAttributes(mThemeAttrs, R.styleable.VectorDrawablePath);
                 updateStateFromTypedArray(a);
                 a.recycle();
             }
 
-            boolean fillCanApplyTheme = canGradientApplyTheme(mFillColors);
-            boolean strokeCanApplyTheme = canGradientApplyTheme(mStrokeColors);
+            // Resolve the theme attributes in-directly referred by the VectorDrawable, for example,
+            // fillColor can refer to a color state list which itself needs to apply theme.
+            // And this is the reason we still want to keep partial update for the path's properties.
+            boolean fillCanApplyTheme = canComplexColorApplyTheme(mFillColors);
+            boolean strokeCanApplyTheme = canComplexColorApplyTheme(mStrokeColors);
+
             if (fillCanApplyTheme) {
                 mFillColors = mFillColors.obtainForTheme(t);
-                nUpdateFullPathFillGradient(mNativePtr,
-                        ((GradientColor)mFillColors).getShader().getNativeInstance());
+                if (mFillColors instanceof GradientColor) {
+                    nUpdateFullPathFillGradient(mNativePtr,
+                            ((GradientColor) mFillColors).getShader().getNativeInstance());
+                } else if (mFillColors instanceof ColorStateList) {
+                    nSetFillColor(mNativePtr, mFillColors.getDefaultColor());
+                }
             }
 
             if (strokeCanApplyTheme) {
                 mStrokeColors = mStrokeColors.obtainForTheme(t);
-                nUpdateFullPathStrokeGradient(mNativePtr,
-                        ((GradientColor)mStrokeColors).getShader().getNativeInstance());
+                if (mStrokeColors instanceof GradientColor) {
+                    nUpdateFullPathStrokeGradient(mNativePtr,
+                            ((GradientColor) mStrokeColors).getShader().getNativeInstance());
+                } else if (mStrokeColors instanceof ColorStateList) {
+                    nSetStrokeColor(mNativePtr, mStrokeColors.getDefaultColor());
+                }
             }
         }
 
-        private boolean canGradientApplyTheme(ComplexColor complexColor) {
-            return complexColor != null && complexColor.canApplyTheme()
-                    && complexColor instanceof GradientColor;
+        private boolean canComplexColorApplyTheme(ComplexColor complexColor) {
+            return complexColor != null && complexColor.canApplyTheme();
         }
 
         /* Setters and Getters, used by animator from AnimatedVectorDrawable. */
