@@ -1192,7 +1192,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
             }
         }
-        if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                 "Based on layer: Adding window " + win + " at " + (i + 1) + " of "
                         + windows.size());
         windows.add(i + 1, win);
@@ -1224,7 +1224,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 //apptoken note that the window could be a floating window
                 //that was created later or a window at the top of the list of
                 //windows associated with this token.
-                if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                         "not Base app: Adding window " + win + " at " + (newIdx + 1) + " of "
                                 + windows.size());
                 windows.add(newIdx + 1, win);
@@ -1262,7 +1262,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         i++;
-        if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
                 "Free window: Adding window " + win + " at " + i + " of " + windows.size());
         windows.add(i, win);
         mWindowsChanged = true;
@@ -1333,7 +1333,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void addWindowToListInOrderLocked(final WindowState win, boolean addToToken) {
-        if (DEBUG_FOCUS_LIGHT) Slog.d(TAG_WM, "addWindowToListInOrderLocked: win=" + win +
+        if (DEBUG_FOCUS) Slog.d(TAG_WM, "addWindowToListInOrderLocked: win=" + win +
                 " Callers=" + Debug.getCallers(4));
         if (win.mAttachedWindow == null) {
             final WindowToken token = win.mToken;
