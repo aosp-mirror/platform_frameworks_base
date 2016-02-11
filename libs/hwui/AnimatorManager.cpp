@@ -27,9 +27,8 @@ namespace uirenderer {
 
 using namespace std;
 
-static void unref(BaseRenderNodeAnimator* animator) {
+static void detach(sp<BaseRenderNodeAnimator>& animator) {
     animator->detach();
-    animator->decStrong(nullptr);
 }
 
 AnimatorManager::AnimatorManager(RenderNode& parent)
@@ -38,14 +37,12 @@ AnimatorManager::AnimatorManager(RenderNode& parent)
 }
 
 AnimatorManager::~AnimatorManager() {
-    for_each(mNewAnimators.begin(), mNewAnimators.end(), unref);
-    for_each(mAnimators.begin(), mAnimators.end(), unref);
+    for_each(mNewAnimators.begin(), mNewAnimators.end(), detach);
+    for_each(mAnimators.begin(), mAnimators.end(), detach);
 }
 
 void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-    animator->incStrong(nullptr);
-    animator->attach(&mParent);
-    mNewAnimators.push_back(animator.get());
+    mNewAnimators.emplace_back(animator.get());
 }
 
 void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
@@ -56,25 +53,31 @@ void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
             &mParent, mParent.getName());
 }
 
-template<typename T>
-static void move_all(T& source, T& dest) {
-    dest.reserve(source.size() + dest.size());
-    for (typename T::iterator it = source.begin(); it != source.end(); it++) {
-        dest.push_back(*it);
-    }
-    source.clear();
-}
-
 void AnimatorManager::pushStaging() {
     if (mNewAnimators.size()) {
         LOG_ALWAYS_FATAL_IF(!mAnimationHandle,
                 "Trying to start new animators on %p (%s) without an animation handle!",
                 &mParent, mParent.getName());
-        // Since this is a straight move, we don't need to inc/dec the ref count
-        move_all(mNewAnimators, mAnimators);
+        // Only add animators that are not already in the on-going animator list.
+        for (auto& animator : mNewAnimators) {
+            RenderNode* targetRenderNode = animator->target();
+            if (targetRenderNode == &mParent) {
+                // Animator already in the animator list: skip adding again
+                continue;
+            }
+
+            if (targetRenderNode){
+                // If the animator is already in another RenderNode's animator list, remove animator from
+                // that list and add animator to current RenderNode's list.
+                targetRenderNode->animators().removeActiveAnimator(animator);
+            }
+            animator->attach(&mParent);
+            mAnimators.push_back(std::move(animator));
+        }
+        mNewAnimators.clear();
     }
-    for (vector<BaseRenderNodeAnimator*>::iterator it = mAnimators.begin(); it != mAnimators.end(); it++) {
-        (*it)->pushStaging(mAnimationHandle->context());
+    for (auto& animator : mAnimators) {
+        animator->pushStaging(mAnimationHandle->context());
     }
 }
 
@@ -83,11 +86,11 @@ public:
     AnimateFunctor(TreeInfo& info, AnimationContext& context)
             : dirtyMask(0), mInfo(info), mContext(context) {}
 
-    bool operator() (BaseRenderNodeAnimator* animator) {
+    bool operator() (sp<BaseRenderNodeAnimator>& animator) {
         dirtyMask |= animator->dirtyMask();
         bool remove = animator->animate(mContext);
         if (remove) {
-            animator->decStrong(nullptr);
+            animator->detach();
         } else {
             if (animator->isRunning()) {
                 mInfo.out.hasAnimations = true;
@@ -129,20 +132,18 @@ void AnimatorManager::animateNoDamage(TreeInfo& info) {
 
 uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
     AnimateFunctor functor(info, mAnimationHandle->context());
-    std::vector< BaseRenderNodeAnimator* >::iterator newEnd;
-    newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
+    auto newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mAnimationHandle->notifyAnimationsRan();
     mParent.mProperties.updateMatrix();
     return functor.dirtyMask;
 }
 
-static void endStagingAnimator(BaseRenderNodeAnimator* animator) {
-    animator->end();
+static void endStagingAnimator(sp<BaseRenderNodeAnimator>& animator) {
+    animator->cancel();
     if (animator->listener()) {
-        animator->listener()->onAnimationFinished(animator);
+        animator->listener()->onAnimationFinished(animator.get());
     }
-    animator->decStrong(nullptr);
 }
 
 void AnimatorManager::endAllStagingAnimators() {
@@ -153,13 +154,16 @@ void AnimatorManager::endAllStagingAnimators() {
     mNewAnimators.clear();
 }
 
+void AnimatorManager::removeActiveAnimator(const sp<BaseRenderNodeAnimator>& animator) {
+    std::remove(mAnimators.begin(), mAnimators.end(), animator);
+}
+
 class EndActiveAnimatorsFunctor {
 public:
     EndActiveAnimatorsFunctor(AnimationContext& context) : mContext(context) {}
 
-    void operator() (BaseRenderNodeAnimator* animator) {
+    void operator() (sp<BaseRenderNodeAnimator>& animator) {
         animator->forceEndNow(mContext);
-        animator->decStrong(nullptr);
     }
 
 private:
