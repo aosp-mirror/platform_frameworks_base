@@ -46,7 +46,7 @@ class RoundRectClipState {
 public:
     /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
     static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc<RoundRectClipState>(size);
+        return allocator.alloc(size);
     }
 
     bool areaRequiresRoundRectClip(const Rect& rect) const {
@@ -67,7 +67,7 @@ class ProjectionPathMask {
 public:
     /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
     static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc<ProjectionPathMask>(size);
+        return allocator.alloc(size);
     }
 
     const SkPath* projectionMask;

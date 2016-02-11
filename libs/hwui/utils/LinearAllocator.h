@@ -52,36 +52,30 @@ public:
      * The lifetime of the returned buffers is tied to that of the LinearAllocator. If calling
      * delete() on an object stored in a buffer is needed, it should be overridden to use
      * rewindIfLastAlloc()
-     *
-     * Note that unlike create, for alloc the type is purely for compile-time error
-     * checking and does not affect size.
      */
-    template<class T>
-    void* alloc(size_t size) {
-        static_assert(std::is_trivially_destructible<T>::value,
-                "Error, type is non-trivial! did you mean to use create()?");
-        return allocImpl(size);
-    }
+    void* alloc(size_t size);
 
     /**
      * Allocates an instance of the template type with the given construction parameters
      * and adds it to the automatic destruction list.
      */
     template<class T, typename... Params>
-    T* create(Params&&... params) {
-        T* ret = new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
-        if (!std::is_trivially_destructible<T>::value) {
-            auto dtor = [](void* ret) { ((T*)ret)->~T(); };
-            addToDestructionList(dtor, ret);
-        }
+    T* create(Params... params) {
+        T* ret = new (*this) T(params...);
+        autoDestroy(ret);
         return ret;
     }
 
-    template<class T, typename... Params>
-    T* create_trivial(Params&&... params) {
-        static_assert(std::is_trivially_destructible<T>::value,
-                "Error, called create_trivial on a non-trivial type");
-        return new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
+    /**
+     * Adds the pointer to the tracking list to have its destructor called
+     * when the LinearAllocator is destroyed.
+     */
+    template<class T>
+    void autoDestroy(T* addr) {
+        if (!std::is_trivially_destructible<T>::value) {
+            auto dtor = [](void* addr) { ((T*)addr)->~T(); };
+            addToDestructionList(dtor, addr);
+        }
     }
 
     /**
@@ -119,8 +113,6 @@ private:
         void* addr;
         DestructorNode* next = nullptr;
     };
-
-    void* allocImpl(size_t size);
 
     void addToDestructionList(Destructor, void* addr);
     void runDestructorFor(void* addr);
@@ -167,7 +159,7 @@ public:
             : linearAllocator(other.linearAllocator) {}
 
     T* allocate(size_t num, const void* = 0) {
-        return (T*)(linearAllocator.alloc<void*>(num * sizeof(T)));
+        return (T*)(linearAllocator.alloc(num * sizeof(T)));
     }
 
     void deallocate(pointer p, size_t num) {
@@ -194,5 +186,7 @@ public:
 
 }; // namespace uirenderer
 }; // namespace android
+
+void* operator new(std::size_t size, android::uirenderer::LinearAllocator& la);
 
 #endif // ANDROID_LINEARALLOCATOR_H
