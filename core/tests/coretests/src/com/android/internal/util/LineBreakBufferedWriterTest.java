@@ -180,6 +180,22 @@ public class LineBreakBufferedWriterTest extends TestCase {
         assertOutput("aaaaaaaaaabbbbbc\nd", "ddddddddd");
     }
 
+    public void testMoreThenInitialCapacitySimpleWrites() {
+        // This check is different from testMoreThanBufferSizeChar. The initial capacity is lower
+        // than the maximum buffer size here.
+        final LineBreakBufferedWriter lw = new LineBreakBufferedWriter(mWriter, 1024, 3);
+
+        for(int i = 0; i < 10; i++) {
+            lw.print('$');
+        }
+        for(int i = 0; i < 10; i++) {
+            lw.print('%');
+        }
+        lw.flush();
+
+        assertOutput("$$$$$$$$$$%%%%%%%%%%");
+    }
+
     private void assertOutput(String... golden) {
         List<String> goldList = createTestGolden(golden);
         assertEquals(goldList, mWriter.getStrings());
