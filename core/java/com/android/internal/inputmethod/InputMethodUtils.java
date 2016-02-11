@@ -769,7 +769,7 @@ public class InputMethodUtils {
     public static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
             @Nullable final String inputMethodsAndSubtypesString) {
 
-        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<String, ArraySet<String>>();
+        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<>();
         if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
             return imeMap;
         }
@@ -784,7 +784,7 @@ public class InputMethodUtils {
                         typeSplitter,
                         subtypeSplitter);
         for (Pair<String, ArrayList<String>> ime : allImeSettings) {
-            ArraySet<String> subtypes = new ArraySet<String>();
+            ArraySet<String> subtypes = new ArraySet<>();
             if (ime.second != null) {
                 subtypes.addAll(ime.second);
             }
