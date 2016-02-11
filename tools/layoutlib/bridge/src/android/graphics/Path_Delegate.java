@@ -388,21 +388,18 @@ public final class Path_Delegate {
     @LayoutlibDelegate
     /*package*/ static void native_addRoundRect(long nPath, float left, float top, float right,
             float bottom, float[] radii, int dir) {
-        // Java2D doesn't support different rounded corners in each corner, so just use the
-        // first value.
-        native_addRoundRect(nPath, left, top, right, bottom, radii[0], radii[1], dir);
 
-        // there can be a case where this API is used but with similar values for all corners, so
-        // in that case we don't warn.
-        // we only care if 2 corners are different so just compare to the next one.
-        for (int i = 0 ; i < 3 ; i++) {
-            if (radii[i * 2] != radii[(i + 1) * 2] || radii[i * 2 + 1] != radii[(i + 1) * 2 + 1]) {
-                Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                        "Different corner sizes are not supported in Path.addRoundRect.",
-                        null, null /*data*/);
-                break;
-            }
+        Path_Delegate pathDelegate = sManager.getDelegate(nPath);
+        if (pathDelegate == null) {
+            return;
         }
+
+        float[] cornerDimensions = new float[radii.length];
+        for (int i = 0; i < radii.length; i++) {
+            cornerDimensions[i] = 2 * radii[i];
+        }
+        pathDelegate.mPath.append(new RoundRectangle(left, top, right - left, bottom - top,
+                cornerDimensions), false);
     }
 
     @LayoutlibDelegate
