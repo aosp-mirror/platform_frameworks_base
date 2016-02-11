@@ -6791,6 +6791,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("profileOwner " + profileOwner + " and admin "
                     + admin + " are not in the same package");
         }
+        // Only allow the system user to use this method
+        if (!mInjector.binderGetCallingUserHandle().isSystem()) {
+            throw new SecurityException("createAndManageUser was called from non-system user");
+        }
         // Create user.
         UserHandle user = null;
         synchronized (this) {
@@ -6802,7 +6806,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if ((flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0) {
                     userInfoFlags |= UserInfo.FLAG_EPHEMERAL;
                 }
-                UserInfo userInfo = mUserManager.createUser(name, userInfoFlags);
+                UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
+                        userInfoFlags);
                 if (userInfo != null) {
                     user = userInfo.getUserHandle();
                 }

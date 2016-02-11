@@ -17,6 +17,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 
 /**
@@ -106,4 +107,12 @@ public abstract class UserManagerInternal {
      * non-ephemeral users left.
      */
     public abstract void removeAllUsers();
+
+    /**
+     * Same as UserManager.createUser(), but bypasses the check for DISALLOW_ADD_USER.
+     *
+     * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
+     * createAndManageUser is called by the device owner.
+     */
+    public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags);
 }
