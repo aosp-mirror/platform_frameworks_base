@@ -120,6 +120,7 @@ public class DeviceIdleController extends SystemService
     private AlarmManager mAlarmManager;
     private IBatteryStats mBatteryStats;
     private PowerManagerInternal mLocalPowerManager;
+    private AlarmManagerService.LocalService mLocalAlarmManager;
     private INetworkPolicyManager mNetworkPolicyManager;
     private DisplayManager mDisplayManager;
     private SensorManager mSensorManager;
@@ -266,6 +267,17 @@ public class DeviceIdleController extends SystemService
      * be shared with others because it will not be modified once set.
      */
     private int[] mPowerSaveWhitelistAllAppIdArray = new int[0];
+
+    /**
+     * App IDs that have been white-listed by the user to opt out of power save restrictions.
+     */
+    private final SparseBooleanArray mPowerSaveWhitelistUserAppIds = new SparseBooleanArray();
+
+    /**
+     * Current app IDs that are in the user power save white list.  This array can
+     * be shared with others because it will not be modified once set.
+     */
+    private int[] mPowerSaveWhitelistUserAppIdArray = new int[0];
 
     /**
      * List of end times for UIDs that are temporarily marked as being allowed to access
@@ -963,6 +975,10 @@ public class DeviceIdleController extends SystemService
             return getSystemPowerWhitelistInternal();
         }
 
+        @Override public String[] getUserPowerWhitelist() {
+            return getUserPowerWhitelistInternal();
+        }
+
         @Override public String[] getFullPowerWhitelistExceptIdle() {
             return getFullPowerWhitelistExceptIdleInternal();
         }
@@ -977,6 +993,10 @@ public class DeviceIdleController extends SystemService
 
         @Override public int[] getAppIdWhitelist() {
             return getAppIdWhitelistInternal();
+        }
+
+        @Override public int[] getAppIdUserWhitelist() {
+            return getAppIdUserWhitelistInternal();
         }
 
         @Override public int[] getAppIdTempWhitelist() {
@@ -1160,6 +1180,7 @@ public class DeviceIdleController extends SystemService
                 mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
+                mLocalAlarmManager = getLocalService(AlarmManagerService.LocalService.class);
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
                 mDisplayManager = (DisplayManager) getContext().getSystemService(
@@ -1226,6 +1247,7 @@ public class DeviceIdleController extends SystemService
                 getContext().registerReceiver(mReceiver, filter);
 
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+                mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
 
                 mDisplayManager.registerDisplayListener(mDisplayListener, null);
                 updateDisplayLocked();
@@ -1279,6 +1301,17 @@ public class DeviceIdleController extends SystemService
             String[] apps = new String[size];
             for (int i = 0; i < size; i++) {
                 apps[i] = mPowerSaveWhitelistApps.keyAt(i);
+            }
+            return apps;
+        }
+    }
+
+    public String[] getUserPowerWhitelistInternal() {
+        synchronized (this) {
+            int size = mPowerSaveWhitelistUserApps.size();
+            String[] apps = new String[size];
+            for (int i = 0; i < mPowerSaveWhitelistUserApps.size(); i++) {
+                apps[i] = mPowerSaveWhitelistUserApps.keyAt(i);
             }
             return apps;
         }
@@ -1341,6 +1374,12 @@ public class DeviceIdleController extends SystemService
     public int[] getAppIdWhitelistInternal() {
         synchronized (this) {
             return mPowerSaveWhitelistAllAppIdArray;
+        }
+    }
+
+    public int[] getAppIdUserWhitelistInternal() {
+        synchronized (this) {
+            return mPowerSaveWhitelistUserAppIdArray;
         }
     }
 
@@ -1986,11 +2025,15 @@ public class DeviceIdleController extends SystemService
     private static int[] buildAppIdArray(ArrayMap<String, Integer> systemApps,
             ArrayMap<String, Integer> userApps, SparseBooleanArray outAppIds) {
         outAppIds.clear();
-        for (int i=0; i<systemApps.size(); i++) {
-            outAppIds.put(systemApps.valueAt(i), true);
+        if (systemApps != null) {
+            for (int i = 0; i < systemApps.size(); i++) {
+                outAppIds.put(systemApps.valueAt(i), true);
+            }
         }
-        for (int i=0; i<userApps.size(); i++) {
-            outAppIds.put(userApps.valueAt(i), true);
+        if (userApps != null) {
+            for (int i = 0; i < userApps.size(); i++) {
+                outAppIds.put(userApps.valueAt(i), true);
+            }
         }
         int size = outAppIds.size();
         int[] appids = new int[size];
@@ -2005,12 +2048,21 @@ public class DeviceIdleController extends SystemService
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistExceptIdleAppIds);
         mPowerSaveWhitelistAllAppIdArray = buildAppIdArray(mPowerSaveWhitelistApps,
                 mPowerSaveWhitelistUserApps, mPowerSaveWhitelistAllAppIds);
+        mPowerSaveWhitelistUserAppIdArray = buildAppIdArray(null,
+                mPowerSaveWhitelistUserApps, mPowerSaveWhitelistUserAppIds);
         if (mLocalPowerManager != null) {
             if (DEBUG) {
                 Slog.d(TAG, "Setting wakelock whitelist to "
                         + Arrays.toString(mPowerSaveWhitelistAllAppIdArray));
             }
             mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
+        }
+        if (mLocalAlarmManager != null) {
+            if (DEBUG) {
+                Slog.d(TAG, "Setting alarm whitelist to "
+                        + Arrays.toString(mPowerSaveWhitelistUserAppIdArray));
+            }
+            mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
         }
     }
 
@@ -2475,6 +2527,15 @@ public class DeviceIdleController extends SystemService
                 for (int i = 0; i < size; i++) {
                     pw.print("    ");
                     pw.print(mPowerSaveWhitelistExceptIdleAppIds.keyAt(i));
+                    pw.println();
+                }
+            }
+            size = mPowerSaveWhitelistUserAppIds.size();
+            if (size > 0) {
+                pw.println("  Whitelist user app ids:");
+                for (int i = 0; i < size; i++) {
+                    pw.print("    ");
+                    pw.print(mPowerSaveWhitelistUserAppIds.keyAt(i));
                     pw.println();
                 }
             }
