@@ -64,7 +64,9 @@ public:
     static void operator delete(void* ptr) { LOG_ALWAYS_FATAL("delete not supported"); }
     static void* operator new(size_t size) = delete; /** PURPOSELY OMITTED **/
     static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
+        // FIXME: Quick hack to keep old pipeline working, delete this when
+        // we no longer need to support HWUI_NEWOPS := false
+        return allocator.alloc<char>(size);
     }
 
     enum OpLogFlag {
