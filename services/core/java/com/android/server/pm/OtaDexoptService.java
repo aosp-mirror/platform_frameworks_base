@@ -55,8 +55,6 @@ import static com.android.server.pm.Installer.DEXOPT_OTA;
 public class OtaDexoptService extends IOtaDexopt.Stub {
     private final static String TAG = "OTADexopt";
     private final static boolean DEBUG_DEXOPT = true;
-    // Apps used in the last 7 days.
-    private final static long DEXOPT_LRU_THRESHOLD_IN_MINUTES = 7 * 24 * 60;
 
     private final Context mContext;
     private final PackageDexOptimizer mPackageDexOptimizer;
@@ -94,69 +92,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         if (mDexoptPackages != null) {
             throw new IllegalStateException("already called prepare()");
         }
-
-        mDexoptPackages = new LinkedList<>();
-
-        ArrayList<PackageParser.Package> pkgs;
         synchronized (mPackageManagerService.mPackages) {
-            pkgs = new ArrayList<PackageParser.Package>(mPackageManagerService.mPackages.values());
-        }
-
-        // Sort apps by importance for dexopt ordering. Important apps are given more priority
-        // in case the device runs out of space.
-
-        // Give priority to core apps.
-        for (PackageParser.Package pkg : pkgs) {
-            if (pkg.coreApp) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Adding core app " + mDexoptPackages.size() + ": " + pkg.packageName);
-                }
-                mDexoptPackages.add(pkg);
-            }
-        }
-        pkgs.removeAll(mDexoptPackages);
-
-        // Give priority to system apps that listen for pre boot complete.
-        Intent intent = new Intent(Intent.ACTION_PRE_BOOT_COMPLETED);
-        ArraySet<String> pkgNames = getPackageNamesForIntent(intent, UserHandle.USER_SYSTEM);
-        for (PackageParser.Package pkg : pkgs) {
-            if (pkgNames.contains(pkg.packageName)) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Adding pre boot system app " + mDexoptPackages.size() + ": " +
-                            pkg.packageName);
-                }
-                mDexoptPackages.add(pkg);
-            }
-        }
-        pkgs.removeAll(mDexoptPackages);
-
-        // Filter out packages that aren't recently used, add all remaining apps.
-        // TODO: add a property to control this?
-        if (mPackageManagerService.isHistoricalPackageUsageAvailable()) {
-            filterRecentlyUsedApps(pkgs, DEXOPT_LRU_THRESHOLD_IN_MINUTES * 60 * 1000);
-        }
-        mDexoptPackages.addAll(pkgs);
-
-        // Now go ahead and also add the libraries required for these packages.
-        // TODO: Think about interleaving things.
-        Set<PackageParser.Package> dependencies = new HashSet<>();
-        for (PackageParser.Package p : mDexoptPackages) {
-            dependencies.addAll(mPackageManagerService.findSharedNonSystemLibraries(p));
-        }
-        if (!dependencies.isEmpty()) {
-            dependencies.removeAll(mDexoptPackages);
-        }
-        mDexoptPackages.addAll(dependencies);
-
-        if (DEBUG_DEXOPT) {
-            StringBuilder sb = new StringBuilder();
-            for (PackageParser.Package pkg : mDexoptPackages) {
-                if (sb.length() > 0) {
-                    sb.append(", ");
-                }
-                sb.append(pkg.packageName);
-            }
-            Log.i(TAG, "Packages to be optimized: " + sb.toString());
+            mDexoptPackages = PackageManagerServiceUtils.getPackagesForDexopt(
+                    mPackageManagerService.mPackages.values(), mPackageManagerService);
         }
     }
 
@@ -226,29 +164,6 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             }
         }
         return pkgNames;
-    }
-
-    private void filterRecentlyUsedApps(Collection<PackageParser.Package> pkgs,
-            long dexOptLRUThresholdInMills) {
-        // Filter out packages that aren't recently used.
-        int total = pkgs.size();
-        int skipped = 0;
-        long now = System.currentTimeMillis();
-        for (Iterator<PackageParser.Package> i = pkgs.iterator(); i.hasNext();) {
-            PackageParser.Package pkg = i.next();
-            long then = pkg.mLastPackageUsageTimeInMills;
-            if (then + dexOptLRUThresholdInMills < now) {
-                if (DEBUG_DEXOPT) {
-                    Log.i(TAG, "Skipping dexopt of " + pkg.packageName + " last resumed: " +
-                          ((then == 0) ? "never" : new Date(then)));
-                }
-                i.remove();
-                skipped++;
-            }
-        }
-        if (DEBUG_DEXOPT) {
-            Log.i(TAG, "Skipped optimizing " + skipped + " of " + total);
-        }
     }
 
     private static class OTADexoptPackageDexOptimizer extends
