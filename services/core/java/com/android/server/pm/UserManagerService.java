@@ -1789,6 +1789,10 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. DISALLOW_ADD_USER is enabled.");
             return null;
         }
+        return createUserInternalUnchecked(name, flags, parentId);
+    }
+
+    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId) {
         if (ActivityManager.isLowRamDeviceStatic()) {
             return null;
         }
@@ -2974,6 +2978,17 @@ public class UserManagerService extends IUserManager.Stub {
                         (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
                 am.switchUser(UserHandle.USER_SYSTEM);
             }
+        }
+
+        @Override
+        public UserInfo createUserEvenWhenDisallowed(String name, int flags) {
+            UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL);
+            // Keep this in sync with UserManager.createUser
+            if (user != null && !user.isAdmin()) {
+                setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);
+                setUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, true, user.id);
+            }
+            return user;
         }
     }
 
