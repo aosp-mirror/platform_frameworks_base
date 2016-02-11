@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.IWallpaperManagerCallback;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -248,9 +249,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final boolean ONLY_CORE_APPS;
 
     /** If true, the lockscreen will show a distinct wallpaper */
-    private static final boolean ENABLE_LOCKSCREEN_WALLPAPER =
-            !ActivityManager.isLowRamDeviceStatic()
-                    && SystemProperties.getBoolean("debug.lockscreen_wallpaper", false);
+    private static final boolean ENABLE_LOCKSCREEN_WALLPAPER = true;
 
     /* If true, the device supports freeform window management.
      * This affects the status bar UI. */
@@ -296,6 +295,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     AccessibilityController mAccessibilityController;
     FingerprintUnlockController mFingerprintUnlockController;
     LightStatusBarController mLightStatusBarController;
+    private LockscreenWallpaper mLockscreenWallpaper;
 
     int mNaturalBarHeight = -1;
 
@@ -791,6 +791,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.id.keyguard_indication_text),
                 mKeyguardBottomArea.getLockIcon());
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
+
+        if (ENABLE_LOCKSCREEN_WALLPAPER) {
+            mLockscreenWallpaper = new LockscreenWallpaper(mContext, this, mHandler);
+        }
 
         // set the initial view visibility
         setAreThereNotifications();
@@ -1819,7 +1823,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     };
 
     /**
-     * Refresh or remove lockscreen artwork from media metadata.
+     * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
     public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
         if (!SHOW_LOCKSCREEN_MEDIA_ARTWORK) return;
@@ -1847,10 +1851,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
         if (ENABLE_LOCKSCREEN_WALLPAPER && artworkBitmap == null) {
-            // TODO: use real lockscreen wallpaper.
-            WallpaperManager wallpaperManager = mContext
-                    .getSystemService(WallpaperManager.class);
-            artworkBitmap = wallpaperManager.getBitmap();
+            artworkBitmap = mLockscreenWallpaper.getBitmap();
         }
 
         final boolean hasArtwork = artworkBitmap != null;
@@ -3084,10 +3085,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 notifyNavigationBarScreenOn(true);
             }
-            else if (ENABLE_LOCKSCREEN_WALLPAPER
-                    && Intent.ACTION_WALLPAPER_CHANGED.equals(action)) {
-                updateMediaMetaData(true, true);
-            }
         }
     };
 
@@ -3173,6 +3170,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
         setControllerUsers();
         clearCurrentMediaNotification();
+        mLockscreenWallpaper.setUser(newUserId);
         updateMediaMetaData(true, false);
     }
 
