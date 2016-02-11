@@ -554,6 +554,26 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         }
     }
 
+    public void testLockedDevice() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mMtpManager.addValidDevice(new MtpDeviceRecord(
+                0, "Device A", false /* unopened */, new MtpRoot[0], null, null));
+
+        mProvider.resumeRootScanner();
+        mResolver.waitForNotification(ROOTS_URI, 1);
+
+        try (final Cursor cursor = mProvider.queryRoots(null)) {
+            assertEquals(1, cursor.getCount());
+        }
+
+        try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {
+            assertEquals(0, cursor.getCount());
+            assertEquals(
+                    "error_locked_device",
+                    cursor.getExtras().getString(DocumentsContract.EXTRA_ERROR));
+        }
+    }
+
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();

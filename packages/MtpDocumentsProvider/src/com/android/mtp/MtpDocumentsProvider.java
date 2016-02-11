@@ -166,25 +166,25 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             openDevice(parentIdentifier.mDeviceId);
             if (parentIdentifier.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_DEVICE) {
-                final Identifier singleStorageIdentifier =
-                        mDatabase.getSingleStorageIdentifier(parentDocumentId);
-                if (singleStorageIdentifier == null) {
+                final String[] storageDocIds = mDatabase.getStorageDocumentIds(parentDocumentId);
+                if (storageDocIds.length == 0) {
+                    // Remote device does not provide storages. Maybe it is locked.
+                    return createErrorCursor(projection, R.string.error_locked_device);
+                } else if (storageDocIds.length > 1) {
                     // Returns storage list from database.
                     return mDatabase.queryChildDocuments(projection, parentDocumentId);
                 }
-                parentIdentifier = singleStorageIdentifier;
+
+                // Exact one storage is found. Skip storage and returns object in the single
+                // storage.
+                parentIdentifier = mDatabase.createIdentifier(storageDocIds[0]);
             }
+
             // Returns object list from document loader.
             return getDocumentLoader(parentIdentifier).queryChildDocuments(
                     projection, parentIdentifier);
         } catch (BusyDeviceException exception) {
-            final Bundle bundle = new Bundle();
-            bundle.putString(
-                    DocumentsContract.EXTRA_ERROR,
-                    mResources.getString(R.string.error_busy_device));
-            final Cursor cursor = new MatrixCursor(projection);
-            cursor.setExtras(bundle);
-            return cursor;
+            return createErrorCursor(projection, R.string.error_busy_device);
         } catch (IOException exception) {
             Log.e(MtpDocumentsProvider.TAG, "queryChildDocuments", exception);
             throw new FileNotFoundException(exception.getMessage());
@@ -451,6 +451,21 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         } finally {
             cursor.close();
         }
+    }
+
+    /**
+     * Creates empty cursor with specific error message.
+     *
+     * @param projection Column names.
+     * @param stringResId String resource ID of error message.
+     * @return Empty cursor with error message.
+     */
+    private Cursor createErrorCursor(String[] projection, int stringResId) {
+        final Bundle bundle = new Bundle();
+        bundle.putString(DocumentsContract.EXTRA_ERROR, mResources.getString(stringResId));
+        final Cursor cursor = new MatrixCursor(projection);
+        cursor.setExtras(bundle);
+        return cursor;
     }
 
     private static class DeviceToolkit {
