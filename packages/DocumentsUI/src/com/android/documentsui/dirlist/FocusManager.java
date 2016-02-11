@@ -54,18 +54,6 @@ class FocusManager implements View.OnFocusChangeListener {
      * @return Whether the event was handled.
      */
     public boolean handleKey(DocumentHolder doc, int keyCode, KeyEvent event) {
-        boolean extendSelection = false;
-        // Translate space/shift-space into PgDn/PgUp
-        if (keyCode == KeyEvent.KEYCODE_SPACE) {
-            if (event.isShiftPressed()) {
-                keyCode = KeyEvent.KEYCODE_PAGE_UP;
-            } else {
-                keyCode = KeyEvent.KEYCODE_PAGE_DOWN;
-            }
-        } else {
-            extendSelection = event.isShiftPressed();
-        }
-
         if (Events.isNavigationKeyCode(keyCode)) {
             // Find the target item and focus it.
             int endPos = findTargetPosition(doc.itemView, keyCode, event);
