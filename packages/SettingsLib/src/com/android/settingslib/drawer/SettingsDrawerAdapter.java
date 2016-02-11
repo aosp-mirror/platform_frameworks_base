@@ -65,7 +65,7 @@ public class SettingsDrawerAdapter extends BaseAdapter {
     }
 
     public Tile getTile(int position) {
-        return mItems.get(position).tile;
+        return mItems.get(position) != null ? mItems.get(position).tile : null;
     }
 
     @Override
