@@ -279,10 +279,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mCallbacks.clear();
     }
 
-    protected void checkIfRestrictionEnforced(State state, String userRestriction) {
+    protected void checkIfRestrictionEnforcedByAdminOnly(State state, String userRestriction) {
         EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
                 userRestriction, ActivityManager.getCurrentUser());
-        if (admin != null) {
+        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+                userRestriction, ActivityManager.getCurrentUser())) {
             state.disabledByPolicy = true;
             state.enforcedAdmin = admin;
         } else {

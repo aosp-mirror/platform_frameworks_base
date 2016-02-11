@@ -210,12 +210,16 @@ public class UserSwitcherController {
                     }
                 }
 
+                boolean systemCanCreateUsers = !mUserManager.hasBaseUserRestriction(
+                                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
                 boolean currentUserCanCreateUsers = currentUserInfo != null
                         && (currentUserInfo.isAdmin()
-                                || currentUserInfo.id == UserHandle.USER_SYSTEM);
-                boolean canCreateGuest = (currentUserCanCreateUsers || addUsersWhenLocked)
+                                || currentUserInfo.id == UserHandle.USER_SYSTEM)
+                        && systemCanCreateUsers;
+                boolean anyoneCanCreateUsers = systemCanCreateUsers && addUsersWhenLocked;
+                boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
                         && guestRecord == null;
-                boolean canCreateUser = (currentUserCanCreateUsers || addUsersWhenLocked)
+                boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
                         && mUserManager.canAddMoreUsers();
                 boolean createIsRestricted = !addUsersWhenLocked;
 
@@ -225,7 +229,7 @@ public class UserSwitcherController {
                             guestRecord = new UserRecord(null /* info */, null /* picture */,
                                     true /* isGuest */, false /* isCurrent */,
                                     false /* isAddUser */, createIsRestricted);
-                            checkIfAddUserDisallowed(guestRecord);
+                            checkIfAddUserDisallowedByAdminOnly(guestRecord);
                             records.add(guestRecord);
                         }
                     } else {
@@ -238,7 +242,7 @@ public class UserSwitcherController {
                     UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
                             false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
                             createIsRestricted);
-                    checkIfAddUserDisallowed(addUserRecord);
+                    checkIfAddUserDisallowedByAdminOnly(addUserRecord);
                     records.add(addUserRecord);
                 }
 
@@ -615,10 +619,11 @@ public class UserSwitcherController {
         }
     }
 
-    private void checkIfAddUserDisallowed(UserRecord record) {
+    private void checkIfAddUserDisallowedByAdminOnly(UserRecord record) {
         EnforcedAdmin admin = RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
                 UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser());
-        if (admin != null) {
+        if (admin != null && !RestrictedLockUtils.hasBaseUserRestriction(mContext,
+                UserManager.DISALLOW_ADD_USER, ActivityManager.getCurrentUser())) {
             record.isDisabledByAdmin = true;
             record.enforcedAdmin = admin;
         } else {

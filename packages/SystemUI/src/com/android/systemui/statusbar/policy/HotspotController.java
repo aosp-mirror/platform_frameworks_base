@@ -21,7 +21,6 @@ public interface HotspotController {
     void removeCallback(Callback callback);
     boolean isHotspotEnabled();
     void setHotspotEnabled(boolean enabled);
-    boolean isTetheringAllowed();
 
     public interface Callback {
         void onHotspotChanged(boolean enabled);
