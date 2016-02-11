@@ -283,6 +283,15 @@ public class LockPatternUtils {
         getTrustManager().reportUnlockAttempt(true /* authenticated */, userId);
     }
 
+    public int getCurrentFailedPasswordAttempts(int userId) {
+        return getDevicePolicyManager().getCurrentFailedPasswordAttempts(userId);
+    }
+
+    public int getMaximumFailedPasswordsForWipe(int userId) {
+        return getDevicePolicyManager().getMaximumFailedPasswordsForWipe(
+                null /* componentName */, userId);
+    }
+
     /**
      * Check to see if a pattern matches the saved pattern.
      * If pattern matches, return an opaque attestation that the challenge

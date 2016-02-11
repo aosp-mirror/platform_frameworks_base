@@ -3527,11 +3527,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int getCurrentFailedPasswordAttempts(int userHandle, boolean parent) {
+        enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
-            // This API can only be called by an active device admin,
-            // so try to retrieve it to check that the caller is one.
-            getActiveAdminForCallerLocked(
-                    null, DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, parent);
+            if (!isCallerWithSystemUid()) {
+                // This API can only be called by an active device admin,
+                // so try to retrieve it to check that the caller is one.
+                getActiveAdminForCallerLocked(
+                        null, DeviceAdminInfo.USES_POLICY_WATCH_LOGIN, parent);
+            }
 
             DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, parent));
 

@@ -1826,9 +1826,23 @@ public class DevicePolicyManager {
      * this method; if it has not, a security exception will be thrown.
      */
     public int getCurrentFailedPasswordAttempts() {
+        return getCurrentFailedPasswordAttempts(myUserId());
+    }
+
+    /**
+     * Retrieve the number of times the given user has failed at entering a
+     * password since that last successful password entry.
+     *
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to be able to call this method; if it has
+     * not and it is not the system uid, a security exception will be thrown.
+     *
+     * @hide
+     */
+    public int getCurrentFailedPasswordAttempts(int userHandle) {
         if (mService != null) {
             try {
-                return mService.getCurrentFailedPasswordAttempts(myUserId(), mParentInstance);
+                return mService.getCurrentFailedPasswordAttempts(userHandle, mParentInstance);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
