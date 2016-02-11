@@ -101,7 +101,6 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
-
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
@@ -1267,7 +1266,11 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
 
             // Handle enter key events
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                return onActivate(doc);
+                if (event.isShiftPressed()) {
+                    return onSelect(doc);
+                } else {
+                    return onActivate(doc);
+                }
             }
 
             return false;
