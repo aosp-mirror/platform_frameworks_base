@@ -1500,8 +1500,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updateNotificationShadeForChildren() {
+        // First let's remove all children which don't belong in the parents
         ArrayList<ExpandableNotificationRow> toRemove = new ArrayList<>();
-        boolean orderChanged = false;
         for (int i = 0; i < mStackScroller.getChildCount(); i++) {
             View view = mStackScroller.getChildAt(i);
             if (!(view instanceof ExpandableNotificationRow)) {
@@ -1513,7 +1513,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             List<ExpandableNotificationRow> children = parent.getNotificationChildren();
             List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
 
-            // lets first remove all undesired children
             if (children != null) {
                 toRemove.clear();
                 for (ExpandableNotificationRow childRow : children) {
@@ -1526,8 +1525,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mStackScroller.notifyGroupChildRemoved(remove);
                 }
             }
+        }
 
-            // We now add all the children which are not in there already
+        // Let's now add all notification children which are missing
+        boolean orderChanged = false;
+        for (int i = 0; i < mStackScroller.getChildCount(); i++) {
+            View view = mStackScroller.getChildAt(i);
+            if (!(view instanceof ExpandableNotificationRow)) {
+                // We don't care about non-notification views.
+                continue;
+            }
+
+            ExpandableNotificationRow parent = (ExpandableNotificationRow) view;
+            List<ExpandableNotificationRow> children = parent.getNotificationChildren();
+            List<ExpandableNotificationRow> orderedChildren = mTmpChildOrderMap.get(parent);
+
             for (int childIndex = 0; orderedChildren != null && childIndex < orderedChildren.size();
                     childIndex++) {
                 ExpandableNotificationRow childView = orderedChildren.get(childIndex);
