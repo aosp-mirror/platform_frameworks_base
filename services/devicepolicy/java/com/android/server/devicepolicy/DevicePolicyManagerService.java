@@ -258,20 +258,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.WIFI_ON);
     }
 
-    /** Keyguard features that when set on a profile will affect the profiles parent user. */
+    /**
+     * Keyguard features that when set on a managed profile that doesn't have its own challenge will
+     * affect the profile's parent user. These can also be set on the managed profile's parent DPM
+     * instance.
+     */
     private static final int PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER =
-            // STOPSHIP If the work challenge supports fingerprint, move DISABLE_FINGERPRINT
-            // to PROFILE_KEYGUARD_FEATURES_AFFECT_PROFILE?
             DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS
             | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
 
-    /** Keyguard features that when set on a profile affect the profile content or challenge only */
-    private static final int PROFILE_KEYGUARD_FEATURES_AFFECT_PROFILE =
+    /**
+     * Keyguard features that when set on a profile affect the profile content or challenge only.
+     * These cannot be set on the managed profile's parent DPM instance
+     */
+    private static final int PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY =
             DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
 
     /** Keyguard features that are allowed to be set on a managed profile */
     private static final int PROFILE_KEYGUARD_FEATURES =
-            PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER | PROFILE_KEYGUARD_FEATURES_AFFECT_PROFILE;
+            PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER | PROFILE_KEYGUARD_FEATURES_PROFILE_ONLY;
 
     final Context mContext;
     final Injector mInjector;
@@ -644,7 +649,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int getUid() { return info.getActivityInfo().applicationInfo.uid; }
 
         public UserHandle getUserHandle() {
-            return new UserHandle(UserHandle.getUserId(info.getActivityInfo().applicationInfo.uid));
+            return UserHandle.of(UserHandle.getUserId(info.getActivityInfo().applicationInfo.uid));
         }
 
         void writeToXml(XmlSerializer out)
@@ -5240,8 +5245,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (isManagedProfile(userHandle)) {
             if (parent) {
                 which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
-            } else if (isSeparateProfileChallengeEnabled(userHandle)){
-                which = which & PROFILE_KEYGUARD_FEATURES_AFFECT_PROFILE;
             } else {
                 which = which & PROFILE_KEYGUARD_FEATURES;
             }
@@ -5289,7 +5292,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = admins.get(i);
                     int userId = admin.getUserHandle().getIdentifier();
-                    if (userId == userHandle || !isManagedProfile(userHandle)) {
+                    boolean isRequestedUser = !parent && (userId == userHandle);
+                    if (isRequestedUser || !isManagedProfile(userId)) {
                         // If we are being asked explicitly about this user
                         // return all disabled features even if its a managed profile.
                         which |= admin.disabledKeyguardFeatures;
