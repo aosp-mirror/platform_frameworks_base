@@ -8498,26 +8498,32 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mPackagesToRemove.add(packageUserPair);
         }
 
-        final List<ComponentName> activeAdminsList = getActiveAdmins(userId);
-        if (activeAdminsList == null || activeAdminsList.size() == 0) {
-            startUninstallIntent(packageName, userId);
-            return;
-        }
+        // All active admins on the user.
+        final List<ComponentName> allActiveAdmins = getActiveAdmins(userId);
 
-        for (ComponentName activeAdmin : activeAdminsList) {
-            if (packageName.equals(activeAdmin.getPackageName())) {
-                removeActiveAdmin(activeAdmin, userId);
+        // Active admins in the target package.
+        final List<ComponentName> packageActiveAdmins = new ArrayList<>();
+        if (allActiveAdmins != null) {
+            for (ComponentName activeAdmin : allActiveAdmins) {
+                if (packageName.equals(activeAdmin.getPackageName())) {
+                    packageActiveAdmins.add(activeAdmin);
+                    removeActiveAdmin(activeAdmin, userId);
+                }
             }
         }
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                for (ComponentName activeAdmin : activeAdminsList) {
-                    removeAdminArtifacts(activeAdmin, userId);
+        if (packageActiveAdmins.size() == 0) {
+            startUninstallIntent(packageName, userId);
+        } else {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    for (ComponentName activeAdmin : packageActiveAdmins) {
+                        removeAdminArtifacts(activeAdmin, userId);
+                    }
+                    startUninstallIntent(packageName, userId);
                 }
-                startUninstallIntent(packageName, userId);
-            }
-        }, DEVICE_ADMIN_DEACTIVATE_TIMEOUT); // Start uninstall after timeout anyway.
+            }, DEVICE_ADMIN_DEACTIVATE_TIMEOUT); // Start uninstall after timeout anyway.
+        }
     }
 
     private void removePackageIfRequired(final String packageName, final int userId) {
