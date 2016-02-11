@@ -70,6 +70,7 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
@@ -122,9 +123,6 @@ final class TaskRecord {
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
     private static final String ATTR_CALLING_UID = "calling_uid";
     private static final String ATTR_CALLING_PACKAGE = "calling_package";
-    // TODO(b/26847884): Currently needed while migrating to resize_mode.
-    // Can be removed at some later point.
-    private static final String ATTR_RESIZEABLE = "resizeable";
     private static final String ATTR_RESIZE_MODE = "resize_mode";
     private static final String ATTR_PRIVILEGED = "privileged";
     private static final String ATTR_NON_FULLSCREEN_BOUNDS = "non_fullscreen_bounds";
@@ -1169,7 +1167,7 @@ final class TaskRecord {
         int nextTaskId = INVALID_TASK_ID;
         int callingUid = -1;
         String callingPackage = "";
-        int resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
         boolean privileged = false;
         Rect bounds = null;
 
@@ -1231,11 +1229,10 @@ final class TaskRecord {
                 callingUid = Integer.valueOf(attrValue);
             } else if (ATTR_CALLING_PACKAGE.equals(attrName)) {
                 callingPackage = attrValue;
-            } else if (ATTR_RESIZEABLE.equals(attrName)) {
-                resizeMode = Boolean.valueOf(attrValue)
-                        ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_CROP_WINDOWS;
             } else if (ATTR_RESIZE_MODE.equals(attrName)) {
                 resizeMode = Integer.valueOf(attrValue);
+                resizeMode = (resizeMode == RESIZE_MODE_CROP_WINDOWS)
+                        ? RESIZE_MODE_FORCE_RESIZEABLE : resizeMode;
             } else if (ATTR_PRIVILEGED.equals(attrName)) {
                 privileged = Boolean.valueOf(attrValue);
             } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
