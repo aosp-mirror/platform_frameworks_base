@@ -2080,8 +2080,25 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        if (isSnoozedPackage(sbn)) {
-            if (DEBUG) Log.d(TAG, "No peeking: snoozed package: " + sbn.getKey());
+        boolean inUse = mPowerManager.isScreenOn()
+                && (!mStatusBarKeyguardViewManager.isShowing()
+                || mStatusBarKeyguardViewManager.isOccluded())
+                && !mStatusBarKeyguardViewManager.isInputRestricted();
+        try {
+            inUse = inUse && !mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.d(TAG, "failed to query dream manager", e);
+        }
+
+        if (!inUse) {
+            if (DEBUG) {
+                Log.d(TAG, "No peeking: not in use: " + sbn.getKey());
+            }
+            return false;
+        }
+
+        if (mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
+            if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
 
@@ -2090,15 +2107,17 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        if (sbn.getNotification().fullScreenIntent != null
-                && mAccessibilityManager.isTouchExplorationEnabled()) {
-            if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
-            return false;
+        if (sbn.getNotification().fullScreenIntent != null) {
+            if (mAccessibilityManager.isTouchExplorationEnabled()) {
+                if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
+                return false;
+            } else {
+                return true;
+            }
         }
 
-
-        if (mNotificationData.shouldSuppressScreenOn(sbn.getKey())) {
-            if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
+        if (isSnoozedPackage(sbn)) {
+            if (DEBUG) Log.d(TAG, "No peeking: snoozed package: " + sbn.getKey());
             return false;
         }
 
@@ -2107,17 +2126,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        boolean inUse = mPowerManager.isScreenOn()
-                && (!mStatusBarKeyguardViewManager.isShowing()
-                        || mStatusBarKeyguardViewManager.isOccluded())
-                && !mStatusBarKeyguardViewManager.isInputRestricted();
-        try {
-            inUse = inUse && !mDreamManager.isDreaming();
-        } catch (RemoteException e) {
-            Log.d(TAG, "failed to query dream manager", e);
-        }
-        if (DEBUG) Log.d(TAG, "peek if device in use: " + inUse);
-        return inUse;
+        return true;
     }
 
     protected abstract boolean isSnoozedPackage(StatusBarNotification sbn);
