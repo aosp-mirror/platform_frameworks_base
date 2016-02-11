@@ -768,7 +768,6 @@ final class ActivityStack {
         r.state = ActivityState.RESUMED;
         if (DEBUG_STATES) Slog.v(TAG_STATES,
                 "Moving to RESUMED: " + r + " (starting new instance)");
-        r.stopped = false;
         mResumedActivity = r;
         r.task.touchActiveTime();
         mRecentTasks.addLocked(r.task);
@@ -1228,9 +1227,11 @@ final class ActivityStack {
      * this function updates the rest of our state to match that fact.
      */
     private void completeResumeLocked(ActivityRecord next) {
+        next.visible = true;
         next.idle = false;
         next.results = null;
         next.newIntents = null;
+        next.stopped = false;
 
         if (next.isHomeActivity()) {
             ProcessRecord app = next.task.mActivities.get(0).app;
@@ -1729,6 +1730,8 @@ final class ActivityStack {
 
         // This activity is not currently visible, but is running. Tell it to become visible.
         if (r.state == ActivityState.RESUMED || r == starting) {
+            Slog.d(TAG_VISIBILITY, "Not making visible, r=" + r + " state=" + r.state
+                    + " starting=" + starting);
             return;
         }
 
@@ -2291,7 +2294,6 @@ final class ActivityStack {
             // From this point on, if something goes wrong there is no way
             // to recover the activity.
             try {
-                next.visible = true;
                 completeResumeLocked(next);
             } catch (Exception e) {
                 // If any exception gets thrown, toss away this
@@ -2302,8 +2304,6 @@ final class ActivityStack {
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
                 return true;
             }
-            next.stopped = false;
-
         } else {
             // Whoops, need to restart this activity!
             if (!next.hasBeenLaunched) {
@@ -4283,6 +4283,12 @@ final class ActivityStack {
                 // "restart!".
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is relaunching resumed " + r);
+
+                if (DEBUG_STATES && !r.visible) {
+                    Slog.v(TAG_STATES, "Config is relaunching resumed invisible activity " + r
+                            + " called by " + Debug.getCallers(4));
+                }
+
                 relaunchActivityLocked(r, r.configChangeFlags, true, preserveWindow);
             } else {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
@@ -4433,9 +4439,21 @@ final class ActivityStack {
         }
 
         if (andResume) {
-            r.results = null;
-            r.newIntents = null;
+            if (DEBUG_STATES) {
+                Slog.d(TAG_STATES, "Resumed after relaunch " + r);
+            }
             r.state = ActivityState.RESUMED;
+            // Relaunch-resume could happen either when the app is already in the front,
+            // or while it's being brought to front. In the latter case, it's marked RESUMED
+            // but not yet visible (or stopped). We need to complete the resume here as the
+            // code in resumeTopActivityInnerLocked to complete the resume might be skipped.
+            if (!r.visible || r.stopped) {
+                mWindowManager.setAppVisibility(r.appToken, true);
+                completeResumeLocked(r);
+            } else {
+                r.results = null;
+                r.newIntents = null;
+            }
         } else {
             mHandler.removeMessages(PAUSE_TIMEOUT_MSG, r);
             r.state = ActivityState.PAUSED;
