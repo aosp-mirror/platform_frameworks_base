@@ -263,7 +263,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         mSelectionManager.addCallback(selectionListener);
 
         // Make sure this is done after the RecyclerView is set up.
-        mFocusManager = new FocusManager(mRecView, mSelectionManager);
+        mFocusManager = new FocusManager(mRecView);
 
         mModel = new Model();
         mModel.addUpdateListener(mAdapter);
@@ -1261,6 +1261,18 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             }
 
             if (mFocusManager.handleKey(doc, keyCode, event)) {
+                // Handle range selection adjustments. Extending the selection will adjust the
+                // bounds of the in-progress range selection. Each time an unshifted navigation
+                // event is received, the range selection is restarted.
+                if (shouldExtendSelection(event)) {
+                    if (!mSelectionManager.isRangeSelectionActive()) {
+                        // Start a range selection if one isn't active
+                        mSelectionManager.startRangeSelection(doc.getAdapterPosition());
+                    }
+                    mSelectionManager.snapRangeSelection(mFocusManager.getFocusPosition());
+                } else {
+                    mSelectionManager.endRangeSelection();
+                }
                 return true;
             }
 
@@ -1274,6 +1286,11 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             }
 
             return false;
+        }
+
+        private boolean shouldExtendSelection(KeyEvent event) {
+            return Events.isNavigationKeyCode(event.getKeyCode()) &&
+                    event.isShiftPressed();
         }
     }
 
