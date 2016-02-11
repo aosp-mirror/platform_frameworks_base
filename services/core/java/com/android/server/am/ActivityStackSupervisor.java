@@ -1938,9 +1938,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
         final boolean updated = stack.ensureActivityConfigurationLocked(r, 0,
                 preserveWindows);
-        // And we need to make sure at this point that all other activities
-        // are made visible with the correct configuration.
-        ensureActivitiesVisibleLocked(r, 0, preserveWindows);
         if (!updated) {
             resumeFocusedStackTopActivityLocked();
         }
