@@ -4236,7 +4236,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             mOpeningApps.remove(wtoken);
             mClosingApps.remove(wtoken);
-            wtoken.mAppStopped = false;
             wtoken.waitingToShow = false;
             wtoken.hiddenRequested = !visible;
 
@@ -4246,6 +4245,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // if made visible again.
                 wtoken.appDied = false;
                 wtoken.removeAllWindows();
+            } else if (visible) {
+                wtoken.mAppStopped = false;
             }
 
             // If we are preparing an app transition, then delay changing
