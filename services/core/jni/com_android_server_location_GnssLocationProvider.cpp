@@ -122,7 +122,7 @@ static void sv_status_callback(GpsSvStatus* sv_status)
     sGnssSvListSize = sv_status->num_svs;
     // Clamp the list size. Legacy GpsSvStatus has only 32 elements in sv_list.
     if (sGnssSvListSize > GPS_MAX_SATELLITE_COUNT) {
-        ALOGW("Too many satellites %d. Clamps to %d.",
+        ALOGW("Too many satellites %zd. Clamps to %d.",
               sGnssSvListSize,
               GPS_MAX_SATELLITE_COUNT);
         sGnssSvListSize = GPS_MAX_SATELLITE_COUNT;
@@ -172,7 +172,7 @@ static void gnss_sv_status_callback(GnssSvStatus* sv_status) {
     sGnssSvListSize = sv_status->num_svs;
     // Clamp the list size
     if (sGnssSvListSize > GNSS_MAX_SATELLITE_COUNT) {
-        ALOGD("Too many satellites %d. Clamps to %d.",
+        ALOGD("Too many satellites %zd. Clamps to %d.",
               sGnssSvListSize,
               GNSS_MAX_SATELLITE_COUNT);
         sGnssSvListSize = GNSS_MAX_SATELLITE_COUNT;
