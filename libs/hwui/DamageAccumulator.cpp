@@ -45,7 +45,7 @@ struct DirtyStack {
 };
 
 DamageAccumulator::DamageAccumulator() {
-    mHead = mAllocator.create_trivial<DirtyStack>();
+    mHead = (DirtyStack*) mAllocator.alloc(sizeof(DirtyStack));
     memset(mHead, 0, sizeof(DirtyStack));
     // Create a root that we will not pop off
     mHead->prev = mHead;
@@ -78,7 +78,7 @@ void DamageAccumulator::computeCurrentTransform(Matrix4* outMatrix) const {
 
 void DamageAccumulator::pushCommon() {
     if (!mHead->next) {
-        DirtyStack* nextFrame = mAllocator.create_trivial<DirtyStack>();
+        DirtyStack* nextFrame = (DirtyStack*) mAllocator.alloc(sizeof(DirtyStack));
         nextFrame->next = nullptr;
         nextFrame->prev = mHead;
         mHead->next = nextFrame;

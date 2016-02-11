@@ -81,6 +81,10 @@ static void _addAllocation(int count) {
 
 #define min(x,y) (((x) < (y)) ? (x) : (y))
 
+void* operator new(std::size_t size, android::uirenderer::LinearAllocator& la) {
+    return la.alloc(size);
+}
+
 namespace android {
 namespace uirenderer {
 
@@ -167,7 +171,7 @@ void LinearAllocator::ensureNext(size_t size) {
     mNext = start(mCurrentPage);
 }
 
-void* LinearAllocator::allocImpl(size_t size) {
+void* LinearAllocator::alloc(size_t size) {
     size = ALIGN(size);
     if (size > mMaxAllocSize && !fitsInCurrentPage(size)) {
         ALOGV("Exceeded max size %zu > %zu", size, mMaxAllocSize);
@@ -192,7 +196,7 @@ void LinearAllocator::addToDestructionList(Destructor dtor, void* addr) {
                   "DestructorNode must have standard layout");
     static_assert(std::is_trivially_destructible<DestructorNode>::value,
                   "DestructorNode must be trivially destructable");
-    auto node = new (allocImpl(sizeof(DestructorNode))) DestructorNode();
+    auto node = new (*this) DestructorNode();
     node->dtor = dtor;
     node->addr = addr;
     node->next = mDtorList;
