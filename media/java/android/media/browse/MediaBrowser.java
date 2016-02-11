@@ -212,21 +212,25 @@ public final class MediaBrowser {
         // It's ok to call this any state, because allowing this lets apps not have
         // to check isConnected() unnecessarily. They won't appreciate the extra
         // assertions for this. We do everything we can here to go back to a sane state.
-        if (mServiceCallbacks != null) {
-            try {
-                mServiceBinder.disconnect(mServiceCallbacks);
-            } catch (RemoteException ex) {
-                // We are disconnecting anyway. Log, just for posterity but it's not
-                // a big problem.
-                Log.w(TAG, "RemoteException during connect for " + mServiceComponent);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mServiceCallbacks != null) {
+                    try {
+                        mServiceBinder.disconnect(mServiceCallbacks);
+                    } catch (RemoteException ex) {
+                        // We are disconnecting anyway. Log, just for posterity but it's not
+                        // a big problem.
+                        Log.w(TAG, "RemoteException during connect for " + mServiceComponent);
+                    }
+                }
+                forceCloseConnection();
+                if (DBG) {
+                    Log.d(TAG, "disconnect...");
+                    dump();
+                }
             }
-        }
-        forceCloseConnection();
-
-        if (DBG) {
-            Log.d(TAG, "disconnect...");
-            dump();
-        }
+        });
     }
 
     /**
