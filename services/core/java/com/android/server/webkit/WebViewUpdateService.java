@@ -29,6 +29,7 @@ import android.content.pm.Signature;
 import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.AndroidRuntimeException;
@@ -141,7 +142,7 @@ public class WebViewUpdateService extends SystemService {
                                 // only kills dependents of packages that are being removed.
                                 try {
                                     ActivityManagerNative.getDefault().killPackageDependents(
-                                        oldProviderName, getContext().getUserId());
+                                        oldProviderName, UserHandle.USER_ALL);
                                 } catch (RemoteException e) {
                                 }
                             }
@@ -209,7 +210,7 @@ public class WebViewUpdateService extends SystemService {
         try {
             if (oldPackage != null) {
                 ActivityManagerNative.getDefault().killPackageDependents(
-                        oldPackage.packageName, getContext().getUserId());
+                        oldPackage.packageName, UserHandle.USER_ALL);
             }
         } catch (RemoteException e) {
         }
