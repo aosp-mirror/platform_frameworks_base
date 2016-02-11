@@ -181,7 +181,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 triggeredAuthorities = new String[job.changedAuthorities.size()];
                 job.changedAuthorities.toArray(triggeredAuthorities);
             }
-            mParams = new JobParameters(this, job.getJobId(), job.getExtras(), isDeadlineExpired,
+            mParams = new JobParameters(this, job.getJobId(), job.getExtras(),
+                    job.getTransientExtras(), isDeadlineExpired,
                     triggeredUris, triggeredAuthorities);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 

@@ -18,6 +18,7 @@ package android.app.job;
 
 import android.app.job.IJobCallback;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,6 +43,7 @@ public class JobParameters implements Parcelable {
 
     private final int jobId;
     private final PersistableBundle extras;
+    private final Bundle transientExtras;
     private final IBinder callback;
     private final boolean overrideDeadlineExpired;
     private final Uri[] mTriggeredContentUris;
@@ -51,10 +53,11 @@ public class JobParameters implements Parcelable {
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
-                boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
+            Bundle transientExtras, boolean overrideDeadlineExpired, Uri[] triggeredContentUris,
             String[] triggeredContentAuthorities) {
         this.jobId = jobId;
         this.extras = extras;
+        this.transientExtras = transientExtras;
         this.callback = callback;
         this.overrideDeadlineExpired = overrideDeadlineExpired;
         this.mTriggeredContentUris = triggeredContentUris;
@@ -83,6 +86,15 @@ public class JobParameters implements Parcelable {
      */
     public PersistableBundle getExtras() {
         return extras;
+    }
+
+    /**
+     * @return The transient extras you passed in when constructing this job with
+     * {@link android.app.job.JobInfo.Builder#setTransientExtras(android.os.Bundle)}. This will
+     * never be null. If you did not set any extras this will be an empty bundle.
+     */
+    public Bundle getTransientExtras() {
+        return transientExtras;
     }
 
     /**
@@ -127,6 +139,7 @@ public class JobParameters implements Parcelable {
     private JobParameters(Parcel in) {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
+        transientExtras = in.readBundle();
         callback = in.readStrongBinder();
         overrideDeadlineExpired = in.readInt() == 1;
         mTriggeredContentUris = in.createTypedArray(Uri.CREATOR);
@@ -148,6 +161,7 @@ public class JobParameters implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(jobId);
         dest.writePersistableBundle(extras);
+        dest.writeBundle(transientExtras);
         dest.writeStrongBinder(callback);
         dest.writeInt(overrideDeadlineExpired ? 1 : 0);
         dest.writeTypedArray(mTriggeredContentUris, flags);

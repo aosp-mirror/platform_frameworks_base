@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -113,6 +114,13 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     }
 
     /**
+     * Constructs a PersistableBundle without initializing it.
+     */
+    PersistableBundle(boolean doInit) {
+        super(doInit);
+    }
+
+    /**
      * Make a PersistableBundle for a single key/value pair.
      *
      * @hide
@@ -130,6 +138,19 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
     @Override
     public Object clone() {
         return new PersistableBundle(this);
+    }
+
+    /**
+     * Make a deep copy of the given bundle.  Traverses into inner containers and copies
+     * them as well, so they are not shared across bundles.  Will traverse in to
+     * {@link Bundle}, {@link PersistableBundle}, {@link ArrayList}, and all types of
+     * primitive arrays.  Other types of objects (such as Parcelable or Serializable)
+     * are referenced as-is and not copied in any way.
+     */
+    public PersistableBundle deepcopy() {
+        PersistableBundle b = new PersistableBundle(false);
+        b.copyInternal(this, true);
+        return b;
     }
 
     /**
