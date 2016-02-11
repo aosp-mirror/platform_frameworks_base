@@ -104,6 +104,9 @@ public class LocaleStore {
         }
 
         private boolean isSuggestionOfType(int suggestionMask) {
+            if (!mIsTranslated) { // Never suggest an untranslated locale
+                return false;
+            }
             return (mSuggestionFlags & suggestionMask) == suggestionMask;
         }
 
@@ -207,6 +210,27 @@ public class LocaleStore {
         }
     }
 
+    /*
+     * Show all the languages supported for a country in the suggested list.
+     * This is also handy for devices without SIM (tablets).
+     */
+    private static void addSuggestedLocalesForRegion(Locale locale) {
+        if (locale == null) {
+            return;
+        }
+        final String country = locale.getCountry();
+        if (country.isEmpty()) {
+            return;
+        }
+
+        for (LocaleInfo li : sLocaleCache.values()) {
+            if (country.equals(li.getLocale().getCountry())) {
+                // We don't need to differentiate between manual and SIM suggestions
+                li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
+            }
+        }
+    }
+
     public static void fillCache(Context context) {
         if (sFullyInitialized) {
             return;
@@ -255,6 +279,8 @@ public class LocaleStore {
         for (LocaleInfo li : sLocaleCache.values()) {
             li.setTranslated(localizedLocales.contains(li.getLangScriptKey()));
         }
+
+        addSuggestedLocalesForRegion(Locale.getDefault());
 
         sFullyInitialized = true;
     }
