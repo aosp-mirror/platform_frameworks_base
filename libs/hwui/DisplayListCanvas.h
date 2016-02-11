@@ -251,7 +251,7 @@ private:
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
         if (!srcBuffer) return nullptr;
 
-        T* dstBuffer = (T*) mDisplayList->allocator.alloc(count * sizeof(T));
+        T* dstBuffer = (T*) mDisplayList->allocator.alloc<T>(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
         return dstBuffer;
     }
@@ -320,8 +320,7 @@ private:
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        SkBitmap* localBitmap = new (alloc()) SkBitmap(bitmap);
-        alloc().autoDestroy(localBitmap);
+        SkBitmap* localBitmap = alloc().create<SkBitmap>(bitmap);
         mDisplayList->bitmapResources.push_back(localBitmap);
         return localBitmap;
     }

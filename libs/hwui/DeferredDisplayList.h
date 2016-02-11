@@ -49,11 +49,6 @@ typedef const void* mergeid_t;
 
 class DeferredDisplayState {
 public:
-    static void* operator new(size_t size) = delete;
-    static void* operator new(size_t size, LinearAllocator& allocator) {
-        return allocator.alloc(size);
-    }
-
     // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped
     Rect mBounds;
 
@@ -124,7 +119,7 @@ private:
     DeferredDisplayList(const DeferredDisplayList& other); // disallow copy
 
     DeferredDisplayState* createState() {
-        return new (mAllocator) DeferredDisplayState();
+        return mAllocator.create_trivial<DeferredDisplayState>();
     }
 
     void tryRecycleState(DeferredDisplayState* state) {
