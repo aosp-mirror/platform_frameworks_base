@@ -20802,7 +20802,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING, userId);
         } catch (RemoteException e) {
         }
-        if (pkgUid == -1) {
+        if (userId != UserHandle.USER_ALL && pkgUid == -1) {
             throw new IllegalArgumentException(
                     "Cannot kill dependents of non-existing package " + packageName);
         }
