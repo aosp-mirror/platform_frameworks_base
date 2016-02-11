@@ -44,6 +44,7 @@ import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -1293,13 +1294,15 @@ public class WifiManager {
      * @return the list of access points found in the most recent scan. An app must hold
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
-     * in order to get valid results.
+     * in order to get valid results.  If there is a remote exception (e.g., either a communication
+     * problem with the system service or an exception within the framework) an empty list will be
+     * returned.
      */
     public List<ScanResult> getScanResults() {
         try {
             return mService.getScanResults(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return null;
+            return new ArrayList<ScanResult>();
         }
     }
 
