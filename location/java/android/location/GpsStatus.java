@@ -138,15 +138,19 @@ public final class GpsStatus {
     // For API-compat a public ctor() is not available
     GpsStatus() {}
 
-    private void setStatus(int svCount, int[] prnWithFlags, float[] snrs, float[] elevations,
-            float[] azimuths, int[] constellationTypes) { 
+    private void setStatus(int svCount, int[] svidWithFlags, float[] snrs, float[] elevations,
+            float[] azimuths) {
         clearSatellites();
         for (int i = 0; i < svCount; i++) {
+            final int constellationType =
+                    (svidWithFlags[i] >> GnssStatus.CONSTELLATION_TYPE_SHIFT_WIDTH)
+                    & GnssStatus.CONSTELLATION_TYPE_MASK;
             // Skip all non-GPS satellites.
-            if (constellationTypes[i] != GnssStatus.CONSTELLATION_GPS) {
+            if (constellationType != GnssStatus.CONSTELLATION_GPS) {
+                // TODO: translate the defacto pre-N use of  prn's >32 to new struct
                 continue;
             }
-            int prn = prnWithFlags[i] >> GnssStatus.PRN_SHIFT_WIDTH;
+            int prn = svidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH;
             if (prn > 0 && prn <= NUM_SATELLITES) {
                 GpsSatellite satellite = mSatellites.get(prn);
                 if (satellite == null) {
@@ -159,11 +163,11 @@ public final class GpsStatus {
                 satellite.mElevation = elevations[i];
                 satellite.mAzimuth = azimuths[i];
                 satellite.mHasEphemeris =
-                        (prnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
+                        (svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
                 satellite.mHasAlmanac =
-                        (prnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
+                        (svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
                 satellite.mUsedInFix =
-                        (prnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0;
+                        (svidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0;
             }
         }
     }
@@ -176,8 +180,8 @@ public final class GpsStatus {
      */
     void setStatus(GnssStatus status, int timeToFirstFix) {
         mTimeToFirstFix = timeToFirstFix;
-        setStatus(status.mSvCount, status.mPrnWithFlags, status.mSnrs, status.mElevations,
-                status.mAzimuths, status.mConstellationTypes);
+        setStatus(status.mSvCount, status.mSvidWithFlags, status.mSnrs, status.mElevations,
+                status.mAzimuths);
     }
 
     void setTimeToFirstFix(int ttff) {

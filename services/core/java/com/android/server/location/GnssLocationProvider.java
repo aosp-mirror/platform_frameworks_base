@@ -1557,15 +1557,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
      * called from native code to update SV info
      */
     private void reportSvStatus() {
-        int svCount = native_read_sv_status(mPrnWithFlags, mSnrs, mSvElevations, mSvAzimuths,
-                mConstellationTypes);
+        int svCount = native_read_sv_status(mSvidWithFlags, mSnrs, mSvElevations, mSvAzimuths);
         mListenerHelper.onSvStatusChanged(
                 svCount,
-                mPrnWithFlags,
+                mSvidWithFlags,
                 mSnrs,
                 mSvElevations,
-                mSvAzimuths,
-                mConstellationTypes);
+                mSvAzimuths);
 
         if (VERBOSE) {
             Log.v(TAG, "SV count: " + svCount);
@@ -1573,19 +1571,19 @@ public class GnssLocationProvider implements LocationProviderInterface {
         // Calculate number of sets used in fix.
         int usedInFixCount = 0;
         for (int i = 0; i < svCount; i++) {
-            if ((mPrnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
+            if ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) != 0) {
                 ++usedInFixCount;
             }
             if (VERBOSE) {
-                Log.v(TAG, "prn: " + (mPrnWithFlags[i] >> GnssStatus.PRN_SHIFT_WIDTH) +
+                Log.v(TAG, "svid: " + (mSvidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH) +
                         " snr: " + mSnrs[i]/10 +
                         " elev: " + mSvElevations[i] +
                         " azimuth: " + mSvAzimuths[i] +
-                        ((mPrnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
+                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) == 0
                                 ? "  " : " E") +
-                        ((mPrnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
+                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_HAS_ALMANAC_DATA) == 0
                                 ? "  " : " A") +
-                        ((mPrnWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
+                        ((mSvidWithFlags[i] & GnssStatus.GNSS_SV_FLAGS_USED_IN_FIX) == 0
                                 ? "" : "U"));
             }
         }
@@ -2398,14 +2396,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     // for GPS SV statistics
-    private static final int MAX_SVS = 512;
+    private static final int MAX_SVS = 64;
 
     // preallocated arrays, to avoid memory allocation in reportStatus()
-    private int mPrnWithFlags[] = new int[MAX_SVS];
+    private int mSvidWithFlags[] = new int[MAX_SVS];
     private float mSnrs[] = new float[MAX_SVS];
     private float mSvElevations[] = new float[MAX_SVS];
     private float mSvAzimuths[] = new float[MAX_SVS];
-    private int mConstellationTypes[] = new int[MAX_SVS];
     private int mSvCount;
     // preallocated to avoid memory allocation in reportNmea()
     private byte[] mNmeaBuffer = new byte[120];
@@ -2426,7 +2423,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // returns number of SVs
     // mask[0] is ephemeris mask and mask[1] is almanac mask
     private native int native_read_sv_status(int[] prnWithFlags, float[] snrs, float[] elevations,
-            float[] azimuths, int[] constellationTypes);
+            float[] azimuths);
     private native int native_read_nmea(byte[] buffer, int bufferSize);
     private native void native_inject_location(double latitude, double longitude, float accuracy);
 
