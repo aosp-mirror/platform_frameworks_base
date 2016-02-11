@@ -14,51 +14,86 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="16dp"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true">
-
-    <ImageView
-        android:id="@android:id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="32dp" />
+    android:orientation="vertical">
 
     <TextView
-        android:id="@android:id/title"
-        android:layout_width="wrap_content"
+        android:id="@+id/charge_and_estimation"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toStartOf="@android:id/toggle"
-        android:layout_toEndOf="@android:id/icon"
-        android:textAppearance="@style/TextAppearance.QS.DetailItemPrimary"
-        android:text="@string/battery_detail_switch_title" />
+        android:paddingStart="72dp"
+        android:paddingBottom="@dimen/battery_detail_graph_space_top"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/colorAccent" />
 
-    <TextView
-        android:id="@android:id/summary"
-        android:layout_width="wrap_content"
+    <com.android.settingslib.graph.UsageView
+        android:id="@+id/battery_usage"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@android:id/title"
-        android:layout_toStartOf="@android:id/toggle"
-        android:layout_toEndOf="@android:id/icon"
-        android:textAppearance="@style/TextAppearance.QS.DetailItemSecondary"
-        android:text="@string/battery_detail_switch_summary" />
+        systemui:sideLabels="@array/battery_labels"
+        android:colorAccent="?android:attr/colorAccent"
+        systemui:textColor="#66FFFFFF" />
 
-    <Switch
-        android:id="@android:id/toggle"
-        android:layout_width="wrap_content"
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginTop="@dimen/battery_detail_graph_space_bottom"
+        android:layout_marginBottom="8dp" />
+
+    <RelativeLayout
+        android:id="@+id/switch_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="16dp"
-        android:clickable="false"
-        android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true">
 
-</RelativeLayout>
+        <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="32dp" />
+
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@android:id/toggle"
+            android:layout_toEndOf="@android:id/icon"
+            android:textAppearance="@style/TextAppearance.QS.DetailItemPrimary"
+            android:text="@string/battery_detail_switch_title" />
+
+        <TextView
+            android:id="@android:id/summary"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@android:id/title"
+            android:layout_toStartOf="@android:id/toggle"
+            android:layout_toEndOf="@android:id/icon"
+            android:textAppearance="@style/TextAppearance.QS.DetailItemSecondary"
+            android:text="@string/battery_detail_switch_summary" />
+
+        <Switch
+            android:id="@android:id/toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="16dp"
+            android:clickable="false"
+            android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+
+    </RelativeLayout>
+</LinearLayout>

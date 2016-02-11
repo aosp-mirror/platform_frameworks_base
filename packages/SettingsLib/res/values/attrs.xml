@@ -24,4 +24,11 @@
     </declare-styleable>
     <attr name="wifi_signal" format="reference" />
 
+    <declare-styleable name="UsageView">
+        <attr name="android:colorAccent" />
+        <attr name="sideLabels" format="reference" />
+        <attr name="bottomLabels" format="reference" />
+        <attr name="textColor" format="color" />
+    </declare-styleable>
+
 </resources>

@@ -732,6 +732,9 @@
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging/discharging -->
+    <string name="power_remaining_duration_only">Approx. <xliff:g id="time">%2$s</xliff:g> left</string>
+
     <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
     <string name="power_discharging_duration"><xliff:g id="level">%1$s</xliff:g>
         - approx. <xliff:g id="time">%2$s</xliff:g> left</string>
@@ -774,5 +777,17 @@
 
     <!-- Option in navigation drawer that leads to Settings main screen [CHAR LIMIT=30] -->
     <string name="home">Home</string>
+
+    <string-array name="battery_labels" translatable="false">
+        <item>0%</item>
+        <item>50%</item>
+        <item>100%</item>
+    </string-array>
+
+    <!-- Label for length of time since the battery graph started [CHAR LIMIT=20] -->
+    <string name="charge_length_format"><xliff:g name="time" example="3 hours">%1$s</xliff:g> ago</string>
+
+    <!-- Label for length of time until battery is charged [CHAR LIMIT=20] -->
+    <string name="remaining_length_format"><xliff:g name="time" example="3 hours">%1$s</xliff:g> left</string>
 
 </resources>

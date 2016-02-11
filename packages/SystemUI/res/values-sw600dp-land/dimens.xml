@@ -37,4 +37,7 @@
 
     <dimen name="navigation_key_width">162dp</dimen>
     <dimen name="navigation_key_padding">42dp</dimen>
+
+    <dimen name="battery_detail_graph_space_top">27dp</dimen>
+    <dimen name="battery_detail_graph_space_bottom">27dp</dimen>
 </resources>
