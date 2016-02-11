@@ -36,7 +36,7 @@ import android.util.Log;
  */
 public class WifiNanEventListener {
     private static final String TAG = "WifiNanEventListener";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /**
