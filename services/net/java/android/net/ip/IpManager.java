@@ -61,7 +61,6 @@ import java.util.Objects;
  * @hide
  */
 public class IpManager extends StateMachine {
-    private static final String TAG = IpManager.class.getSimpleName();
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
@@ -130,6 +129,7 @@ public class IpManager extends StateMachine {
     private final State mStoppingState = new StoppingState();
     private final State mStartedState = new StartedState();
 
+    private final String mTag;
     private final Context mContext;
     private final String mInterfaceName;
     @VisibleForTesting
@@ -156,11 +156,11 @@ public class IpManager extends StateMachine {
 
     public IpManager(Context context, String ifName, Callback callback)
                 throws IllegalArgumentException {
-        super(TAG + "." + ifName);
+        super(IpManager.class.getSimpleName() + "." + ifName);
+        mTag = getName();
 
         mContext = context;
         mInterfaceName = ifName;
-
         mCallback = callback;
 
         mNwService = INetworkManagementService.Stub.asInterface(
@@ -177,7 +177,7 @@ public class IpManager extends StateMachine {
         try {
             mNwService.registerObserver(mNetlinkTracker);
         } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't register NetlinkTracker: " + e.toString());
+            Log.e(mTag, "Couldn't register NetlinkTracker: " + e.toString());
         }
 
         resetLinkProperties();
@@ -200,7 +200,9 @@ public class IpManager extends StateMachine {
      */
     @VisibleForTesting
     protected IpManager(String ifName, Callback callback) {
-        super(TAG + ".test-" + ifName);
+        super(IpManager.class.getSimpleName() + ".test-" + ifName);
+        mTag = getName();
+
         mInterfaceName = ifName;
         mCallback = callback;
 
@@ -273,7 +275,7 @@ public class IpManager extends StateMachine {
                 mInterfaceName, mInterfaceIndex,
                 msg.arg1, msg.arg2, Objects.toString(msg.obj));
         if (VDBG) {
-            Log.d(TAG, getWhatToString(msg.what) + " " + logLine);
+            Log.d(mTag, getWhatToString(msg.what) + " " + logLine);
         }
         return logLine;
     }
@@ -283,7 +285,7 @@ public class IpManager extends StateMachine {
             mInterfaceIndex = NetworkInterface.getByName(mInterfaceName).getIndex();
         } catch (SocketException | NullPointerException e) {
             // TODO: throw new IllegalStateException.
-            Log.e(TAG, "ALERT: Failed to get interface index: ", e);
+            Log.e(mTag, "ALERT: Failed to get interface index: ", e);
         }
     }
 
@@ -365,17 +367,17 @@ public class IpManager extends StateMachine {
     private void dispatchCallback(ProvisioningChange delta, LinkProperties newLp) {
         switch (delta) {
             case GAINED_PROVISIONING:
-                if (VDBG) { Log.d(TAG, "onProvisioningSuccess()"); }
+                if (VDBG) { Log.d(mTag, "onProvisioningSuccess()"); }
                 mCallback.onProvisioningSuccess(newLp);
                 break;
 
             case LOST_PROVISIONING:
-                if (VDBG) { Log.d(TAG, "onProvisioningFailure()"); }
+                if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
                 mCallback.onProvisioningFailure(newLp);
                 break;
 
             default:
-                if (VDBG) { Log.d(TAG, "onLinkPropertiesChange()"); }
+                if (VDBG) { Log.d(mTag, "onLinkPropertiesChange()"); }
                 mCallback.onLinkPropertiesChange(newLp);
                 break;
         }
@@ -396,7 +398,7 @@ public class IpManager extends StateMachine {
             switch (delta) {
                 case GAINED_PROVISIONING:
                 case LOST_PROVISIONING:
-                    Log.d(TAG, "provisioning: " + delta);
+                    Log.d(mTag, "provisioning: " + delta);
                     break;
             }
         }
@@ -452,7 +454,7 @@ public class IpManager extends StateMachine {
         }
 
         if (VDBG) {
-            Log.d(TAG, "newLp{" + newLp + "}");
+            Log.d(mTag, "newLp{" + newLp + "}");
         }
 
         return newLp;
@@ -464,7 +466,7 @@ public class IpManager extends StateMachine {
             ifcg.setLinkAddress(new LinkAddress("0.0.0.0/0"));
             mNwService.setInterfaceConfig(mInterfaceName, ifcg);
         } catch (RemoteException e) {
-            Log.e(TAG, "ALERT: Failed to clear IPv4 address on interface " + mInterfaceName, e);
+            Log.e(mTag, "ALERT: Failed to clear IPv4 address on interface " + mInterfaceName, e);
         }
     }
 
@@ -474,7 +476,7 @@ public class IpManager extends StateMachine {
         final ProvisioningChange delta = setLinkProperties(newLp);
 
         if (VDBG) {
-            Log.d(TAG, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
+            Log.d(mTag, "onNewDhcpResults(" + Objects.toString(dhcpResults) + ")");
         }
         mCallback.onNewDhcpResults(dhcpResults);
 
@@ -502,7 +504,7 @@ public class IpManager extends StateMachine {
             delta = ProvisioningChange.LOST_PROVISIONING;
         }
 
-        if (VDBG) { Log.d(TAG, "onNewDhcpResults(null)"); }
+        if (VDBG) { Log.d(mTag, "onNewDhcpResults(null)"); }
         mCallback.onNewDhcpResults(null);
 
         dispatchCallback(delta, newLp);
@@ -518,7 +520,7 @@ public class IpManager extends StateMachine {
                 mNwService.disableIpv6(mInterfaceName);
                 mNwService.clearInterfaceAddresses(mInterfaceName);
             } catch (Exception e) {
-                Log.e(TAG, "Failed to clear addresses or disable IPv6" + e);
+                Log.e(mTag, "Failed to clear addresses or disable IPv6" + e);
             }
 
             resetLinkProperties();
@@ -541,7 +543,7 @@ public class IpManager extends StateMachine {
 
                 case DhcpStateMachine.CMD_ON_QUIT:
                     // Everything is already stopped.
-                    Log.e(TAG, "Unexpected CMD_ON_QUIT (already stopped).");
+                    Log.e(mTag, "Unexpected CMD_ON_QUIT (already stopped).");
                     break;
 
                 default:
@@ -584,9 +586,9 @@ public class IpManager extends StateMachine {
                 mNwService.enableIpv6(mInterfaceName);
                 // TODO: Perhaps clearIPv4Address() as well.
             } catch (RemoteException re) {
-                Log.e(TAG, "Unable to change interface settings: " + re);
+                Log.e(mTag, "Unable to change interface settings: " + re);
             } catch (IllegalStateException ie) {
-                Log.e(TAG, "Unable to change interface settings: " + ie);
+                Log.e(mTag, "Unable to change interface settings: " + ie);
             }
 
             mIpReachabilityMonitor = new IpReachabilityMonitor(
@@ -607,7 +609,7 @@ public class IpManager extends StateMachine {
                 if (applyStaticIpConfig()) {
                     handleIPv4Success(new DhcpResults(mStaticIpConfig));
                 } else {
-                    if (VDBG) { Log.d(TAG, "onProvisioningFailure()"); }
+                    if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
                     mCallback.onProvisioningFailure(getLinkProperties());
                     transitionTo(mStoppingState);
                 }
@@ -640,7 +642,7 @@ public class IpManager extends StateMachine {
                     break;
 
                 case CMD_START:
-                    Log.e(TAG, "ALERT: START received in StartedState. Please fix caller.");
+                    Log.e(mTag, "ALERT: START received in StartedState. Please fix caller.");
                     break;
 
                 case CMD_CONFIRM:
@@ -677,7 +679,7 @@ public class IpManager extends StateMachine {
                 }
 
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
-                    if (VDBG) { Log.d(TAG, "onPreDhcpAction()"); }
+                    if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
                     mCallback.onPreDhcpAction();
                     break;
 
@@ -685,7 +687,7 @@ public class IpManager extends StateMachine {
                     // Note that onPostDhcpAction() is likely to be
                     // asynchronous, and thus there is no guarantee that we
                     // will be able to observe any of its effects here.
-                    if (VDBG) { Log.d(TAG, "onPostDhcpAction()"); }
+                    if (VDBG) { Log.d(mTag, "onPostDhcpAction()"); }
                     mCallback.onPostDhcpAction();
 
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
@@ -697,14 +699,14 @@ public class IpManager extends StateMachine {
                             handleIPv4Failure();
                             break;
                         default:
-                            Log.e(TAG, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
+                            Log.e(mTag, "Unknown CMD_POST_DHCP_ACTION status:" + msg.arg1);
                     }
                     break;
                 }
 
                 case DhcpStateMachine.CMD_ON_QUIT:
                     // DHCPv4 quit early for some reason.
-                    Log.e(TAG, "Unexpected CMD_ON_QUIT.");
+                    Log.e(mTag, "Unexpected CMD_ON_QUIT.");
                     mDhcpStateMachine = null;
                     break;
 
@@ -720,9 +722,9 @@ public class IpManager extends StateMachine {
             ifcg.setInterfaceUp();
             try {
                 mNwService.setInterfaceConfig(mInterfaceName, ifcg);
-                if (DBG) Log.d(TAG, "Static IP configuration succeeded");
+                if (DBG) Log.d(mTag, "Static IP configuration succeeded");
             } catch (IllegalStateException | RemoteException e) {
-                Log.e(TAG, "Static IP configuration failed: ", e);
+                Log.e(mTag, "Static IP configuration failed: ", e);
                 return false;
             }
 
