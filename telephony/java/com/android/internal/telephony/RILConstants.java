@@ -92,7 +92,33 @@ public interface RILConstants {
     int NO_SMS_TO_ACK = 48;                   /* ACK received when there is no SMS to ack */
     int NETWORK_ERR = 49;                     /* Received error from network */
     int REQUEST_RATE_LIMITED = 50;            /* Operation denied due to overly-frequent requests */
-
+    // Below is list of OEM specific error codes which can by used by OEMs in case they don't want to
+    // reveal particular replacement for Generic failure
+    int OEM_ERROR_1 = 501;
+    int OEM_ERROR_2 = 502;
+    int OEM_ERROR_3 = 503;
+    int OEM_ERROR_4 = 504;
+    int OEM_ERROR_5 = 505;
+    int OEM_ERROR_6 = 506;
+    int OEM_ERROR_7 = 507;
+    int OEM_ERROR_8 = 508;
+    int OEM_ERROR_9 = 509;
+    int OEM_ERROR_10 = 510;
+    int OEM_ERROR_11 = 511;
+    int OEM_ERROR_12 = 512;
+    int OEM_ERROR_13 = 513;
+    int OEM_ERROR_14 = 514;
+    int OEM_ERROR_15 = 515;
+    int OEM_ERROR_16 = 516;
+    int OEM_ERROR_17 = 517;
+    int OEM_ERROR_18 = 518;
+    int OEM_ERROR_19 = 519;
+    int OEM_ERROR_20 = 520;
+    int OEM_ERROR_21 = 521;
+    int OEM_ERROR_22 = 522;
+    int OEM_ERROR_23 = 523;
+    int OEM_ERROR_24 = 524;
+    int OEM_ERROR_25 = 525;
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
     int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */
