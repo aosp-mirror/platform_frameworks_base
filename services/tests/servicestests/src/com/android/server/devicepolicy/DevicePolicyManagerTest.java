@@ -22,9 +22,12 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
@@ -995,6 +998,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testApplicationRestrictionsManagingApp() throws Exception {
         setAsProfileOwner(admin1);
 
+        final String nonExistAppRestrictionsManagerPackage = "com.google.app.restrictions.manager2";
         final String appRestrictionsManagerPackage = "com.google.app.restrictions.manager";
         final int appRestrictionsManagerAppId = 20987;
         final int appRestrictionsManagerUid = UserHandle.getUid(
@@ -1003,6 +1007,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(appRestrictionsManagerPackage),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
         mContext.binder.callingUid = appRestrictionsManagerUid;
+
+        final PackageInfo pi = new PackageInfo();
+        pi.applicationInfo = new ApplicationInfo();
+        pi.applicationInfo.flags = ApplicationInfo.FLAG_HAS_CODE;
+        doReturn(pi).when(mContext.ipackageManager).getPackageInfo(
+                eq(appRestrictionsManagerPackage),
+                anyInt(),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
 
         // appRestrictionsManager package shouldn't be able to manage restrictions as the PO hasn't
         // delegated that permission yet.
@@ -1027,6 +1039,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Check via the profile owner that no restrictions were set.
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
         assertEquals(0, dpm.getApplicationRestrictions(admin1, "pkg1").size());
+
+        // Check the API does not allow setting a non-existent package
+        try {
+            dpm.setApplicationRestrictionsManagingPackage(admin1,
+                    nonExistAppRestrictionsManagerPackage);
+            fail("Non-existent app set as app restriction manager.");
+        } catch (IllegalArgumentException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "is not installed on the current user", expected.getMessage());
+        }
 
         // Let appRestrictionsManagerPackage manage app restrictions
         dpm.setApplicationRestrictionsManagingPackage(admin1, appRestrictionsManagerPackage);
