@@ -2250,7 +2250,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void maybeEscalateHeadsUp() {
-        TreeSet<HeadsUpManager.HeadsUpEntry> entries = mHeadsUpManager.getSortedEntries();
+        Collection<HeadsUpManager.HeadsUpEntry> entries = mHeadsUpManager.getAllEntries();
         for (HeadsUpManager.HeadsUpEntry entry : entries) {
             final StatusBarNotification sbn = entry.entry.notification;
             final Notification notification = sbn.getNotification();
