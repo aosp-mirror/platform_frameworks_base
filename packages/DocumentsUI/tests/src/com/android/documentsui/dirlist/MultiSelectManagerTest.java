@@ -189,6 +189,54 @@ public class MultiSelectManagerTest extends AndroidTestCase {
         assertSelection(items.get(20));
     }
 
+    public void testRangeSelection() {
+        mManager.startRangeSelection(15);
+        mManager.snapRangeSelection(19);
+        assertRangeSelection(15, 19);
+    }
+
+    public void testRangeSelection_snapExpand() {
+        mManager.startRangeSelection(15);
+        mManager.snapRangeSelection(19);
+        mManager.snapRangeSelection(27);
+        assertRangeSelection(15, 27);
+    }
+
+    public void testRangeSelection_snapContract() {
+        mManager.startRangeSelection(15);
+        mManager.snapRangeSelection(27);
+        mManager.snapRangeSelection(19);
+        assertRangeSelection(15, 19);
+    }
+
+    public void testRangeSelection_snapInvert() {
+        mManager.startRangeSelection(15);
+        mManager.snapRangeSelection(27);
+        mManager.snapRangeSelection(3);
+        assertRangeSelection(3, 15);
+    }
+
+    public void testRangeSelection_multiple() {
+        mManager.startRangeSelection(15);
+        mManager.snapRangeSelection(27);
+        mManager.endRangeSelection();
+        mManager.startRangeSelection(42);
+        mManager.snapRangeSelection(57);
+        assertSelectionSize(29);
+        assertRangeSelected(15, 27);
+        assertRangeSelected(42, 57);
+
+    }
+
+    public void testRangeSelection_singleSelect() {
+        mManager = new MultiSelectManager(mEnv, mAdapter, MultiSelectManager.MODE_SINGLE, null);
+        mManager.addCallback(mCallback);
+        mManager.startRangeSelection(11);
+        mManager.snapRangeSelection(19);
+        assertSelectionSize(1);
+        assertSelection(items.get(19));
+    }
+
     public void testProvisionalSelection() {
         Selection s = mManager.getSelection();
         assertSelection();
