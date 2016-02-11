@@ -505,12 +505,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             bitmapCreateFlags, ninePatchChunk, ninePatchInsets, -1);
 }
 
-// Need to buffer enough input to be able to rewind as much as might be read by a decoder
-// trying to determine the stream's format. Currently the most is 64, read by
-// SkWebpCodec.
-// FIXME: Get this number from SkCodec
-#define BYTES_TO_BUFFER 64
-
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
         jobject padding, jobject options) {
 
@@ -519,7 +513,7 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
 
     if (stream.get()) {
         std::unique_ptr<SkStreamRewindable> bufferedStream(
-                SkFrontBufferedStream::Create(stream.release(), BYTES_TO_BUFFER));
+                SkFrontBufferedStream::Create(stream.release(), SkCodec::MinBufferedBytesNeeded()));
         SkASSERT(bufferedStream.get() != NULL);
         bitmap = doDecode(env, bufferedStream.release(), padding, options);
     }
@@ -565,7 +559,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
     std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.release(),
-            BYTES_TO_BUFFER));
+            SkCodec::MinBufferedBytesNeeded()));
 
     return doDecode(env, stream.release(), padding, bitmapFactoryOptions);
 }
