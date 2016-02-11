@@ -20,6 +20,7 @@ import android.app.AppGlobals;
 import android.app.job.JobInfo;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -204,6 +205,10 @@ public class JobStatus {
 
     public PersistableBundle getExtras() {
         return job.getExtras();
+    }
+
+    public Bundle getTransientExtras() {
+        return job.getTransientExtras();
     }
 
     public int getPriority() {

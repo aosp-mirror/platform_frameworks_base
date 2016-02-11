@@ -6241,6 +6241,7 @@ package android.app.job {
     method public long getMinLatencyMillis();
     method public int getNetworkType();
     method public android.content.ComponentName getService();
+    method public android.os.Bundle getTransientExtras();
     method public android.app.job.JobInfo.TriggerContentUri[] getTriggerContentUris();
     method public boolean isPeriodic();
     method public boolean isPersisted();
@@ -6273,6 +6274,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setRequiredNetworkType(int);
     method public android.app.job.JobInfo.Builder setRequiresCharging(boolean);
     method public android.app.job.JobInfo.Builder setRequiresDeviceIdle(boolean);
+    method public android.app.job.JobInfo.Builder setTransientExtras(android.os.Bundle);
   }
 
   public static final class JobInfo.TriggerContentUri implements android.os.Parcelable {
@@ -6289,6 +6291,7 @@ package android.app.job {
     method public int describeContents();
     method public android.os.PersistableBundle getExtras();
     method public int getJobId();
+    method public android.os.Bundle getTransientExtras();
     method public java.lang.String[] getTriggeredContentAuthorities();
     method public android.net.Uri[] getTriggeredContentUris();
     method public boolean isOverrideDeadlineExpired();
@@ -28316,6 +28319,7 @@ package android.os {
     ctor public Bundle(android.os.Bundle);
     ctor public Bundle(android.os.PersistableBundle);
     method public java.lang.Object clone();
+    method public android.os.Bundle deepcopy();
     method public int describeContents();
     method public android.os.IBinder getBinder(java.lang.String);
     method public android.os.Bundle getBundle(java.lang.String);
@@ -29024,6 +29028,7 @@ package android.os {
     ctor public PersistableBundle(int);
     ctor public PersistableBundle(android.os.PersistableBundle);
     method public java.lang.Object clone();
+    method public android.os.PersistableBundle deepcopy();
     method public int describeContents();
     method public android.os.PersistableBundle getPersistableBundle(java.lang.String);
     method public void putPersistableBundle(java.lang.String, android.os.PersistableBundle);

@@ -249,6 +249,8 @@ public class JobStoreTest extends AndroidTestCase {
                 second.hasEarlyConstraint());
         assertEquals("Extras don't match",
                 first.getExtras().toString(), second.getExtras().toString());
+        assertEquals("Transient xtras don't match",
+                first.getTransientExtras().toString(), second.getTransientExtras().toString());
     }
 
     /**

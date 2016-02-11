@@ -121,25 +121,13 @@ public class BaseBundle {
      * @param b a Bundle to be copied.
      */
     BaseBundle(BaseBundle b) {
-        if (b.mParcelledData != null) {
-            if (b.mParcelledData == EMPTY_PARCEL) {
-                mParcelledData = EMPTY_PARCEL;
-            } else {
-                mParcelledData = Parcel.obtain();
-                mParcelledData.appendFrom(b.mParcelledData, 0, b.mParcelledData.dataSize());
-                mParcelledData.setDataPosition(0);
-            }
-        } else {
-            mParcelledData = null;
-        }
+        copyInternal(b, false);
+    }
 
-        if (b.mMap != null) {
-            mMap = new ArrayMap<String, Object>(b.mMap);
-        } else {
-            mMap = null;
-        }
-
-        mClassLoader = b.mClassLoader;
+    /**
+     * Special constructor that does not initialize the bundle.
+     */
+    BaseBundle(boolean doInit) {
     }
 
     /**
@@ -259,6 +247,78 @@ public class BaseBundle {
     public void clear() {
         unparcel();
         mMap.clear();
+    }
+
+    void copyInternal(BaseBundle from, boolean deep) {
+        if (from.mParcelledData != null) {
+            if (from.mParcelledData == EMPTY_PARCEL) {
+                mParcelledData = EMPTY_PARCEL;
+            } else {
+                mParcelledData = Parcel.obtain();
+                mParcelledData.appendFrom(from.mParcelledData, 0, from.mParcelledData.dataSize());
+                mParcelledData.setDataPosition(0);
+            }
+        } else {
+            mParcelledData = null;
+        }
+
+        if (from.mMap != null) {
+            if (!deep) {
+                mMap = new ArrayMap<>(from.mMap);
+            } else {
+                final ArrayMap<String, Object> fromMap = from.mMap;
+                final int N = fromMap.size();
+                mMap = new ArrayMap<>(N);
+                for (int i=0; i<N; i++) {
+                    mMap.append(fromMap.keyAt(i), deepcopyValue(fromMap.valueAt(i)));
+                }
+            }
+        } else {
+            mMap = null;
+        }
+
+        mClassLoader = from.mClassLoader;
+    }
+
+    Object deepcopyValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Bundle) {
+            return ((Bundle)value).deepcopy();
+        } else if (value instanceof PersistableBundle) {
+            return ((PersistableBundle)value).deepcopy();
+        } else if (value instanceof ArrayList) {
+            return deepcopyArrayList((ArrayList) value);
+        } else if (value.getClass().isArray()) {
+            if (value instanceof int[]) {
+                return ((int[])value).clone();
+            } else if (value instanceof long[]) {
+                return ((long[])value).clone();
+            } else if (value instanceof float[]) {
+                return ((float[])value).clone();
+            } else if (value instanceof double[]) {
+                return ((double[])value).clone();
+            } else if (value instanceof Object[]) {
+                return ((Object[])value).clone();
+            } else if (value instanceof byte[]) {
+                return ((byte[])value).clone();
+            } else if (value instanceof short[]) {
+                return ((short[])value).clone();
+            } else if (value instanceof char[]) {
+                return ((char[]) value).clone();
+            }
+        }
+        return value;
+    }
+
+    ArrayList deepcopyArrayList(ArrayList from) {
+        final int N = from.size();
+        ArrayList out = new ArrayList(N);
+        for (int i=0; i<N; i++) {
+            out.add(deepcopyValue(from.get(i)));
+        }
+        return out;
     }
 
     /**

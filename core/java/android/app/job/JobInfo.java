@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -85,6 +86,7 @@ public class JobInfo implements Parcelable {
 
     private final int jobId;
     private final PersistableBundle extras;
+    private final Bundle transientExtras;
     private final ComponentName service;
     private final boolean requireCharging;
     private final boolean requireDeviceIdle;
@@ -114,6 +116,14 @@ public class JobInfo implements Parcelable {
      */
     public PersistableBundle getExtras() {
         return extras;
+    }
+
+    /**
+     * Bundle of transient extras which are returned to your application at execution time,
+     * but not persisted by the system.
+     */
+    public Bundle getTransientExtras() {
+        return transientExtras;
     }
 
     /**
@@ -247,6 +257,7 @@ public class JobInfo implements Parcelable {
     private JobInfo(Parcel in) {
         jobId = in.readInt();
         extras = in.readPersistableBundle();
+        transientExtras = in.readBundle();
         service = in.readParcelable(null);
         requireCharging = in.readInt() == 1;
         requireDeviceIdle = in.readInt() == 1;
@@ -267,7 +278,8 @@ public class JobInfo implements Parcelable {
 
     private JobInfo(JobInfo.Builder b) {
         jobId = b.mJobId;
-        extras = b.mExtras;
+        extras = b.mExtras.deepcopy();
+        transientExtras = b.mTransientExtras.deepcopy();
         service = b.mJobService;
         requireCharging = b.mRequiresCharging;
         requireDeviceIdle = b.mRequiresDeviceIdle;
@@ -297,6 +309,7 @@ public class JobInfo implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(jobId);
         out.writePersistableBundle(extras);
+        out.writeBundle(transientExtras);
         out.writeParcelable(service, flags);
         out.writeInt(requireCharging ? 1 : 0);
         out.writeInt(requireDeviceIdle ? 1 : 0);
@@ -405,6 +418,7 @@ public class JobInfo implements Parcelable {
     public static final class Builder {
         private int mJobId;
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
+        private Bundle mTransientExtras = Bundle.EMPTY;
         private ComponentName mJobService;
         private int mPriority;
         // Requirements.
@@ -454,6 +468,16 @@ public class JobInfo implements Parcelable {
          */
         public Builder setExtras(PersistableBundle extras) {
             mExtras = extras;
+            return this;
+        }
+
+        /**
+         * Set optional transient extras. This is incompatible with jobs that are also
+         * persisted with {@link #setPersisted(boolean)}; mixing the two is not allowed.
+         * @param extras Bundle containing extras you want the scheduler to hold on to for you.
+         */
+        public Builder setTransientExtras(Bundle extras) {
+            mTransientExtras = extras;
             return this;
         }
 
@@ -616,7 +640,6 @@ public class JobInfo implements Parcelable {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
                         "constraints, this is not allowed.");
             }
-            mExtras = new PersistableBundle(mExtras);  // Make our own copy.
             // Check that a deadline was not set on a periodic job.
             if (mIsPeriodic && (mMaxExecutionDelayMillis != 0L)) {
                 throw new IllegalArgumentException("Can't call setOverrideDeadline() on a " +
@@ -632,6 +655,10 @@ public class JobInfo implements Parcelable {
             }
             if (mIsPersisted && (mTriggerContentUris != null)) {
                 throw new IllegalArgumentException("Can't call addTriggerContentUri() on a " +
+                        "persisted job");
+            }
+            if (mIsPersisted && !mTransientExtras.isEmpty()) {
+                throw new IllegalArgumentException("Can't call setTransientExtras() on a " +
                         "persisted job");
             }
             if (mBackoffPolicySet && mRequiresDeviceIdle) {
