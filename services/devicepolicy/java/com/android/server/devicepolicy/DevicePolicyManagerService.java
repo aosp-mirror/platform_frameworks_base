@@ -1249,7 +1249,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (packageName == null || packageName.equals(adminPackage)) {
                         if (mIPackageManager.getPackageInfo(adminPackage, 0, userHandle) == null
                                 || mIPackageManager.getReceiverInfo(
-                                    aa.info.getComponent(), 0, userHandle) == null) {
+                                    aa.info.getComponent(),
+                                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
+                                    userHandle) == null) {
                             removed = true;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
@@ -7104,7 +7106,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 List<ResolveInfo> activitiesToEnable = mIPackageManager.queryIntentActivities(
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        0, // no flags
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
                         parentUserId);
 
                 if (VERBOSE_LOG) {
