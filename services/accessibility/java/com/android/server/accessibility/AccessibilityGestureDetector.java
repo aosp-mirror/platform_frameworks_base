@@ -110,9 +110,25 @@ class AccessibilityGestureDetector extends GestureDetector.SimpleOnGestureListen
     // The minimal score for accepting a predicted gesture.
     private static final float MIN_PREDICTION_SCORE = 2.0f;
 
+    // Distance a finger must travel before we decide if it is a gesture or not.
     private static final int GESTURE_CONFIRM_MM = 10;
-    private static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 1000;
-    private static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 500;
+
+    // Time threshold used to determine if an interaction is a gesture or not.
+    // If the first movement of 1cm takes longer than this value, we assume it's
+    // a slow movement, and therefore not a gesture.
+    //
+    // This value was determined by measuring the time for the first 1cm
+    // movement when gesturing, and touch exploring.  Based on user testing,
+    // all gestures started with the initial movement taking less than 100ms.
+    // When touch exploring, the first movement almost always takes longer than
+    // 200ms.  From this data, 150ms seems the best value to decide what
+    // kind of interaction it is.
+    private static final long CANCEL_ON_PAUSE_THRESHOLD_NOT_STARTED_MS = 150;
+
+    // Time threshold used to determine if a gesture should be cancelled.  If
+    // the finger pauses for longer than this delay, the ongoing gesture is
+    // cancelled.
+    private static final long CANCEL_ON_PAUSE_THRESHOLD_STARTED_MS = 500;
 
     AccessibilityGestureDetector(Context context, Listener listener) {
         mListener = listener;
