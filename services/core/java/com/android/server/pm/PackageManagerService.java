@@ -282,6 +282,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -6778,30 +6779,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Extract pacakges only if profile-guided compilation is enabled because
         // otherwise BackgroundDexOptService will not dexopt them later.
         if (mUseJitProfiles) {
-            ArraySet<String> pkgs = getOptimizablePackages();
-            if (pkgs != null) {
-                for (String pkg : pkgs) {
-                    performDexOpt(pkg, null /* instructionSet */, false /* useProfiles */,
-                            true /* extractOnly */, false /* force */);
+            List<PackageParser.Package> pkgs;
+            synchronized (mPackages) {
+                pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
+            }
+            for (PackageParser.Package pkg : pkgs) {
+                if (PackageDexOptimizer.canOptimizePackage(pkg)) {
+                    performDexOpt(pkg.packageName, null /* instructionSet */,
+                             false /* useProfiles */, true /* extractOnly */, false /* force */);
                 }
             }
         }
-    }
-
-    private ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
-        List<ResolveInfo> ris = null;
-        try {
-            ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                    intent, null, 0, userId);
-        } catch (RemoteException e) {
-        }
-        ArraySet<String> pkgNames = new ArraySet<String>();
-        if (ris != null) {
-            for (ResolveInfo ri : ris) {
-                pkgNames.add(ri.activityInfo.packageName);
-            }
-        }
-        return pkgNames;
     }
 
     @Override
