@@ -82,7 +82,7 @@ public class MimeTypeMap {
     /**
      * Return the MIME type for the given extension.
      * @param extension A file extension without the leading '.'
-     * @return The MIME type for the given extension or null iff there is none.
+     * @return The MIME type for the given extension or null if there is none.
      */
     public String getMimeTypeFromExtension(String extension) {
         return MimeUtils.guessMimeTypeFromExtension(extension);
