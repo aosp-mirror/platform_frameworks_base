@@ -62,7 +62,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
     static final boolean DEBUG_OOM_ADJ = DEBUG_ALL || false;
-    static final boolean DEBUG_PAUSE = DEBUG_ALL || true;
+    static final boolean DEBUG_PAUSE = DEBUG_ALL || false;
     static final boolean DEBUG_POWER = DEBUG_ALL || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
     static final boolean DEBUG_PROCESS_OBSERVERS = DEBUG_ALL || false;
@@ -85,7 +85,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_UID_OBSERVERS = DEBUG_ALL || false;
     static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
     static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
-    static final boolean DEBUG_VISIBILITY = DEBUG_ALL || true;
+    static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
     static final boolean DEBUG_VISIBLE_BEHIND = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_USAGE_STATS = DEBUG_ALL || false;
     static final boolean DEBUG_PERMISSIONS_REVIEW = DEBUG_ALL || false;
