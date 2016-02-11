@@ -27,8 +27,6 @@
     <FrameLayout
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:layout_marginStart="@dimen/root_icon_margin"
-        android:layout_marginEnd="@dimen/root_icon_margin"
         android:duplicateParentState="true">
 
         <ImageView
@@ -55,7 +53,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textAlignment="viewStart"
-            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textAppearance="@android:style/TextAppearance.Material.Menu"
             android:textColor="@color/item_root_primary_text" />
 
         <TextView
@@ -65,7 +63,7 @@
             android:singleLine="true"
             android:ellipsize="end"
             android:textAlignment="viewStart"
-            android:textAppearance="@android:style/TextAppearance.Material.Body1"
+            android:textAppearance="@android:style/TextAppearance.Material.Caption"
             android:textColor="@color/item_root_primary_text" />
 
     </LinearLayout>

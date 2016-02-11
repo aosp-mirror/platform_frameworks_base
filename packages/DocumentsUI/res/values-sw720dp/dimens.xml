@@ -18,4 +18,6 @@
     <dimen name="grid_padding_horiz">16dp</dimen>
     <dimen name="grid_padding_vert">16dp</dimen>
 
+    <dimen name="list_item_padding">24dp</dimen>
+
 </resources>
