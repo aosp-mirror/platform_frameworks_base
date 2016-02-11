@@ -350,6 +350,16 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     }
 
     /**
+     * Obtains document ID for the given device ID.
+     * @param deviceId
+     * @return document ID
+     * @throws FileNotFoundException device ID has not been build.
+     */
+    public String getDeviceDocumentId(int deviceId) throws FileNotFoundException {
+        return mDatabase.getDeviceDocumentId(deviceId);
+    }
+
+    /**
      * Resumes root scanner to handle the update of device list.
      */
     void resumeRootScanner() {
