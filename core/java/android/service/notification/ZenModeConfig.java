@@ -565,6 +565,10 @@ public class ZenModeConfig implements Parcelable {
 
     private static boolean safeBoolean(XmlPullParser parser, String att, boolean defValue) {
         final String val = parser.getAttributeValue(null, att);
+        return safeBoolean(val, defValue);
+    }
+
+    private static boolean safeBoolean(String val, boolean defValue) {
         if (TextUtils.isEmpty(val)) return defValue;
         return Boolean.valueOf(val);
     }
@@ -802,6 +806,7 @@ public class ZenModeConfig implements Parcelable {
                 .appendQueryParameter("days", toDayList(schedule.days))
                 .appendQueryParameter("start", schedule.startHour + "." + schedule.startMinute)
                 .appendQueryParameter("end", schedule.endHour + "." + schedule.endMinute)
+                .appendQueryParameter("exitAtAlarm", String.valueOf(schedule.exitAtAlarm))
                 .build();
     }
 
@@ -825,6 +830,7 @@ public class ZenModeConfig implements Parcelable {
         rt.startMinute = start[1];
         rt.endHour = end[0];
         rt.endMinute = end[1];
+        rt.exitAtAlarm = safeBoolean(conditionId.getQueryParameter("exitAtAlarm"), false);
         return rt;
     }
 
@@ -838,6 +844,8 @@ public class ZenModeConfig implements Parcelable {
         public int startMinute;
         public int endHour;
         public int endMinute;
+        public boolean exitAtAlarm;
+        public long nextAlarm;
 
         @Override
         public int hashCode() {
@@ -852,7 +860,8 @@ public class ZenModeConfig implements Parcelable {
                     && startHour == other.startHour
                     && startMinute == other.startMinute
                     && endHour == other.endHour
-                    && endMinute == other.endMinute;
+                    && endMinute == other.endMinute
+                    && exitAtAlarm == other.exitAtAlarm;
         }
 
         public ScheduleInfo copy() {
@@ -865,6 +874,8 @@ public class ZenModeConfig implements Parcelable {
             rt.startMinute = startMinute;
             rt.endHour = endHour;
             rt.endMinute = endMinute;
+            rt.exitAtAlarm = exitAtAlarm;
+            rt.nextAlarm = nextAlarm;
             return rt;
         }
     }
