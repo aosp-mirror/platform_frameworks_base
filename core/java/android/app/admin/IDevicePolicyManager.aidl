@@ -116,9 +116,10 @@ interface IDevicePolicyManager {
         int numbers, int symbols, int nonletter, int userHandle);
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
-
-    void reportKeyguardDismissed();
-    void reportKeyguardSecured();
+    void reportFailedFingerprintAttempt(int userHandle);
+    void reportSuccessfulFingerprintAttempt(int userHandle);
+    void reportKeyguardDismissed(int userHandle);
+    void reportKeyguardSecured(int userHandle);
 
     boolean setDeviceOwner(in ComponentName who, String ownerName, int userId);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
