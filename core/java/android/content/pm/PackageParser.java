@@ -80,6 +80,7 @@ import libcore.io.IoUtils;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.content.pm.ActivityInfo.FLAG_IMMERSIVE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_CROP_WINDOWS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -3448,7 +3449,7 @@ public class PackageParser {
                 a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
             } else if (a.info.screenOrientation == SCREEN_ORIENTATION_UNSPECIFIED
                     && (a.info.flags & FLAG_IMMERSIVE) == 0) {
-                a.info.resizeMode = RESIZE_MODE_CROP_WINDOWS;
+                a.info.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
             }
 
             if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysFocusable, false)) {
