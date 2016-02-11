@@ -475,6 +475,23 @@ public class KeyguardViewMediator extends SystemUI {
                     break;
             }
         }
+
+        @Override
+        public void onFingerprintAuthFailed() {
+            final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+            if (mLockPatternUtils.isSecure(currentUser)) {
+                mLockPatternUtils.getDevicePolicyManager().reportFailedFingerprintAttempt(
+                        currentUser);
+            }
+        }
+
+        @Override
+        public void onFingerprintAuthenticated(int userId) {
+            if (mLockPatternUtils.isSecure(userId)) {
+                mLockPatternUtils.getDevicePolicyManager().reportSuccessfulFingerprintAttempt(
+                        userId);
+            }
+        }
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
@@ -1370,8 +1387,9 @@ public class KeyguardViewMediator extends SystemUI {
      * @see #KEYGUARD_DONE
      */
     private void handleKeyguardDone(boolean authenticated) {
-        if (mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
-            mLockPatternUtils.getDevicePolicyManager().reportKeyguardDismissed();
+        final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+        if (mLockPatternUtils.isSecure(currentUser)) {
+            mLockPatternUtils.getDevicePolicyManager().reportKeyguardDismissed(currentUser);
         }
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         synchronized (this) {
@@ -1484,8 +1502,9 @@ public class KeyguardViewMediator extends SystemUI {
      * @see #SHOW
      */
     private void handleShow(Bundle options) {
-        if (mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
-            mLockPatternUtils.getDevicePolicyManager().reportKeyguardSecured();
+        final int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+        if (mLockPatternUtils.isSecure(currentUser)) {
+            mLockPatternUtils.getDevicePolicyManager().reportKeyguardSecured(currentUser);
         }
         synchronized (KeyguardViewMediator.this) {
             if (!mSystemReady) {

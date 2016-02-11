@@ -77,8 +77,10 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_KEYGUARD_DISMISSED;
     /**
      * Indicate that there has been an authentication attempt to dismiss the keyguard. The log entry
-     * contains the attempt result (integer, 1 for successful, 0 for unsuccessful), accessible via
-     * {@link SecurityEvent#getData()}}
+     * contains the following information about the attempt in order, accessible via
+     * {@link SecurityEvent#getData()}}: attempt result (integer, 1 for successful, 0 for
+     * unsuccessful), strength of auth method (integer, 1 if strong auth method was used,
+     * 0 otherwise)
      */
     public static final int TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT =
             SecurityLogTags.SECURITY_KEYGUARD_DISMISS_AUTH_ATTEMPT;
