@@ -719,14 +719,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     int getNextTaskIdForUserLocked(int userId) {
-        mRecentTasks.loadUserRecentsLocked(userId);
         final int currentTaskId = mCurTaskIdForUser.get(userId, userId * MAX_TASK_IDS_PER_USER);
         // for a userId u, a taskId can only be in the range
         // [u*MAX_TASK_IDS_PER_USER, (u+1)*MAX_TASK_IDS_PER_USER-1], so if MAX_TASK_IDS_PER_USER
         // was 10, user 0 could only have taskIds 0 to 9, user 1: 10 to 19, user 2: 20 to 29, so on.
         int candidateTaskId = currentTaskId;
-        while (anyTaskForIdLocked(candidateTaskId, !RESTORE_FROM_RECENTS,
-                INVALID_STACK_ID) != null) {
+        while (mRecentTasks.taskIdTakenForUserLocked(candidateTaskId, userId)
+                || anyTaskForIdLocked(candidateTaskId, !RESTORE_FROM_RECENTS,
+                        INVALID_STACK_ID) != null) {
             candidateTaskId++;
             if (candidateTaskId == (userId + 1) * MAX_TASK_IDS_PER_USER) {
                 // Wrap around as there will be smaller task ids that are available now.
