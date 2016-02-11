@@ -30,7 +30,7 @@ import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
+import android.provider.Settings.Global;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.webkit.IWebViewUpdateService;
@@ -90,7 +90,7 @@ public class WebViewUpdateService extends SystemService {
                     // change provider when the new version of the package is being installed).
                     if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)
                         && intent.getExtras().getBoolean(Intent.EXTRA_REPLACING)) {
-                        synchronized(this) {
+                        synchronized(WebViewUpdateService.this) {
                             if (mCurrentWebViewPackage == null) return;
 
                             String webViewPackage = "package:" + mCurrentWebViewPackage.packageName;
@@ -267,13 +267,13 @@ public class WebViewUpdateService extends SystemService {
     }
 
     private static String getUserChosenWebViewProvider() {
-        return Settings.Secure.getString(AppGlobals.getInitialApplication().getContentResolver(),
-                Settings.Secure.WEBVIEW_PROVIDER);
+        return Settings.Global.getString(AppGlobals.getInitialApplication().getContentResolver(),
+                Settings.Global.WEBVIEW_PROVIDER);
     }
 
     private void updateUserSetting(String newProviderName) {
-        Settings.Secure.putString(getContext().getContentResolver(),
-                Settings.Secure.WEBVIEW_PROVIDER,
+        Settings.Global.putString(getContext().getContentResolver(),
+                Settings.Global.WEBVIEW_PROVIDER,
                 newProviderName == null ? "" : newProviderName);
     }
 
