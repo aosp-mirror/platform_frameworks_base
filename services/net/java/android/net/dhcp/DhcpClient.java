@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.DhcpResults;
 import android.net.BaseDhcpStateMachine;
-import android.net.DhcpStateMachine;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
@@ -103,12 +102,35 @@ public class DhcpClient extends BaseDhcpStateMachine {
     // t=0, t=2, t=6, t=14, t=30, allowing for 10% jitter.
     private static final int DHCP_TIMEOUT_MS    =  36 * SECONDS;
 
+    private static final int PUBLIC_BASE = Protocol.BASE_DHCP;
+
+    /* Commands from controller to start/stop DHCP */
+    public static final int CMD_START_DHCP                  = PUBLIC_BASE + 1;
+    public static final int CMD_STOP_DHCP                   = PUBLIC_BASE + 2;
+    public static final int CMD_RENEW_DHCP                  = PUBLIC_BASE + 3;
+
+    /* Notification from DHCP state machine prior to DHCP discovery/renewal */
+    public static final int CMD_PRE_DHCP_ACTION             = PUBLIC_BASE + 4;
+    /* Notification from DHCP state machine post DHCP discovery/renewal. Indicates
+     * success/failure */
+    public static final int CMD_POST_DHCP_ACTION            = PUBLIC_BASE + 5;
+    /* Notification from DHCP state machine before quitting */
+    public static final int CMD_ON_QUIT                     = PUBLIC_BASE + 6;
+
+    /* Command from controller to indicate DHCP discovery/renewal can continue
+     * after pre DHCP action is complete */
+    public static final int CMD_PRE_DHCP_ACTION_COMPLETE    = PUBLIC_BASE + 7;
+
+    /* Message.arg1 arguments to CMD_POST_DHCP notification */
+    public static final int DHCP_SUCCESS = 1;
+    public static final int DHCP_FAILURE = 2;
+
     // Messages.
-    private static final int BASE                 = Protocol.BASE_DHCP + 100;
-    private static final int CMD_KICK             = BASE + 1;
-    private static final int CMD_RECEIVED_PACKET  = BASE + 2;
-    private static final int CMD_TIMEOUT          = BASE + 3;
-    private static final int CMD_ONESHOT_TIMEOUT  = BASE + 4;
+    private static final int PRIVATE_BASE         = Protocol.BASE_DHCP + 100;
+    private static final int CMD_KICK             = PRIVATE_BASE + 1;
+    private static final int CMD_RECEIVED_PACKET  = PRIVATE_BASE + 2;
+    private static final int CMD_TIMEOUT          = PRIVATE_BASE + 3;
+    private static final int CMD_ONESHOT_TIMEOUT  = PRIVATE_BASE + 4;
 
     // DHCP parameters that we request.
     private static final byte[] REQUESTED_PARAMS = new byte[] {
@@ -211,7 +233,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         // Used to time out PacketRetransmittingStates.
         mTimeoutAlarm = makeWakeupMessage("TIMEOUT", CMD_TIMEOUT);
         // Used to schedule DHCP renews.
-        mRenewAlarm = makeWakeupMessage("RENEW", DhcpStateMachine.CMD_RENEW_DHCP);
+        mRenewAlarm = makeWakeupMessage("RENEW", CMD_RENEW_DHCP);
         // Used to tell the caller when its request (CMD_START_DHCP or CMD_RENEW_DHCP) timed out.
         // TODO: when the legacy DHCP client is gone, make the client fully asynchronous and
         // remove this.
@@ -400,13 +422,12 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     private void notifySuccess() {
-        mController.sendMessage(DhcpStateMachine.CMD_POST_DHCP_ACTION,
-                DhcpStateMachine.DHCP_SUCCESS, 0, new DhcpResults(mDhcpLease));
+        mController.sendMessage(
+                CMD_POST_DHCP_ACTION, DHCP_SUCCESS, 0, new DhcpResults(mDhcpLease));
     }
 
     private void notifyFailure() {
-        mController.sendMessage(DhcpStateMachine.CMD_POST_DHCP_ACTION,
-                DhcpStateMachine.DHCP_FAILURE, 0, null);
+        mController.sendMessage(CMD_POST_DHCP_ACTION, DHCP_FAILURE, 0, null);
     }
 
     private void clearDhcpState() {
@@ -428,7 +449,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
     protected void onQuitting() {
         Log.d(TAG, "onQuitting");
-        mController.sendMessage(DhcpStateMachine.CMD_ON_QUIT);
+        mController.sendMessage(CMD_ON_QUIT);
     }
 
     private void maybeLog(String msg) {
@@ -442,17 +463,17 @@ public class DhcpClient extends BaseDhcpStateMachine {
 
         private String messageName(int what) {
             switch (what) {
-                case DhcpStateMachine.CMD_START_DHCP:
+                case CMD_START_DHCP:
                     return "CMD_START_DHCP";
-                case DhcpStateMachine.CMD_STOP_DHCP:
+                case CMD_STOP_DHCP:
                     return "CMD_STOP_DHCP";
-                case DhcpStateMachine.CMD_RENEW_DHCP:
+                case CMD_RENEW_DHCP:
                     return "CMD_RENEW_DHCP";
-                case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
+                case CMD_PRE_DHCP_ACTION:
                     return "CMD_PRE_DHCP_ACTION";
-                case DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE:
+                case CMD_PRE_DHCP_ACTION_COMPLETE:
                     return "CMD_PRE_DHCP_ACTION_COMPLETE";
-                case DhcpStateMachine.CMD_POST_DHCP_ACTION:
+                case CMD_POST_DHCP_ACTION:
                     return "CMD_POST_DHCP_ACTION";
                 case CMD_KICK:
                     return "CMD_KICK";
@@ -495,14 +516,14 @@ public class DhcpClient extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             super.enter();
-            mController.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION);
+            mController.sendMessage(CMD_PRE_DHCP_ACTION);
         }
 
         @Override
         public boolean processMessage(Message message) {
             super.processMessage(message);
             switch (message.what) {
-                case DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE:
+                case CMD_PRE_DHCP_ACTION_COMPLETE:
                     transitionTo(mOtherState);
                     return HANDLED;
                 default:
@@ -532,7 +553,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         public boolean processMessage(Message message) {
             super.processMessage(message);
             switch (message.what) {
-                case DhcpStateMachine.CMD_START_DHCP:
+                case CMD_START_DHCP:
                     scheduleOneshotTimeout();
                     if (mRegisteredForPreDhcpNotification) {
                         transitionTo(mWaitBeforeStartState);
@@ -588,7 +609,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         public boolean processMessage(Message message) {
             super.processMessage(message);
             switch (message.what) {
-                case DhcpStateMachine.CMD_STOP_DHCP:
+                case CMD_STOP_DHCP:
                     transitionTo(mStoppedState);
                     return HANDLED;
                 case CMD_ONESHOT_TIMEOUT:
@@ -810,7 +831,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         public boolean processMessage(Message message) {
             super.processMessage(message);
             switch (message.what) {
-                case DhcpStateMachine.CMD_RENEW_DHCP:
+                case CMD_RENEW_DHCP:
                     if (mRegisteredForPreDhcpNotification) {
                         transitionTo(mWaitBeforeRenewalState);
                     } else {
