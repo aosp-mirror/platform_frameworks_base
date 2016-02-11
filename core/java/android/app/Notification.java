@@ -3358,13 +3358,9 @@ public class Notification implements Parcelable
                 return mN.bigContentView;
             } else if (mStyle != null) {
                 result = mStyle.makeBigContentView();
-            } else if (mActions.size() == 0) {
-                return null;
-            }
-            if (result == null) {
-                result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
-            } else {
                 hideLine1Text(result);
+            } else if (mActions.size() != 0) {
+                result = applyStandardTemplateWithActions(getBigBaseLayoutResource());
             }
             adaptNotificationHeaderForBigContentView(result);
             return result;
@@ -3384,11 +3380,15 @@ public class Notification implements Parcelable
         }
 
         private void hideLine1Text(RemoteViews result) {
-            result.setViewVisibility(R.id.text_line_1, View.GONE);
+            if (result != null) {
+                result.setViewVisibility(R.id.text_line_1, View.GONE);
+            }
         }
 
         private void adaptNotificationHeaderForBigContentView(RemoteViews result) {
-            result.setBoolean(R.id.notification_header, "setExpanded", true);
+            if (result != null) {
+                result.setBoolean(R.id.notification_header, "setExpanded", true);
+            }
         }
 
         /**
@@ -4326,6 +4326,15 @@ public class Notification implements Parcelable
             return makeMediaBigContentView();
         }
 
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView() {
+            RemoteViews expanded = makeMediaBigContentView();
+            return expanded != null ? expanded : makeMediaContentView();
+        }
+
         /** @hide */
         @Override
         public void addExtras(Bundle extras) {
@@ -4407,6 +4416,13 @@ public class Notification implements Parcelable
 
         private RemoteViews makeMediaBigContentView() {
             final int actionCount = Math.min(mBuilder.mActions.size(), MAX_MEDIA_BUTTONS);
+            // Dont add an expanded view if there is no more content to be revealed
+            int actionsInCompact = mActionsToShowInCompact == null
+                    ? 0
+                    : Math.min(mActionsToShowInCompact.length, MAX_MEDIA_BUTTONS_IN_COMPACT);
+            if (mBuilder.mN.mLargeIcon == null && actionCount <= actionsInCompact) {
+                return null;
+            }
             RemoteViews big = mBuilder.applyStandardTemplate(
                     R.layout.notification_template_material_big_media,
                     false);
