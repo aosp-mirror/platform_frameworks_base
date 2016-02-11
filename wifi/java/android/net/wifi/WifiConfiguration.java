@@ -1755,11 +1755,6 @@ public class WifiConfiguration implements Parcelable {
     }
 
     /** @hide */
-    public boolean isVisibleToUser(int userId) {
-        return shared || (UserHandle.getUserId(creatorUid) == userId);
-    }
-
-    /** @hide */
     public void setPasspointManagementObjectTree(String passpointManagementObjectTree) {
         mPasspointManagementObjectTree = passpointManagementObjectTree;
     }
