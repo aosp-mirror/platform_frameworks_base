@@ -52,11 +52,14 @@ public final class TvTrackInfo implements Parcelable {
     private final int mVideoHeight;
     private final float mVideoFrameRate;
     private final float mVideoPixelAspectRatio;
+    private final byte mVideoActiveFormatDescription;
+
     private final Bundle mExtra;
 
     private TvTrackInfo(int type, String id, String language, CharSequence description,
             int audioChannelCount, int audioSampleRate, int videoWidth, int videoHeight,
-            float videoFrameRate, float videoPixelAspectRatio, Bundle extra) {
+            float videoFrameRate, float videoPixelAspectRatio, byte videoActiveFormatDescription,
+            Bundle extra) {
         mType = type;
         mId = id;
         mLanguage = language;
@@ -67,6 +70,7 @@ public final class TvTrackInfo implements Parcelable {
         mVideoHeight = videoHeight;
         mVideoFrameRate = videoFrameRate;
         mVideoPixelAspectRatio = videoPixelAspectRatio;
+        mVideoActiveFormatDescription = videoActiveFormatDescription;
         mExtra = extra;
     }
 
@@ -81,6 +85,7 @@ public final class TvTrackInfo implements Parcelable {
         mVideoHeight = in.readInt();
         mVideoFrameRate = in.readFloat();
         mVideoPixelAspectRatio = in.readFloat();
+        mVideoActiveFormatDescription = in.readByte();
         mExtra = in.readBundle();
     }
 
@@ -179,6 +184,20 @@ public final class TvTrackInfo implements Parcelable {
     }
 
     /**
+     * Returns the Active Format Description (AFD) code of the video.
+     * Valid only for {@link #TYPE_VIDEO} tracks.
+     *
+     * <p>The complete list of values are defined in ETSI TS 101 154 V1.7.1 Annex B, ATSC A/53 Part
+     * 4 and SMPTE 2016-1-2007.
+     */
+    public final byte getVideoActiveFormatDescription() {
+        if (mType != TYPE_VIDEO) {
+            throw new IllegalStateException("Not a video track");
+        }
+        return mVideoActiveFormatDescription;
+    }
+
+    /**
      * Returns the extra information about the current track.
      */
     public final Bundle getExtra() {
@@ -208,6 +227,7 @@ public final class TvTrackInfo implements Parcelable {
         dest.writeInt(mVideoHeight);
         dest.writeFloat(mVideoFrameRate);
         dest.writeFloat(mVideoPixelAspectRatio);
+        dest.writeByte(mVideoActiveFormatDescription);
         dest.writeBundle(mExtra);
     }
 
@@ -238,6 +258,7 @@ public final class TvTrackInfo implements Parcelable {
         private int mVideoHeight;
         private float mVideoFrameRate;
         private float mVideoPixelAspectRatio = 1.0f;
+        private byte mVideoActiveFormatDescription;
         private Bundle mExtra;
 
         /**
@@ -368,6 +389,25 @@ public final class TvTrackInfo implements Parcelable {
         }
 
         /**
+         * Sets the Active Format Description (AFD) code of the video.
+         * Valid only for {@link #TYPE_VIDEO} tracks.
+         *
+         * <p>This is needed for applications to be able to scale the video properly based on the
+         * information about where in the coded picture the active video is.
+         * The complete list of values are defined in ETSI TS 101 154 V1.7.1 Annex B, ATSC A/53 Part
+         * 4 and SMPTE 2016-1-2007.
+         *
+         * @param videoActiveFormatDescription The AFD code of the video.
+         */
+        public final Builder setVideoActiveFormatDescription(byte videoActiveFormatDescription) {
+            if (mType != TYPE_VIDEO) {
+                throw new IllegalStateException("Not a video track");
+            }
+            mVideoActiveFormatDescription = videoActiveFormatDescription;
+            return this;
+        }
+
+        /**
          * Sets the extra information about the current track.
          *
          * @param extra The extra information.
@@ -385,7 +425,7 @@ public final class TvTrackInfo implements Parcelable {
         public TvTrackInfo build() {
             return new TvTrackInfo(mType, mId, mLanguage, mDescription, mAudioChannelCount,
                     mAudioSampleRate, mVideoWidth, mVideoHeight, mVideoFrameRate,
-                    mVideoPixelAspectRatio, mExtra);
+                    mVideoPixelAspectRatio, mVideoActiveFormatDescription, mExtra);
         }
     }
 }
