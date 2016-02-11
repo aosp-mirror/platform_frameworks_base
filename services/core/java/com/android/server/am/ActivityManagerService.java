@@ -2851,31 +2851,39 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void setFocusedStack(int stackId) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setFocusedStack()");
         if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedStack: stackId=" + stackId);
-        synchronized (ActivityManagerService.this) {
-            ActivityStack stack = mStackSupervisor.getStack(stackId);
-            if (stack != null) {
-                ActivityRecord r = stack.topRunningActivityLocked();
-                if (r != null) {
-                    setFocusedActivityLocked(r, "setFocusedStack");
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityStack stack = mStackSupervisor.getStack(stackId);
+                if (stack == null) {
+                    return;
+                }
+                final ActivityRecord r = stack.topRunningActivityLocked();
+                if (setFocusedActivityLocked(r, "setFocusedStack")) {
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
     }
 
     @Override
     public void setFocusedTask(int taskId) {
+        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "setFocusedTask()");
         if (DEBUG_FOCUS) Slog.d(TAG_FOCUS, "setFocusedTask: taskId=" + taskId);
-        long callingId = Binder.clearCallingIdentity();
+        final long callingId = Binder.clearCallingIdentity();
         try {
-            synchronized (ActivityManagerService.this) {
-                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
-                if (task != null) {
-                    final ActivityRecord r = task.topRunningActivityLocked();
-                    if (setFocusedActivityLocked(r, "setFocusedTask")) {
-                        mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                    }
+            synchronized (this) {
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                if (task == null) {
+                    return;
+                }
+                final ActivityRecord r = task.topRunningActivityLocked();
+                if (setFocusedActivityLocked(r, "setFocusedTask")) {
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
         } finally {
