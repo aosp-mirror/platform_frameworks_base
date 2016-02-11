@@ -44,8 +44,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
  * {@hide}
  */
 public class PackageManagerServiceUtils {
-    // Apps used in the last 7 days.
-    private final static long DEXOPT_LRU_THRESHOLD_IN_MINUTES = 7 * 24 * 60;
+    private final static long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
     private static ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
         List<ResolveInfo> ris = null;
@@ -81,7 +80,7 @@ public class PackageManagerServiceUtils {
             }
         }
         if (DEBUG_DEXOPT) {
-            Log.i(TAG, "Skipped optimizing " + skipped + " of " + total);
+            Log.i(TAG, "Skipped dexopt " + skipped + " of " + total);
         }
     }
 
@@ -121,7 +120,7 @@ public class PackageManagerServiceUtils {
         // Filter out packages that aren't recently used, add all remaining apps.
         // TODO: add a property to control this?
         if (packageManagerService.isHistoricalPackageUsageAvailable()) {
-            filterRecentlyUsedApps(remainingPkgs, DEXOPT_LRU_THRESHOLD_IN_MINUTES * 60 * 1000);
+            filterRecentlyUsedApps(remainingPkgs, SEVEN_DAYS_IN_MILLISECONDS);
         }
         result.addAll(remainingPkgs);
 
@@ -132,6 +131,8 @@ public class PackageManagerServiceUtils {
             dependencies.addAll(packageManagerService.findSharedNonSystemLibraries(p));
         }
         if (!dependencies.isEmpty()) {
+            // We might have packages already in `result` that are dependencies
+            // of other packages. Make sure we don't add those to the list twice.
             dependencies.removeAll(result);
         }
         result.addAll(dependencies);
@@ -144,7 +145,7 @@ public class PackageManagerServiceUtils {
                 }
                 sb.append(pkg.packageName);
             }
-            Log.i(TAG, "Packages to be optimized: " + sb.toString());
+            Log.i(TAG, "Packages to be dexopted: " + sb.toString());
         }
 
         return result;
