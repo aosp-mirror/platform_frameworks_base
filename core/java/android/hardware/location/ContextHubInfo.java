@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 /**
  * @hide
-  */
+ */
 @SystemApi
 public class ContextHubInfo {
     private int mId;
@@ -58,6 +58,8 @@ public class ContextHubInfo {
      * set the context hub unique identifer
      *
      * @param id - unique system wide identifier for the hub
+     *
+     * @hide
      */
     public void setId(int id) {
         mId = id;
@@ -75,7 +77,9 @@ public class ContextHubInfo {
     /**
      * set a string as the hub name
      *
-     * @param String - the name for the hub
+     * @param name - the name for the hub
+     *
+     * @hide
      */
     public void setName(String name) {
         mName = name;
@@ -93,7 +97,9 @@ public class ContextHubInfo {
     /**
      * set a string as the vendor name
      *
-     * @param String - a name for the vendor
+     * @param vendor - a name for the vendor
+     *
+     * @hide
      */
     public void setVendor(String vendor) {
         mVendor = vendor;
@@ -111,7 +117,9 @@ public class ContextHubInfo {
     /**
      * set tool chain string
      *
-     * @param String - description of the tool chain
+     * @param toolchain - description of the tool chain
+     *
+     * @hide
      */
     public void setToolchain(String toolchain) {
         mToolchain = toolchain;
@@ -130,6 +138,8 @@ public class ContextHubInfo {
      * set platform version
      *
      * @param platformVersion - platform version number
+     *
+     * @hide
      */
     public void setPlatformVersion(int platformVersion) {
         mPlatformVersion = platformVersion;
@@ -148,6 +158,8 @@ public class ContextHubInfo {
      * set platform software version
      *
      * @param staticSwVersion - platform static s/w version number
+     *
+     * @hide
      */
     public void setStaticSwVersion(int staticSwVersion) {
         mStaticSwVersion = staticSwVersion;
@@ -166,6 +178,8 @@ public class ContextHubInfo {
      * set the tool chain version number
      *
      * @param toolchainVersion - tool chain version number
+     *
+     * @hide
      */
     public void setToolchainVersion(int toolchainVersion) {
         mToolchainVersion = toolchainVersion;
@@ -184,6 +198,8 @@ public class ContextHubInfo {
      * set the peak mips that this hub can support
      *
      * @param peakMips - peak mips this hub can deliver
+     *
+     * @hide
      */
     public void setPeakMips(float peakMips) {
         mPeakMips = peakMips;
@@ -206,6 +222,8 @@ public class ContextHubInfo {
      * Set the power consumed by the hub in stopped state
      *
      * @param stoppedPowerDrawMw - stopped power in milli watts
+     *
+     * @hide
      */
     public void setStoppedPowerDrawMw(float stoppedPowerDrawMw) {
         mStoppedPowerDrawMw = stoppedPowerDrawMw;
@@ -230,6 +248,8 @@ public class ContextHubInfo {
      * Set the sleep power draw in milliwatts
      *
      * @param sleepPowerDrawMw - sleep power draw in milliwatts.
+     *
+     * @hide
      */
     public void setSleepPowerDrawMw(float sleepPowerDrawMw) {
         mSleepPowerDrawMw = sleepPowerDrawMw;
@@ -250,6 +270,8 @@ public class ContextHubInfo {
      *
      * @param peakPowerDrawMw - peak power draw of the hub in
      *                        milliwatts.
+     *
+     * @hide
      */
     public void setPeakPowerDrawMw(float peakPowerDrawMw) {
         mPeakPowerDrawMw = peakPowerDrawMw;
@@ -281,6 +303,8 @@ public class ContextHubInfo {
      * set the supported sensors on this hub
      *
      * @param supportedSensors - supported sensors on this hub
+     *
+     * @hide
      */
     public void setSupportedSensors(int[] supportedSensors) {
         mSupportedSensors = Arrays.copyOf(supportedSensors, supportedSensors.length);
@@ -292,6 +316,8 @@ public class ContextHubInfo {
      * @param memoryRegions - memory regions information
      *
      * @see MemoryRegion
+     *
+     * @hide
      */
     public void setMemoryRegions(MemoryRegion[] memoryRegions) {
         mMemoryRegions = Arrays.copyOf(memoryRegions, memoryRegions.length);
