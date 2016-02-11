@@ -52116,7 +52116,6 @@ package java.security {
   public abstract class Signature extends java.security.SignatureSpi {
     ctor protected Signature(java.lang.String);
     method public final java.lang.String getAlgorithm();
-    method public java.security.SignatureSpi getCurrentSpi();
     method public static java.security.Signature getInstance(java.lang.String) throws java.security.NoSuchAlgorithmException;
     method public static java.security.Signature getInstance(java.lang.String, java.lang.String) throws java.security.NoSuchAlgorithmException, java.security.NoSuchProviderException;
     method public static java.security.Signature getInstance(java.lang.String, java.security.Provider) throws java.security.NoSuchAlgorithmException;
