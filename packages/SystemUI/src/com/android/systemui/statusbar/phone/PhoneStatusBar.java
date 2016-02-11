@@ -754,19 +754,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setOverflowContainer(mKeyguardIconOverflowContainer);
 
 
-        mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_no_notifications, mStackScroller, false);
-        mStackScroller.setEmptyShadeView(mEmptyShadeView);
-        mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
-        mDismissView.setOnButtonClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MetricsLogger.action(mContext, MetricsEvent.ACTION_DISMISS_ALL_NOTES);
-                clearAllNotifications();
-            }
-        });
-        mStackScroller.setDismissView(mDismissView);
+        inflateEmptyShadeView();
+        inflateDismissView();
         mExpandedContents = mStackScroller;
 
         mBackdrop = (BackDropView) mStatusBarWindow.findViewById(R.id.backdrop);
@@ -928,6 +917,34 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
 
         return mStatusBarView;
+    }
+
+    @Override
+    protected void reInflateViews() {
+        super.reInflateViews();
+        inflateDismissView();
+        updateClearAll();
+        inflateEmptyShadeView();
+        updateEmptyShadeView();
+    }
+
+    private void inflateEmptyShadeView() {
+        mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_no_notifications, mStackScroller, false);
+        mStackScroller.setEmptyShadeView(mEmptyShadeView);
+    }
+
+    private void inflateDismissView() {
+        mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
+        mDismissView.setOnButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MetricsLogger.action(mContext, MetricsEvent.ACTION_DISMISS_ALL_NOTES);
+                clearAllNotifications();
+            }
+        });
+        mStackScroller.setDismissView(mDismissView);
     }
 
     protected void createUserSwitcher() {
