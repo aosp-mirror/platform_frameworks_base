@@ -224,7 +224,7 @@ public class SurfaceView extends View {
         mParent.requestTransparentRegion(this);
         mSession = getWindowSession();
         mLayout.token = getWindowToken();
-        mLayout.setTitle("SurfaceView");
+        mLayout.setTitle("SurfaceView - " + getViewRootImpl().getTitle());
         mViewVisibility = getVisibility() == VISIBLE;
 
         if (!mGlobalListenersAdded) {
