@@ -209,7 +209,7 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
         // not rejected, so defer render as either Layer, or direct (possibly wrapped in saveLayer)
         if (node.getLayer()) {
             // HW layer
-            LayerOp* drawLayerOp = mAllocator.create_trivial<LayerOp>(node);
+            LayerOp* drawLayerOp = new (mAllocator) LayerOp(node);
             BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
             if (bakedOpState) {
                 // Node's layer already deferred, schedule it to render into parent layer
@@ -220,13 +220,13 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
             // (temp layers are clipped to viewport, since they don't persist offscreen content)
             SkPaint saveLayerPaint;
             saveLayerPaint.setAlpha(properties.getAlpha());
-            deferBeginLayerOp(*mAllocator.create_trivial<BeginLayerOp>(
+            deferBeginLayerOp(*new (mAllocator) BeginLayerOp(
                     saveLayerBounds,
                     Matrix4::identity(),
                     nullptr, // no record-time clip - need only respect defer-time one
                     &saveLayerPaint));
             deferNodeOps(node);
-            deferEndLayerOp(*mAllocator.create_trivial<EndLayerOp>());
+            deferEndLayerOp(*new (mAllocator) EndLayerOp());
         } else {
             deferNodeOps(node);
         }
@@ -549,7 +549,7 @@ void FrameBuilder::deferBitmapRectOp(const BitmapRectOp& op) {
 void FrameBuilder::deferVectorDrawableOp(const VectorDrawableOp& op) {
     const SkBitmap& bitmap = op.vectorDrawable->getBitmapUpdateIfDirty();
     SkPaint* paint = op.vectorDrawable->getPaint();
-    const BitmapRectOp* resolvedOp = mAllocator.create_trivial<BitmapRectOp>(op.unmappedBounds,
+    const BitmapRectOp* resolvedOp = new (mAllocator) BitmapRectOp(op.unmappedBounds,
             op.localMatrix,
             op.localClip,
             paint,
@@ -565,7 +565,7 @@ void FrameBuilder::deferCirclePropsOp(const CirclePropsOp& op) {
     float y = *(op.y);
     float radius = *(op.radius);
     Rect unmappedBounds(x - radius, y - radius, x + radius, y + radius);
-    const OvalOp* resolvedOp = mAllocator.create_trivial<OvalOp>(
+    const OvalOp* resolvedOp = new (mAllocator) OvalOp(
             unmappedBounds,
             op.localMatrix,
             op.localClip,
@@ -626,7 +626,7 @@ void FrameBuilder::deferRoundRectOp(const RoundRectOp& op) {
 void FrameBuilder::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     // allocate a temporary round rect op (with mAllocator, so it persists until render), so the
     // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
-    const RoundRectOp* resolvedOp = mAllocator.create_trivial<RoundRectOp>(
+    const RoundRectOp* resolvedOp = new (mAllocator) RoundRectOp(
             Rect(*(op.left), *(op.top), *(op.right), *(op.bottom)),
             op.localMatrix,
             op.localClip,
@@ -754,7 +754,7 @@ void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
 
     // record the draw operation into the previous layer's list of draw commands
     // uses state from the associated beginLayerOp, since it has all the state needed for drawing
-    LayerOp* drawLayerOp = mAllocator.create_trivial<LayerOp>(
+    LayerOp* drawLayerOp = new (mAllocator) LayerOp(
             beginLayerOp.unmappedBounds,
             beginLayerOp.localMatrix,
             beginLayerOp.localClip,
@@ -788,7 +788,7 @@ void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
     /**
      * First, defer an operation to copy out the content from the rendertarget into a layer.
      */
-    auto copyToOp = mAllocator.create_trivial<CopyToLayerOp>(op, layerHandle);
+    auto copyToOp = new (mAllocator) CopyToLayerOp(op, layerHandle);
     BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator,
             &(currentLayer().viewportClip), dstRect, *copyToOp);
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::CopyToLayer);
@@ -803,7 +803,7 @@ void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
      * And stash an operation to copy that layer back under the rendertarget until
      * a balanced EndUnclippedLayerOp is seen
      */
-    auto copyFromOp = mAllocator.create_trivial<CopyFromLayerOp>(op, layerHandle);
+    auto copyFromOp = new (mAllocator) CopyFromLayerOp(op, layerHandle);
     bakedState = BakedOpState::directConstruct(mAllocator,
             &(currentLayer().viewportClip), dstRect, *copyFromOp);
     currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
