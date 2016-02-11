@@ -30,7 +30,7 @@ import java.util.Map;
  * Class containing MtpDatabase constants.
  */
 class MtpDatabaseConstants {
-    static final int DATABASE_VERSION = 2;
+    static final int DATABASE_VERSION = 3;
     static final String DATABASE_NAME = "database";
 
     static final int FLAG_DATABASE_IN_MEMORY = 1;
@@ -125,7 +125,7 @@ class MtpDatabaseConstants {
             COLUMN_PARENT_DOCUMENT_ID + " INTEGER," +
             COLUMN_ROW_STATE + " INTEGER NOT NULL," +
             COLUMN_DOCUMENT_TYPE + " INTEGER NOT NULL," +
-            Document.COLUMN_MIME_TYPE + " TEXT," +
+            Document.COLUMN_MIME_TYPE + " TEXT NOT NULL," +
             Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
             Document.COLUMN_SUMMARY + " TEXT," +
             Document.COLUMN_LAST_MODIFIED + " INTEGER," +
