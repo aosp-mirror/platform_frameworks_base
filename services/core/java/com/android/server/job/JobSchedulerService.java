@@ -330,7 +330,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     private void cancelJobImpl(JobStatus cancelled) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
-        stopTrackingJob(cancelled);
+        stopTrackingJob(cancelled, true /* writeBack */);
         synchronized (mJobs) {
             // Remove from pending queue.
             mPendingJobs.remove(cancelled);
@@ -509,12 +509,12 @@ public class JobSchedulerService extends com.android.server.SystemService
      * Called when we want to remove a JobStatus object that we've finished executing. Returns the
      * object removed.
      */
-    private boolean stopTrackingJob(JobStatus jobStatus) {
+    private boolean stopTrackingJob(JobStatus jobStatus, boolean writeBack) {
         boolean removed;
         boolean rocking;
         synchronized (mJobs) {
             // Remove from store as well as controllers.
-            removed = mJobs.remove(jobStatus);
+            removed = mJobs.remove(jobStatus, writeBack);
             rocking = mReadyToRock;
         }
         if (removed && rocking) {
@@ -645,7 +645,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) {
             Slog.d(TAG, "Completed " + jobStatus + ", reschedule=" + needsReschedule);
         }
-        if (!stopTrackingJob(jobStatus)) {
+        // Do not write back immediately if this is a periodic job. The job may get lost if system
+        // shuts down before it is added back.
+        if (!stopTrackingJob(jobStatus, !jobStatus.getJob().isPeriodic())) {
             if (DEBUG) {
                 Slog.d(TAG, "Could not find job to remove. Was job removed while executing?");
             }

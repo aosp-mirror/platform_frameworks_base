@@ -159,9 +159,10 @@ public class JobStore {
 
     /**
      * Remove the provided job. Will also delete the job if it was persisted.
+     * @param writeBack If true, the job will be deleted (if it was persisted) immediately.
      * @return Whether or not the job existed to be removed.
      */
-    public boolean remove(JobStatus jobStatus) {
+    public boolean remove(JobStatus jobStatus, boolean writeBack) {
         boolean removed = mJobSet.remove(jobStatus);
         if (!removed) {
             if (DEBUG) {
@@ -169,7 +170,7 @@ public class JobStore {
             }
             return false;
         }
-        if (jobStatus.isPersisted()) {
+        if (writeBack && jobStatus.isPersisted()) {
             maybeWriteStatusToDiskAsync();
         }
         return removed;
