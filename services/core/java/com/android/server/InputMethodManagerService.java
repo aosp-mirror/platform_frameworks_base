@@ -800,7 +800,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 handleMessage(msg);
             }
         }, true /*asyncHandler*/);
-        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mHardKeyboardListener = new HardKeyboardListener();
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
@@ -1050,8 +1050,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void updateCurrentProfileIds() {
-        List<UserInfo> profiles =
-                UserManager.get(mContext).getProfiles(mSettings.getCurrentUserId());
+        List<UserInfo> profiles = mContext.getSystemService(UserManager.class)
+                .getProfiles(mSettings.getCurrentUserId());
         int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
         for (int i = 0; i < currentProfileIds.length; i++) {
             currentProfileIds[i] = profiles.get(i).id;
@@ -1081,10 +1081,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (!mSystemReady) {
                 mSystemReady = true;
-                mKeyguardManager =
-                        (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-                mNotificationManager = (NotificationManager)
-                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
+                mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
                 statusBar.setIconVisibility(mSlotIme, false);
                 updateSystemUiLocked(mCurToken, mImeWindowVis, mBackDisposition);
@@ -3137,8 +3135,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             mDialogBuilder.setIcon(dialogIcon);
 
-            final LayoutInflater inflater = (LayoutInflater) dialogContext.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
+            final LayoutInflater inflater = dialogContext.getSystemService(LayoutInflater.class);
             final View tv = inflater.inflate(
                     com.android.internal.R.layout.input_method_switch_dialog_title, null);
             mDialogBuilder.setCustomTitle(tv);
@@ -3222,7 +3219,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mTextViewResourceId = textViewResourceId;
             mItemsList = itemsList;
             mCheckedItem = checkedItem;
-            mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            mInflater = context.getSystemService(LayoutInflater.class);
         }
 
         @Override
