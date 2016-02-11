@@ -165,6 +165,10 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     generateTexture(colors, positions, info.width, 2, texture);
 
     mSize += size;
+    LOG_ALWAYS_FATAL_IF((int)size != texture->objectSize(),
+            "size != texture->objectSize(), size %" PRIu32 ", objectSize %" PRIu32
+            " width = %" PRIu32 " bytesPerPixel() = %" PRIu32,
+            size, texture->objectSize(), info.width, bytesPerPixel());
     mCache.put(gradient, texture);
 
     return texture;
