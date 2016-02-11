@@ -654,12 +654,39 @@ class HtmlToSpannedConverter implements ContentHandler {
     private int mFlags;
 
     private static Pattern sTextAlignPattern;
+    private static Pattern sForegroundColorPattern;
+    private static Pattern sBackgroundColorPattern;
+    private static Pattern sTextDecorationPattern;
 
     private static Pattern getTextAlignPattern() {
         if (sTextAlignPattern == null) {
             sTextAlignPattern = Pattern.compile("(?:\\s+|\\A)text-align\\s*:\\s*(\\S*)\\b");
         }
         return sTextAlignPattern;
+    }
+
+    private static Pattern getForegroundColorPattern() {
+        if (sForegroundColorPattern == null) {
+            sForegroundColorPattern = Pattern.compile(
+                    "(?:\\s+|\\A)color\\s*:\\s*(\\S*)\\b");
+        }
+        return sForegroundColorPattern;
+    }
+
+    private static Pattern getBackgroundColorPattern() {
+        if (sBackgroundColorPattern == null) {
+            sBackgroundColorPattern = Pattern.compile(
+                    "(?:\\s+|\\A)background(?:-color)?\\s*:\\s*(\\S*)\\b");
+        }
+        return sBackgroundColorPattern;
+    }
+
+    private static Pattern getTextDecorationPattern() {
+        if (sTextDecorationPattern == null) {
+            sTextDecorationPattern = Pattern.compile(
+                    "(?:\\s+|\\A)text-decoration\\s*:\\s*(\\S*)\\b");
+        }
+        return sTextDecorationPattern;
     }
 
     public HtmlToSpannedConverter( String source, Html.ImageGetter imageGetter,
@@ -715,8 +742,15 @@ class HtmlToSpannedConverter implements ContentHandler {
             // so we can safely emit the linebreaks when we handle the close tag.
         } else if (tag.equalsIgnoreCase("p")) {
             startBlockElement(mSpannableStringBuilder, attributes, getMarginParagraph());
+            startCssStyle(mSpannableStringBuilder, attributes);
+        } else if (tag.equalsIgnoreCase("ul")) {
+            startBlockElement(mSpannableStringBuilder, attributes, getMarginList());
+        } else if (tag.equalsIgnoreCase("li")) {
+            startLi(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("div")) {
             startBlockElement(mSpannableStringBuilder, attributes, getMarginDiv());
+        } else if (tag.equalsIgnoreCase("span")) {
+            startCssStyle(mSpannableStringBuilder, attributes);
         } else if (tag.equalsIgnoreCase("strong")) {
             start(mSpannableStringBuilder, new Bold());
         } else if (tag.equalsIgnoreCase("b")) {
@@ -768,9 +802,16 @@ class HtmlToSpannedConverter implements ContentHandler {
         if (tag.equalsIgnoreCase("br")) {
             handleBr(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("p")) {
+            endCssStyle(mSpannableStringBuilder);
             endBlockElement(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("ul")) {
+            endBlockElement(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("li")) {
+            endLi(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("div")) {
             endBlockElement(mSpannableStringBuilder);
+        } else if (tag.equalsIgnoreCase("span")) {
+            endCssStyle(mSpannableStringBuilder);
         } else if (tag.equalsIgnoreCase("strong")) {
             end(mSpannableStringBuilder, Bold.class, new StyleSpan(Typeface.BOLD));
         } else if (tag.equalsIgnoreCase("b")) {
@@ -822,6 +863,14 @@ class HtmlToSpannedConverter implements ContentHandler {
 
     private int getMarginHeading() {
         return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_HEADING);
+    }
+
+    private int getMarginListItem() {
+        return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_LIST_ITEM);
+    }
+
+    private int getMarginList() {
+        return getMargin(Html.FROM_HTML_SEPARATOR_LINE_BREAK_LIST);
     }
 
     private int getMarginDiv() {
@@ -905,6 +954,18 @@ class HtmlToSpannedConverter implements ContentHandler {
         text.append('\n');
     }
 
+    private void startLi(Editable text, Attributes attributes) {
+        startBlockElement(text, attributes, getMarginListItem());
+        start(text, new Bullet());
+        startCssStyle(text, attributes);
+    }
+
+    private static void endLi(Editable text) {
+        endCssStyle(text);
+        endBlockElement(text);
+        end(text, Bullet.class, new BulletSpan());
+    }
+
     private void startBlockquote(Editable text, Attributes attributes) {
         startBlockElement(text, attributes, getMarginBlockquote());
         start(text, new Blockquote());
@@ -967,6 +1028,55 @@ class HtmlToSpannedConverter implements ContentHandler {
         Object obj = getLast(text, kind);
         if (obj != null) {
             setSpanFromMark(text, obj, repl);
+        }
+    }
+
+    private static void startCssStyle(Editable text, Attributes attributes) {
+        String style = attributes.getValue("", "style");
+        if (style != null) {
+            final int len = text.length();
+            Matcher m = getForegroundColorPattern().matcher(style);
+            if (m.find()) {
+                int c = Color.getHtmlColor(m.group(1));
+                if (c != -1) {
+                    text.setSpan(new Foreground(c | 0xFF000000), len, len,
+                            Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                }
+            }
+
+            m = getBackgroundColorPattern().matcher(style);
+            if (m.find()) {
+                int c = Color.getHtmlColor(m.group(1));
+                if (c != -1) {
+                    text.setSpan(new Background(c | 0xFF000000), len, len,
+                            Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                }
+            }
+
+            m = getTextDecorationPattern().matcher(style);
+            if (m.find()) {
+                String textDecoration = m.group(1);
+                if (textDecoration.equalsIgnoreCase("line-through")) {
+                    text.setSpan(new Strikethrough(), len, len, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                }
+            }
+        }
+    }
+
+    private static void endCssStyle(Editable text) {
+        Strikethrough s = getLast(text, Strikethrough.class);
+        if (s != null) {
+            setSpanFromMark(text, s, new StrikethroughSpan());
+        }
+
+        Background b = getLast(text, Background.class);
+        if (b != null) {
+            setSpanFromMark(text, b, new BackgroundColorSpan(b.mBackgroundColor));
+        }
+
+        Foreground f = getLast(text, Foreground.class);
+        if (f != null) {
+            setSpanFromMark(text, f, new ForegroundColorSpan(f.mForegroundColor));
         }
     }
 
@@ -1132,6 +1242,7 @@ class HtmlToSpannedConverter implements ContentHandler {
     private static class Blockquote { }
     private static class Super { }
     private static class Sub { }
+    private static class Bullet { }
 
     private static class Font {
         public String mColor;
@@ -1148,6 +1259,22 @@ class HtmlToSpannedConverter implements ContentHandler {
 
         public Href(String href) {
             mHref = href;
+        }
+    }
+
+    private static class Foreground {
+        private int mForegroundColor;
+
+        public Foreground(int foregroundColor) {
+            mForegroundColor = foregroundColor;
+        }
+    }
+
+    private static class Background {
+        private int mBackgroundColor;
+
+        public Background(int backgroundColor) {
+            mBackgroundColor = backgroundColor;
         }
     }
 
