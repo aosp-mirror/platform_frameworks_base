@@ -47,24 +47,26 @@ public final class GnssStatus {
     public static final int GNSS_SV_FLAGS_USED_IN_FIX = (1 << 2);
 
     /** @hide */
-    public static final int PRN_SHIFT_WIDTH = 3;
+    public static final int SVID_SHIFT_WIDTH = 7;
+    /** @hide */
+    public static final int CONSTELLATION_TYPE_SHIFT_WIDTH = 3;
+    /** @hide */
+    public static final int CONSTELLATION_TYPE_MASK = 0xf;
 
     /* These package private values are modified by the LocationManager class */
-    /* package */ int[] mPrnWithFlags;
+    /* package */ int[] mSvidWithFlags;
     /* package */ float[] mSnrs;
     /* package */ float[] mElevations;
     /* package */ float[] mAzimuths;
-    /* package */ int[] mConstellationTypes;
     /* package */ int mSvCount;
 
-    GnssStatus(int svCount, int[] prnWithFlags, float[] snrs, float[] elevations, float[] azimuths,
-            int[] constellationTypes) {
+    GnssStatus(int svCount, int[] svidWithFlags, float[] snrs, float[] elevations,
+            float[] azimuths) {
         mSvCount = svCount;
-        mPrnWithFlags = prnWithFlags;
+        mSvidWithFlags = svidWithFlags;
         mSnrs = snrs;
         mElevations = elevations;
         mAzimuths = azimuths;
-        mConstellationTypes = constellationTypes;
     }
 
     /**
@@ -79,15 +81,16 @@ public final class GnssStatus {
      * @param satIndex the index of the satellite in the list.
      */
     public int getConstellationType(int satIndex) {
-        return mConstellationTypes[satIndex];
+        return (mSvidWithFlags[satIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
+                & CONSTELLATION_TYPE_MASK;
     }
 
     /**
      * Retrieves the pseudo-random number of the satellite at the specified position.
      * @param satIndex the index of the satellite in the list.
      */
-    public int getPrn(int satIndex) {
-        return mPrnWithFlags[satIndex] >> PRN_SHIFT_WIDTH;
+    public int getSvid(int satIndex) {
+        return mSvidWithFlags[satIndex] >> SVID_SHIFT_WIDTH;
     }
 
     /**
@@ -119,7 +122,7 @@ public final class GnssStatus {
      * @param satIndex the index of the satellite in the list.
      */
     public boolean hasEphemeris(int satIndex) {
-        return (mPrnWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
+        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_EPHEMERIS_DATA) != 0;
     }
 
     /**
@@ -127,7 +130,7 @@ public final class GnssStatus {
      * @param satIndex the index of the satellite in the list.
      */
     public boolean hasAlmanac(int satIndex) {
-        return (mPrnWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
+        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_HAS_ALMANAC_DATA) != 0;
     }
 
     /**
@@ -135,6 +138,6 @@ public final class GnssStatus {
      * @param satIndex the index of the satellite in the list.
      */
     public boolean usedInFix(int satIndex) {
-        return (mPrnWithFlags[satIndex] & GNSS_SV_FLAGS_USED_IN_FIX) != 0;
+        return (mSvidWithFlags[satIndex] & GNSS_SV_FLAGS_USED_IN_FIX) != 0;
     }
 }
