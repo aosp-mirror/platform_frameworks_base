@@ -2546,6 +2546,7 @@ public class SyncManager {
                             Slog.v(TAG, "Pushing back running sync due to a higher priority sync");
                         }
                         deferActiveSyncH(asc);
+                        break;
                     }
                 }
             }
