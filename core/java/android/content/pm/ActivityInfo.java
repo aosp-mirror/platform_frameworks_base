@@ -178,6 +178,11 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int RESIZE_MODE_RESIZEABLE_AND_PIPABLE = 3;
     /**
+     * Activity is does not support resizing, but we are forcing it to be resizeable.
+     * @hide
+     */
+    public static final int RESIZE_MODE_FORCE_RESIZEABLE = 4;
+    /**
      * Value indicating if the resizing mode the activity supports.
      * See {@link android.R.attr#resizeableActivity}.
      * @hide
@@ -786,7 +791,9 @@ public class ActivityInfo extends ComponentInfo
 
     /** @hide */
     public static boolean isResizeableMode(int mode) {
-        return mode == RESIZE_MODE_RESIZEABLE || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE;
+        return mode == RESIZE_MODE_RESIZEABLE
+                || mode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE
+                || mode == RESIZE_MODE_FORCE_RESIZEABLE;
     }
 
     /** @hide */
@@ -800,6 +807,8 @@ public class ActivityInfo extends ComponentInfo
                 return "RESIZE_MODE_RESIZEABLE";
             case RESIZE_MODE_RESIZEABLE_AND_PIPABLE:
                 return "RESIZE_MODE_RESIZEABLE_AND_PIPABLE";
+            case RESIZE_MODE_FORCE_RESIZEABLE:
+                return "RESIZE_MODE_FORCE_RESIZEABLE";
             default:
                 return "unknown=" + mode;
         }
