@@ -27,13 +27,15 @@ import com.android.documentsui.Events;
 /**
  * A class that handles navigation and focus within the DirectoryFragment.
  */
-class FocusManager {
+class FocusManager implements View.OnFocusChangeListener {
     private static final String TAG = "FocusManager";
 
     private RecyclerView mView;
     private RecyclerView.Adapter<?> mAdapter;
     private LinearLayoutManager mLayout;
     private MultiSelectManager mSelectionManager;
+
+    private int mLastFocusPosition = RecyclerView.NO_POSITION;
 
     public FocusManager(RecyclerView view, MultiSelectManager selectionManager) {
         mView = view;
@@ -52,24 +54,46 @@ class FocusManager {
      * @return Whether the event was handled.
      */
     public boolean handleKey(DocumentHolder doc, int keyCode, KeyEvent event) {
-        boolean handled = false;
         if (Events.isNavigationKeyCode(keyCode)) {
             // Find the target item and focus it.
             int endPos = findTargetPosition(doc.itemView, keyCode, event);
 
             if (endPos != RecyclerView.NO_POSITION) {
                 focusItem(endPos);
+                boolean extendSelection = event.isShiftPressed();
 
                 // Handle any necessary adjustments to selection.
-                boolean extendSelection = event.isShiftPressed();
                 if (extendSelection) {
                     int startPos = doc.getAdapterPosition();
                     mSelectionManager.selectRange(startPos, endPos);
                 }
-                handled = true;
             }
+            // Swallow all navigation keystrokes. Otherwise they go to the app's global
+            // key-handler, which will route them back to the DF and cause focus to be reset.
+            return true;
         }
-        return handled;
+        return false;
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        // Remember focus events on items.
+        if (hasFocus && v.getParent() == mView) {
+            mLastFocusPosition = mView.getChildAdapterPosition(v);
+        }
+    }
+
+    /**
+     * Requests focus on the item that last had focus. Scrolls to that item if necessary.
+     */
+    public void restoreLastFocus() {
+        if (mLastFocusPosition != RecyclerView.NO_POSITION) {
+            // The system takes care of situations when a view is no longer on screen, etc,
+            focusItem(mLastFocusPosition);
+        } else {
+            // Focus the first visible item
+            focusItem(mLayout.findFirstVisibleItemPosition());
+        }
     }
 
     /**

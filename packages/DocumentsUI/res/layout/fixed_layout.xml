@@ -16,11 +16,14 @@
 
 <!-- CoordinatorLayout is necessary for various components (e.g. Snackbars, and
      floating action buttons) to operate correctly. -->
+<!-- focusableInTouchMode is set in order to force key events to go to the activity's global key
+     callback, which is necessary for proper event routing. See BaseActivity.onKeyDown. -->
 <android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/coordinator_layout">
+    android:id="@+id/coordinator_layout"
+    android:focusableInTouchMode="true">
 
     <LinearLayout
         android:layout_width="match_parent"
