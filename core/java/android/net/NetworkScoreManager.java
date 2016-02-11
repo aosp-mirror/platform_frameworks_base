@@ -105,7 +105,8 @@ public class NetworkScoreManager {
     /**
      * Broadcast action: the active scorer has been changed. Scorer apps may listen to this to
      * perform initialization once selected as the active scorer, or clean up unneeded resources
-     * if another scorer has been selected. Note that it is unnecessary to clear existing scores as
+     * if another scorer has been selected. This is an explicit broadcast only sent to the
+     * previous scorer and new scorer. Note that it is unnecessary to clear existing scores as
      * this is handled by the system.
      *
      * <p>The new scorer will be specified in {@link #EXTRA_NEW_SCORER}.
