@@ -25,4 +25,6 @@
     <string name="accessing_notification_title">Accessing files from <xliff:g id="device_model" example="Nexus 9">%1$s</xliff:g></string>
     <!-- Description of notification showing Files app is accessing files in a MTP device. [CHAR LIMIT=60]-->
     <string name="accessing_notification_description">Don\'t disconnect the device</string>
+    <!-- Error message shown in Files app when the connected MTP device is busy. [CHAR LIMIT=150]-->
+    <string name="error_busy_device">The other device is busy. You can\'t transfer files until it\'s available.</string>
 </resources>

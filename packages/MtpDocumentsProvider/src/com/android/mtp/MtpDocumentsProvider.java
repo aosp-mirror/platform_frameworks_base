@@ -20,10 +20,12 @@ import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.graphics.Point;
 import android.media.MediaFile;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
@@ -35,6 +37,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.mtp.exceptions.BusyDeviceException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -174,6 +177,14 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             // Returns object list from document loader.
             return getDocumentLoader(parentIdentifier).queryChildDocuments(
                     projection, parentIdentifier);
+        } catch (BusyDeviceException exception) {
+            final Bundle bundle = new Bundle();
+            bundle.putString(
+                    DocumentsContract.EXTRA_ERROR,
+                    mResources.getString(R.string.error_busy_device));
+            final Cursor cursor = new MatrixCursor(projection);
+            cursor.setExtras(bundle);
+            return cursor;
         } catch (IOException exception) {
             Log.e(MtpDocumentsProvider.TAG, "queryChildDocuments", exception);
             throw new FileNotFoundException(exception.getMessage());
