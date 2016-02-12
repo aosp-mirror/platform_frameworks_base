@@ -8038,7 +8038,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     boolean isPackageInstalledForUser(String packageName, int userHandle) {
         try {
-            PackageInfo pi = mIPackageManager.getPackageInfo(packageName, 0, userHandle);
+            PackageInfo pi = mInjector.getIPackageManager().getPackageInfo(packageName, 0,
+                    userHandle);
             return (pi != null) && (pi.applicationInfo.flags != 0);
         } catch (RemoteException re) {
             throw new RuntimeException("Package manager has died", re);
