@@ -2155,7 +2155,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             Configuration newConfig) throws RemoteException {
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, newConfig, getBackdropFrame(frame),
-                isDragResizeChanged() /* forceRelayout */);
+                isDragResizeChanged() /* forceRelayout */, mPolicy.isNavBarForcedShownLw(this));
         mDragResizingChangeReported = true;
     }
 

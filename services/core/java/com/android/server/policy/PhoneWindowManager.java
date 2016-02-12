@@ -576,6 +576,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mConsumeSearchKeyUp;
     boolean mAssistKeyLongPressed;
     boolean mPendingMetaAction;
+    boolean mForceShowSystemBars;
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -3608,7 +3609,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void getInsetHintLw(WindowManager.LayoutParams attrs, int displayRotation,
+    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, int displayRotation,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int sysuiVis = PolicyControl.getSystemUiVisibility(null, attrs);
@@ -3663,10 +3664,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             outStableInsets.set(mStableLeft, mStableTop,
                     availRight - mStableRight, availBottom - mStableBottom);
-            return;
+            return mForceShowSystemBars;
         }
         outContentInsets.setEmpty();
         outStableInsets.setEmpty();
+        return mForceShowSystemBars;
     }
 
     private boolean shouldUseOutsets(WindowManager.LayoutParams attrs, int fl) {
@@ -6103,6 +6105,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
+    public boolean isNavBarForcedShownLw(WindowState windowState) {
+        return mForceShowSystemBars
+                && !windowState.getFrameLw().equals(windowState.getDisplayFrameLw());
+    }
+
+    @Override
     public boolean isDockSideAllowed(int dockSide) {
 
         // We do not allow all dock sides at which the navigation bar touches the docked stack.
@@ -6994,8 +7002,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // We need to force system bars when the docked stack is visible, when the freeform stack
         // is visible but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        final boolean forceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing;
-        final boolean forceOpaqueSystemBars = forceShowSystemBars && !mForceStatusBarFromKeyguard;
+        mForceShowSystemBars = dockedStackVisible || freeformStackVisible || resizing;
+        final boolean forceOpaqueSystemBars = mForceShowSystemBars && !mForceStatusBarFromKeyguard;
 
         // apply translucent bar vis flags
         WindowState transWin = isStatusBarKeyguard() && !mHideLockScreen
@@ -7043,11 +7051,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
 
         final boolean transientStatusBarAllowed = mStatusBar != null
-                && (statusBarHasFocus || (!forceShowSystemBars
+                && (statusBarHasFocus || (!mForceShowSystemBars
                         && (hideStatusBarWM || (hideStatusBarSysui && immersiveSticky))));
 
         final boolean transientNavBarAllowed = mNavigationBar != null
-                && !forceShowSystemBars && hideNavBarSysui && immersiveSticky;
+                && !mForceShowSystemBars && hideNavBarSysui && immersiveSticky;
 
         final long now = SystemClock.uptimeMillis();
         final boolean pendingPanic = mPendingPanicGestureUptime != 0
@@ -7064,7 +7072,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && !transientStatusBarAllowed && hideStatusBarSysui;
         final boolean denyTransientNav = mNavigationBarController.isTransientShowRequested()
                 && !transientNavBarAllowed;
-        if (denyTransientStatus || denyTransientNav || forceShowSystemBars) {
+        if (denyTransientStatus || denyTransientNav || mForceShowSystemBars) {
             // clear the clearable flags instead
             clearClearableFlagsLw();
             vis &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;

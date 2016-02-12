@@ -22517,6 +22517,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect mOutsets = new Rect();
 
         /**
+         * In multi-window we force show the navigation bar. Because we don't want that the surface
+         * size changes in this mode, we instead have a flag whether the navigation bar size should
+         * always be consumed, so the app is treated like there is no virtual navigation bar at all.
+         */
+        boolean mAlwaysConsumeNavBar;
+
+        /**
          * The internal insets given by this window.  This value is
          * supplied by the client (through
          * {@link ViewTreeObserver.OnComputeInternalInsetsListener}) and will
