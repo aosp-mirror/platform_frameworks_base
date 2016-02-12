@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import android.Manifest;
+import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -74,7 +75,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     private RemoteViewsAdapterServiceConnection mServiceConnection;
     private WeakReference<RemoteAdapterConnectionCallback> mCallback;
     private OnClickHandler mRemoteViewsOnClickHandler;
-    private FixedSizeRemoteViewsCache mCache;
+    private final FixedSizeRemoteViewsCache mCache;
     private int mVisibleWindowLowerBound;
     private int mVisibleWindowUpperBound;
 
@@ -286,9 +287,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * A FrameLayout which contains a loading view, and manages the re/applying of RemoteViews when
      * they are loaded.
      */
-    private static class RemoteViewsFrameLayout extends FrameLayout {
-        public RemoteViewsFrameLayout(Context context) {
+    private static class RemoteViewsFrameLayout extends AppWidgetHostView {
+        private final FixedSizeRemoteViewsCache mCache;
+
+        public RemoteViewsFrameLayout(Context context, FixedSizeRemoteViewsCache cache) {
             super(context);
+            mCache = cache;
         }
 
         /**
@@ -297,13 +301,24 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
          *             successfully.
          */
         public void onRemoteViewsLoaded(RemoteViews view, OnClickHandler handler) {
-            try {
-                // Remove all the children of this layout first
-                removeAllViews();
-                addView(view.apply(getContext(), this, handler));
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to apply RemoteViews.");
-            }
+            setOnClickHandler(handler);
+            applyRemoteViews(view);
+        }
+
+        @Override
+        protected View getDefaultView() {
+            return mCache.getMetaData().createDefaultLoadingView(this);
+        }
+
+        @Override
+        protected Context getRemoteContext() {
+            return null;
+        }
+
+        @Override
+        protected View getErrorView() {
+            // Use the default loading view as the error view.
+            return getDefaultView();
         }
     }
 
@@ -457,63 +472,33 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             }
         }
 
-        private RemoteViewsFrameLayout createLoadingView(int position, View convertView,
-                ViewGroup parent, Object lock, LayoutInflater layoutInflater, OnClickHandler
-                handler) {
-            // Create and return a new FrameLayout, and setup the references for this position
+        /**
+         * Creates a default loading view. Uses the size of the first row as a guide for the
+         * size of the loading view.
+         */
+        private synchronized View createDefaultLoadingView(ViewGroup parent) {
             final Context context = parent.getContext();
-            RemoteViewsFrameLayout layout = new RemoteViewsFrameLayout(context);
-
-            // Create a new loading view
-            synchronized (lock) {
-                boolean customLoadingViewAvailable = false;
-
-                if (mUserLoadingView != null) {
-                    // Try to inflate user-specified loading view
-                    try {
-                        View loadingView = mUserLoadingView.apply(parent.getContext(), parent,
-                                handler);
-                        loadingView.setTagInternal(com.android.internal.R.id.rowTypeId,
-                                new Integer(0));
-                        layout.addView(loadingView);
-                        customLoadingViewAvailable = true;
-                    } catch (Exception e) {
-                        Log.w(TAG, "Error inflating custom loading view, using default loading" +
-                                "view instead", e);
-                    }
+            if (mFirstViewHeight < 0) {
+                try {
+                    View firstView = mFirstView.apply(parent.getContext(), parent);
+                    firstView.measure(
+                            MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
+                            MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+                    mFirstViewHeight = firstView.getMeasuredHeight();
+                } catch (Exception e) {
+                    float density = context.getResources().getDisplayMetrics().density;
+                    mFirstViewHeight = Math.round(sDefaultLoadingViewHeight * density);
+                    Log.w(TAG, "Error inflating first RemoteViews" + e);
                 }
-                if (!customLoadingViewAvailable) {
-                    // A default loading view
-                    // Use the size of the first row as a guide for the size of the loading view
-                    if (mFirstViewHeight < 0) {
-                        try {
-                            View firstView = mFirstView.apply(parent.getContext(), parent, handler);
-                            firstView.measure(
-                                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED),
-                                    MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-                            mFirstViewHeight = firstView.getMeasuredHeight();
-                            mFirstView = null;
-                        } catch (Exception e) {
-                            float density = context.getResources().getDisplayMetrics().density;
-                            mFirstViewHeight = (int)
-                                    Math.round(sDefaultLoadingViewHeight * density);
-                            mFirstView = null;
-                            Log.w(TAG, "Error inflating first RemoteViews" + e);
-                        }
-                    }
-
-                    // Compose the loading view text
-                    TextView loadingTextView = (TextView) layoutInflater.inflate(
-                            com.android.internal.R.layout.remote_views_adapter_default_loading_view,
-                            layout, false);
-                    loadingTextView.setHeight(mFirstViewHeight);
-                    loadingTextView.setTag(new Integer(0));
-
-                    layout.addView(loadingTextView);
-                }
+                mFirstView = null;
             }
 
-            return layout;
+            // Compose the loading view text
+            TextView loadingTextView = (TextView) LayoutInflater.from(context).inflate(
+                    com.android.internal.R.layout.remote_views_adapter_default_loading_view,
+                    parent, false);
+            loadingTextView.setHeight(mFirstViewHeight);
+            return loadingTextView;
         }
     }
 
@@ -1117,21 +1102,6 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
     }
 
     /**
-     * Returns the item type id for the specified convert view.  Returns -1 if the convert view
-     * is invalid.
-     */
-    private int getConvertViewTypeId(View convertView) {
-        int typeId = -1;
-        if (convertView != null) {
-            Object tag = convertView.getTag(com.android.internal.R.id.rowTypeId);
-            if (tag != null) {
-                typeId = (Integer) tag;
-            }
-        }
-        return typeId;
-    }
-
-    /**
      * This method allows an AdapterView using this Adapter to provide information about which
      * views are currently being displayed. This allows for certain optimizations and preloading
      * which  wouldn't otherwise be possible.
@@ -1145,7 +1115,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         // "Request" an index so that we can queue it for loading, initiate subsequent
         // preloading, etc.
         synchronized (mCache) {
-            boolean isInCache = mCache.containsRemoteViewAt(position);
+            RemoteViews rv = mCache.getRemoteViewsAt(position);
+            boolean isInCache = (rv != null);
             boolean isConnected = mServiceConnection.isConnected();
             boolean hasNewItems = false;
 
@@ -1162,75 +1133,23 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
                 hasNewItems = mCache.queuePositionsToBePreloadedFromRequestedPosition(position);
             }
 
+            final RemoteViewsFrameLayout layout =
+                    (convertView instanceof RemoteViewsFrameLayout)
+                            ? (RemoteViewsFrameLayout) convertView
+                            : new RemoteViewsFrameLayout(parent.getContext(), mCache);
             if (isInCache) {
-                View convertViewChild = null;
-                int convertViewTypeId = 0;
-                RemoteViewsFrameLayout layout = null;
-
-                if (convertView instanceof RemoteViewsFrameLayout) {
-                    layout = (RemoteViewsFrameLayout) convertView;
-                    convertViewChild = layout.getChildAt(0);
-                    convertViewTypeId = getConvertViewTypeId(convertViewChild);
-                }
-
-                // Second, we try and retrieve the RemoteViews from the cache, returning a loading
-                // view and queueing it to be loaded if it has not already been loaded.
-                Context context = parent.getContext();
-                RemoteViews rv = mCache.getRemoteViewsAt(position);
-                RemoteViewsIndexMetaData indexMetaData = mCache.getMetaDataAt(position);
-                int typeId = indexMetaData.typeId;
-
-                try {
-                    // Reuse the convert view where possible
-                    if (layout != null) {
-                        if (convertViewTypeId == typeId) {
-                            rv.reapply(context, convertViewChild, mRemoteViewsOnClickHandler);
-                            return layout;
-                        }
-                        layout.removeAllViews();
-                    } else {
-                        layout = new RemoteViewsFrameLayout(context);
-                    }
-
-                    // Otherwise, create a new view to be returned
-                    View newView = rv.apply(context, parent, mRemoteViewsOnClickHandler);
-                    newView.setTagInternal(com.android.internal.R.id.rowTypeId,
-                            new Integer(typeId));
-                    layout.addView(newView);
-                    return layout;
-
-                } catch (Exception e){
-                    // We have to make sure that we successfully inflated the RemoteViews, if not
-                    // we return the loading view instead.
-                    Log.w(TAG, "Error inflating RemoteViews at position: " + position + ", using" +
-                            "loading view instead" + e);
-
-                    RemoteViewsFrameLayout loadingView = null;
-                    final RemoteViewsMetaData metaData = mCache.getMetaData();
-                    synchronized (metaData) {
-                        loadingView = metaData.createLoadingView(position, convertView, parent,
-                                mCache, mLayoutInflater, mRemoteViewsOnClickHandler);
-                    }
-                    return loadingView;
-                } finally {
-                    if (hasNewItems) loadNextIndexInBackground();
-                }
+                layout.onRemoteViewsLoaded(rv, mRemoteViewsOnClickHandler);
+                if (hasNewItems) loadNextIndexInBackground();
             } else {
-                // If the cache does not have the RemoteViews at this position, then create a
-                // loading view and queue the actual position to be loaded in the background
-                RemoteViewsFrameLayout loadingView = null;
-                final RemoteViewsMetaData metaData = mCache.getMetaData();
-                synchronized (metaData) {
-                    loadingView = metaData.createLoadingView(position, convertView, parent,
-                            mCache, mLayoutInflater, mRemoteViewsOnClickHandler);
-                }
-
-                mRequestedViews.add(position, loadingView);
+                // If the views is not loaded, apply the loading view. If the loading view doesn't
+                // exist, the layout will create a default view based on the firstView height.
+                layout.onRemoteViewsLoaded(mCache.getMetaData().mUserLoadingView,
+                        mRemoteViewsOnClickHandler);
+                mRequestedViews.add(position, layout);
                 mCache.queueRequestedPositionToLoad(position);
                 loadNextIndexInBackground();
-
-                return loadingView;
             }
+            return layout;
         }
     }
 
