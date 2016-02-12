@@ -62,6 +62,7 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
             mPlusPaint;
     private float mTextHeight, mWarningTextHeight;
     private int mIconTint = Color.WHITE;
+    private float mOldDarkIntensity = 0f;
 
     private int mHeight;
     private int mWidth;
@@ -295,6 +296,9 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
     }
 
     public void setDarkIntensity(float darkIntensity) {
+        if (darkIntensity == mOldDarkIntensity) {
+            return;
+        }
         int backgroundColor = getBackgroundColor(darkIntensity);
         int fillColor = getFillColor(darkIntensity);
         mIconTint = fillColor;
@@ -302,6 +306,7 @@ public class BatteryMeterDrawable extends Drawable implements DemoMode,
         mBoltPaint.setColor(fillColor);
         mChargeColor = fillColor;
         invalidateSelf();
+        mOldDarkIntensity = darkIntensity;
     }
 
     private int getBackgroundColor(float darkIntensity) {

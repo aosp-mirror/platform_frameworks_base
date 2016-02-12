@@ -17,6 +17,7 @@
 package com.android.internal.statusbar;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -31,7 +32,23 @@ oneway interface IStatusBar
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
-    void setSystemUiVisibility(int vis, int mask);
+
+    /**
+     * Notifies the status bar of a System UI visibility flag change.
+     *
+     * @param vis the visibility flags except SYSTEM_UI_FLAG_LIGHT_STATUS_BAR which will be reported
+     *            separately in fullscreenStackVis and dockedStackVis
+     * @param fullscreenStackVis the flags which only apply in the region of the fullscreen stack,
+     *                           which is currently only SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+     * @param dockedStackVis the flags that only apply in the region of the docked stack, which is
+     *                       currently only SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+     * @param mask which flags to change
+     * @param fullscreenBounds the current bounds of the fullscreen stack, in screen coordinates
+     * @param dockedBounds the current bounds of the docked stack, in screen coordinates
+     */
+    void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
+            in Rect fullscreenBounds, in Rect dockedBounds);
+
     void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);

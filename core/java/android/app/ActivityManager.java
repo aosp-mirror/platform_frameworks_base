@@ -632,6 +632,17 @@ public class ActivityManager {
         public static boolean useWindowFrameForBackdrop(int stackId) {
             return stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == PINNED_STACK_ID;
         }
+
+        /**
+         * Returns true if a window from the specified stack with {@param stackId} are normally
+         * fullscreen, i. e. they can become the top opaque fullscreen window, meaning that it
+         * controls system bars, lockscreen occluded/dismissing state, screen rotation animation,
+         * etc.
+         */
+        public static boolean normallyFullscreenWindows(int stackId) {
+            return stackId != PINNED_STACK_ID && stackId != FREEFORM_WORKSPACE_STACK_ID
+                    && stackId != DOCKED_STACK_ID;
+        }
     }
 
     /**

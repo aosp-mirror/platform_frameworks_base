@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
@@ -80,6 +81,7 @@ public class SignalClusterView
     private ArrayList<PhoneState> mPhoneStates = new ArrayList<PhoneState>();
     private int mIconTint = Color.WHITE;
     private float mDarkIntensity;
+    private final Rect mTintArea = new Rect();
 
     ViewGroup mEthernetGroup, mWifiGroup;
     View mNoSimsCombo;
@@ -490,23 +492,31 @@ public class SignalClusterView
         }
     }
 
-    public void setIconTint(int tint, float darkIntensity) {
-        boolean changed = tint != mIconTint || darkIntensity != mDarkIntensity;
+    public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
+        boolean changed = tint != mIconTint || darkIntensity != mDarkIntensity
+                || !mTintArea.equals(tintArea);
         mIconTint = tint;
         mDarkIntensity = darkIntensity;
+        mTintArea.set(tintArea);
         if (changed && isAttachedToWindow()) {
             applyIconTint();
         }
     }
 
     private void applyIconTint() {
-        setTint(mVpn, mIconTint);
-        setTint(mAirplane, mIconTint);
-        applyDarkIntensity(mDarkIntensity, mNoSims, mNoSimsDark);
-        applyDarkIntensity(mDarkIntensity, mWifi, mWifiDark);
-        applyDarkIntensity(mDarkIntensity, mEthernet, mEthernetDark);
+        setTint(mVpn, StatusBarIconController.getTint(mTintArea, mVpn, mIconTint));
+        setTint(mAirplane, StatusBarIconController.getTint(mTintArea, mAirplane, mIconTint));
+        applyDarkIntensity(
+                StatusBarIconController.getDarkIntensity(mTintArea, mNoSims, mDarkIntensity),
+                mNoSims, mNoSimsDark);
+        applyDarkIntensity(
+                StatusBarIconController.getDarkIntensity(mTintArea, mWifi, mDarkIntensity),
+                mWifi, mWifiDark);
+        applyDarkIntensity(
+                StatusBarIconController.getDarkIntensity(mTintArea, mEthernet, mDarkIntensity),
+                mEthernet, mEthernetDark);
         for (int i = 0; i < mPhoneStates.size(); i++) {
-            mPhoneStates.get(i).setIconTint(mIconTint, mDarkIntensity);
+            mPhoneStates.get(i).setIconTint(mIconTint, mDarkIntensity, mTintArea);
         }
     }
 
@@ -613,9 +623,11 @@ public class SignalClusterView
             }
         }
 
-        public void setIconTint(int tint, float darkIntensity) {
-            applyDarkIntensity(darkIntensity, mMobile, mMobileDark);
-            setTint(mMobileType, tint);
+        public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
+            applyDarkIntensity(
+                    StatusBarIconController.getDarkIntensity(tintArea, mMobile, darkIntensity),
+                    mMobile, mMobileDark);
+            setTint(mMobileType, StatusBarIconController.getTint(tintArea, mMobileType, tint));
         }
     }
 }

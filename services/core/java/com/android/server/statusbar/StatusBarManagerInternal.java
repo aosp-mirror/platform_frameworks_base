@@ -16,6 +16,7 @@
 
 package com.android.server.statusbar;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 
 import com.android.server.notification.NotificationDelegate;
@@ -29,4 +30,7 @@ public interface StatusBarManagerInternal {
     void showAssistDisclosure();
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
+    void topAppWindowChanged(boolean menuVisible);
+    void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
+            Rect fullscreenBounds, Rect dockedBounds, String cause);
 }

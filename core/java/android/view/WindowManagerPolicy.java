@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -388,6 +389,12 @@ public interface WindowManagerPolicy {
          * Check whether the window is currently dimming.
          */
         public boolean isDimming();
+
+        /**
+         * @return the stack id this windows belongs to, or {@link StackId#INVALID_STACK_ID} if
+         *         not attached to any stack.
+         */
+        int getStackId();
     }
 
     /**
@@ -465,6 +472,11 @@ public interface WindowManagerPolicy {
          * @return The content insets of the docked divider window.
          */
         int getDockedDividerInsetsLw();
+
+        /**
+         * Retrieves the {@param outBounds} from the stack with id {@param stackId}.
+         */
+        void getStackBounds(int stackId, Rect outBounds);
     }
 
     public interface PointerEventListener {

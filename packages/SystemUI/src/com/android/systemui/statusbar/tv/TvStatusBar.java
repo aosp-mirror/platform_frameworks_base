@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.tv;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
@@ -68,7 +69,8 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void setSystemUiVisibility(int vis, int mask) {
+    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
+            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
     }
 
     @Override
