@@ -5907,13 +5907,6 @@ public final class Settings {
                 "camera_double_tap_power_gesture_disabled";
 
         /**
-         * Name of the package used as WebView provider (if unset the provider is instead determined
-         * by the system).
-         * @hide
-         */
-        public static final String WEBVIEW_PROVIDER = "webview_provider";
-
-        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -6939,6 +6932,13 @@ public final class Settings {
          */
         public static final String WEBVIEW_DATA_REDUCTION_PROXY_KEY =
                 "webview_data_reduction_proxy_key";
+
+        /**
+         * Name of the package used as WebView provider (if unset the provider is instead determined
+         * by the system).
+         * @hide
+         */
+        public static final String WEBVIEW_PROVIDER = "webview_provider";
 
        /**
         * Whether Wifi display is enabled/disabled
