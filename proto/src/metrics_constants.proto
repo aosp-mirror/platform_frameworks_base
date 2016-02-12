@@ -1927,6 +1927,14 @@ message MetricsEvent {
     // access before; action pass package name of calling package.
     ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE = 331;
 
+    // Logged when the user slides a notification and
+    // reveals the gear beneath it.
+    ACTION_REVEAL_GEAR = 332;
+
+    // Logged when the user taps on the gear beneath
+    // a notification.
+    ACTION_TOUCH_GEAR = 333;
+
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
 
