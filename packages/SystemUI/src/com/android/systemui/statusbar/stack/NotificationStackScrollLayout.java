@@ -361,9 +361,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    public void onGearTouched(ExpandableNotificationRow row) {
+    public void onGearTouched(ExpandableNotificationRow row, int x, int y) {
         if (mLongPressListener != null) {
-            mLongPressListener.onLongPress(row, 0, 0);
+            mLongPressListener.onLongPress(row, x, y);
         }
     }
 
