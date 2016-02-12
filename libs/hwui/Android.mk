@@ -144,20 +144,8 @@ hwui_c_includes += \
     external/skia/include/private \
     external/skia/src/core
 
-hwui_shared_libraries := \
-    liblog \
-    libcutils \
-    libutils \
-    libEGL \
-    libGLESv2 \
-    libskia \
-    libui \
-    libgui \
-    libprotobuf-cpp-lite \
-
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
     hwui_cflags += -DANDROID_ENABLE_RENDERSCRIPT
-    hwui_shared_libraries += libRS libRScpp
     hwui_c_includes += \
         $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,) \
         frameworks/rs/cpp \
@@ -180,12 +168,15 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 LOCAL_MODULE := libhwui_static
-LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := $(hwui_cflags)
 LOCAL_SRC_FILES := $(hwui_src_files)
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+        $(LOCAL_PATH) \
+        $(hwui_c_includes) \
+        $(call hwui_proto_include)
 
+include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_STATIC_LIBRARY)
 
 # ------------------------
@@ -196,7 +187,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_CLASS := STATIC_LIBRARIES
 LOCAL_MODULE := libhwui_static_null_gpu
-LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -DHWUI_NULL_GPU
@@ -205,8 +195,12 @@ LOCAL_SRC_FILES := \
         debug/nullegl.cpp \
         debug/nullgles.cpp
 LOCAL_C_INCLUDES := $(hwui_c_includes) $(call hwui_proto_include)
-LOCAL_EXPORT_C_INCLUDE_DIRS := $(hwui_c_includes) $(call hwui_proto_include)
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+        $(LOCAL_PATH) \
+        $(hwui_c_includes) \
+        $(call hwui_proto_include)
 
+include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_STATIC_LIBRARY)
 
 # ------------------------
@@ -218,8 +212,9 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE := libhwui
 LOCAL_WHOLE_STATIC_LIBRARIES := libhwui_static
-LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
+LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)
 
+include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_SHARED_LIBRARY)
 
 # ------------------------
@@ -230,7 +225,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE := hwui_unit_tests
 LOCAL_MODULE_TAGS := tests
-LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_STATIC_LIBRARIES := libhwui_static_null_gpu
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
@@ -263,6 +257,7 @@ ifeq (true, $(HWUI_NEW_OPS))
         tests/unit/RecordingCanvasTests.cpp
 endif
 
+include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_NATIVE_TEST)
 
 # ------------------------
@@ -278,7 +273,6 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuitest
 LOCAL_MODULE_STEM_64 := hwuitest64
-LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := $(hwui_cflags)
 
 # set to libhwui_static_null_gpu to skip actual GL commands
@@ -289,6 +283,7 @@ LOCAL_SRC_FILES += \
     tests/macrobench/TestSceneRunner.cpp \
     tests/macrobench/main.cpp
 
+include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_EXECUTABLE)
 
 # ------------------------
@@ -303,7 +298,6 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuimicro
 LOCAL_MODULE_STEM_64 := hwuimicro64
-LOCAL_SHARED_LIBRARIES := $(hwui_shared_libraries)
 LOCAL_CFLAGS := \
         $(hwui_cflags) \
         -DHWUI_NULL_GPU
@@ -325,6 +319,5 @@ ifeq (true, $(HWUI_NEW_OPS))
         tests/microbench/FrameBuilderBench.cpp
 endif
 
-LOCAL_CLANG := true # workaround gcc bug
-
+include $(LOCAL_PATH)/hwui_static_deps.mk
 include $(BUILD_EXECUTABLE)
