@@ -2086,7 +2086,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             final int oldUidFirewallRule = uidFirewallRules.get(uid, FIREWALL_RULE_DEFAULT);
             if (DBG) {
                 Slog.d(TAG, "oldRule = " + oldUidFirewallRule
-                        + ", newRule=" + rule + " for uid=" + uid);
+                        + ", newRule=" + rule + " for uid=" + uid + " on chain " + chain);
             }
             if (oldUidFirewallRule == rule) {
                 if (DBG) Slog.d(TAG, "!!!!! Skipping change");
