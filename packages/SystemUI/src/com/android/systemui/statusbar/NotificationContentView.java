@@ -496,7 +496,8 @@ public class NotificationContentView extends FrameLayout {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
-            if (viewHeight <= mContractedChild.getHeight() || noExpandedChild) {
+            if (noExpandedChild || (viewHeight <= mContractedChild.getHeight()
+                    && (!mIsChildInGroup || !mContainingNotification.isExpanded()))) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
