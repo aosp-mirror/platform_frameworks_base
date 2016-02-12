@@ -27,7 +27,6 @@ import android.app.IWallpaperManagerCallback;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -69,7 +68,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
@@ -296,7 +294,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     AccessibilityController mAccessibilityController;
     FingerprintUnlockController mFingerprintUnlockController;
     LightStatusBarController mLightStatusBarController;
-    private LockscreenWallpaper mLockscreenWallpaper;
+    protected LockscreenWallpaper mLockscreenWallpaper;
 
     int mNaturalBarHeight = -1;
 
@@ -3171,7 +3169,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
         setControllerUsers();
         clearCurrentMediaNotification();
-        mLockscreenWallpaper.setUser(newUserId);
+        mLockscreenWallpaper.setCurrentUser(newUserId);
         updateMediaMetaData(true, false);
     }
 
