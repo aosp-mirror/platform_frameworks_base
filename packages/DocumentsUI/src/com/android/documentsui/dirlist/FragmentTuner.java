@@ -249,9 +249,10 @@ public abstract class FragmentTuner {
 
         @Override
         void onModelLoaded(Model model, @ResultType int resultType) {
-            if (DEBUG) Log.d(TAG, "Handling model loaded. Has Location shcnage: " + mState.initialiLocationHasChanged());
+            if (DEBUG) Log.d(TAG, "Handling model loaded. Has Location shcnage: " + mState.initialLocationHasChanged());
             // When launched into empty root, open drawer.
-            if (model.isEmpty() && !mState.initialiLocationHasChanged()) {
+            if (model.isEmpty() && !mState.initialLocationHasChanged()
+                    && resultType != DirectoryFragment.TYPE_SEARCH) {
                 if (DEBUG) Log.d(TAG, "Showing roots drawer cuz stuffs empty.");
 
                 // This noops on layouts without drawer, so no need to guard.
