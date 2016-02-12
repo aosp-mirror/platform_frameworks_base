@@ -17,6 +17,7 @@
 package com.android.internal.statusbar;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -37,7 +38,6 @@ interface IStatusBarService
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
-    void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher);
     void expandSettingsPanel(String subPanel);
@@ -47,7 +47,8 @@ interface IStatusBarService
     // You need the STATUS_BAR_SERVICE permission
     void registerStatusBar(IStatusBar callbacks, out List<String> iconSlots,
             out List<StatusBarIcon> iconList,
-            out int[] switches, out List<IBinder> binders);
+            out int[] switches, out List<IBinder> binders, out Rect fullscreenStackBounds,
+            out Rect dockedStackBounds);
     void onPanelRevealed(boolean clearNotificationEffects, int numItems);
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
