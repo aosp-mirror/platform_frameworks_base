@@ -1749,16 +1749,6 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private boolean isPackageInstalled(String pkg, int userId) {
-        final ApplicationInfo info = mPm.getApplicationInfo(pkg,
-                PackageManager.GET_UNINSTALLED_PACKAGES,
-                userId);
-        if (info == null || (info.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Removes the app restrictions file for a specific package and user id, if it exists.
      */
@@ -2201,20 +2191,18 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
 
-        if (isPackageInstalled(packageName, userId)) {
-            // Notify package of changes via an intent - only sent to explicitly registered receivers.
-            Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
-            changeIntent.setPackage(packageName);
-            changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mContext.sendBroadcastAsUser(changeIntent, new UserHandle(userId));
-        }
+        // Notify package of changes via an intent - only sent to explicitly registered receivers.
+        Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
+        changeIntent.setPackage(packageName);
+        changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcastAsUser(changeIntent, UserHandle.of(userId));
     }
 
     private int getUidForPackage(String packageName) {
         long ident = Binder.clearCallingIdentity();
         try {
             return mContext.getPackageManager().getApplicationInfo(packageName,
-                    PackageManager.GET_UNINSTALLED_PACKAGES).uid;
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES).uid;
         } catch (NameNotFoundException nnfe) {
             return -1;
         } finally {
