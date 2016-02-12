@@ -17,6 +17,7 @@
 package com.android.ims.internal;
 
 import com.android.ims.ImsReasonInfo;
+
 /**
  * A listener type for receiving notifications about the changes to
  * the IMS connection(registration).
@@ -26,13 +27,34 @@ import com.android.ims.ImsReasonInfo;
 interface IImsRegistrationListener {
     /**
      * Notifies the application when the device is connected to the IMS network.
+     *
+     * @deprecated see {@link registrationConnectedWithRadioTech}
      */
     void registrationConnected();
 
     /**
      * Notifies the application when the device is trying to connect the IMS network.
+     *
+     * @deprecated see {@link registrationProgressingWithRadioTech}
      */
     void registrationProgressing();
+
+    /**
+     * Notifies the application when the device is connected to the IMS network.
+     *
+     * @param imsRadioTech the radio access technology. Valid values are {@code
+     * RIL_RADIO_TECHNOLOGY_*} defined in {@link ServiceState}.
+     */
+    void registrationConnectedWithRadioTech(int imsRadioTech);
+
+    /**
+     * Notifies the application when the device is trying to connect the IMS network.
+     *
+     * @param imsRadioTech the radio access technology. Valid values are {@code
+     * RIL_RADIO_TECHNOLOGY_*} defined in {@link ServiceState}.
+     */
+    void registrationProgressingWithRadioTech(int imsRadioTech);
+
 
     /**
      * Notifies the application when the device is disconnected from the IMS network.
