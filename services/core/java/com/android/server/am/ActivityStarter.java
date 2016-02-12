@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.server.am;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -74,7 +90,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
@@ -84,6 +102,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.EventLog;
 import android.util.Slog;
@@ -582,6 +601,22 @@ class ActivityStarter {
         intent = new Intent(intent);
 
         ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
+        if (rInfo == null) {
+            UserInfo userInfo = mSupervisor.getUserInfo(userId);
+            if (userInfo != null && userInfo.isManagedProfile()) {
+                // Special case for managed profiles, if attempting to launch non-cryto aware
+                // app in a locked managed profile from an unlocked parent allow it to resolve
+                // as user will be sent via confirm credentials to unlock the profile.
+                UserManager userManager = UserManager.get(mService.mContext);
+                UserInfo parent = userManager.getProfileParent(userId);
+                if (parent != null
+                        && userManager.isUserUnlocked(parent.getUserHandle())
+                        && !userManager.isUserUnlocked(userInfo.getUserHandle())) {
+                    rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
+                            PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE);
+                }
+            }
+        }
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
