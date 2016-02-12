@@ -22910,7 +22910,9 @@ package android.media.tv {
     method public android.content.pm.ServiceInfo getServiceInfo();
     method public int getTunerCount();
     method public int getType();
+    method public boolean isHidden(android.content.Context);
     method public boolean isPassthroughInput();
+    method public java.lang.CharSequence loadCustomLabel(android.content.Context);
     method public android.graphics.drawable.Drawable loadIcon(android.content.Context);
     method public java.lang.CharSequence loadLabel(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
