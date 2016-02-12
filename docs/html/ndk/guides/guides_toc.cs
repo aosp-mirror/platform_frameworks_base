@@ -73,6 +73,13 @@
       </ul>
    </li>
 
+      <li class="nav-section">
+      <div class="nav-section-header empty">
+      <a href="<?cs var:toroot ?>ndk/guides/graphics/index.html">
+      <span class="en">Graphics</span></a></div>
+   </li>
+
+
 </ul>
 
 
