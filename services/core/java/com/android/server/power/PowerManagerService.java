@@ -776,8 +776,9 @@ public final class PowerManagerService extends SystemService
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcast(intent);
                     // Send internal version that requires signature permission.
-                    mContext.sendBroadcastAsUser(new Intent(
-                            PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL), UserHandle.ALL,
+                    intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             Manifest.permission.DEVICE_POWER);
                 }
             });
