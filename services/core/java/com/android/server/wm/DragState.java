@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.content.ClipData;
 import android.content.ClipDescription;
+import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -33,6 +34,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.IUserManager;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
@@ -73,6 +78,8 @@ class DragState {
     IBinder mLocalWin;
     int mPid;
     int mUid;
+    int mSourceUserId;
+    boolean mCrossProfileCopyAllowed;
     ClipData mData;
     ClipDescription mDataDescription;
     int mTouchSource;
@@ -221,6 +228,18 @@ class DragState {
         mNotifiedWindows.clear();
         mDragInProgress = true;
 
+        mSourceUserId = UserHandle.getUserId(mUid);
+
+        final IUserManager userManager =
+                (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
+        try {
+            mCrossProfileCopyAllowed = !userManager.getUserRestrictions(mSourceUserId).getBoolean(
+                    UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
+        } catch (RemoteException e) {
+            Slog.e(TAG_WM, "Remote Exception calling UserManager: " + e);
+            mCrossProfileCopyAllowed = false;
+        }
+
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
@@ -234,7 +253,7 @@ class DragState {
         }
     }
 
-    /* helper - send a caller-provided event, presumed to be DRAG_STARTED, if the
+    /* helper - send a ACTION_DRAG_STARTED event, if the
      * designated window is potentially a drop recipient.  There are race situations
      * around DRAG_ENDED broadcast, so we make sure that once we've declared that
      * the drag has ended, we never send out another DRAG_STARTED for this drag action.
@@ -244,19 +263,7 @@ class DragState {
      */
     private void sendDragStartedLw(WindowState newWin, float touchX, float touchY,
             ClipDescription desc) {
-        // Don't actually send the event if the drag is supposed to be pinned
-        // to the originating window but 'newWin' is not that window.
-        if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
-            final IBinder winBinder = newWin.mClient.asBinder();
-            if (winBinder != mLocalWin) {
-                if (DEBUG_DRAG) {
-                    Slog.d(TAG_WM, "Not dispatching local DRAG_STARTED to " + newWin);
-                }
-                return;
-            }
-        }
-
-        if (mDragInProgress && newWin.isPotentialDragTarget()) {
+        if (mDragInProgress && isValidDropTarget(newWin)) {
             DragEvent event = obtainDragEvent(newWin, DragEvent.ACTION_DRAG_STARTED,
                     touchX, touchY, null, desc, null, null, false);
             try {
@@ -274,23 +281,48 @@ class DragState {
         }
     }
 
-    /* helper - construct and send a DRAG_STARTED event only if the window has not
+    private boolean isValidDropTarget(WindowState targetWin) {
+        if (targetWin == null) {
+            return false;
+        }
+        if (!targetWin.isPotentialDragTarget()) {
+            return false;
+        }
+        if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
+            // Drag is limited to the current window.
+            if (mLocalWin != targetWin.mClient.asBinder()) {
+                return false;
+            }
+        }
+
+        return mCrossProfileCopyAllowed ||
+                mSourceUserId == UserHandle.getUserId(targetWin.getOwningUid());
+    }
+
+    /* helper - send a ACTION_DRAG_STARTED event only if the window has not
      * previously been notified, i.e. it became visible after the drag operation
      * was begun.  This is a rare case.
      */
     void sendDragStartedIfNeededLw(WindowState newWin) {
         if (mDragInProgress) {
             // If we have sent the drag-started, we needn't do so again
-            for (WindowState ws : mNotifiedWindows) {
-                if (ws == newWin) {
-                    return;
-                }
+            if (isWindowNotified(newWin)) {
+                return;
             }
             if (DEBUG_DRAG) {
                 Slog.d(TAG_WM, "need to send DRAG_STARTED to new window " + newWin);
             }
             sendDragStartedLw(newWin, mCurrentX, mCurrentY, mDataDescription);
         }
+    }
+
+    private boolean isWindowNotified(WindowState newWin) {
+        for (WindowState ws : mNotifiedWindows) {
+            if (ws == newWin) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void broadcastDragEndedLw() {
@@ -389,14 +421,13 @@ class DragState {
             if (DEBUG_DRAG) Slog.d(TAG_WM, "No touched win at x=" + x + " y=" + y);
             return;
         }
-        if ((mFlags & View.DRAG_FLAG_GLOBAL) == 0) {
-            final IBinder touchedBinder = touchedWin.mClient.asBinder();
-            if (touchedBinder != mLocalWin) {
-                // This drag is pinned only to the originating window, but the drag
-                // point is outside that window.  Pretend it's over empty space.
-                touchedWin = null;
-            }
+
+        if (!isWindowNotified(touchedWin)) {
+            // The drag point is over a window which was not notified about a drag start.
+            // Pretend it's over empty space.
+            touchedWin = null;
         }
+
         try {
             final int myPid = Process.myPid();
 
@@ -445,7 +476,7 @@ class DragState {
         mCurrentX = x;
         mCurrentY = y;
 
-        if (touchedWin == null) {
+        if (!isWindowNotified(touchedWin)) {
             // "drop" outside a valid window -- no recipient to apply a
             // timeout to, and we can send the drag-ended message immediately.
             mDragResult = false;
@@ -454,6 +485,9 @@ class DragState {
 
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "sending DROP to " + touchedWin);
+        }
+        if (mSourceUserId != UserHandle.getUserId(touchedWin.getOwningUid())){
+            mData.fixUris(mSourceUserId);
         }
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
