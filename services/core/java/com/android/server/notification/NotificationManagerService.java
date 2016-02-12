@@ -1350,9 +1350,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean doesAppUseTopics(String pkg, int uid) {
+        public boolean doesUserUseTopics(String pkg, int uid) {
             enforceSystemOrSystemUI("Caller not system or systemui");
-            return mRankingHelper.doesAppUseTopics(pkg, uid);
+            return mRankingHelper.doesUserUseTopics(pkg, uid);
         }
 
         /**
