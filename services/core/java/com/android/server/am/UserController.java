@@ -68,6 +68,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -82,6 +83,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerService;
 
 import java.io.PrintWriter;
@@ -561,6 +563,10 @@ final class UserController {
                     continue;
                 }
                 UserInfo userInfo = getUserInfo(oldUserId);
+                if (userInfo.isEphemeral()) {
+                    LocalServices.getService(UserManagerInternal.class)
+                            .onEphemeralUserStop(oldUserId);
+                }
                 if (userInfo.isGuest() || userInfo.isEphemeral()) {
                     // This is a user to be stopped.
                     stopUsersLocked(oldUserId, true, null);

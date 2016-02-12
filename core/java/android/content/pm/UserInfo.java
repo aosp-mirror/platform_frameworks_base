@@ -73,6 +73,9 @@ public class UserInfo implements Parcelable {
 
     /**
      * Indicates that this user is disabled.
+     *
+     * <p>Note: If an ephemeral user is disabled, it shouldn't be later re-enabled. Ephemeral users
+     * are disabled as their removal is in progress to indicate that they shouldn't be re-entered.
      */
     public static final int FLAG_DISABLED = 0x00000040;
 
@@ -171,6 +174,10 @@ public class UserInfo implements Parcelable {
      * @return true if this user can be switched to.
      **/
     public boolean supportsSwitchTo() {
+        if (isEphemeral() && !isEnabled()) {
+            // Don't support switching to an ephemeral user with removal in progress.
+            return false;
+        }
         // TODO remove fw.show_hidden_users when we have finished developing managed profiles.
         return !isManagedProfile() || SystemProperties.getBoolean("fw.show_hidden_users", false);
     }
