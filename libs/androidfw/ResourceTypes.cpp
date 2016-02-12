@@ -2236,7 +2236,7 @@ bool ResTable_config::isLocaleBetterThan(const ResTable_config& o,
     // See if any of the regions is better than the other
     const int region_comparison = localeDataCompareRegions(
             country, o.country,
-            language, localeScript, requested->country);
+            language, requested->localeScript, requested->country);
     if (region_comparison != 0) {
         return (region_comparison > 0);
     }
@@ -2526,17 +2526,34 @@ bool ResTable_config::match(const ResTable_config& settings) const {
 
         // For backward compatibility and supporting private-use locales, we
         // fall back to old behavior if we couldn't determine the script for
-        // either of the desired locale or the provided locale.
-        if (localeScript[0] == '\0' || localeScript[1] == '\0') {
+        // either of the desired locale or the provided locale. But if we could determine
+        // the scripts, they should be the same for the locales to match.
+        bool countriesMustMatch = false;
+        char computed_script[4];
+        const char* script;
+        if (settings.localeScript[0] == '\0') { // could not determine the request's script
+            countriesMustMatch = true;
+        } else {
+            if (localeScript[0] == '\0') { // script was not provided, so we try to compute it
+                localeDataComputeScript(computed_script, language, country);
+                if (computed_script[0] == '\0') { // we could not compute the script
+                    countriesMustMatch = true;
+                } else {
+                    script = computed_script;
+                }
+            } else { // script was provided, so just use it
+                script = localeScript;
+            }
+        }
+
+        if (countriesMustMatch) {
             if (country[0] != '\0'
                 && (country[0] != settings.country[0]
                     || country[1] != settings.country[1])) {
                 return false;
             }
         } else {
-            // But if we could determine the scripts, they should be the same
-            // for the locales to match.
-            if (memcmp(localeScript, settings.localeScript, sizeof(localeScript)) != 0) {
+            if (memcmp(script, settings.localeScript, sizeof(settings.localeScript)) != 0) {
                 return false;
             }
         }
