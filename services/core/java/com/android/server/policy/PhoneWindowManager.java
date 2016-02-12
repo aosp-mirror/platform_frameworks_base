@@ -4397,6 +4397,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = mUnrestrictedScreenTop
                             + mUnrestrictedScreenHeight;
+                } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0) {
+                    pf.left = df.left = of.left = mRestrictedScreenLeft;
+                    pf.top = df.top = of.top  = mRestrictedScreenTop;
+                    pf.right = df.right = of.right = mRestrictedScreenLeft + mRestrictedScreenWidth;
+                    pf.bottom = df.bottom = of.bottom = mRestrictedScreenTop
+                            + mRestrictedScreenHeight;
+                    if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                        cf.left = mDockLeft;
+                        cf.top = mDockTop;
+                        cf.right = mDockRight;
+                        cf.bottom = mDockBottom;
+                    } else {
+                        cf.left = mContentLeft;
+                        cf.top = mContentTop;
+                        cf.right = mContentRight;
+                        cf.bottom = mContentBottom;
+                    }
                 } else {
                     pf.left = df.left = of.left = cf.left = mRestrictedScreenLeft;
                     pf.top = df.top = of.top = cf.top = mRestrictedScreenTop;

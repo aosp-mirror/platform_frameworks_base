@@ -86,6 +86,7 @@ import static android.view.Window.DECOR_CAPTION_SHADE_DARK;
 import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
@@ -1003,13 +1004,25 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
 
+        // If we didn't request fullscreen layout, but we still got it because of the
+        // mForceWindowDrawsStatusBarBackground flag, also consume top inset.
+        boolean consumingStatusBar = (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) == 0
+                && (sysUiVisibility & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
+                && (attrs.flags & FLAG_LAYOUT_IN_SCREEN) == 0
+                && (attrs.flags & FLAG_LAYOUT_INSET_DECOR) == 0
+                && mForceWindowDrawsStatusBarBackground
+                && mLastTopInset != 0;
+
+        int consumedTop = consumingStatusBar ? mLastTopInset : 0;
         int consumedRight = consumingNavBar ? mLastRightInset : 0;
         int consumedBottom = consumingNavBar ? mLastBottomInset : 0;
 
         if (mContentRoot != null
                 && mContentRoot.getLayoutParams() instanceof MarginLayoutParams) {
             MarginLayoutParams lp = (MarginLayoutParams) mContentRoot.getLayoutParams();
-            if (lp.rightMargin != consumedRight || lp.bottomMargin != consumedBottom) {
+            if (lp.topMargin != consumedTop || lp.rightMargin != consumedRight
+                    || lp.bottomMargin != consumedBottom) {
+                lp.topMargin = consumedTop;
                 lp.rightMargin = consumedRight;
                 lp.bottomMargin = consumedBottom;
                 mContentRoot.setLayoutParams(lp);
@@ -1023,7 +1036,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             if (insets != null) {
                 insets = insets.replaceSystemWindowInsets(
                         insets.getSystemWindowInsetLeft(),
-                        insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetTop() - consumedTop,
                         insets.getSystemWindowInsetRight() - consumedRight,
                         insets.getSystemWindowInsetBottom() - consumedBottom);
             }
