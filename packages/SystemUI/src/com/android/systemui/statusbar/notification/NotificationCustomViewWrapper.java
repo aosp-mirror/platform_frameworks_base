@@ -45,4 +45,10 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
             mInvertHelper.update(dark);
         }
     }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        mView.setAlpha(visible ? 1.0f : 0.0f);
+    }
 }

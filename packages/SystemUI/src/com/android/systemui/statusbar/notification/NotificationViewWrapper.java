@@ -105,6 +105,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     @Override
     public void setVisible(boolean visible) {
+        mView.animate().cancel();
         mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
     }
 }
