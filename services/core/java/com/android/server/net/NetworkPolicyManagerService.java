@@ -1864,31 +1864,58 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void addRestrictBackgroundWhitelistedUid(int uid) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        Slog.i(TAG, "adding uid " + uid + " to restrict background whitelist");
+        if (!isUidValidForRules(uid)) return;
+        final boolean changed;
         synchronized (mRulesLock) {
+            final boolean oldStatus = mRestrictBackgroundWhitelistUids.get(uid);
+            if (oldStatus) {
+                if (LOGD) Slog.d(TAG, "uid " + uid + " is already whitelisted");
+                return;
+            }
+            Slog.i(TAG, "adding uid " + uid + " to restrict background whitelist");
             mRestrictBackgroundWhitelistUids.append(uid, true);
-            updateRulesForGlobalChangeLocked(true);
+            changed = mRestrictBackground && !oldStatus;
+            if (changed && hasInternetPermissions(uid)) {
+                setUidNetworkRules(uid, false);
+            }
             writePolicyLocked();
         }
-        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0).sendToTarget();
+        if (changed) {
+            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
+                    .sendToTarget();
+        }
     }
 
     @Override
     public void removeRestrictBackgroundWhitelistedUid(int uid) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
+        if (!isUidValidForRules(uid)) return;
+        final boolean changed;
         synchronized (mRulesLock) {
-            removeRestrictBackgroundWhitelistedUidLocked(uid, true);
+            changed = removeRestrictBackgroundWhitelistedUidLocked(uid, true);
         }
-        mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0).sendToTarget();
+        if (changed) {
+            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
+                    .sendToTarget();
+        }
     }
 
-    private void removeRestrictBackgroundWhitelistedUidLocked(int uid, boolean updateNow) {
+    private boolean removeRestrictBackgroundWhitelistedUidLocked(int uid, boolean updateNow) {
+        final boolean oldStatus = mRestrictBackgroundWhitelistUids.get(uid);
+        if (!oldStatus) {
+            if (LOGD) Slog.d(TAG, "uid " + uid + " was not whitelisted before");
+            return false;
+        }
+        Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
+        final boolean changed = mRestrictBackground && oldStatus;
         mRestrictBackgroundWhitelistUids.delete(uid);
         if (updateNow) {
-            updateRulesForGlobalChangeLocked(true);
+            if (changed && hasInternetPermissions(uid)) {
+                setUidNetworkRules(uid, true);
+            }
             writePolicyLocked();
         }
+        return changed;
     }
 
     @Override
@@ -2408,22 +2435,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Applies network rules to bandwidth and firewall controllers based on uid policy.
-     * @param uid The uid for which to apply the latest policy
+     * Checks if an uid has INTERNET permissions.
+     * <p>
+     * Useful for the cases where the lack of network access can simplify the rules.
      */
-    void updateRulesForUidLocked(int uid) {
-        if (!isUidValidForRules(uid)) return;
-
-        // quick check: if this uid doesn't have INTERNET permission, it doesn't have
-        // network access anyway, so it is a waste to mess with it here.
+    private boolean hasInternetPermissions(int uid) {
         final IPackageManager ipm = AppGlobals.getPackageManager();
         try {
             if (ipm.checkUidPermission(Manifest.permission.INTERNET, uid)
                     != PackageManager.PERMISSION_GRANTED) {
-                return;
+                return false;
             }
         } catch (RemoteException e) {
         }
+        return true;
+    }
+
+    /**
+     * Applies network rules to bandwidth and firewall controllers based on uid policy.
+     * @param uid The uid for which to apply the latest policy
+     */
+    void updateRulesForUidLocked(int uid) {
+        if (!isUidValidForRules(uid) || !hasInternetPermissions(uid)) return;
 
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final boolean uidForeground = isUidForegroundLocked(uid);
@@ -2598,7 +2631,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
                     }
-
                     return true;
                 }
                 case MSG_ADVISE_PERSIST_THRESHOLD: {
@@ -2827,14 +2859,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onPackageRemoved(String packageName, int uid) {
             if (LOGV) Slog.v(TAG, "onPackageRemoved: " + packageName + " ->" + uid);
-            synchronized (mRulesLock) {
-                removeRestrictBackgroundWhitelistedUidLocked(uid, true);
-            }
-        }
-
-        @Override
-        public void onPackageRemovedAllUsers(String packageName, int uid) {
-            if (LOGV) Slog.v(TAG, "onPackageRemovedAllUsers: " + packageName + " ->" + uid);
             synchronized (mRulesLock) {
                 removeRestrictBackgroundWhitelistedUidLocked(uid, true);
             }
