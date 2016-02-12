@@ -6829,16 +6829,36 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Extract pacakges only if profile-guided compilation is enabled because
         // otherwise BackgroundDexOptService will not dexopt them later.
-        if (mUseJitProfiles) {
-            List<PackageParser.Package> pkgs;
-            synchronized (mPackages) {
-                pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
+        if (!mUseJitProfiles || !isUpgrade()) {
+            return;
+        }
+
+        List<PackageParser.Package> pkgs;
+        synchronized (mPackages) {
+            pkgs = PackageManagerServiceUtils.getPackagesForDexopt(mPackages.values(), this);
+        }
+
+        int curr = 0;
+        int total = pkgs.size();
+        for (PackageParser.Package pkg : pkgs) {
+            curr++;
+
+            if (DEBUG_DEXOPT) {
+                Log.i(TAG, "Extracting app " + curr + " of " + total + ": " + pkg.packageName);
             }
-            for (PackageParser.Package pkg : pkgs) {
-                if (PackageDexOptimizer.canOptimizePackage(pkg)) {
-                    performDexOpt(pkg.packageName, null /* instructionSet */,
-                             false /* useProfiles */, true /* extractOnly */, false /* force */);
+
+            if (!isFirstBoot()) {
+                try {
+                    ActivityManagerNative.getDefault().showBootMessage(
+                            mContext.getResources().getString(R.string.android_upgrading_apk,
+                                    curr, total), true);
+                } catch (RemoteException e) {
                 }
+            }
+
+            if (PackageDexOptimizer.canOptimizePackage(pkg)) {
+                performDexOpt(pkg.packageName, null /* instructionSet */,
+                         false /* useProfiles */, true /* extractOnly */, false /* force */);
             }
         }
     }
