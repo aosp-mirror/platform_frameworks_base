@@ -409,7 +409,11 @@ public class StatusBarIconController extends StatusBarIconList implements Tunabl
         if (darkArea == null && mTintArea.isEmpty()) {
             return;
         }
-        mTintArea.set(darkArea);
+        if (darkArea == null) {
+            mTintArea.setEmpty();
+        } else {
+            mTintArea.set(darkArea);
+        }
         applyIconTint();
         mNotificationIconAreaController.setTintArea(darkArea);
     }
