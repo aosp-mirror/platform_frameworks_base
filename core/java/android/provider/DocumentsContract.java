@@ -1201,7 +1201,7 @@ public final class DocumentsContract {
         final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
                 sourceDocumentUri.getAuthority());
         try {
-            return moveDocument(client, sourceParentDocumentUri, sourceDocumentUri,
+            return moveDocument(client, sourceDocumentUri, sourceParentDocumentUri,
                     targetParentDocumentUri);
         } catch (Exception e) {
             Log.w(TAG, "Failed to move document", e);
