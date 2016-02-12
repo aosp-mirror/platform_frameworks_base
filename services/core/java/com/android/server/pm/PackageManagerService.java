@@ -10678,10 +10678,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, true,
                 "setPackageSuspended for user " + userId);
 
-        // TODO: investigate and add more restrictions for suspending crucial packages.
-        if (isPackageDeviceAdmin(packageName, userId)) {
-            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
-                    + "\": has active device admin");
+        if (!canSuspendPackageForUser(packageName, userId)) {
             return false;
         }
 
@@ -10724,6 +10721,36 @@ public class PackageManagerService extends IPackageManager.Stub {
             final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
             return pkgSetting != null && pkgSetting.getSuspended(userId);
         }
+    }
+
+    // TODO: investigate and add more restrictions for suspending crucial packages.
+    private boolean canSuspendPackageForUser(String packageName, int userId) {
+        if (isPackageDeviceAdmin(packageName, userId)) {
+            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
+                    + "\": has active device admin");
+            return false;
+        }
+
+        String activeLauncherPackageName = getActiveLauncherPackageName(userId);
+        if (packageName.equals(activeLauncherPackageName)) {
+            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
+                    + "\" because it is set as the active launcher");
+            return false;
+        }
+
+        return true;
+    }
+
+    private String getActiveLauncherPackageName(int userId) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolveInfo = resolveIntent(
+                intent,
+                intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                PackageManager.MATCH_DEFAULT_ONLY,
+                userId);
+
+        return resolveInfo == null ? null : resolveInfo.activityInfo.packageName;
     }
 
     @Override
