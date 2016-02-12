@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -32,6 +33,7 @@ public class NotificationIconAreaController {
     protected View mNotificationIconArea;
     private IconMerger mNotificationIcons;
     private ImageView mMoreIcon;
+    private final Rect mTintArea = new Rect();
 
     public NotificationIconAreaController(Context context, PhoneStatusBar phoneStatusBar) {
         mPhoneStatusBar = phoneStatusBar;
@@ -64,6 +66,20 @@ public class NotificationIconAreaController {
      */
     public View getNotificationInnerAreaView() {
         return mNotificationIconArea;
+    }
+
+    /**
+     * See {@link StatusBarIconController#setIconsDarkArea}.
+     *
+     * @param tintArea the area in which to tint the icons, specified in screen coordinates
+     */
+    public void setTintArea(Rect tintArea) {
+        if (tintArea == null) {
+            mTintArea.setEmpty();
+        } else {
+            mTintArea.set(tintArea);
+        }
+        applyNotificationIconsTint();
     }
 
     /**
@@ -145,7 +161,8 @@ public class NotificationIconAreaController {
             boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
             boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mNotificationColorUtil);
             if (colorize) {
-                v.setImageTintList(ColorStateList.valueOf(mIconTint));
+                v.setImageTintList(ColorStateList.valueOf(
+                        StatusBarIconController.getTint(mTintArea, v, mIconTint)));
             }
         }
     }

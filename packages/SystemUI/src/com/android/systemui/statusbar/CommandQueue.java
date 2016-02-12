@@ -17,12 +17,14 @@
 package com.android.systemui.statusbar;
 
 import android.content.ComponentName;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Pair;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 
@@ -94,7 +96,8 @@ public class CommandQueue extends IStatusBar.Stub {
         public void animateExpandNotificationsPanel();
         public void animateCollapsePanels(int flags);
         public void animateExpandSettingsPanel(String obj);
-        public void setSystemUiVisibility(int vis, int mask);
+        public void setSystemUiVisibility(int vis, int fullscreenStackVis,
+                int dockedStackVis, int mask, Rect fullscreenStackBounds, Rect dockedStackBounds);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition,
                 boolean showImeSwitcher);
@@ -169,11 +172,19 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setSystemUiVisibility(int vis, int mask) {
+    public void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis,
+            int mask, Rect fullscreenStackBounds, Rect dockedStackBounds) {
         synchronized (mLock) {
             // Don't coalesce these, since it might have one time flags set such as
             // STATUS_BAR_UNHIDE which might get lost.
-            mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, vis, mask, null).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = vis;
+            args.argi2 = fullscreenStackVis;
+            args.argi3 = dockedStackVis;
+            args.argi4 = mask;
+            args.arg1 = fullscreenStackBounds;
+            args.arg2 = dockedStackBounds;
+            mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, args).sendToTarget();
         }
     }
 
@@ -377,7 +388,10 @@ public class CommandQueue extends IStatusBar.Stub {
                     mCallbacks.animateExpandSettingsPanel((String) msg.obj);
                     break;
                 case MSG_SET_SYSTEMUI_VISIBILITY:
-                    mCallbacks.setSystemUiVisibility(msg.arg1, msg.arg2);
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    mCallbacks.setSystemUiVisibility(args.argi1, args.argi2, args.argi3,
+                            args.argi4, (Rect) args.arg1, (Rect) args.arg2);
+                    args.recycle();
                     break;
                 case MSG_TOP_APP_WINDOW_CHANGED:
                     mCallbacks.topAppWindowChanged(msg.arg1 != 0);
