@@ -132,7 +132,7 @@ class NavigationView {
             showBreadcrumb(true);
             mToolbar.setTitle(null);
             mIgnoreNextNavigation = true;
-            mBreadcrumb.setSelection(mBreadcrumbAdapter.getCount() - 1);
+            mBreadcrumb.setSelection(mBreadcrumbAdapter.getCount() - 1, false);
         }
 
         if (DEBUG) Log.d(TAG, "Final toolbar title is: " + mToolbar.getTitle());
