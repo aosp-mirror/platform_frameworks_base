@@ -1883,8 +1883,6 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                     //printf("Comment of %s: %s\n", String8(e).string(),
                     //        String8(cmt).string());
                     syms->appendComment(String8(e), String16(cmt), srcPos);
-                } else {
-                    //printf("No comment for %s\n", String8(e).string());
                 }
                 syms->makeSymbolPublic(String8(e), srcPos);
             } else if (strcmp16(block.getElementName(&len), uses_permission16.string()) == 0) {
@@ -2535,10 +2533,6 @@ static status_t writeSymbolClass(
             fprintf(fp,
                     "%s/** %s\n",
                     getIndentSpace(indent), cmt.string());
-        } else if (sym.isPublic && !includePrivate) {
-            sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
-                assets->getPackage().string(), className.string(),
-                String8(sym.name).string());
         }
         String16 typeComment(sym.typeComment);
         if (typeComment.size() > 0) {
@@ -2581,10 +2575,6 @@ static status_t writeSymbolClass(
                      "%s */\n",
                     getIndentSpace(indent), cmt.string(),
                     getIndentSpace(indent));
-        } else if (sym.isPublic && !includePrivate) {
-            sym.sourcePos.warning("No comment for public symbol %s:%s/%s",
-                assets->getPackage().string(), className.string(),
-                String8(sym.name).string());
         }
         ann.printAnnotations(fp, getIndentSpace(indent));
         fprintf(fp, "%spublic static final String %s=\"%s\";\n",
