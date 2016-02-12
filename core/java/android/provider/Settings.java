@@ -4660,6 +4660,14 @@ public final class Settings {
                 "lock_screen_allow_private_notifications";
 
         /**
+         * When set by a user, allows notification remote input atop a securely locked screen
+         * without having to unlock
+         * @hide
+         */
+        public static final String LOCK_SCREEN_ALLOW_REMOTE_INPUT =
+                "lock_screen_allow_remote_input";
+
+        /**
          * Set by the system to track if the user needs to see the call to action for
          * the lockscreen notification policy.
          * @hide

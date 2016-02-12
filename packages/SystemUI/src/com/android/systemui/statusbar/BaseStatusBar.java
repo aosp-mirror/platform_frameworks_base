@@ -229,6 +229,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected int mState;
     protected boolean mBouncerShowing;
     protected boolean mShowLockscreenNotifications;
+    protected boolean mAllowLockscreenRemoteInput;
 
     protected NotificationOverflowContainer mKeyguardIconOverflowContainer;
     protected DismissView mDismissView;
@@ -400,9 +401,24 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
                 p = p.getParent();
             }
+            ExpandableNotificationRow row = null;
+            while (p != null) {
+                if (p instanceof ExpandableNotificationRow) {
+                    row = (ExpandableNotificationRow) p;
+                    break;
+                }
+                p = p.getParent();
+            }
 
-            if (riv == null) {
+            if (riv == null || row == null) {
                 return false;
+            }
+
+            row.setUserExpanded(true);
+
+            if (isLockscreenPublicMode() && !mAllowLockscreenRemoteInput) {
+                onLockedRemoteInput(row, view);
+                return true;
             }
 
             riv.setVisibility(View.VISIBLE);
@@ -617,6 +633,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mSettingsObserver);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
+                mSettingsObserver,
+                UserHandle.USER_ALL);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT), false,
                 mSettingsObserver,
                 UserHandle.USER_ALL);
 
@@ -1300,6 +1320,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected void onLockedRemoteInput(ExpandableNotificationRow row, View clickedView) {}
+
     @Override
     public void onExpandClicked(Entry clickedEntry, boolean nowExpanded) {
     }
@@ -1936,6 +1958,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         mShowLockscreenNotifications = show;
     }
 
+    protected void setLockScreenAllowRemoteInput(boolean allowLockscreenRemoteInput) {
+        mAllowLockscreenRemoteInput = allowLockscreenRemoteInput;
+    }
+
     private void updateLockscreenNotificationSetting() {
         final boolean show = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
@@ -1945,7 +1971,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                 null /* admin */, mCurrentUserId);
         final boolean allowedByDpm = (dpmFlags
                 & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
+
+        final boolean remoteInput = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
+                0,
+                mCurrentUserId) != 0;
+
         setShowLockscreenNotifications(show && allowedByDpm);
+        setLockScreenAllowRemoteInput(remoteInput);
     }
 
     protected abstract void setAreThereNotifications();
