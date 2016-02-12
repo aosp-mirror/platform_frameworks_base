@@ -769,7 +769,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mDragState.mUid,
                     dropTargetWin.getOwningPackage(),
                     mDragState.mFlags & DRAG_FLAGS_URI_PERMISSIONS,
-                    UserHandle.getUserId(mDragState.mUid),
+                    mDragState.mSourceUserId,
                     UserHandle.getUserId(dropTargetWin.getOwningUid()));
         }
 
