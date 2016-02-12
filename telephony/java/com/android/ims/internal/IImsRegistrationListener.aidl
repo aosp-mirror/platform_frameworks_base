@@ -18,6 +18,8 @@ package com.android.ims.internal;
 
 import com.android.ims.ImsReasonInfo;
 
+import android.net.Uri;
+
 /**
  * A listener type for receiving notifications about the changes to
  * the IMS connection(registration).
@@ -100,4 +102,9 @@ interface IImsRegistrationListener {
      * @param count The number of waiting voice messages.
      */
     void voiceMessageCountUpdate(int count);
+
+    /**
+     * Notifies the application when the list of URIs associated with IMS client is updated.
+     */
+    void registrationAssociatedUriChanged(in Uri[] uris);
 }
