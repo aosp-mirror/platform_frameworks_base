@@ -99,13 +99,14 @@ public final class MediaBrowser {
     private final Handler mHandler = new Handler();
     private final ArrayMap<String, Subscription> mSubscriptions = new ArrayMap<>();
 
-    private int mState = CONNECT_STATE_DISCONNECTED;
+    private volatile int mState = CONNECT_STATE_DISCONNECTED;
+    private volatile String mRootId;
+    private volatile MediaSession.Token mMediaSessionToken;
+    private volatile Bundle mExtras;
+
     private MediaServiceConnection mServiceConnection;
     private IMediaBrowserService mServiceBinder;
     private IMediaBrowserServiceCallbacks mServiceCallbacks;
-    private String mRootId;
-    private MediaSession.Token mMediaSessionToken;
-    private Bundle mExtras;
 
     /**
      * Creates a media browser for the specified media browse service.
