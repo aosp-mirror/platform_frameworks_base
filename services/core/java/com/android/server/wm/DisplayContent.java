@@ -127,7 +127,7 @@ class DisplayContent {
         isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
         mService = service;
         initializeDisplayBaseInfo();
-        mDividerControllerLocked = new DockedStackDividerController(service.mContext, this);
+        mDividerControllerLocked = new DockedStackDividerController(service, this);
         mDimLayerController = new DimLayerController(this);
     }
 
@@ -606,9 +606,21 @@ class DisplayContent {
         return "Display " + mDisplayId + " info=" + mDisplayInfo + " stacks=" + mStacks;
     }
 
+    /**
+     * @return The docked stack, but only if it is visible, and {@code null} otherwise.
+     */
     TaskStack getDockedStackLocked() {
         final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         return (stack != null && stack.isVisibleLocked()) ? stack : null;
+    }
+
+    /**
+     * Like {@link #getDockedStackLocked}, but also returns the docked stack if it's currently not
+     * visible, as long as it's not hidden because the current user doesn't have any tasks there.
+     */
+    TaskStack getDockedStackVisibleForUserLocked() {
+        final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
+        return (stack != null && stack.isVisibleForUserLocked()) ? stack : null;
     }
 
     /**

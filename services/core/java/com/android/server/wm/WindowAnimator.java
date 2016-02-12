@@ -705,7 +705,8 @@ public class WindowAnimator {
                 }
 
                 orAnimating(mService.getDisplayContentLocked(displayId).animateDimLayers());
-
+                orAnimating(mService.getDisplayContentLocked(displayId).getDockedDividerController()
+                        .animate(mCurrentTime));
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (mService.mAccessibilityController != null
                         && displayId == Display.DEFAULT_DISPLAY) {
