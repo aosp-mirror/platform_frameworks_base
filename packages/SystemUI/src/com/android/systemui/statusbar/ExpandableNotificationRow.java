@@ -527,6 +527,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mGuts.setVisibility(oldGuts.getVisibility());
             addView(mGuts, index);
         }
+        mPrivateLayout.reInflateViews();
+        mPublicLayout.reInflateViews();
     }
 
     public interface ExpansionLogger {
