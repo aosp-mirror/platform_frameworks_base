@@ -24,6 +24,8 @@ class TestResources extends MockResources {
         switch (id) {
             case R.string.root_name:
                 return "%1$s %2$s";
+            case R.string.error_busy_device:
+                return "error_busy_device";
         }
         throw new NotFoundException();
     }

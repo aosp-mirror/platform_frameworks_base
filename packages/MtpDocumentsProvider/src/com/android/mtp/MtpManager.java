@@ -33,6 +33,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.mtp.exceptions.BusyDeviceException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -101,7 +102,8 @@ class MtpManager {
         }
 
         if (!device.open(connection)) {
-            throw new IOException("Failed to open a MTP device.");
+            // We cannot open connection when another application use the device.
+            throw new BusyDeviceException();
         }
 
         // Handle devices that fail to obtain storages just after opening a MTP session.
@@ -134,7 +136,7 @@ class MtpManager {
                 try {
                     roots = getRoots(device.getDeviceId());
                 } catch (IOException exp) {
-                    Log.e(MtpDocumentsProvider.TAG, exp.getMessage());
+                    Log.e(MtpDocumentsProvider.TAG, "Failed to open device", exp);
                     // If we failed to fetch roots for the device, we still returns device model
                     // with an empty set of roots so that the device is shown DocumentsUI as long as
                     // the device is physically connected.
