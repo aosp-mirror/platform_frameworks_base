@@ -557,14 +557,21 @@ class WindowStateAnimator {
         if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             result = performShowLocked();
         }
-        if (mDestroyPreservedSurfaceUponRedraw) {
-            mService.mDestroyPreservedSurface.add(mWin);
-        }
         return result;
     }
 
     void preserveSurfaceLocked() {
         if (mDestroyPreservedSurfaceUponRedraw) {
+            // This could happen when switching the surface mode very fast. For example,
+            // we preserved a surface when dragResizing changed to true. Then before the
+            // preserved surface is removed, dragResizing changed to false again.
+            // In this case, we need to leave the preserved surface alone, and destroy
+            // the actual surface, so that the createSurface call could create a surface
+            // of the proper size. The preserved surface will still be removed when client
+            // finishes drawing to the new surface.
+            mSurfaceDestroyDeferred = false;
+            destroySurfaceLocked();
+            mSurfaceDestroyDeferred = true;
             return;
         }
         if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(mWin, "SET FREEZE LAYER", false);
@@ -810,7 +817,7 @@ class WindowStateAnimator {
                 }
                 // Don't hide wallpaper if we're deferring the surface destroy
                 // because of a surface change.
-                if (!(mSurfaceDestroyDeferred && mDestroyPreservedSurfaceUponRedraw)) {
+                if (!mDestroyPreservedSurfaceUponRedraw) {
                     mWallpaperControllerLocked.hideWallpapers(mWin);
                 }
             } catch (RuntimeException e) {
@@ -1328,6 +1335,9 @@ class WindowStateAnimator {
 
             if (prepared && mLastHidden && mDrawState == HAS_DRAWN) {
                 if (showSurfaceRobustlyLocked()) {
+                    if (mDestroyPreservedSurfaceUponRedraw) {
+                        mService.mDestroyPreservedSurface.add(mWin);
+                    }
                     mAnimator.requestRemovalOfReplacedWindows(w);
                     mLastHidden = false;
                     if (mIsWallpaper) {
