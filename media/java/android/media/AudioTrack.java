@@ -1052,32 +1052,27 @@ public class AudioTrack implements AudioRouting
         }
     }
 
-// TODO Change getBufferCapacityInFrames() reference below to
-// {@link #getBufferCapacityInFrames()} after @hide is removed.
-// TODO Change setBufferSizeInFrames(int) reference below to
-// {@link #setBufferSizeInFrames(int)} after @hide is removed.
+
     /**
-     *  Returns the effective size of the <code>AudioTrack</code> buffer
+     * Returns the effective size of the <code>AudioTrack</code> buffer
      * that the application writes to.
-     *  <p> This will be less than or equal to the result of
-     * getBufferCapacityInFrames().
-     * It will be equal if setBufferSizeInFrames(int) has never been called.
-     *  <p> If the track is subsequently routed to a different output sink, the buffer
-     *  size and capacity may enlarge to accommodate.
-     *  <p> If the <code>AudioTrack</code> encoding indicates compressed data,
-     *  e.g. {@link AudioFormat#ENCODING_AC3}, then the frame count returned is
-     *  the size of the native <code>AudioTrack</code> buffer in bytes.
-     *  <p> See also {@link AudioManager#getProperty(String)} for key
-     *  {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
-     *  @return current size in frames of the <code>AudioTrack</code> buffer.
-     *  @throws IllegalStateException
+     * <p> This will be less than or equal to the result of
+     * {@link #getBufferCapacityInFrames()}.
+     * It will be equal if {@link #setBufferSizeInFrames(int)} has never been called.
+     * <p> If the track is subsequently routed to a different output sink, the buffer
+     * size and capacity may enlarge to accommodate.
+     * <p> If the <code>AudioTrack</code> encoding indicates compressed data,
+     * e.g. {@link AudioFormat#ENCODING_AC3}, then the frame count returned is
+     * the size of the native <code>AudioTrack</code> buffer in bytes.
+     * <p> See also {@link AudioManager#getProperty(String)} for key
+     * {@link AudioManager#PROPERTY_OUTPUT_FRAMES_PER_BUFFER}.
+     * @return current size in frames of the <code>AudioTrack</code> buffer.
+     * @throws IllegalStateException
      */
     public int getBufferSizeInFrames() {
         return native_get_buffer_size_frames();
     }
 
-// TODO Change getBufferCapacityInFrames() reference below to
-// {@link #getBufferCapacityInFrames()} after @hide is removed.
     /**
      * Limits the effective size of the <code>AudioTrack</code> buffer
      * that the application writes to.
@@ -1087,9 +1082,9 @@ public class AudioTrack implements AudioRouting
      * <p>Changing this limit modifies the latency associated with
      * the buffer for this track. A smaller size will give lower latency
      * but there may be more glitches due to buffer underruns.
-     *  <p>The actual size used may not be equal to this requested size.
+     * <p>The actual size used may not be equal to this requested size.
      * It will be limited to a valid range with a maximum of
-     * getBufferCapacityInFrames().
+     * {@link #getBufferCapacityInFrames()}.
      * It may also be adjusted slightly for internal reasons.
      * If bufferSizeInFrames is less than zero then {@link #ERROR_BAD_VALUE}
      * will be returned.
@@ -1097,9 +1092,9 @@ public class AudioTrack implements AudioRouting
      * It is not supported for compressed audio tracks.
      *
      * @param bufferSizeInFrames requested buffer size
-     * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
-     *    {@link #ERROR_INVALID_OPERATION}
-     *  @throws IllegalStateException
+     * @return the actual buffer size in frames or an error code,
+     *    {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
+     * @throws IllegalStateException
      */
     public int setBufferSizeInFrames(int bufferSizeInFrames) {
         if (mDataLoadMode == MODE_STATIC || mState == STATE_UNINITIALIZED) {
