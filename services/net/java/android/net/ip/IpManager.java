@@ -258,12 +258,12 @@ public class IpManager extends StateMachine {
                 return "EVENT_PRE_DHCP_ACTION_COMPLETE";
             case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
                 return "EVENT_NETLINK_LINKPROPERTIES_CHANGED";
-            case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
-                return "DhcpStateMachine.CMD_PRE_DHCP_ACTION";
-            case DhcpStateMachine.CMD_POST_DHCP_ACTION:
-                return "DhcpStateMachine.CMD_POST_DHCP_ACTION";
-            case DhcpStateMachine.CMD_ON_QUIT:
-                return "DhcpStateMachine.CMD_ON_QUIT";
+            case DhcpClient.CMD_PRE_DHCP_ACTION:
+                return "DhcpClient.CMD_PRE_DHCP_ACTION";
+            case DhcpClient.CMD_POST_DHCP_ACTION:
+                return "DhcpClient.CMD_POST_DHCP_ACTION";
+            case DhcpClient.CMD_ON_QUIT:
+                return "DhcpClient.CMD_ON_QUIT";
         }
         return "UNKNOWN:" + Integer.toString(what);
     }
@@ -541,7 +541,7 @@ public class IpManager extends StateMachine {
                     setLinkProperties(assembleLinkProperties());
                     break;
 
-                case DhcpStateMachine.CMD_ON_QUIT:
+                case DhcpClient.CMD_ON_QUIT:
                     // Everything is already stopped.
                     Log.e(mTag, "Unexpected CMD_ON_QUIT (already stopped).");
                     break;
@@ -565,7 +565,7 @@ public class IpManager extends StateMachine {
         @Override
         public boolean processMessage(Message msg) {
             switch (msg.what) {
-                case DhcpStateMachine.CMD_ON_QUIT:
+                case DhcpClient.CMD_ON_QUIT:
                     mDhcpStateMachine = null;
                     transitionTo(mStoppedState);
                     break;
@@ -617,7 +617,7 @@ public class IpManager extends StateMachine {
                 // Start DHCPv4.
                 makeDhcpStateMachine();
                 mDhcpStateMachine.registerForPreDhcpNotification();
-                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
+                mDhcpStateMachine.sendMessage(DhcpClient.CMD_START_DHCP);
             }
         }
 
@@ -627,7 +627,7 @@ public class IpManager extends StateMachine {
             mIpReachabilityMonitor = null;
 
             if (mDhcpStateMachine != null) {
-                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
+                mDhcpStateMachine.sendMessage(DhcpClient.CMD_STOP_DHCP);
                 mDhcpStateMachine.doQuit();
             }
 
@@ -660,8 +660,7 @@ public class IpManager extends StateMachine {
                     // calls completedPreDhcpAction() after provisioning with
                     // a static IP configuration.
                     if (mDhcpStateMachine != null) {
-                        mDhcpStateMachine.sendMessage(
-                                DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
+                        mDhcpStateMachine.sendMessage(DhcpClient.CMD_PRE_DHCP_ACTION_COMPLETE);
                     }
                     break;
 
@@ -678,12 +677,12 @@ public class IpManager extends StateMachine {
                     break;
                 }
 
-                case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
+                case DhcpClient.CMD_PRE_DHCP_ACTION:
                     if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
                     mCallback.onPreDhcpAction();
                     break;
 
-                case DhcpStateMachine.CMD_POST_DHCP_ACTION: {
+                case DhcpClient.CMD_POST_DHCP_ACTION: {
                     // Note that onPostDhcpAction() is likely to be
                     // asynchronous, and thus there is no guarantee that we
                     // will be able to observe any of its effects here.
@@ -692,10 +691,10 @@ public class IpManager extends StateMachine {
 
                     final DhcpResults dhcpResults = (DhcpResults) msg.obj;
                     switch (msg.arg1) {
-                        case DhcpStateMachine.DHCP_SUCCESS:
+                        case DhcpClient.DHCP_SUCCESS:
                             handleIPv4Success(dhcpResults);
                             break;
-                        case DhcpStateMachine.DHCP_FAILURE:
+                        case DhcpClient.DHCP_FAILURE:
                             handleIPv4Failure();
                             break;
                         default:
@@ -704,7 +703,7 @@ public class IpManager extends StateMachine {
                     break;
                 }
 
-                case DhcpStateMachine.CMD_ON_QUIT:
+                case DhcpClient.CMD_ON_QUIT:
                     // DHCPv4 quit early for some reason.
                     Log.e(mTag, "Unexpected CMD_ON_QUIT.");
                     mDhcpStateMachine = null;
