@@ -264,13 +264,16 @@ public class RecentsTaskLoader {
     private int mNumVisibleThumbnailsLoaded;
 
     int mDefaultTaskBarBackgroundColor;
+    int mDefaultTaskViewBackgroundColor;
     BitmapDrawable mDefaultIcon;
     Bitmap mDefaultThumbnail;
 
     public RecentsTaskLoader(Context context) {
         Resources res = context.getResources();
         mDefaultTaskBarBackgroundColor =
-                res.getColor(R.color.recents_task_bar_default_background_color);
+                context.getColor(R.color.recents_task_bar_default_background_color);
+        mDefaultTaskViewBackgroundColor =
+                context.getColor(R.color.recents_task_view_default_background_color);
         mMaxThumbnailCacheSize = res.getInteger(R.integer.config_recents_max_thumbnail_count);
         mMaxIconCacheSize = res.getInteger(R.integer.config_recents_max_icon_count);
         int iconCacheSize = RecentsDebugFlags.Static.DisableBackgroundCache ? 1 :
@@ -556,10 +559,20 @@ public class RecentsTaskLoader {
     }
 
     /**
+     * Returns the task's background color if possible.
+     */
+    int getActivityBackgroundColor(ActivityManager.TaskDescription td) {
+        if (td != null && td.getBackgroundColor() != 0) {
+            return td.getBackgroundColor();
+        }
+        return mDefaultTaskViewBackgroundColor;
+    }
+
+    /**
      * Returns the activity info for the given task key, retrieving one from the system if the
      * task key is expired.
      */
-    private ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
+    ActivityInfo getAndUpdateActivityInfo(Task.TaskKey taskKey) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         ComponentName cn = taskKey.getComponent();
         ActivityInfo activityInfo = mActivityInfoCache.get(cn);
