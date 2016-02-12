@@ -342,6 +342,26 @@ class MtpDatabase {
         }
     }
 
+    String getDeviceDocumentId(int deviceId) throws FileNotFoundException {
+        try (final Cursor cursor = mDatabase.query(
+                TABLE_DOCUMENTS,
+                strings(Document.COLUMN_DOCUMENT_ID),
+                COLUMN_DEVICE_ID + " = ? AND " + COLUMN_DOCUMENT_TYPE + " = ? AND " +
+                COLUMN_ROW_STATE + " != ?",
+                strings(deviceId, DOCUMENT_TYPE_DEVICE, ROW_STATE_DISCONNECTED),
+                null,
+                null,
+                null,
+                "1")) {
+            if (cursor.getCount() > 0) {
+                cursor.moveToNext();
+                return cursor.getString(0);
+            } else {
+                throw new FileNotFoundException("The device ID not found: " + deviceId);
+            }
+        }
+    }
+
     /**
      * Adds new document under the parent.
      * The method does not affect invalidated and pending documents because we know the document is

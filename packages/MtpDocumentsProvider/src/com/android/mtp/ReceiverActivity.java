@@ -17,10 +17,15 @@
 package com.android.mtp;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Intent;
+import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
+import android.util.Log;
+
+import java.io.IOException;
 
 /**
  * Invisible activity to receive intents.
@@ -33,14 +38,21 @@ public class ReceiverActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(getIntent().getAction())) {
-            // TODO: To obtain data URI for the attached device, we need to wait until RootScanner
-            // found the device and add it to database. Set correct root URI, and use ACTION_BROWSE
-            // to launch Documents UI.
-            final Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            intent.setComponent(new ComponentName(
-                    "com.android.documentsui", "com.android.documentsui.LauncherActivity"));
-            this.startActivity(intent);
+            final UsbDevice device = getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+            try {
+                final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
+                provider.openDevice(device.getDeviceId());
+                final String deviceRootId = provider.getDeviceDocumentId(device.getDeviceId());
+                final Uri uri = DocumentsContract.buildRootUri(
+                        MtpDocumentsProvider.AUTHORITY, deviceRootId);
+
+                final Intent intent = new Intent(DocumentsContract.ACTION_BROWSE);
+                intent.setData(uri);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                this.startActivity(intent);
+            } catch (IOException exception) {
+                Log.e(MtpDocumentsProvider.TAG, "Failed to open device", exception);
+            }
         }
         finish();
     }
