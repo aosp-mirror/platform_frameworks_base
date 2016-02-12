@@ -89,13 +89,13 @@ public class NotificationPanelView extends PanelView implements
     private KeyguardAffordanceHelper mAfforanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
-    private QSContainer mQsContainer;
+    protected QSContainer mQsContainer;
     private KeyguardStatusView mKeyguardStatusView;
     private TextView mClockView;
     private View mReserveNotificationSpace;
     private View mQsNavbarScrim;
     private NotificationsQuickSettingsContainer mNotificationContainerParent;
-    private NotificationStackScrollLayout mNotificationStackScroller;
+    protected NotificationStackScrollLayout mNotificationStackScroller;
     private boolean mAnimateNextTopPaddingChange;
 
     private int mTrackingPointer;
@@ -126,9 +126,9 @@ public class NotificationPanelView extends PanelView implements
     private float mInitialTouchY;
     private float mLastTouchX;
     private float mLastTouchY;
-    private float mQsExpansionHeight;
-    private int mQsMinExpansionHeight;
-    private int mQsMaxExpansionHeight;
+    protected float mQsExpansionHeight;
+    protected int mQsMinExpansionHeight;
+    protected int mQsMaxExpansionHeight;
     private int mQsPeekHeight;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
@@ -1072,8 +1072,8 @@ public class NotificationPanelView extends PanelView implements
 
     private void setKeyguardBottomAreaVisibility(int statusBarState,
             boolean goingToFullShade) {
+        mKeyguardBottomArea.animate().cancel();
         if (goingToFullShade) {
-            mKeyguardBottomArea.animate().cancel();
             mKeyguardBottomArea.animate()
                     .alpha(0f)
                     .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
@@ -1083,13 +1083,11 @@ public class NotificationPanelView extends PanelView implements
                     .start();
         } else if (statusBarState == StatusBarState.KEYGUARD
                 || statusBarState == StatusBarState.SHADE_LOCKED) {
-            mKeyguardBottomArea.animate().cancel();
             if (!mDozing) {
                 mKeyguardBottomArea.setVisibility(View.VISIBLE);
             }
             mKeyguardBottomArea.setAlpha(1f);
         } else {
-            mKeyguardBottomArea.animate().cancel();
             mKeyguardBottomArea.setVisibility(View.GONE);
             mKeyguardBottomArea.setAlpha(1f);
         }
@@ -1196,7 +1194,7 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    private void updateQsExpansion() {
+    protected void updateQsExpansion() {
         mQsContainer.setQsExpansion(getQsExpansionFraction(), getHeaderTranslation());
     }
 
@@ -1238,7 +1236,7 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    private void requestScrollerTopPaddingUpdate(boolean animate) {
+    protected void requestScrollerTopPaddingUpdate(boolean animate) {
         mNotificationStackScroller.updateTopPadding(calculateQsTopPadding(),
                 mAnimateNextTopPaddingChange || animate,
                 mKeyguardShowing
@@ -1520,16 +1518,12 @@ public class NotificationPanelView extends PanelView implements
         updateQsExpansion();
     }
 
-    private float getHeaderTranslation() {
+    protected float getHeaderTranslation() {
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
             return 0;
         }
         if (mNotificationStackScroller.getNotGoneChildCount() == 0) {
-            if (mExpandedHeight / HEADER_RUBBERBAND_FACTOR >= mQsMinExpansionHeight) {
-                return 0;
-            } else {
-                return mExpandedHeight / HEADER_RUBBERBAND_FACTOR - mQsMinExpansionHeight;
-            }
+            return Math.min(0, mExpandedHeight / HEADER_RUBBERBAND_FACTOR - mQsMinExpansionHeight);
         }
         float stackTranslation = mNotificationStackScroller.getStackTranslation();
         float translation = stackTranslation / HEADER_RUBBERBAND_FACTOR;
@@ -2191,7 +2185,7 @@ public class NotificationPanelView extends PanelView implements
      *
      * @param x the x-coordinate the touch event
      */
-    private void updateVerticalPanelPosition(float x) {
+    protected void updateVerticalPanelPosition(float x) {
         if (mNotificationStackScroller.getWidth() * 1.75f > getWidth()) {
             resetVerticalPanelPosition();
             return;
@@ -2216,7 +2210,7 @@ public class NotificationPanelView extends PanelView implements
         mQsContainer.setTranslationX(translation);
     }
 
-    private void updateStackHeight(float stackHeight) {
+    protected void updateStackHeight(float stackHeight) {
         mNotificationStackScroller.setStackHeight(stackHeight);
         updateKeyguardBottomAreaAlpha();
     }
@@ -2225,7 +2219,7 @@ public class NotificationPanelView extends PanelView implements
         mBar.panelScrimMinFractionChanged(minFraction);
     }
 
-    public void clearNotificattonEffects() {
+    public void clearNotificationEffects() {
         mStatusBar.clearNotificationEffects();
     }
 
