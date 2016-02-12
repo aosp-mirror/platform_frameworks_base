@@ -201,8 +201,7 @@ public class LauncherAppsService extends SystemService {
             long ident = Binder.clearCallingIdentity();
             try {
                 List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(mainIntent,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                        user.getIdentifier());
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.getIdentifier());
                 return new ParceledListSlice<>(apps);
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -220,7 +219,7 @@ public class LauncherAppsService extends SystemService {
             long ident = Binder.clearCallingIdentity();
             try {
                 ResolveInfo app = mPm.resolveActivityAsUser(intent,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.getIdentifier());
                 return app;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -239,7 +238,7 @@ public class LauncherAppsService extends SystemService {
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 PackageInfo info = pm.getPackageInfo(packageName,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.getIdentifier());
                 return info != null && info.applicationInfo.enabled;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -277,7 +276,7 @@ public class LauncherAppsService extends SystemService {
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 ActivityInfo info = pm.getActivityInfo(component,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.getIdentifier());
                 return info != null;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -303,7 +302,7 @@ public class LauncherAppsService extends SystemService {
             try {
                 IPackageManager pm = AppGlobals.getPackageManager();
                 ActivityInfo info = pm.getActivityInfo(component,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.getIdentifier());
                 if (!info.exported) {
                     throw new SecurityException("Cannot launch non-exported components "
                             + component);
@@ -313,7 +312,7 @@ public class LauncherAppsService extends SystemService {
                 // as calling startActivityAsUser ignores the category and just
                 // resolves based on the component if present.
                 List<ResolveInfo> apps = mPm.queryIntentActivitiesAsUser(launchIntent,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, user.getIdentifier());
+                        PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, user.getIdentifier());
                 final int size = apps.size();
                 for (int i = 0; i < size; ++i) {
                     ActivityInfo activityInfo = apps.get(i).activityInfo;

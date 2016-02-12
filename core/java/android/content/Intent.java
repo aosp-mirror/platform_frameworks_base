@@ -3028,6 +3028,17 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGED_PROFILE_REMOVED";
 
     /**
+     * Broadcast sent to the primary user when the credential-encrypted private storage for
+     * an associated managed profile is unlocked. Carries an extra {@link #EXTRA_USER} that
+     * specifies the UserHandle of the profile that was unlocked. Only applications (for example
+     * Launchers) that need to display merged content across both primary and managed profiles
+     * need to worry about this broadcast. This is only sent to registered receivers,
+     * not manifest receivers.
+     */
+    public static final String ACTION_MANAGED_PROFILE_UNLOCKED =
+            "android.intent.action.MANAGED_PROFILE_UNLOCKED";
+
+    /**
      * Broadcast sent to the primary user when an associated managed profile's availability has
      * changed. This includes when the user toggles the profile's quiet mode. Carries an extra
      * {@link #EXTRA_USER} that specifies the UserHandle of the profile. When quiet mode is changed,

@@ -1046,10 +1046,14 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId) {
+        return resolveIntent(intent, resolvedType, userId, 0);
+    }
+
+    ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags) {
         try {
             return AppGlobals.getPackageManager().resolveIntent(intent, resolvedType,
-                            PackageManager.MATCH_DEFAULT_ONLY
-                            | ActivityManagerService.STOCK_PM_FLAGS, userId);
+                    PackageManager.MATCH_DEFAULT_ONLY | flags
+                    | ActivityManagerService.STOCK_PM_FLAGS, userId);
         } catch (RemoteException e) {
         }
         return null;

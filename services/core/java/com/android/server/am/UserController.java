@@ -297,6 +297,22 @@ final class UserController {
                         null, null, AppOpsManager.OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
                         userId);
 
+                if (getUserInfo(userId).isManagedProfile()) {
+                    UserInfo parent = getUserManager().getProfileParent(userId);
+                    if (parent != null) {
+                        final Intent profileUnlockedIntent = new Intent(
+                                Intent.ACTION_MANAGED_PROFILE_UNLOCKED);
+                        unlockedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
+                        unlockedIntent.addFlags(
+                                Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                                | Intent.FLAG_RECEIVER_FOREGROUND);
+                        mService.broadcastIntentLocked(null, null, profileUnlockedIntent,
+                                null, null, 0, null, null, null, AppOpsManager.OP_NONE,
+                                null, false, false, MY_PID, SYSTEM_UID,
+                                parent.id);
+                    }
+                }
+
                 final Intent bootIntent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                 bootIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
                 bootIntent.addFlags(Intent.FLAG_RECEIVER_NO_ABORT
