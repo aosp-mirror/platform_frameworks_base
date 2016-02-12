@@ -1934,13 +1934,18 @@ public class UserManagerService extends IUserManager.Stub {
         if (user == null) {
             return null;
         }
-        setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user.id);
-        // Change the setting before applying the DISALLOW_SHARE_LOCATION restriction, otherwise
-        // the putIntForUser() will fail.
-        android.provider.Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                android.provider.Settings.Secure.LOCATION_MODE,
-                android.provider.Settings.Secure.LOCATION_MODE_OFF, user.id);
-        setUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, true, user.id);
+        long identity = Binder.clearCallingIdentity();
+        try {
+            setUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS, true, user.id);
+            // Change the setting before applying the DISALLOW_SHARE_LOCATION restriction, otherwise
+            // the putIntForUser() will fail.
+            android.provider.Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                    android.provider.Settings.Secure.LOCATION_MODE,
+                    android.provider.Settings.Secure.LOCATION_MODE_OFF, user.id);
+            setUserRestriction(UserManager.DISALLOW_SHARE_LOCATION, true, user.id);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         return user;
     }
 
