@@ -557,13 +557,9 @@ class MtpDatabase {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            if (oldVersion == 1) {
-                db.execSQL("DROP TABLE " + TABLE_DOCUMENTS);
-                db.execSQL("DROP TABLE " + TABLE_ROOT_EXTRA);
-                onCreate(db);
-                return;
-            }
-            throw new UnsupportedOperationException();
+            db.execSQL("DROP TABLE " + TABLE_DOCUMENTS);
+            db.execSQL("DROP TABLE " + TABLE_ROOT_EXTRA);
+            onCreate(db);
         }
     }
 
@@ -680,7 +676,12 @@ class MtpDatabase {
         if (formatCodeMimeType != null) {
             return formatCodeMimeType;
         }
-        return MediaFile.getMimeTypeForFile(info.getName());
+        final String mediaFileMimeType = MediaFile.getMimeTypeForFile(info.getName());
+        if (mediaFileMimeType != null) {
+            return mediaFileMimeType;
+        }
+        // We don't know the file type.
+        return "application/octet-stream";
     }
 
     static String[] strings(Object... args) {
