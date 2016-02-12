@@ -22959,10 +22959,8 @@ package android.media.tv {
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
     field public static final java.lang.String META_DATA_CONTENT_RATING_SYSTEMS = "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
-    field public static final int RECORDING_ERROR_CONNECTION_FAILED = 1; // 0x1
-    field public static final int RECORDING_ERROR_DISCONNECTED = 2; // 0x2
-    field public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 3; // 0x3
-    field public static final int RECORDING_ERROR_RESOURCE_BUSY = 4; // 0x4
+    field public static final int RECORDING_ERROR_INSUFFICIENT_SPACE = 1; // 0x1
+    field public static final int RECORDING_ERROR_RESOURCE_BUSY = 2; // 0x2
     field public static final int RECORDING_ERROR_UNKNOWN = 0; // 0x0
     field public static final long TIME_SHIFT_INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
     field public static final int TIME_SHIFT_STATUS_AVAILABLE = 3; // 0x3
@@ -23062,6 +23060,8 @@ package android.media.tv {
 
   public static abstract class TvRecordingClient.RecordingCallback {
     ctor public TvRecordingClient.RecordingCallback();
+    method public void onConnectionFailed(java.lang.String);
+    method public void onDisconnected(java.lang.String);
     method public void onError(int);
     method public void onRecordingStopped(android.net.Uri);
     method public void onTuned();
