@@ -26,6 +26,8 @@ class TestResources extends MockResources {
                 return "%1$s %2$s";
             case R.string.error_busy_device:
                 return "error_busy_device";
+            case R.string.error_locked_device:
+                return "error_locked_device";
         }
         throw new NotFoundException();
     }
