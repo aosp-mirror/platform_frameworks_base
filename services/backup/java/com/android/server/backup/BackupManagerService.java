@@ -87,6 +87,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.StringBuilderPrinter;
@@ -142,6 +143,7 @@ import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
@@ -786,8 +788,9 @@ public class BackupManagerService {
             case MSG_OP_COMPLETE:
             {
                 try {
-                    BackupRestoreTask task = (BackupRestoreTask) msg.obj;
-                    task.operationComplete(msg.arg1);
+                    Pair<BackupRestoreTask, Long> taskWithResult =
+                            (Pair<BackupRestoreTask, Long>) msg.obj;
+                    taskWithResult.first.operationComplete(taskWithResult.second);
                 } catch (ClassCastException e) {
                     Slog.e(TAG, "Invalid completion in flight, obj=" + msg.obj);
                 }
@@ -2460,7 +2463,7 @@ public class BackupManagerService {
         void execute();
 
         // An operation that wanted a callback has completed
-        void operationComplete(int result);
+        void operationComplete(long result);
 
         // An operation that wanted a callback has timed out
         void handleTimeout();
@@ -3095,7 +3098,7 @@ public class BackupManagerService {
         }
 
         @Override
-        public void operationComplete(int unusedResult) {
+        public void operationComplete(long unusedResult) {
             // The agent reported back to us!
 
             if (mBackupData == null) {
@@ -4532,7 +4535,7 @@ public class BackupManagerService {
         // a standalone thread.  The  runner owns this half of the pipe, and closes
         // it to indicate EOD to the other end.
         class SinglePackageBackupPreflight implements BackupRestoreTask, FullBackupPreflight {
-            final AtomicInteger mResult = new AtomicInteger();
+            final AtomicLong mResult = new AtomicLong();
             final CountDownLatch mLatch = new CountDownLatch(1);
             final IBackupTransport mTransport;
 
@@ -4554,10 +4557,10 @@ public class BackupManagerService {
 
                     // now wait to get our result back
                     mLatch.await();
-                    int totalSize = mResult.get();
-                    // If preflight timeouted, mResult will contain error code.
+                    long totalSize = mResult.get();
+                    // If preflight timeouted, mResult will contain error code as int.
                     if (totalSize < 0) {
-                        return totalSize;
+                        return (int) totalSize;
                     }
                     if (MORE_DEBUG) {
                         Slog.v(TAG, "Got preflight response; size=" + totalSize);
@@ -4585,7 +4588,7 @@ public class BackupManagerService {
             }
 
             @Override
-            public void operationComplete(int result) {
+            public void operationComplete(long result) {
                 // got the callback, and our preflightFullBackup() method is waiting for the result
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "Preflight op complete, result=" + result);
@@ -8562,7 +8565,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
 
         @Override
-        public void operationComplete(int unusedResult) {
+        public void operationComplete(long unusedResult) {
             if (MORE_DEBUG) {
                 Slog.i(TAG, "operationComplete() during restore: target="
                         + mCurrentPackage.packageName
@@ -9647,9 +9650,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         // The completion callback, if any, is invoked on the handler
         if (op != null && op.callback != null) {
-            Message msg = mBackupHandler.obtainMessage(MSG_OP_COMPLETE, op.callback);
-            // NB: this cannot distinguish between results > 2 gig
-            msg.arg1 = (result > Integer.MAX_VALUE) ? Integer.MAX_VALUE : (int) result;
+            Pair<BackupRestoreTask, Long> callbackAndResult = Pair.create(op.callback, result);
+            Message msg = mBackupHandler.obtainMessage(MSG_OP_COMPLETE, callbackAndResult);
             mBackupHandler.sendMessage(msg);
         }
     }
