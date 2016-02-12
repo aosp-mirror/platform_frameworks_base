@@ -165,15 +165,15 @@ final class UserController {
         void register(ContentResolver resolver) {
             resolver.registerContentObserver(mUserSetupComplete, false, this, UserHandle.USER_ALL);
             synchronized (mService) {
-                updateCurrentUserSetupCompleteLocked();
+                updateUserSetupCompleteLocked(UserHandle.USER_ALL);
             }
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, Uri uri, int userId) {
             if (mUserSetupComplete.equals(uri)) {
                 synchronized (mService) {
-                    updateCurrentUserSetupCompleteLocked();
+                    updateUserSetupCompleteLocked(userId);
                 }
             }
         }
@@ -655,7 +655,7 @@ final class UserController {
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
-                updateCurrentUserSetupCompleteLocked();
+                updateUserSetupCompleteLocked(userId);
 
                 if (foreground) {
                     mCurrentUserId = userId;
@@ -870,11 +870,22 @@ final class UserController {
         mUserSwitchObservers.finishBroadcast();
     }
 
-    void updateCurrentUserSetupCompleteLocked() {
+    void updateUserSetupCompleteLocked(int userId) {
+        int[] users;
+        if (userId != UserHandle.USER_ALL) {
+            users = new int[] {userId};
+        } else {
+            users = new int[mStartedUsers.size()];
+            for (int i = mStartedUsers.size() - 1; i >= 0; i--) {
+                users[i] = mStartedUsers.keyAt(i);
+            }
+        }
         final ContentResolver cr = mService.mContext.getContentResolver();
-        final boolean setupComplete =
-                Settings.Secure.getIntForUser(cr, USER_SETUP_COMPLETE, 0, mCurrentUserId) != 0;
-        mSetupCompletedUsers.put(mCurrentUserId, setupComplete);
+        for (int i = 0; i < users.length; i++) {
+            final boolean setupComplete =
+                    Settings.Secure.getIntForUser(cr, USER_SETUP_COMPLETE, 0, users[i]) != 0;
+            mSetupCompletedUsers.put(users[i], setupComplete);
+        }
     }
 
     boolean isUserSetupCompleteLocked(int userId) {
