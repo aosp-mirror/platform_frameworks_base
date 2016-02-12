@@ -38,7 +38,7 @@ import android.util.Log;
  */
 public class WifiNanManager {
     private static final String TAG = "WifiNanManager";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     private IBinder mBinder;

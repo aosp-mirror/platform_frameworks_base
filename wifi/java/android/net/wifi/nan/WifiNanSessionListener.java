@@ -43,7 +43,7 @@ import android.util.Log;
  */
 public class WifiNanSessionListener {
     private static final String TAG = "WifiNanSessionListener";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /**

@@ -27,7 +27,7 @@ import android.util.Log;
  */
 public class WifiNanSession {
     private static final String TAG = "WifiNanSession";
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /**
