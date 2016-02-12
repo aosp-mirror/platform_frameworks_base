@@ -339,6 +339,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final AppOpsManager mAppOps;
 
     private final MyPackageMonitor mPackageMonitor;
+    private final IPackageManager mIPm;
+
 
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
@@ -369,6 +371,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Context.DEVICE_IDLE_CONTROLLER));
         mTime = checkNotNull(time, "missing TrustedTime");
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mIPm = AppGlobals.getPackageManager();
 
         HandlerThread thread = new HandlerThread(TAG);
         thread.start();
@@ -2335,14 +2338,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // quick check: if this uid doesn't have INTERNET permission, it
                     // doesn't have network access anyway, so it is a waste to mess
                     // with it here.
-                    try {
-                        if (ipm.checkUidPermission(Manifest.permission.INTERNET, uid)
-                                != PackageManager.PERMISSION_GRANTED) {
-                            continue;
-                        }
-                    } catch (RemoteException e) {
+                    if (hasInternetPermissions(uid)) {
+                        uidRules.put(uid, FIREWALL_RULE_DENY);
                     }
-                    uidRules.put(uid, FIREWALL_RULE_DENY);
                 }
             }
         }
@@ -2451,9 +2449,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Useful for the cases where the lack of network access can simplify the rules.
      */
     private boolean hasInternetPermissions(int uid) {
-        final IPackageManager ipm = AppGlobals.getPackageManager();
         try {
-            if (ipm.checkUidPermission(Manifest.permission.INTERNET, uid)
+            if (mIPm.checkUidPermission(Manifest.permission.INTERNET, uid)
                     != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
