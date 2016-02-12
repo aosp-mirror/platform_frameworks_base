@@ -293,14 +293,19 @@ public class TransformState {
         mTransformedView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         mTransformedView.setAlpha(visible ? 1.0f : 0.0f);
         if (visible) {
-            mTransformedView.setTranslationX(0);
-            mTransformedView.setTranslationY(0);
-            mTransformedView.setScaleX(1.0f);
-            mTransformedView.setScaleY(1.0f);
+            resetTransformedView();
         }
     }
 
     public void prepareFadeIn() {
+        resetTransformedView();
+    }
+
+    private void resetTransformedView() {
+        mTransformedView.setTranslationX(0);
+        mTransformedView.setTranslationY(0);
+        mTransformedView.setScaleX(1.0f);
+        mTransformedView.setScaleY(1.0f);
     }
 
     public static TransformState obtain() {

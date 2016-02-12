@@ -248,14 +248,16 @@ public class NotificationContentView extends FrameLayout {
     public void reset(boolean resetActualHeight) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
+            removeView(mContractedChild);
         }
         if (mExpandedChild != null) {
             mExpandedChild.animate().cancel();
+            removeView(mExpandedChild);
         }
         if (mHeadsUpChild != null) {
             mHeadsUpChild.animate().cancel();
+            removeView(mHeadsUpChild);
         }
-        removeAllViews();
         mContractedChild = null;
         mExpandedChild = null;
         mHeadsUpChild = null;
@@ -494,7 +496,8 @@ public class NotificationContentView extends FrameLayout {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
-            if (viewHeight <= mContractedChild.getHeight() || noExpandedChild) {
+            if (noExpandedChild || (viewHeight <= mContractedChild.getHeight()
+                    && (!mIsChildInGroup || !mContainingNotification.isExpanded()))) {
                 return VISIBLE_TYPE_CONTRACTED;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
@@ -569,6 +572,9 @@ public class NotificationContentView extends FrameLayout {
         if (mIsChildInGroup) {
             mSingleLineView = mHybridViewManager.bindFromNotification(
                     mSingleLineView, mStatusBarNotification.getNotification());
+        } else if (mSingleLineView != null) {
+            removeView(mSingleLineView);
+            mSingleLineView = null;
         }
     }
 
@@ -684,5 +690,13 @@ public class NotificationContentView extends FrameLayout {
 
     public void requestSelectLayout(boolean needsAnimation) {
         selectLayout(needsAnimation, false);
+    }
+
+    public void reInflateViews() {
+        if (mIsChildInGroup && mSingleLineView != null) {
+            removeView(mSingleLineView);
+            mSingleLineView = null;
+            updateSingleLineView();
+        }
     }
 }
