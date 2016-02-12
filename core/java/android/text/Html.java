@@ -54,6 +54,9 @@ import android.text.style.UnderlineSpan;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -691,6 +694,22 @@ class HtmlToSpannedConverter implements ContentHandler {
     private static Pattern sBackgroundColorPattern;
     private static Pattern sTextDecorationPattern;
 
+    /**
+     * Name-value mapping of HTML/CSS colors which have different values in {@link Color}.
+     */
+    private static final Map<String, Integer> sColorMap;
+
+    static {
+        sColorMap = new HashMap<>();
+        sColorMap.put("darkgray", 0xFFA9A9A9);
+        sColorMap.put("gray", 0xFF808080);
+        sColorMap.put("lightgray", 0xFFD3D3D3);
+        sColorMap.put("darkgrey", 0xFFA9A9A9);
+        sColorMap.put("grey", 0xFF808080);
+        sColorMap.put("lightgrey", 0xFFD3D3D3);
+        sColorMap.put("green", 0xFF008000);
+    }
+
     private static Pattern getTextAlignPattern() {
         if (sTextAlignPattern == null) {
             sTextAlignPattern = Pattern.compile("(?:\\s+|\\A)text-align\\s*:\\s*(\\S*)\\b");
@@ -948,7 +967,7 @@ class HtmlToSpannedConverter implements ContentHandler {
         final int len = text.length();
         if (margin > 0) {
             appendNewlines(text, margin);
-            text.setSpan(new Newline(margin), len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+            start(text, new Newline(margin));
         }
 
         String style = attributes.getValue("", "style");
@@ -957,14 +976,11 @@ class HtmlToSpannedConverter implements ContentHandler {
             if (m.find()) {
                 String alignment = m.group(1);
                 if (alignment.equalsIgnoreCase("start")) {
-                    text.setSpan(new Alignment(Layout.Alignment.ALIGN_NORMAL),
-                            len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                    start(text, new Alignment(Layout.Alignment.ALIGN_NORMAL));
                 } else if (alignment.equalsIgnoreCase("center")) {
-                    text.setSpan(new Alignment(Layout.Alignment.ALIGN_CENTER),
-                            len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                    start(text, new Alignment(Layout.Alignment.ALIGN_CENTER));
                 } else if (alignment.equalsIgnoreCase("end")) {
-                    text.setSpan(new Alignment(Layout.Alignment.ALIGN_OPPOSITE),
-                            len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                    start(text, new Alignment(Layout.Alignment.ALIGN_OPPOSITE));
                 }
             }
         }
@@ -1053,7 +1069,7 @@ class HtmlToSpannedConverter implements ContentHandler {
 
     private static void start(Editable text, Object mark) {
         int len = text.length();
-        text.setSpan(mark, len, len, Spannable.SPAN_MARK_MARK);
+        text.setSpan(mark, len, len, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
     }
 
     private static void end(Editable text, Class kind, Object repl) {
@@ -1064,25 +1080,22 @@ class HtmlToSpannedConverter implements ContentHandler {
         }
     }
 
-    private static void startCssStyle(Editable text, Attributes attributes) {
+    private void startCssStyle(Editable text, Attributes attributes) {
         String style = attributes.getValue("", "style");
         if (style != null) {
-            final int len = text.length();
             Matcher m = getForegroundColorPattern().matcher(style);
             if (m.find()) {
-                int c = Color.getHtmlColor(m.group(1));
+                int c = getHtmlColor(m.group(1));
                 if (c != -1) {
-                    text.setSpan(new Foreground(c | 0xFF000000), len, len,
-                            Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    start(text, new Foreground(c | 0xFF000000));
                 }
             }
 
             m = getBackgroundColorPattern().matcher(style);
             if (m.find()) {
-                int c = Color.getHtmlColor(m.group(1));
+                int c = getHtmlColor(m.group(1));
                 if (c != -1) {
-                    text.setSpan(new Background(c | 0xFF000000), len, len,
-                            Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    start(text, new Background(c | 0xFF000000));
                 }
             }
 
@@ -1090,7 +1103,7 @@ class HtmlToSpannedConverter implements ContentHandler {
             if (m.find()) {
                 String textDecoration = m.group(1);
                 if (textDecoration.equalsIgnoreCase("line-through")) {
-                    text.setSpan(new Strikethrough(), len, len, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    start(text, new Strikethrough());
                 }
             }
         }
@@ -1134,64 +1147,58 @@ class HtmlToSpannedConverter implements ContentHandler {
                      Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
-    private static void startFont(Editable text, Attributes attributes) {
+    private void startFont(Editable text, Attributes attributes) {
         String color = attributes.getValue("", "color");
         String face = attributes.getValue("", "face");
 
-        int len = text.length();
-        text.setSpan(new Font(color, face), len, len, Spannable.SPAN_MARK_MARK);
+        if (!TextUtils.isEmpty(color)) {
+            int c = getHtmlColor(color);
+            if (c != -1) {
+                start(text, new Foreground(c | 0xFF000000));
+            }
+        }
+
+        if (!TextUtils.isEmpty(face)) {
+            start(text, new Font(face));
+        }
     }
 
     private static void endFont(Editable text) {
-        int len = text.length();
-        Font f = getLast(text, Font.class);
-        int where = text.getSpanStart(f);
-        text.removeSpan(f);
+        Font font = getLast(text, Font.class);
+        if (font != null) {
+            setSpanFromMark(text, font, new TypefaceSpan(font.mFace));
+        }
 
-        if (where != len) {
-            if (!TextUtils.isEmpty(f.mColor)) {
-                if (f.mColor.startsWith("@")) {
-                    Resources res = Resources.getSystem();
-                    String name = f.mColor.substring(1);
-                    int colorRes = res.getIdentifier(name, "color", "android");
-                    if (colorRes != 0) {
-                        ColorStateList colors = res.getColorStateList(colorRes, null);
-                        text.setSpan(new TextAppearanceSpan(null, 0, 0, colors, null),
-                                where, len,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                } else {
-                    int c = Color.getHtmlColor(f.mColor);
-                    if (c != -1) {
-                        text.setSpan(new ForegroundColorSpan(c | 0xFF000000),
-                                where, len,
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-                }
-            }
-
-            if (f.mFace != null) {
-                text.setSpan(new TypefaceSpan(f.mFace), where, len,
-                             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
+        Foreground foreground = getLast(text, Foreground.class);
+        if (foreground != null) {
+            setSpanFromMark(text, foreground,
+                    new ForegroundColorSpan(foreground.mForegroundColor));
         }
     }
 
     private static void startA(Editable text, Attributes attributes) {
         String href = attributes.getValue("", "href");
-
-        int len = text.length();
-        text.setSpan(new Href(href), len, len, Spannable.SPAN_MARK_MARK);
+        start(text, new Href(href));
     }
 
     private static void endA(Editable text) {
-        int len = text.length();
         Href h = getLast(text, Href.class);
         if (h != null) {
             if (h.mHref != null) {
                 setSpanFromMark(text, h, new URLSpan((h.mHref)));
             }
         }
+    }
+
+    private int getHtmlColor(String color) {
+        if ((mFlags & Html.FROM_HTML_OPTION_USE_CSS_COLORS)
+                == Html.FROM_HTML_OPTION_USE_CSS_COLORS) {
+            Integer i = sColorMap.get(color.toLowerCase(Locale.US));
+            if (i != null) {
+                return i;
+            }
+        }
+        return Color.getHtmlColor(color);
     }
 
     public void setDocumentLocator(Locator locator) {
@@ -1278,11 +1285,9 @@ class HtmlToSpannedConverter implements ContentHandler {
     private static class Bullet { }
 
     private static class Font {
-        public String mColor;
         public String mFace;
 
-        public Font(String color, String face) {
-            mColor = color;
+        public Font(String face) {
             mFace = face;
         }
     }
