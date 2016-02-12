@@ -129,6 +129,7 @@ public class ChooserActivity extends ResolverActivity {
                     if (mServiceConnections.isEmpty()) {
                         mChooserHandler.removeMessages(CHOOSER_TARGET_SERVICE_WATCHDOG_TIMEOUT);
                         sendVoiceChoicesIfNeeded();
+                        mChooserListAdapter.setShowServiceTargets(true);
                     }
                     break;
 
@@ -138,6 +139,7 @@ public class ChooserActivity extends ResolverActivity {
                     }
                     unbindRemainingServices();
                     sendVoiceChoicesIfNeeded();
+                    mChooserListAdapter.setShowServiceTargets(true);
                     break;
 
                 default:
@@ -766,6 +768,7 @@ public class ChooserActivity extends ResolverActivity {
 
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
+        private boolean mShowServiceTargets;
 
         private float mLateFee = 1.f;
 
@@ -866,6 +869,9 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         public int getServiceTargetCount() {
+            if (!mShowServiceTargets) {
+                return 0;
+            }
             return Math.min(mServiceTargets.size(), MAX_SERVICE_TARGETS);
         }
 
@@ -952,6 +958,14 @@ public class ChooserActivity extends ResolverActivity {
 
             mLateFee *= 0.95f;
 
+            notifyDataSetChanged();
+        }
+
+        /**
+         * Set to true to reveal all service targets at once.
+         */
+        public void setShowServiceTargets(boolean show) {
+            mShowServiceTargets = show;
             notifyDataSetChanged();
         }
 
