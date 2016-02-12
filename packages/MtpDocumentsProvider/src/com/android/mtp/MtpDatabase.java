@@ -37,6 +37,7 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
 import java.util.Objects;
@@ -244,15 +245,16 @@ class MtpDatabase {
     }
 
     /**
-     * Returns identifier of single storage if given document points device and it has only one
-     * storage. Otherwise null.
+     * Returns document IDs of storages under the given device document.
      *
-     * @param documentId Document ID that may point a device.
-     * @return Identifier for single storage or null.
+     * @param documentId Document ID that points a device.
+     * @return Storage document IDs.
      * @throws FileNotFoundException The given document ID is not registered in database.
      */
-    @Nullable Identifier getSingleStorageIdentifier(String documentId)
+    String[] getStorageDocumentIds(String documentId)
             throws FileNotFoundException {
+        Preconditions.checkArgument(createIdentifier(documentId).mDocumentType ==
+                DOCUMENT_TYPE_DEVICE);
         // Check if the parent document is device that has single storage.
         try (final Cursor cursor = mDatabase.query(
                 TABLE_DOCUMENTS,
@@ -267,12 +269,11 @@ class MtpDatabase {
                 null,
                 null,
                 null)) {
-            if (cursor.getCount() == 1) {
-                cursor.moveToNext();
-                return createIdentifier(cursor.getString(0));
-            } else {
-                return null;
+            final String[] ids = new String[cursor.getCount()];
+            for (int i = 0; cursor.moveToNext(); i++) {
+                ids[i] = cursor.getString(0);
             }
+            return ids;
         }
     }
 

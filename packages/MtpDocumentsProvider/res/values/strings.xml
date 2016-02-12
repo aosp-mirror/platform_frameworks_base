@@ -27,4 +27,6 @@
     <string name="accessing_notification_description">Don\'t disconnect the device</string>
     <!-- Error message shown in Files app when the connected MTP device is busy. [CHAR LIMIT=150]-->
     <string name="error_busy_device">The other device is busy. You can\'t transfer files until it\'s available.</string>
+    <!-- Error message shown in Files app when the connected MTP device may be locked. [CHAR LIMIT=150]-->
+    <string name="error_locked_device">No files found. The other device may be locked. If so, unlock it and try again.</string>
 </resources>
