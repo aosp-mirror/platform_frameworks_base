@@ -340,6 +340,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
+    protected boolean handleSlideBack() {
+        if (mSettingsIconRow != null && mSettingsIconRow.isVisible()) {
+            animateTranslateNotification(0 /* targetLeft */);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected boolean shouldHideBackground() {
         return super.shouldHideBackground() || mShowNoBackground;
     }
