@@ -778,7 +778,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private boolean mShouldIgnoreInvalidAnim;
         // TODO: Consider using NativeAllocationRegistery to track native allocation
         private final VirtualRefBasePtr mSetRefBasePtr;
-        private WeakReference<RenderNode> mTarget = null;
         private WeakReference<RenderNode> mLastSeenTarget = null;
         private int mLastListenerId = 0;
         private int mPendingAnimationAction = NONE;
@@ -1048,16 +1047,13 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             }
         }
 
-        private boolean setTarget(RenderNode node) {
-            node.addAnimator(this);
-            mTarget = new WeakReference<RenderNode>(node);
-            return true;
-        }
-
         private boolean useLastSeenTarget() {
-            if (mLastSeenTarget != null && mLastSeenTarget.get() != null) {
-                setTarget(mLastSeenTarget.get());
-                return true;
+            if (mLastSeenTarget != null) {
+                final RenderNode target = mLastSeenTarget.get();
+                if (target != null && target.isAttached()) {
+                    target.addAnimator(this);
+                    return true;
+                }
             }
             return false;
         }
@@ -1155,7 +1151,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             if (mListener != null) {
                 mListener.onAnimationEnd(null);
             }
-            mTarget = null;
         }
 
         // onFinished: should be called from native
