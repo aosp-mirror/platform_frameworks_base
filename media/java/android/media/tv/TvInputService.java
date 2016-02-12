@@ -1584,6 +1584,10 @@ public abstract class TvInputService extends Service {
          * new data entry in the {@link TvContract.RecordedPrograms} table that describes the newly
          * recorded program.
          *
+         * <p>The recording session must call this method in response to {@link #onStopRecording()}.
+         * The session may call it even before receiving a call to {@link #onStopRecording()} if a
+         * partially recorded program is available when there is an error.
+         *
          * @param recordedProgramUri The URI of the newly recorded program.
          */
         public void notifyRecordingStopped(final Uri recordedProgramUri) {
@@ -1604,8 +1608,14 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Informs the application that there is an error. It may be called at any time after this
-         * recording session is created until {@link #onRelease()} is called.
+         * Informs the application that there is an error and this recording session is no longer
+         * able to start or continue recording. It may be called at any time after the recording
+         * session is created until {@link #onRelease()} is called.
+         *
+         * <p>The application may release the current session upon receiving the error code through
+         * {@link TvRecordingClient.RecordingCallback#onError(int)}. The session may call
+         * {@link #notifyRecordingStopped(Uri)} if a partially recorded but still playable program
+         * is available, before calling this method.
          *
          * @param error The error code. Should be one of the followings.
          * <ul>
