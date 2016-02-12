@@ -51495,7 +51495,6 @@ package java.lang.reflect {
     method public static int getLength(java.lang.Object);
     method public static long getLong(java.lang.Object, int) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
     method public static short getShort(java.lang.Object, int) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
-    method public static java.lang.Object newArray(java.lang.Class<?>, int) throws java.lang.NegativeArraySizeException;
     method public static java.lang.Object newInstance(java.lang.Class<?>, int) throws java.lang.NegativeArraySizeException;
     method public static java.lang.Object newInstance(java.lang.Class<?>, int...) throws java.lang.IllegalArgumentException, java.lang.NegativeArraySizeException;
     method public static void set(java.lang.Object, int, java.lang.Object) throws java.lang.ArrayIndexOutOfBoundsException, java.lang.IllegalArgumentException;
@@ -56685,13 +56684,11 @@ package java.text {
     method public static final java.text.DecimalFormatSymbols getInstance(java.util.Locale);
     method public java.lang.String getInternationalCurrencySymbol();
     method public char getMinusSign();
-    method public java.lang.String getMinusSignString();
     method public char getMonetaryDecimalSeparator();
     method public java.lang.String getNaN();
     method public char getPatternSeparator();
     method public char getPerMill();
     method public char getPercent();
-    method public java.lang.String getPercentString();
     method public char getZeroDigit();
     method public void setCurrency(java.util.Currency);
     method public void setCurrencySymbol(java.lang.String);
