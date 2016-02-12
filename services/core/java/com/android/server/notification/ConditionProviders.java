@@ -234,9 +234,13 @@ public class ConditionProviders extends ManagedServices {
                 final ConditionRecord r = getRecordLocked(c.id, info.component, true /*create*/);
                 r.info = info;
                 r.condition = c;
-                if (mCallback != null) {
-                    mCallback.onConditionChanged(c.id, c);
-                }
+            }
+        }
+        final int N = conditions.length;
+        for (int i = 0; i < N; i++) {
+            final Condition c = conditions[i];
+            if (mCallback != null) {
+                mCallback.onConditionChanged(c.id, c);
             }
         }
     }
