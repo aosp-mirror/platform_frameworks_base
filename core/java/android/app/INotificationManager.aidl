@@ -56,7 +56,7 @@ interface INotificationManager
     void setImportance(String pkg, int uid, in Notification.Topic topic, int importance);
     int getImportance(String pkg, int uid, in Notification.Topic topic);
     int getTopicImportance(String pkg, String topicId);
-    boolean doesAppUseTopics(String pkg, int uid);
+    boolean doesUserUseTopics(String pkg, int uid);
     boolean hasBannedTopics(String pkg, int uid);
 
     // TODO: Remove this when callers have been migrated to the equivalent
