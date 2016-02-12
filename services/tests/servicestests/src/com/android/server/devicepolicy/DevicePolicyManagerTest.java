@@ -43,7 +43,6 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +89,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(mContext.packageManager.hasSystemFeature(eq(PackageManager.FEATURE_DEVICE_ADMIN)))
                 .thenReturn(true);
+
+        // By default, pretend all users are running and unlocked.
+        when(mContext.userManager.isUserUnlocked(anyInt())).thenReturn(true);
 
         initializeDpms();
 
@@ -409,6 +411,45 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             fail("Didn't throw SecurityException");
         } catch (SecurityException expected) {
         }
+    }
+
+    /**
+     * {@link DevicePolicyManager#removeActiveAdmin} should fail with the user is not unlocked
+     * (because we can't send the remove broadcast).
+     */
+    public void testRemoveActiveAdmin_userNotRunningOrLocked() {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+
+        // Add admin.
+
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+
+        assertTrue(dpm.isAdminActive(admin1));
+
+        assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+
+        // 1. User not unlocked.
+        when(mContext.userManager.isUserUnlocked(eq(DpmMockContext.CALLER_USER_HANDLE)))
+                .thenReturn(false);
+        try {
+            dpm.removeActiveAdmin(admin1);
+            fail("Didn't throw IllegalStateException");
+        } catch (IllegalStateException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "User must be running and unlocked", expected.getMessage());
+        }
+
+        assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
+
+        // 2. User unlocked.
+        when(mContext.userManager.isUserUnlocked(eq(DpmMockContext.CALLER_USER_HANDLE)))
+                .thenReturn(true);
+
+        dpm.removeActiveAdmin(admin1);
+
+        assertTrue(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
     }
 
     /**
@@ -779,6 +820,18 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         doReturn(DpmMockContext.CALLER_SYSTEM_USER_UID).when(mContext.packageManager).getPackageUidAsUser(
                 eq(admin1.getPackageName()),
                 anyInt());
+
+        // But first pretend the user is locked.  Then it should fail.
+        when(mContext.userManager.isUserUnlocked(anyInt())).thenReturn(false);
+        try {
+            dpm.clearDeviceOwnerApp(admin1.getPackageName());
+            fail("Didn't throw IllegalStateException");
+        } catch (IllegalStateException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "User must be running and unlocked", expected.getMessage());
+        }
+
+        when(mContext.userManager.isUserUnlocked(anyInt())).thenReturn(true);
         reset(mContext.userManagerInternal);
         dpm.clearDeviceOwnerApp(admin1.getPackageName());
 
@@ -866,7 +919,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.isProfileOwnerApp(admin1.getPackageName()));
         assertFalse(dpm.isRemovingAdmin(admin1, DpmMockContext.CALLER_USER_HANDLE));
 
-        // Clear
+        // First try when the user is locked, which should fail.
+        when(mContext.userManager.isUserUnlocked(anyInt()))
+                .thenReturn(false);
+        try {
+            dpm.clearProfileOwner(admin1);
+            fail("Didn't throw IllegalStateException");
+        } catch (IllegalStateException expected) {
+            MoreAsserts.assertContainsRegex(
+                    "User must be running and unlocked", expected.getMessage());
+        }
+        // Clear, really.
+        when(mContext.userManager.isUserUnlocked(anyInt()))
+                .thenReturn(true);
         dpm.clearProfileOwner(admin1);
 
         // Check

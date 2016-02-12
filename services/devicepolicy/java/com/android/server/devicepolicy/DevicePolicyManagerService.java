@@ -2813,6 +2813,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforceFullCrossUsersPermission(userHandle);
+        enforceUserUnlocked(userHandle);
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
             if (admin == null) {
@@ -5524,6 +5525,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException(
                         "clearDeviceOwner can only be called by the device owner");
             }
+            enforceUserUnlocked(deviceOwnerUserId);
 
             final ActiveAdmin admin = getDeviceOwnerAdminLocked();
             if (admin != null) {
@@ -5578,6 +5580,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final UserHandle callingUser = mInjector.binderGetCallingUserHandle();
         final int userId = callingUser.getIdentifier();
         enforceNotManagedProfile(userId, "clear profile owner");
+        enforceUserUnlocked(userId);
         // Check if this is the profile owner who is calling
         final ActiveAdmin admin =
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -5951,6 +5954,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         + "already set-up");
             }
         }
+    }
+
+    private void enforceUserUnlocked(int userId) {
+        Preconditions.checkState(mUserManager.isUserUnlocked(userId),
+                "User must be running and unlocked");
     }
 
     private void enforceManageUsers() {
@@ -8516,6 +8524,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkArgument(!TextUtils.isEmpty(packageName));
 
         final int userId = mInjector.userHandleGetCallingUserId();
+
+        enforceUserUnlocked(userId);
 
         final ComponentName profileOwner = getProfileOwner(userId);
         if (profileOwner != null && packageName.equals(profileOwner.getPackageName())) {
