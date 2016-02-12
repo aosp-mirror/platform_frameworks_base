@@ -288,8 +288,10 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, final String path,
+    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily,
+            final String path, final int index, final List<FontListParser.Axis> axes,
             final int weight, final boolean isItalic) {
+        // 'index' and 'axes' are not supported by java.awt.Font
         final FontFamily_Delegate delegate = getDelegate(nativeFamily);
         if (delegate != null) {
             if (sFontLocation == null) {
