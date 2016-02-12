@@ -1065,9 +1065,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return resolveActivity(intent, rInfo, startFlags, profilerInfo);
     }
 
-    final boolean realStartActivityLocked(ActivityRecord r,
-            ProcessRecord app, boolean andResume, boolean checkConfig)
-            throws RemoteException {
+    final boolean realStartActivityLocked(ActivityRecord r, ProcessRecord app,
+            boolean andResume, boolean checkConfig) throws RemoteException {
+
+        if (!allPausedActivitiesComplete()) {
+            // While there are activities pausing we skipping starting any new activities until
+            // pauses are complete. NOTE: that we also do this for activities that are starting in
+            // the paused state because they will first be resumed then paused on the client side.
+            if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG_PAUSE,
+                    "realStartActivityLocked: Skipping start of r=" + r
+                    + " some activities pausing...");
+            return false;
+        }
 
         if (andResume) {
             r.startFreezingScreenLocked(app, 0);
@@ -2263,7 +2272,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         boolean kept = true;
         try {
             final ActivityStack stack = moveTaskToStackUncheckedLocked(
-                    task, stackId, toTop, forceFocus, "moveTaskToStack:" + reason);
+                    task, stackId, toTop, forceFocus, reason + " moveTaskToStack");
             stackId = stack.mStackId;
 
             if (!animate) {
