@@ -518,12 +518,7 @@ public class TaskStackLayoutAlgorithm {
      * Returns the default focus state.
      */
     public float getDefaultFocusState() {
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        if (launchState.launchedWithAltTab || debugFlags.isInitialStatePaging()) {
-            return STATE_FOCUSED;
-        }
-        return STATE_UNFOCUSED;
+        return STATE_FOCUSED;
     }
 
     /**

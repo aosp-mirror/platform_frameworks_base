@@ -52,11 +52,9 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         public static final int MockTaskGroupsTaskCount = 12;
     }
 
-    private static final String KEY_FAST_TOGGLE = "overview_fast_toggle_via_button";
-    private static final String KEY_INITIAL_STATE_PAGING = "overview_initial_state_paging";
+    private static final String KEY_DISABLE_FAST_TOGGLE = "overview_disable_fast_toggle_via_button";
 
-    private boolean mFastToggleRecents;
-    private boolean mInitialStatePaging;
+    private boolean mDisableFastToggleRecents;
 
     /**
      * We read the prefs once when we start the activity, then update them as the tuner changes
@@ -65,7 +63,7 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public RecentsDebugFlags(Context context) {
         // Register all our flags, this will also call onTuningChanged() for each key, which will
         // initialize the current state of each flag
-        TunerService.get(context).addTunable(this, KEY_FAST_TOGGLE, KEY_INITIAL_STATE_PAGING);
+        TunerService.get(context).addTunable(this, KEY_DISABLE_FAST_TOGGLE);
     }
 
     /**
@@ -74,32 +72,21 @@ public class RecentsDebugFlags implements TunerService.Tunable {
     public boolean isFastToggleRecentsEnabled() {
         // These checks EnableFastToggleTimeoutOverride
         SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.hasFreeformWorkspaceSupport() || ssp.hasDockedTask() ||
-                ssp.isTouchExplorationEnabled()) {
+        if (mDisableFastToggleRecents || ssp.hasFreeformWorkspaceSupport() || ssp.hasDockedTask()
+                || ssp.isTouchExplorationEnabled()) {
             return false;
         }
         if (Static.EnableFastToggleTimeoutOverride) {
             return true;
         }
-        return mFastToggleRecents;
-    }
-
-    /**
-     * @return whether the initial stack state is paging.
-     */
-    public boolean isInitialStatePaging() {
-        return mInitialStatePaging;
+        return true;
     }
 
     @Override
     public void onTuningChanged(String key, String newValue) {
         switch (key) {
-            case KEY_FAST_TOGGLE:
-                mFastToggleRecents = (newValue != null) &&
-                        (Integer.parseInt(newValue) != 0);
-                break;
-            case KEY_INITIAL_STATE_PAGING:
-                mInitialStatePaging = (newValue != null) &&
+            case KEY_DISABLE_FAST_TOGGLE:
+                mDisableFastToggleRecents = (newValue != null) &&
                         (Integer.parseInt(newValue) != 0);
                 break;
         }
