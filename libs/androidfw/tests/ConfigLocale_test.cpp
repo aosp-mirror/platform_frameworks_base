@@ -371,6 +371,19 @@ TEST(ConfigLocaleTest, match) {
     EXPECT_TRUE(supported.match(requested));
 }
 
+TEST(ConfigLocaleTest, match_emptyScript) {
+    ResTable_config supported, requested;
+
+    fillIn("fr", "FR", NULL, NULL, &supported);
+    fillIn("fr", "CA", NULL, NULL, &requested);
+
+    // emulate packages built with older AAPT
+    memset(supported.localeScript, '\0', 4);
+    supported.localeScriptWasProvided = false;
+
+    EXPECT_TRUE(supported.match(requested));
+}
+
 TEST(ConfigLocaleTest, isLocaleBetterThan_basics) {
     ResTable_config config1, config2, request;
 
