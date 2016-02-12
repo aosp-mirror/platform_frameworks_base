@@ -26,6 +26,7 @@
 #include "GraphicsJNI.h"
 #include <ScopedPrimitiveArray.h>
 #include <ScopedUtfChars.h>
+#include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/AssetManager.h>
 #include "Utils.h"
@@ -82,9 +83,32 @@ static struct {
     jfieldID mStyleValue;
 } gAxisClassInfo;
 
+static void release_global_ref(const void* /*data*/, void* context) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    bool needToAttach = (env == NULL);
+    if (needToAttach) {
+        JavaVMAttachArgs args;
+        args.version = JNI_VERSION_1_4;
+        args.name = "release_font_data";
+        args.group = NULL;
+        jint result = AndroidRuntime::getJavaVM()->AttachCurrentThread(&env, &args);
+        if (result != JNI_OK) {
+            ALOGE("failed to attach to thread to release global ref.");
+            return;
+        }
+    }
+
+    jobject obj = reinterpret_cast<jobject>(context);
+    env->DeleteGlobalRef(obj);
+
+    if (needToAttach) {
+       AndroidRuntime::getJavaVM()->DetachCurrentThread();
+    }
+}
+
 static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong familyPtr,
-        jstring path, jint ttcIndex, jobject listOfAxis, jint weight, jboolean isItalic) {
-    NPE_CHECK_RETURN_ZERO(env, path);
+        jobject font, jint ttcIndex, jobject listOfAxis, jint weight, jboolean isItalic) {
+    NPE_CHECK_RETURN_ZERO(env, font);
 
     // Declare axis native type.
     std::unique_ptr<SkFontMgr::FontParameters::Axis[]> skiaAxes;
@@ -109,19 +133,29 @@ static jboolean FontFamily_addFontWeightStyle(JNIEnv* env, jobject clazz, jlong 
         }
     }
 
-    ScopedUtfChars str(env, path);
-    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
-    std::unique_ptr<SkStreamAsset> fontData(SkStream::NewFromFile(str.c_str()));
-    if (!fontData) {
-        ALOGE("addFont failed to open %s", str.c_str());
+    void* fontPtr = env->GetDirectBufferAddress(font);
+    if (fontPtr == NULL) {
+        ALOGE("addFont failed to create font, buffer invalid");
         return false;
     }
+    jlong fontSize = env->GetDirectBufferCapacity(font);
+    if (fontSize < 0) {
+        ALOGE("addFont failed to create font, buffer size invalid");
+        return false;
+    }
+    jobject fontRef = MakeGlobalRefOrDie(env, font);
+    SkAutoTUnref<SkData> data(SkData::NewWithProc(fontPtr, fontSize,
+            release_global_ref, reinterpret_cast<void*>(fontRef)));
+    std::unique_ptr<SkStreamAsset> fontData(new SkMemoryStream(data));
+
     SkFontMgr::FontParameters params;
     params.setCollectionIndex(ttcIndex);
     params.setAxes(skiaAxes.get(), skiaAxesLength);
+
+    SkAutoTUnref<SkFontMgr> fm(SkFontMgr::RefDefault());
     SkTypeface* face = fm->createFromStream(fontData.release(), params);
     if (face == NULL) {
-        ALOGE("addFont failed to create font %s#%d", str.c_str(), ttcIndex);
+        ALOGE("addFont failed to create font, invalid request");
         return false;
     }
     FontFamily* fontFamily = reinterpret_cast<FontFamily*>(familyPtr);
@@ -175,7 +209,7 @@ static const JNINativeMethod gFontFamilyMethods[] = {
     { "nCreateFamily",         "(Ljava/lang/String;I)J", (void*)FontFamily_create },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
     { "nAddFont",              "(JLjava/lang/String;I)Z", (void*)FontFamily_addFont },
-    { "nAddFontWeightStyle",   "(JLjava/lang/String;ILjava/util/List;IZ)Z",
+    { "nAddFontWeightStyle",   "(JLjava/nio/ByteBuffer;ILjava/util/List;IZ)Z",
             (void*)FontFamily_addFontWeightStyle },
     { "nAddFontFromAsset",     "(JLandroid/content/res/AssetManager;Ljava/lang/String;)Z",
             (void*)FontFamily_addFontFromAsset },

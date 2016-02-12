@@ -27,6 +27,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -258,11 +260,26 @@ public class Typeface {
         mStyle = nativeGetStyle(ni);
     }
 
-    private static FontFamily makeFamilyFromParsed(FontListParser.Family family) {
+    private static FontFamily makeFamilyFromParsed(FontListParser.Family family,
+            Map<String, ByteBuffer> bufferForPath) {
         FontFamily fontFamily = new FontFamily(family.lang, family.variant);
         for (FontListParser.Font font : family.fonts) {
-            fontFamily.addFontWeightStyle(font.fontName, font.ttcIndex, font.axes,
-                    font.weight, font.isItalic);
+            ByteBuffer fontBuffer = bufferForPath.get(font.fontName);
+            if (fontBuffer == null) {
+                try (FileInputStream file = new FileInputStream(font.fontName)) {
+                    FileChannel fileChannel = file.getChannel();
+                    long fontSize = fileChannel.size();
+                    fontBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fontSize);
+                    bufferForPath.put(font.fontName, fontBuffer);
+                } catch (IOException e) {
+                    Log.e(TAG, "Error mapping font file " + font.fontName);
+                    continue;
+                }
+            }
+            if (!fontFamily.addFontWeightStyle(fontBuffer, font.ttcIndex, font.axes,
+                    font.weight, font.isItalic)) {
+                Log.e(TAG, "Error creating font " + font.fontName + "#" + font.ttcIndex);
+            }
         }
         return fontFamily;
     }
@@ -280,13 +297,15 @@ public class Typeface {
             FileInputStream fontsIn = new FileInputStream(configFilename);
             FontListParser.Config fontConfig = FontListParser.parse(fontsIn);
 
+            Map<String, ByteBuffer> bufferForPath = new HashMap<String, ByteBuffer>();
+
             List<FontFamily> familyList = new ArrayList<FontFamily>();
             // Note that the default typeface is always present in the fallback list;
             // this is an enhancement from pre-Minikin behavior.
             for (int i = 0; i < fontConfig.families.size(); i++) {
                 FontListParser.Family f = fontConfig.families.get(i);
                 if (i == 0 || f.name == null) {
-                    familyList.add(makeFamilyFromParsed(f));
+                    familyList.add(makeFamilyFromParsed(f, bufferForPath));
                 }
             }
             sFallbackFonts = familyList.toArray(new FontFamily[familyList.size()]);
@@ -302,7 +321,7 @@ public class Typeface {
                         // duplicating the corresponding FontFamily.
                         typeface = sDefaultTypeface;
                     } else {
-                        FontFamily fontFamily = makeFamilyFromParsed(f);
+                        FontFamily fontFamily = makeFamilyFromParsed(f, bufferForPath);
                         FontFamily[] families = { fontFamily };
                         typeface = Typeface.createFromFamiliesWithDefault(families);
                     }
