@@ -10662,6 +10662,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    public boolean isPackageSuspendedForUser(String packageName, int userId) {
+        enforceCrossUserPermission(Binder.getCallingUid(), userId, true,
+                false, "isPackageSuspendedForUser for user " + userId);
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            return pkgSetting != null && pkgSetting.getSuspended(userId);
+        }
+    }
+
+    @Override
     public void verifyPendingInstall(int id, int verificationCode) throws RemoteException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,

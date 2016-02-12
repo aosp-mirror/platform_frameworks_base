@@ -855,7 +855,13 @@ public class MockPackageManager extends PackageManager {
     /** @hide */
     @Override
     public boolean setPackageSuspendedAsUser(String packageName, boolean hidden, int userId) {
-        return false;
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public boolean isPackageSuspendedForUser(String packageName, int userId) {
+        throw new UnsupportedOperationException();
     }
 
     /**

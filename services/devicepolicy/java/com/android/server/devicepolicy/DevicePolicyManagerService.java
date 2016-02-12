@@ -6948,10 +6948,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             long id = mInjector.binderClearCallingIdentity();
             try {
-                ApplicationInfo appInfo = mIPackageManager.getApplicationInfo(
-                        packageName, 0, callingUserId);
-                return appInfo != null &&
-                        (appInfo.flags & ApplicationInfo.FLAG_SUSPENDED) != 0;
+                return mIPackageManager.isPackageSuspendedForUser(packageName, callingUserId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);

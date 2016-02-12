@@ -5304,6 +5304,16 @@ public abstract class PackageManager {
     public abstract boolean setPackageSuspendedAsUser(
             String packageName, boolean suspended, @UserIdInt int userId);
 
+    /**
+     * @see #setPackageSuspendedAsUser(String, boolean, int)
+     * @param packageName The name of the package to get the suspended status of.
+     * @param userId The user id.
+     * @return {@code true} if the package is suspended or {@code false} if the package is not
+     * suspended or could not be found.
+     * @hide
+     */
+    public abstract boolean isPackageSuspendedForUser(String packageName, int userId);
+
     /** {@hide} */
     public static boolean isMoveStatusFinished(int status) {
         return (status < 0 || status > 100);
