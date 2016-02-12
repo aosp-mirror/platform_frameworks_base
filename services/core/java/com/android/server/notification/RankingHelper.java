@@ -521,15 +521,14 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public boolean doesAppUseTopics(String pkgName, int uid) {
+    public boolean doesUserUseTopics(String pkgName, int uid) {
         final Record r = getOrCreateRecord(pkgName, uid);
-        int numTopics = r.topics.size();
-        if (numTopics == 0
-                || (numTopics == 1 && r.topics.containsKey(Notification.TOPIC_DEFAULT))) {
-            return false;
-        } else {
-            return true;
+        for (Topic topic : r.topics.values()) {
+            if (topic.importance != Ranking.IMPORTANCE_UNSPECIFIED
+                    && r.importance != topic.importance)
+                return true;
         }
+        return false;
     }
 
     private Topic getOrCreateTopic(Record r, Notification.Topic topic) {

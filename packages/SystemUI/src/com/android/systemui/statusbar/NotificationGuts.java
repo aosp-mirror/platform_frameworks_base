@@ -113,15 +113,15 @@ public class NotificationGuts extends LinearLayout {
                 ? new Notification.Topic(Notification.TOPIC_DEFAULT, mContext.getString(
                 com.android.internal.R.string.default_notification_topic_label))
                 : sbn.getNotification().getTopic();
-        boolean doesAppUseTopics = false;
+        boolean doesUserUseTopics = false;
         try {
-            doesAppUseTopics =
-                    mINotificationManager.doesAppUseTopics(sbn.getPackageName(), sbn.getUid());
+            doesUserUseTopics =
+                    mINotificationManager.doesUserUseTopics(sbn.getPackageName(), sbn.getUid());
         } catch (RemoteException e) {}
-        final boolean appUsesTopics = doesAppUseTopics;
+        final boolean userUsesTopics = doesUserUseTopics;
 
         mApplyToTopic = (RadioButton) row.findViewById(R.id.apply_to_topic);
-        if (appUsesTopics) {
+        if (userUsesTopics) {
             mApplyToTopic.setChecked(true);
         }
         final View applyToApp = row.findViewById(R.id.apply_to_app);
@@ -156,7 +156,7 @@ public class NotificationGuts extends LinearLayout {
                 updateTitleAndSummary(progress);
                 if (fromUser) {
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_MODIFY_IMPORTANCE_SLIDER);
-                    if (appUsesTopics) {
+                    if (userUsesTopics) {
                         mApplyToTopic.setVisibility(View.VISIBLE);
                         mApplyToTopic.setText(
                                 mContext.getString(R.string.apply_to_topic, mTopic.getLabel()));
