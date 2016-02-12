@@ -42,7 +42,7 @@ import java.util.Objects;
 @SystemApi
 public class AudioMixingRule {
 
-    private AudioMixingRule(int mixType, ArrayList<AttributeMatchCriterion> criteria) {
+    private AudioMixingRule(int mixType, ArrayList<AudioMixMatchCriterion> criteria) {
         mCriteria = criteria;
         mTargetMixType = mixType;
     }
@@ -91,21 +91,21 @@ public class AudioMixingRule {
     public static final int RULE_EXCLUDE_UID =
             RULE_EXCLUSION_MASK | RULE_MATCH_UID;
 
-    static final class AttributeMatchCriterion {
+    static final class AudioMixMatchCriterion {
         final AudioAttributes mAttr;
-        final Integer mIntProp;
+        final int mIntProp;
         final int mRule;
 
         /** input parameters must be valid */
-        AttributeMatchCriterion(AudioAttributes attributes, int rule) {
+        AudioMixMatchCriterion(AudioAttributes attributes, int rule) {
             mAttr = attributes;
-            mIntProp = null;
+            mIntProp = Integer.MIN_VALUE;
             mRule = rule;
         }
         /** input parameters must be valid */
-        AttributeMatchCriterion(Integer intProp, int rule) {
+        AudioMixMatchCriterion(Integer intProp, int rule) {
             mAttr = null;
-            mIntProp = intProp;
+            mIntProp = intProp.intValue();
             mRule = rule;
         }
 
@@ -125,10 +125,10 @@ public class AudioMixingRule {
                 dest.writeInt(mAttr.getCapturePreset());
                 break;
             case RULE_MATCH_UID:
-                dest.writeInt(mIntProp.intValue());
+                dest.writeInt(mIntProp);
                 break;
             default:
-                Log.e("AttributeMatchCriterion", "Unknown match rule" + match_rule
+                Log.e("AudioMixMatchCriterion", "Unknown match rule" + match_rule
                         + " when writing to Parcel");
                 dest.writeInt(-1);
             }
@@ -137,8 +137,8 @@ public class AudioMixingRule {
 
     private final int mTargetMixType;
     int getTargetMixType() { return mTargetMixType; }
-    private final ArrayList<AttributeMatchCriterion> mCriteria;
-    ArrayList<AttributeMatchCriterion> getCriteria() { return mCriteria; }
+    private final ArrayList<AudioMixMatchCriterion> mCriteria;
+    ArrayList<AudioMixMatchCriterion> getCriteria() { return mCriteria; }
 
     @Override
     public int hashCode() {
@@ -205,7 +205,7 @@ public class AudioMixingRule {
      */
     @SystemApi
     public static class Builder {
-        private ArrayList<AttributeMatchCriterion> mCriteria;
+        private ArrayList<AudioMixMatchCriterion> mCriteria;
         private int mTargetMixType = AudioMix.MIX_TYPE_INVALID;
 
         /**
@@ -213,7 +213,7 @@ public class AudioMixingRule {
          */
         @SystemApi
         public Builder() {
-            mCriteria = new ArrayList<AttributeMatchCriterion>();
+            mCriteria = new ArrayList<AudioMixMatchCriterion>();
         }
 
         /**
@@ -378,10 +378,10 @@ public class AudioMixingRule {
                 throw new IllegalArgumentException("Incompatible rule for mix");
             }
             synchronized (mCriteria) {
-                Iterator<AttributeMatchCriterion> crIterator = mCriteria.iterator();
+                Iterator<AudioMixMatchCriterion> crIterator = mCriteria.iterator();
                 final int match_rule = rule & ~RULE_EXCLUSION_MASK;
                 while (crIterator.hasNext()) {
-                    final AttributeMatchCriterion criterion = crIterator.next();
+                    final AudioMixMatchCriterion criterion = crIterator.next();
                     switch (match_rule) {
                         case RULE_MATCH_ATTRIBUTE_USAGE:
                             // "usage"-based rule
@@ -413,7 +413,7 @@ public class AudioMixingRule {
                             break;
                         case RULE_MATCH_UID:
                             // "usage"-based rule
-                            if (criterion.mIntProp.intValue() == intProp.intValue()) {
+                            if (criterion.mIntProp == intProp.intValue()) {
                                 if (criterion.mRule == rule) {
                                     // rule already exists, we're done
                                     return this;
@@ -431,10 +431,10 @@ public class AudioMixingRule {
                 switch (match_rule) {
                     case RULE_MATCH_ATTRIBUTE_USAGE:
                     case RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
-                        mCriteria.add(new AttributeMatchCriterion(attrToMatch, rule));
+                        mCriteria.add(new AudioMixMatchCriterion(attrToMatch, rule));
                         break;
                     case RULE_MATCH_UID:
-                        mCriteria.add(new AttributeMatchCriterion(intProp, rule));
+                        mCriteria.add(new AudioMixMatchCriterion(intProp, rule));
                         break;
                     default:
                         throw new IllegalStateException("Unreachable code in addRuleInternal()");
