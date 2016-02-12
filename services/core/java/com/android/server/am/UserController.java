@@ -887,20 +887,14 @@ final class UserController {
     }
 
     void updateUserSetupCompleteLocked(int userId) {
-        int[] users;
-        if (userId != UserHandle.USER_ALL) {
-            users = new int[] {userId};
-        } else {
-            users = new int[mStartedUsers.size()];
-            for (int i = mStartedUsers.size() - 1; i >= 0; i--) {
-                users[i] = mStartedUsers.keyAt(i);
-            }
-        }
         final ContentResolver cr = mService.mContext.getContentResolver();
-        for (int i = 0; i < users.length; i++) {
-            final boolean setupComplete =
-                    Settings.Secure.getIntForUser(cr, USER_SETUP_COMPLETE, 0, users[i]) != 0;
-            mSetupCompletedUsers.put(users[i], setupComplete);
+        for (int i = mStartedUsers.size() - 1; i >= 0; i--) {
+            int startedUser = mStartedUsers.keyAt(i);
+            if (startedUser == userId || userId == UserHandle.USER_ALL) {
+                final boolean setupComplete =
+                        Settings.Secure.getIntForUser(cr, USER_SETUP_COMPLETE, 0, startedUser) != 0;
+                mSetupCompletedUsers.put(startedUser, setupComplete);
+            }
         }
     }
 
