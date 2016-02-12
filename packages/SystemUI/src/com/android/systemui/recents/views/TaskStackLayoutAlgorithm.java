@@ -25,6 +25,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.FloatProperty;
 import android.util.Property;
+import android.view.ViewDebug;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -216,15 +217,20 @@ public class TaskStackLayoutAlgorithm {
     private TaskStackLayoutAlgorithmCallbacks mCb;
 
     // The task bounds (untransformed) for layout.  This rect is anchored at mTaskRoot.
+    @ViewDebug.ExportedProperty(category="recents")
     public Rect mTaskRect = new Rect();
     // The freeform workspace bounds, inset from the top by the search bar, and is a fixed height
+    @ViewDebug.ExportedProperty(category="recents")
     public Rect mFreeformRect = new Rect();
     // The stack bounds, inset from the top by the search bar, and runs to
     // the bottom of the screen
+    @ViewDebug.ExportedProperty(category="recents")
     public Rect mStackRect = new Rect();
     // This is the current system insets
+    @ViewDebug.ExportedProperty(category="recents")
     public Rect mSystemInsets = new Rect();
     // This is the bounds of the history button above the stack rect
+    @ViewDebug.ExportedProperty(category="recents")
     public Rect mHistoryButtonRect = new Rect();
 
     // The visible ranges when the stack is focused and unfocused
@@ -232,14 +238,17 @@ public class TaskStackLayoutAlgorithm {
     private Range mFocusedRange;
 
     // The offset from the top when scrolled to the top of the stack
+    @ViewDebug.ExportedProperty(category="recents")
     private int mFocusedPeekHeight;
 
     // The offset from the top of the stack to the top of the bounds when the stack is scrolled to
     // the end
+    @ViewDebug.ExportedProperty(category="recents")
     private int mStackTopOffset;
 
     // The offset from the bottom of the stack to the bottom of the bounds when the stack is
     // scrolled to the front
+    @ViewDebug.ExportedProperty(category="recents")
     private int mStackBottomOffset;
 
     // The paths defining the motion of the tasks when the stack is focused and unfocused
@@ -250,27 +259,36 @@ public class TaskStackLayoutAlgorithm {
 
     // The state of the stack focus (0..1), which controls the transition of the stack from the
     // focused to non-focused state
+    @ViewDebug.ExportedProperty(category="recents")
     private float mFocusState;
 
     // The animator used to reset the focused state
     private ObjectAnimator mFocusStateAnimator;
 
     // The smallest scroll progress, at this value, the back most task will be visible
+    @ViewDebug.ExportedProperty(category="recents")
     float mMinScrollP;
     // The largest scroll progress, at this value, the front most task will be visible above the
     // navigation bar
+    @ViewDebug.ExportedProperty(category="recents")
     float mMaxScrollP;
     // The initial progress that the scroller is set when you first enter recents
+    @ViewDebug.ExportedProperty(category="recents")
     float mInitialScrollP;
     // The task progress for the front-most task in the stack
+    @ViewDebug.ExportedProperty(category="recents")
     float mFrontMostTaskP;
 
     // The last computed task counts
+    @ViewDebug.ExportedProperty(category="recents")
     int mNumStackTasks;
+    @ViewDebug.ExportedProperty(category="recents")
     int mNumFreeformTasks;
 
     // The min/max z translations
+    @ViewDebug.ExportedProperty(category="recents")
     int mMinTranslationZ;
+    @ViewDebug.ExportedProperty(category="recents")
     int mMaxTranslationZ;
 
     // Optimization, allows for quick lookup of task -> index
