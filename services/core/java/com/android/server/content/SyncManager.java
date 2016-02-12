@@ -62,6 +62,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -70,41 +71,42 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
-import android.os.Messenger;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Slog;
 import android.util.Pair;
-
+import android.util.Slog;
 import android.util.SparseArray;
+
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
+
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.accounts.AccountManagerService;
+import com.android.server.backup.AccountSyncSettingsBackupHelper;
 import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * Implementation details:
@@ -510,12 +512,12 @@ public class SyncManager {
 
         mSyncStorageEngine.setPeriodicSyncAddedListener(
                 new SyncStorageEngine.PeriodicSyncAddedListener() {
-            @Override
-            public void onPeriodicSyncAdded(EndPoint target, Bundle extras, long pollFrequency,
-                                            long flex) {
-                updateOrAddPeriodicSync(target, pollFrequency, flex, extras);
-            }
-        });
+                    @Override
+                    public void onPeriodicSyncAdded(EndPoint target, Bundle extras, long pollFrequency,
+                            long flex) {
+                        updateOrAddPeriodicSync(target, pollFrequency, flex, extras);
+                    }
+                });
 
         mSyncStorageEngine.setOnAuthorityRemovedListener(new SyncStorageEngine.OnAuthorityRemovedListener() {
             @Override
@@ -750,8 +752,8 @@ public class SyncManager {
      * @param onlyThoseWithUnkownSyncableState Only sync authorities that have unknown state.
      */
     public void scheduleSync(Account requestedAccount, int userId, int reason,
-                             String requestedAuthority, Bundle extras, long beforeRuntimeMillis,
-                             long runtimeMillis, boolean onlyThoseWithUnkownSyncableState) {
+            String requestedAuthority, Bundle extras, long beforeRuntimeMillis,
+            long runtimeMillis, boolean onlyThoseWithUnkownSyncableState) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (extras == null) {
             extras = new Bundle();
@@ -941,7 +943,7 @@ public class SyncManager {
      * flexMillis will be updated.
      */
     public void updateOrAddPeriodicSync(EndPoint target, long pollFrequency, long flex,
-                                        Bundle extras) {
+            Bundle extras) {
         UpdatePeriodicSyncMessagePayload payload = new UpdatePeriodicSyncMessagePayload(target,
                 pollFrequency, flex, extras);
         mSyncHandler.obtainMessage(SyncHandler.MESSAGE_UPDATE_PERIODIC_SYNC, payload)
@@ -995,7 +997,7 @@ public class SyncManager {
     }
 
     private void sendSyncFinishedOrCanceledMessage(ActiveSyncContext syncContext,
-                                                   SyncResult syncResult) {
+            SyncResult syncResult) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) Slog.v(TAG, "sending MESSAGE_SYNC_FINISHED");
         Message msg = mSyncHandler.obtainMessage();
         msg.what = SyncHandler.MESSAGE_SYNC_FINISHED;
@@ -1053,7 +1055,7 @@ public class SyncManager {
         public final SyncResult syncResult;
 
         SyncFinishedOrCancelledMessagePayload(ActiveSyncContext syncContext,
-                                              SyncResult syncResult) {
+                SyncResult syncResult) {
             this.activeSyncContext = syncContext;
             this.syncResult = syncResult;
         }
@@ -1066,7 +1068,7 @@ public class SyncManager {
         public final Bundle extras;
 
         UpdatePeriodicSyncMessagePayload(EndPoint target, long pollFrequency, long flex,
-                                         Bundle extras) {
+                Bundle extras) {
             this.target = target;
             this.pollFrequency = pollFrequency;
             this.flex = flex;
@@ -1297,7 +1299,7 @@ public class SyncManager {
                 JobInfo.NETWORK_TYPE_UNMETERED : JobInfo.NETWORK_TYPE_ANY;
 
         JobInfo.Builder b = new JobInfo.Builder(syncOperation.jobId,
-                    new ComponentName(mContext, SyncJobService.class))
+                new ComponentName(mContext, SyncJobService.class))
                 .setExtras(syncOperation.toJobInfoExtras())
                 .setRequiredNetworkType(networkType)
                 .setPersisted(true)
@@ -1502,7 +1504,7 @@ public class SyncManager {
          * for this sync. This is used to attribute the wakelock hold to that application.
          */
         public ActiveSyncContext(SyncOperation syncOperation, long historyRowId,
-                                 int syncAdapterUid) {
+                int syncAdapterUid) {
             super();
             mSyncAdapterUid = syncAdapterUid;
             mSyncOperation = syncOperation;
@@ -1731,7 +1733,7 @@ public class SyncManager {
                     new Comparator<RegisteredServicesCache.ServiceInfo<SyncAdapterType>>() {
                         @Override
                         public int compare(RegisteredServicesCache.ServiceInfo<SyncAdapterType> lhs,
-                                           RegisteredServicesCache.ServiceInfo<SyncAdapterType> rhs) {
+                                RegisteredServicesCache.ServiceInfo<SyncAdapterType> rhs) {
                             return lhs.type.authority.compareTo(rhs.type.authority);
                         }
                     });
@@ -2572,6 +2574,7 @@ public class SyncManager {
         }
 
         private void updateRunningAccountsH(EndPoint syncTargets) {
+            AccountAndUser[] oldAccounts = mRunningAccounts;
             mRunningAccounts = AccountManagerService.getSingleton().getRunningAccounts();
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Slog.v(TAG, "Accounts list: ");
@@ -2592,6 +2595,17 @@ public class SyncManager {
                     Log.d(TAG, "canceling sync since the account is no longer running");
                     sendSyncFinishedOrCanceledMessage(currentSyncContext,
                             null /* no result since this is a cancel */);
+                }
+            }
+
+            // On account add, check if there are any settings to be restored.
+            for (AccountAndUser aau : mRunningAccounts) {
+                if (!containsAccountAndUser(oldAccounts, aau.account, aau.userId)) {
+                    if (Log.isLoggable(TAG, Log.DEBUG)) {
+                        Log.d(TAG, "Account " + aau.account + " added, checking sync restore data");
+                    }
+                    AccountSyncSettingsBackupHelper.accountAdded(mContext);
+                    break;
                 }
             }
 
@@ -2618,7 +2632,7 @@ public class SyncManager {
          * @param flexMillis new flex time in milliseconds.
          */
         private void maybeUpdateSyncPeriodH(SyncOperation syncOperation, long pollFrequencyMillis,
-                                            long flexMillis) {
+                long flexMillis) {
             if (!(pollFrequencyMillis == syncOperation.periodMillis
                     && flexMillis == syncOperation.flexMillis)) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {
@@ -2633,7 +2647,7 @@ public class SyncManager {
         }
 
         private void updateOrAddPeriodicSyncH(EndPoint target, long pollFrequency, long flex,
-                                              Bundle extras) {
+                Bundle extras) {
             final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
             verifyJobScheduler();  // Will fill in mScheduledSyncs cache if it is not already filled.
             final long pollFrequencyMillis = pollFrequency * 1000L;
@@ -2821,7 +2835,7 @@ public class SyncManager {
         }
 
         private void runBoundToAdapterH(final ActiveSyncContext activeSyncContext,
-                                        IBinder syncAdapter) {
+                IBinder syncAdapter) {
             final SyncOperation syncOperation = activeSyncContext.mSyncOperation;
             try {
                 activeSyncContext.mIsLinkedToDeath = true;
@@ -2889,7 +2903,7 @@ public class SyncManager {
         }
 
         private void runSyncFinishedOrCanceledH(SyncResult syncResult,
-                                                ActiveSyncContext activeSyncContext) {
+                ActiveSyncContext activeSyncContext) {
             final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
 
             final SyncOperation syncOperation = activeSyncContext.mSyncOperation;
@@ -3023,7 +3037,7 @@ public class SyncManager {
         }
 
         private void installHandleTooManyDeletesNotification(Account account, String authority,
-                                                             long numDeletes, int userId) {
+                long numDeletes, int userId) {
             if (mNotificationMgr == null) return;
 
             final ProviderInfo providerInfo = mContext.getPackageManager().resolveContentProvider(
@@ -3099,7 +3113,7 @@ public class SyncManager {
         }
 
         public void stopSyncEvent(long rowId, SyncOperation syncOperation, String resultMessage,
-                                  int upstreamActivity, int downstreamActivity, long elapsedTime) {
+                int upstreamActivity, int downstreamActivity, long elapsedTime) {
             EventLog.writeEvent(2720,
                     syncOperation.toEventLog(SyncStorageEngine.EVENT_STOP));
             mSyncStorageEngine.stopSyncEvent(rowId, elapsedTime,
