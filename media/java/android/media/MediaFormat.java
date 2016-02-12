@@ -65,6 +65,7 @@ import java.util.Map;
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
  * <tr><td>{@link #KEY_CHANNEL_COUNT}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_SAMPLE_RATE}</td><td>Integer</td><td></td></tr>
+ * <tr><td>{@link #KEY_PCM_ENCODING}</td><td>Integer</td><td>optional</td></tr>
  * <tr><td>{@link #KEY_IS_ADTS}</td><td>Integer</td><td>optional, if <em>decoding</em> AAC audio content, setting this key to 1 indicates that each audio frame is prefixed by the ADTS header.</td></tr>
  * <tr><td>{@link #KEY_AAC_PROFILE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired profile.</td></tr>
  * <tr><td>{@link #KEY_AAC_SBR_MODE}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is AAC audio, specifies the desired SBR mode.</td></tr>
@@ -195,6 +196,26 @@ public final class MediaFormat {
      * The associated value is an integer or a float.
      */
     public static final String KEY_FRAME_RATE = "frame-rate";
+
+    /**
+     * A key describing the raw audio sample encoding/format.
+     *
+     * <p>The associated value is an integer, using one of the
+     * {@link AudioFormat}.ENCODING_PCM_ values.</p>
+     *
+     * <p>This is an optional key for audio decoders and encoders specifying the
+     * desired raw audio sample format during {@link MediaCodec#configure
+     * MediaCodec.configure(&hellip;)} call. Use {@link MediaCodec#getInputFormat
+     * MediaCodec.getInput}/{@link MediaCodec#getOutputFormat OutputFormat(&hellip;)}
+     * to confirm the actual format. For the PCM decoder this key specifies both
+     * input and output sample encodings.</p>
+     *
+     * <p>This key is also used by {@link MediaExtractor} to specify the sample
+     * format of audio data, if it is specified.</p>
+     *
+     * <p>If this key is missing, the raw audio sample format is signed 16-bit short.</p>
+     */
+    public static final String KEY_PCM_ENCODING = "pcm-encoding";
 
     /**
      * A key describing the capture rate of a video format in frames/sec.
@@ -564,7 +585,7 @@ public final class MediaFormat {
     public static final String KEY_IS_TIMED_TEXT = "is-timed-text";
 
     // The following color aspect values must be in sync with the ones in HardwareAPI.h.
-    /*
+    /**
      * An optional key describing the color primaries, white point and
      * luminance factors for video content.
      *
