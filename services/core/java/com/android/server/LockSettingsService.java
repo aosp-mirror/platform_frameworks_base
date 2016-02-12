@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.ActivityManagerNative;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -34,6 +35,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
+import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Context.USER_SERVICE;
 import static android.Manifest.permission.READ_CONTACTS;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -124,7 +126,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mLockSettingsService.maybeShowEncryptionNotification(UserHandle.ALL);
+                mLockSettingsService.maybeShowEncryptionNotifications();
             } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
                 // TODO
             }
@@ -176,22 +178,48 @@ public class LockSettingsService extends ILockSettings.Stub {
      * If the account is credential-encrypted, show notification requesting the user to unlock
      * the device.
      */
-    private void maybeShowEncryptionNotification(UserHandle userHandle) {
-        if (UserHandle.ALL.equals(userHandle)) {
-            final List<UserInfo> users = mUserManager.getUsers();
-            for (int i = 0; i < users.size(); i++) {
-                UserHandle user = users.get(i).getUserHandle();
-                if (!mUserManager.isUserUnlocked(user)) {
-                    showEncryptionNotification(user);
+    private void maybeShowEncryptionNotifications() {
+        final List<UserInfo> users = mUserManager.getUsers();
+        for (int i = 0; i < users.size(); i++) {
+            UserInfo user = users.get(i);
+            UserHandle userHandle = user.getUserHandle();
+            if (!mUserManager.isUserUnlocked(userHandle)) {
+                if (!user.isManagedProfile()) {
+                    showEncryptionNotification(userHandle);
+                } else {
+                    UserInfo parent = mUserManager.getProfileParent(user.id);
+                    if (parent != null && mUserManager.isUserUnlocked(parent.getUserHandle())) {
+                        // Only show notifications for managed profiles once their parent
+                        // user is unlocked.
+                        showEncryptionNotificationForProfile(userHandle);
+                    }
                 }
             }
-        } else if (!mUserManager.isUserUnlocked(userHandle)){
-            showEncryptionNotification(userHandle);
         }
     }
 
+    private void showEncryptionNotificationForProfile(UserHandle user) {
+        Resources r = mContext.getResources();
+        CharSequence title = r.getText(
+                com.android.internal.R.string.user_encrypted_title);
+        CharSequence message = r.getText(
+                com.android.internal.R.string.profile_encrypted_message);
+        CharSequence detail = r.getText(
+                com.android.internal.R.string.profile_encrypted_detail);
+
+        final KeyguardManager km = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
+        final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null, user.getIdentifier());
+        if (unlockIntent == null) {
+            return;
+        }
+        unlockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        showEncryptionNotification(user, title, message, detail, intent);
+    }
+
     private void showEncryptionNotification(UserHandle user) {
-        if (DEBUG) Slog.v(TAG, "showing encryption notification, user: " + user.getIdentifier());
         Resources r = mContext.getResources();
         CharSequence title = r.getText(
                 com.android.internal.R.string.user_encrypted_title);
@@ -203,6 +231,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         PendingIntent intent = PendingIntent.getBroadcast(mContext, 0, ACTION_NULL,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
+        showEncryptionNotification(user, title, message, detail, intent);
+    }
+
+    private void showEncryptionNotification(UserHandle user, CharSequence title, CharSequence message,
+            CharSequence detail, PendingIntent intent) {
+        if (DEBUG) Slog.v(TAG, "showing encryption notification, user: " + user.getIdentifier());
         Notification notification = new Notification.Builder(mContext)
                 .setSmallIcon(com.android.internal.R.drawable.ic_user_secure)
                 .setWhen(0)
@@ -230,8 +264,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         hideEncryptionNotification(new UserHandle(userId));
     }
 
-    public void onUnlockUser(int userHandle) {
-        hideEncryptionNotification(new UserHandle(userHandle));
+    public void onUnlockUser(int userId) {
+        hideEncryptionNotification(new UserHandle(userId));
+
+        // Now we have unlocked the parent user we should show notifications
+        // about any profiles that exist.
+        List<UserInfo> profiles = mUserManager.getProfiles(userId);
+        for (int i = 0; i < profiles.size(); i++) {
+            UserInfo profile = profiles.get(i);
+            if (profile.isManagedProfile()) {
+                UserHandle userHandle = profile.getUserHandle();
+                if (!mUserManager.isUserUnlocked(userHandle)) {
+                    showEncryptionNotificationForProfile(userHandle);
+                }
+            }
+        }
     }
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
