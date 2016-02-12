@@ -167,7 +167,7 @@
         android:name="android.bluetooth.a2dp-sink.profile.action.PLAYING_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp-sink.profile.action.AUDIO_CONFIG_CHANGED" />
-   <protected-broadcast
+    <protected-broadcast
         android:name="android.bluetooth.avrcp-controller.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
@@ -974,6 +974,11 @@
          to handle the respond-via-message action during incoming calls.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.SEND_RESPOND_VIA_MESSAGE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to send SMS to premium shortcodes without user permission.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SEND_SMS_NO_CONFIRMATION"
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to filter carrier specific sms.
