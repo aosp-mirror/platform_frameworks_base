@@ -28,6 +28,9 @@ namespace uirenderer {
 
 static int bytesPerPixel(GLint glFormat) {
     switch (glFormat) {
+    // The wrapped-texture case, usually means a SurfaceTexture
+    case 0:
+        return 0;
     case GL_ALPHA:
         return 1;
     case GL_RGB:
