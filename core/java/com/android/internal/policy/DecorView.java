@@ -1719,8 +1719,13 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     private void loadBackgroundDrawablesIfNeeded() {
         if (mResizingBackgroundDrawable == null) {
-            mResizingBackgroundDrawable = getResizingBackgroundDrawable(
+            mResizingBackgroundDrawable = getResizingBackgroundDrawable(getContext(),
                     mWindow.mBackgroundResource, mWindow.mBackgroundFallbackResource);
+            if (mResizingBackgroundDrawable == null) {
+                // We shouldn't really get here as the background fallback should be always
+                // available since it is defaulted by the system.
+                Log.w(mLogTag, "Failed to find background drawable for PhoneWindow=" + mWindow);
+            }
         }
         if (mCaptionBackgroundDrawable == null) {
             mCaptionBackgroundDrawable = getContext().getDrawable(
@@ -1818,9 +1823,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
      * Returns the color used to fill areas the app has not rendered content to yet when the
      * user is resizing the window of an activity in multi-window mode.
      */
-    private Drawable getResizingBackgroundDrawable(int backgroundRes, int backgroundFallbackRes) {
-        final Context context = getContext();
-
+    public static Drawable getResizingBackgroundDrawable(Context context, int backgroundRes,
+            int backgroundFallbackRes) {
         if (backgroundRes != 0) {
             final Drawable drawable = context.getDrawable(backgroundRes);
             if (drawable != null) {
@@ -1834,10 +1838,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 return fallbackDrawable;
             }
         }
-
-        // We shouldn't really get here as the background fallback should be always available since
-        // it is defaulted by the system.
-        Log.w(mLogTag, "Failed to find background drawable for PhoneWindow=" + mWindow);
         return null;
     }
 

@@ -112,6 +112,8 @@ public class SystemServicesProxy {
     Display mDisplay;
     String mRecentsPackage;
     ComponentName mAssistComponent;
+
+    boolean mIsSafeMode;
     boolean mHasFreeformWorkspaceSupport;
 
     Bitmap mDummyIcon;
@@ -137,6 +139,7 @@ public class SystemServicesProxy {
                 mPm.hasSystemFeature(PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT) ||
                         Settings.Global.getInt(context.getContentResolver(),
                                 DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+        mIsSafeMode = mPm.isSafeMode();
 
         // Get the dummy thumbnail width/heights
         Resources res = context.getResources();
@@ -187,7 +190,8 @@ public class SystemServicesProxy {
                 rti.firstActiveTime = rti.lastActiveTime = i;
                 if (i % 2 == 0) {
                     rti.taskDescription = new ActivityManager.TaskDescription(description,
-                        Bitmap.createBitmap(mDummyIcon),
+                        Bitmap.createBitmap(mDummyIcon), null,
+                        0xFF000000 | (0xFFFFFF & new Random().nextInt()),
                         0xFF000000 | (0xFFFFFF & new Random().nextInt()));
                 } else {
                     rti.taskDescription = new ActivityManager.TaskDescription();
@@ -258,6 +262,13 @@ public class SystemServicesProxy {
      */
     public boolean hasFreeformWorkspaceSupport() {
         return mHasFreeformWorkspaceSupport;
+    }
+
+    /**
+     * Returns whether this device is in the safe mode.
+     */
+    public boolean isInSafeMode() {
+        return mIsSafeMode;
     }
 
     /** Returns whether the recents is currently running */

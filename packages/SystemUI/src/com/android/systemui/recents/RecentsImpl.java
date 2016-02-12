@@ -837,11 +837,13 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Draws the header of a task used for the window animation into a bitmap.
      */
     private Bitmap drawThumbnailTransitionBitmap(Task toTask, TaskViewTransform toTransform) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         if (toTransform != null && toTask.key != null) {
             Bitmap thumbnail;
             synchronized (mHeaderBarLock) {
                 int toHeaderWidth = (int) toTransform.rect.width();
                 int toHeaderHeight = (int) (mHeaderBar.getMeasuredHeight() * toTransform.scale);
+                boolean disabledInSafeMode = !toTask.isSystemApp && ssp.isInSafeMode();
                 mHeaderBar.onTaskViewSizeChanged((int) toTransform.rect.width(),
                         (int) toTransform.rect.height());
                 thumbnail = Bitmap.createBitmap(toHeaderWidth, toHeaderHeight,
@@ -851,7 +853,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 } else {
                     Canvas c = new Canvas(thumbnail);
                     c.scale(toTransform.scale, toTransform.scale);
-                    mHeaderBar.rebindToTask(toTask, false /* touchExplorationEnabled */);
+                    mHeaderBar.rebindToTask(toTask, false /* touchExplorationEnabled */,
+                            disabledInSafeMode);
                     mHeaderBar.draw(c);
                     c.setBitmap(null);
                 }

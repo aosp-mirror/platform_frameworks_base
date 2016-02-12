@@ -28,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewDebug;
 import android.view.ViewParent;
 import android.view.animation.Animation;
 import android.view.animation.Interpolator;
@@ -69,6 +70,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     FlingAnimationUtils mFlingAnimUtils;
     ValueAnimator mScrollFlingAnimator;
 
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mIsScrolling;
     float mDownScrollP;
     int mDownX, mDownY;

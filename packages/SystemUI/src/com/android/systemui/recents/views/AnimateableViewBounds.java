@@ -19,16 +19,22 @@ package com.android.systemui.recents.views;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 
 /* An outline provider that has a clip and outline that can be animated. */
 public class AnimateableViewBounds extends ViewOutlineProvider {
 
     View mSourceView;
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mClipRect = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mClipBounds = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
     Rect mLastClipBounds = new Rect();
+    @ViewDebug.ExportedProperty(category="recents")
     int mCornerRadius;
+    @ViewDebug.ExportedProperty(category="recents")
     float mAlpha = 1f;
     final float mMinAlpha = 0.25f;
 

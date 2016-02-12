@@ -20,8 +20,6 @@ import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.ComponentName;
@@ -40,11 +38,10 @@ import android.util.MutableBoolean;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -121,8 +118,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     LayoutInflater mInflater;
     TaskStack mStack;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="layout_")
     TaskStackLayoutAlgorithm mLayoutAlgorithm;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="scroller_")
     TaskStackViewScroller mStackScroller;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="touch_")
     TaskStackViewTouchHandler mTouchHandler;
     TaskStackAnimationHelper mAnimationHelper;
     GradientDrawable mFreeformWorkspaceBackground;
@@ -134,25 +134,36 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     ArraySet<Task.TaskKey> mIgnoreTasks = new ArraySet<>();
     AnimationProps mDeferredTaskViewLayoutAnimation = null;
 
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="doze_")
     DozeTrigger mUIDozeTrigger;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="focused_task_")
     Task mFocusedTask;
 
     int mTaskCornerRadiusPx;
     private int mDividerSize;
     private int mStartTimerIndicatorDuration;
 
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mTaskViewsClipDirty = true;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mAwaitingFirstLayout = true;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mInMeasureLayout = false;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mEnterAnimationComplete = false;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mTouchExplorationEnabled;
+    @ViewDebug.ExportedProperty(category="recents")
     boolean mScreenPinningEnabled;
 
     // The stable stack bounds are the full bounds that we were measured with from RecentsView
+    @ViewDebug.ExportedProperty(category="recents")
     private Rect mStableStackBounds = new Rect();
     // The current stack bounds are dynamic and may change as the user drags and drops
+    @ViewDebug.ExportedProperty(category="recents")
     private Rect mStackBounds = new Rect();
 
+    @ViewDebug.ExportedProperty(category="recents")
     private int[] mTmpVisibleRange = new int[2];
     private Rect mTmpRect = new Rect();
     private ArrayMap<Task.TaskKey, TaskView> mTmpTaskViewMap = new ArrayMap<>();

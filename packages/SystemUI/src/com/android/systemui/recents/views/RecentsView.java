@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents.views;
 
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -32,6 +34,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.WindowInsets;
@@ -79,8 +82,6 @@ import com.android.systemui.statusbar.FlingAnimationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
  * to their SpaceNode bounds.
@@ -103,6 +104,8 @@ public class RecentsView extends FrameLayout {
 
     private boolean mAwaitingFirstLayout = true;
     private boolean mLastTaskLaunchedWasFreeform;
+
+    @ViewDebug.ExportedProperty(category="recents")
     private Rect mSystemInsets = new Rect();
     private int mDividerSize;
 
@@ -110,6 +113,7 @@ public class RecentsView extends FrameLayout {
     private Animator mBackgroundScrimAnimator;
 
     private RecentsTransitionHelper mTransitionHelper;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="touch_")
     private RecentsViewTouchHandler mTouchHandler;
     private final FlingAnimationUtils mFlingAnimationUtils;
 

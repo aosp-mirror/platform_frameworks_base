@@ -20,6 +20,7 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+import android.view.ViewDebug;
 
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
@@ -61,12 +62,18 @@ public class RecentsViewTouchHandler {
 
     private RecentsView mRv;
 
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="drag_task")
     private Task mDragTask;
+    @ViewDebug.ExportedProperty(deepExport=true, prefix="drag_task_view_")
     private TaskView mTaskView;
 
+    @ViewDebug.ExportedProperty(category="recents")
     private Point mTaskViewOffset = new Point();
+    @ViewDebug.ExportedProperty(category="recents")
     private Point mDownPos = new Point();
+    @ViewDebug.ExportedProperty(category="recents")
     private boolean mDragRequested;
+    @ViewDebug.ExportedProperty(category="recents")
     private boolean mIsDragging;
     private float mDragSlop;
 
