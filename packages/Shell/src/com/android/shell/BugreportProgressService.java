@@ -88,8 +88,8 @@ import android.widget.Toast;
  * <p>
  * The workflow is:
  * <ol>
- * <li>When {@code dumpstate} starts, it sends a {@code BUGREPORT_STARTED} with its pid and the
- * estimated total effort.
+ * <li>When {@code dumpstate} starts, it sends a {@code BUGREPORT_STARTED} with a sequential id,
+ * its pid, and the estimated total effort.
  * <li>{@link BugreportReceiver} receives the intent and delegates it to this service.
  * <li>Upon start, this service:
  * <ol>
@@ -132,6 +132,7 @@ public class BugreportProgressService extends Service {
 
     static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
     static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
+    static final String EXTRA_ID = "android.intent.extra.ID";
     static final String EXTRA_PID = "android.intent.extra.PID";
     static final String EXTRA_MAX = "android.intent.extra.MAX";
     static final String EXTRA_NAME = "android.intent.extra.NAME";
@@ -177,7 +178,7 @@ public class BugreportProgressService extends Service {
      */
     private static final String SCREENSHOT_DIR = "bugreports";
 
-    /** Managed dumpstate processes (keyed by pid) */
+    /** Managed dumpstate processes (keyed by id) */
     private final SparseArray<BugreportInfo> mProcesses = new SparseArray<>();
 
     private Context mContext;
@@ -222,7 +223,7 @@ public class BugreportProgressService extends Service {
         }
 
         // If service is killed it cannot be recreated because it would not know which
-        // dumpstate PIDs it would have to watch.
+        // dumpstate IDs it would have to watch.
         return START_NOT_STICKY;
     }
 
@@ -299,38 +300,41 @@ public class BugreportProgressService extends Service {
             }
             final String action = intent.getAction();
             final int pid = intent.getIntExtra(EXTRA_PID, 0);
+            // TODO: temporarily using pid as id until test cases and dumpstate are changed.
+            final int id = intent.getIntExtra(EXTRA_ID, pid);
             final int max = intent.getIntExtra(EXTRA_MAX, -1);
             final String name = intent.getStringExtra(EXTRA_NAME);
 
-            if (DEBUG) Log.v(TAG, "action: " + action + ", name: " + name + ", pid: " + pid
-                    + ", max: "+ max);
+            if (DEBUG)
+                Log.v(TAG, "action: " + action + ", name: " + name + ", id: " + id + ", pid: "
+                        + pid + ", max: " + max);
             switch (action) {
                 case INTENT_BUGREPORT_STARTED:
-                    if (!startProgress(name, pid, max)) {
+                    if (!startProgress(name, id, pid, max)) {
                         stopSelfWhenDone();
                         return;
                     }
                     poll();
                     break;
                 case INTENT_BUGREPORT_FINISHED:
-                    if (pid == 0) {
+                    if (id == 0) {
                         // Shouldn't happen, unless BUGREPORT_FINISHED is received from a legacy,
                         // out-of-sync dumpstate process.
-                        Log.w(TAG, "Missing " + EXTRA_PID + " on intent " + intent);
+                        Log.w(TAG, "Missing " + EXTRA_ID + " on intent " + intent);
                     }
-                    onBugreportFinished(pid, intent);
+                    onBugreportFinished(id, intent);
                     break;
                 case INTENT_BUGREPORT_INFO_LAUNCH:
-                    launchBugreportInfoDialog(pid);
+                    launchBugreportInfoDialog(id);
                     break;
                 case INTENT_BUGREPORT_SCREENSHOT:
-                    takeScreenshot(pid, true);
+                    takeScreenshot(id, true);
                     break;
                 case INTENT_BUGREPORT_SHARE:
-                    shareBugreport(pid, (BugreportInfo) intent.getParcelableExtra(EXTRA_INFO));
+                    shareBugreport(id, (BugreportInfo) intent.getParcelableExtra(EXTRA_INFO));
                     break;
                 case INTENT_BUGREPORT_CANCEL:
-                    cancel(pid);
+                    cancel(id);
                     break;
                 default:
                     Log.w(TAG, "Unsupported intent: " + action);
@@ -367,10 +371,10 @@ public class BugreportProgressService extends Service {
         }
     }
 
-    private BugreportInfo getInfo(int pid) {
-        final BugreportInfo info = mProcesses.get(pid);
+    private BugreportInfo getInfo(int id) {
+        final BugreportInfo info = mProcesses.get(id);
         if (info == null) {
-            Log.w(TAG, "Not monitoring process with PID " + pid);
+            Log.w(TAG, "Not monitoring process with ID " + id);
         }
         return info;
     }
@@ -381,9 +385,13 @@ public class BugreportProgressService extends Service {
      *
      * @return whether it succeeded or not.
      */
-    private boolean startProgress(String name, int pid, int max) {
+    private boolean startProgress(String name, int id, int pid, int max) {
         if (name == null) {
             Log.w(TAG, "Missing " + EXTRA_NAME + " on start intent");
+        }
+        if (id == -1) {
+            Log.e(TAG, "Missing " + EXTRA_ID + " on start intent");
+            return false;
         }
         if (pid == -1) {
             Log.e(TAG, "Missing " + EXTRA_PID + " on start intent");
@@ -394,14 +402,14 @@ public class BugreportProgressService extends Service {
             return false;
         }
 
-        final BugreportInfo info = new BugreportInfo(mContext, pid, name, max);
-        if (mProcesses.indexOfKey(pid) >= 0) {
-            Log.w(TAG, "PID " + pid + " already watched");
+        final BugreportInfo info = new BugreportInfo(mContext, id, pid, name, max);
+        if (mProcesses.indexOfKey(id) >= 0) {
+            Log.w(TAG, "ID " + id + " already watched");
         } else {
-            mProcesses.put(info.pid, info);
+            mProcesses.put(info.id, info);
         }
         // Take initial screenshot.
-        takeScreenshot(pid, false);
+        takeScreenshot(id, false);
         updateProgress(info);
         return true;
     }
@@ -423,22 +431,22 @@ public class BugreportProgressService extends Service {
                 com.android.internal.R.string.cancel), newCancelIntent(mContext, info)).build();
         final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
         infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
-        infoIntent.putExtra(EXTRA_PID, info.pid);
+        infoIntent.putExtra(EXTRA_ID, info.id);
         final Action infoAction = new Action.Builder(null,
                 mContext.getString(R.string.bugreport_info_action),
-                PendingIntent.getService(mContext, info.pid, infoIntent,
+                PendingIntent.getService(mContext, info.id, infoIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT)).build();
         final Intent screenshotIntent = new Intent(mContext, BugreportProgressService.class);
         screenshotIntent.setAction(INTENT_BUGREPORT_SCREENSHOT);
-        screenshotIntent.putExtra(EXTRA_PID, info.pid);
+        screenshotIntent.putExtra(EXTRA_ID, info.id);
         PendingIntent screenshotPendingIntent = mTakingScreenshot ? null : PendingIntent
-                .getService(mContext, info.pid, screenshotIntent,
+                .getService(mContext, info.id, screenshotIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
         final Action screenshotAction = new Action.Builder(null,
                 mContext.getString(R.string.bugreport_screenshot_action),
                 screenshotPendingIntent).build();
 
-        final String title = mContext.getString(R.string.bugreport_in_progress_title, info.pid);
+        final String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
 
         final String name =
                 info.name != null ? info.name : mContext.getString(R.string.bugreport_unnamed);
@@ -464,8 +472,8 @@ public class BugreportProgressService extends Service {
                     + info + ")");
             return;
         }
-        Log.v(TAG, "Sending 'Progress' notification for pid " + info.pid + ": " + percentText);
-        NotificationManager.from(mContext).notify(TAG, info.pid, notification);
+        Log.v(TAG, "Sending 'Progress' notification for id " + info.id + ": " + percentText);
+        NotificationManager.from(mContext).notify(TAG, info.id, notification);
     }
 
     /**
@@ -474,38 +482,38 @@ public class BugreportProgressService extends Service {
     private static PendingIntent newCancelIntent(Context context, BugreportInfo info) {
         final Intent intent = new Intent(INTENT_BUGREPORT_CANCEL);
         intent.setClass(context, BugreportProgressService.class);
-        intent.putExtra(EXTRA_PID, info.pid);
-        return PendingIntent.getService(context, info.pid, intent,
+        intent.putExtra(EXTRA_ID, info.id);
+        return PendingIntent.getService(context, info.id, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     /**
      * Finalizes the progress on a given bugreport and cancel its notification.
      */
-    private void stopProgress(int pid) {
-        if (mProcesses.indexOfKey(pid) < 0) {
-            Log.w(TAG, "PID not watched: " + pid);
+    private void stopProgress(int id) {
+        if (mProcesses.indexOfKey(id) < 0) {
+            Log.w(TAG, "ID not watched: " + id);
         } else {
-            Log.d(TAG, "Removing PID " + pid);
-            mProcesses.remove(pid);
+            Log.d(TAG, "Removing ID " + id);
+            mProcesses.remove(id);
         }
         stopSelfWhenDone();
-        Log.v(TAG, "stopProgress(" + pid + "): cancel notification");
-        NotificationManager.from(mContext).cancel(TAG, pid);
+        Log.v(TAG, "stopProgress(" + id + "): cancel notification");
+        NotificationManager.from(mContext).cancel(TAG, id);
     }
 
     /**
      * Cancels a bugreport upon user's request.
      */
-    private void cancel(int pid) {
-        Log.v(TAG, "cancel: pid=" + pid);
-        final BugreportInfo info = getInfo(pid);
+    private void cancel(int id) {
+        Log.v(TAG, "cancel: ID=" + id);
+        final BugreportInfo info = getInfo(id);
         if (info != null && !info.finished) {
-            Log.i(TAG, "Cancelling bugreport service (pid=" + pid + ") on user's request");
+            Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
             setSystemProperty(CTL_STOP, BUGREPORT_SERVICE);
             deleteScreenshots(info);
         }
-        stopProgress(pid);
+        stopProgress(id);
     }
 
     /**
@@ -522,14 +530,15 @@ public class BugreportProgressService extends Service {
         for (int i = 0; i < total; i++) {
             final BugreportInfo info = mProcesses.valueAt(i);
             if (info == null) {
-                Log.wtf(TAG, "pollProgress(): null info at index " + i + "(pid = "
+                Log.wtf(TAG, "pollProgress(): null info at index " + i + "(ID = "
                         + mProcesses.keyAt(i) + ")");
                 continue;
             }
 
             final int pid = info.pid;
+            final int id = info.id;
             if (info.finished) {
-                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid);
+                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid + "(id: " + id + ")");
                 continue;
             }
             activeProcesses++;
@@ -544,13 +553,13 @@ public class BugreportProgressService extends Service {
 
             if (progressChanged || maxChanged) {
                 if (progressChanged) {
-                    if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + " from "
-                            + info.progress + " to " + progress);
+                    if (DEBUG) Log.v(TAG, "Updating progress for PID " + pid + "(id: " + id
+                            + ") from " + info.progress + " to " + progress);
                     info.progress = progress;
                 }
                 if (maxChanged) {
-                    Log.i(TAG, "Updating max progress for PID " + pid + " from " + info.max
-                            + " to " + max);
+                    Log.i(TAG, "Updating max progress for PID " + pid + "(id: " + id
+                            + ") from " + info.max + " to " + max);
                     info.max = max;
                 }
                 info.lastUpdate = System.currentTimeMillis();
@@ -558,9 +567,9 @@ public class BugreportProgressService extends Service {
             } else {
                 long inactiveTime = System.currentTimeMillis() - info.lastUpdate;
                 if (inactiveTime >= INACTIVITY_TIMEOUT) {
-                    Log.w(TAG, "No progress update for process " + pid + " since "
+                    Log.w(TAG, "No progress update for PID " + pid + " since "
                             + info.getFormattedLastUpdate());
-                    stopProgress(info.pid);
+                    stopProgress(info.id);
                 }
             }
         }
@@ -572,19 +581,16 @@ public class BugreportProgressService extends Service {
      * Fetches a {@link BugreportInfo} for a given process and launches a dialog where the user can
      * change its values.
      */
-    private void launchBugreportInfoDialog(int pid) {
+    private void launchBugreportInfoDialog(int id) {
         // Copy values so it doesn't lock mProcesses while UI is being updated
         final String name, title, description;
-        final BugreportInfo info = getInfo(pid);
+        final BugreportInfo info = getInfo(id);
         if (info == null) {
             return;
         }
-        name = info.name;
-        title = info.title;
-        description = info.description;
 
         collapseNotificationBar();
-        mInfoDialog.initialize(mContext, pid, name, title, description);
+        mInfoDialog.initialize(mContext, info);
     }
 
     /**
@@ -597,7 +603,7 @@ public class BugreportProgressService extends Service {
      * Typical usage is delaying when taken from the notification action, and taking it right away
      * upon receiving a {@link #INTENT_BUGREPORT_STARTED}.
      */
-    private void takeScreenshot(int pid, boolean delayed) {
+    private void takeScreenshot(int id, boolean delayed) {
         setTakingScreenshot(true);
         if (delayed) {
             collapseNotificationBar();
@@ -608,28 +614,28 @@ public class BugreportProgressService extends Service {
             // Show a toast just once, otherwise it might be captured in the screenshot.
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
 
-            takeScreenshot(pid, SCREENSHOT_DELAY_SECONDS);
+            takeScreenshot(id, SCREENSHOT_DELAY_SECONDS);
         } else {
-            takeScreenshot(pid, 0);
+            takeScreenshot(id, 0);
         }
     }
 
     /**
      * Takes a screenshot after {@code delay} seconds.
      */
-    private void takeScreenshot(int pid, int delay) {
+    private void takeScreenshot(int id, int delay) {
         if (delay > 0) {
-            Log.d(TAG, "Taking screenshot for " + pid + " in " + delay + " seconds");
+            Log.d(TAG, "Taking screenshot for " + id + " in " + delay + " seconds");
             final Message msg = mMainHandler.obtainMessage();
             msg.what = MSG_DELAYED_SCREENSHOT;
-            msg.arg1 = pid;
+            msg.arg1 = id;
             msg.arg2 = delay - 1;
             mMainHandler.sendMessageDelayed(msg, DateUtils.SECOND_IN_MILLIS);
             return;
         }
 
         // It's time to take the screenshot: let the proper thread handle it
-        final BugreportInfo info = getInfo(pid);
+        final BugreportInfo info = getInfo(id);
         if (info == null) {
             return;
         }
@@ -638,7 +644,7 @@ public class BugreportProgressService extends Service {
 
         final Message requestMsg = new Message();
         requestMsg.what = MSG_SCREENSHOT_REQUEST;
-        requestMsg.arg1 = pid;
+        requestMsg.arg1 = id;
         requestMsg.obj = screenshotPath;
         mScreenshotHandler.sendMessage(requestMsg);
     }
@@ -715,30 +721,30 @@ public class BugreportProgressService extends Service {
      */
     private void stopSelfWhenDone() {
         if (mProcesses.size() > 0) {
-            if (DEBUG) Log.v(TAG, "Staying alive, waiting for pids " + mProcesses);
+            if (DEBUG) Log.d(TAG, "Staying alive, waiting for IDs " + mProcesses);
             return;
         }
-        Log.v(TAG, "No more pids to handle, shutting down");
+        Log.v(TAG, "No more processes to handle, shutting down");
         stopSelf();
     }
 
     /**
      * Handles the BUGREPORT_FINISHED intent sent by {@code dumpstate}.
      */
-    private void onBugreportFinished(int pid, Intent intent) {
+    private void onBugreportFinished(int id, Intent intent) {
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         if (bugreportFile == null) {
             // Should never happen, dumpstate always set the file.
             Log.wtf(TAG, "Missing " + EXTRA_BUGREPORT + " on intent " + intent);
             return;
         }
-        mInfoDialog.onBugreportFinished(pid);
-        BugreportInfo info = getInfo(pid);
+        mInfoDialog.onBugreportFinished(id);
+        BugreportInfo info = getInfo(id);
         if (info == null) {
             // Happens when BUGREPORT_FINISHED was received without a BUGREPORT_STARTED first.
-            Log.v(TAG, "Creating info for untracked pid " + pid);
-            info = new BugreportInfo(mContext, pid);
-            mProcesses.put(pid, info);
+            Log.v(TAG, "Creating info for untracked ID " + id);
+            info = new BugreportInfo(mContext, id);
+            mProcesses.put(id, info);
         }
         info.renameScreenshots(mScreenshotsDir);
         info.bugreportFile = bugreportFile;
@@ -765,7 +771,7 @@ public class BugreportProgressService extends Service {
         if (!info.bugreportFile.exists() || !info.bugreportFile.canRead()) {
             Log.e(TAG, "Could not read bugreport file " + info.bugreportFile);
             Toast.makeText(context, R.string.bugreport_unreadable_text, Toast.LENGTH_LONG).show();
-            stopProgress(info.pid);
+            stopProgress(info.id);
             return;
         }
 
@@ -837,12 +843,12 @@ public class BugreportProgressService extends Service {
      * Shares the bugreport upon user's request by issuing a {@link Intent#ACTION_SEND_MULTIPLE}
      * intent, but issuing a warning dialog the first time.
      */
-    private void shareBugreport(int pid, BugreportInfo sharedInfo) {
-        BugreportInfo info = getInfo(pid);
+    private void shareBugreport(int id, BugreportInfo sharedInfo) {
+        BugreportInfo info = getInfo(id);
         if (info == null) {
             // Service was terminated but notification persisted
             info = sharedInfo;
-            Log.d(TAG, "shareBugreport(): no info for PID " + pid + " on managed processes ("
+            Log.d(TAG, "shareBugreport(): no info for ID " + id + " on managed processes ("
                     + mProcesses + "), using info from intent instead (" + info + ")");
         }
 
@@ -863,7 +869,7 @@ public class BugreportProgressService extends Service {
         mContext.startActivity(notifIntent);
 
         // ... and stop watching this process.
-        stopProgress(pid);
+        stopProgress(id);
     }
 
     /**
@@ -877,16 +883,16 @@ public class BugreportProgressService extends Service {
         final Intent shareIntent = new Intent(INTENT_BUGREPORT_SHARE);
         shareIntent.setClass(context, BugreportProgressService.class);
         shareIntent.setAction(INTENT_BUGREPORT_SHARE);
-        shareIntent.putExtra(EXTRA_PID, info.pid);
+        shareIntent.putExtra(EXTRA_ID, info.id);
         shareIntent.putExtra(EXTRA_INFO, info);
 
-        final String title = context.getString(R.string.bugreport_finished_title, info.pid);
+        final String title = context.getString(R.string.bugreport_finished_title, info.id);
         final Notification.Builder builder = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(context.getString(R.string.bugreport_finished_text))
-                .setContentIntent(PendingIntent.getService(context, info.pid, shareIntent,
+                .setContentIntent(PendingIntent.getService(context, info.id, shareIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT))
                 .setDeleteIntent(newCancelIntent(context, info))
                 .setLocalOnly(true)
@@ -897,8 +903,8 @@ public class BugreportProgressService extends Service {
             builder.setContentInfo(info.name);
         }
 
-        Log.v(TAG, "Sending 'Share' notification for pid " + info.pid + ": " + title);
-        NotificationManager.from(context).notify(TAG, info.pid, builder.build());
+        Log.v(TAG, "Sending 'Share' notification for ID " + info.id + ": " + title);
+        NotificationManager.from(context).notify(TAG, info.id, builder.build());
     }
 
     /**
@@ -906,7 +912,7 @@ public class BugreportProgressService extends Service {
      * finishes - at this point there is nothing to be done other than waiting, hence it has no
      * pending action.
      */
-    private static void sendBugreportBeingUpdatedNotification(Context context, int pid) {
+    private static void sendBugreportBeingUpdatedNotification(Context context, int id) {
         final String title = context.getString(R.string.bugreport_updating_title);
         final Notification.Builder builder = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
@@ -916,8 +922,8 @@ public class BugreportProgressService extends Service {
                 .setLocalOnly(true)
                 .setColor(context.getColor(
                         com.android.internal.R.color.system_notification_accent_color));
-        Log.v(TAG, "Sending 'Updating zip' notification for pid " + pid + ": " + title);
-        NotificationManager.from(context).notify(TAG, pid, builder.build());
+        Log.v(TAG, "Sending 'Updating zip' notification for ID " + id + ": " + title);
+        NotificationManager.from(context).notify(TAG, id, builder.build());
     }
 
     /**
@@ -985,7 +991,7 @@ public class BugreportProgressService extends Service {
 
         // It's not possible to add a new entry into an existing file, so we need to create a new
         // zip, copy all entries, then rename it.
-        sendBugreportBeingUpdatedNotification(context, info.pid); // ...and that takes time
+        sendBugreportBeingUpdatedNotification(context, info.id); // ...and that takes time
         final File dir = info.bugreportFile.getParentFile();
         final File tmpZip = new File(dir, "tmp-" + info.bugreportFile.getName());
         Log.d(TAG, "Writing temporary zip file (" + tmpZip + ") with title and/or description");
@@ -1113,8 +1119,8 @@ public class BugreportProgressService extends Service {
     /**
      * Updates the user-provided details of a bugreport.
      */
-    private void updateBugreportInfo(int pid, String name, String title, String description) {
-        final BugreportInfo info = getInfo(pid);
+    private void updateBugreportInfo(int id, String name, String title, String description) {
+        final BugreportInfo info = getInfo(id);
         if (info == null) {
             return;
         }
@@ -1179,6 +1185,7 @@ public class BugreportProgressService extends Service {
         private EditText mInfoDescription;
         private AlertDialog mDialog;
         private Button mOkButton;
+        private int mId;
         private int mPid;
 
         /**
@@ -1207,8 +1214,7 @@ public class BugreportProgressService extends Service {
         /**
          * Sets its internal state and displays the dialog.
          */
-        private void initialize(Context context, int pid, String name, String title,
-                String description) {
+        private void initialize(Context context, BugreportInfo info) {
             // First initializes singleton.
             if (mDialog == null) {
                 @SuppressLint("InflateParams")
@@ -1232,7 +1238,7 @@ public class BugreportProgressService extends Service {
 
                 mDialog = new AlertDialog.Builder(context)
                         .setView(view)
-                        .setTitle(context.getString(R.string.bugreport_info_dialog_title, pid))
+                        .setTitle(context.getString(R.string.bugreport_info_dialog_title, info.id))
                         .setCancelable(false)
                         .setPositiveButton(context.getString(com.android.internal.R.string.ok),
                                 null)
@@ -1258,16 +1264,17 @@ public class BugreportProgressService extends Service {
             }
 
             // Then set fields.
-            mSavedName = mTempName = name;
-            mPid = pid;
-            if (!TextUtils.isEmpty(name)) {
-                mInfoName.setText(name);
+            mSavedName = mTempName = info.name;
+            mId = info.id;
+            mPid = info.pid;
+            if (!TextUtils.isEmpty(info.name)) {
+                mInfoName.setText(info.name);
             }
-            if (!TextUtils.isEmpty(title)) {
-                mInfoTitle.setText(title);
+            if (!TextUtils.isEmpty(info.title)) {
+                mInfoTitle.setText(info.title);
             }
-            if (!TextUtils.isEmpty(description)) {
-                mInfoDescription.setText(description);
+            if (!TextUtils.isEmpty(info.description)) {
+                mInfoDescription.setText(info.description);
             }
 
             // And finally display it.
@@ -1290,7 +1297,7 @@ public class BugreportProgressService extends Service {
                         final String title = mInfoTitle.getText().toString();
                         final String description = mInfoDescription.getText().toString();
 
-                        updateBugreportInfo(mPid, name, title, description);
+                        updateBugreportInfo(mId, name, title, description);
                         mDialog.dismiss();
                     }
                 });
@@ -1328,7 +1335,7 @@ public class BugreportProgressService extends Service {
             // Must update system property for the cases where dumpstate finishes
             // while the user is still entering other fields (like title or
             // description)
-            setBugreportNameProperty(mPid, name);
+            setBugreportNameProperty(mId, name);
         }
 
        /**
@@ -1337,7 +1344,7 @@ public class BugreportProgressService extends Service {
          * <p>Once the bugreport is finished dumpstate has already generated the final files, so
          * changing the name would have no effect.
          */
-        private void onBugreportFinished(int pid) {
+        private void onBugreportFinished(int id) {
             if (mInfoName != null) {
                 mInfoName.setEnabled(false);
                 mInfoName.setText(mSavedName);
@@ -1351,6 +1358,11 @@ public class BugreportProgressService extends Service {
      */
     private static final class BugreportInfo implements Parcelable {
         private final Context context;
+
+        /**
+         * Sequential, user-friendly id used to identify the bugreport.
+         */
+        final int id;
 
         /**
          * {@code pid} of the {@code dumpstate} process generating the bugreport.
@@ -1426,8 +1438,9 @@ public class BugreportProgressService extends Service {
         /**
          * Constructor for tracked bugreports - typically called upon receiving BUGREPORT_STARTED.
          */
-        BugreportInfo(Context context, int pid, String name, int max) {
+        BugreportInfo(Context context, int id, int pid, String name, int max) {
             this.context = context;
+            this.id = id;
             this.pid = pid;
             this.name = name;
             this.max = max;
@@ -1437,8 +1450,8 @@ public class BugreportProgressService extends Service {
          * Constructor for untracked bugreports - typically called upon receiving BUGREPORT_FINISHED
          * without a previous call to BUGREPORT_STARTED.
          */
-        BugreportInfo(Context context, int pid) {
-            this(context, pid, null, 0);
+        BugreportInfo(Context context, int id) {
+            this(context, id, id, null, 0);
             this.finished = true;
         }
 
@@ -1494,7 +1507,7 @@ public class BugreportProgressService extends Service {
         @Override
         public String toString() {
             final float percent = ((float) progress * 100 / max);
-            return "pid: " + pid + ", name: " + name + ", finished: " + finished
+            return "id: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
                     + "\n\ttitle: " + title + "\n\tdescription: " + description
                     + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
                     + "\n\tprogress: " + progress + "/" + max + "(" + percent + ")"
@@ -1506,6 +1519,7 @@ public class BugreportProgressService extends Service {
         // Parcelable contract
         protected BugreportInfo(Parcel in) {
             context = null;
+            id = in.readInt();
             pid = in.readInt();
             name = in.readString();
             title = in.readString();
@@ -1527,6 +1541,7 @@ public class BugreportProgressService extends Service {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(id);
             dest.writeInt(pid);
             dest.writeString(name);
             dest.writeString(title);
