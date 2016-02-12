@@ -246,7 +246,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     // compute the frame count
     size_t frameCount;
-    if (audio_is_linear_pcm(format)) {
+    if (audio_has_proportional_frames(format)) {
         const size_t bytesPerSample = audio_bytes_per_sample(format);
         frameCount = buffSizeInBytes / (channelCount * bytesPerSample);
     } else {
@@ -1008,7 +1008,7 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
         return -1;
     }
     const audio_format_t format = audioFormatToNative(audioFormat);
-    if (audio_is_linear_pcm(format)) {
+    if (audio_has_proportional_frames(format)) {
         const size_t bytesPerSample = audio_bytes_per_sample(format);
         return frameCount * channelCount * bytesPerSample;
     } else {
