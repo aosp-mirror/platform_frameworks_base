@@ -17,7 +17,7 @@
 package android.media.audiopolicy;
 
 import android.media.AudioFormat;
-import android.media.audiopolicy.AudioMixingRule.AttributeMatchCriterion;
+import android.media.audiopolicy.AudioMixingRule.AudioMixMatchCriterion;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -86,9 +86,9 @@ public class AudioPolicyConfig implements Parcelable {
             dest.writeInt(mix.getFormat().getEncoding());
             dest.writeInt(mix.getFormat().getChannelMask());
             // write mix rules
-            final ArrayList<AttributeMatchCriterion> criteria = mix.getRule().getCriteria();
+            final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
             dest.writeInt(criteria.size());
-            for (AttributeMatchCriterion criterion : criteria) {
+            for (AudioMixMatchCriterion criterion : criteria) {
                 criterion.writeToParcel(dest);
             }
         }
@@ -150,8 +150,8 @@ public class AudioPolicyConfig implements Parcelable {
             textDump += "  channels=0x";
             textDump += Integer.toHexString(mix.getFormat().getChannelMask()).toUpperCase() +"\n";
             // write mix rules
-            final ArrayList<AttributeMatchCriterion> criteria = mix.getRule().getCriteria();
-            for (AttributeMatchCriterion criterion : criteria) {
+            final ArrayList<AudioMixMatchCriterion> criteria = mix.getRule().getCriteria();
+            for (AudioMixMatchCriterion criterion : criteria) {
                 switch(criterion.mRule) {
                     case AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_USAGE:
                         textDump += "  exclude usage ";
@@ -171,11 +171,11 @@ public class AudioPolicyConfig implements Parcelable {
                         break;
                     case AudioMixingRule.RULE_MATCH_UID:
                         textDump += "  match UID ";
-                        textDump += criterion.mIntProp.toString();
+                        textDump += criterion.mIntProp;
                         break;
                     case AudioMixingRule.RULE_EXCLUDE_UID:
                         textDump += "  exclude UID ";
-                        textDump += criterion.mIntProp.toString();
+                        textDump += criterion.mIntProp;
                         break;
                     default:
                         textDump += "invalid rule!";
