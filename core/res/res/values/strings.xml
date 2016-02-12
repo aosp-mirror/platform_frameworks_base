@@ -2608,8 +2608,8 @@
     <string name="aerr_report">Send feedback</string>
     <!-- Button that closes a crashed application -->
     <string name="aerr_close">Close</string>
-    <!-- Button that mutes further crashes of the crashed application-->
-    <string name="aerr_mute">Mute</string>
+    <!-- Button that mutes further crashes of the crashed application. Note that this only appears on engineering builds. -->
+    <string name="aerr_mute">Mute until device restarts</string>
     <!-- Button that waits a bit more for an unresponsive app -->
     <string name="aerr_wait">Wait</string>
     <!-- Button that closes an unresponsive application -->
