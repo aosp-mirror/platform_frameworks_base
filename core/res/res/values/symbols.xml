@@ -2388,7 +2388,6 @@
   <java-symbol type="string" name="config_iccHotswapPromptForRestartDialogComponent" />
 
   <java-symbol type="string" name="config_packagedKeyboardName" />
-  <java-symbol type="string" name="default_notification_topic_label" />
   <java-symbol type="bool" name="config_forceWindowDrawsStatusBarBackground" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
 
@@ -2427,7 +2426,7 @@
   <java-symbol type="dimen" name="notification_content_margin_end" />
   <java-symbol type="dimen" name="notification_content_picture_margin" />
   <java-symbol type="dimen" name="notification_content_margin_top" />
-  <java-symbol type="string" name="importance_from_topic" />
+  <java-symbol type="string" name="importance_from_user" />
   <java-symbol type="string" name="importance_from_person" />
 
   <java-symbol type="layout" name="work_widget_mask_view" />

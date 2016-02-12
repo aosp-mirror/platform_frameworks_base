@@ -35,7 +35,6 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -92,12 +91,12 @@ public final class NotificationRecord {
     private int mAuthoritativeRank;
     private String mGlobalSortKey;
     private int mPackageVisibility;
-    private int mTopicImportance = IMPORTANCE_UNSPECIFIED;
+    private int mUserImportance = IMPORTANCE_UNSPECIFIED;
     private int mImportance = IMPORTANCE_UNSPECIFIED;
     private CharSequence mImportanceExplanation = null;
 
     private int mSuppressedVisualEffects = 0;
-    private String mTopicExplanation;
+    private String mUserExplanation;
     private String mPeopleExplanation;
 
     @VisibleForTesting
@@ -182,7 +181,7 @@ public final class NotificationRecord {
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
-        mTopicImportance = previous.mTopicImportance;
+        mUserImportance = previous.mUserImportance;
         mImportance = previous.mImportance;
         mImportanceExplanation = previous.mImportanceExplanation;
         // Don't copy mGlobalSortKey, recompute it.
@@ -274,8 +273,8 @@ public final class NotificationRecord {
         pw.println(prefix + "  mRecentlyIntrusive=" + mRecentlyIntrusive);
         pw.println(prefix + "  mPackagePriority=" + mPackagePriority);
         pw.println(prefix + "  mPackageVisibility=" + mPackageVisibility);
-        pw.println(prefix + "  mTopicImportance="
-                + NotificationListenerService.Ranking.importanceToString(mTopicImportance));
+        pw.println(prefix + "  mUserImportance="
+                + NotificationListenerService.Ranking.importanceToString(mUserImportance));
         pw.println(prefix + "  mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "  mImportanceExplanation=" + mImportanceExplanation);
@@ -356,17 +355,17 @@ public final class NotificationRecord {
         return mPackageVisibility;
     }
 
-    public void setTopicImportance(int importance) {
-        mTopicImportance = importance;
-        applyTopicImportance();
+    public void setUserImportance(int importance) {
+        mUserImportance = importance;
+        applyUserImportance();
     }
 
-    private String getTopicExplanation() {
-        if (mTopicExplanation == null) {
-            mTopicExplanation =
-                    mContext.getString(com.android.internal.R.string.importance_from_topic);
+    private String getUserExplanation() {
+        if (mUserExplanation == null) {
+            mUserExplanation =
+                    mContext.getString(com.android.internal.R.string.importance_from_user);
         }
-        return mTopicExplanation;
+        return mUserExplanation;
     }
 
     private String getPeopleExplanation() {
@@ -377,15 +376,15 @@ public final class NotificationRecord {
         return mPeopleExplanation;
     }
 
-    private void applyTopicImportance() {
-        if (mTopicImportance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
-            mImportance = mTopicImportance;
-            mImportanceExplanation = getTopicExplanation();
+    private void applyUserImportance() {
+        if (mUserImportance != NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED) {
+            mImportance = mUserImportance;
+            mImportanceExplanation = getUserExplanation();
         }
     }
 
-    public int getTopicImportance() {
-        return mTopicImportance;
+    public int getUserImportance() {
+        return mUserImportance;
     }
 
     public void setImportance(int importance, CharSequence explanation) {
@@ -393,7 +392,7 @@ public final class NotificationRecord {
             mImportance = importance;
             mImportanceExplanation = explanation;
         }
-        applyTopicImportance();
+        applyUserImportance();
     }
 
     public int getImportance() {
@@ -528,6 +527,6 @@ public final class NotificationRecord {
     }
 
     public boolean isImportanceFromUser() {
-        return mImportance == mTopicImportance;
+        return mImportance == mUserImportance;
     }
 }

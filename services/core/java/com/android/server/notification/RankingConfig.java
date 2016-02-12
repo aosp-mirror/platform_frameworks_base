@@ -15,30 +15,17 @@
  */
 package com.android.server.notification;
 
-import android.app.Notification;
-
-import java.util.List;
-
 public interface RankingConfig {
 
-    List<Notification.Topic> getTopics(String packageName, int uid);
+    int getPriority(String packageName, int uid);
 
-    int getPriority(String packageName, int uid, Notification.Topic topic);
+    void setPriority(String packageName, int uid, int priority);
 
-    void setPriority(String packageName, int uid, Notification.Topic topic, int priority);
+    int getVisibilityOverride(String packageName, int uid);
 
-    int getVisibilityOverride(String packageName, int uid, Notification.Topic topic);
+    void setVisibilityOverride(String packageName, int uid, int visibility);
 
-    void setVisibilityOverride(String packageName, int uid, Notification.Topic topic,
-            int visibility);
+    void setImportance(String packageName, int uid, int importance);
 
-    void setImportance(String packageName, int uid, Notification.Topic topic, int importance);
-
-    int getImportance(String packageName, int uid, Notification.Topic topic);
-
-    boolean doesUserUseTopics(String packageName, int uid);
-
-    boolean hasBannedTopics(String packageName, int uid);
-
-    int getImportance(String packageName, int uid, String topicId);
+    int getImportance(String packageName, int uid);
 }

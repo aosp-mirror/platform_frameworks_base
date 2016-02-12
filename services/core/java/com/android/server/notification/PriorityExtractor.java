@@ -1,5 +1,5 @@
-/**
-* Copyright (C) 2015 The Android Open Source Project
+/*
+* Copyright (C) 2014 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import android.content.Context;
 import android.util.Slog;
 
 /**
- * Determines the importance of the given notification.
+ * Determines if the given notification can bypass Do Not Disturb.
  */
-public class TopicImportanceExtractor implements NotificationSignalExtractor {
+public class PriorityExtractor implements NotificationSignalExtractor {
     private static final String TAG = "ImportantTopicExtractor";
     private static final boolean DBG = false;
 
@@ -42,9 +42,8 @@ public class TopicImportanceExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int topicImportance = mConfig.getImportance(record.sbn.getPackageName(),
-                record.sbn.getUid(), record.sbn.getNotification().getTopic());
-        record.setTopicImportance(topicImportance);
+        record.setPackagePriority(
+                mConfig.getPriority(record.sbn.getPackageName(), record.sbn.getUid()));
 
         return null;
     }
