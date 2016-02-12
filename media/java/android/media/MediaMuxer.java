@@ -32,8 +32,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
- * MediaMuxer facilitates muxing elementary streams. Currently only supports an
- * mp4 file as the output and at most one audio and/or one video elementary
+ * MediaMuxer facilitates muxing elementary streams. Currently supports mp4 or
+ * webm file as the output and at most one audio and/or one video elementary
  * stream.
  * <p>
  * It is generally used like this:
