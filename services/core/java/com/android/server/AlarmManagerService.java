@@ -150,6 +150,12 @@ class AlarmManagerService extends SystemService {
     int mNumTimeChanged;
 
     /**
+     * The current set of user whitelisted apps for device idle mode, meaning these are allowed
+     * to freely schedule alarms.
+     */
+    int[] mDeviceIdleUserWhitelist = new int[0];
+
+    /**
      * For each uid, this is the last time we dispatched an "allow while idle" alarm,
      * used to determine the earliest we can dispatch the next such alarm.
      */
@@ -936,6 +942,7 @@ class AlarmManagerService extends SystemService {
         }
 
         publishBinderService(Context.ALARM_SERVICE, mService);
+        publishLocalService(LocalService.class, new LocalService());
     }
 
     @Override
@@ -1251,14 +1258,6 @@ class AlarmManagerService extends SystemService {
                 flags &= ~AlarmManager.FLAG_IDLE_UNTIL;
             }
 
-            // If the caller is a core system component, and not calling to do work on behalf
-            // of someone else, then always set ALLOW_WHILE_IDLE_UNRESTRICTED.  This means we
-            // will allow these alarms to go off as normal even while idle, with no timing
-            // restrictions.
-            if (callingUid < Process.FIRST_APPLICATION_UID && workSource == null) {
-                flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
-            }
-
             // If this is an exact time alarm, then it can't be batched with other alarms.
             if (windowLength == AlarmManager.WINDOW_EXACT) {
                 flags |= AlarmManager.FLAG_STANDALONE;
@@ -1268,6 +1267,16 @@ class AlarmManagerService extends SystemService {
             // use it to wake early from idle if needed.
             if (alarmClock != null) {
                 flags |= AlarmManager.FLAG_WAKE_FROM_IDLE | AlarmManager.FLAG_STANDALONE;
+
+            // If the caller is a core system component or on the user's whitelist, and not calling
+            // to do work on behalf of someone else, then always set ALLOW_WHILE_IDLE_UNRESTRICTED.
+            // This means we will allow these alarms to go off as normal even while idle, with no
+            // timing restrictions.
+            } else if (workSource == null && (callingUid < Process.FIRST_APPLICATION_UID
+                    || Arrays.binarySearch(mDeviceIdleUserWhitelist,
+                            UserHandle.getAppId(callingUid)) >= 0)) {
+                flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;
+                flags &= ~AlarmManager.FLAG_ALLOW_WHILE_IDLE;
             }
 
             setImpl(type, triggerAtTime, windowLength, interval, operation, directReceiver,
@@ -1344,6 +1353,12 @@ class AlarmManagerService extends SystemService {
         }
     };
 
+    public final class LocalService {
+        public void setDeviceIdleUserWhitelist(int[] appids) {
+            setDeviceIdleUserWhitelistImpl(appids);
+        }
+    }
+
     void dumpImpl(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("Current Alarm Manager state:");
@@ -1386,6 +1401,7 @@ class AlarmManagerService extends SystemService {
             pw.print("  Next wakeup: "); TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
             pw.print("  Num time change events: "); pw.println(mNumTimeChanged);
+            pw.println("  mDeviceIdleUserWhitelist=" + Arrays.toString(mDeviceIdleUserWhitelist));
 
             pw.println();
             pw.println("  Next alarm clock information: ");
@@ -1675,6 +1691,12 @@ class AlarmManagerService extends SystemService {
     long getNextWakeFromIdleTimeImpl() {
         synchronized (mLock) {
             return mNextWakeFromIdle != null ? mNextWakeFromIdle.whenElapsed : Long.MAX_VALUE;
+        }
+    }
+
+    void setDeviceIdleUserWhitelistImpl(int[] appids) {
+        synchronized (mLock) {
+            mDeviceIdleUserWhitelist = appids;
         }
     }
 
