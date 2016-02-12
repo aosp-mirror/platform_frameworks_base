@@ -89,6 +89,7 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
@@ -341,6 +342,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mKeyguardFadingAway;
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
+
+    // RemoteInputView to be activated after unlock
+    private View mPendingRemoteInputView;
 
     int mMaxAllowedKeyguardNotifications;
 
@@ -3567,6 +3571,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mDraggedDownRow.notifyHeightChanged(false  /* needsAnimation */);
             mDraggedDownRow = null;
         }
+        mPendingRemoteInputView = null;
         mAssistManager.onLockscreenShown();
     }
 
@@ -3683,6 +3688,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public boolean hideKeyguard() {
         boolean staying = mLeaveOpenOnKeyguardHide;
         setBarState(StatusBarState.SHADE);
+        View viewToClick = null;
         if (mLeaveOpenOnKeyguardHide) {
             mLeaveOpenOnKeyguardHide = false;
             long delay = calculateGoingToFullShadeDelay();
@@ -3691,6 +3697,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 mDraggedDownRow.setUserLocked(false);
                 mDraggedDownRow = null;
             }
+            viewToClick = mPendingRemoteInputView;
+            mPendingRemoteInputView = null;
 
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
@@ -3707,6 +3715,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             instantCollapseNotificationPanel();
         }
         updateKeyguardState(staying, false /* fromShadeLocked */);
+
+        if (viewToClick != null) {
+            viewToClick.callOnClick();
+        }
 
         // Keyguard state has changed, but QS is not listening anymore. Make sure to update the tile
         // visibilities so next time we open the panel we know the correct height already.
@@ -4071,11 +4083,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mLeaveOpenOnKeyguardHide = true;
             showBouncer();
             mDraggedDownRow = row;
+            mPendingRemoteInputView = null;
         } else {
             mNotificationPanel.animateToFullShade(0 /* delay */);
             setBarState(StatusBarState.SHADE_LOCKED);
             updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
         }
+    }
+
+    @Override
+    protected void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
+        mLeaveOpenOnKeyguardHide = true;
+        showBouncer();
+        mPendingRemoteInputView = clicked;
     }
 
     @Override
