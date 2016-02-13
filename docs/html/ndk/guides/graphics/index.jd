@@ -5,7 +5,7 @@ page.title=Vulkan Graphics API
 <a class="external-link" href="https://www.khronos.org/vulkan/">Vulkan</a> is a
 low-overhead, cross-platform API for high-performance, 3D graphics. Like OpenGL
 ES, Vulkan provides tools for creating high-quality, real-time graphics in
-applications. In addition, Vulkan provides other advantages, such as reducing
+applications. Vulkan also provides advantages such as reducing
 CPU overhead and providing support for the
 <a class="external-link" href="https://www.khronos.org/spir">SPIR-V Binary
 Intermediate language</a>.
