@@ -156,7 +156,6 @@ public class FreeformWorkspaceLayoutAlgorithm {
             transformOut.rect.set(ffRect);
             transformOut.rect.offset(stackLayout.mFreeformRect.left, stackLayout.mFreeformRect.top);
             transformOut.visible = true;
-            transformOut.relativeTaskProgress = 0f;
             return transformOut;
         }
         return null;

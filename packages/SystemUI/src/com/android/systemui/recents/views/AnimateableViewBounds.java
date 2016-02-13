@@ -22,6 +22,8 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
 
+import com.android.systemui.recents.misc.Utilities;
+
 /* An outline provider that has a clip and outline that can be animated. */
 public class AnimateableViewBounds extends ViewOutlineProvider {
 
@@ -55,7 +57,7 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
 
     @Override
     public void getOutline(View view, Outline outline) {
-        outline.setAlpha(MIN_ALPHA + mAlpha * (MAX_ALPHA - MIN_ALPHA));
+        outline.setAlpha(Utilities.mapRange(mAlpha, MIN_ALPHA, MAX_ALPHA));
         if (mCornerRadius > 0) {
             outline.setRoundRect(mClipRect.left, mClipRect.top,
                     mSourceView.getWidth() - mClipRect.right,

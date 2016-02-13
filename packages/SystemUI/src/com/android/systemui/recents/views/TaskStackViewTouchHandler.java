@@ -545,8 +545,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             // We only really need to interpolate the bounds, progress and translation
             mTmpTransform.rect.set(Utilities.RECTF_EVALUATOR.evaluate(dismissFraction,
                     fromTransform.rect, toTransform.rect));
-            mTmpTransform.dimAlpha = fromTransform.dimAlpha + (toTransform.dimAlpha - fromTransform.dimAlpha) *
-                    dismissFraction;
+            mTmpTransform.dimAlpha = fromTransform.dimAlpha + (toTransform.dimAlpha -
+                    fromTransform.dimAlpha) * dismissFraction;
             mTmpTransform.translationZ = fromTransform.translationZ +
                     (toTransform.translationZ - fromTransform.translationZ) * dismissFraction;
 

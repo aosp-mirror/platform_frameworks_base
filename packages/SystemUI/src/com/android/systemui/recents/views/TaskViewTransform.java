@@ -90,10 +90,6 @@ public class TaskViewTransform {
 
     public boolean visible = false;
 
-    // This is the relative task progress of this task, relative to the stack scroll at which this
-    // transform was computed
-    public float relativeTaskProgress = 0f;
-
     // This is a window-space rect used for positioning the task in the stack and freeform workspace
     public RectF rect = new RectF();
 
@@ -106,7 +102,6 @@ public class TaskViewTransform {
         alpha = tv.getAlpha();
         visible = true;
         dimAlpha = tv.getDimAlpha();
-        relativeTaskProgress = 0f;
         rect.set(tv.getLeft(), tv.getTop(), tv.getRight(), tv.getBottom());
     }
 
@@ -119,7 +114,6 @@ public class TaskViewTransform {
         alpha = other.alpha;
         visible = other.visible;
         dimAlpha = other.dimAlpha;
-        relativeTaskProgress = other.relativeTaskProgress;
         rect.set(other.rect);
     }
 
@@ -131,7 +125,6 @@ public class TaskViewTransform {
         scale = 1f;
         alpha = 1f;
         dimAlpha = 0f;
-        relativeTaskProgress = 0f;
         visible = false;
         rect.setEmpty();
     }
