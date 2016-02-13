@@ -111,7 +111,7 @@ public:
             serializeReferenceToPb(entry.key, pbEntry->mutable_key());
 
             pb::Item* pbItem = pbEntry->mutable_item();
-            serializeItemCommonToPb(*entry.value, pbEntry);
+            serializeItemCommonToPb(entry.key, pbEntry);
             PbSerializerVisitor subVisitor(mSourcePool, mSymbolPool, pbItem);
             entry.value->accept(&subVisitor);
         }
