@@ -48,24 +48,13 @@ struct ResourceParserTest : public ::testing::Test {
     }
 
     ::testing::AssertionResult testParse(const StringPiece& str) {
-        return testParse(str, ConfigDescription{}, {});
+        return testParse(str, ConfigDescription{});
     }
 
     ::testing::AssertionResult testParse(const StringPiece& str, const ConfigDescription& config) {
-        return testParse(str, config, {});
-    }
-
-    ::testing::AssertionResult testParse(const StringPiece& str,
-                                         std::initializer_list<std::u16string> products) {
-        return testParse(str, {}, std::move(products));
-    }
-
-    ::testing::AssertionResult testParse(const StringPiece& str, const ConfigDescription& config,
-                                         std::initializer_list<std::u16string> products) {
         std::stringstream input(kXmlPreamble);
         input << "<resources>\n" << str << "\n</resources>" << std::endl;
         ResourceParserOptions parserOptions;
-        parserOptions.products = products;
         ResourceParser parser(mContext->getDiagnostics(), &mTable, Source{ "test" }, config,
                               parserOptions);
         xml::XmlPullParser xmlParser(input);
@@ -546,7 +535,7 @@ TEST_F(ResourceParserTest, ParsePublicIdAsDefinition) {
     ASSERT_NE(nullptr, id);
 }
 
-TEST_F(ResourceParserTest, FilterProductsThatDontMatch) {
+TEST_F(ResourceParserTest, KeepAllProducts) {
     std::string input = R"EOF(
         <string name="foo" product="phone">hi</string>
         <string name="foo" product="no-sdcard">ho</string>
@@ -555,33 +544,26 @@ TEST_F(ResourceParserTest, FilterProductsThatDontMatch) {
         <string name="bit" product="phablet">hoot</string>
         <string name="bot" product="default">yes</string>
     )EOF";
-    ASSERT_TRUE(testParse(input, { std::u16string(u"no-sdcard"), std::u16string(u"phablet") }));
+    ASSERT_TRUE(testParse(input));
 
-    String* fooStr = test::getValue<String>(&mTable, u"@string/foo");
-    ASSERT_NE(nullptr, fooStr);
-    EXPECT_EQ(StringPiece16(u"ho"), *fooStr->value);
-
-    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bar"));
-    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/baz"));
-    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bit"));
-    EXPECT_NE(nullptr, test::getValue<String>(&mTable, u"@string/bot"));
-}
-
-TEST_F(ResourceParserTest, FilterProductsThatBothMatchInOrder) {
-    std::string input = R"EOF(
-        <string name="foo" product="phone">phone</string>
-        <string name="foo" product="default">default</string>
-    )EOF";
-    ASSERT_TRUE(testParse(input, { std::u16string(u"phone") }));
-
-    String* foo = test::getValue<String>(&mTable, u"@string/foo");
-    ASSERT_NE(nullptr, foo);
-    EXPECT_EQ(std::u16string(u"phone"), *foo->value);
-}
-
-TEST_F(ResourceParserTest, FailWhenProductFilterStripsOutAllVersionsOfResource) {
-    std::string input = "<string name=\"foo\" product=\"tablet\">hello</string>\n";
-    ASSERT_FALSE(testParse(input, { std::u16string(u"phone") }));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, u"@string/foo",
+                                                                 ConfigDescription::defaultConfig(),
+                                                                 "phone"));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, u"@string/foo",
+                                                                 ConfigDescription::defaultConfig(),
+                                                                 "no-sdcard"));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, u"@string/bar",
+                                                                 ConfigDescription::defaultConfig(),
+                                                                 ""));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, u"@string/baz",
+                                                                 ConfigDescription::defaultConfig(),
+                                                                 ""));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, u"@string/bit",
+                                                                 ConfigDescription::defaultConfig(),
+                                                                 "phablet"));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<String>(&mTable, u"@string/bot",
+                                                                 ConfigDescription::defaultConfig(),
+                                                                 "default"));
 }
 
 TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {

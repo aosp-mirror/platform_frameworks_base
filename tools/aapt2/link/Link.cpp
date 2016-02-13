@@ -31,6 +31,7 @@
 #include "java/ManifestClassGenerator.h"
 #include "java/ProguardRules.h"
 #include "link/Linkers.h"
+#include "link/ProductFilter.h"
 #include "link/ReferenceLinker.h"
 #include "link/ManifestFixer.h"
 #include "link/TableMerger.h"
@@ -70,6 +71,7 @@ struct LinkOptions {
     Maybe<std::u16string> privateSymbols;
     ManifestFixerOptions manifestFixerOptions;
     IConfigFilter* configFilter = nullptr;
+    std::unordered_set<std::string> products;
 };
 
 struct LinkContext : public IAaptContext {
@@ -292,16 +294,16 @@ public:
                         for (const auto& configValue : entry->values) {
                             // Special case the occurrence of an ID that is being generated for the
                             // 'android' package. This is due to legacy reasons.
-                            if (valueCast<Id>(configValue.value.get()) &&
+                            if (valueCast<Id>(configValue->value.get()) &&
                                     package->name == u"android") {
                                 mContext->getDiagnostics()->warn(
-                                        DiagMessage(configValue.value->getSource())
+                                        DiagMessage(configValue->value->getSource())
                                         << "generated id '" << resName
                                         << "' for external package '" << package->name
                                         << "'");
                             } else {
                                 mContext->getDiagnostics()->error(
-                                        DiagMessage(configValue.value->getSource())
+                                        DiagMessage(configValue->value->getSource())
                                         << "defined resource '" << resName
                                         << "' for external package '" << package->name
                                         << "'");
@@ -512,7 +514,10 @@ public:
 
             std::unique_ptr<Id> id = util::make_unique<Id>();
             id->setSource(fileDesc->source.withLine(exportedSymbol.line));
-            bool result = mFinalTable.addResourceAllowMangled(resName, {}, std::move(id),
+            bool result = mFinalTable.addResourceAllowMangled(resName,
+                                                              ConfigDescription::defaultConfig(),
+                                                              std::string(),
+                                                              std::move(id),
                                                               mContext->getDiagnostics());
             if (!result) {
                 return false;
@@ -679,6 +684,12 @@ public:
             ReferenceLinker linker;
             if (!linker.consume(mContext, &mFinalTable)) {
                 mContext->getDiagnostics()->error(DiagMessage() << "failed linking references");
+                return 1;
+            }
+
+            ProductFilter productFilter(mOptions.products);
+            if (!productFilter.consume(mContext, &mFinalTable)) {
+                mContext->getDiagnostics()->error(DiagMessage() << "failed stripping products");
                 return 1;
             }
         }
@@ -931,6 +942,7 @@ int link(const std::vector<StringPiece>& args) {
     Maybe<std::string> customJavaPackage;
     std::vector<std::string> extraJavaPackages;
     Maybe<std::string> configs;
+    Maybe<std::string> productList;
     bool legacyXFlag = false;
     bool requireLocalization = false;
     Flags flags = Flags()
@@ -954,6 +966,8 @@ int link(const std::vector<StringPiece>& args) {
                             &requireLocalization)
             .optionalFlag("-c", "Comma separated list of configurations to include. The default\n"
                                 "is all configurations", &configs)
+            .optionalFlag("--product", "Comma separated list of product names to keep",
+                          &productList)
             .optionalSwitch("--output-to-dir", "Outputs the APK contents to a directory specified "
                             "by -o",
                             &options.outputToDirectory)
@@ -1036,6 +1050,14 @@ int link(const std::vector<StringPiece>& args) {
         // A given package can actually be a colon separated list of packages.
         for (StringPiece package : util::split(extraPackage, ':')) {
             options.extraJavaPackages.insert(util::utf8ToUtf16(package));
+        }
+    }
+
+    if (productList) {
+        for (StringPiece product : util::tokenize<char>(productList.value(), ',')) {
+            if (product != "" && product != "default") {
+                options.products.insert(product.toString());
+            }
         }
     }
 

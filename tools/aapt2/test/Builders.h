@@ -104,8 +104,8 @@ public:
                                    const ConfigDescription& config,
                                    std::unique_ptr<Value> value) {
         ResourceName resName = parseNameOrDie(name);
-        bool result = mTable->addResourceAllowMangled(resName, id, config, std::move(value),
-                                                      &mDiagnostics);
+        bool result = mTable->addResourceAllowMangled(resName, id, config, std::string(),
+                                                      std::move(value), &mDiagnostics);
         assert(result);
         return *this;
     }
@@ -130,6 +130,14 @@ inline std::unique_ptr<Reference> buildReference(const StringPiece16& ref,
     std::unique_ptr<Reference> reference = util::make_unique<Reference>(parseNameOrDie(ref));
     reference->id = id;
     return reference;
+}
+
+inline std::unique_ptr<BinaryPrimitive> buildPrimitive(uint8_t type, uint32_t data) {
+    android::Res_value value = {};
+    value.size = sizeof(value);
+    value.dataType = type;
+    value.data = data;
+    return util::make_unique<BinaryPrimitive>(value);
 }
 
 template <typename T>

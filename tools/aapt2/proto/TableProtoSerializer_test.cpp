@@ -49,8 +49,18 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
     std::unique_ptr<Plural> plural = util::make_unique<Plural>();
     plural->values[Plural::One] = util::make_unique<String>(table->stringPool.makeRef(u"one"));
     ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:plurals/hey"),
-                                   ConfigDescription{}, std::move(plural),
+                                   ConfigDescription{}, std::string(), std::move(plural),
                                    context->getDiagnostics()));
+
+    // Make a resource with different products.
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:integer/one"),
+                                   test::parseConfigOrDie("land"), std::string(),
+                                   test::buildPrimitive(android::Res_value::TYPE_INT_DEC, 123u),
+                                   context->getDiagnostics()));
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:integer/one"),
+                                       test::parseConfigOrDie("land"), std::string("tablet"),
+                                       test::buildPrimitive(android::Res_value::TYPE_INT_DEC, 321u),
+                                       context->getDiagnostics()));
 
     std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(table.get());
     ASSERT_NE(nullptr, pbTable);
@@ -69,6 +79,17 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
     AAPT_ASSERT_TRUE(result);
     EXPECT_EQ(SymbolState::kPublic, result.value().type->symbolStatus.state);
     EXPECT_EQ(SymbolState::kPublic, result.value().entry->symbolStatus.state);
+
+    // Find the product-dependent values
+    BinaryPrimitive* prim = test::getValueForConfigAndProduct<BinaryPrimitive>(
+            newTable.get(), u"@com.app.a:integer/one", test::parseConfigOrDie("land"), "");
+    ASSERT_NE(nullptr, prim);
+    EXPECT_EQ(123u, prim->value.data);
+
+    prim = test::getValueForConfigAndProduct<BinaryPrimitive>(
+            newTable.get(), u"@com.app.a:integer/one", test::parseConfigOrDie("land"), "tablet");
+    ASSERT_NE(nullptr, prim);
+    EXPECT_EQ(321u, prim->value.data);
 }
 
 TEST(TableProtoSerializer, SerializeFileHeader) {

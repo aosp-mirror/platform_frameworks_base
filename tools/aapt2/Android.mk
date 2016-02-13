@@ -38,6 +38,7 @@ sources := \
 	io/ZipArchive.cpp \
 	link/AutoVersioner.cpp \
 	link/ManifestFixer.cpp \
+	link/ProductFilter.cpp \
 	link/PrivateAttributeMover.cpp \
 	link/ReferenceLinker.cpp \
 	link/TableMerger.cpp \
@@ -83,6 +84,7 @@ testSources := \
 	link/AutoVersioner_test.cpp \
 	link/ManifestFixer_test.cpp \
 	link/PrivateAttributeMover_test.cpp \
+	link/ProductFilter_test.cpp \
 	link/ReferenceLinker_test.cpp \
 	link/TableMerger_test.cpp \
 	link/XmlReferenceLinker_test.cpp \

@@ -107,7 +107,6 @@ static Maybe<ResourcePathData> extractResourcePathData(const std::string& path,
 struct CompileOptions {
     std::string outputPath;
     Maybe<std::string> resDir;
-    std::vector<std::u16string> products;
     bool pseudolocalize = false;
     bool legacyMode = false;
     bool verbose = false;
@@ -198,7 +197,6 @@ static bool compileTable(IAaptContext* context, const CompileOptions& options,
         xml::XmlPullParser xmlParser(fin);
 
         ResourceParserOptions parserOptions;
-        parserOptions.products = options.products;
         parserOptions.errorOnPositionalArguments = !options.legacyMode;
 
         // If the filename includes donottranslate, then the default translatable is false.
@@ -457,11 +455,8 @@ public:
 int compile(const std::vector<StringPiece>& args) {
     CompileOptions options;
 
-    Maybe<std::string> productList;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
-            .optionalFlag("--product", "Comma separated list of product types to compile",
-                          &productList)
             .optionalFlag("--dir", "Directory to scan for resources", &options.resDir)
             .optionalSwitch("--pseudo-localize", "Generate resources for pseudo-locales "
                             "(en-XA and ar-XB)", &options.pseudolocalize)
@@ -470,12 +465,6 @@ int compile(const std::vector<StringPiece>& args) {
             .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
     if (!flags.parse("aapt2 compile", args, &std::cerr)) {
         return 1;
-    }
-
-    if (productList) {
-        for (StringPiece part : util::tokenize<char>(productList.value(), ',')) {
-            options.products.push_back(util::utf8ToUtf16(part));
-        }
     }
 
     CompileContext context;

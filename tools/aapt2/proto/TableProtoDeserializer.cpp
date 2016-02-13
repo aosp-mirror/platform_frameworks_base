@@ -19,7 +19,6 @@
 #include "ValueVisitor.h"
 #include "proto/ProtoHelpers.h"
 #include "proto/ProtoSerialize.h"
-#include "util/Comparators.h"
 
 #include <androidfw/ResourceTypes.h>
 
@@ -134,21 +133,19 @@ public:
                         return {};
                     }
 
-                    auto iter = std::lower_bound(entry->values.begin(), entry->values.end(),
-                                                 config, cmp::lessThanConfig);
-                    if (iter != entry->values.end() && iter->config == config) {
+                    ResourceConfigValue* configValue = entry->findOrCreateValue(config,
+                                                                                pbConfig.product());
+                    if (configValue->value) {
                         // Duplicate config.
                         mDiag->error(DiagMessage(mSource) << "duplicate configuration");
                         return {};
                     }
 
-                    std::unique_ptr<Value> value = deserializeValueFromPb(pbConfigValue.value(),
-                                                                          config,
-                                                                          &table->stringPool);
-                    if (!value) {
+                    configValue->value = deserializeValueFromPb(pbConfigValue.value(),
+                                                                config, &table->stringPool);
+                    if (!configValue->value) {
                         return {};
                     }
-                    entry->values.insert(iter, ResourceConfigValue{ config, std::move(value) });
                 }
             }
         }

@@ -19,8 +19,6 @@
 #include "ResourceTable.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-
-#include "util/Comparators.h"
 #include "util/Util.h"
 
 #include <algorithm>
@@ -124,6 +122,73 @@ ResourceEntry* ResourceTableType::findOrCreateEntry(const StringPiece16& name) {
     return entries.emplace(iter, new ResourceEntry(name))->get();
 }
 
+ResourceConfigValue* ResourceEntry::findValue(const ConfigDescription& config) {
+    return findValue(config, StringPiece());
+}
+
+struct ConfigKey {
+    const ConfigDescription* config;
+    const StringPiece& product;
+};
+
+bool ltConfigKeyRef(const std::unique_ptr<ResourceConfigValue>& lhs, const ConfigKey& rhs) {
+    int cmp = lhs->config.compare(*rhs.config);
+    if (cmp == 0) {
+        cmp = StringPiece(lhs->product).compare(rhs.product);
+    }
+    return cmp < 0;
+}
+
+ResourceConfigValue* ResourceEntry::findValue(const ConfigDescription& config,
+                                              const StringPiece& product) {
+    auto iter = std::lower_bound(values.begin(), values.end(),
+                                 ConfigKey{ &config, product }, ltConfigKeyRef);
+    if (iter != values.end()) {
+        ResourceConfigValue* value = iter->get();
+        if (value->config == config && StringPiece(value->product) == product) {
+            return value;
+        }
+    }
+    return nullptr;
+}
+
+ResourceConfigValue* ResourceEntry::findOrCreateValue(const ConfigDescription& config,
+                                                      const StringPiece& product) {
+    auto iter = std::lower_bound(values.begin(), values.end(),
+                                 ConfigKey{ &config, product }, ltConfigKeyRef);
+    if (iter != values.end()) {
+        ResourceConfigValue* value = iter->get();
+        if (value->config == config && StringPiece(value->product) == product) {
+            return value;
+        }
+    }
+    ResourceConfigValue* newValue = values.insert(
+            iter, util::make_unique<ResourceConfigValue>(config, product))->get();
+    return newValue;
+}
+
+std::vector<ResourceConfigValue*> ResourceEntry::findAllValues(const ConfigDescription& config) {
+    std::vector<ResourceConfigValue*> results;
+
+    auto iter = values.begin();
+    for (; iter != values.end(); ++iter) {
+        ResourceConfigValue* value = iter->get();
+        if (value->config == config) {
+            results.push_back(value);
+            ++iter;
+            break;
+        }
+    }
+
+    for (; iter != values.end(); ++iter) {
+        ResourceConfigValue* value = iter->get();
+        if (value->config == config) {
+            results.push_back(value);
+        }
+    }
+    return results;
+}
+
 /**
  * The default handler for collisions. A return value of -1 means keep the
  * existing value, 0 means fail, and +1 means take the incoming value.
@@ -188,56 +253,69 @@ int ResourceTable::resolveValueCollision(Value* existing, Value* incoming) {
 static constexpr const char16_t* kValidNameChars = u"._-";
 static constexpr const char16_t* kValidNameMangledChars = u"._-$";
 
-bool ResourceTable::addResource(const ResourceNameRef& name, const ConfigDescription& config,
-                                std::unique_ptr<Value> value, IDiagnostics* diag) {
-    return addResourceImpl(name, {}, config, std::move(value), kValidNameChars,
-                           resolveValueCollision, diag);
-}
-
-bool ResourceTable::addResource(const ResourceNameRef& name, const ResourceId resId,
-                                const ConfigDescription& config, std::unique_ptr<Value> value,
+bool ResourceTable::addResource(const ResourceNameRef& name,
+                                const ConfigDescription& config,
+                                const StringPiece& product,
+                                std::unique_ptr<Value> value,
                                 IDiagnostics* diag) {
-    return addResourceImpl(name, resId, config, std::move(value), kValidNameChars,
+    return addResourceImpl(name, {}, config, product, std::move(value), kValidNameChars,
                            resolveValueCollision, diag);
 }
 
-bool ResourceTable::addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
-                                     const Source& source, const StringPiece16& path,
+bool ResourceTable::addResource(const ResourceNameRef& name,
+                                const ResourceId resId,
+                                const ConfigDescription& config,
+                                const StringPiece& product,
+                                std::unique_ptr<Value> value,
+                                IDiagnostics* diag) {
+    return addResourceImpl(name, resId, config, product, std::move(value), kValidNameChars,
+                           resolveValueCollision, diag);
+}
+
+bool ResourceTable::addFileReference(const ResourceNameRef& name,
+                                     const ConfigDescription& config,
+                                     const Source& source,
+                                     const StringPiece16& path,
                                      IDiagnostics* diag) {
     return addFileReference(name, config, source, path, resolveValueCollision, diag);
 }
 
-bool ResourceTable::addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
-                                     const Source& source, const StringPiece16& path,
+bool ResourceTable::addFileReference(const ResourceNameRef& name,
+                                     const ConfigDescription& config,
+                                     const Source& source,
+                                     const StringPiece16& path,
                                      std::function<int(Value*,Value*)> conflictResolver,
                                      IDiagnostics* diag) {
     std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
             stringPool.makeRef(path));
     fileRef->setSource(source);
-    return addResourceImpl(name, ResourceId{}, config, std::move(fileRef), kValidNameChars,
-                           conflictResolver, diag);
+    return addResourceImpl(name, ResourceId{}, config, StringPiece{}, std::move(fileRef),
+                           kValidNameChars, conflictResolver, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                                             const ConfigDescription& config,
+                                            const StringPiece& product,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-    return addResourceImpl(name, ResourceId{}, config, std::move(value), kValidNameMangledChars,
-                           resolveValueCollision, diag);
+    return addResourceImpl(name, ResourceId{}, config, product, std::move(value),
+                           kValidNameMangledChars, resolveValueCollision, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,
                                             const ResourceId id,
                                             const ConfigDescription& config,
+                                            const StringPiece& product,
                                             std::unique_ptr<Value> value,
                                             IDiagnostics* diag) {
-    return addResourceImpl(name, id, config, std::move(value), kValidNameMangledChars,
+    return addResourceImpl(name, id, config, product, std::move(value), kValidNameMangledChars,
                            resolveValueCollision, diag);
 }
 
 bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
                                     const ResourceId resId,
                                     const ConfigDescription& config,
+                                    const StringPiece& product,
                                     std::unique_ptr<Value> value,
                                     const char16_t* validChars,
                                     std::function<int(Value*,Value*)> conflictResolver,
@@ -298,21 +376,21 @@ bool ResourceTable::addResourceImpl(const ResourceNameRef& name,
         return false;
     }
 
-    const auto endIter = entry->values.end();
-    auto iter = std::lower_bound(entry->values.begin(), endIter, config, cmp::lessThanConfig);
-    if (iter == endIter || iter->config != config) {
-        // This resource did not exist before, add it.
-        entry->values.insert(iter, ResourceConfigValue{ config, std::move(value) });
+    ResourceConfigValue* configValue = entry->findOrCreateValue(config, product);
+    if (!configValue->value) {
+        // Resource does not exist, add it now.
+        configValue->value = std::move(value);
+
     } else {
-        int collisionResult = conflictResolver(iter->value.get(), value.get());
+        int collisionResult = conflictResolver(configValue->value.get(), value.get());
         if (collisionResult > 0) {
             // Take the incoming value.
-            iter->value = std::move(value);
+            configValue->value = std::move(value);
         } else if (collisionResult == 0) {
             diag->error(DiagMessage(value->getSource())
                         << "duplicate value for resource '" << name << "' "
                         << "with config '" << config << "'");
-            diag->error(DiagMessage(iter->value->getSource())
+            diag->error(DiagMessage(configValue->value->getSource())
                         << "resource previously defined here");
             return false;
         }

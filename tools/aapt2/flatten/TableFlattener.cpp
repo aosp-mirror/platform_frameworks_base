@@ -402,10 +402,10 @@ private:
 
             const size_t configCount = entry->values.size();
             for (size_t i = 0; i < configCount; i++) {
-                const ConfigDescription& config = entry->values[i].config;
+                const ConfigDescription& config = entry->values[i]->config;
                 for (size_t j = i + 1; j < configCount; j++) {
                     configMasks[entry->id.value()] |= util::hostToDevice32(
-                            config.diff(entry->values[j].config));
+                            config.diff(entry->values[j]->config));
                 }
             }
         }
@@ -445,8 +445,8 @@ private:
 
                 // Group values by configuration.
                 for (auto& configValue : entry->values) {
-                    configToEntryListMap[configValue.config].push_back(FlatEntry{
-                            entry, configValue.value.get(), keyIndex });
+                    configToEntryListMap[configValue->config].push_back(FlatEntry{
+                            entry, configValue->value.get(), keyIndex });
                 }
             }
 

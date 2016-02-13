@@ -26,7 +26,7 @@
 namespace aapt {
 
 class ResourceTable;
-struct ResourceEntry;
+class ResourceEntry;
 struct ConfigDescription;
 
 /**
