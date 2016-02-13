@@ -540,8 +540,6 @@ final class Settings {
                 // is okay to muck with.
                 PackageSetting newp = new PackageSetting(p);
                 replacePackageLPw(name, newp);
-            } else {
-                mPackages.remove(name);
             }
             return true;
         }
@@ -576,9 +574,10 @@ final class Settings {
     }
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
-            String legacyNativeLibraryPathString, String primaryCpuAbiString, String secondaryCpuAbiString,
-            String cpuAbiOverrideString, int uid, int vc, int pkgFlags, int pkgPrivateFlags,
-            String parentPackageName, List<String> childPackageNames) {
+            String legacyNativeLibraryPathString, String primaryCpuAbiString,
+            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, int vc, int
+            pkgFlags, int pkgPrivateFlags, String parentPackageName,
+            List<String> childPackageNames) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -679,6 +678,9 @@ final class Settings {
         if (p != null) {
             p.primaryCpuAbiString = primaryCpuAbiString;
             p.secondaryCpuAbiString = secondaryCpuAbiString;
+            if (childPackageNames != null) {
+                p.childPackageNames = new ArrayList<>(childPackageNames);
+            }
 
             if (!p.codePath.equals(codePath)) {
                 // Check to see if its a disabled system app
