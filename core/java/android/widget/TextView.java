@@ -6853,11 +6853,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         .setLineSpacing(mSpacingAdd, mSpacingMult)
                         .setIncludePad(mIncludePad)
                         .setBreakStrategy(mBreakStrategy)
-                        .setHyphenationFrequency(mHyphenationFrequency);
+                        .setHyphenationFrequency(mHyphenationFrequency)
+                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 if (shouldEllipsize) {
                     builder.setEllipsize(mEllipsize)
-                            .setEllipsizedWidth(ellipsisWidth)
-                            .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                            .setEllipsizedWidth(ellipsisWidth);
                 }
                 mHintLayout = builder.build();
             }
@@ -6944,11 +6944,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     .setLineSpacing(mSpacingAdd, mSpacingMult)
                     .setIncludePad(mIncludePad)
                     .setBreakStrategy(mBreakStrategy)
-                    .setHyphenationFrequency(mHyphenationFrequency);
+                    .setHyphenationFrequency(mHyphenationFrequency)
+                    .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             if (shouldEllipsize) {
                 builder.setEllipsize(effectiveEllipsize)
-                        .setEllipsizedWidth(ellipsisWidth)
-                        .setMaxLines(mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
+                        .setEllipsizedWidth(ellipsisWidth);
+
             }
             // TODO: explore always setting maxLines
             result = builder.build();
