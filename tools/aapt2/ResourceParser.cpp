@@ -19,7 +19,6 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-#include "util/Comparators.h"
 #include "util/ImmutableMap.h"
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
@@ -71,6 +70,7 @@ static uint32_t parseFormatAttribute(const StringPiece16& str) {
 struct ParsedResource {
     ResourceName name;
     ConfigDescription config;
+    std::string product;
     Source source;
     ResourceId id;
     Maybe<SymbolState> symbolState;
@@ -78,35 +78,6 @@ struct ParsedResource {
     std::unique_ptr<Value> value;
     std::list<ParsedResource> childResources;
 };
-
-bool ResourceParser::shouldStripResource(const ResourceNameRef& name,
-                                         const Maybe<std::u16string>& product) const {
-    if (product) {
-        for (const std::u16string& productToMatch : mOptions.products) {
-            if (product.value() == productToMatch) {
-                // We specified a product, and it is in the list, so don't strip.
-                return false;
-            }
-        }
-    }
-
-    // Nothing matched, try 'default'. Default only matches if we didn't already use another
-    // product variant.
-    if (!product || product.value() == u"default") {
-        if (Maybe<ResourceTable::SearchResult> result = mTable->findResource(name)) {
-            const ResourceEntry* entry = result.value().entry;
-            auto iter = std::lower_bound(entry->values.begin(), entry->values.end(), mConfig,
-                                         cmp::lessThanConfig);
-            if (iter != entry->values.end() && iter->config == mConfig && !iter->value->isWeak()) {
-                // We have a value for this config already, and it is not weak,
-                // so filter out this default.
-                return true;
-            }
-        }
-        return false;
-    }
-    return true;
-}
 
 // Recursively adds resources to the ResourceTable.
 static bool addResourcesToTable(ResourceTable* table, IDiagnostics* diag, ParsedResource* res) {
@@ -125,7 +96,8 @@ static bool addResourcesToTable(ResourceTable* table, IDiagnostics* diag, Parsed
         res->value->setComment(std::move(res->comment));
         res->value->setSource(std::move(res->source));
 
-        if (!table->addResource(res->name, res->id, res->config, std::move(res->value), diag)) {
+        if (!table->addResource(res->name, res->id, res->config, res->product,
+                                std::move(res->value), diag)) {
             return false;
         }
     }
@@ -295,9 +267,8 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
         parsedResource.comment = std::move(comment);
 
         // Extract the product name if it exists.
-        Maybe<std::u16string> product;
         if (Maybe<StringPiece16> maybeProduct = xml::findNonEmptyAttribute(parser, u"product")) {
-            product = maybeProduct.value().toString();
+            parsedResource.product = util::utf16ToUtf8(maybeProduct.value());
         }
 
         // Parse the resource regardless of product.
@@ -306,12 +277,7 @@ bool ResourceParser::parseResources(xml::XmlPullParser* parser) {
             continue;
         }
 
-        // We successfully parsed the resource. Check if we should include it or strip it.
-        if (shouldStripResource(parsedResource.name, product)) {
-            // Record that we stripped out this resource name.
-            // We will check that at least one variant of this resource was included.
-            strippedResources.insert(parsedResource.name);
-        } else if (!addResourcesToTable(mTable, mDiag, &parsedResource)) {
+        if (!addResourcesToTable(mTable, mDiag, &parsedResource)) {
             error = true;
         }
     }
@@ -524,7 +490,7 @@ std::unique_ptr<Item> ResourceParser::parseXml(xml::XmlPullParser* parser, const
         // name.package can be empty here, as it will assume the package name of the table.
         std::unique_ptr<Id> id = util::make_unique<Id>();
         id->setSource(mSource.withLine(beginXmlLine));
-        mTable->addResource(name, {}, std::move(id), mDiag);
+        mTable->addResource(name, {}, {}, std::move(id), mDiag);
     };
 
     // Process the raw value.

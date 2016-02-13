@@ -43,13 +43,13 @@ TEST_F(ResourceTableTest, FailToAddResourceWithBadName) {
 
     EXPECT_FALSE(table.addResource(
             ResourceNameRef(u"android", ResourceType::kId, u"hey,there"),
-            ConfigDescription{},
+            ConfigDescription{}, "",
             test::ValueBuilder<Id>().setSource("test.xml", 21u).build(),
             &mDiagnostics));
 
     EXPECT_FALSE(table.addResource(
             ResourceNameRef(u"android", ResourceType::kId, u"hey:there"),
-            ConfigDescription{},
+            ConfigDescription{}, "",
             test::ValueBuilder<Id>().setSource("test.xml", 21u).build(),
             &mDiagnostics));
 }
@@ -59,6 +59,7 @@ TEST_F(ResourceTableTest, AddOneResource) {
 
     EXPECT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/id"),
                                   ConfigDescription{},
+                                  "",
                                   test::ValueBuilder<Id>()
                                           .setSource("test/path/file.xml", 23u).build(),
                                   &mDiagnostics));
@@ -76,24 +77,28 @@ TEST_F(ResourceTableTest, AddMultipleResources) {
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:attr/layout_width"),
             config,
+            "",
             test::ValueBuilder<Id>().setSource("test/path/file.xml", 10u).build(),
             &mDiagnostics));
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:attr/id"),
             config,
+            "",
             test::ValueBuilder<Id>().setSource("test/path/file.xml", 12u).build(),
             &mDiagnostics));
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:string/ok"),
             config,
+            "",
             test::ValueBuilder<Id>().setSource("test/path/file.xml", 14u).build(),
             &mDiagnostics));
 
     EXPECT_TRUE(table.addResource(
             test::parseNameOrDie(u"@android:string/ok"),
             languageConfig,
+            "",
             test::ValueBuilder<BinaryPrimitive>(android::Res_value{})
                     .setSource("test/path/file.xml", 20u)
                     .build(),
@@ -110,18 +115,49 @@ TEST_F(ResourceTableTest, OverrideWeakResourceValue) {
     ResourceTable table;
 
     ASSERT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/foo"), ConfigDescription{},
-                                  util::make_unique<Attribute>(true), &mDiagnostics));
+                                  "", util::make_unique<Attribute>(true), &mDiagnostics));
 
     Attribute* attr = test::getValue<Attribute>(&table, u"@android:attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_TRUE(attr->isWeak());
 
     ASSERT_TRUE(table.addResource(test::parseNameOrDie(u"@android:attr/foo"), ConfigDescription{},
-                                  util::make_unique<Attribute>(false), &mDiagnostics));
+                                  "", util::make_unique<Attribute>(false), &mDiagnostics));
 
     attr = test::getValue<Attribute>(&table, u"@android:attr/foo");
     ASSERT_NE(nullptr, attr);
     EXPECT_FALSE(attr->isWeak());
+}
+
+TEST_F(ResourceTableTest, ProductVaryingValues) {
+    ResourceTable table;
+
+    EXPECT_TRUE(table.addResource(test::parseNameOrDie(u"@android:string/foo"),
+                                  test::parseConfigOrDie("land"),
+                                  "tablet",
+                                  util::make_unique<Id>(),
+                                  &mDiagnostics));
+    EXPECT_TRUE(table.addResource(test::parseNameOrDie(u"@android:string/foo"),
+                                  test::parseConfigOrDie("land"),
+                                  "phone",
+                                  util::make_unique<Id>(),
+                                  &mDiagnostics));
+
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(&table, u"@android:string/foo",
+                                                             test::parseConfigOrDie("land"),
+                                                             "tablet"));
+    EXPECT_NE(nullptr, test::getValueForConfigAndProduct<Id>(&table, u"@android:string/foo",
+                                                             test::parseConfigOrDie("land"),
+                                                             "phone"));
+
+    Maybe<ResourceTable::SearchResult> sr = table.findResource(
+            test::parseNameOrDie(u"@android:string/foo"));
+    AAPT_ASSERT_TRUE(sr);
+    std::vector<ResourceConfigValue*> values = sr.value().entry->findAllValues(
+            test::parseConfigOrDie("land"));
+    ASSERT_EQ(2u, values.size());
+    EXPECT_EQ(std::string("phone"), values[0]->product);
+    EXPECT_EQ(std::string("tablet"), values[1]->product);
 }
 
 } // namespace aapt

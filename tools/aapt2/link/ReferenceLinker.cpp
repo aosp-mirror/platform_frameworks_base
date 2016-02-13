@@ -316,7 +316,7 @@ bool ReferenceLinker::consume(IAaptContext* context, ResourceTable* table) {
                                                &table->stringPool, &declStack, &callSite);
 
                 for (auto& configValue : entry->values) {
-                    configValue.value->accept(&visitor);
+                    configValue->value->accept(&visitor);
                 }
 
                 if (visitor.hasError()) {

@@ -34,13 +34,6 @@ struct ParsedResource;
 
 struct ResourceParserOptions {
     /**
-     * Optional product names by which to filter resources.
-     * This is like a preprocessor definition in that we strip out resources
-     * that don't match before we compile them.
-     */
-    std::vector<std::u16string> products;
-
-    /**
      * Whether the default setting for this parser is to allow translation.
      */
     bool translatable = true;
@@ -105,9 +98,6 @@ private:
     bool parseStringArray(xml::XmlPullParser* parser, ParsedResource* outResource);
     bool parseArrayImpl(xml::XmlPullParser* parser, ParsedResource* outResource, uint32_t typeMask);
     bool parsePlural(xml::XmlPullParser* parser, ParsedResource* outResource);
-
-    bool shouldStripResource(const ResourceNameRef& name,
-                             const Maybe<std::u16string>& product) const;
 
     IDiagnostics* mDiag;
     ResourceTable* mTable;
