@@ -10,6 +10,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_SHARED_LIBRARIES :=  \
     libc \
+    liblog \
     libcutils \
     libutils \
     libbinder \
