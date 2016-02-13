@@ -152,8 +152,7 @@ public class TaskStackViewScroller {
 
     /** Returns the bounded stack scroll */
     float getBoundedStackScroll(float scroll) {
-        return Math.max(mLayoutAlgorithm.mMinScrollP,
-                Math.min(mLayoutAlgorithm.mMaxScrollP, scroll));
+        return Utilities.clamp(scroll, mLayoutAlgorithm.mMinScrollP, mLayoutAlgorithm.mMaxScrollP);
     }
 
     /** Returns the amount that the absolute value of how much the scroll is out of bounds. */

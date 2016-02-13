@@ -50,6 +50,7 @@ public class AnimationProps {
     public static final int SCALE = 5;
     public static final int BOUNDS = 6;
     public static final int DIM_ALPHA = 7;
+    public static final int FOCUS_STATE = 8;
 
     private SparseLongArray mPropStartDelay;
     private SparseLongArray mPropDuration;
