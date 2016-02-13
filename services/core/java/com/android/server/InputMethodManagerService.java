@@ -666,8 +666,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
 
-                buildInputMethodListLocked(
-                        mMethodList, mMethodMap, false /* resetDefaultEnabledIme */);
+                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
 
                 boolean changed = false;
 
@@ -906,8 +905,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeSelectedOnBoot = !TextUtils.isEmpty(defaultImiId);
 
         synchronized (mMethodMap) {
-            buildInputMethodListLocked(mMethodList, mMethodMap,
-                    !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
+            buildInputMethodListLocked(!mImeSelectedOnBoot /* resetDefaultEnabledIme */);
         }
         mSettings.enableAllIMEsIfThereIsNoEnabledIME();
 
@@ -987,7 +985,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) {
                 Slog.i(TAG, "Locale has been changed to " + newLocale);
             }
-            buildInputMethodListLocked(mMethodList, mMethodMap, resetDefaultEnabledIme);
+            buildInputMethodListLocked(resetDefaultEnabledIme);
             if (!updateOnlyWhenLocaleChanged) {
                 final String selectedImiId = mSettings.getSelectedInputMethod();
                 if (TextUtils.isEmpty(selectedImiId)) {
@@ -1092,8 +1090,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mWindowManagerInternal.setOnHardKeyboardStatusChangeListener(
                             mHardKeyboardListener);
                 }
-                buildInputMethodListLocked(mMethodList, mMethodMap,
-                        !mImeSelectedOnBoot /* resetDefaultEnabledIme */);
+                buildInputMethodListLocked(!mImeSelectedOnBoot /* resetDefaultEnabledIme */);
                 if (!mImeSelectedOnBoot) {
                     Slog.w(TAG, "Reset the default IME as \"Resource\" is ready here.");
                     resetStateIfCurrentLocaleChangedLocked();
@@ -2599,8 +2596,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         mFileManager.addInputMethodSubtypes(imi, subtypes);
                         final long ident = Binder.clearCallingIdentity();
                         try {
-                            buildInputMethodListLocked(mMethodList, mMethodMap,
-                                    false /* resetDefaultEnabledIme */);
+                            buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
                         } finally {
                             Binder.restoreCallingIdentity(ident);
                         }
@@ -2955,14 +2951,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return false;
     }
 
-    void buildInputMethodListLocked(ArrayList<InputMethodInfo> list,
-            HashMap<String, InputMethodInfo> map, boolean resetDefaultEnabledIme) {
+    void buildInputMethodListLocked(boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
                     + " \n ------ caller=" + Debug.getCallers(10));
         }
-        list.clear();
-        map.clear();
+        mMethodList.clear();
+        mMethodMap.clear();
 
         // Use for queryIntentServicesAsUser
         final PackageManager pm = mContext.getPackageManager();
@@ -2990,9 +2985,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             try {
                 InputMethodInfo p = new InputMethodInfo(mContext, ri, additionalSubtypes);
-                list.add(p);
+                mMethodList.add(p);
                 final String id = p.getId();
-                map.put(id, p);
+                mMethodMap.put(id, p);
 
                 if (DEBUG) {
                     Slog.d(TAG, "Found an input method " + p);
@@ -3004,7 +2999,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         if (resetDefaultEnabledIme) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mSystemReady, list);
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mSystemReady, mMethodList);
             for (int i = 0; i < defaultEnabledIme.size(); ++i) {
                 final InputMethodInfo imi =  defaultEnabledIme.get(i);
                 if (DEBUG) {
@@ -3016,7 +3011,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         final String defaultImiId = mSettings.getSelectedInputMethod();
         if (!TextUtils.isEmpty(defaultImiId)) {
-            if (!map.containsKey(defaultImiId)) {
+            if (!mMethodMap.containsKey(defaultImiId)) {
                 Slog.w(TAG, "Default IME is uninstalled. Choose new default IME.");
                 if (chooseNewDefaultIMELocked()) {
                     updateInputMethodsFromSettingsLocked(true);
