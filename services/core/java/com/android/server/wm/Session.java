@@ -528,6 +528,16 @@ final class Session extends IWindowSession.Stub
         }
     }
 
+    @Override
+    public void updatePointerIcon(IWindow window) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.updatePointerIcon(window);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     void windowAddedLocked() {
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(
