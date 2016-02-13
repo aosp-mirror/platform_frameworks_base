@@ -310,6 +310,11 @@ class AppWindowToken extends WindowToken {
             if (!(win.mRemoveOnExit && win.mExiting)) {
                 win.mExiting = exiting;
             }
+            // If we're no longer exiting, remove the window from destroying list
+            if (!win.mExiting && win.mDestroying) {
+                win.mDestroying = false;
+                service.mDestroySurface.remove(win);
+            }
         }
     }
 
@@ -326,7 +331,7 @@ class AppWindowToken extends WindowToken {
             }
 
             if (!mAppStopped && !win.mClientRemoveRequested) {
-                return;
+                continue;
             }
 
             win.destroyOrSaveSurface();
