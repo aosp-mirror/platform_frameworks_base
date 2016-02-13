@@ -27,7 +27,6 @@
         android:layout_marginTop="25dp"
         android:saveEnabled="false"
         android:textSize="18sp"
-        android:textColor="#ffffffff"
         android:text="@string/waste_away"
         />
 
@@ -38,7 +37,6 @@
         android:layout_marginTop="25dp"
         android:saveEnabled="false"
         android:textSize="18sp"
-        android:textColor="#ffffffff"
         android:text="@string/wake_away"
         />
 
@@ -52,7 +50,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
             android:textSize="12sp"
-            android:textColor="#ffffffff"
             />
     </ScrollView>
 
