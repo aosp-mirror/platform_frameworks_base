@@ -560,7 +560,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     tv.updateViewPropertiesToTaskTransform(transform, AnimationProps.IMMEDIATE,
                             mRequestUpdateClippingListener);
                 } else {
-                    if (Float.compare(transform.p, 0f) <= 0) {
+                    if (Float.compare(transform.relativeTaskProgress, 0f) <= 0) {
                         tv.updateViewPropertiesToTaskTransform(
                                 mLayoutAlgorithm.getBackOfStackTransform(),
                                 AnimationProps.IMMEDIATE, mRequestUpdateClippingListener);

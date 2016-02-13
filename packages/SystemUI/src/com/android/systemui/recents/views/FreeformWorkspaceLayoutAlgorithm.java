@@ -152,10 +152,11 @@ public class FreeformWorkspaceLayoutAlgorithm {
             transformOut.scale = 1f;
             transformOut.alpha = 1f;
             transformOut.translationZ = stackLayout.mMaxTranslationZ;
+            transformOut.dimAlpha = 0f;
             transformOut.rect.set(ffRect);
             transformOut.rect.offset(stackLayout.mFreeformRect.left, stackLayout.mFreeformRect.top);
             transformOut.visible = true;
-            transformOut.p = 1f;
+            transformOut.relativeTaskProgress = 0f;
             return transformOut;
         }
         return null;

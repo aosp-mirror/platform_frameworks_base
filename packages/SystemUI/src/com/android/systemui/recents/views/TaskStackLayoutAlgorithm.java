@@ -26,6 +26,7 @@ import android.util.ArraySet;
 import android.util.FloatProperty;
 import android.util.Property;
 import android.view.ViewDebug;
+import android.view.animation.AccelerateInterpolator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -106,6 +107,10 @@ public class TaskStackLayoutAlgorithm {
 
     // The scale factor to apply to the user movement in the stack to unfocus it
     private static final float UNFOCUS_MULTIPLIER = 0.8f;
+
+    // The distribution of dim to apply to tasks in the stack
+    private static final AccelerateInterpolator DIM_INTERPOLATOR = new AccelerateInterpolator(3f);
+    public static final float DIM_MAX_VALUE = 0.35f;
 
     // The various focus states
     public static final float STATE_FOCUSED = 1f;
@@ -719,12 +724,14 @@ public class TaskStackLayoutAlgorithm {
         transformOut.scale = 1f;
         transformOut.alpha = 1f;
         transformOut.translationZ = z;
+        transformOut.dimAlpha = DIM_MAX_VALUE * DIM_INTERPOLATOR.getInterpolation(1f -
+                Math.max(0f, Math.min(1f, relP)));
         transformOut.rect.set(mTaskRect);
         transformOut.rect.offset(x, y);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
         transformOut.visible = (transformOut.rect.top < mStackRect.bottom) &&
                 (frontTransform == null || transformOut.rect.top != frontTransform.rect.top);
-        transformOut.p = relP;
+        transformOut.relativeTaskProgress = relP;
     }
 
     /**
