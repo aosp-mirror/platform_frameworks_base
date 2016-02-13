@@ -352,7 +352,7 @@ bool BinaryResourceParser::parseType(const ResourceTablePackage* package,
             return false;
         }
 
-        if (!mTable->addResourceAllowMangled(name, config, std::move(resourceValue),
+        if (!mTable->addResourceAllowMangled(name, config, {}, std::move(resourceValue),
                                              mContext->getDiagnostics())) {
             return false;
         }

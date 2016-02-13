@@ -19,7 +19,6 @@
 #include "ValueVisitor.h"
 #include "compile/PseudolocaleGenerator.h"
 #include "compile/Pseudolocalizer.h"
-#include "util/Comparators.h"
 
 namespace aapt {
 
@@ -208,10 +207,12 @@ ConfigDescription modifyConfigForPseudoLocale(const ConfigDescription& base,
     return modified;
 }
 
-void pseudolocalizeIfNeeded(std::vector<ResourceConfigValue>* configValues,
-                            Pseudolocalizer::Method method, StringPool* pool, Value* value) {
+void pseudolocalizeIfNeeded(const Pseudolocalizer::Method method,
+                            ResourceConfigValue* originalValue,
+                            StringPool* pool,
+                            ResourceEntry* entry) {
     Visitor visitor(pool, method);
-    value->accept(&visitor);
+    originalValue->value->accept(&visitor);
 
     std::unique_ptr<Value> localizedValue;
     if (visitor.mValue) {
@@ -220,16 +221,18 @@ void pseudolocalizeIfNeeded(std::vector<ResourceConfigValue>* configValues,
         localizedValue = std::move(visitor.mItem);
     }
 
-    if (localizedValue) {
-        ConfigDescription pseudolocalizedConfig = modifyConfigForPseudoLocale(ConfigDescription{},
-                                                                              method);
-        auto iter = std::lower_bound(configValues->begin(), configValues->end(),
-                                     pseudolocalizedConfig, cmp::lessThanConfig);
-        if (iter == configValues->end() || iter->config != pseudolocalizedConfig) {
-            // The pseudolocalized config doesn't exist, add it.
-            configValues->insert(iter, ResourceConfigValue{ pseudolocalizedConfig,
-                                                            std::move(localizedValue) });
-        }
+    if (!localizedValue) {
+        return;
+    }
+
+    ConfigDescription configWithAccent = modifyConfigForPseudoLocale(
+            originalValue->config, method);
+
+    ResourceConfigValue* newConfigValue = entry->findOrCreateValue(
+            configWithAccent, originalValue->product);
+    if (!newConfigValue->value) {
+        // Only use auto-generated pseudo-localization if none is defined.
+        newConfigValue->value = std::move(localizedValue);
     }
 }
 
@@ -239,18 +242,13 @@ bool PseudolocaleGenerator::consume(IAaptContext* context, ResourceTable* table)
     for (auto& package : table->packages) {
         for (auto& type : package->types) {
             for (auto& entry : type->entries) {
-                auto iter = std::lower_bound(entry->values.begin(), entry->values.end(),
-                                             ConfigDescription{}, cmp::lessThanConfig);
-                if (iter != entry->values.end() && iter->config == ConfigDescription{}) {
-                    // Only pseudolocalize the default configuration.
-
-                    // The iterator will be invalidated, so grab a pointer to the value.
-                    Value* originalValue = iter->value.get();
-
-                    pseudolocalizeIfNeeded(&entry->values, Pseudolocalizer::Method::kAccent,
-                                           &table->stringPool, originalValue);
-                    pseudolocalizeIfNeeded(&entry->values, Pseudolocalizer::Method::kBidi,
-                                           &table->stringPool, originalValue);
+                std::vector<ResourceConfigValue*> values = entry->findAllValues(
+                        ConfigDescription::defaultConfig());
+                for (ResourceConfigValue* value : values) {
+                    pseudolocalizeIfNeeded(Pseudolocalizer::Method::kAccent, value,
+                                           &table->stringPool, entry.get());
+                    pseudolocalizeIfNeeded(Pseudolocalizer::Method::kBidi, value,
+                                           &table->stringPool, entry.get());
                 }
             }
         }

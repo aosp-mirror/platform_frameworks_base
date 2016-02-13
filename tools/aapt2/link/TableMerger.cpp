@@ -18,9 +18,7 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
-
 #include "link/TableMerger.h"
-#include "util/Comparators.h"
 #include "util/Util.h"
 
 #include <cassert>
@@ -197,28 +195,28 @@ bool TableMerger::doMerge(const Source& src,
 
             ResourceNameRef resName(mMasterPackage->name, dstType->type, dstEntry->name);
 
-            for (ResourceConfigValue& srcValue : srcEntry->values) {
-                auto iter = std::lower_bound(dstEntry->values.begin(), dstEntry->values.end(),
-                                             srcValue.config, cmp::lessThanConfig);
+            for (auto& srcValue : srcEntry->values) {
+                ResourceConfigValue* dstValue = dstEntry->findValue(srcValue->config,
+                                                                    srcValue->product);
 
                 const bool stripConfig = mOptions.filter ?
-                        !mOptions.filter->match(srcValue.config) : false;
+                        !mOptions.filter->match(srcValue->config) : false;
 
-                if (iter != dstEntry->values.end() && iter->config == srcValue.config) {
+                if (dstValue) {
                     const int collisionResult = ResourceTable::resolveValueCollision(
-                            iter->value.get(), srcValue.value.get());
+                            dstValue->value.get(), srcValue->value.get());
                     if (collisionResult == 0 && !overlay) {
                         // Error!
                         ResourceNameRef resourceName(srcPackage->name,
                                                      srcType->type,
                                                      srcEntry->name);
 
-                        mContext->getDiagnostics()->error(DiagMessage(srcValue.value->getSource())
+                        mContext->getDiagnostics()->error(DiagMessage(srcValue->value->getSource())
                                                           << "resource '" << resourceName
                                                           << "' has a conflicting value for "
                                                           << "configuration ("
-                                                          << srcValue.config << ")");
-                        mContext->getDiagnostics()->note(DiagMessage(iter->value->getSource())
+                                                          << srcValue->config << ")");
+                        mContext->getDiagnostics()->note(DiagMessage(dstValue->value->getSource())
                                                          << "originally defined here");
                         error = true;
                         continue;
@@ -227,16 +225,18 @@ bool TableMerger::doMerge(const Source& src,
                         continue;
                     }
 
-                } else if (!stripConfig){
-                    // Insert a place holder value. We will fill it in below.
-                    iter = dstEntry->values.insert(iter, ResourceConfigValue{ srcValue.config });
                 }
 
                 if (stripConfig) {
                     continue;
                 }
 
-                if (FileReference* f = valueCast<FileReference>(srcValue.value.get())) {
+                if (!dstValue) {
+                    // Force create the entry if we didn't have it.
+                    dstValue = dstEntry->findOrCreateValue(srcValue->config, srcValue->product);
+                }
+
+                if (FileReference* f = valueCast<FileReference>(srcValue->value.get())) {
                     std::unique_ptr<FileReference> newFileRef;
                     if (manglePackage) {
                         newFileRef = cloneAndMangleFile(srcPackage->name, *f);
@@ -246,15 +246,15 @@ bool TableMerger::doMerge(const Source& src,
                     }
 
                     if (callback) {
-                        if (!callback(resName, iter->config, newFileRef.get(), f)) {
+                        if (!callback(resName, srcValue->config, newFileRef.get(), f)) {
                             error = true;
                             continue;
                         }
                     }
-                    iter->value = std::move(newFileRef);
+                    dstValue->value = std::move(newFileRef);
 
                 } else {
-                    iter->value = std::unique_ptr<Value>(srcValue.value->clone(
+                    dstValue->value = std::unique_ptr<Value>(srcValue->value->clone(
                             &mMasterTable->stringPool));
                 }
             }
@@ -290,7 +290,8 @@ bool TableMerger::mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, b
     ResourceTablePackage* pkg = table.createPackage(fileDesc.name.package, 0x0);
     pkg->findOrCreateType(fileDesc.name.type)
             ->findOrCreateEntry(fileDesc.name.entry)
-            ->values.push_back(ResourceConfigValue{ fileDesc.config, std::move(fileRef) });
+            ->findOrCreateValue(fileDesc.config, {})
+            ->value = std::move(fileRef);
 
     auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
                        FileReference* newFile, FileReference* oldFile) -> bool {

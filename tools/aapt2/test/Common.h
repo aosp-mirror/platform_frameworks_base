@@ -52,6 +52,11 @@ struct DummyDiagnosticsImpl : public IDiagnostics {
     void note(const DiagMessage& message) override {}
 };
 
+inline IDiagnostics* getDiagnostics() {
+    static DummyDiagnosticsImpl diag;
+    return &diag;
+}
+
 inline ResourceName parseNameOrDie(const StringPiece16& str) {
     ResourceNameRef ref;
     bool result = ResourceUtils::tryParseReference(str, &ref);
@@ -66,21 +71,23 @@ inline ConfigDescription parseConfigOrDie(const StringPiece& str) {
     return config;
 }
 
-template <typename T> T* getValueForConfig(ResourceTable* table, const StringPiece16& resName,
-                                           const ConfigDescription& config) {
+template <typename T> T* getValueForConfigAndProduct(ResourceTable* table,
+                                                     const StringPiece16& resName,
+                                                     const ConfigDescription& config,
+                                                     const StringPiece& product) {
     Maybe<ResourceTable::SearchResult> result = table->findResource(parseNameOrDie(resName));
     if (result) {
-        ResourceEntry* entry = result.value().entry;
-        auto iter = std::lower_bound(entry->values.begin(), entry->values.end(), config,
-                                     [](const ResourceConfigValue& a, const ConfigDescription& b)
-                                             -> bool {
-                                         return a.config < b;
-                                     });
-        if (iter != entry->values.end() && iter->config == config) {
-            return valueCast<T>(iter->value.get());
+        ResourceConfigValue* configValue = result.value().entry->findValue(config, product);
+        if (configValue) {
+            return valueCast<T>(configValue->value.get());
         }
     }
     return nullptr;
+}
+
+template <typename T> T* getValueForConfig(ResourceTable* table, const StringPiece16& resName,
+                                           const ConfigDescription& config) {
+    return getValueForConfigAndProduct<T>(table, resName, config, {});
 }
 
 template <typename T> T* getValue(ResourceTable* table, const StringPiece16& resName) {
