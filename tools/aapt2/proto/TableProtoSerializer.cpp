@@ -242,21 +242,24 @@ std::unique_ptr<pb::ResourceTable> serializeTableToPb(ResourceTable* table) {
 
                 for (auto& configValue : entry->values) {
                     pb::ConfigValue* pbConfigValue = pbEntry->add_config_values();
-                    serializeConfig(configValue.config, pbConfigValue->mutable_config());
-
-                    pb::Value* pbValue = pbConfigValue->mutable_value();
-                    serializeSourceToPb(configValue.value->getSource(), &sourcePool,
-                                        pbValue->mutable_source());
-                    if (!configValue.value->getComment().empty()) {
-                        pbValue->set_comment(util::utf16ToUtf8(configValue.value->getComment()));
+                    serializeConfig(configValue->config, pbConfigValue->mutable_config());
+                    if (!configValue->product.empty()) {
+                        pbConfigValue->mutable_config()->set_product(configValue->product);
                     }
 
-                    if (configValue.value->isWeak()) {
+                    pb::Value* pbValue = pbConfigValue->mutable_value();
+                    serializeSourceToPb(configValue->value->getSource(), &sourcePool,
+                                        pbValue->mutable_source());
+                    if (!configValue->value->getComment().empty()) {
+                        pbValue->set_comment(util::utf16ToUtf8(configValue->value->getComment()));
+                    }
+
+                    if (configValue->value->isWeak()) {
                         pbValue->set_weak(true);
                     }
 
                     PbSerializerVisitor visitor(&sourcePool, &symbolPool, pbValue);
-                    configValue.value->accept(&visitor);
+                    configValue->value->accept(&visitor);
                 }
             }
         }

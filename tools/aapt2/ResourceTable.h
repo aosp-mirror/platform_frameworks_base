@@ -24,9 +24,12 @@
 #include "Source.h"
 #include "StringPool.h"
 
+#include <android-base/macros.h>
+#include <map>
 #include <memory>
 #include <string>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 
 namespace aapt {
@@ -46,19 +49,36 @@ struct Symbol {
     std::u16string comment;
 };
 
-/**
- * Represents a value defined for a given configuration.
- */
-struct ResourceConfigValue {
-    ConfigDescription config;
+class ResourceConfigValue {
+public:
+    /**
+     * The configuration for which this value is defined.
+     */
+    const ConfigDescription config;
+
+    /**
+     * The product for which this value is defined.
+     */
+    const std::string product;
+
+    /**
+     * The actual Value.
+     */
     std::unique_ptr<Value> value;
+
+    ResourceConfigValue(const ConfigDescription& config, const StringPiece& product) :
+            config(config), product(product.toString()) { }
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ResourceConfigValue);
 };
 
 /**
  * Represents a resource entry, which may have
  * varying values for each defined configuration.
  */
-struct ResourceEntry {
+class ResourceEntry {
+public:
     /**
      * The name of the resource. Immutable, as
      * this determines the order of this resource
@@ -72,24 +92,33 @@ struct ResourceEntry {
     Maybe<uint16_t> id;
 
     /**
-     * Whether this resource is public (and must maintain the same
-     * entry ID across builds).
+     * Whether this resource is public (and must maintain the same entry ID across builds).
      */
     Symbol symbolStatus;
 
     /**
      * The resource's values for each configuration.
      */
-    std::vector<ResourceConfigValue> values;
+    std::vector<std::unique_ptr<ResourceConfigValue>> values;
 
     ResourceEntry(const StringPiece16& name) : name(name.toString()) { }
+
+    ResourceConfigValue* findValue(const ConfigDescription& config);
+    ResourceConfigValue* findValue(const ConfigDescription& config, const StringPiece& product);
+    ResourceConfigValue* findOrCreateValue(const ConfigDescription& config,
+                                           const StringPiece& product);
+    std::vector<ResourceConfigValue*> findAllValues(const ConfigDescription& config);
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ResourceEntry);
 };
 
 /**
  * Represents a resource type, which holds entries defined
  * for this type.
  */
-struct ResourceTableType {
+class ResourceTableType {
+public:
     /**
      * The logical type of resource (string, drawable, layout, etc.).
      */
@@ -114,8 +143,10 @@ struct ResourceTableType {
     explicit ResourceTableType(const ResourceType type) : type(type) { }
 
     ResourceEntry* findEntry(const StringPiece16& name);
-
     ResourceEntry* findOrCreateEntry(const StringPiece16& name);
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ResourceTableType);
 };
 
 enum class PackageType {
@@ -125,16 +156,20 @@ enum class PackageType {
     Dynamic
 };
 
-struct ResourceTablePackage {
+class ResourceTablePackage {
+public:
     PackageType type = PackageType::App;
     Maybe<uint8_t> id;
     std::u16string name;
 
     std::vector<std::unique_ptr<ResourceTableType>> types;
 
+    ResourceTablePackage() = default;
     ResourceTableType* findType(ResourceType type);
-
     ResourceTableType* findOrCreateType(const ResourceType type);
+
+private:
+    DISALLOW_COPY_AND_ASSIGN(ResourceTablePackage);
 };
 
 /**
@@ -144,8 +179,6 @@ struct ResourceTablePackage {
 class ResourceTable {
 public:
     ResourceTable() = default;
-    ResourceTable(const ResourceTable&) = delete;
-    ResourceTable& operator=(const ResourceTable&) = delete;
 
     /**
      * When a collision of resources occurs, this method decides which value to keep.
@@ -155,38 +188,59 @@ public:
      */
     static int resolveValueCollision(Value* existing, Value* incoming);
 
-    bool addResource(const ResourceNameRef& name, const ConfigDescription& config,
-                     std::unique_ptr<Value> value, IDiagnostics* diag);
-
-    bool addResource(const ResourceNameRef& name, const ResourceId resId,
-                     const ConfigDescription& config, std::unique_ptr<Value> value,
+    bool addResource(const ResourceNameRef& name,
+                     const ConfigDescription& config,
+                     const StringPiece& product,
+                     std::unique_ptr<Value> value,
                      IDiagnostics* diag);
 
-    bool addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
-                          const Source& source, const StringPiece16& path,
+    bool addResource(const ResourceNameRef& name,
+                     const ResourceId resId,
+                     const ConfigDescription& config,
+                     const StringPiece& product,
+                     std::unique_ptr<Value> value,
+                     IDiagnostics* diag);
+
+    bool addFileReference(const ResourceNameRef& name,
+                          const ConfigDescription& config,
+                          const Source& source,
+                          const StringPiece16& path,
                           IDiagnostics* diag);
 
-    bool addFileReference(const ResourceNameRef& name, const ConfigDescription& config,
-                          const Source& source, const StringPiece16& path,
-                          std::function<int(Value*,Value*)> conflictResolver, IDiagnostics* diag);
+    bool addFileReference(const ResourceNameRef& name,
+                          const ConfigDescription& config,
+                          const Source& source,
+                          const StringPiece16& path,
+                          std::function<int(Value*,Value*)> conflictResolver,
+                          IDiagnostics* diag);
 
     /**
      * Same as addResource, but doesn't verify the validity of the name. This is used
      * when loading resources from an existing binary resource table that may have mangled
      * names.
      */
-    bool addResourceAllowMangled(const ResourceNameRef& name, const ConfigDescription& config,
-                                 std::unique_ptr<Value> value, IDiagnostics* diag);
-
-    bool addResourceAllowMangled(const ResourceNameRef& name, const ResourceId id,
-                                 const ConfigDescription& config, std::unique_ptr<Value> value,
+    bool addResourceAllowMangled(const ResourceNameRef& name,
+                                 const ConfigDescription& config,
+                                 const StringPiece& product,
+                                 std::unique_ptr<Value> value,
                                  IDiagnostics* diag);
 
-    bool setSymbolState(const ResourceNameRef& name, const ResourceId resId,
-                        const Symbol& symbol, IDiagnostics* diag);
+    bool addResourceAllowMangled(const ResourceNameRef& name,
+                                 const ResourceId id,
+                                 const ConfigDescription& config,
+                                 const StringPiece& product,
+                                 std::unique_ptr<Value> value,
+                                 IDiagnostics* diag);
 
-    bool setSymbolStateAllowMangled(const ResourceNameRef& name, const ResourceId resId,
-                                    const Symbol& symbol, IDiagnostics* diag);
+    bool setSymbolState(const ResourceNameRef& name,
+                        const ResourceId resId,
+                        const Symbol& symbol,
+                        IDiagnostics* diag);
+
+    bool setSymbolStateAllowMangled(const ResourceNameRef& name,
+                                    const ResourceId resId,
+                                    const Symbol& symbol,
+                                    IDiagnostics* diag);
 
     struct SearchResult {
         ResourceTablePackage* package;
@@ -229,13 +283,19 @@ private:
     bool addResourceImpl(const ResourceNameRef& name,
                          ResourceId resId,
                          const ConfigDescription& config,
+                         const StringPiece& product,
                          std::unique_ptr<Value> value,
                          const char16_t* validChars,
                          std::function<int(Value*,Value*)> conflictResolver,
                          IDiagnostics* diag);
 
-    bool setSymbolStateImpl(const ResourceNameRef& name, ResourceId resId,
-                            const Symbol& symbol, const char16_t* validChars, IDiagnostics* diag);
+    bool setSymbolStateImpl(const ResourceNameRef& name,
+                            ResourceId resId,
+                            const Symbol& symbol,
+                            const char16_t* validChars,
+                            IDiagnostics* diag);
+
+    DISALLOW_COPY_AND_ASSIGN(ResourceTable);
 };
 
 } // namespace aapt

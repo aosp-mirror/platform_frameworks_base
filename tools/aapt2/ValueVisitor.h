@@ -146,7 +146,7 @@ inline void visitAllValuesInPackage(ResourceTablePackage* pkg, RawValueVisitor* 
     for (auto& type : pkg->types) {
         for (auto& entry : type->entries) {
             for (auto& configValue : entry->values) {
-                configValue.value->accept(visitor);
+                configValue->value->accept(visitor);
             }
         }
     }

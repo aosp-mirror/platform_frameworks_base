@@ -15,9 +15,7 @@
  */
 
 #include "ConfigDescription.h"
-
 #include "link/Linkers.h"
-
 #include "test/Builders.h"
 #include "test/Context.h"
 
@@ -31,9 +29,9 @@ TEST(AutoVersionerTest, GenerateVersionedResources) {
     const ConfigDescription sw600dpLandConfig = test::parseConfigOrDie("sw600dp-land");
 
     ResourceEntry entry(u"foo");
-    entry.values.push_back(ResourceConfigValue{ defaultConfig });
-    entry.values.push_back(ResourceConfigValue{ landConfig });
-    entry.values.push_back(ResourceConfigValue{ sw600dpLandConfig });
+    entry.values.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
+    entry.values.push_back(util::make_unique<ResourceConfigValue>(landConfig, ""));
+    entry.values.push_back(util::make_unique<ResourceConfigValue>(sw600dpLandConfig, ""));
 
     EXPECT_TRUE(shouldGenerateVersionedResource(&entry, defaultConfig, 17));
     EXPECT_TRUE(shouldGenerateVersionedResource(&entry, landConfig, 17));
@@ -45,9 +43,9 @@ TEST(AutoVersionerTest, GenerateVersionedResourceWhenHigherVersionExists) {
     const ConfigDescription v21Config = test::parseConfigOrDie("v21");
 
     ResourceEntry entry(u"foo");
-    entry.values.push_back(ResourceConfigValue{ defaultConfig });
-    entry.values.push_back(ResourceConfigValue{ sw600dpV13Config });
-    entry.values.push_back(ResourceConfigValue{ v21Config });
+    entry.values.push_back(util::make_unique<ResourceConfigValue>(defaultConfig, ""));
+    entry.values.push_back(util::make_unique<ResourceConfigValue>(sw600dpV13Config, ""));
+    entry.values.push_back(util::make_unique<ResourceConfigValue>(v21Config, ""));
 
     EXPECT_TRUE(shouldGenerateVersionedResource(&entry, defaultConfig, 17));
     EXPECT_FALSE(shouldGenerateVersionedResource(&entry, defaultConfig, 22));

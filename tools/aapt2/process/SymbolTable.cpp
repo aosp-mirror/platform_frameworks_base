@@ -17,9 +17,7 @@
 #include "ConfigDescription.h"
 #include "Resource.h"
 #include "ValueVisitor.h"
-
 #include "process/SymbolTable.h"
-#include "util/Comparators.h"
 #include "util/Util.h"
 
 #include <androidfw/AssetManager.h>
@@ -55,12 +53,10 @@ const ISymbolTable::Symbol* SymbolTableWrapper::findByName(const ResourceName& n
 
     if (name.type == ResourceType::kAttr || name.type == ResourceType::kAttrPrivate) {
         const ConfigDescription kDefaultConfig;
-        auto iter = std::lower_bound(sr.entry->values.begin(), sr.entry->values.end(),
-                                     kDefaultConfig, cmp::lessThanConfig);
-
-        if (iter != sr.entry->values.end() && iter->config == kDefaultConfig) {
+        ResourceConfigValue* configValue = sr.entry->findValue(kDefaultConfig);
+        if (configValue) {
             // This resource has an Attribute.
-            if (Attribute* attr = valueCast<Attribute>(iter->value.get())) {
+            if (Attribute* attr = valueCast<Attribute>(configValue->value.get())) {
                 symbol->attribute = util::make_unique<Attribute>(*attr);
             } else {
                 return {};

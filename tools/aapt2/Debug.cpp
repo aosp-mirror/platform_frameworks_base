@@ -144,8 +144,8 @@ void Debug::printTable(ResourceTable* table) {
 
                 PrintVisitor visitor;
                 for (const auto& value : entry->values) {
-                    std::cout << "      (" << value.config << ") ";
-                    value.value->accept(&visitor);
+                    std::cout << "      (" << value->config << ") ";
+                    value->value->accept(&visitor);
                     std::cout << std::endl;
                 }
             }
@@ -176,7 +176,7 @@ void Debug::printStyleGraph(ResourceTable* table, const ResourceName& targetStyl
         if (result) {
             ResourceEntry* entry = result.value().entry;
             for (const auto& value : entry->values) {
-                if (Style* style = valueCast<Style>(value.value.get())) {
+                if (Style* style = valueCast<Style>(value->value.get())) {
                     if (style->parent && style->parent.value().name) {
                         parents.insert(style->parent.value().name.value());
                         stylesToVisit.push(style->parent.value().name.value());

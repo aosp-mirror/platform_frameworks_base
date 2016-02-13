@@ -23,7 +23,6 @@
 #include "java/AnnotationProcessor.h"
 #include "java/ClassDefinitionWriter.h"
 #include "java/JavaClassGenerator.h"
-#include "util/Comparators.h"
 #include "util/StringPiece.h"
 
 #include <algorithm>
@@ -258,12 +257,12 @@ bool JavaClassGenerator::writeEntriesForClass(ClassDefinitionWriter* outClassDef
         }
 
         for (const auto& configValue : entry->values) {
-            processor.appendComment(configValue.value->getComment());
+            processor.appendComment(configValue->value->getComment());
         }
 
         // If this is an Attribute, append the format Javadoc.
         if (!entry->values.empty()) {
-            if (Attribute* attr = valueCast<Attribute>(entry->values.front().value.get())) {
+            if (Attribute* attr = valueCast<Attribute>(entry->values.front()->value.get())) {
                 // We list out the available values for the given attribute.
                 addAttributeFormatDoc(&processor, attr);
             }
@@ -272,7 +271,7 @@ bool JavaClassGenerator::writeEntriesForClass(ClassDefinitionWriter* outClassDef
         if (type->type == ResourceType::kStyleable) {
             assert(!entry->values.empty());
             const Styleable* styleable = static_cast<const Styleable*>(
-                    entry->values.front().value.get());
+                    entry->values.front()->value.get());
             writeStyleableEntryForClass(outClassDef, &processor, packageNameToGenerate,
                                         unmangledName, styleable);
         } else {
@@ -311,11 +310,10 @@ bool JavaClassGenerator::generate(const StringPiece16& packageNameToGenerate,
 
             if (type->type == ResourceType::kAttr) {
                 // Also include private attributes in this same class.
-                auto iter = std::lower_bound(package->types.begin(), package->types.end(),
-                                             ResourceType::kAttrPrivate, cmp::lessThanType);
-                if (iter != package->types.end() && (*iter)->type == ResourceType::kAttrPrivate) {
+                ResourceTableType* privType = package->findType(ResourceType::kAttrPrivate);
+                if (privType) {
                     result = writeEntriesForClass(&classDef, packageNameToGenerate,
-                                                  package.get(), iter->get());
+                                                  package.get(), privType);
                     if (!result) {
                         return false;
                     }
