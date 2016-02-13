@@ -30,7 +30,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewParent;
-import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
@@ -45,7 +44,6 @@ import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.HideRecentsEvent;
 import com.android.systemui.recents.events.ui.StackViewScrolledEvent;
 import com.android.systemui.recents.events.ui.TaskViewDismissedEvent;
-import com.android.systemui.recents.misc.RectFEvaluator;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -547,7 +545,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             // We only really need to interpolate the bounds, progress and translation
             mTmpTransform.rect.set(Utilities.RECTF_EVALUATOR.evaluate(dismissFraction,
                     fromTransform.rect, toTransform.rect));
-            mTmpTransform.p = fromTransform.p + (toTransform.p - fromTransform.p) * dismissFraction;
+            mTmpTransform.dimAlpha = fromTransform.dimAlpha + (toTransform.dimAlpha - fromTransform.dimAlpha) *
+                    dismissFraction;
             mTmpTransform.translationZ = fromTransform.translationZ +
                     (toTransform.translationZ - fromTransform.translationZ) * dismissFraction;
 

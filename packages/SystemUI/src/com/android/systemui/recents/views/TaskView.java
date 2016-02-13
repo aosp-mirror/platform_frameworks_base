@@ -31,13 +31,11 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
-import android.util.IntProperty;
 import android.util.Property;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewOutlineProvider;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -81,39 +79,21 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * The dim overlay is generally calculated from the task progress, but occasionally (like when
      * launching) needs to be animated independently of the task progress.
      */
-    public static final Property<TaskView, Integer> DIM =
-            new IntProperty<TaskView>("dim") {
+    public static final Property<TaskView, Float> DIM_ALPHA =
+            new FloatProperty<TaskView>("dim") {
                 @Override
-                public void setValue(TaskView tv, int dim) {
-                    tv.setDim(dim);
-                }
-
-                @Override
-                public Integer get(TaskView tv) {
-                    return tv.getDim();
-                }
-            };
-
-    public static final Property<TaskView, Float> TASK_PROGRESS =
-            new FloatProperty<TaskView>("taskProgress") {
-                @Override
-                public void setValue(TaskView tv, float p) {
-                    tv.setTaskProgress(p);
+                public void setValue(TaskView tv, float dimAlpha) {
+                    tv.setDimAlpha(dimAlpha);
                 }
 
                 @Override
                 public Float get(TaskView tv) {
-                    return tv.getTaskProgress();
+                    return tv.getDimAlpha();
                 }
             };
 
     @ViewDebug.ExportedProperty(category="recents")
-    float mTaskProgress;
-    @ViewDebug.ExportedProperty(category="recents")
-    float mMaxDimScale;
-    @ViewDebug.ExportedProperty(category="recents")
-    int mDimAlpha;
-    AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(3f);
+    float mDimAlpha;
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
     Paint mDimLayerPaint = new Paint();
     float mActionButtonTranslationZ;
@@ -163,7 +143,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         super(context, attrs, defStyleAttr, defStyleRes);
         RecentsConfiguration config = Recents.getConfiguration();
         Resources res = context.getResources();
-        mMaxDimScale = res.getInteger(R.integer.recents_max_task_stack_view_dim) / 255f;
         mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius));
         if (config.fakeShadows) {
@@ -269,8 +248,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mTmpAnimators.clear();
         toTransform.applyToTaskView(this, mTmpAnimators, toAnimation, !config.fakeShadows);
         if (toAnimation.isImmediate()) {
-            if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
-                setTaskProgress(toTransform.p);
+            if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
+                setDimAlpha(toTransform.dimAlpha);
             }
             // Manually call back to the animator listener and update callback
             if (toAnimation.getListener() != null) {
@@ -281,9 +260,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             }
         } else {
             // Both the progress and the update are a function of the bounds movement of the task
-            if (Float.compare(getTaskProgress(), toTransform.p) != 0) {
-                ObjectAnimator anim = ObjectAnimator.ofFloat(this, TASK_PROGRESS, getTaskProgress(),
-                        toTransform.p);
+            if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
+                ObjectAnimator anim = ObjectAnimator.ofFloat(this, DIM_ALPHA, getDimAlpha(),
+                        toTransform.dimAlpha);
                 mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, anim));
             }
             if (updateCallback != null) {
@@ -301,7 +280,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /** Resets this view's properties */
     void resetViewProperties() {
         cancelTransformAnimation();
-        setDim(0);
+        setDimAlpha(0);
         setVisibility(View.VISIBLE);
         getViewBounds().reset();
         getHeaderView().reset();
@@ -376,74 +355,56 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         }
     }
 
-    /** Sets the current task progress. */
-    public void setTaskProgress(float p) {
-        mTaskProgress = p;
-        mViewBounds.setAlpha(p);
-        updateDimFromTaskProgress();
-    }
-
     public TaskViewHeader getHeaderView() {
         return mHeaderView;
     }
 
-    /** Returns the current task progress. */
-    public float getTaskProgress() {
-        return mTaskProgress;
-    }
-
-    /** Returns the current dim. */
-    public void setDim(int dim) {
+    /**
+     * Sets the current dim.
+     */
+    public void setDimAlpha(float dimAlpha) {
         RecentsConfiguration config = Recents.getConfiguration();
 
-        mDimAlpha = dim;
+        int dimAlphaInt = (int) (dimAlpha * 255);
+        mDimAlpha = dimAlpha;
+        mViewBounds.setAlpha(1f - (dimAlpha / TaskStackLayoutAlgorithm.DIM_MAX_VALUE));
         if (config.useHardwareLayers) {
             // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
             if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {
-                mDimColorFilter.setColor(Color.argb(mDimAlpha, 0, 0, 0));
+                mDimColorFilter.setColor(Color.argb(dimAlphaInt, 0, 0, 0));
                 mDimLayerPaint.setColorFilter(mDimColorFilter);
                 mContent.setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
             }
         } else {
-            float dimAlpha = mDimAlpha / 255.0f;
             mThumbnailView.setDimAlpha(dimAlpha);
             mHeaderView.setDimAlpha(dimAlpha);
         }
     }
 
-    /** Returns the current dim. */
-    public int getDim() {
+    /**
+     * Returns the current dim.
+     */
+    public float getDimAlpha() {
         return mDimAlpha;
     }
 
-    /** Animates the dim to the task progress. */
-    void animateDimToProgress(int duration, Animator.AnimatorListener animListener) {
+    /**
+     * Animates the dim to the given value.
+     */
+    void animateDimAlpha(float toDimAlpha, AnimationProps animation) {
         // Animate the dim into view as well
-        int toDim = getDimFromTaskProgress();
-        if (toDim != getDim()) {
-            ObjectAnimator anim = ObjectAnimator.ofInt(this, DIM, getDim(), toDim);
-            anim.setDuration(duration);
-            if (animListener != null) {
-                anim.addListener(animListener);
+        if (Float.compare(toDimAlpha, getDimAlpha()) != 0) {
+            Animator anim = animation.apply(AnimationProps.DIM_ALPHA, ObjectAnimator.ofFloat(this,
+                    DIM_ALPHA, getDimAlpha(), toDimAlpha));
+            if (animation.getListener() != null) {
+                anim.addListener(animation.getListener());
             }
             anim.start();
         } else {
-            animListener.onAnimationEnd(null);
+            if (animation.getListener() != null) {
+                animation.getListener().onAnimationEnd(null);
+            }
         }
-    }
-
-    /** Compute the dim as a function of the scale of this view. */
-    int getDimFromTaskProgress() {
-        float x = mTaskProgress < 0
-                ? 1f
-                : mDimInterpolator.getInterpolation(1f - mTaskProgress);
-        float dim = mMaxDimScale * x;
-        return (int) (dim * 255);
-    }
-
-    /** Update the dim as a function of the scale of this view. */
-    void updateDimFromTaskProgress() {
-        setDim(getDimFromTaskProgress());
     }
 
     /**
@@ -532,15 +493,18 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onPrepareLaunchTargetForEnterAnimation() {
         // These values will be animated in when onStartLaunchTargetEnterAnimation() is called
-        setDim(0);
+        setDimAlpha(0);
         mActionButtonView.setAlpha(0f);
     }
 
     @Override
     public void onStartLaunchTargetEnterAnimation(int duration, boolean screenPinningEnabled,
             ReferenceCountedTrigger postAnimationTrigger) {
+        // Un-dim the view before launching the target
+        AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT)
+                .setListener(postAnimationTrigger.decrementOnAnimationEnd());
         postAnimationTrigger.increment();
-        animateDimToProgress(duration, postAnimationTrigger.decrementOnAnimationEnd());
+        animateDimAlpha(0, animation);
 
         if (screenPinningEnabled) {
             showActionButton(true /* fadeIn */, duration /* fadeInDuration */);
@@ -550,12 +514,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onStartLaunchTargetLaunchAnimation(int duration, boolean screenPinningRequested,
             ReferenceCountedTrigger postAnimationTrigger) {
-        if (mDimAlpha > 0) {
-            ObjectAnimator anim = ObjectAnimator.ofInt(this, DIM, getDim(), 0);
-            anim.setDuration(duration);
-            anim.setInterpolator(Interpolators.ALPHA_OUT);
-            anim.start();
-        }
+        // Un-dim the view before launching the target
+        AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
+        animateDimAlpha(0, animation);
 
         postAnimationTrigger.increment();
         hideActionButton(true /* fadeOut */, duration,
