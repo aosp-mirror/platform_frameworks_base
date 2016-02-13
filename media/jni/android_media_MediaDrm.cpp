@@ -28,7 +28,9 @@
 
 #include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
+#include <cutils/properties.h>
 #include <media/IDrm.h>
+#include <media/IMediaDrmService.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
@@ -352,18 +354,29 @@ JDrm::~JDrm() {
 // static
 sp<IDrm> JDrm::MakeDrm() {
     sp<IServiceManager> sm = defaultServiceManager();
+    sp<IDrm> drm;
 
-    sp<IBinder> binder =
-        sm->getService(String16("media.player"));
-
-    sp<IMediaPlayerService> service =
-        interface_cast<IMediaPlayerService>(binder);
-
-    if (service == NULL) {
-        return NULL;
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.mediadrmservice.enable", value, NULL)
+        && (!strcmp("1", value) || !strcasecmp("true", value))) {
+        sp<IBinder> binder =
+            sm->getService(String16("media.drm"));
+        sp<IMediaDrmService> service =
+            interface_cast<IMediaDrmService>(binder);
+        if (service == NULL) {
+            return NULL;
+        }
+        drm = service->makeDrm();
+    } else {
+        sp<IBinder> binder =
+            sm->getService(String16("media.player"));
+        sp<IMediaPlayerService> service =
+            interface_cast<IMediaPlayerService>(binder);
+        if (service == NULL) {
+            return NULL;
+        }
+        drm = service->makeDrm();
     }
-
-    sp<IDrm> drm = service->makeDrm();
 
     if (drm == NULL || (drm->initCheck() != OK && drm->initCheck() != NO_INIT)) {
         return NULL;
