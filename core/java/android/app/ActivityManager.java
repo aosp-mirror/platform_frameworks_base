@@ -581,8 +581,12 @@ public class ActivityManager {
          * the task to the specified stack.
          */
         public static boolean useAnimationSpecForAppTransition(int stackId) {
+
+            // TODO: INVALID_STACK_ID is also animated because we don't persist stack id's across
+            // reboots.
             return stackId == FREEFORM_WORKSPACE_STACK_ID
-                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
+                    || stackId == FULLSCREEN_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID
+                    || stackId == INVALID_STACK_ID;
         }
 
         /** Returns true if the windows in the stack can receive input keys. */
