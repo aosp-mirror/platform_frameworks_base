@@ -81,7 +81,6 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bot.openOverflowMenu();
         bot.openDialog(R.string.menu_rename);
         bot.setDialogText(newName);
-        bot.dismissKeyboardIfPresent();
 
         device.waitForIdle(TIMEOUT);
         bot.findRenameDialogOkButton().click();
@@ -110,7 +109,6 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bot.openOverflowMenu();
         bot.openDialog(R.string.menu_rename);
         bot.setDialogText(newName);
-        bot.dismissKeyboardIfPresent();
 
         device.waitForIdle(TIMEOUT);
         bot.findRenameDialogCancelButton().click();
