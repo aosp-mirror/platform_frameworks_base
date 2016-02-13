@@ -236,4 +236,9 @@ public final class BridgeWindowSession implements IWindowSession {
     public void prepareToReplaceChildren(IBinder appToken) {
         // pass for now.
     }
+
+    @Override
+    public void updatePointerIcon(IWindow window) {
+        // pass for now.
+    }
 }

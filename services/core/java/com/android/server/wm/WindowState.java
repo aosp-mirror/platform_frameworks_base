@@ -2483,4 +2483,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mReplacingWindow = null;
         mAnimateReplacingWindow = false;
     }
+
+    float translateToWindowX(float x) {
+        float winX = x - mFrame.left;
+        if (mEnforceSizeCompat) {
+            winX *= mGlobalScale;
+        }
+        return winX;
+    }
+
+    float translateToWindowY(float y) {
+        float winY = y - mFrame.top;
+        if (mEnforceSizeCompat) {
+            winY *= mGlobalScale;
+        }
+        return winY;
+    }
 }
