@@ -249,14 +249,14 @@
     <!-- The height of the search bar space. -->
     <dimen name="recents_search_bar_space_height">64dp</dimen>
 
-    <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.03333</item>
-
     <!-- The overscroll percentage allowed on the stack. -->
     <item name="recents_stack_overscroll_percentage" format="float" type="dimen">0.0875</item>
 
-    <!-- The top offset for the task stack. -->
+    <!-- The top padding for the task stack. -->
     <dimen name="recents_stack_top_padding">16dp</dimen>
+
+    <!-- The side padding for the task stack. -->
+    <dimen name="recents_stack_left_right_padding">16dp</dimen>
 
     <!-- The dimesnsions of the dismiss all recents button. -->
     <dimen name="recents_dismiss_all_button_size">48dp</dimen>
@@ -274,7 +274,10 @@
     <dimen name="recents_stack_overscroll">24dp</dimen>
 
     <!-- The size of the peek area at the top of the stack. -->
-    <dimen name="recents_layout_focused_peek_size">@dimen/recents_history_button_height</dimen>
+    <dimen name="recents_layout_focused_top_peek_size">@dimen/recents_history_button_height</dimen>
+
+    <!-- The size of the peek area at the bottom of the stack. -->
+    <dimen name="recents_layout_focused_bottom_peek_size">@dimen/recents_history_button_height</dimen>
 
     <!-- The height of the history button. -->
     <dimen name="recents_history_button_height">48dp</dimen>

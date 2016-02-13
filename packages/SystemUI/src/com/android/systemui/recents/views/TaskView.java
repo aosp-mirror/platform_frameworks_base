@@ -500,7 +500,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onStartLaunchTargetEnterAnimation(int duration, boolean screenPinningEnabled,
             ReferenceCountedTrigger postAnimationTrigger) {
-        // Un-dim the view before launching the target
+        // Un-dim the view before/while launching the target
         AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT)
                 .setListener(postAnimationTrigger.decrementOnAnimationEnd());
         postAnimationTrigger.increment();
@@ -514,7 +514,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     @Override
     public void onStartLaunchTargetLaunchAnimation(int duration, boolean screenPinningRequested,
             ReferenceCountedTrigger postAnimationTrigger) {
-        // Un-dim the view before launching the target
+        // Un-dim the view before/while launching the target
         AnimationProps animation = new AnimationProps(duration, Interpolators.ALPHA_OUT);
         animateDimAlpha(0, animation);
 

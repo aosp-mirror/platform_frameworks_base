@@ -186,6 +186,7 @@ public class RecentsHistoryView extends LinearLayout
         mRecyclerView = (RecyclerView) findViewById(R.id.list);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mRecyclerView.getItemAnimator().setRemoveDuration(100);
         ItemTouchHelper touchHelper = new ItemTouchHelper(mItemTouchHandler);
         touchHelper.attachToRecyclerView(mRecyclerView);
     }

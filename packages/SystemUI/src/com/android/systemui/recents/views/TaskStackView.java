@@ -560,7 +560,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                     tv.updateViewPropertiesToTaskTransform(transform, AnimationProps.IMMEDIATE,
                             mRequestUpdateClippingListener);
                 } else {
-                    if (Float.compare(transform.relativeTaskProgress, 0f) <= 0) {
+                    if (transform.rect.top <= mLayoutAlgorithm.mStackRect.top) {
                         tv.updateViewPropertiesToTaskTransform(
                                 mLayoutAlgorithm.getBackOfStackTransform(),
                                 AnimationProps.IMMEDIATE, mRequestUpdateClippingListener);
@@ -838,7 +838,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             boolean requestViewFocus, int timerIndicatorDuration) {
         // Find the next task to focus
         int newFocusedTaskIndex = mStack.getTaskCount() > 0 ?
-                Math.max(0, Math.min(mStack.getTaskCount() - 1, focusTaskIndex)) : -1;
+                Utilities.clamp(focusTaskIndex, 0, mStack.getTaskCount() - 1) : -1;
         final Task newFocusedTask = (newFocusedTaskIndex != -1) ?
                 mStack.getStackTasks().get(newFocusedTaskIndex) : null;
 

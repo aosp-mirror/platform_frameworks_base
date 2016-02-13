@@ -18,6 +18,7 @@ package com.android.systemui.recents.misc;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.annotation.FloatRange;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -102,6 +103,46 @@ public class Utilities {
             Collections.addAll(setOut, array);
         }
         return setOut;
+    }
+
+    /**
+     * @return the clamped {@param value} between the provided {@param min} and {@param max}.
+     */
+    public static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * @return the clamped {@param value} between the provided {@param min} and {@param max}.
+     */
+    public static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * @return the clamped {@param value} between 0 and 1.
+     */
+    public static float clamp01(float value) {
+        return Math.max(0f, Math.min(1f, value));
+    }
+
+    /**
+     * Scales the {@param value} to be proportionally between the {@param min} and
+     * {@param max} values.
+     *
+     * @param value must be between 0 and 1
+     */
+    public static float mapRange(@FloatRange(from=0.0,to=1.0) float value, float min, float max) {
+        return min + (value * (max - min));
+    }
+
+    /**
+     * Scales the {@param value} proportionally from {@param min} and {@param max} to 0 and 1.
+     *
+     * @param value must be between {@param min} and {@param max}
+     */
+    public static float unmapRange(float value, float min, float max) {
+        return (value - min) / (max - min);
     }
 
     /** Scales a rect about its centroid */
