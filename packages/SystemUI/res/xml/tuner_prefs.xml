@@ -113,14 +113,9 @@
         android:title="@string/overview" >
 
         <com.android.systemui.tuner.TunerSwitch
-            android:key="overview_initial_state_paging"
-            android:title="@string/overview_initial_state_paging"
-            android:summary="@string/overview_initial_state_paging_desc" />
-
-        <com.android.systemui.tuner.TunerSwitch
-            android:key="overview_fast_toggle_via_button"
-            android:title="@string/overview_fast_toggle_via_button"
-            android:summary="@string/overview_fast_toggle_via_button_desc" />
+            android:key="overview_disable_fast_toggle_via_button"
+            android:title="@string/overview_disable_fast_toggle_via_button"
+            android:summary="@string/overview_disable_fast_toggle_via_button_desc" />
 
         <com.android.systemui.tuner.TunerSwitch
             android:key="overview_nav_bar_gesture"
