@@ -19,7 +19,6 @@
 #include <utils/RefBase.h>
 #include <utils/Log.h>
 
-#include "BufferPool.h"
 #include "FrameInfo.h"
 #include "FrameMetricsObserver.h"
 
@@ -31,10 +30,7 @@ namespace uirenderer {
 
 class FrameMetricsReporter {
 public:
-    FrameMetricsReporter() {
-        mBufferPool = new BufferPool(kBufferSize, kBufferCount);
-        LOG_ALWAYS_FATAL_IF(mBufferPool.get() == nullptr, "OOM: unable to allocate buffer pool");
-    }
+    FrameMetricsReporter() {}
 
     void addObserver(FrameMetricsObserver* observer) {
         mObservers.push_back(observer);
@@ -55,36 +51,13 @@ public:
     }
 
     void reportFrameMetrics(const int64_t* stats) {
-        BufferPool::Buffer* statsBuffer = mBufferPool->acquire();
-
-        if (statsBuffer != nullptr) {
-            // copy in frame stats
-            memcpy(statsBuffer->getBuffer(), stats, kBufferSize * sizeof(*stats));
-
-            // notify on requested threads
-            for (size_t i = 0; i < mObservers.size(); i++) {
-                mObservers[i]->notify(statsBuffer, mDroppedReports);
-            }
-
-            // drop our reference
-            statsBuffer->release();
-            mDroppedReports = 0;
-        } else {
-            mDroppedReports++;
+        for (size_t i = 0; i < mObservers.size(); i++) {
+            mObservers[i]->notify(stats);
         }
     }
 
-    int getDroppedReports() { return mDroppedReports; }
-
 private:
-    static const size_t kBufferCount = 3;
-    static const size_t kBufferSize = static_cast<size_t>(FrameInfoIndex::NumIndexes);
-
     std::vector< sp<FrameMetricsObserver> > mObservers;
-
-    sp<BufferPool> mBufferPool;
-
-    int mDroppedReports = 0;
 };
 
 }; // namespace uirenderer

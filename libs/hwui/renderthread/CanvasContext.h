@@ -159,14 +159,6 @@ public:
         }
     }
 
-    long getDroppedFrameReportCount() {
-        if (mFrameMetricsReporter.get() != nullptr) {
-            return mFrameMetricsReporter->getDroppedReports();
-        }
-
-        return 0;
-    }
-
 private:
     friend class RegisterFrameCallbackTask;
     // TODO: Replace with something better for layer & other GL object
