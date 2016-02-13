@@ -41,6 +41,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -81,6 +82,7 @@ import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.PointerIcon;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.IDockedStackListener;
@@ -466,6 +468,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final float[] mTmpFloats = new float[9];
     final Rect mTmpRect = new Rect();
     final Rect mTmpRect2 = new Rect();
+    final Region mTmpRegion = new Region();
 
     boolean mDisplayReady;
     boolean mSafeMode;
@@ -758,7 +761,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean completeDropLw(float x, float y) {
-        WindowState dropTargetWin = mDragState.getDropTargetWinLw(x, y);
+        WindowState dropTargetWin = getTouchableWinAtPointLocked(mDragState.mDisplay, x, y);
 
         DropPermissionsHandler dropPermissions = null;
         if (dropTargetWin != null &&
@@ -10170,6 +10173,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (displayId == Display.DEFAULT_DISPLAY) {
             displayContent.mTapDetector = new TaskTapPointerEventListener(this, displayContent);
             registerPointerEventListener(displayContent.mTapDetector);
+            registerPointerEventListener(mMousePositionTracker);
         }
 
         return displayContent;
@@ -10262,6 +10266,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.close();
             if (displayId == Display.DEFAULT_DISPLAY) {
                 unregisterPointerEventListener(displayContent.mTapDetector);
+                unregisterPointerEventListener(mMousePositionTracker);
             }
         }
         mAnimator.removeDisplayLocked(displayId);
@@ -10458,6 +10463,128 @@ public class WindowManagerService extends IWindowManager.Stub
             mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
             mTmpRect.inset(mTmpRect2);
             inOutBounds.intersect(mTmpRect);
+        }
+    }
+
+    /**
+     * Find the visible, touch-deliverable window under the given point
+     */
+    WindowState getTouchableWinAtPointLocked(Display display, float xf, float yf) {
+        WindowState touchedWin = null;
+        final int x = (int) xf;
+        final int y = (int) yf;
+
+        final WindowList windows = getWindowListLocked(display);
+        if (windows == null) {
+            return null;
+        }
+        final int N = windows.size();
+        for (int i = N - 1; i >= 0; i--) {
+            WindowState child = windows.get(i);
+            final int flags = child.mAttrs.flags;
+            if (!child.isVisibleLw()) {
+                continue;
+            }
+            if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
+                continue;
+            }
+
+            child.getTouchableRegion(mTmpRegion);
+
+            final int touchFlags = flags &
+                    (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+            if (mTmpRegion.contains(x, y) || touchFlags == 0) {
+                touchedWin = child;
+                break;
+            }
+        }
+
+        return touchedWin;
+    }
+
+    private MousePositionTracker mMousePositionTracker = new MousePositionTracker();
+
+    private static class MousePositionTracker implements PointerEventListener {
+        private boolean mLatestEventWasMouse;
+        private float mLatestMouseX;
+        private float mLatestMouseY;
+
+        void updatePosition(float x, float y) {
+            synchronized (this) {
+                mLatestEventWasMouse = true;
+                mLatestMouseX = x;
+                mLatestMouseY = y;
+            }
+        }
+
+        @Override
+        public void onPointerEvent(MotionEvent motionEvent) {
+            if (motionEvent.isFromSource(InputDevice.SOURCE_MOUSE)) {
+                updatePosition(motionEvent.getRawX(), motionEvent.getRawY());
+            } else {
+                synchronized (this) {
+                    mLatestEventWasMouse = false;
+                }
+            }
+        }
+    };
+
+    void updatePointerIcon(IWindow client) {
+        float mouseX, mouseY;
+
+        synchronized(mMousePositionTracker) {
+            if (!mMousePositionTracker.mLatestEventWasMouse) {
+                return;
+            }
+            mouseX = mMousePositionTracker.mLatestMouseX;
+            mouseY = mMousePositionTracker.mLatestMouseY;
+        }
+
+        synchronized (mWindowMap) {
+            if (mDragState != null) {
+                // Drag cursor overrides the app cursor.
+                return;
+            }
+            WindowState callingWin = windowForClientLocked(null, client, false);
+            if (callingWin == null) {
+                Slog.w(TAG_WM, "Bad requesting window " + client);
+                return;
+            }
+            final DisplayContent displayContent = callingWin.getDisplayContent();
+            if (displayContent == null) {
+                return;
+            }
+            Display display = displayContent.getDisplay();
+            WindowState windowUnderPointer = getTouchableWinAtPointLocked(display, mouseX, mouseY);
+            if (windowUnderPointer != callingWin) {
+                return;
+            }
+            try {
+                windowUnderPointer.mClient.updatePointerIcon(
+                        windowUnderPointer.translateToWindowX(mouseX),
+                        windowUnderPointer.translateToWindowY(mouseY));
+            } catch (RemoteException e) {
+                Slog.w(TAG_WM, "unable to update pointer icon");
+            }
+        }
+    }
+
+    void restorePointerIconLocked(Display display, float latestX, float latestY) {
+        // Mouse position tracker has not been getting updates while dragging, update it now.
+        mMousePositionTracker.updatePosition(latestX, latestY);
+
+        WindowState windowUnderPointer = getTouchableWinAtPointLocked(display, latestX, latestY);
+        if (windowUnderPointer != null) {
+            try {
+                windowUnderPointer.mClient.updatePointerIcon(
+                        windowUnderPointer.translateToWindowX(latestX),
+                        windowUnderPointer.translateToWindowY(latestY));
+            } catch (RemoteException e) {
+                Slog.w(TAG_WM, "unable to restore pointer icon");
+            }
+        } else {
+            InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_DEFAULT);
         }
     }
 

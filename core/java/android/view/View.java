@@ -21581,6 +21581,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mPointerIcon = pointerIcon;
+        if (mAttachInfo == null) {
+            return;
+        }
+        try {
+            mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
