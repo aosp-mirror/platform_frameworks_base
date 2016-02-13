@@ -25,7 +25,9 @@
 #include "JNIHelp.h"
 
 #include <binder/IServiceManager.h>
+#include <cutils/properties.h>
 #include <media/ICrypto.h>
+#include <media/IMediaDrmService.h>
 #include <media/IMediaPlayerService.h>
 #include <media/stagefright/foundation/ADebug.h>
 
@@ -61,18 +63,29 @@ JCrypto::~JCrypto() {
 // static
 sp<ICrypto> JCrypto::MakeCrypto() {
     sp<IServiceManager> sm = defaultServiceManager();
+    sp<ICrypto> crypto;
 
-    sp<IBinder> binder =
-        sm->getService(String16("media.player"));
-
-    sp<IMediaPlayerService> service =
-        interface_cast<IMediaPlayerService>(binder);
-
-    if (service == NULL) {
-        return NULL;
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.mediadrmservice.enable", value, NULL)
+        && (!strcmp("1", value) || !strcasecmp("true", value))) {
+        sp<IBinder> binder =
+            sm->getService(String16("media.drm"));
+        sp<IMediaDrmService> service =
+            interface_cast<IMediaDrmService>(binder);
+        if (service == NULL) {
+            return NULL;
+        }
+        crypto = service->makeCrypto();
+    } else {
+        sp<IBinder> binder =
+            sm->getService(String16("media.player"));
+        sp<IMediaPlayerService> service =
+            interface_cast<IMediaPlayerService>(binder);
+        if (service == NULL) {
+            return NULL;
+        }
+        crypto = service->makeCrypto();
     }
-
-    sp<ICrypto> crypto = service->makeCrypto();
 
     if (crypto == NULL || (crypto->initCheck() != OK && crypto->initCheck() != NO_INIT)) {
         return NULL;
