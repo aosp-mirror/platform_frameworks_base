@@ -398,6 +398,12 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
                 @Override
                 public void onUserSwitching(int newUserId) throws RemoteException {
                     mUserInfoController.reloadUserInfo();
+                    if (reply != null) {
+                        try {
+                            reply.sendResult(null);
+                        } catch (RemoteException e) {
+                        }
+                    }
                 }
 
                 @Override

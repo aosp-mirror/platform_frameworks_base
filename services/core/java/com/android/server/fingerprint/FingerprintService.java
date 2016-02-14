@@ -1186,6 +1186,12 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                     public void onUserSwitching(int newUserId) throws RemoteException {
                         mHandler.obtainMessage(MSG_USER_SWITCHING, newUserId, 0 /* unused */)
                                 .sendToTarget();
+                        if (reply != null) {
+                            try {
+                                reply.sendResult(null);
+                            } catch (RemoteException e) {
+                            }
+                        }
                     }
                     @Override
                     public void onUserSwitchComplete(int newUserId) throws RemoteException {
