@@ -30,33 +30,11 @@
 
 namespace aapt {
 
-struct FileToMerge {
-    /**
-     * The compiled file from which to read the data.
-     */
-    io::IFile* file;
-
-    /**
-     * Where the original, uncompiled file came from.
-     */
-    Source originalSource;
-
-    /**
-     * The destination path within the APK/archive.
-     */
-    std::string dstPath;
-};
-
 struct TableMergerOptions {
     /**
      * If true, resources in overlays can be added without previously having existed.
      */
     bool autoAddOverlay = false;
-
-    /**
-     * A filter that removes resources whose configurations don't match.
-     */
-    IConfigFilter* filter = nullptr;
 };
 
 /**
@@ -80,10 +58,6 @@ public:
      * are made to this ResourceTable for efficiency reasons.
      */
     TableMerger(IAaptContext* context, ResourceTable* outTable, const TableMergerOptions& options);
-
-    const std::map<ResourceKeyRef, FileToMerge>& getFilesToMerge() {
-        return mFilesToMerge;
-    }
 
     const std::set<std::u16string>& getMergedPackages() const {
         return mMergedPackages;
@@ -119,8 +93,7 @@ public:
 private:
     using FileMergeCallback = std::function<bool(const ResourceNameRef&,
                                                  const ConfigDescription& config,
-                                                 FileReference*,
-                                                 FileReference*)>;
+                                                 FileReference*, FileReference*)>;
 
     IAaptContext* mContext;
     ResourceTable* mMasterTable;
@@ -128,7 +101,6 @@ private:
     ResourceTablePackage* mMasterPackage;
 
     std::set<std::u16string> mMergedPackages;
-    std::map<ResourceKeyRef, FileToMerge> mFilesToMerge;
 
     bool mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, bool overlay);
 

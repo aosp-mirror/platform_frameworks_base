@@ -23,6 +23,7 @@
 #include "ResourceValues.h"
 #include "Source.h"
 #include "StringPool.h"
+#include "io/File.h"
 
 #include <android-base/macros.h>
 #include <map>
@@ -202,17 +203,17 @@ public:
                      IDiagnostics* diag);
 
     bool addFileReference(const ResourceNameRef& name,
-                          const ConfigDescription& config,
-                          const Source& source,
-                          const StringPiece16& path,
-                          IDiagnostics* diag);
+                              const ConfigDescription& config,
+                              const Source& source,
+                              const StringPiece16& path,
+                              IDiagnostics* diag);
 
-    bool addFileReference(const ResourceNameRef& name,
-                          const ConfigDescription& config,
-                          const Source& source,
-                          const StringPiece16& path,
-                          std::function<int(Value*,Value*)> conflictResolver,
-                          IDiagnostics* diag);
+    bool addFileReferenceAllowMangled(const ResourceNameRef& name,
+                                      const ConfigDescription& config,
+                                      const Source& source,
+                                      const StringPiece16& path,
+                                      io::IFile* file,
+                                      IDiagnostics* diag);
 
     /**
      * Same as addResource, but doesn't verify the validity of the name. This is used
@@ -279,6 +280,14 @@ public:
 
 private:
     ResourceTablePackage* findOrCreatePackage(const StringPiece16& name);
+
+    bool addFileReferenceImpl(const ResourceNameRef& name,
+                              const ConfigDescription& config,
+                              const Source& source,
+                              const StringPiece16& path,
+                              io::IFile* file,
+                              const char16_t* validChars,
+                              IDiagnostics* diag);
 
     bool addResourceImpl(const ResourceNameRef& name,
                          ResourceId resId,

@@ -277,20 +277,31 @@ bool ResourceTable::addFileReference(const ResourceNameRef& name,
                                      const Source& source,
                                      const StringPiece16& path,
                                      IDiagnostics* diag) {
-    return addFileReference(name, config, source, path, resolveValueCollision, diag);
+    return addFileReferenceImpl(name, config, source, path, nullptr, kValidNameChars, diag);
 }
 
-bool ResourceTable::addFileReference(const ResourceNameRef& name,
-                                     const ConfigDescription& config,
-                                     const Source& source,
-                                     const StringPiece16& path,
-                                     std::function<int(Value*,Value*)> conflictResolver,
-                                     IDiagnostics* diag) {
+bool ResourceTable::addFileReferenceAllowMangled(const ResourceNameRef& name,
+                                                 const ConfigDescription& config,
+                                                 const Source& source,
+                                                 const StringPiece16& path,
+                                                 io::IFile* file,
+                                                 IDiagnostics* diag) {
+    return addFileReferenceImpl(name, config, source, path, file, kValidNameMangledChars, diag);
+}
+
+bool ResourceTable::addFileReferenceImpl(const ResourceNameRef& name,
+                                         const ConfigDescription& config,
+                                         const Source& source,
+                                         const StringPiece16& path,
+                                         io::IFile* file,
+                                         const char16_t* validChars,
+                                         IDiagnostics* diag) {
     std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
             stringPool.makeRef(path));
     fileRef->setSource(source);
+    fileRef->file = file;
     return addResourceImpl(name, ResourceId{}, config, StringPiece{}, std::move(fileRef),
-                           kValidNameChars, conflictResolver, diag);
+                           kValidNameChars, resolveValueCollision, diag);
 }
 
 bool ResourceTable::addResourceAllowMangled(const ResourceNameRef& name,

@@ -25,8 +25,12 @@
 
 namespace aapt {
 
+struct DebugPrintTableOptions {
+    bool showSources = false;
+};
+
 struct Debug {
-    static void printTable(ResourceTable* table);
+    static void printTable(ResourceTable* table, const DebugPrintTableOptions& options = {});
     static void printStyleGraph(ResourceTable* table,
                                 const ResourceName& targetStyle);
     static void dumpHex(const void* data, size_t len);

@@ -424,8 +424,17 @@ static bool compileFile(IAaptContext* context, const CompileOptions& options,
 class CompileContext : public IAaptContext {
 private:
     StdErrDiagnostics mDiagnostics;
+    bool mVerbose = false;
 
 public:
+    void setVerbose(bool val) {
+        mVerbose = val;
+    }
+
+    bool verbose() override {
+        return mVerbose;
+    }
+
     IDiagnostics* getDiagnostics() override {
        return &mDiagnostics;
     }
@@ -453,8 +462,10 @@ public:
  * Entry point for compilation phase. Parses arguments and dispatches to the correct steps.
  */
 int compile(const std::vector<StringPiece>& args) {
+    CompileContext context;
     CompileOptions options;
 
+    bool verbose = false;
     Flags flags = Flags()
             .requiredFlag("-o", "Output path", &options.outputPath)
             .optionalFlag("--dir", "Directory to scan for resources", &options.resDir)
@@ -462,12 +473,13 @@ int compile(const std::vector<StringPiece>& args) {
                             "(en-XA and ar-XB)", &options.pseudolocalize)
             .optionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
                             &options.legacyMode)
-            .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
+            .optionalSwitch("-v", "Enables verbose logging", &verbose);
     if (!flags.parse("aapt2 compile", args, &std::cerr)) {
         return 1;
     }
 
-    CompileContext context;
+    context.setVerbose(verbose);
+
     std::unique_ptr<IArchiveWriter> archiveWriter;
 
     std::vector<ResourcePathData> inputData;
