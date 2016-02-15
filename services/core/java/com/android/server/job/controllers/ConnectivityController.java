@@ -47,6 +47,7 @@ public class ConnectivityController extends StateController implements
     private final List<JobStatus> mTrackedJobs = new LinkedList<JobStatus>();
     private final BroadcastReceiver mConnectivityChangedReceiver =
             new ConnectivityChangedReceiver();
+    ConnectivityManager mConnectivityManager;
     /** Singleton. */
     private static ConnectivityController mSingleton;
     private static Object sCreationLock = new Object();
@@ -73,6 +74,8 @@ public class ConnectivityController extends StateController implements
                 mConnectivityChangedReceiver, UserHandle.ALL, intentFilter, null, null);
         ConnectivityService cs =
                 (ConnectivityService)ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+        mConnectivityManager = (ConnectivityManager)
+                mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cs != null) {
             if (cs.getActiveNetworkInfo() != null) {
                 mNetworkConnected = cs.getActiveNetworkInfo().isConnected();
@@ -85,6 +88,10 @@ public class ConnectivityController extends StateController implements
     public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
             synchronized (mTrackedJobs) {
+                // Register network active listener when the queue is about to become non-empty.
+                if (mTrackedJobs.isEmpty()) {
+                    mConnectivityManager.addDefaultNetworkActiveListener(this);
+                }
                 jobStatus.connectivityConstraintSatisfied.set(mNetworkConnected);
                 jobStatus.unmeteredConstraintSatisfied.set(mNetworkUnmetered);
                 mTrackedJobs.add(jobStatus);
@@ -97,6 +104,9 @@ public class ConnectivityController extends StateController implements
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
             synchronized (mTrackedJobs) {
                 mTrackedJobs.remove(jobStatus);
+                if (mTrackedJobs.isEmpty()) {
+                    mConnectivityManager.removeDefaultNetworkActiveListener(this);
+                }
             }
         }
     }
