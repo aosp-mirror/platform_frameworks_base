@@ -844,6 +844,7 @@ class MountService extends IMountService.Stub
             // user directories are locked or unlocked based on the current
             // emulation status.
             final boolean initLocked = StorageManager.isEmulatedFileBasedEncryptionEnabled();
+            Slog.d(TAG, "Setting up emulation state, initlocked=" + initLocked);
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
             for (UserInfo user : users) {
                 try {
@@ -851,7 +852,7 @@ class MountService extends IMountService.Stub
                         mCryptConnector.execute("cryptfs", "lock_user_key", user.id);
                     } else {
                         mCryptConnector.execute("cryptfs", "unlock_user_key", user.id,
-                                user.serialNumber, "!");
+                                user.serialNumber, "!", "!");
                     }
                 } catch (NativeDaemonConnectorException e) {
                     Slog.w(TAG, "Failed to init vold", e);
