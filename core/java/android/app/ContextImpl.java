@@ -492,6 +492,7 @@ class ContextImpl extends Context {
         if (!file.exists()) {
             try {
                 Os.mkdir(file.getAbsolutePath(), 0771);
+                Os.chmod(file.getAbsolutePath(), 0771);
             } catch (ErrnoException e) {
                 if (e.errno == OsConstants.EEXIST) {
                     // We must have raced with someone; that's okay
