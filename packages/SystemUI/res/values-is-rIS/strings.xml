@@ -301,6 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"skjáfesting"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"leita"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ekki var hægt að ræsa <xliff:g id="APP">%s</xliff:g>."</string>
+    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
+    <skip />
     <string name="recents_history_button_label" msgid="5153358867807604821">"Ferill"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Hreinsa"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Lárétt skipting"</string>
@@ -521,4 +523,5 @@
     <string name="select_keycode" msgid="7413765103381924584">"Veldu lyklaborðshnapp"</string>
     <string name="preview" msgid="9077832302472282938">"Forskoðun"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dragðu til að bæta við reitum"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Breyta"</string>
 </resources>
