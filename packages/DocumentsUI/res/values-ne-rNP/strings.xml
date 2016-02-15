@@ -53,7 +53,7 @@
     <string name="drawer_close" msgid="7602734368552123318">"मूलहरू लुकाउनुहोस्"</string>
     <string name="save_error" msgid="6167009778003223664">"कागजात सुरक्षित गर्न विफल भयो"</string>
     <string name="create_error" msgid="3735649141335444215">"फोल्डर सिर्जना गर्न असफल भयो"</string>
-    <string name="query_error" msgid="5999895349602476581">"यो समय सामग्री लोड गर्न सक्दैन"</string>
+    <string name="query_error" msgid="5999895349602476581">"अहिले सामग्री लोड गर्न सक्दैन"</string>
     <string name="root_recent" msgid="4470053704320518133">"हालैको"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> खाली"</string>
     <string name="root_type_service" msgid="2178854894416775409">"भण्डारण सेवाहरू"</string>
@@ -62,7 +62,7 @@
     <string name="root_type_apps" msgid="8838065367985945189">"थप अनुप्रयोगहरू"</string>
     <string name="empty" msgid="7858882803708117596">"कुनै वस्तु छैन।"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s मा कुनै पनि मेल खानेहरू छैन"</string>
-    <string name="toast_no_application" msgid="4632640357724698144">"फाइल खोल्न सकिदैन"</string>
+    <string name="toast_no_application" msgid="4632640357724698144">"फाइल खोल्न सक्दैन"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"केही कागजातहरू मेट्न असमर्थ छ"</string>
     <string name="share_via" msgid="8966594246261344259">"माध्यमबाट साझेदारी गर्नुहोस्"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फाइलहरू प्रतिलिपि गर्दै:"</string>
