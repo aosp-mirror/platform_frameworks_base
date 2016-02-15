@@ -426,6 +426,7 @@
     <protected-broadcast android:name="android.intent.action.DYNAMIC_SENSOR_CHANGED" />
 
     <protected-broadcast android:name="android.intent.action.ACTION_RADIO_OFF" />
+    <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
