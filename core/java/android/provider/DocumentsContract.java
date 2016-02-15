@@ -358,6 +358,7 @@ public final class DocumentsContract {
          * @see #COLUMN_MIME_TYPE
          * @see DocumentsProvider#openTypedDocument(String, String, Bundle,
          *      android.os.CancellationSignal)
+         * @see DocumentsProvider#getDocumentStreamTypes(String, String)
          */
         public static final int FLAG_VIRTUAL_DOCUMENT = 1 << 9;
 
