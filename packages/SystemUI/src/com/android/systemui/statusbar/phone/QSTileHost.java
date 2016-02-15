@@ -147,8 +147,9 @@ public final class QSTileHost implements QSTile.Host, Tunable {
 
         mServices = new TileServices(this, mLooper);
 
-        mAutoTiles = new AutoTileManager(context, this);
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
+        // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
+        mAutoTiles = new AutoTileManager(context, this);
     }
 
     public void setHeaderView(View view) {
