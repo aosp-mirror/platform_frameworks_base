@@ -302,8 +302,8 @@ final class UserController {
                     if (parent != null) {
                         final Intent profileUnlockedIntent = new Intent(
                                 Intent.ACTION_MANAGED_PROFILE_UNLOCKED);
-                        unlockedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
-                        unlockedIntent.addFlags(
+                        profileUnlockedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
+                        profileUnlockedIntent.addFlags(
                                 Intent.FLAG_RECEIVER_REGISTERED_ONLY
                                 | Intent.FLAG_RECEIVER_FOREGROUND);
                         mService.broadcastIntentLocked(null, null, profileUnlockedIntent,
