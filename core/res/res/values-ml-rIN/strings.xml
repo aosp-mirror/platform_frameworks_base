@@ -1558,6 +1558,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"ചില പ്രവർത്തനക്ഷമതകൾ പരിമിതപ്പെടാം"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"അൺലോക്കുചെയ്യാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"ഉപയോക്തൃ ഡാറ്റ ലോക്കുചെയ്തു"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"ഔദ്യോഗിക പ്രൊഫൈൽ ലോക്കുചെയ്തു"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"ഔദ്യോഗിക പ്രൊഫൈൽ അൺലോക്കുചെയ്യാൻ ടാപ്പുചെയ്യുക"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> എന്നതിലേക്ക് കണക്റ്റുചെയ്തു"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ഫയലുകൾ കാണുന്നതിന് ടാപ്പുചെയ്യുക"</string>
     <string name="pin_target" msgid="3052256031352291362">"പിൻ ചെയ്യുക"</string>

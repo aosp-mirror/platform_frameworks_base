@@ -1555,12 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"O administrador de %1$s desactivou este paquete. Contacta con el para obter máis información."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tes mensaxes novas"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Abre a aplicación de SMS para ver as mensaxes"</string>
-    <!-- no translation found for user_encrypted_title (9054897468831672082) -->
-    <skip />
-    <!-- no translation found for user_encrypted_message (4923292604515744267) -->
-    <skip />
-    <!-- no translation found for user_encrypted_detail (5708447464349420392) -->
-    <skip />
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Pode haber funcións limitadas"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Toca para desbloquear"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Datos do usuario bloqueados"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil de traballo bloqueado"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Toca para desbloquear o perfil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toca para ver os ficheiros"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fixar"</string>

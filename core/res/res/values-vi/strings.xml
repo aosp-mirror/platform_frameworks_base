@@ -1558,6 +1558,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"Một số chức năng có thể bị hạn chế"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Nhấn để mở khóa"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Đã khóa dữ liệu người dùng"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Đã khóa hồ sơ công việc"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Nhấn để mở khóa hồ sơ công việc"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Đã kết nối với <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Nhấn để xem tệp"</string>
     <string name="pin_target" msgid="3052256031352291362">"Ghim"</string>

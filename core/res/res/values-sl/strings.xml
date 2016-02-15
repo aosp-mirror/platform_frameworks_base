@@ -1596,6 +1596,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"Nekatere funkcije bodo omejene"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Dotaknite se, da odklenete"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Uporabniški podatki zaklenjeni"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Delovni profil je zaklenjen"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Dotaknite se za odkl. del. pr."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Vzpostavljena povezava z napravo <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dotaknite se, če si želite ogledati datoteke"</string>
     <string name="pin_target" msgid="3052256031352291362">"Pripenjanje"</string>
