@@ -16,12 +16,14 @@
 
 package android.app.admin;
 
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.auditing.SecurityLog;
 import android.auditing.SecurityLog.SecurityEvent;
@@ -5606,6 +5608,25 @@ public class DevicePolicyManager {
     public void setOrganizationColor(@NonNull ComponentName admin, int color) {
         try {
             mService.setOrganizationColor(admin, color);
+        } catch (RemoteException re) {
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
+        }
+    }
+
+    /**
+     * @hide
+     *
+     * Sets the color used for customization.
+     *
+     * @param color The 32bit representation of the color to be used.
+     * @param userId which user to set the color to.
+     * @RequiresPermission(allOf = {
+     *       Manifest.permission.MANAGE_USERS,
+     *       Manifest.permission.INTERACT_ACROSS_USERS_FULL})
+     */
+    public void setOrganizationColorForUser(@ColorInt int color, @UserIdInt int userId) {
+        try {
+            mService.setOrganizationColorForUser(color, userId);
         } catch (RemoteException re) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
         }

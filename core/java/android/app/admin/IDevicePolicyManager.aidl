@@ -277,6 +277,7 @@ interface IDevicePolicyManager {
     boolean isSeparateProfileChallengeAllowed(int userHandle);
 
     void setOrganizationColor(in ComponentName admin, in int color);
+    void setOrganizationColorForUser(in int color, in int userId);
     int getOrganizationColor(in ComponentName admin);
     int getOrganizationColorForUser(int userHandle);
 
