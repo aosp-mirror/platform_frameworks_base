@@ -2896,6 +2896,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 throw new SecurityException("Package " + packageName + " was not found!");
             }
 
+            if (mSafeMode && !ps.isSystem()) {
+                throw new SecurityException("Package " + packageName + " not a system app!");
+            }
+
             if (ps.frozen) {
                 throw new SecurityException("Package " + packageName + " is currently frozen!");
             }
@@ -3275,12 +3279,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 flags |= PackageManager.MATCH_ENCRYPTION_AWARE;
             }
         }
-
-        // Safe mode means we should ignore any third-party apps
-        if (mSafeMode) {
-            flags |= PackageManager.MATCH_SYSTEM_ONLY;
-        }
-
         return flags;
     }
 
@@ -3340,6 +3338,12 @@ public class PackageManagerService extends IPackageManager.Stub {
             Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
                     + " with flags 0x" + Integer.toHexString(flags), new Throwable());
         }
+
+        // Safe mode means we shouldn't match any third-party components
+        if (mSafeMode) {
+            flags |= PackageManager.MATCH_SYSTEM_ONLY;
+        }
+
         return updateFlags(flags, userId);
     }
 
