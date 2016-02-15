@@ -227,12 +227,14 @@
 
     <!-- The radius of the rounded corners on a task view. -->
     <dimen name="recents_task_view_rounded_corners_radius">2dp</dimen>
+    <!-- The radius of the rounded corners on a task view's shadow. -->
+    <dimen name="recents_task_view_shadow_rounded_corners_radius">12dp</dimen>
 
     <!-- The min translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_min">16dp</dimen>
+    <dimen name="recents_task_view_z_min">3dp</dimen>
 
     <!-- The max translation in the Z index for the last task. -->
-    <dimen name="recents_task_view_z_max">48dp</dimen>
+    <dimen name="recents_task_view_z_max">24dp</dimen>
 
     <!-- The amount to translate when animating the removal of a task. -->
     <dimen name="recents_task_view_remove_anim_translation_x">100dp</dimen>
@@ -273,11 +275,11 @@
     <!-- The amount to allow the stack to overscroll. -->
     <dimen name="recents_stack_overscroll">24dp</dimen>
 
-    <!-- The size of the peek area at the top of the stack. -->
+    <!-- The size of the peek area at the top of the stack (below the status bar). -->
     <dimen name="recents_layout_focused_top_peek_size">@dimen/recents_history_button_height</dimen>
 
-    <!-- The size of the peek area at the bottom of the stack. -->
-    <dimen name="recents_layout_focused_bottom_peek_size">@dimen/recents_history_button_height</dimen>
+    <!-- The size of each task peek area at the bottom of the stack (above the nav bar). -->
+    <dimen name="recents_layout_focused_bottom_task_peek_size">16dp</dimen>
 
     <!-- The height of the history button. -->
     <dimen name="recents_history_button_height">48dp</dimen>
