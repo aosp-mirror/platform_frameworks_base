@@ -31747,7 +31747,7 @@ package android.provider {
     method public android.database.Cursor queryRecentDocuments(java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
     method public abstract android.database.Cursor queryRoots(java.lang.String[]) throws java.io.FileNotFoundException;
     method public android.database.Cursor querySearchDocuments(java.lang.String, java.lang.String, java.lang.String[]) throws java.io.FileNotFoundException;
-    method public boolean removeDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
+    method public void removeDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public java.lang.String renameDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public final void revokeDocumentPermission(java.lang.String);
     method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
