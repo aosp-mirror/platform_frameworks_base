@@ -1558,6 +1558,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"કેટલીક કાર્યક્ષમતા મર્યાદિત હોઈ શકે છે"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"અનલૉક કરવા માટે ટૅપ કરો"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"વપરાશકર્તા ડેટા લૉક કર્યો"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"કાર્ય પ્રોફાઇલ લૉક કરી"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"કાર્ય પ્રોફાઇલ અનલૉક કરવા ટૅપ કરો"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> થી કનેક્ટ કરેલું છે"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ફાઇલો જોવા માટે ટૅપ કરો"</string>
     <string name="pin_target" msgid="3052256031352291362">"પિન કરો"</string>

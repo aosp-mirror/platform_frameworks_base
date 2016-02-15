@@ -1558,6 +1558,10 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"Vissa funktioner är begränsade"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Tryck om du vill låsa upp"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Användaruppgifterna är låsta"</string>
+    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
+    <skip />
+    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
+    <skip />
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Ansluten till <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Filerna visas om du trycker här"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fäst"</string>

@@ -1555,11 +1555,12 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"‏%1$s منتظم کی جانب سے غیر فعال کر دیا گیا۔ مزید جاننے کیلئے ان سے رابطہ کریں۔"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"آپ کے پاس نئے پیغامات ہیں"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏دیکھنے کیلئے SMS ایپ کھولیں"</string>
-    <!-- no translation found for user_encrypted_title (9054897468831672082) -->
+    <string name="user_encrypted_title" msgid="9054897468831672082">"کچھ فعالیت محدود ہو سکتی ہے"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"غیرمقفل کرنے کیلئے تھپتھپائیں"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"صارف کا ڈیٹا مقفل ہے"</string>
+    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
     <skip />
-    <!-- no translation found for user_encrypted_message (4923292604515744267) -->
-    <skip />
-    <!-- no translation found for user_encrypted_detail (5708447464349420392) -->
+    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
     <skip />
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> سے منسلک"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"فائلوں کو دیکھنے کیلئے تھپتھپائیں"</string>

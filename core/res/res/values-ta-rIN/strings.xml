@@ -1558,6 +1558,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"சில செயல்பாடு வரம்பிடப்பட்டிருக்கலாம்"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"திறக்க, தட்டவும்"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"பயனர் தரவு பூட்டப்பட்டது"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"பணி சுயவிவரம் பூட்டியுள்ளது"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"பணி சுயவிவரத்தை திறக்க, தட்டுக"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> உடன் இணைக்கப்பட்டது"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"கோப்புகளைப் பார்க்க, தட்டவும்"</string>
     <string name="pin_target" msgid="3052256031352291362">"பின் செய்"</string>

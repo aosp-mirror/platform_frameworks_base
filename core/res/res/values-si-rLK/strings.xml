@@ -1557,12 +1557,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s පරිපාලක විසින් අබල කරන ලදී. තව දැන ගැනීමට ඔවුන් අමතන්න."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ඔබට නව පණිවිඩ තිබේ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"බැලීමට විවෘත SMS යෙදුම විවෘත කරන්න"</string>
-    <!-- no translation found for user_encrypted_title (9054897468831672082) -->
-    <skip />
-    <!-- no translation found for user_encrypted_message (4923292604515744267) -->
-    <skip />
-    <!-- no translation found for user_encrypted_detail (5708447464349420392) -->
-    <skip />
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ඇතැම් ක්‍රියාකාරිත්ව සීමිත විය හැකිය"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"අගුලු හැරීමට තට්ටු කරන්න"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"පරිශීලක දත්ත අගුලු දමා ඇත"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"කාර්යාල පැතිකඩ අගුලු දමා ඇත"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"කාර්යාල පැතිකඩ අගුලු හැරීමට තට්ටු කරන්න"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> වෙත සම්බන්ධ විය"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ගොනු බැලීමට තට්ටු කරන්න"</string>
     <string name="pin_target" msgid="3052256031352291362">"අමුණන්න"</string>

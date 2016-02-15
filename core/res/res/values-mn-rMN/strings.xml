@@ -1553,12 +1553,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s админ идэвхгүй болгосон. Дэлгэрэнгүй мэдэхийн тулд тэдэнтэй холбоо барина уу."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Танд шинэ зурвасууд байна"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Үзэхийн тулд SMS аппыг нээх"</string>
-    <!-- no translation found for user_encrypted_title (9054897468831672082) -->
-    <skip />
-    <!-- no translation found for user_encrypted_message (4923292604515744267) -->
-    <skip />
-    <!-- no translation found for user_encrypted_detail (5708447464349420392) -->
-    <skip />
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Зарим үйлдэл хязгаарлалттай байж болно"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Түгжээг тайлахын тулд дар"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Хэрэглэгчийн мэдээлэл түгжигдсэн"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Ажлын профайлыг түгжсэн"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Ажлын профайлын түгжээг тайлахын тулд дарна уу"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-д холбогдсон"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Файлыг үзэхийн тулд дарна уу"</string>
     <string name="pin_target" msgid="3052256031352291362">"PIN"</string>

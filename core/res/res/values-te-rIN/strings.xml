@@ -1558,6 +1558,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"కొంత కార్యాచరణ పరిమితం కావచ్చు"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"అన్‌లాక్ చేయడానికి నొక్కండి"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"వినియోగదారు డేటా లాక్ అయ్యింది"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"కార్యాలయ ప్రొఫైల్ లాక్ అయింది"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"కార్యాలయ ప్రొఫైల్ అన్‌లాక్ చేయుటకు నొక్కండి"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ఫైల్‌లను వీక్షించడానికి నొక్కండి"</string>
     <string name="pin_target" msgid="3052256031352291362">"పిన్ చేయి"</string>

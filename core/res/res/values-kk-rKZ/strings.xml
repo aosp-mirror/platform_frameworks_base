@@ -1555,9 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s әкімшісі өшірген. Қосымша мәліметтер алу үшін оларға хабарласыңыз."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Сізде жаңа хабарлар бар"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Көру үшін SMS қолданбасын ашыңыз"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Кейбір функциялар шектеулі болуы мүмкін"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Кейбір функциялар істемеуі мүмкін"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Құлыпты ашу үшін түртіңіз"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Пайдаланушы деректері құлыптаулы"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Жұмыс профилі құлыптаулы"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Жұмыс профилінің құлпын ашу үшін түртіңіз"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> қосылу орындалды"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Файлдарды көру үшін түртіңіз"</string>
     <string name="pin_target" msgid="3052256031352291362">"PIN код"</string>

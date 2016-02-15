@@ -1558,6 +1558,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"Des fonctionnalités peuvent être limitées"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Appuyer pour déverrouiller"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Infos sur utilis. verrouillées"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil professionnel verrouillé"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"App. pour déver. profil profes."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connecté à <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Appuyez ici pour voir les fichiers."</string>
     <string name="pin_target" msgid="3052256031352291362">"Épingler"</string>
