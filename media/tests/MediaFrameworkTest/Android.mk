@@ -7,6 +7,8 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
+LOCAL_JAVA_LANGUAGE_VERSION := 1.8
+
 LOCAL_STATIC_JAVA_LIBRARIES := easymocklib \
     mockito-target \
     core-tests \
