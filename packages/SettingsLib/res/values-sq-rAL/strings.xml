@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Lejo gjithmonë skanimet për Wi-Fi edhe kur je në lëvizje"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Përdor klientin DHCP të versionit paraprak"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Të dhënat celulare gjithmonë aktive"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Çaktivizo volumin absolut"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kur ky funksion aktivizohet, Wi‑Fi bëhet më agresiv në kalimin e lidhjes së të dhënave te rrjeti celular, në rastet kur sinjali Wi‑Fi është i dobët"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Këto cilësime janë të projektuara vetëm për përdorim në programim. Ato mund të shkaktojnë që pajisja dhe aplikacionet në të, të mos punojnë ose të veprojnë në mënyrë të gabuar."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiko apl. përmes USB-së"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollo aplikacionet e instaluara nëpërmjet ADB/ADT për sjellje të dëmshme."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Çaktivizon funksionin e volumit absolut të Bluetooth në rast të problemeve të volumit me pajisjet në largësi, si p.sh. një volum i lartë i papranueshëm ose mungesa e kontrollit."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminali lokal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivizo aplikacionin terminal që ofron qasje në guaskën lokale"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Kontrolli HDCP"</string>

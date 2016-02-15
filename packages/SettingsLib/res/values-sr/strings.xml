@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Увек дозволи скенирање Wi‑Fi-ја у ромингу"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Користи застарели DHCP клијент"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Подаци за мобилне уређаје су увек активни"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Онемогући главно подешавање јачине звука"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Приказ опција за сертификацију бежичног екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Повећава ниво евидентирања за Wi‑Fi. Приказ по SSID RSSI-у у бирачу Wi‑Fi мреже"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Када се омогући, Wi‑Fi ће бити агресивнији при пребацивању мреже за пренос података на Мобилну, када је Wi‑Fi сигнал слаб"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ова подешавања су намењена само за програмирање. Могу да изазову престанак функционисања или неочекивано понашање уређаја и апликација на њему."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Верификуј апликације преко USB-а"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверава да ли су апликације инсталиране преко ADB-а/ADT-а штетне."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Онемогућава главно подешавање јачине звука на Bluetooth уређају у случају проблема са јачином звука на даљинским уређајима, као што су изузетно велика јачина звука или недостатак контроле."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локални терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Омогући аплик. терминала за приступ локалном командном окружењу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP провера"</string>

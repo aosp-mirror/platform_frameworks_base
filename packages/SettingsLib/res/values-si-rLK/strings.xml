@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi රෝම් පරිලෝකන වෙතට සැමවිට අවසර දෙන්න"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"ලෙගසි DHCP සේවාලාභියා භාවිත කරන්න"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"සෙලියුලර් දත්ත සැමවිට ක්‍රියාකාරීය"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"සබල විට Wi‑Fi සිග්නලය අඩු විට Wi‑Fi දත්ත සම්බන්ධතාවය සෙලියුලර් වෙත භාර දීමට වඩා ආක්‍රමණික වේ"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"මෙම සැකසීම් වර්ධක භාවිතය සඳහා පමණි. ඔබගේ උපාංගයේ සහ යෙදුම්වල අක්‍රිය වීමට හෝ වැරදි ක්‍රියා කෙරුමකට ඒවා බලපෑ හැක."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ඔස්සේ යෙදුම් සත්‍යාපනය කරගන්න"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT හරහා ස්ථාපනය වූ යෙදුම්, විනාශකාරී ක්‍රියාවන් ඇත්දැයි පරික්ෂාකර බලන්න."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"පිළිගත නොහැකි ලෙස වැඩි හඩ පරිමාව හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP පරික්ෂාව"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ආරෝපණය නොවෙමින්"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"පූර්ණ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"පරිපාලක විසින් අබල කරන ලදී"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"මුල් පිටුව"</string>
 </resources>

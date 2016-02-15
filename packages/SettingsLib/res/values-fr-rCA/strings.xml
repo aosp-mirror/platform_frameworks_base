@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Toujours autoriser la détection de réseaux Wi-Fi en itinérance"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Utiliser l\'ancien client DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Données cellulaires toujours actives"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Désactiver le volume absolu"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Si cette option est activée, le passage du Wi-Fi aux données cellulaires est forcé lorsque le signal Wi-Fi est faible"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ces paramètres sont en cours de développement. Ils peuvent endommager votre appareil et les applications qui s\'y trouvent, ou provoquer leur dysfonctionnement."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Vérifier les applis via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Vérifiez que les applications installées par ADB/ADT ne présentent pas de comportement dangereux."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Désactive la fonctionnalité de volume absolu par Bluetooth en cas de problème de volume sur les appareils à distance, par exemple si le volume est trop élevé ou s\'il ne peut pas être contrôlé."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activer l\'application Terminal permettant l\'accès au shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Vérification HDCP"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"N\'est pas en charge"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Pleine"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Désactivé par l\'administrateur"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Accueil"</string>
 </resources>

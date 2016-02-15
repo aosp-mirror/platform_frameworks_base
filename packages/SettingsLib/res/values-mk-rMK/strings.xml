@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Секогаш дозволувај Wi‑Fi скенирање во роаминг"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Користете наследен клиент на DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Мобилниот интернет е секогаш активен"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Оневозможете апсолутна јачина на звук"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Покажи ги опциите за безжичен приказ на сертификат"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Кога е вклучено, Wi-Fi ќе биде поагресивно при предавање на поврзувањето со податоци на мобилната мрежа при слаб сигнал на Wi-Fi."</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Овие подесувања се наменети само за употреба за развој. Тие може да предизвикаат уредот и апликациите во него да се расипат или да се однесуваат необично."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потврди апликации преку УСБ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Провери апликации инсталирани преку ADB/ADT за штетно однесување."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Ја оневозможува карактеристиката за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Овозможи апликација на терминал што овозможува локален пристап кон школка."</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверување HDCP"</string>

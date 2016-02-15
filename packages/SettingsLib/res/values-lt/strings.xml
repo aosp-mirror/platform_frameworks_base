@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Visada leisti „Wi-Fi“ tarptiklinio ryšio nuskaitymą"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Naudoti seną DHCP kliento programą"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Korinio ryšio duomenys visada aktyvūs"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Išjungti didžiausią garsą"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rodyti belaidžio rodymo sertifikavimo parinktis"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Padidinti „Wi‑Fi“ įrašymo į žurnalą lygį, rodyti SSID RSSI „Wi-Fi“ rinkiklyje"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Jei įgalinta ši parinktis, „Wi‑Fi“ agresyviau perduos duomenų ryšį į mobiliojo ryšio tinklą, kai „Wi‑Fi“ signalas bus silpnas"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Šie nustatymai skirti tik kūrėjams. Nustačius juos įrenginys ir jame naudojamos programos gali nustoti veikti arba veikti netinkamai."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Patvirtinti progr. naudojant USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Patikrinkite, ar programų, įdiegtų naudojant ADB / ADT, veikimas nėra žalingas."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Išjungiama „Bluetooth“ didžiausio garso funkcija, jei naudojant nuotolinio valdymo įrenginius kyla problemų dėl garso, pvz., garsas yra per didelis arba jo negalima tinkamai valdyti."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Vietinis terminalas"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Įgal. terminalo progr., siūlančią prieigą prie viet. apvalkalo"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP tikrinimas"</string>
