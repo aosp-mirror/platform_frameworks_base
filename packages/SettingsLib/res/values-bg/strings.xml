@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Сканирането за роуминг на Wi-Fi да е разрешено винаги"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Наследена клиентска програма за DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Винаги активни клетъчни данни"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Деактивиране на пълната сила на звука"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"При активиране предаването на връзката за данни от Wi-Fi към мобилната мрежа ще е по-агресивно, когато Wi-Fi сигналът е слаб"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Тези настройки са предназначени само за програмиране. Те могат да доведат до прекъсване на работата или неправилно функциониране на устройството ви и приложенията в него."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Потвържд. на прил. през USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверка на инсталираните чрез ADB/ADT приложения за опасно поведение."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Деактивира функцията на Bluetooth за пълна сила на звука в случай на проблеми със звука на отдалечени устройства, като например неприемливо висока сила на звука или липса на управление."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка с HDCP"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не се зарежда"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Пълна"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Деактивирано от администратора"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Начало"</string>
 </resources>

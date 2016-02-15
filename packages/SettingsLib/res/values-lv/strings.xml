@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vienmēr atļaut Wi‑Fi meklēšanu"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Lietot mantoto DHCP klientu"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Vienmēr aktīvs mobilo datu savienojums"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Atspējot absolūto skaļumu"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Rādīt bezvadu attēlošanas sertifikācijas iespējas"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Palieliniet Wi‑Fi reģistrēšanas līmeni; rādīt katram SSID RSSI Wi‑Fi atlasītājā."</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Ja opcija ir iespējota un Wi‑Fi signāls ir vājš, datu savienojuma pāreja no Wi-Fi uz mobilo tīklu tiks veikta agresīvāk."</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Šie iestatījumi ir paredzēti tikai izstrādei. To dēļ var tikt pārtraukta vai traucēta ierīces un lietojumprogrammu darbība."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificēt, ja instalētas no USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Pārbaudīt, vai lietotņu, kuru instalēšanai izmantots ADB/ADT, darbība nav kaitīga."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Atspējo Bluetooth absolūtā skaļuma funkciju skaļuma problēmu gadījumiem attālajās ierīcēs, piemēram, ja ir nepieņemami liels skaļums vai nav iespējas kontrolēt skaļumu."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Vietējā beigu lietotne"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Iespējot beigu lietotni, kurā piedāvāta vietējā čaulas piekļuve"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP pārbaude"</string>
