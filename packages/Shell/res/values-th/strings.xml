@@ -22,7 +22,7 @@
     <string name="bugreport_updating_title" msgid="4423539949559634214">"กำลังเพิ่มรายละเอียดในรายงานข้อบกพร่อง"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"โปรดรอสักครู่…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"กวาดไปทางซ้ายเพื่อแชร์รายงานข้อบกพร่อง"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"แตะเพื่อแบ่งปันรายงานข้อบกพร่องของคุณ"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"แตะเพื่อแชร์รายงานข้อบกพร่องของคุณ"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"รายงานข้อบกพร่องมีข้อมูลจากไฟล์บันทึกต่างๆ ของระบบ รวมถึงข้อมูลส่วนตัว แชร์รายงานข้อบกพร่องกับแอปและบุคคลที่คุณไว้ใจเท่านั้น"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"แสดงข้อความนี้ในครั้งต่อไป"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"รายงานข้อบกพร่อง"</string>

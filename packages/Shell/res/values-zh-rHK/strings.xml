@@ -30,9 +30,9 @@
     <string name="bugreport_unnamed" msgid="2800582406842092709">"未命名"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"詳細資訊"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"螢幕擷取畫面"</string>
-    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"已成功拍攝螢幕擷取畫面。"</string>
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"成功拍攝螢幕擷取畫面。"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"無法擷取螢幕畫面。"</string>
-    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"錯誤報告 <xliff:g id="ID">#%d</xliff:g> 的詳細資料"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"錯誤報告 <xliff:g id="ID">#%d</xliff:g> 的詳情"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"檔案名稱"</string>
     <string name="bugreport_info_title" msgid="5599558206004371052">"標題"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"詳細說明"</string>

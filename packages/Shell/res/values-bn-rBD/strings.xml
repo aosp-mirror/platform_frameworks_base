@@ -17,15 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"শেল"</string>
-    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
-    <skip />
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"ত্রুটির প্রতিবেদন <xliff:g id="ID">#%d</xliff:g> তৈরি করা হচ্ছে"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"ত্রুটির প্রতিবেদন <xliff:g id="ID">#%d</xliff:g> ক্যাপচার করা হয়েছে"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"ত্রুটির প্রতিবেদনে বিশদ বিবরণ যোগ করা হচ্ছে"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"অনুগ্রহ করে অপেক্ষা করুন..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"আপনার বাগ রিপোর্ট শেয়ার করতে বামে সোয়াইপ করুন"</string>
-    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
-    <skip />
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"আপনার ত্রুটির প্রতিবেদন শেয়ার করতে আলতো চাপ দিন"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"ত্রুটির প্রতিবেদনগুলিতে থাকা ডেটা, সিস্টেমের বিভিন্ন লগ ফাইলগুলি থেকে আসে, যাতে ব্যক্তিগত এবং গোপনীয় তথ্য অন্তর্ভুক্ত থাকে৷ আপনি বিশ্বাস করেন শুধুমাত্র এমন অ্যাপ্লিকেশান এবং ব্যক্তিদের সাথে ত্রুটির প্রতিবেদনগুলি ভাগ করুন৷"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"এই বার্তাটি পরের বার দেখান"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"ত্রুটির প্রতিবেদনগুলি"</string>
@@ -33,11 +30,9 @@
     <string name="bugreport_unnamed" msgid="2800582406842092709">"নামবিহীন"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"বিশদ বিবরণ"</string>
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"স্ক্রীনশট"</string>
-    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
-    <skip />
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"স্ক্রীনশট সফলভাবে নেওয়া হয়েছে৷"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"স্ক্রীনশট নেওয়া যায়নি৷"</string>
-    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
-    <skip />
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ত্রুটির প্রতিবেদন <xliff:g id="ID">#%d</xliff:g> এর বিশদ বিবরণ"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"ফাইলের নাম"</string>
     <string name="bugreport_info_title" msgid="5599558206004371052">"শীর্ষক"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"বিস্তারিত বিবরণ"</string>

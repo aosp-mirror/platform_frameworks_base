@@ -16,24 +16,16 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (3701846017049540910) -->
-    <skip />
-    <!-- no translation found for bugreport_in_progress_title (4311705936714972757) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_title (4429132808670114081) -->
-    <skip />
+    <string name="app_label" msgid="3701846017049540910">"Shell"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Izvještaj o grešci <xliff:g id="ID">#%d</xliff:g> se generira"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"Izvještaj o grešci <xliff:g id="ID">#%d</xliff:g> je snimljen"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Dodavanje detalja u izvještaj o greškama"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"Pričekajte..."</string>
-    <!-- no translation found for bugreport_finished_text (8389172248433597683) -->
-    <skip />
-    <!-- no translation found for bugreport_finished_text (8353769438382138847) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm (5130698467795669780) -->
-    <skip />
-    <!-- no translation found for bugreport_confirm_repeat (4926842460688645058) -->
-    <skip />
-    <!-- no translation found for bugreport_storage_title (5332488144740527109) -->
-    <skip />
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Prevucite lijevo da biste podijelili izvještaj o greškama"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Dodirnite da biste podijelili izvještaj o grešci"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"Izvještaji o greškama sadrže podatke iz raznih dnevnika sistema, uključujući lične i privatne informacije. Podijelite izvještaje o greškama samo sa aplikacijama i osobama kojima vjerujete."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Pokaži ovu poruku sljedeći put"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Izvještaji o greškama"</string>
     <!-- no translation found for bugreport_unreadable_text (586517851044535486) -->
     <skip />
     <!-- no translation found for bugreport_unnamed (2800582406842092709) -->
@@ -42,12 +34,10 @@
     <skip />
     <!-- no translation found for bugreport_screenshot_action (8677781721940614995) -->
     <skip />
-    <!-- no translation found for bugreport_screenshot_taken (5684211273096253120) -->
-    <skip />
+    <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"Ekran je uspješno snimljen."</string>
     <!-- no translation found for bugreport_screenshot_failed (5853049140806834601) -->
     <skip />
-    <!-- no translation found for bugreport_info_dialog_title (1355948594292983332) -->
-    <skip />
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Detalji izvještaja o grešci <xliff:g id="ID">#%d</xliff:g>"</string>
     <!-- no translation found for bugreport_info_name (4414036021935139527) -->
     <skip />
     <!-- no translation found for bugreport_info_title (5599558206004371052) -->
