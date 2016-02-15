@@ -17,12 +17,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"सेल"</string>
-    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> निकालियो"</string>
-    <string name="bugreport_finished_title" msgid="4429132808670114081">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> कैद गरियो"</string>
+    <string name="bugreport_in_progress_title" msgid="4311705936714972757">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>लाई निकालिदैछ"</string>
+    <string name="bugreport_finished_title" msgid="4429132808670114081">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>लाई कैद गरियो"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"बग रिपोर्टमा विवरणहरू थप्दै"</string>
     <string name="bugreport_updating_wait" msgid="3322151947853929470">"कृपया प्रतीक्षा गर्नुहोला..."</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"तपाईँको बग रिपोर्ट साझेदारी गर्न बायाँ स्वाइप गर्नुहोस्"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"तपाईंको बग रिपोर्ट साझेदारी गर्न ट्याप गर्नुहोस्"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"तपाईंको बग रिपोर्टलाई साझेदारी गर्न ट्याप गर्नुहोस्"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"बग रिपोर्टहरूमा प्रणालीका विभिन्न लग फाइलहरूबाट व्यक्तिगत तथा नीजि सूचनासहितको डेटा रहन्छ।  बग रिपोर्टहरू अनुप्रयोगहरू र तपाईँले विश्वास गरेका व्यक्तिहरूसँग मात्र साझेदारी गर्नुहोस्।"</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"यो सन्देश अर्को पटक देखाउनुहोस्"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"बग रिपोर्टहरू"</string>
@@ -32,7 +32,7 @@
     <string name="bugreport_screenshot_action" msgid="8677781721940614995">"स्क्रिनशट"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"स्क्रिनशट सफलतापूर्वक लिइयो।"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रिनशट लिन सकिएन।"</string>
-    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g> विवरणहरू"</string>
+    <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>का विवरणहरू"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फाइलको नाम"</string>
     <string name="bugreport_info_title" msgid="5599558206004371052">"शीर्षक"</string>
     <string name="bugreport_info_description" msgid="4117088998733546784">"विस्तृत विवरण"</string>
