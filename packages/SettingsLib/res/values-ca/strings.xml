@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Permet sempre cerca de Wi-Fi en ininerància"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Utilitza el client DHCP heretat"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Dades mòbils sempre actives"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactiva el volum absolut"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra les opcions de certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Augmenta nivell de registre Wi‑Fi i mostra\'l per SSID RSSI al Selector de Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Si s\'activa, la Wi-Fi serà més agressiva en transferir la connexió de dades al mòbil, si el senyal de la Wi-Fi no és estable"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aquesta configuració només està prevista per a usos de desenvolupament. Pot fer que el dispositiu i que les aplicacions s\'interrompin o tinguin un comportament inadequat."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifica aplicacions per USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprova les aplicacions instal·lades mitjançant ADB/ADT per detectar possibles comportaments perillosos"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desactiva la funció de volum absolut de Bluetooth en cas que es produeixin problemes de volum amb dispositius remots, com ara un volum massa alt o una manca de control."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprovació HDCP"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"No s\'està carregant"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Plena"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Opció desactivada per l\'administrador"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Inici"</string>
 </resources>

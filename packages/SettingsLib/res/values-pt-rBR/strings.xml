@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Sempre permitir verif. de roaming de Wi-Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Usar cliente DHCP legado"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Dados da rede celular sempre ativos"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desativar volume absoluto"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opções de certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar o nível de registro do Wi-Fi; mostrar conforme o RSSI de SSID na Seleção de Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Quando ativada, o Wi-Fi será mais agressivo em transferir a conexão de dados para celular, quando o sinal de Wi-Fi estiver fraco"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Essas configurações são destinadas apenas para o uso de desenvolvedores. Elas podem causar a desativação ou mau funcionamento do dispositivo e dos apps contidos nele."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificar apps por USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificar comportamento nocivo em apps instalados via ADB/ADT."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desativa o recurso Bluetooth de volume absoluto em caso de problemas com o volume em dispositivos remotos, como volume excessivamente alto ou falta de controle."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Ativar o app terminal que oferece acesso ao shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verificação HDCP"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Não está carregando"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Cheio"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Desativada pelo administrador"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Início"</string>
 </resources>

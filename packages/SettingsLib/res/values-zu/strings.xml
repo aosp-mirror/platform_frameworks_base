@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vumela njalo ukuskena kokuzula kwe-Wi-Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Sebenzisa iklayenti le-legacy le-DHCP"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Idatha yeselula ihlala isebenza"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Khubaza ivolumu ngokuphelele"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Bonisa izinketho zokunikeza isitifiketi ukubukeka okungenantambo"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"khuphula izinga lokungena le-Wi-Fi, bonisa nge-SSID RSSI engayodwana kusikhethi se-Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Uma inikwe amandla, i-Wi-Fi izoba namandla kakhulu ekunikezeleni ukuxhumeka kwedatha kuselula, uma isiginali ye-Wi-Fi iphansi"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Lezi zilungiselelo zenzelwe ukusetshenziswa ukuthuthukisa kuphela. Zingadala ukuthi idivayisi yakho kanye nensiza ekuyona ukuthi iphuke noma iziphathe kabi."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Qiniseka izinhlelo zokusebenza nge-USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Hlola izinhlelo zokusebenza ezifakiwe nge-ADB/ADT ngokuziphatha okuyingozi."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Ikhubaza isici esiphelele sevolumu ye-Bluetooth uma kuba nezinkinga zevolumu ngamadivayisi esilawuli kude ezifana nevolumu ephezulu noma eshoda ngokulawuleka."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Itheminali yasendaweni"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Nika amandla uhlelo lokusebenza letheminali olunikeza ukufinyelela kwasendaweni kwe-shell"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Ihlola i-HDCP"</string>

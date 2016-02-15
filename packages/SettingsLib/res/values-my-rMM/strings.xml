@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi ရွမ်းရှာဖွေမှုကို အမြဲတမ်း ခွင့်ပြုမည်"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"DHCP ကလိုင်းယင့် အဟောင်းအားသုံးရန်"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ဆဲလ်လူလာဒေတာ အမြဲတမ်းဖွင့်ထားသည်"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"ဖွင့်ထားလျှင်၊ Wi‑Fi မှ ဆယ်လူလာသို့ အချက်လက် ချိတ်ဆက်မှုအား လွှဲပြောင်းရာ၌ ပိုမိုထိရောက်ပါသည်၊ WIFI အားနည်းနေချိန်တွင်"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ဤဆက်တင်းများကို တည်ဆောက်ပြုပြင်ရာတွင် သုံးရန်အတွက်သာ ရည်ရွယ်သည်။ ၎င်းတို့သည် သင်၏စက်နှင့် အပလီကေးရှင်းများကို ရပ်စေခြင်း သို့ လုပ်ဆောင်ချက်မမှန်ကန်ခြင်းများ ဖြစ်ပေါ်စေနိုင်သည်။"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USBပေါ်မှ အပလီကေးရှင်းများကို အတည်ပြုစိစစ်ရန်"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT မှတဆင့် ထည့်သွင်းသော အပလီကေးရှင်းများကို အန္တရာယ်ဖြစ်နိုင်ခြင်း ရှိမရှိ စစ်ဆေးရန်။"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ချိတ်ဆက်ထားသည့် ကိရိယာတွင် လက်မခံနိုင်လောက်အောင် ဆူညံ သို့မဟုတ် ထိန်းညှိမရနိုင်သော အသံပိုင်းပြဿနာ ရှိခဲ့လျှင် ဘလူးတုသ် ပကတိ အသံနှုန်းကို ပိတ်ပါ။"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP စစ်ဆေးမှု"</string>

@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi Roam სკანირების მუდამ დაშვება"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"მოძველებული DHCP კლიენტის გამოყენება"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"ფიჭური მონაცემები ყოველთვის აქტიურია"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ხმის აბსოლუტური სიძლიერის გათიშვა"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"თუ ჩართულია, Wi‑Fi სიგნალის შესუსტების შემთხვევაში Wi-Fi უფრო აქტიურად შეეცდება გადაიყვანოს ინტერნეტ-კავშირი მობილურ ინტერნეტზე"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ამ პარამეტრების გამოყენება დასაშვებია მხოლოდ დეველოპერული მიზნებით. მათმა გამოყენებამ შეიძლება გამოიწვიოს თქვენი მოწყობილობის და მისი აპლიკაციების დაზიანება ან გაუმართავი მუშაობა."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"აპლიკაციების USB-ს საშუალებით შემოწმება"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"შეამოწმეთ, რამდენად უსაფრთხოა ADB/ADT-ის საშუალებით ინსტალირებული აპლიკაციები."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"გათიშავს Bluetooth-ის ხმის აბსოლუტური სიძლიერის ფუნქციას დისტანციურ მოწყობილობებზე ხმასთან დაკავშირებული ისეთი პრობლემების არსებობის შემთხვევაში, როგორიცაა ხმის დაუშვებლად მაღალი სიძლიერე ან კონტროლის შეუძლებლობა."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ადგილობრივი ტერმინალი"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ლოკალურ გარსზე წვდომის ტერმინალური აპლიკაციის ჩართვა"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP შემოწმება"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"არ იტენება"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ბატარეა დატენილია"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"გათიშულია ადმინისტრატორის მიერ"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"მთავარი"</string>
 </resources>
