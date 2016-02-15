@@ -301,6 +301,8 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"screen pinning"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"search"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Could not start <xliff:g id="APP">%s</xliff:g>."</string>
+    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
+    <skip />
     <string name="recents_history_button_label" msgid="5153358867807604821">"History"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Clear"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
@@ -508,7 +510,7 @@
     <string name="menu_ime" msgid="4943221416525250684">"Menu / Keyboard Switcher"</string>
     <string name="select_button" msgid="1597989540662710653">"Select button to add"</string>
     <string name="add_button" msgid="4134946063432258161">"Add button"</string>
-    <string name="save" msgid="2311877285724540644">"Savings"</string>
+    <string name="save" msgid="2311877285724540644">"Save"</string>
     <string name="reset" msgid="2448168080964209908">"Reset"</string>
     <string name="no_home_title" msgid="1563808595146071549">"No home button found"</string>
     <string name="no_home_message" msgid="5408485011659260911">"A home button is required to be able to navigate this device. Please add a home button before saving."</string>
@@ -521,4 +523,5 @@
     <string name="select_keycode" msgid="7413765103381924584">"Select Keyboard Button"</string>
     <string name="preview" msgid="9077832302472282938">"Preview"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Drag to add tiles"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"(edit)"</string>
 </resources>
