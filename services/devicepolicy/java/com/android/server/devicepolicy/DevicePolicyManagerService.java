@@ -8325,6 +8325,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public void setOrganizationColorForUser(int color, int userId) {
+        if (!mHasFeature) {
+            return;
+        }
+        enforceFullCrossUsersPermission(userId);
+        enforceManageUsers();
+        enforceManagedProfile(userId, "set organization color");
+        synchronized (this) {
+            ActiveAdmin admin = getProfileOwnerAdminLocked(userId);
+            admin.organizationColor = color;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    @Override
     public int getOrganizationColor(@NonNull ComponentName who) {
         if (!mHasFeature) {
             return ActiveAdmin.DEF_ORGANIZATION_COLOR;
