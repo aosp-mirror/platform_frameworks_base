@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা Wifi রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"লেগাসি DHCP ক্লায়েন্ট ব্যবহার করুন"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"সেলুলার ডেটা সর্বদাই সক্রিয় থাকে"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi লগিং স্তর বাড়ান, Wi‑Fi চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"সক্ষম করা থাকলে, নিম্নমানের Wi‑Fi সিগন্যালের ক্ষেত্রে, সেলুলার-এ ডেটা সংযোগ প্রদান করতে Wi‑Fi আরো বেশি শক্তিশালীভাবে কাজ করবে"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"এইসব সেটিংস কেবলমাত্র উন্নত করার উদ্দেশ্য। সেগুলি কারণে আপনার ডিভাইস ভেঙ্গে এবং অ্যাপ্লিকেশানগুলি ভালো ভাবে কাজ করা নাও কারতে পারে।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB এর অ্যাপ্লিকেশানগুলি যাচাই করুন"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, Bluetooth চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP পরীক্ষণ"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"চার্জ হচ্ছে না"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"পূর্ণ"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"প্রশাসক দ্বারা অক্ষমিত"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"হোম"</string>
 </resources>

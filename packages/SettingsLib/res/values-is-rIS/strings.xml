@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Leyfa alltaf reikileit með Wi-Fi"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Nota gamlan DHCP-biðlara"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Alltaf kveikt á farsímagögnum"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Slökkva á samstillingu hljóðstyrks"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Þegar þetta er virkt mun Wi-Fi ganga harðar fram í að færa gagnatenginguna yfir til símkerfisins þegar Wi-Fi merkið er lélegt"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Þessar stillingar eru einungis ætlaðar í þróunarskyni. Þær geta valdið því að tækið og forrit þess bili eða starfi á rangan hátt."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Staðfesta forrit gegnum USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kanna skaðlega hegðun forrita sem sett eru upp frá ADB/ADT."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Slekkur á samstillingu Bluetooth-hljóðstyrks ef vandamál koma upp með hljóðstyrk hjá fjartengdum tækjum, svo sem of hár hljóðstyrkur eða erfiðleikar við stjórnun."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Staðbundin skipanalína"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Virkja skipanalínuforrit sem leyfir staðbundinn skeljaraðgang"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-athugun"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ekki í hleðslu"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Fullhlaðin"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Stjórnandi gerði óvirkt"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Heim"</string>
 </resources>

@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Kablosuz Dolaşım Taramalarına daima izin ver"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Eski DHCP istemcisini kullan"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Hücresel veri her zaman etkin"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Mutlak sesi iptal et"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Kablosuz ekran sertifikası seçeneklerini göster"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Kablosuz günlük kaydı seviyesini artır. Kablosuz Seçici\'de her bir SSID RSSI için göster."</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Etkinleştirildiğinde, Kablosuz ağ sinyali zayıfken veri bağlantısının Hücresel ağa geçirilmesinde daha agresif olunur"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Bu ayarlar yalnızca geliştirme amaçlıdır. Cihazınızın veya cihazdaki uygulamaların bozulmasına veya hatalı çalışmasına neden olabilir."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB\'den yüklenen uygulamaları doğrula"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT üzerinden yüklenen uygulamaları zararlı davranışlara karşı denetle."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Uzak cihazda sesin aşırı yüksek olması veya kontrol edilememesi gibi ses sorunları olması ihtimaline karşı Bluetooh mutlak ses özelliğini iptal eder."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Yerel terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Yerel kabuk erişimi sunan terminal uygulamasını etkinleştir"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP denetimi"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Şarj etmiyor"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Dolu"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Yönetici tarafından devre dışı bırakıldı"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Ana Ekran"</string>
 </resources>

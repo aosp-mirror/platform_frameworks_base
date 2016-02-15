@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏اسکن‌های رومینگ Wi‑Fi همیشه مجاز است"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"‏استفاده از کلاینت DHCP قدیمی"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"داده سلولی همیشه فعال"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"غیرفعال کردن میزان صدای مطلق"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"نمایش گزینه‌ها برای گواهینامه نمایش بی‌سیم"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏افزایش سطح گزارش‌گیری Wi‑Fi، نمایش به ازای SSID RSSI در انتخاب‌کننده Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"‏وقتی فعال است، در شرایط پایین بودن سیگنال، Wi‑Fi برای واگذار کردن اتصال داده به شبکه سلولی فعال‌تر خواهد بود."</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"این تنظیمات فقط برای برنامه‌نویسی در نظر گرفته شده است. ممکن است استفاده از این تنظیمات موجب خرابی یا عملکرد نادرست دستگاه یا برنامه‌های شما شود."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏تأیید برنامه‌های نصب شده از طریق USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"در صورت وجود مشکل میزان صدا با دستگاه‌های راه دور مثل میزان صدای بلند ناخوشایند یا عدم کنترل صدا، قابلیت میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏بررسی HDCP"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"شارژ نمی‌شود"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"پر"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"سرپرست آن را غیرفعال کرده است"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"صفحه اصلی"</string>
 </resources>

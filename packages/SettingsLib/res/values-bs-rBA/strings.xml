@@ -148,10 +148,10 @@
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Uklonjene aplikacije"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Uklonjene aplikacije i korisnici"</string>
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"USB dijeljenje veze"</string>
-    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prenosna pristupna tačka"</string>
+    <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prijenosna pristupna tačka"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Dijeljenje Bluetooth veze"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Dijeljenje veze"</string>
-    <string name="tether_settings_title_all" msgid="8356136101061143841">"Dijeljenje internetske veze i prenosna pristupna tačka"</string>
+    <string name="tether_settings_title_all" msgid="8356136101061143841">"Dijeljenje internetske veze i prijenosna pristupna tačka"</string>
     <string name="managed_user_title" msgid="8101244883654409696">"Profil za Work"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gost"</string>
     <string name="unknown" msgid="1592123443519355854">"Nepoznato"</string>
@@ -170,7 +170,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Reproduciraj kratku demonstraciju sintetiziranja govora"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instaliraj glasovne podatke"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Instalirajte glasovne podatke potrebne za sintetiziranje govora"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ovaj program za sintetiziranje govora može biti u mogućnosti da prikuplja sav tekst koji se izgovara, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Potiče od aplikacije <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Da li želite koristiti ovaj program za sintetiziranje govora?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Ovaj program za sintetiziranje govora u mogućnosti je da prikuplja sav tekst koji se izgovara, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Program omogućava aplikacija <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Da li želite koristiti ovaj program za sintetiziranje govora?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Ovaj jezik zahtijeva mrežnu vezu radi za izlaz tekst-u-govor."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Ovo je primjer sinteze govora"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Zadani status jezika"</string>
@@ -226,8 +226,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvijek dopustiti Wi-Fi lutajuće skeniranje"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Koristi zastareli DHCP klijent"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobilni podaci uvijek aktivni"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogućite apsolutnu jačinu zvuka"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži opcije za certifikaciju Bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo Wi-Fi zapisivanja, pokazati po SSID RSSI Wi-Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Kada je omogućeno, Wi-Fi će biti agresivniji u predavanju podatkovne veze mobilnoj, kada je Wi-Fi signal slab"</string>
@@ -242,14 +241,13 @@
     <string name="legacy_dhcp_client_summary" msgid="163383566317652040">"Koristi DHCP klijent iz Lollipopa umjesto novog Android DHCP klijenta."</string>
     <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži mobilne podatke aktivnim, čak i kada je Wi-Fi je aktivan (za brzo prebacivanje između mreža)."</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti USB otklanjanje grešaka?"</string>
-    <string name="adb_warning_message" msgid="7316799925425402244">"USB otklanjanje grešaka je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz dnevnika rada."</string>
+    <string name="adb_warning_message" msgid="7316799925425402244">"USB otklanjanje grešaka je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Opozvati pristup otklanjanju grešaka USB-om za sve računare koje ste prethodno ovlastili?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Dopustiti postavke za razvoj?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ove postavke su namijenjene samo za svrhe razvoja. Mogu izazvati pogrešno ponašanje uređaja i aplikacija na njemu."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikuj aplikacije putem USB-a"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Provjerava da li se u aplikacijama instaliranim putem ADB-a/ADT-a javlja zlonamerno ponašanje."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogućava opciju Bluetooth apsolutne jačine zvuka u slučaju problema s jačinom zvuka na udaljenim uređajima, kao što je neprihvatljivo glasan zvuk ili nedostatak kontrole."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogući terminalnu aplik. koja nudi pristup lok. kom. okruženju"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP provjeravanje"</string>
@@ -297,9 +295,9 @@
     <string name="force_msaa" msgid="7920323238677284387">"Prinudno primjeni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Omogući 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Ispravi pogreške na nepravougaonim operacijama isecanja"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Iscrtavanje GPU profila"</string>
+    <string name="track_frame_time" msgid="6146354853663863443">"Profil GPU iscrtavanja"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Skala animacije prozora"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Skaliranje animacije prelaza"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Skaliranje animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Skala trajanja animatora"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Simuliraj sekundarne ekrane"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplikacije"</string>
@@ -320,7 +318,7 @@
     <skip />
     <!-- no translation found for enable_freeform_support_summary (2252563497485436534) -->
     <skip />
-    <string name="local_backup_password_title" msgid="3860471654439418822">"Lozinka za rezervnu kopiju za radnu površinu"</string>
+    <string name="local_backup_password_title" msgid="3860471654439418822">"Lozinka za rezervnu kopiju radne površine"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Potpune sigurnosne kopije za računare trenutno nisu zaštićene"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Dodirnite da promijenite ili uklonite lozinku za potpune rezervne kopije sa radne površine"</string>
     <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nova lozinka za rezervnu kopiju postavljena"</string>
@@ -392,6 +390,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ne puni se"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Onemogućio administrator"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Početna stranica"</string>
 </resources>

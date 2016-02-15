@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Använd äldre DHCP-klient"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Mobildata alltid aktiverad"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inaktivera Absolute volume"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"När funktionen har aktiverats kommer dataanslutningen lämnas över från Wi-Fi till mobilen på ett aggressivare sätt när Wi-Fi-signalen är svag"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Inställningarna är endast avsedda att användas för utvecklingsändamål. De kan orsaka problem med enheten eller apparna som finns installerade på den."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiera appar via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollera om appar som installeras via ADB/ADT kan vara skadliga."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Inaktivera Bluetooth-funktionen Absolute volume om det skulle uppstå problem med volymen på fjärrenheter, t.ex. alldeles för hög volym eller brist på kontroll."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivera en terminalapp som ger åtkomst till hyllor lokalt"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontroll"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Laddar inte"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Fullt"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Har inaktiverats av administratören"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Startsida"</string>
 </resources>

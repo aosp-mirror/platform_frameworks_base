@@ -165,8 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Ruhusu Uchanganuzi wa Matumizi ya Mitandao mingine"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"Tumia kiteja cha DHCP kilichopitwa na wakati"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"Data ya kifaa cha mkononi inatumika kila wakati"</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume (2660673801947898809) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Zima sauti kamili"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Onyesha chaguo za cheti cha kuonyesha pasiwaya"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Ongeza hatua ya uwekaji kumbukumbu ya Wi-Fi, onyesha kwa kila SSID RSSI kwenye Kichukuzi cha Wi-Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"Ikiwashwa, Wifi itakabidhi kwa hima muunganisho wa data kwa mtandao wa Simu za Mkononi, mawimbi ya Wifi yanapokuwa hafifu"</string>
@@ -187,8 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Mipangilio hii imekusudiwa kwa matumizi ya usanidi tu. Inaweza kusababisha kifaa chako na programu zilizoko kuvunjika au kutofanya kazi vizuri."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Thibitisha programu kupitia USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kagua programu zilizosakinishwa kupitia ADB/ADT kwa tabia ya kudhuru."</string>
-    <!-- no translation found for bluetooth_disable_absolute_volume_summary (6031284410786545957) -->
-    <skip />
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Huzima kipengele cha Bluetooth cha sauti kamili kunapotokea matatizo ya sauti katika vifaa vya mbali kama vile sauti ya juu mno au inaposhindikana kuidhibiti."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Inakagua HDCP"</string>
@@ -313,6 +311,5 @@
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Haichaji"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Imejaa"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Msimamizi amezima mapendeleo ya mipangilio"</string>
-    <!-- no translation found for home (8263346537524314127) -->
-    <skip />
+    <string name="home" msgid="8263346537524314127">"Mwanzo"</string>
 </resources>

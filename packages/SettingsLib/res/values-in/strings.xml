@@ -186,7 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Setelan ini hanya dimaksudkan untuk penggunaan pengembangan. Setelan dapat menyebabkan perangkat dan aplikasi yang menerapkannya rusak atau tidak berfungsi semestinya."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifikasi aplikasi melalui USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Periksa perilaku membahayakan dalam aplikasi yang terpasang melalui ADB/ADT."</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Menonaktifkan fitur volume absolut Bluetooth jika terjadi masalah volume dengan perangkat jarak jauh seperti volume yang terlalu keras atau kurangnya kontrol."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Menonaktifkan fitur volume absolut Bluetooth jika ada masalah volume dengan perangkat jarak jauh, misalnya volume terlalu keras atau kurangnya kontrol."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal lokal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktifkan aplikasi terminal yang menawarkan akses kerangka lokal"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Pemeriksaan HDCP"</string>
