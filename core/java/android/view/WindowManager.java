@@ -1724,7 +1724,7 @@ public interface WindowManager extends ViewManager {
         }
 
         public final CharSequence getTitle() {
-            return mTitle;
+            return mTitle != null ? mTitle : "";
         }
 
         /** @hide */
@@ -1950,7 +1950,8 @@ public interface WindowManager extends ViewManager {
                 // already have one.
                 packageName = o.packageName;
             }
-            if (!mTitle.equals(o.mTitle)) {
+            if (o.mTitle != null) {
+                // NOTE: mTitle only copied if the originator set one.
                 mTitle = o.mTitle;
                 changes |= TITLE_CHANGED;
             }
@@ -2194,7 +2195,7 @@ public interface WindowManager extends ViewManager {
             }
         }
 
-        private CharSequence mTitle = "";
+        private CharSequence mTitle = null;
 
         /** @hide */
         @Override
