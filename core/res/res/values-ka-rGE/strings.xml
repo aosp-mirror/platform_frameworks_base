@@ -1538,7 +1538,7 @@
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> შერჩეული</item>
     </plurals>
     <string name="default_notification_topic_label" msgid="227586145791870829">"სხვადასხვა"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"ამ შეტყობინებების მნიშვნელობის დონე განისაზღვრება თქვენ მიერ."</string>
+    <string name="importance_from_topic" msgid="3572280439880023233">"ამ შეტყობინებების მნიშვნელობის დონე განისაზღვრა თქვენ მიერ."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"მნიშვნელოვანია ჩართული მომხმარებლების გამო."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"მიეცეს უფლება <xliff:g id="APP">%1$s</xliff:g>-ს, <xliff:g id="ACCOUNT">%2$s</xliff:g>-ის მეშვეობით ახალი მომხმარებელი შექმნას ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"მიეცეს უფლება <xliff:g id="APP">%1$s</xliff:g>-ს, <xliff:g id="ACCOUNT">%2$s</xliff:g>-ის მეშვეობით ახალი მომხმარებელი შექმნას (ამ ანგარიშის მქონე მომხმარებელი უკვე არსებობს) ?"</string>
@@ -1555,9 +1555,13 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"გათიშულია „%1$s“-ის ადმინისტრატორის მიერ. დაუკავშირდით მას მეტის გასაგებად."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"თქვენ ახალი შეტყობინებები გაქვთ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"სანახავად, გახსენით SMS აპი"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"ზოგიერთი ფუნქცია შეიძლება მიუწვდომელი იყოს"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"შეეხეთ გასაგრძელებლად"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"მომხმარებლის პროფილი ჩაკეტილია"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ზოგიერთი ფუნქცია შეიძლება შეიზღუდოს"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"შეეხეთ განსაბლოკად"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"მომხმ.-ის მონაცემები ჩაკეტილია"</string>
+    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
+    <skip />
+    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
+    <skip />
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"დაკავშირებულია <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>-თან"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"შეეხეთ ფაილების სანახავად"</string>
     <string name="pin_target" msgid="3052256031352291362">"ჩამაგრება"</string>

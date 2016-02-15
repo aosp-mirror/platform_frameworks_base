@@ -1555,9 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s प्रशासकाद्वारे अक्षम केले. अधिक जाणून घेण्‍यासाठी त्यांच्याशी संपर्क साधा."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"आपल्याकडे नवीन संदेश आहेत"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"पाहण्‍यासाठी SMS अॅप उघडा"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"काही कार्ये कदाचित उपलब्ध नसू शकतात"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"सुरू ठेवण्यासाठी स्पर्श करा"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"वापरकर्ता प्रोफाईल लॉक केले"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"काही कार्यक्षमता मर्यादित असू शकतात"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"अनलॉक करण्यासाठी टॅप करा"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"वापरकर्ता डेटा लॉक केला"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"कार्य प्रोफाईल लॉक केले"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाईल अनलॉक करण्यासाठी टॅप करा"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> शी कनेक्ट केलेले"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"फायली पाहण्यासाठी टॅप करा"</string>
     <string name="pin_target" msgid="3052256031352291362">"पिन"</string>

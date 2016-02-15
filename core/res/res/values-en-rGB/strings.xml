@@ -1555,9 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Disabled by %1$s administrator. Contact them to find out more."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"You have new messages"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Open SMS app to view"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Some functions might not be available"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Touch to continue"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"User profile locked"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Some functionality may be limited"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Tap to unlock"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"User data locked"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Work profile locked"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Tap to unlock work profile"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connected to <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tap to view files"</string>
     <string name="pin_target" msgid="3052256031352291362">"Pin"</string>

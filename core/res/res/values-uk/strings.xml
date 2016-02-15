@@ -1593,9 +1593,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Вимкнув адміністратор %1$s. Зв’яжіться з ним, щоб дізнатися більше."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"У вас є нові повідомлення"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Щоб переглянути, відкрийте додаток для SMS"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Деякі функції можуть бути недоступні"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Торкніться, щоб продовжити"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Профіль користувача блокується"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Деякі функції можуть не працювати"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Торкніться, щоб розблокувати"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Дані користувача заблоковано"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Робочий профіль заблоковано"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Торкніться, щоб розблокувати"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Під’єднано до пристрою <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Торкніться, щоб переглянути файли"</string>
     <string name="pin_target" msgid="3052256031352291362">"Закріпити"</string>

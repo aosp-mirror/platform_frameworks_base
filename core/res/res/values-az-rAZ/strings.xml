@@ -1555,9 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s administratoru tərəfindən deaktiv edildi. Ətraflı məlumat üçün onlarla əlaqə saxlayın."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Yeni mesajlarınız var"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Baxmaq üçün SMS tətbiqini açın"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Bəzi funksiyalar əlçatan olmaya bilər"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Davam etmək üçün toxunun"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"İstifadəçi profili kilidlidir"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Bir neçə funksionallıq məhdudlaşdırıla bilər"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Kilidi açmaq üçün tıklayın"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"İstifadəçi datası kilidlidir"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"İş profili kilidlidir"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"İş profilinin kilidini açmaq üçün tıklayın"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> məhsuluna bağlandı"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Faylları görmək üçün basın"</string>
     <string name="pin_target" msgid="3052256031352291362">"Pin kod"</string>

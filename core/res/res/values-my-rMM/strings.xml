@@ -1555,9 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"%1$s စီမံခန့်ခွဲသူမှ ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် ၎င်းတို့ကိုဆက်သွယ်ပါ။"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"သင့်ထံတွင် စာအသစ်များရောက်နေသည်"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ကြည့်ရှုရန် SMS အက်ပ်ကိုဖွင့်ပါ"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"အချို့လုပ်ဆောင်ချက်များ ရနိုင်သေးမည်မဟုတ်ပါ"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"ရှေ့ဆက်ရန်တို့ပါ"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"အသုံးပြုသူပရိုဖိုင် သော့ခတ်ထားသည်"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"အချို့လုပ်ဆောင်ချက်များ ကန့်သတ်ချက်ရှိနိုင်သည်"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"သော့ဖွင့်ရန် တို့ပါ"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"အသုံးပြုသူဒေတာအား သော့ခတ်ထားသည်"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"အလုပ်ပရိုဖိုင် သော့ခတ်ထားသည်"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"သင့်အလုပ်ပရိုဖိုင်ကို သော့ဖွင့်ရန် တို့ပါ"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"ဖိုင်များကိုကြည့်ရန် တို့ပါ"</string>
     <string name="pin_target" msgid="3052256031352291362">"တွဲပါ"</string>

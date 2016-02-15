@@ -1555,9 +1555,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"「%1$s」管理員已停用此套件。請與管理員聯絡以瞭解詳情。"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"您有新的訊息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"開啟短訊應用程式查看內容"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"部分功能可能無法使用"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"輕觸即可繼續"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"使用者個人檔案目前處於鎖定狀態"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"部分功能可能會受到限制"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"輕按即可解鎖"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"使用者資料已上鎖"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Work 設定檔目前處於鎖定狀態"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"輕按即可將 Work 設定檔解鎖"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"已連線至 <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"輕按即可查看檔案"</string>
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>

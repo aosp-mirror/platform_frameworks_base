@@ -1557,9 +1557,13 @@
     <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Du har nye meldinger"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Åpne SMS-appen for å se"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Noen funksjoner kan være utilgjengelige"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Trykk for å fortsette"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Brukerprofilen er låst"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Enkelte funksjoner kan være begrenset"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Trykk for å låse opp"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Brukerdataene er låst"</string>
+    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
+    <skip />
+    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
+    <skip />
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Koblet til <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Trykk for å se filer"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fest"</string>

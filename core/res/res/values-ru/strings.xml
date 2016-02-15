@@ -1593,9 +1593,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Пакет заблокирован администратором компании \"%1$s\". Обратитесь к нему за дополнительной информацией."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Новые сообщения"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Чтобы просмотреть, откройте приложение для обмена SMS"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Некоторые функции недоступны"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Нажмите, чтобы продолжить"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Профиль заблокирован"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Некоторые функции недоступны"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Нажмите для разблокировки"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Пользов. данные заблокированы"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Рабочий профиль заблокирован"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Нажмите, чтобы разблокировать раб. профиль"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Подключено к <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Нажмите, чтобы просмотреть файлы"</string>
     <string name="pin_target" msgid="3052256031352291362">"Закрепить"</string>

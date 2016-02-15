@@ -1555,9 +1555,13 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Απενεργοποιήθηκε από το διαχειριστή της συσκευής %1$s. Επικοινωνήστε με το διαχειριστή για να μάθετε περισσότερα."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Έχετε νέα μηνύματα"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Άνοιγμα της εφαρμογής SMS για προβολή"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Ενδεχόμενο μη διαθέσιμων λειτουργιών"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Αγγίξτε για συνέχεια"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Το προφίλ χρήστη κλειδώθηκε"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Μερ. λειτ. ίσως είναι περιορ."</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Πατήστε για ξεκλείδωμα"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Τα δεδομένα χρήστη κλειδώθηκαν"</string>
+    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
+    <skip />
+    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
+    <skip />
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Συνδέθηκε με το <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Πατήστε για να δείτε τα αρχεία"</string>
     <string name="pin_target" msgid="3052256031352291362">"Καρφίτσωμα"</string>

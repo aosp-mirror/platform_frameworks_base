@@ -1574,9 +1574,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Onemogućio je administrator kompanije %1$s. Kontaktirajte ga da biste saznali više."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Imate nove poruke"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Otvorite aplikaciju za SMS da biste pregledali"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Neke funkcije nisu dostupne"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Dodirnite da biste nastavili"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil korisnika je zaključan"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Neke funkcije su možda ograničene"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Dodirnite da biste otključali"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Podaci korisnika su zaključani"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil za Work je zaključan"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Dodirom otklj. profil za Work"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Povezano je sa proizvodom <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dodirnite za pregled datoteka"</string>
     <string name="pin_target" msgid="3052256031352291362">"Zakači"</string>

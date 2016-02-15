@@ -1593,9 +1593,13 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Wyłączone przez administratora organizacji %1$s. Skontaktuj się z nim, by dowiedzieć się więcej."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Masz nowe wiadomości"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Otwórz aplikację do SMS-ów, by wyświetlić wiadomość"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"Niektóre funkcje mogą być niedostępne"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"Kliknij, by kontynuować"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"Profil użytkownika zablokowany"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Niektóre funkcje mogą być niedostępne"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Kliknij, by odblokować"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"Dane użytkownika zablokowane"</string>
+    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
+    <skip />
+    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
+    <skip />
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Połączono z: <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dotknij, by wyświetlić pliki"</string>
     <string name="pin_target" msgid="3052256031352291362">"Przypnij"</string>

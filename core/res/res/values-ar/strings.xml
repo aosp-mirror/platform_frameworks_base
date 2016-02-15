@@ -1631,9 +1631,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"‏تم التعطيل بواسطة مشرف %1$s. يمكنك الاتصال به لمعرفة المزيد."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"لديك رسائل جديدة"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"قد لا تكون بعض الوظائف متاحة"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"المس للمتابعة"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"تم قفل الملف الشخصي للمستخدم"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ربما تكون بعض الوظائف مُقيّدة."</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"انقر لإلغاء القفل."</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"تم قفل بيانات المستخدم."</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"تم قفل الملف الشخصي للعمل."</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"انقر لإلغاء قفل الملف الشخصي للعمل"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"تم الاتصال بـ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"انقر لعرض الملفات"</string>
     <string name="pin_target" msgid="3052256031352291362">"تثبيت"</string>

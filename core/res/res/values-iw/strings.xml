@@ -1593,9 +1593,11 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"‏הושבתה על ידי מנהל המערכת של %1$s. צור איתו קשר כדי לקבל מידע נוסף."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"יש לך הודעות חדשות"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏פתח את אפליקציית ה-SMS כדי להציג"</string>
-    <string name="user_encrypted_title" msgid="7664361246988454307">"ייתכן שפונקציות מסוימות לא יהיו זמינות"</string>
-    <string name="user_encrypted_message" msgid="7504541494700807850">"גע כדי להמשיך"</string>
-    <string name="user_encrypted_detail" msgid="979981584766912935">"פרופיל המשתמש נעול"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"ייתכן שחלק מהפונקציונליות תהיה מוגבלת"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"הקש כדי לבטל את הנעילה"</string>
+    <string name="user_encrypted_detail" msgid="5708447464349420392">"נתוני משתמש נעולים"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"פרופיל העבודה נעול"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"הקש לביטול נעילת פרופיל העבודה"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"מחובר אל <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"הקש כדי להציג קבצים"</string>
     <string name="pin_target" msgid="3052256031352291362">"הצמד"</string>
