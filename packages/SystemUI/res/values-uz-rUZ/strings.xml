@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skrinshot saqlanmoqda."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skrinshot saqlandi."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Ekraningiz suratini ko‘rish uchun bosing."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Ko‘rish uchun bu yerga bosing."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Skrinshot saqlanmadi."</string>
     <string name="screenshot_failed_text" msgid="1260203058661337274">"Ekrandan suratga olib bo‘lmadi: xotirada joy kam yoki ilova/tashkilot bunga ruxsat bermagan."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fayl ko‘chirish moslamalari"</string>
@@ -296,11 +296,13 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Cheklov: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Ogohlantirish: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Ish rejimi"</string>
-    <string name="recents_empty_message" msgid="8682129509540827999">"Siz yaqinda ishlatgan ilova ekranlari bu yerda ko‘rinadi"</string>
+    <string name="recents_empty_message" msgid="8682129509540827999">"Bu yerda yaqinda ishlatilgan ilovalar ko‘rsatiladi"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Ilova haqida ma’lumot"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"o‘zgarmas ekran"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"qidirish"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"“<xliff:g id="APP">%s</xliff:g>” ilovasini ishga tushirib bo‘lmadi."</string>
+    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
+    <skip />
     <string name="recents_history_button_label" msgid="5153358867807604821">"Jurnal"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Tozalash"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gorizontal yo‘nalishda bo‘lish"</string>
@@ -521,4 +523,5 @@
     <string name="select_keycode" msgid="7413765103381924584">"Klaviatura tugmasini tanlang"</string>
     <string name="preview" msgid="9077832302472282938">"Oldindan ko‘rish"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Fragmentlar qo‘shish uchun torting"</string>
+    <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
 </resources>
