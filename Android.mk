@@ -1014,9 +1014,10 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		-devsite \
 		-toroot / \
 		-hdf android.whichdoc online \
+		-useUpdatedTemplates \
 		-hdf devsite true
 
-LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk-dev
 
 include $(BUILD_DROIDDOC)
 
