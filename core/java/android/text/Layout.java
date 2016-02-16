@@ -30,6 +30,7 @@ import android.text.style.ParagraphStyle;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -1926,8 +1927,17 @@ public abstract class Layout {
         // To simply test for an RTL direction, test the bit using
         // DIR_RTL_FLAG, if set then the direction is rtl.
 
-        /* package */ int[] mDirections;
-        /* package */ Directions(int[] dirs) {
+        /**
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public int[] mDirections;
+
+        /**
+         * @hide
+         */
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public Directions(int[] dirs) {
             mDirections = dirs;
         }
     }
@@ -2070,9 +2080,14 @@ public abstract class Layout {
 
     private static final int TAB_INCREMENT = 20;
 
-    /* package */ static final Directions DIRS_ALL_LEFT_TO_RIGHT =
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final Directions DIRS_ALL_LEFT_TO_RIGHT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK });
-    /* package */ static final Directions DIRS_ALL_RIGHT_TO_LEFT =
+
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
 
 }

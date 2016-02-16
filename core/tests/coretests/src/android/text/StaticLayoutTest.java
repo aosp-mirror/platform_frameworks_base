@@ -163,7 +163,7 @@ public class StaticLayoutTest extends TestCase {
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
                 fmi.top, fmi.descent + spacingAdd,
                 fmi.ascent, fmi.descent + spacingAdd,
-                fmi.ascent, fmi.bottom + spacingAdd);
+                fmi.ascent, fmi.bottom);
     }
 
     /**
@@ -185,7 +185,7 @@ public class StaticLayoutTest extends TestCase {
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
                 fmi.top, fmi.descent + s.scale(fmi.descent - fmi.top),
                 fmi.ascent, fmi.descent + s.scale(fmi.descent - fmi.ascent),
-                fmi.ascent, fmi.bottom + s.scale(fmi.bottom - fmi.ascent));
+                fmi.ascent, fmi.bottom);
     }
 
     /**
@@ -207,7 +207,7 @@ public class StaticLayoutTest extends TestCase {
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
                 fmi.top, fmi.descent + s.scale(fmi.descent - fmi.top),
                 fmi.ascent, fmi.descent + s.scale(fmi.descent - fmi.ascent),
-                fmi.ascent, fmi.bottom + s.scale(fmi.bottom - fmi.ascent));
+                fmi.ascent, fmi.bottom);
     }
 
     // ----- test utility classes and methods -----

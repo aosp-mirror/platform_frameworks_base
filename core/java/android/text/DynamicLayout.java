@@ -20,6 +20,7 @@ import android.graphics.Paint;
 import android.text.style.UpdateLayout;
 import android.text.style.WrapTogetherSpan;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
@@ -449,7 +450,8 @@ public class DynamicLayout extends Layout
      *
      * @hide
      */
-    void updateBlocks(int startLine, int endLine, int newLineCount) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void updateBlocks(int startLine, int endLine, int newLineCount) {
         if (mBlockEndLines == null) {
             createBlocks();
             return;
@@ -549,7 +551,8 @@ public class DynamicLayout extends Layout
      * This package private method is used for test purposes only
      * @hide
      */
-    void setBlocksDataForTest(int[] blockEndLines, int[] blockIndices, int numberOfBlocks) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void setBlocksDataForTest(int[] blockEndLines, int[] blockIndices, int numberOfBlocks) {
         mBlockEndLines = new int[blockEndLines.length];
         mBlockIndices = new int[blockIndices.length];
         System.arraycopy(blockEndLines, 0, mBlockEndLines, 0, blockEndLines.length);
