@@ -889,12 +889,14 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         imageView.setImageResource(drawable);
 
         mEmptyView.setVisibility(View.VISIBLE);
+        mEmptyView.requestFocus();
         mRecView.setVisibility(View.GONE);
     }
 
     private void showDirectory() {
         mEmptyView.setVisibility(View.GONE);
         mRecView.setVisibility(View.VISIBLE);
+        mRecView.requestFocus();
     }
 
     private String findCommonMimeType(List<String> mimeTypes) {
