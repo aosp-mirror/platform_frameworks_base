@@ -16,8 +16,6 @@
 
 package android.transition;
 
-import com.android.internal.R;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -27,6 +25,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.internal.R;
 
 /**
  * This transition tracks changes to the visibility of target views in the
@@ -144,12 +144,9 @@ public class Fade extends Visibility {
             Log.d(LOG_TAG, "Fade.onAppear: startView, startVis, endView, endVis = " +
                     startView + ", " + view);
         }
-        float startAlpha = 0;
-        if (startValues != null) {
-            startAlpha = (Float) startValues.values.get(PROPNAME_TRANSITION_ALPHA);
-            if (startAlpha == 1) {
-                startAlpha = 0;
-            }
+        float startAlpha = getStartAlpha(startValues, 0);
+        if (startAlpha == 1) {
+            startAlpha = 0;
         }
         return createAnimation(view, startAlpha, 1);
     }
@@ -157,11 +154,19 @@ public class Fade extends Visibility {
     @Override
     public Animator onDisappear(ViewGroup sceneRoot, final View view, TransitionValues startValues,
             TransitionValues endValues) {
-        float startAlpha = 1;
-        if (startValues != null) {
-            startAlpha = (Float) startValues.values.get(PROPNAME_TRANSITION_ALPHA);
-        }
+        float startAlpha = getStartAlpha(startValues, 1);
         return createAnimation(view, startAlpha, 0);
+    }
+
+    private static float getStartAlpha(TransitionValues startValues, float fallbackValue) {
+        float startAlpha = fallbackValue;
+        if (startValues != null) {
+            Float startAlphaFloat = (Float) startValues.values.get(PROPNAME_TRANSITION_ALPHA);
+            if (startAlphaFloat != null) {
+                startAlpha = startAlphaFloat;
+            }
+        }
+        return startAlpha;
     }
 
     private static class FadeAnimatorListener extends AnimatorListenerAdapter {
