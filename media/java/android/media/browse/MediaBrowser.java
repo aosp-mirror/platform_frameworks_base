@@ -470,7 +470,7 @@ public final class MediaBrowser {
             sub = new Subscription();
             mSubscriptions.put(parentId, sub);
         }
-        sub.add(callback, options);
+        sub.putCallback(options, callback);
 
         // If we are connected, tell the service that we are watching. If we aren't connected,
         // the service will be told when we connect.
@@ -502,7 +502,7 @@ public final class MediaBrowser {
         Subscription sub = mSubscriptions.get(parentId);
 
         // Tell the service if necessary.
-        if (sub != null && sub.remove(options) && mState == CONNECT_STATE_CONNECTED) {
+        if (sub != null && sub.removeCallback(options) && mState == CONNECT_STATE_CONNECTED) {
             try {
                 // NOTE: Do not call removeSubscriptionWithOptions when options are null. Otherwise,
                 // it will break the action of support library which expects removeSubscription will
@@ -1093,7 +1093,16 @@ public final class MediaBrowser {
             return mCallbacks;
         }
 
-        public void add(SubscriptionCallback callback, Bundle options) {
+        public SubscriptionCallback getCallback(Bundle options) {
+            for (int i = 0; i < mOptionsList.size(); ++i) {
+                if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
+                    return mCallbacks.get(i);
+                }
+            }
+            return null;
+        }
+
+        public void putCallback(Bundle options, SubscriptionCallback callback) {
             for (int i = 0; i < mOptionsList.size(); ++i) {
                 if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
                     mCallbacks.set(i, callback);
@@ -1104,7 +1113,7 @@ public final class MediaBrowser {
             mOptionsList.add(options);
         }
 
-        public boolean remove(Bundle options) {
+        public boolean removeCallback(Bundle options) {
             for (int i = 0; i < mOptionsList.size(); ++i) {
                 if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
                     mCallbacks.remove(i);
@@ -1113,15 +1122,6 @@ public final class MediaBrowser {
                 }
             }
             return false;
-        }
-
-        public SubscriptionCallback getCallback(Bundle options) {
-            for (int i = 0; i < mOptionsList.size(); ++i) {
-                if (MediaBrowserUtils.areSameOptions(mOptionsList.get(i), options)) {
-                    return mCallbacks.get(i);
-                }
-            }
-            return null;
         }
     }
 }
