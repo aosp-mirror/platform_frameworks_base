@@ -282,8 +282,7 @@ public class JobStore {
                         continue;
                     }
 
-                    JobStatus copy = new JobStatus(jobStatus.getJob(), jobStatus.getUid(),
-                            jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed());
+                    JobStatus copy = new JobStatus(jobStatus);
                     mStoreCopy.add(copy);
                 }
             }
@@ -544,7 +543,7 @@ public class JobStore {
         private JobStatus restoreJobFromXml(XmlPullParser parser) throws XmlPullParserException,
                 IOException {
             JobInfo.Builder jobBuilder;
-            int uid, userId;
+            int uid, sourceUserId;
 
             // Read out job identifier attributes and priority.
             try {
@@ -557,7 +556,7 @@ public class JobStore {
                     jobBuilder.setPriority(Integer.valueOf(val));
                 }
                 val = parser.getAttributeValue(null, "sourceUserId");
-                userId = val == null ? -1 : Integer.valueOf(val);
+                sourceUserId = val == null ? -1 : Integer.valueOf(val);
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
@@ -608,9 +607,9 @@ public class JobStore {
                 try {
                     String val = parser.getAttributeValue(null, "period");
                     final long periodMillis = Long.valueOf(val);
-                    jobBuilder.setPeriodic(periodMillis);
                     val = parser.getAttributeValue(null, "flex");
                     final long flexMillis = (val != null) ? Long.valueOf(val) : periodMillis;
+                    jobBuilder.setPeriodic(periodMillis, flexMillis);
                     // As a sanity check, cap the recreated run time to be no later than flex+period
                     // from now. This is the latest the periodic could be pushed out. This could
                     // happen if the periodic ran early (at flex time before period), and then the
@@ -679,10 +678,8 @@ public class JobStore {
             parser.nextTag(); // Consume </extras>
 
             JobStatus js = new JobStatus(
-                    jobBuilder.build(), uid, elapsedRuntimes.first, elapsedRuntimes.second);
-            if (userId != -1) {
-                js.setSource(sourcePackageName, userId);
-            }
+                    jobBuilder.build(), uid, sourcePackageName, sourceUserId, elapsedRuntimes.first,
+                    elapsedRuntimes.second);
             return js;
         }
 
