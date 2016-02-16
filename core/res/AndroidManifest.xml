@@ -397,6 +397,7 @@
     <protected-broadcast android:name="com.android.settings.location.MODE_CHANGING" />
 
     <protected-broadcast android:name="ScheduleConditionProvider.EVALUATE" />
+    <protected-broadcast android:name="EventConditionProvider.EVALUATE" />
     <protected-broadcast android:name="wifi_scan_available" />
 
     <protected-broadcast android:name="action.cne.started" />
@@ -427,6 +428,20 @@
 
     <protected-broadcast android:name="android.intent.action.ACTION_RADIO_OFF" />
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNLOCKED" />
+
+    <protected-broadcast android:name="android.accounts.LOGIN_ACCOUNTS_CHANGED" />
+    <protected-broadcast android:name="com.android.sync.SYNC_CONN_STATUS_CHANGED" />
+
+    <protected-broadcast android:name="com.android.phone.SIP_INCOMING_CALL" />
+    <protected-broadcast android:name="com.android.phone.SIP_ADD_PHONE" />
+    <protected-broadcast android:name="com.android.phone.SIP_REMOVE_PHONE" />
+    <protected-broadcast android:name="com.android.phone.SIP_CALL_OPTION_CHANGED" />
+
+    <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_ACL_CONNECTED" />
+    <protected-broadcast android:name="android.bluetooth.adapter.action.BLE_ACL_DISCONNECTED" />
+
+    <protected-broadcast android:name="android.bluetooth.input.profile.action.HANDSHAKE" />
+    <protected-broadcast android:name="android.bluetooth.input.profile.action.REPORT" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
