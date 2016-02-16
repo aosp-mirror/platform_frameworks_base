@@ -85,9 +85,6 @@ public abstract class Visibility extends Transition {
 
     private int mMode = MODE_IN | MODE_OUT;
 
-    private int mForcedStartVisibility = -1;
-    private int mForcedEndVisibility = -1;
-
     public Visibility() {}
 
     public Visibility(Context context, AttributeSet attrs) {
@@ -132,13 +129,8 @@ public abstract class Visibility extends Transition {
         return sTransitionProperties;
     }
 
-    private void captureValues(TransitionValues transitionValues, int forcedVisibility) {
-        int visibility;
-        if (forcedVisibility != -1) {
-            visibility = forcedVisibility;
-        } else {
-            visibility = transitionValues.view.getVisibility();
-        }
+    private void captureValues(TransitionValues transitionValues) {
+        int visibility = transitionValues.view.getVisibility();
         transitionValues.values.put(PROPNAME_VISIBILITY, visibility);
         transitionValues.values.put(PROPNAME_PARENT, transitionValues.view.getParent());
         int[] loc = new int[2];
@@ -148,22 +140,12 @@ public abstract class Visibility extends Transition {
 
     @Override
     public void captureStartValues(TransitionValues transitionValues) {
-        captureValues(transitionValues, mForcedStartVisibility);
+        captureValues(transitionValues);
     }
 
     @Override
     public void captureEndValues(TransitionValues transitionValues) {
-        captureValues(transitionValues, mForcedEndVisibility);
-    }
-
-    /** @hide */
-    @Override
-    public void forceVisibility(int visibility, boolean isStartValue) {
-        if (isStartValue) {
-            mForcedStartVisibility = visibility;
-        } else {
-            mForcedEndVisibility = visibility;
-        }
+        captureValues(transitionValues);
     }
 
     /**
@@ -297,12 +279,6 @@ public abstract class Visibility extends Transition {
             if (parentVisibilityInfo.visibilityChange) {
                 return null;
             }
-        }
-        final boolean isForcedVisibility = mForcedStartVisibility != -1 ||
-                mForcedEndVisibility != -1;
-        if (isForcedVisibility) {
-            // Make sure that we reverse the effect of onDisappear's setTransitionAlpha(0)
-            endValues.view.setTransitionAlpha(1);
         }
         return onAppear(sceneRoot, endValues.view, startValues, endValues);
     }
@@ -447,21 +423,16 @@ public abstract class Visibility extends Transition {
         }
 
         if (viewToKeep != null) {
-            int originalVisibility = -1;
-            final boolean isForcedVisibility = mForcedStartVisibility != -1 ||
-                    mForcedEndVisibility != -1;
-            if (!isForcedVisibility) {
-                originalVisibility = viewToKeep.getVisibility();
-                viewToKeep.setTransitionVisibility(View.VISIBLE);
-            }
+            int originalVisibility = viewToKeep.getVisibility();
+            viewToKeep.setTransitionVisibility(View.VISIBLE);
             Animator animator = onDisappear(sceneRoot, viewToKeep, startValues, endValues);
             if (animator != null) {
                 DisappearListener disappearListener = new DisappearListener(viewToKeep,
-                        finalVisibility, isForcedVisibility);
+                        finalVisibility);
                 animator.addListener(disappearListener);
                 animator.addPauseListener(disappearListener);
                 addListener(disappearListener);
-            } else if (!isForcedVisibility) {
+            } else {
                 viewToKeep.setTransitionVisibility(originalVisibility);
             }
             return animator;
@@ -509,18 +480,15 @@ public abstract class Visibility extends Transition {
 
     private static class DisappearListener
             extends TransitionListenerAdapter implements AnimatorListener, AnimatorPauseListener {
-        private final boolean mIsForcedVisibility;
         private final View mView;
         private final int mFinalVisibility;
         private final ViewGroup mParent;
 
         private boolean mLayoutSuppressed;
-        private boolean mFinalVisibilitySet = false;
         boolean mCanceled = false;
 
-        public DisappearListener(View view, int finalVisibility, boolean isForcedVisibility) {
+        public DisappearListener(View view, int finalVisibility) {
             this.mView = view;
-            this.mIsForcedVisibility = isForcedVisibility;
             this.mFinalVisibility = finalVisibility;
             this.mParent = (ViewGroup) view.getParent();
             // Prevent a layout from including mView in its calculation.
@@ -529,14 +497,14 @@ public abstract class Visibility extends Transition {
 
         @Override
         public void onAnimationPause(Animator animation) {
-            if (!mCanceled && !mIsForcedVisibility) {
+            if (!mCanceled) {
                 mView.setTransitionVisibility(mFinalVisibility);
             }
         }
 
         @Override
         public void onAnimationResume(Animator animation) {
-            if (!mCanceled && !mIsForcedVisibility) {
+            if (!mCanceled) {
                 mView.setTransitionVisibility(View.VISIBLE);
             }
         }
@@ -576,15 +544,10 @@ public abstract class Visibility extends Transition {
 
         private void hideViewWhenNotCanceled() {
             if (!mCanceled) {
-                if (mIsForcedVisibility) {
-                    mView.setTransitionAlpha(0);
-                } else if (!mFinalVisibilitySet) {
-                    // Recreate the parent's display list in case it includes mView.
-                    mView.setTransitionVisibility(mFinalVisibility);
-                    if (mParent != null) {
-                        mParent.invalidate();
-                    }
-                    mFinalVisibilitySet = true;
+                // Recreate the parent's display list in case it includes mView.
+                mView.setTransitionVisibility(mFinalVisibility);
+                if (mParent != null) {
+                    mParent.invalidate();
                 }
             }
             // Layout is allowed now that the View is in its final state
@@ -592,7 +555,7 @@ public abstract class Visibility extends Transition {
         }
 
         private void suppressLayout(boolean suppress) {
-            if (mLayoutSuppressed != suppress && mParent != null && !mIsForcedVisibility) {
+            if (mLayoutSuppressed != suppress && mParent != null) {
                 mLayoutSuppressed = suppress;
                 mParent.suppressLayout(suppress);
             }

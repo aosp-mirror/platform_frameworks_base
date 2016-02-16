@@ -48,27 +48,16 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     private static final long MAX_WAIT_MS = 1000;
 
     private Bundle mSharedElementBundle;
-
     private boolean mExitNotified;
-
     private boolean mSharedElementNotified;
-
     private Activity mActivity;
-
     private boolean mIsBackgroundReady;
-
     private boolean mIsCanceled;
-
     private Handler mHandler;
-
     private ObjectAnimator mBackgroundAnimator;
-
     private boolean mIsHidden;
-
     private Bundle mExitSharedElementBundle;
-
     private boolean mIsExitStarted;
-
     private boolean mSharedElementsHidden;
 
     public ExitTransitionCoordinator(Activity activity, ArrayList<String> names,
@@ -129,6 +118,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
     public void resetViews() {
         if (mTransitioningViews != null) {
             showViews(mTransitioningViews, true);
+            setTransitioningViewsVisiblity(View.VISIBLE, true);
         }
         showViews(mSharedElements, true);
         mIsHidden = true;
@@ -276,8 +266,9 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         Transition transition = getExitTransition();
         ViewGroup decorView = getDecor();
         if (transition != null && decorView != null && mTransitioningViews != null) {
+            setTransitioningViewsVisiblity(View.VISIBLE, false);
             TransitionManager.beginDelayedTransition(decorView, transition);
-            mTransitioningViews.get(0).invalidate();
+            setTransitioningViewsVisiblity(View.INVISIBLE, true);
         } else {
             transitionStarted();
         }
@@ -325,6 +316,7 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     viewsTransitionComplete();
                     if (mIsHidden && transitioningViews != null) {
                         showViews(transitioningViews, true);
+                        setTransitioningViewsVisiblity(View.VISIBLE, true);
                     }
                     if (mSharedElementBundle != null) {
                         delayCancel();
@@ -332,7 +324,6 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                     super.onTransitionEnd(transition);
                 }
             });
-            viewsTransition.forceVisibility(View.INVISIBLE, false);
         }
         return viewsTransition;
     }
@@ -369,9 +360,15 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
         if (transition != null && decorView != null) {
             setGhostVisibility(View.INVISIBLE);
             scheduleGhostVisibilityChange(View.INVISIBLE);
+            if (viewsTransition != null) {
+                setTransitioningViewsVisiblity(View.VISIBLE, false);
+            }
             TransitionManager.beginDelayedTransition(decorView, transition);
             scheduleGhostVisibilityChange(View.VISIBLE);
             setGhostVisibility(View.VISIBLE);
+            if (viewsTransition != null) {
+                setTransitioningViewsVisiblity(View.INVISIBLE, true);
+            }
             decorView.invalidate();
         } else {
             transitionStarted();
