@@ -1033,9 +1033,18 @@ public class DevicePolicyManager {
      * @hide
      */
     public boolean packageHasActiveAdmins(String packageName) {
+        return packageHasActiveAdmins(packageName, myUserId());
+    }
+
+    /**
+     * Used by package administration code to determine if a package can be stopped
+     * or uninstalled.
+     * @hide
+     */
+    public boolean packageHasActiveAdmins(String packageName, int userId) {
         if (mService != null) {
             try {
-                return mService.packageHasActiveAdmins(packageName, myUserId());
+                return mService.packageHasActiveAdmins(packageName, userId);
             } catch (RemoteException e) {
                 Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
