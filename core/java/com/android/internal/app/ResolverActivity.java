@@ -174,10 +174,6 @@ public class ResolverActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // We're dispatching intents that might be coming from legacy apps, so
-        // don't kill ourselves.
-        StrictMode.disableDeathOnFileUriExposure();
-
         // Use a specialized prompt when we're handling the 'Home' app startActivity()
         final Intent intent = makeMyIntent();
         final Set<String> categories = intent.getCategories();
@@ -768,6 +764,17 @@ public class ResolverActivity extends Activity {
     }
 
     public void safelyStartActivity(TargetInfo cti) {
+        // We're dispatching intents that might be coming from legacy apps, so
+        // don't kill ourselves.
+        StrictMode.disableDeathOnFileUriExposure();
+        try {
+            safelyStartActivityInternal(cti);
+        } finally {
+            StrictMode.enableDeathOnFileUriExposure();
+        }
+    }
+
+    private void safelyStartActivityInternal(TargetInfo cti) {
         // If needed, show that intent is forwarded
         // from managed profile to owner or other way around.
         if (mProfileSwitchMessageId != -1) {
