@@ -134,7 +134,14 @@ class ContextImpl extends Context {
     /**
      * Map from package name, to preference name, to cached preferences.
      */
-    private static ArrayMap<String, ArrayMap<File, SharedPreferencesImpl>> sSharedPrefs;
+    @GuardedBy("ContextImpl.class")
+    private static ArrayMap<String, ArrayMap<File, SharedPreferencesImpl>> sSharedPrefsCache;
+
+    /**
+     * Map from preference name to generated path.
+     */
+    @GuardedBy("ContextImpl.class")
+    private ArrayMap<String, File> mSharedPrefsPaths;
 
     final ActivityThread mMainThread;
     final LoadedApk mPackageInfo;
@@ -335,7 +342,17 @@ class ContextImpl extends Context {
             }
         }
 
-        final File file = getSharedPreferencesPath(name);
+        File file;
+        synchronized (ContextImpl.class) {
+            if (mSharedPrefsPaths == null) {
+                mSharedPrefsPaths = new ArrayMap<>();
+            }
+            file = mSharedPrefsPaths.get(name);
+            if (file == null) {
+                file = getSharedPreferencesPath(name);
+                mSharedPrefsPaths.put(name, file);
+            }
+        }
         return getSharedPreferences(file, mode);
     }
 
@@ -363,15 +380,15 @@ class ContextImpl extends Context {
     }
 
     private ArrayMap<File, SharedPreferencesImpl> getSharedPreferencesCacheLocked() {
-        if (sSharedPrefs == null) {
-            sSharedPrefs = new ArrayMap<>();
+        if (sSharedPrefsCache == null) {
+            sSharedPrefsCache = new ArrayMap<>();
         }
 
         final String packageName = getPackageName();
-        ArrayMap<File, SharedPreferencesImpl> packagePrefs = sSharedPrefs.get(packageName);
+        ArrayMap<File, SharedPreferencesImpl> packagePrefs = sSharedPrefsCache.get(packageName);
         if (packagePrefs == null) {
             packagePrefs = new ArrayMap<>();
-            sSharedPrefs.put(packageName, packagePrefs);
+            sSharedPrefsCache.put(packageName, packagePrefs);
         }
 
         return packagePrefs;
