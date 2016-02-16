@@ -75,7 +75,7 @@ public class RecentsActivityLaunchState {
             }
 
             // If coming from another app, focus the next task
-            return numTasks - 2;
+            return Math.max(0, numTasks - 2);
         } else {
             if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
                 // If fast toggling, defer focusing until the next tap (which will automatically

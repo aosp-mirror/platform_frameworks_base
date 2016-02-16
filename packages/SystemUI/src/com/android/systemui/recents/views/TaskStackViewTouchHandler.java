@@ -280,6 +280,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                                 mOverscrollSize);
                         mSv.invalidate();
                     }
+
+                    // Reset the focused task after the user has scrolled
+                    mSv.resetFocusedTask(mSv.getFocusedTask());
                 } else if (mActiveTaskView == null) {
                     // This tap didn't start on a task.
                     maybeHideRecentsFromBackgroundTap((int) ev.getX(), (int) ev.getY());
