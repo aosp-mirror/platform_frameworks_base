@@ -23,7 +23,6 @@
 
 #include <SkScalar.h>
 #include <SkGlyphCache.h>
-#include <SkScalerContext.h>
 #include <SkPaint.h>
 #include <SkPathMeasure.h>
 
