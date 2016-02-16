@@ -421,9 +421,7 @@ public final class TvInputInfo implements Parcelable {
      * @param context Supplies a {@link Context} used to check if this TV input is hidden.
      * @return {@code true} if the user marked this TV input hidden in settings. {@code false}
      *         otherwise.
-     * @hide
      */
-    @SystemApi
     public boolean isHidden(Context context) {
         return TvInputSettings.isHidden(context, mId, UserHandle.myUserId());
     }
@@ -451,9 +449,7 @@ public final class TvInputInfo implements Parcelable {
      * @param context Supplies a {@link Context} used to load the custom label.
      * @return a CharSequence containing the TV input's custom label. {@code null} if there is no
      *         custom label.
-     * @hide
      */
-    @SystemApi
     public CharSequence loadCustomLabel(Context context) {
         return TvInputSettings.getCustomLabel(context, mId, UserHandle.myUserId());
     }
