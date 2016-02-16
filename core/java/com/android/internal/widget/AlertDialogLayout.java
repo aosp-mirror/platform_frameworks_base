@@ -17,7 +17,6 @@
 package com.android.internal.widget;
 
 import android.annotation.AttrRes;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.content.Context;
@@ -107,14 +106,7 @@ public class AlertDialogLayout extends LinearLayout {
 
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-
-        // Treat all panel widths as MATCH_PARENT
-        // by translating AT_MOST to EXACTLY.
         final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        if (widthMode == MeasureSpec.AT_MOST) {
-            final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-            widthMeasureSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
-        }
 
         int childState = 0;
         int usedHeight = getPaddingTop() + getPaddingBottom();
@@ -204,12 +196,49 @@ public class AlertDialogLayout extends LinearLayout {
                 maxWidth = Math.max(maxWidth, child.getMeasuredWidth());
             }
         }
+
         maxWidth += getPaddingLeft() + getPaddingRight();
 
         final int widthSizeAndState = resolveSizeAndState(maxWidth, widthMeasureSpec, childState);
         final int heightSizeAndState = resolveSizeAndState(usedHeight, heightMeasureSpec, 0);
         setMeasuredDimension(widthSizeAndState, heightSizeAndState);
+
+        // If the children weren't already measured EXACTLY, we need to run
+        // another measure pass to for MATCH_PARENT widths.
+        if (widthMode != MeasureSpec.EXACTLY) {
+            forceUniformWidth(count, heightMeasureSpec);
+        }
+
         return true;
+    }
+
+    /**
+     * Remeasures child views to exactly match the layout's measured width.
+     *
+     * @param count the number of child views
+     * @param heightMeasureSpec the original height measure spec
+     */
+    private void forceUniformWidth(int count, int heightMeasureSpec) {
+        // Pretend that the linear layout has an exact size.
+        final int uniformMeasureSpec = MeasureSpec.makeMeasureSpec(
+                getMeasuredWidth(), MeasureSpec.EXACTLY);
+
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                if (lp.width == LayoutParams.MATCH_PARENT) {
+                    // Temporarily force children to reuse their old measured
+                    // height.
+                    final int oldHeight = lp.height;
+                    lp.height = child.getMeasuredHeight();
+
+                    // Remeasure with new dimensions.
+                    measureChildWithMargins(child, uniformMeasureSpec, 0, heightMeasureSpec, 0);
+                    lp.height = oldHeight;
+                }
+            }
+        }
     }
 
     /**
