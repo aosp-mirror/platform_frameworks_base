@@ -65,7 +65,7 @@ public class TaskStackHorizontalViewAdapter extends
     }
 
     public TaskStackHorizontalViewAdapter(List tasks) {
-        mTaskList = new ArrayList<>(tasks);
+        mTaskList = new ArrayList<Task>(tasks);
     }
 
     public void setNewStackTasks(List tasks) {
