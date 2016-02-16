@@ -58,7 +58,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setMinimumLatency(runFromMillis)
                 .setPersisted(true)
                 .build();
-        final JobStatus ts = new JobStatus(this, task, SOME_UID, null, -1);
+        final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1);
         mTaskStoreUnderTest.add(ts);
         Thread.sleep(IO_WAIT);
         // Manually load tasks from xml file.
@@ -91,8 +91,8 @@ public class JobStoreTest extends AndroidTestCase {
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
-        final JobStatus taskStatus1 = new JobStatus(this, task1, SOME_UID, null, -1);
-        final JobStatus taskStatus2 = new JobStatus(this, task2, SOME_UID, null, -1);
+        final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, SOME_UID, null, -1);
+        final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, SOME_UID, null, -1);
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
         Thread.sleep(IO_WAIT);
@@ -140,7 +140,7 @@ public class JobStoreTest extends AndroidTestCase {
         extras.putInt("into", 3);
         b.setExtras(extras);
         final JobInfo task = b.build();
-        JobStatus taskStatus = new JobStatus(this, task, SOME_UID, null, -1);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(task, SOME_UID, null, -1);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
@@ -157,7 +157,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setPeriodic(10000L)
                 .setRequiresCharging(true)
                 .setPersisted(true);
-        JobStatus taskStatus = new JobStatus(this, b.build(), SOME_UID,
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID,
                 "com.google.android.gms", 0);
 
         mTaskStoreUnderTest.add(taskStatus);
@@ -179,7 +179,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setPeriodic(5*60*60*1000, 1*60*60*1000)
                 .setRequiresCharging(true)
                 .setPersisted(true);
-        JobStatus taskStatus = new JobStatus(this, b.build(), SOME_UID, null, -1);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
@@ -204,7 +204,7 @@ public class JobStoreTest extends AndroidTestCase {
                 SystemClock.elapsedRealtime() + (TWO_HOURS * ONE_HOUR) + TWO_HOURS;  // > period+flex
         final long invalidEarlyRuntimeElapsedMillis =
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
-        final JobStatus js = new JobStatus(this, b.build(), SOME_UID, "somePackage",
+        final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
                 0 /* sourceUserId */,
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis);
 
@@ -231,7 +231,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setOverrideDeadline(5000)
                 .setPriority(42)
                 .setPersisted(true);
-        final JobStatus js = new JobStatus(this, b.build(), SOME_UID, null, -1);
+        final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
         mTaskStoreUnderTest.add(js);
         Thread.sleep(IO_WAIT);
         final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();
@@ -247,12 +247,12 @@ public class JobStoreTest extends AndroidTestCase {
         JobInfo.Builder b = new Builder(42, mComponent)
                 .setOverrideDeadline(10000)
                 .setPersisted(false);
-        JobStatus jsNonPersisted = new JobStatus(this, b.build(), SOME_UID, null, -1);
+        JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
         mTaskStoreUnderTest.add(jsNonPersisted);
         b = new Builder(43, mComponent)
                 .setOverrideDeadline(10000)
                 .setPersisted(true);
-        JobStatus jsPersisted = new JobStatus(this, b.build(), SOME_UID, null, -1);
+        JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
         mTaskStoreUnderTest.add(jsPersisted);
         Thread.sleep(IO_WAIT);
         final ArraySet<JobStatus> jobStatusSet = new ArraySet<JobStatus>();

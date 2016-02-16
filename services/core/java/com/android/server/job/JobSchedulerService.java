@@ -237,7 +237,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     }
 
     public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId) {
-        JobStatus jobStatus = new JobStatus(getLock(), job, uId, packageName, userId);
+        JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId);
         try {
             if (ActivityManagerNative.getDefault().getAppStartMode(uId,
                     job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
@@ -476,7 +476,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     JobStatus job = jobs.valueAt(i);
                     for (int controller=0; controller<mControllers.size(); controller++) {
                         mControllers.get(controller).deviceIdleModeChanged(mDeviceIdleMode);
-                        mControllers.get(controller).maybeStartTrackingJob(job, null);
+                        mControllers.get(controller).maybeStartTrackingJobLocked(job, null);
                     }
                 }
                 // GO GO GO!
@@ -491,19 +491,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * about.
      */
     private void startTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
-        boolean update;
-        boolean rocking;
         synchronized (mLock) {
-            update = mJobs.add(jobStatus);
-            rocking = mReadyToRock;
-        }
-        if (rocking) {
-            for (int i=0; i<mControllers.size(); i++) {
-                StateController controller = mControllers.get(i);
-                if (update) {
-                    controller.maybeStopTrackingJob(jobStatus, true);
+            final boolean update = mJobs.add(jobStatus);
+            if (mReadyToRock) {
+                for (int i = 0; i < mControllers.size(); i++) {
+                    StateController controller = mControllers.get(i);
+                    if (update) {
+                        controller.maybeStopTrackingJobLocked(jobStatus, true);
+                    }
+                    controller.maybeStartTrackingJobLocked(jobStatus, lastJob);
                 }
-                controller.maybeStartTrackingJob(jobStatus, lastJob);
             }
         }
     }
@@ -513,20 +510,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * object removed.
      */
     private boolean stopTrackingJob(JobStatus jobStatus, boolean writeBack) {
-        boolean removed;
-        boolean rocking;
         synchronized (mLock) {
             // Remove from store as well as controllers.
-            removed = mJobs.remove(jobStatus, writeBack);
-            rocking = mReadyToRock;
-        }
-        if (removed && rocking) {
-            for (int i=0; i<mControllers.size(); i++) {
-                StateController controller = mControllers.get(i);
-                controller.maybeStopTrackingJob(jobStatus, false);
+            final boolean removed = mJobs.remove(jobStatus, writeBack);
+            if (removed && mReadyToRock) {
+                for (int i=0; i<mControllers.size(); i++) {
+                    StateController controller = mControllers.get(i);
+                    controller.maybeStopTrackingJobLocked(jobStatus, false);
+                }
             }
+            return removed;
         }
-        return removed;
     }
 
     private boolean stopJobOnServiceContextLocked(JobStatus job, int reason) {
@@ -759,7 +753,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "    queued " + job.toShortString());
                     }
                     mPendingJobs.add(job);
-                } else if (areJobConstraintsNotSatisfied(job)) {
+                } else if (areJobConstraintsNotSatisfiedLocked(job)) {
                     stopJobOnServiceContextLocked(job,
                             JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
                 }
@@ -826,7 +820,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         runnableJobs = new ArrayList<>();
                     }
                     runnableJobs.add(job);
-                } else if (areJobConstraintsNotSatisfied(job)) {
+                } else if (areJobConstraintsNotSatisfiedLocked(job)) {
                     stopJobOnServiceContextLocked(job,
                             JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
                 }
@@ -875,7 +869,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
          *      - It's not ready
          *      - It's running on a JSC.
          */
-        private boolean areJobConstraintsNotSatisfied(JobStatus job) {
+        private boolean areJobConstraintsNotSatisfiedLocked(JobStatus job) {
             return !job.isReady() && isCurrentlyActiveLocked(job);
         }
 
@@ -893,7 +887,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 if (DEBUG) {
                     Slog.d(TAG, "pending queue: " + mPendingJobs.size() + " jobs.");
                 }
-                assignJobsToContextsH();
+                assignJobsToContextsLocked();
                 reportActive();
             }
         }
@@ -905,7 +899,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * run higher priority ones.
      * Lock on mJobs before calling this function.
      */
-    private void assignJobsToContextsH() {
+    private void assignJobsToContextsLocked() {
         if (DEBUG) {
             Slog.d(TAG, printPendingQueue());
         }
@@ -990,7 +984,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     }
                     for (int ic=0; ic<mControllers.size(); ic++) {
                         StateController controller = mControllers.get(ic);
-                        controller.prepareForExecution(contextIdToJobMap[i]);
+                        controller.prepareForExecutionLocked(contextIdToJobMap[i]);
                     }
                     if (!mActiveServices.get(i).executeRunnableJob(contextIdToJobMap[i])) {
                         Slog.d(TAG, "Error executing " + contextIdToJobMap[i]);
@@ -1222,7 +1216,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
             for (int i=0; i<mControllers.size(); i++) {
                 pw.println();
-                mControllers.get(i).dumpControllerState(pw);
+                mControllers.get(i).dumpControllerStateLocked(pw);
             }
             pw.println();
             pw.println(printPendingQueue());

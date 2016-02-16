@@ -64,39 +64,34 @@ public class AppIdleController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
-        synchronized (mLock) {
-            mTrackedTasks.add(jobStatus);
-            String packageName = jobStatus.getSourcePackageName();
-            final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
-                    jobStatus.getSourceUid(), jobStatus.getSourceUserId());
-            if (DEBUG) {
-                Slog.d(LOG_TAG, "Start tracking, setting idle state of "
-                        + packageName + " to " + appIdle);
-            }
-            jobStatus.appNotIdleConstraintSatisfied.set(!appIdle);
+    public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
+        mTrackedTasks.add(jobStatus);
+        String packageName = jobStatus.getSourcePackageName();
+        final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
+                jobStatus.getSourceUid(), jobStatus.getSourceUserId());
+        if (DEBUG) {
+            Slog.d(LOG_TAG, "Start tracking, setting idle state of "
+                    + packageName + " to " + appIdle);
         }
+        jobStatus.setAppNotIdleConstraintSatisfied(!appIdle);
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate) {
-        synchronized (mLock) {
-            mTrackedTasks.remove(jobStatus);
-        }
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, boolean forUpdate) {
+        mTrackedTasks.remove(jobStatus);
     }
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw) {
         pw.println("AppIdle");
         pw.println("Parole On: " + mAppIdleParoleOn);
-        synchronized (mLock) {
-            for (JobStatus task : mTrackedTasks) {
-                pw.print(task.getSourcePackageName());
-                pw.print(":idle=" + !task.appNotIdleConstraintSatisfied.get());
-                pw.print(", ");
-            }
-            pw.println();
+        for (JobStatus task : mTrackedTasks) {
+            pw.print(task.getSourcePackageName());
+            pw.print(":idle="
+                    + ((task.satisfiedConstraints&JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0));
+            pw.print(", ");
         }
+        pw.println();
     }
 
     void setAppIdleParoleOn(boolean isAppIdleParoleOn) {
@@ -114,8 +109,7 @@ public class AppIdleController extends StateController {
                 if (DEBUG) {
                     Slog.d(LOG_TAG, "Setting idle state of " + packageName + " to " + appIdle);
                 }
-                if (task.appNotIdleConstraintSatisfied.get() == appIdle) {
-                    task.appNotIdleConstraintSatisfied.set(!appIdle);
+                if (task.setAppNotIdleConstraintSatisfied(!appIdle)) {
                     changed = true;
                 }
             }
@@ -137,12 +131,11 @@ public class AppIdleController extends StateController {
                 for (JobStatus task : mTrackedTasks) {
                     if (task.getSourcePackageName().equals(packageName)
                             && task.getSourceUserId() == userId) {
-                        if (task.appNotIdleConstraintSatisfied.get() != !idle) {
+                        if (task.setAppNotIdleConstraintSatisfied(!idle)) {
                             if (DEBUG) {
                                 Slog.d(LOG_TAG, "App Idle state changed, setting idle state of "
                                         + packageName + " to " + idle);
                             }
-                            task.appNotIdleConstraintSatisfied.set(!idle);
                             changed = true;
                         }
                     }

@@ -78,22 +78,18 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
+    public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         final boolean isOnStablePower = mChargeTracker.isOnStablePower();
         if (taskStatus.hasChargingConstraint()) {
-            synchronized (mLock) {
-                mTrackedTasks.add(taskStatus);
-                taskStatus.chargingConstraintSatisfied.set(isOnStablePower);
-            }
+            mTrackedTasks.add(taskStatus);
+            taskStatus.setChargingConstraintSatisfied(isOnStablePower);
         }
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, boolean forUpdate) {
         if (taskStatus.hasChargingConstraint()) {
-            synchronized (mLock) {
-                mTrackedTasks.remove(taskStatus);
-            }
+            mTrackedTasks.remove(taskStatus);
         }
     }
 
@@ -105,7 +101,7 @@ public class BatteryController extends StateController {
         boolean reportChange = false;
         synchronized (mLock) {
             for (JobStatus ts : mTrackedTasks) {
-                boolean previous = ts.chargingConstraintSatisfied.getAndSet(stablePower);
+                boolean previous = ts.setChargingConstraintSatisfied(stablePower);
                 if (previous != stablePower) {
                     reportChange = true;
                 }
@@ -198,18 +194,16 @@ public class BatteryController extends StateController {
     }
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw) {
         pw.println("Batt.");
         pw.println("Stable power: " + mChargeTracker.isOnStablePower());
-        synchronized (mLock) {
-            Iterator<JobStatus> it = mTrackedTasks.iterator();
-            if (it.hasNext()) {
-                pw.print(String.valueOf(it.next().hashCode()));
-            }
-            while (it.hasNext()) {
-                pw.print("," + String.valueOf(it.next().hashCode()));
-            }
-            pw.println();
+        Iterator<JobStatus> it = mTrackedTasks.iterator();
+        if (it.hasNext()) {
+            pw.print(String.valueOf(it.next().hashCode()));
         }
+        while (it.hasNext()) {
+            pw.print("," + String.valueOf(it.next().hashCode()));
+        }
+        pw.println();
     }
 }
