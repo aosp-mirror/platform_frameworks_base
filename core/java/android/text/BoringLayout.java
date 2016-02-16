@@ -189,12 +189,6 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
         mBottom = spacing;
 
-        if (includepad) {
-            mDesc = spacing + metrics.top;
-        } else {
-            mDesc = spacing + metrics.ascent;
-        }
-
         if (trustWidth) {
             mMax = metrics.width;
         } else {
@@ -214,6 +208,8 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             mTopPadding = metrics.top - metrics.ascent;
             mBottomPadding = metrics.bottom - metrics.descent;
         }
+
+        mDesc = spacing + mBottomPadding + (includepad ? metrics.top : metrics.ascent);
     }
 
     /**
