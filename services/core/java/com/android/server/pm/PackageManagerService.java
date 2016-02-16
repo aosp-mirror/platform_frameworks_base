@@ -4243,7 +4243,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             } else if (actionName != null) {
                 // TODO: remove these terrible hacks
                 if (actionName.startsWith("android.net.netmon.lingerExpired")
-                        || actionName.startsWith("com.android.server.sip.SipWakeupTimer")) {
+                        || actionName.startsWith("com.android.server.sip.SipWakeupTimer")
+                        || actionName.startsWith("com.android.internal.telephony.data-reconnect")) {
                     return true;
                 }
             }
