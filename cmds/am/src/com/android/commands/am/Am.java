@@ -167,6 +167,7 @@ public class Am extends BaseCommand {
                 "       am stack positiontask <TASK_ID> <STACK_ID> <POSITION>\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
+                "       am stack remove <STACK_ID>\n" +
                 "       am task lock <TASK_ID>\n" +
                 "       am task lock stop\n" +
                 "       am task resizeable <TASK_ID> [0 (unresizeable) | 1 (crop_windows) | 2 (resizeable) | 3 (resizeable_and_pipable)]\n" +
@@ -323,6 +324,8 @@ public class Am extends BaseCommand {
                 "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
                 "am stack info: display the information about activity stack <STACK_ID>.\n" +
+                "\n" +
+                "am stack remove: remove stack <STACK_ID>.\n" +
                 "\n" +
                 "am task lock: bring <TASK_ID> to the front and don't allow other tasks to run.\n" +
                 "\n" +
@@ -1732,6 +1735,9 @@ public class Am extends BaseCommand {
             case "size-docked-stack-test":
                 runStackSizeDockedStackTest();
                 break;
+            case "remove":
+                runStackRemove();
+                break;
             default:
                 showError("Error: unknown command '" + op + "'");
                 break;
@@ -1866,6 +1872,12 @@ public class Am extends BaseCommand {
             System.out.println(info);
         } catch (RemoteException e) {
         }
+    }
+
+    private void runStackRemove() throws Exception {
+        String stackIdStr = nextArgRequired();
+        int stackId = Integer.valueOf(stackIdStr);
+        mAm.removeStack(stackId);
     }
 
     private void runMoveTopActivityToPinnedStack() throws Exception {

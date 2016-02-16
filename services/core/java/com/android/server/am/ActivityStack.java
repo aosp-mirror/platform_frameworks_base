@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 
 import static android.content.res.Configuration.SCREENLAYOUT_UNDEFINED;
@@ -766,8 +767,8 @@ final class ActivityStack {
 
     void minimalResumeActivityLocked(ActivityRecord r) {
         r.state = ActivityState.RESUMED;
-        if (DEBUG_STATES) Slog.v(TAG_STATES,
-                "Moving to RESUMED: " + r + " (starting new instance)");
+        if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + r + " (starting new instance)"
+                + " callers=" + Debug.getCallers(5));
         mResumedActivity = r;
         r.task.touchActiveTime();
         mRecentTasks.addLocked(r.task);
@@ -1054,6 +1055,7 @@ final class ActivityStack {
                 if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSED: " + r
                         + (timeout ? " (due to timeout)" : " (pause complete)"));
                 completePauseLocked(true);
+                return;
             } else {
                 EventLog.writeEvent(EventLogTags.AM_FAILED_TO_PAUSE,
                         r.userId, System.identityHashCode(r), r.shortComponentName,
@@ -1069,6 +1071,7 @@ final class ActivityStack {
                 }
             }
         }
+        mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
     }
 
     final void activityStoppedLocked(ActivityRecord r, Bundle icicle,
@@ -1198,12 +1201,13 @@ final class ActivityStack {
             prev.cpuTimeAtResume = 0; // reset it
         }
 
-        // Notify when the task stack has changed, but only if visibilities changed (not just
-        // focus).
+        // Notify when the task stack has changed, but only if visibilities changed (not just focus)
         if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause) {
             mService.notifyTaskStackChangedLocked();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
+
+        mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
     }
 
     private void addToStopping(ActivityRecord r) {
@@ -2005,8 +2009,7 @@ final class ActivityStack {
 
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resuming " + next);
 
-        // If we are currently pausing an activity, then don't do anything
-        // until that is done.
+        // If we are currently pausing an activity, then don't do anything until that is done.
         if (!mStackSupervisor.allPausedActivitiesComplete()) {
             if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG_PAUSE,
                     "resumeTopActivityLocked: Skip resume: some activity pausing.");
@@ -2014,40 +2017,10 @@ final class ActivityStack {
             return false;
         }
 
-        // Okay we are now going to start a switch, to 'next'.  We may first
-        // have to pause the current activity, but this is an important point
-        // where we have decided to go to 'next' so keep track of that.
-        // XXX "App Redirected" dialog is getting too many false positives
-        // at this point, so turn off for now.
-        if (false) {
-            if (mLastStartedActivity != null && !mLastStartedActivity.finishing) {
-                long now = SystemClock.uptimeMillis();
-                final boolean inTime = mLastStartedActivity.startTime != 0
-                        && (mLastStartedActivity.startTime + START_WARN_TIME) >= now;
-                final int lastUid = mLastStartedActivity.info.applicationInfo.uid;
-                final int nextUid = next.info.applicationInfo.uid;
-                if (inTime && lastUid != nextUid
-                        && lastUid != next.launchedFromUid
-                        && mService.checkPermission(
-                                android.Manifest.permission.STOP_APP_SWITCHES,
-                                -1, next.launchedFromUid)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    mService.showLaunchWarningLocked(mLastStartedActivity, next);
-                } else {
-                    next.startTime = now;
-                    mLastStartedActivity = next;
-                }
-            } else {
-                next.startTime = SystemClock.uptimeMillis();
-                mLastStartedActivity = next;
-            }
-        }
-
         mStackSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
-        // We need to start pausing the current activity so the top one
-        // can be resumed...
-        boolean dontWaitForPause = (next.info.flags&ActivityInfo.FLAG_RESUME_WHILE_PAUSING) != 0;
+        // We need to start pausing the current activity so the top one can be resumed...
+        final boolean dontWaitForPause = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0;
         boolean pausing = mStackSupervisor.pauseBackStacks(userLeaving, true, dontWaitForPause);
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
@@ -4425,7 +4398,8 @@ final class ActivityStack {
 
         try {
             if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_SWITCH,
-                    "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + r);
+                    "Moving to " + (andResume ? "RESUMED" : "PAUSED") + " Relaunching " + r
+                    + " callers=" + Debug.getCallers(6));
             r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
                     !andResume, new Configuration(mService.mConfiguration),
