@@ -416,7 +416,7 @@ interface IPackageManager {
      */
     FeatureInfo[] getSystemAvailableFeatures();
 
-    boolean hasSystemFeature(String name);
+    boolean hasSystemFeature(String name, int version);
 
     void enterSafeMode();
     boolean isSafeMode();

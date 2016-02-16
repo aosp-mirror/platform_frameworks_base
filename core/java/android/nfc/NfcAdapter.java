@@ -414,7 +414,7 @@ public final class NfcAdapter {
             return false;
         }
         try {
-            return pm.hasSystemFeature(PackageManager.FEATURE_NFC);
+            return pm.hasSystemFeature(PackageManager.FEATURE_NFC, 0);
         } catch (RemoteException e) {
             Log.e(TAG, "Package manager query failed, assuming no NFC feature", e);
             return false;

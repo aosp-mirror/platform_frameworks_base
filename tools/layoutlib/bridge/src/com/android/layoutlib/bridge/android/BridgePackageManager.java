@@ -323,6 +323,11 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
+    public boolean hasSystemFeature(String name, int version) {
+        return false;
+    }
+
+    @Override
     public ResolveInfo resolveActivity(Intent intent, int flags) {
         return null;
     }
