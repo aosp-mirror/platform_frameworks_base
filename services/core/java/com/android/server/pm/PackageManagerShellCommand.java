@@ -339,9 +339,17 @@ class PackageManagerShellCommand extends ShellCommand {
         for (int p = 0; p < count; p++) {
             FeatureInfo fi = list.get(p);
             pw.print("feature:");
-            if (fi.name != null) pw.println(fi.name);
-            else pw.println("reqGlEsVersion=0x"
+            if (fi.name != null) {
+                pw.print(fi.name);
+                if (fi.version > 0) {
+                    pw.print("=");
+                    pw.print(fi.version);
+                }
+                pw.println();
+            } else {
+                pw.println("reqGlEsVersion=0x"
                     + Integer.toHexString(fi.reqGlEsVersion));
+            }
         }
         return 0;
     }

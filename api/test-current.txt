@@ -1376,6 +1376,7 @@ package android {
     field public static final int valueType = 16843488; // 0x10102e0
     field public static final int variablePadding = 16843157; // 0x1010195
     field public static final int vendor = 16843751; // 0x10103e7
+    field public static final int version = 16844058; // 0x101051a
     field public static final int versionCode = 16843291; // 0x101021b
     field public static final int versionName = 16843292; // 0x101021c
     field public static final int verticalCorrection = 16843322; // 0x101023a
@@ -9407,6 +9408,7 @@ package android.content.pm {
     field public int flags;
     field public java.lang.String name;
     field public int reqGlEsVersion;
+    field public int version;
   }
 
   public class InstrumentationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -9686,6 +9688,7 @@ package android.content.pm {
     method public abstract java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public abstract boolean hasSystemFeature(java.lang.String);
+    method public abstract boolean hasSystemFeature(java.lang.String, int);
     method public abstract boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
     method public abstract boolean isSafeMode();
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -37806,6 +37809,7 @@ package android.test.mock {
     method public java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
     method public boolean hasSystemFeature(java.lang.String);
+    method public boolean hasSystemFeature(java.lang.String, int);
     method public boolean isPermissionRevokedByPolicy(java.lang.String, java.lang.String);
     method public boolean isSafeMode();
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);

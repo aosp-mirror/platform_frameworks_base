@@ -8136,7 +8136,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean hasFeatureManagedUsers() {
         try {
-            return mIPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
+            return mIPackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0);
         } catch (RemoteException e) {
             return false;
         }

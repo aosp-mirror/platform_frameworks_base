@@ -824,6 +824,11 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean hasSystemFeature(String name, int version) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean isSafeMode() {
         throw new UnsupportedOperationException();
     }
