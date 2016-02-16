@@ -22,4 +22,4 @@
           android:paddingStart="24dp"
           android:paddingTop="20dp"
           android:paddingEnd="24dp"
-          android:paddingBottom="13dp" />
+          android:paddingBottom="13dp"/>
