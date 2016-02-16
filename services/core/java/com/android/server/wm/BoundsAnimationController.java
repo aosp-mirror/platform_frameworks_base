@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
+import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.animation.LinearInterpolator;
@@ -39,7 +40,10 @@ import android.view.animation.LinearInterpolator;
  * The object that is resized needs to implement {@link AnimateBoundsUser} interface.
  */
 public class BoundsAnimationController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "BoundsAnimationController" : TAG_WM;
+    private static final boolean DEBUG_LOCAL = false;
+    private static final boolean DEBUG = DEBUG_LOCAL || DEBUG_ANIM;
+    private static final String TAG = TAG_WITH_CLASS_NAME || DEBUG_LOCAL
+            ? "BoundsAnimationController" : TAG_WM;
     private static final int DEBUG_ANIMATION_SLOW_DOWN_FACTOR = 1;
 
     // Only accessed on UI thread.
@@ -80,9 +84,9 @@ public class BoundsAnimationController {
             mTmpRect.top = (int) (mFrom.top * remains + mTo.top * value + 0.5f);
             mTmpRect.right = (int) (mFrom.right * remains + mTo.right * value + 0.5f);
             mTmpRect.bottom = (int) (mFrom.bottom * remains + mTo.bottom * value + 0.5f);
-            if (DEBUG_ANIM) Slog.d(TAG, "animateUpdate: mTarget=" + mTarget + ", mBounds="
-                    + mTmpRect + ", from=" + mFrom + ", mTo=" + mTo + ", value=" + value
-                    + ", remains=" + remains);
+            if (DEBUG) Slog.d(TAG, "animateUpdate: mTarget=" + mTarget + " mBounds="
+                    + mTmpRect + " from=" + mFrom + " mTo=" + mTo + " value=" + value
+                    + " remains=" + remains);
             if (!mTarget.setSize(mTmpRect)) {
                 // Whoops, the target doesn't feel like animating anymore. Let's immediately finish
                 // any further animation.
@@ -93,6 +97,8 @@ public class BoundsAnimationController {
 
         @Override
         public void onAnimationStart(Animator animation) {
+            if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
+                    + " mReplacement=" + mReplacement);
             if (!mReplacement) {
                 mTarget.onAnimationStart();
             }
@@ -100,6 +106,8 @@ public class BoundsAnimationController {
 
         @Override
         public void onAnimationEnd(Animator animation) {
+            if (DEBUG) Slog.d(TAG, "onAnimationEnd: mTarget=" + mTarget
+                    + " mMoveToFullScreen=" + mMoveToFullScreen + " mWillReplace=" + mWillReplace);
             finishAnimation();
             if (mMoveToFullScreen && !mWillReplace) {
                 mTarget.moveToFullscreen();
@@ -114,10 +122,18 @@ public class BoundsAnimationController {
         @Override
         public void cancel() {
             mWillReplace = true;
+            if (DEBUG) Slog.d(TAG, "cancel: willReplace mTarget=" + mTarget);
             super.cancel();
         }
 
+        /** Returns true if the animation target is the same as the input bounds. */
+        public boolean isAnimatingTo(Rect bounds) {
+            return mTo.equals(bounds);
+        }
+
         private void finishAnimation() {
+            if (DEBUG) Slog.d(TAG, "finishAnimation: mTarget=" + mTarget
+                    + " callers" + Debug.getCallers(2));
             if (!mWillReplace) {
                 mTarget.onAnimationEnd();
             }
@@ -167,7 +183,18 @@ public class BoundsAnimationController {
 
         final BoundsAnimator existing = mRunningAnimations.get(target);
         final boolean replacing = existing != null;
+
+        if (DEBUG) Slog.d(TAG, "animateBounds: target=" + target + " from=" + from + " to=" + to
+                + " moveToFullscreen=" + moveToFullscreen + " replacing=" + replacing);
+
         if (replacing) {
+            if (existing.isAnimatingTo(to)) {
+                // Just les the current animation complete if it has the same destination as the
+                // one we are trying to start.
+                if (DEBUG) Slog.d(TAG, "animateBounds: same destination as existing=" + existing
+                        + " ignoring...");
+                return;
+            }
             existing.cancel();
         }
         final BoundsAnimator animator =
