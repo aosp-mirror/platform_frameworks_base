@@ -190,6 +190,7 @@ public class Vpn {
             if (!setPackageAuthorization(packageName, true)) {
                 return false;
             }
+            prepareInternal(packageName);
         }
 
         // Save the new package name in Settings.Secure.
