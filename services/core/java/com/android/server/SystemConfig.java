@@ -342,7 +342,7 @@ public class SystemConfig {
 
                 } else if ("feature".equals(name) && allowFeatures) {
                     String fname = parser.getAttributeValue(null, "name");
-                    int fversion = XmlUtils.readIntAttribute(null, "version", 0);
+                    int fversion = XmlUtils.readIntAttribute(parser, "version", 0);
                     boolean allowed;
                     if (!lowRam) {
                         allowed = true;
