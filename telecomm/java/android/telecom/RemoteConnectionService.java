@@ -330,6 +330,13 @@ final class RemoteConnectionService {
                         .setExtras(extras);
             }
         }
+
+        @Override
+        public void onConnectionEvent(String callId, String event) {
+            if (mConnectionById.containsKey(callId)) {
+                findConnectionForAction(callId, "onConnectionEvent").onConnectionEvent(event);
+            }
+        }
     };
 
     private final ConnectionServiceAdapterServant mServant =
