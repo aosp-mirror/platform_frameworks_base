@@ -19,15 +19,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.BatteryInfo;
+import com.android.settingslib.graph.UsageView;
 import com.android.systemui.BatteryMeterDrawable;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -161,27 +164,43 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
                 BatteryInfo.getBatteryInfo(mContext, new BatteryInfo.Callback() {
                     @Override
                     public void onBatteryInfoLoaded(BatteryInfo info) {
-                        if (mCurrentView != null && mCharging) {
-                            ((TextView) mCurrentView.findViewById(android.R.id.title)).setText(
-                                    info.mChargeLabelString);
+                        if (mCurrentView != null) {
+                            bindBatteryInfo(info);
                         }
                     }
                 });
-                ((TextView) mCurrentView.findViewById(android.R.id.summary)).setText(
+                ((TextView) mCurrentView.findViewById(android.R.id.title)).setText(
                         R.string.battery_detail_charging_summary);
-                mCurrentView.setClickable(false);
                 mCurrentView.findViewById(android.R.id.icon).setVisibility(View.INVISIBLE);
-                mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.INVISIBLE);
+                mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.GONE);
+                mCurrentView.findViewById(R.id.switch_container).setClickable(false);
             } else {
                 ((TextView) mCurrentView.findViewById(android.R.id.title)).setText(
                         R.string.battery_detail_switch_title);
                 ((TextView) mCurrentView.findViewById(android.R.id.summary)).setText(
                         R.string.battery_detail_switch_summary);
-                mCurrentView.setClickable(true);
                 mCurrentView.findViewById(android.R.id.icon).setVisibility(View.VISIBLE);
                 mCurrentView.findViewById(android.R.id.toggle).setVisibility(View.VISIBLE);
-                mCurrentView.setOnClickListener(this);
+                mCurrentView.findViewById(R.id.switch_container).setClickable(true);
+                mCurrentView.findViewById(R.id.switch_container).setOnClickListener(this);
             }
+        }
+
+        private void bindBatteryInfo(BatteryInfo info) {
+            SpannableStringBuilder builder = new SpannableStringBuilder();
+            builder.append(info.batteryPercentString, new RelativeSizeSpan(2),
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            if (info.remainingLabel != null) {
+                if (mContext.getResources().getBoolean(R.bool.quick_settings_wide)) {
+                    builder.append(' ');
+                } else {
+                    builder.append('\n');
+                }
+                builder.append(info.remainingLabel);
+            }
+            ((TextView) mCurrentView.findViewById(R.id.charge_and_estimation)).setText(builder);
+
+            info.bindHistory((UsageView) mCurrentView.findViewById(R.id.battery_usage));
         }
 
         @Override

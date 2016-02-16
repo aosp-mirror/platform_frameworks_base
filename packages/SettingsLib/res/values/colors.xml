@@ -16,4 +16,6 @@
 
 <resources>
     <color name="disabled_text_color">#66000000</color> <!-- 38% black -->
+
+    <color name="usage_graph_dots">#455A64</color>
 </resources>
