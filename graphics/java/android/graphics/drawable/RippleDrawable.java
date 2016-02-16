@@ -251,6 +251,7 @@ public class RippleDrawable extends LayerDrawable {
         boolean enabled = false;
         boolean pressed = false;
         boolean focused = false;
+        boolean hovered = false;
 
         for (int state : stateSet) {
             if (state == R.attr.state_enabled) {
@@ -259,11 +260,13 @@ public class RippleDrawable extends LayerDrawable {
                 focused = true;
             } else if (state == R.attr.state_pressed) {
                 pressed = true;
+            } else if (state == R.attr.state_hovered) {
+                hovered = true;
             }
         }
 
         setRippleActive(enabled && pressed);
-        setBackgroundActive(focused || (enabled && pressed), focused);
+        setBackgroundActive(hovered || focused || (enabled && pressed), focused || hovered);
 
         return changed;
     }
