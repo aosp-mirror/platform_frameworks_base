@@ -239,12 +239,24 @@ public class WifiConfiguration implements Parcelable {
     public String BSSID;
 
     /**
+     * 2GHz band.
+     * @hide
+     */
+    public static final int AP_BAND_2GHZ = 0;
+
+    /**
+     * 5GHz band.
+     * @hide
+     */
+    public static final int AP_BAND_5GHZ = 1;
+
+    /**
      * The band which AP resides on
      * 0-2G  1-5G
      * By default, 2G is chosen
      * @hide
      */
-    public int apBand = 0;
+    public int apBand = AP_BAND_2GHZ;
 
     /**
      * The channel which AP resides on,currently, US only
