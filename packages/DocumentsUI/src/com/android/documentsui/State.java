@@ -153,7 +153,7 @@ public class State implements android.os.Parcelable {
         return mStackTouched;
     }
 
-    public boolean initialiLocationHasChanged() {
+    public boolean initialLocationHasChanged() {
         return mInitialRootChanged || mInitialDocChanged;
     }
 
