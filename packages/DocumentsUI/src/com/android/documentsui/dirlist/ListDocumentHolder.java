@@ -101,7 +101,7 @@ final class ListDocumentHolder extends DocumentHolder {
         mIconThumb.setAlpha(0f);
 
         final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
-        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMime);
+        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMime, null);
 
         mTitle.setText(docDisplayName);
         mTitle.setVisibility(View.VISIBLE);

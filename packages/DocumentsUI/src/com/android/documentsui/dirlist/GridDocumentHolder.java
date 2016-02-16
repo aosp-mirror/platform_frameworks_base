@@ -100,10 +100,9 @@ final class GridDocumentHolder extends DocumentHolder {
         mIconThumb.animate().cancel();
         mIconThumb.setAlpha(0f);
 
-        mIconMimeSm.setImageDrawable(IconUtils.loadMimeIcon(mContext, docMimeType));
-
         final Uri uri = DocumentsContract.buildDocumentUri(docAuthority, docId);
-        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMimeLg);
+        mIconHelper.loadThumbnail(uri, docMimeType, docFlags, docIcon, mIconThumb, mIconMimeLg,
+                mIconMimeSm);
 
         if (mHideTitles) {
             mTitle.setVisibility(View.GONE);

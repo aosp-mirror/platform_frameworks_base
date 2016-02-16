@@ -32,6 +32,7 @@ import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -199,11 +200,12 @@ public class IconHelper {
      * @param docFlags Flags for the file being represented.
      * @param docIcon Custom icon (if any) for the file being requested.
      * @param iconThumb The itemview's thumbnail icon.
-     * @param iconMime The itemview's mime icon.
+     * @param iconMime The itemview's mime icon. Hidden when iconThumb is shown.
+     * @param subIconMime The second itemview's mime icon. Always visible.
      * @return
      */
     public void loadThumbnail(Uri uri, String mimeType, int docFlags, int docIcon,
-            ImageView iconThumb, ImageView iconMime) {
+            ImageView iconThumb, ImageView iconMime, @Nullable ImageView subIconMime) {
         boolean cacheHit = false;
 
         final String docAuthority = uri.getAuthority();
@@ -225,6 +227,12 @@ public class IconHelper {
             }
         }
 
+        final Drawable icon = getDocumentIcon(mContext, docAuthority,
+                DocumentsContract.getDocumentId(uri), mimeType, docIcon);
+        if (subIconMime != null) {
+            subIconMime.setImageDrawable(icon);
+        }
+
         if (cacheHit) {
             iconMime.setImageDrawable(null);
             iconMime.setAlpha(0f);
@@ -232,8 +240,7 @@ public class IconHelper {
         } else {
             // Add a mime icon if the thumbnail is being loaded in the background.
             iconThumb.setImageDrawable(null);
-            iconMime.setImageDrawable(getDocumentIcon(
-                    mContext, docAuthority, DocumentsContract.getDocumentId(uri), mimeType, docIcon));
+            iconMime.setImageDrawable(icon);
             iconMime.setAlpha(1f);
             iconThumb.setAlpha(0f);
         }
