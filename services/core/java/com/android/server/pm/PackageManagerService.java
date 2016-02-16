@@ -14112,20 +14112,19 @@ public class PackageManagerService extends IPackageManager.Stub {
             return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
         }
 
-        PackageParser.Package uninstalledPkg;
+        PackageSetting uninstalledPs = null;
 
         // for the uninstall-updates case and restricted profiles, remember the per-
         // user handle installed state
         int[] allUsers;
         synchronized (mPackages) {
-            uninstalledPkg = mPackages.get(packageName);
-            PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || uninstalledPkg == null) {
+            uninstalledPs = mSettings.mPackages.get(packageName);
+            if (uninstalledPs == null) {
                 Slog.w(TAG, "Not removing non-existent package " + packageName);
                 return PackageManager.DELETE_FAILED_INTERNAL_ERROR;
             }
             allUsers = sUserManager.getUserIds();
-            info.origUsers = ps.queryInstalledUsers(allUsers, true);
+            info.origUsers = uninstalledPs.queryInstalledUsers(allUsers, true);
         }
 
         synchronized (mInstallLock) {
@@ -14134,7 +14133,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     flags | REMOVE_CHATTY, info, true, null);
             synchronized (mPackages) {
                 if (res) {
-                    mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPkg);
+                    mEphemeralApplicationRegistry.onPackageUninstalledLPw(uninstalledPs.pkg);
                 }
             }
         }
