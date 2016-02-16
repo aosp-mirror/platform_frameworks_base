@@ -332,7 +332,9 @@ public class WebViewClient {
      * in memory (for the life of the application) if proceed() or cancel() is
      * called and does not call onReceivedClientCertRequest() again for the
      * same host and port pair. Webview does not store the response if ignore()
-     * is called.
+     * is called. Note that, multiple layers in chromium network stack might be
+     * caching the responses, so the behavior for ignore is only a best case
+     * effort.
      *
      * This method is called on the UI thread. During the callback, the
      * connection is suspended.
