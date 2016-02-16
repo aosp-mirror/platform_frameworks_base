@@ -115,6 +115,64 @@ public class IpManager extends StateMachine {
         public void onReachabilityLost(String logMsg) {}
     }
 
+    /**
+     * This class encapsulates parameters to be passed to
+     * IpManager#startProvisioning(). A defensive copy is made by IpManager
+     * and the values specified herein are in force until IpManager#stop()
+     * is called.
+     *
+     * Example use:
+     *
+     *     final ProvisioningConfiguration config =
+     *             mIpManager.buildProvisioningConfiguration()
+     *                     .withPreDhcpAction()
+     *                     .build();
+     *     mIpManager.startProvisioning(config);
+     *     ...
+     *     mIpManager.stop();
+     *
+     * The specified provisioning configuration will only be active until
+     * IpManager#stop() is called. Future calls to IpManager#startProvisioning()
+     * must specify the configuration again.
+     */
+    public static class ProvisioningConfiguration {
+
+        public static class Builder {
+            private ProvisioningConfiguration mConfig = new ProvisioningConfiguration();
+
+            public Builder withoutIpReachabilityMonitor() {
+                mConfig.mUsingIpReachabilityMonitor = false;
+                return this;
+            }
+
+            public Builder withPreDhcpAction() {
+                mConfig.mRequestedPreDhcpAction = true;
+                return this;
+            }
+
+            public Builder withStaticConfiguration(StaticIpConfiguration staticConfig) {
+                mConfig.mStaticIpConfig = staticConfig;
+                return this;
+            }
+
+            public ProvisioningConfiguration build() {
+                return new ProvisioningConfiguration(mConfig);
+            }
+        }
+
+        /* package */ boolean mUsingIpReachabilityMonitor = true;
+        /* package */ boolean mRequestedPreDhcpAction;
+        /* package */ StaticIpConfiguration mStaticIpConfig;
+
+        public ProvisioningConfiguration() {}
+
+        public ProvisioningConfiguration(ProvisioningConfiguration other) {
+            mUsingIpReachabilityMonitor = other.mUsingIpReachabilityMonitor;
+            mRequestedPreDhcpAction = other.mRequestedPreDhcpAction;
+            mStaticIpConfig = other.mStaticIpConfig;
+        }
+    }
+
     private static final int CMD_STOP = 1;
     private static final int CMD_START = 2;
     private static final int CMD_CONFIRM = 3;
@@ -145,7 +203,7 @@ public class IpManager extends StateMachine {
     private IpReachabilityMonitor mIpReachabilityMonitor;
     private BaseDhcpStateMachine mDhcpStateMachine;
     private DhcpResults mDhcpResults;
-    private StaticIpConfiguration mStaticIpConfig;
+    private ProvisioningConfiguration mConfiguration;
 
     /**
      * Member variables accessed both from within the StateMachine thread
@@ -211,14 +269,24 @@ public class IpManager extends StateMachine {
         mNetlinkTracker = null;
     }
 
-    public void startProvisioning(StaticIpConfiguration staticIpConfig) {
+    public static ProvisioningConfiguration.Builder buildProvisioningConfiguration() {
+        return new ProvisioningConfiguration.Builder();
+    }
+
+    public void startProvisioning(ProvisioningConfiguration req) {
         getInterfaceIndex();
-        sendMessage(CMD_START, staticIpConfig);
+        sendMessage(CMD_START, new ProvisioningConfiguration(req));
+    }
+
+    // TODO: Delete this.
+    public void startProvisioning(StaticIpConfiguration staticIpConfig) {
+        startProvisioning(buildProvisioningConfiguration()
+                .withStaticConfiguration(staticIpConfig)
+                .build());
     }
 
     public void startProvisioning() {
-        getInterfaceIndex();
-        sendMessage(CMD_START);
+        startProvisioning(new ProvisioningConfiguration());
     }
 
     public void stop() {
@@ -296,7 +364,7 @@ public class IpManager extends StateMachine {
     private void resetLinkProperties() {
         mNetlinkTracker.clearLinkProperties();
         mDhcpResults = null;
-        mStaticIpConfig = null;
+        mConfiguration = null;
 
         synchronized (mLock) {
             mLinkProperties = new LinkProperties();
@@ -533,7 +601,7 @@ public class IpManager extends StateMachine {
                     break;
 
                 case CMD_START:
-                    mStaticIpConfig = (StaticIpConfiguration) msg.obj;
+                    mConfiguration = (ProvisioningConfiguration) msg.obj;
                     transitionTo(mStartedState);
                     break;
 
@@ -591,23 +659,23 @@ public class IpManager extends StateMachine {
                 Log.e(mTag, "Unable to change interface settings: " + ie);
             }
 
-            mIpReachabilityMonitor = new IpReachabilityMonitor(
-                    mContext,
-                    mInterfaceName,
-                    new IpReachabilityMonitor.Callback() {
-                        @Override
-                        public void notifyLost(InetAddress ip, String logMsg) {
-                            if (mCallback.usingIpReachabilityMonitor()) {
+            if (mConfiguration.mUsingIpReachabilityMonitor) {
+                mIpReachabilityMonitor = new IpReachabilityMonitor(
+                        mContext,
+                        mInterfaceName,
+                        new IpReachabilityMonitor.Callback() {
+                            @Override
+                            public void notifyLost(InetAddress ip, String logMsg) {
                                 mCallback.onReachabilityLost(logMsg);
                             }
-                        }
-                    });
+                        });
+            }
 
             // If we have a StaticIpConfiguration attempt to apply it and
             // handle the result accordingly.
-            if (mStaticIpConfig != null) {
+            if (mConfiguration.mStaticIpConfig != null) {
                 if (applyStaticIpConfig()) {
-                    handleIPv4Success(new DhcpResults(mStaticIpConfig));
+                    handleIPv4Success(new DhcpResults(mConfiguration.mStaticIpConfig));
                 } else {
                     if (VDBG) { Log.d(mTag, "onProvisioningFailure()"); }
                     mCallback.onProvisioningFailure(getLinkProperties());
@@ -623,8 +691,10 @@ public class IpManager extends StateMachine {
 
         @Override
         public void exit() {
-            mIpReachabilityMonitor.stop();
-            mIpReachabilityMonitor = null;
+            if (mIpReachabilityMonitor != null) {
+                mIpReachabilityMonitor.stop();
+                mIpReachabilityMonitor = null;
+            }
 
             if (mDhcpStateMachine != null) {
                 mDhcpStateMachine.sendMessage(DhcpClient.CMD_STOP_DHCP);
@@ -650,7 +720,7 @@ public class IpManager extends StateMachine {
                     // that both probes (a) on-link neighbors and (b) does
                     // a DHCPv4 RENEW.  We used to do this on Wi-Fi framework
                     // roams.
-                    if (mCallback.usingIpReachabilityMonitor()) {
+                    if (mIpReachabilityMonitor != null) {
                         mIpReachabilityMonitor.probeAll();
                     }
                     break;
@@ -679,7 +749,11 @@ public class IpManager extends StateMachine {
 
                 case DhcpClient.CMD_PRE_DHCP_ACTION:
                     if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
-                    mCallback.onPreDhcpAction();
+                    if (mConfiguration.mRequestedPreDhcpAction) {
+                        mCallback.onPreDhcpAction();
+                    } else {
+                        sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
+                    }
                     break;
 
                 case DhcpClient.CMD_POST_DHCP_ACTION: {
@@ -717,7 +791,7 @@ public class IpManager extends StateMachine {
 
         private boolean applyStaticIpConfig() {
             final InterfaceConfiguration ifcg = new InterfaceConfiguration();
-            ifcg.setLinkAddress(mStaticIpConfig.ipAddress);
+            ifcg.setLinkAddress(mConfiguration.mStaticIpConfig.ipAddress);
             ifcg.setInterfaceUp();
             try {
                 mNwService.setInterfaceConfig(mInterfaceName, ifcg);
