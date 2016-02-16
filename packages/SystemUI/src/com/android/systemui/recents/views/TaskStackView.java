@@ -964,10 +964,26 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 newIndex = (newIndex + (forward ? -1 : 1) + taskCount) % taskCount;
             }
         } else {
-            // We don't have a focused task, so focus the first visible task view
-            TaskView tv = getFrontMostTaskView(stackTasksOnly);
-            if (tv != null) {
-                newIndex = mStack.indexOfStackTask(tv.getTask());
+            // We don't have a focused task
+            float stackScroll = mStackScroller.getStackScroll();
+            ArrayList<Task> tasks = mStack.getStackTasks();
+            int taskCount = tasks.size();
+            if (forward) {
+                // Walk backwards and focus the next task smaller than the current stack scroll
+                for (newIndex = taskCount - 1; newIndex >= 0; newIndex--) {
+                    float taskP = mLayoutAlgorithm.getStackScrollForTask(tasks.get(newIndex));
+                    if (Float.compare(taskP, stackScroll) <= 0) {
+                        break;
+                    }
+                }
+            } else {
+                // Walk forwards and focus the next task larger than the current stack scroll
+                for (newIndex = 0; newIndex < taskCount; newIndex++) {
+                    float taskP = mLayoutAlgorithm.getStackScrollForTask(tasks.get(newIndex));
+                    if (Float.compare(taskP, stackScroll) >= 0) {
+                        break;
+                    }
+                }
             }
         }
         if (newIndex != -1) {
