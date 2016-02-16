@@ -199,7 +199,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
             final RootInfo root = new RootInfo();
             root.rootId = ROOT_ID_HOME;
             mRoots.put(root.rootId, root);
-            root.title = getContext().getString(R.string.root_home);
+            root.title = getContext().getString(R.string.root_documents);
 
             // Only report bytes on *volumes*...as a matter of policy.
             root.reportAvailableBytes = false;
@@ -214,9 +214,9 @@ public class ExternalStorageProvider extends DocumentsProvider {
             // Create the "Home" directory on disk, but don't the localized root.title
             // since the directories shouldn't be localized.
             root.visiblePath = new File(
-                    primaryVolume.getPathForUser(userId), Environment.DIRECTORY_HOME);
+                    primaryVolume.getPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
             root.path = new File(
-                    primaryVolume.getInternalPathForUser(userId), root.rootId);
+                    primaryVolume.getInternalPathForUser(userId), Environment.DIRECTORY_DOCUMENTS);
             try {
                 root.docId = getDocIdForFile(root.path);
             } catch (FileNotFoundException e) {

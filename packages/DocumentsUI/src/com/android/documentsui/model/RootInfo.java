@@ -171,7 +171,7 @@ public class RootInfo implements Durable, Parcelable {
 
         // TODO: remove these special case icons
         if (isHome()) {
-            derivedIcon = R.drawable.ic_root_home;
+            derivedIcon = R.drawable.ic_root_documents;
             derivedType = TYPE_LOCAL;
         } else if (isExternalStorage()) {
             derivedIcon = R.drawable.ic_root_smartphone;
