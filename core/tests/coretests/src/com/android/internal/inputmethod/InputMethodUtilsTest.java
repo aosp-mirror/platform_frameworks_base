@@ -219,7 +219,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // Make sure that an automatic subtype (overridesImplicitlyEnabledSubtype:true) is
         // selected no matter what locale is specified.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoEnGB);
             subtypes.add(nonAutoJa);
@@ -244,7 +244,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // selected as long as there is no no automatic subtype
         // (overridesImplicitlyEnabledSubtype:true) in the given list.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);  // locale == "en_US"
             subtypes.add(nonAutoEnGB);
             subtypes.add(nonAutoJa);
@@ -267,7 +267,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // selected as long as there is no automatic subtype
         // (overridesImplicitlyEnabledSubtype:true) in the given list.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoEnGB); // locale == "en_GB"
             subtypes.add(nonAutoJa);
@@ -291,7 +291,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // try to find a subtype whose language is equal to the language part of the given locale.
         // Here make sure that a subtype (locale: "fr_CA") can be found with locale: "fr".
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoFrCA);  // locale == "fr_CA"
             subtypes.add(nonAutoJa);
             subtypes.add(nonAutoFil);
@@ -311,7 +311,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
         // Then make sure that a subtype (locale: "fr") can be found with locale: "fr_CA".
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoFr);  // locale == "fr"
             subtypes.add(nonAutoJa);
             subtypes.add(nonAutoFil);
@@ -333,7 +333,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // Make sure that subtypes which have "EnabledWhenDefaultIsNotAsciiCapable" in its
         // extra value is selected if and only if all other selected IMEs are not AsciiCapable.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoJa);    // not ASCII capable
             subtypes.add(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype);
@@ -355,7 +355,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
 
         // Make sure that 3-letter language code can be handled.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoFil);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -374,7 +374,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // Make sure that we never end up matching "fi" (finnish) with "fil" (filipino).
         // Also make sure that the first subtype will be used as the last-resort candidate.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoJa);
             subtypes.add(nonAutoEnUS);
             subtypes.add(nonAutoFil);
@@ -393,7 +393,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
 
         // Make sure that "in" and "id" conversion is taken into account.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoIn);
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -409,7 +409,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             verifyEquality(nonAutoIn, result.get(0));
         }
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoIn);
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -425,7 +425,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             verifyEquality(nonAutoIn, result.get(0));
         }
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoId);
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -441,7 +441,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             verifyEquality(nonAutoId, result.get(0));
         }
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoId);
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -482,7 +482,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         final boolean CHECK_COUNTRY = true;
 
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
@@ -514,7 +514,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
 
         // Make sure that 3-letter language code ("fil") can be handled.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoFil);
             final InputMethodInfo imi = createDummyInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
@@ -541,7 +541,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
 
         // Make sure that 3-letter language code ("fil_PH") can be handled.
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoFilPH);
             final InputMethodInfo imi = createDummyInputMethodInfo(
                     "com.android.apps.inputmethod.latin",
@@ -568,7 +568,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
 
         // Make sure that a subtype whose locale is "in" can be queried with "id".
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoIn);
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -587,7 +587,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
 
         // Make sure that a subtype whose locale is "id" can be queried with "in".
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(nonAutoId);
             subtypes.add(nonAutoEnUS);
             final InputMethodInfo imi = createDummyInputMethodInfo(
@@ -712,7 +712,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
     private static ArrayList<InputMethodInfo> getImesWithDefaultVoiceIme() {
         ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -729,7 +729,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
     private static ArrayList<InputMethodInfo> getImesWithoutDefaultVoiceIme() {
         ArrayList<InputMethodInfo> preinstalledImes = new ArrayList<>();
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -740,7 +740,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "dummy.voice1", "DummyVoice1", IS_AUX, !IS_DEFAULT, subtypes));
         }
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("auto", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -751,7 +751,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "dummy.voice2", "DummyVoice2", IS_AUX, !IS_DEFAULT, subtypes));
         }
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_VOICE, IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -759,7 +759,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     "dummy.voice3", "DummyVoice3", IS_AUX, !IS_DEFAULT, subtypes));
         }
         {
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -787,7 +787,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // a dummy Voice IME
         {
             final boolean isDefaultIme = false;
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("", SUBTYPE_MODE_VOICE, IS_AUX,
                     IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -798,7 +798,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // a dummy Hindi IME
         {
             final boolean isDefaultIme = contains(new String[]{ "hi", "en-rIN" }, localeString);
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             // TODO: This subtype should be marked as IS_ASCII_CAPABLE
             subtypes.add(createDummyInputMethodSubtype("en_IN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
@@ -814,7 +814,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // a dummy Pinyin IME
         {
             final boolean isDefaultIme = contains(new String[]{ "zh-rCN" }, localeString);
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("zh_CN", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -826,7 +826,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // a dummy Korean IME
         {
             final boolean isDefaultIme = contains(new String[]{ "ko" }, localeString);
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("ko", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -839,7 +839,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         {
             final boolean isDefaultIme = contains(
                     new String[]{ "en-rUS", "en-rGB", "en-rIN", "en", "hi" }, localeString);
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("en_US", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
@@ -860,7 +860,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         // a dummy Japanese IME
         {
             final boolean isDefaultIme = contains(new String[]{ "ja", "ja-rJP" }, localeString);
-            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
+            final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
             subtypes.add(createDummyInputMethodSubtype("ja", SUBTYPE_MODE_KEYBOARD, !IS_AUX,
                     !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE, !IS_ASCII_CAPABLE,
                     !IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE));
