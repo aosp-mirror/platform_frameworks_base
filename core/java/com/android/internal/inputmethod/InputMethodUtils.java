@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
@@ -769,7 +768,7 @@ public class InputMethodUtils {
     public static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
             @Nullable final String inputMethodsAndSubtypesString) {
 
-        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<String, ArraySet<String>>();
+        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<>();
         if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
             return imeMap;
         }
@@ -784,7 +783,7 @@ public class InputMethodUtils {
                         typeSplitter,
                         subtypeSplitter);
         for (Pair<String, ArrayList<String>> ime : allImeSettings) {
-            ArraySet<String> subtypes = new ArraySet<String>();
+            ArraySet<String> subtypes = new ArraySet<>();
             if (ime.second != null) {
                 subtypes.addAll(ime.second);
             }
@@ -897,6 +896,31 @@ public class InputMethodUtils {
             }
             // IMMS settings are kept per user, so keep track of current user
             mCurrentUserId = userId;
+        }
+
+        private void putString(final String key, final String str) {
+            Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+        }
+
+        private String getString(final String key) {
+            return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
+        }
+
+        private void putInt(final String key, final int value) {
+            Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+        }
+
+        private int getInt(final String key, final int defaultValue) {
+            return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
+        }
+
+        private void putBoolean(final String key, final boolean value) {
+            Settings.Secure.putIntForUser(mResolver, key, value ? 1 : 0, mCurrentUserId);
+        }
+
+        private boolean getBoolean(final String key, final boolean defaultValue) {
+            return Settings.Secure.getIntForUser(mResolver, key, defaultValue ? 1 : 0,
+                    mCurrentUserId) == 1;
         }
 
         public void setCurrentProfileIds(int[] currentProfileIds) {
@@ -1035,17 +1059,15 @@ public class InputMethodUtils {
         }
 
         private void putEnabledInputMethodsStr(String str) {
-            Settings.Secure.putStringForUser(
-                    mResolver, Settings.Secure.ENABLED_INPUT_METHODS, str, mCurrentUserId);
-            mEnabledInputMethodsStrCache = str;
             if (DEBUG) {
                 Slog.d(TAG, "putEnabledInputMethodStr: " + str);
             }
+            putString(Settings.Secure.ENABLED_INPUT_METHODS, str);
+            mEnabledInputMethodsStrCache = str;
         }
 
         public String getEnabledInputMethodsStr() {
-            mEnabledInputMethodsStrCache = Settings.Secure.getStringForUser(
-                    mResolver, Settings.Secure.ENABLED_INPUT_METHODS, mCurrentUserId);
+            mEnabledInputMethodsStrCache = getString(Settings.Secure.ENABLED_INPUT_METHODS);
             if (DEBUG) {
                 Slog.d(TAG, "getEnabledInputMethodsStr: " + mEnabledInputMethodsStrCache
                         + ", " + mCurrentUserId);
@@ -1103,8 +1125,7 @@ public class InputMethodUtils {
             if (DEBUG) {
                 Slog.d(TAG, "putSubtypeHistoryStr: " + str);
             }
-            Settings.Secure.putStringForUser(
-                    mResolver, Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, str, mCurrentUserId);
+            putString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, str);
         }
 
         public Pair<String, String> getLastInputMethodAndSubtypeLocked() {
@@ -1222,12 +1243,11 @@ public class InputMethodUtils {
         }
 
         private String getSubtypeHistoryStr() {
+            final String history = getString(Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY);
             if (DEBUG) {
-                Slog.d(TAG, "getSubtypeHistoryStr: " + Settings.Secure.getStringForUser(
-                        mResolver, Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, mCurrentUserId));
+                Slog.d(TAG, "getSubtypeHistoryStr: " + history);
             }
-            return Settings.Secure.getStringForUser(
-                    mResolver, Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY, mCurrentUserId);
+            return history;
         }
 
         public void putSelectedInputMethod(String imeId) {
@@ -1235,8 +1255,7 @@ public class InputMethodUtils {
                 Slog.d(TAG, "putSelectedInputMethodStr: " + imeId + ", "
                         + mCurrentUserId);
             }
-            Settings.Secure.putStringForUser(
-                    mResolver, Settings.Secure.DEFAULT_INPUT_METHOD, imeId, mCurrentUserId);
+            putString(Settings.Secure.DEFAULT_INPUT_METHOD, imeId);
         }
 
         public void putSelectedSubtype(int subtypeId) {
@@ -1244,18 +1263,15 @@ public class InputMethodUtils {
                 Slog.d(TAG, "putSelectedInputMethodSubtypeStr: " + subtypeId + ", "
                         + mCurrentUserId);
             }
-            Settings.Secure.putIntForUser(mResolver, Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
-                    subtypeId, mCurrentUserId);
+            putInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, subtypeId);
         }
 
         public String getSelectedInputMethod() {
+            final String imi = getString(Settings.Secure.DEFAULT_INPUT_METHOD);
             if (DEBUG) {
-                Slog.d(TAG, "getSelectedInputMethodStr: " + Settings.Secure.getStringForUser(
-                        mResolver, Settings.Secure.DEFAULT_INPUT_METHOD, mCurrentUserId)
-                        + ", " + mCurrentUserId);
+                Slog.d(TAG, "getSelectedInputMethodStr: " + imi);
             }
-            return Settings.Secure.getStringForUser(
-                    mResolver, Settings.Secure.DEFAULT_INPUT_METHOD, mCurrentUserId);
+            return imi;
         }
 
         public boolean isSubtypeSelected() {
@@ -1263,22 +1279,15 @@ public class InputMethodUtils {
         }
 
         private int getSelectedInputMethodSubtypeHashCode() {
-            try {
-                return Settings.Secure.getIntForUser(
-                        mResolver, Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, mCurrentUserId);
-            } catch (SettingNotFoundException e) {
-                return NOT_A_SUBTYPE_ID;
-            }
+            return getInt(Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE, NOT_A_SUBTYPE_ID);
         }
 
         public boolean isShowImeWithHardKeyboardEnabled() {
-                return Settings.Secure.getIntForUser(mResolver,
-                        Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, 0, mCurrentUserId) == 1;
+            return getBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, false);
         }
 
         public void setShowImeWithHardKeyboard(boolean show) {
-            Settings.Secure.putIntForUser(mResolver, Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
-                    show ? 1 : 0, mCurrentUserId);
+            putBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, show);
         }
 
         public int getCurrentUserId() {
