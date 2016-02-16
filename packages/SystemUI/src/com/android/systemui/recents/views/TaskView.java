@@ -80,7 +80,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * launching) needs to be animated independently of the task progress.
      */
     public static final Property<TaskView, Float> DIM_ALPHA =
-            new FloatProperty<TaskView>("dim") {
+            new FloatProperty<TaskView>("dimAlpha") {
                 @Override
                 public void setValue(TaskView tv, float dimAlpha) {
                     tv.setDimAlpha(dimAlpha);
@@ -89,6 +89,23 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
                 @Override
                 public Float get(TaskView tv) {
                     return tv.getDimAlpha();
+                }
+            };
+
+    /**
+     * The dim overlay is generally calculated from the task progress, but occasionally (like when
+     * launching) needs to be animated independently of the task progress.
+     */
+    public static final Property<TaskView, Float> VIEW_OUTLINE_ALPHA =
+            new FloatProperty<TaskView>("viewOutlineAlpha") {
+                @Override
+                public void setValue(TaskView tv, float alpha) {
+                    tv.getViewBounds().setAlpha(alpha);
+                }
+
+                @Override
+                public Float get(TaskView tv) {
+                    return tv.getViewBounds().getAlpha();
                 }
             };
 
@@ -144,7 +161,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         RecentsConfiguration config = Recents.getConfiguration();
         Resources res = context.getResources();
         mViewBounds = new AnimateableViewBounds(this, res.getDimensionPixelSize(
-                R.dimen.recents_task_view_rounded_corners_radius));
+                R.dimen.recents_task_view_shadow_rounded_corners_radius));
         if (config.fakeShadows) {
             setBackground(new FakeShadowDrawable(res, config));
         }
@@ -251,6 +268,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
                 setDimAlpha(toTransform.dimAlpha);
             }
+            if (Float.compare(mViewBounds.getAlpha(), toTransform.viewOutlineAlpha) != 0) {
+                mViewBounds.setAlpha(toTransform.viewOutlineAlpha);
+            }
             // Manually call back to the animator listener and update callback
             if (toAnimation.getListener() != null) {
                 toAnimation.getListener().onAnimationEnd(null);
@@ -263,6 +283,11 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             if (Float.compare(getDimAlpha(), toTransform.dimAlpha) != 0) {
                 ObjectAnimator anim = ObjectAnimator.ofFloat(this, DIM_ALPHA, getDimAlpha(),
                         toTransform.dimAlpha);
+                mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, anim));
+            }
+            if (Float.compare(mViewBounds.getAlpha(), toTransform.viewOutlineAlpha) != 0) {
+                ObjectAnimator anim = ObjectAnimator.ofFloat(this, VIEW_OUTLINE_ALPHA,
+                        mViewBounds.getAlpha(), toTransform.viewOutlineAlpha);
                 mTmpAnimators.add(toAnimation.apply(AnimationProps.BOUNDS, anim));
             }
             if (updateCallback != null) {
@@ -367,7 +392,6 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
         int dimAlphaInt = (int) (dimAlpha * 255);
         mDimAlpha = dimAlpha;
-        mViewBounds.setAlpha(1f - (dimAlpha / TaskStackLayoutAlgorithm.DIM_MAX_VALUE));
         if (config.useHardwareLayers) {
             // Defer setting hardware layers if we have not yet measured, or there is no dim to draw
             if (getMeasuredWidth() > 0 && getMeasuredHeight() > 0) {

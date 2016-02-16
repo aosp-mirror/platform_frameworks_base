@@ -153,6 +153,7 @@ public class FreeformWorkspaceLayoutAlgorithm {
             transformOut.alpha = 1f;
             transformOut.translationZ = stackLayout.mMaxTranslationZ;
             transformOut.dimAlpha = 0f;
+            transformOut.viewOutlineAlpha = TaskStackLayoutAlgorithm.OUTLINE_ALPHA_MAX_VALUE;
             transformOut.rect.set(ffRect);
             transformOut.rect.offset(stackLayout.mFreeformRect.left, stackLayout.mFreeformRect.top);
             transformOut.visible = true;

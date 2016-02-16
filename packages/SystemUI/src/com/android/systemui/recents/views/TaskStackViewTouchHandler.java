@@ -401,6 +401,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         mCurrentTasks = mSv.getStack().getStackTasks();
         MutableBoolean isFrontMostTask = new MutableBoolean(false);
         Task anchorTask = mSv.findAnchorTask(mCurrentTasks, isFrontMostTask);
+        TaskStackLayoutAlgorithm layoutAlgorithm = mSv.getStackAlgorithm();
         TaskStackViewScroller stackScroller = mSv.getScroller();
         if (anchorTask != null) {
             // Get the current set of task transforms
@@ -411,7 +412,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             float prevAnchorTaskScroll = 0;
             boolean pullStackForward = mCurrentTasks.size() > 0;
             if (pullStackForward) {
-                prevAnchorTaskScroll = mSv.getStackAlgorithm().getStackScrollForTask(anchorTask);
+                prevAnchorTaskScroll = layoutAlgorithm.getStackScrollForTask(anchorTask);
             }
 
             // Calculate where the views would be without the deleting tasks
@@ -423,9 +424,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 newStackScroll = stackScroller.getBoundedStackScroll(newStackScroll);
             } else if (pullStackForward) {
                 // Otherwise, offset the scroll by the movement of the anchor task
-                float anchorTaskScroll = mSv.getStackAlgorithm().getStackScrollForTask(anchorTask);
+                float anchorTaskScroll = layoutAlgorithm.getStackScrollForTask(anchorTask);
                 float stackScrollOffset = (anchorTaskScroll - prevAnchorTaskScroll);
-                if (mSv.getStackAlgorithm().getFocusState() !=
+                if (layoutAlgorithm.getFocusState() !=
                         TaskStackLayoutAlgorithm.STATE_FOCUSED) {
                     // If we are focused, we don't want the front task to move, but otherwise, we
                     // allow the back task to move up, and the front task to move back
@@ -439,7 +440,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             mSv.bindVisibleTaskViews(newStackScroll);
 
             // Get the final set of task transforms (with task removed)
-            mSv.getLayoutTaskTransforms(newStackScroll, mCurrentTasks, mFinalTaskTransforms);
+            mSv.getLayoutTaskTransforms(newStackScroll, TaskStackLayoutAlgorithm.STATE_UNFOCUSED,
+                    mCurrentTasks, mFinalTaskTransforms);
 
             // Set the target to scroll towards upon dismissal
             mTargetStackScroll = newStackScroll;
@@ -448,7 +450,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
              * Post condition: All views that will be visible as a part of the gesture are retrieved
              *                 and at their initial positions.  The stack is still at the current
              *                 scroll, but the layout is updated without the task currently being
-             *                 dismissed.
+             *                 dismissed.  The final layout is in the unfocused stack state, which
+             *                 will be applied when the current task is dismissed.
              */
         }
     }
@@ -472,6 +475,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setTouchEnabled(true);
         // Update the scroll to the final scroll position from onBeginDrag()
         mSv.getScroller().setStackScroll(mTargetStackScroll, null);
+        // Update the focus state to the final focus state
+        mSv.getStackAlgorithm().setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
         // Remove the task view from the stack
         EventBus.getDefault().send(new TaskViewDismissedEvent(tv.getTask(), tv));
         // Stop tracking this deletion animation
@@ -547,6 +552,9 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     fromTransform.rect, toTransform.rect));
             mTmpTransform.dimAlpha = fromTransform.dimAlpha + (toTransform.dimAlpha -
                     fromTransform.dimAlpha) * dismissFraction;
+            mTmpTransform.viewOutlineAlpha = fromTransform.viewOutlineAlpha +
+                    (toTransform.viewOutlineAlpha - fromTransform.viewOutlineAlpha) *
+                            dismissFraction;
             mTmpTransform.translationZ = fromTransform.translationZ +
                     (toTransform.translationZ - fromTransform.translationZ) * dismissFraction;
 

@@ -39,7 +39,7 @@ public class TaskStackViewScroller {
     private static final boolean DEBUG = false;
 
     public interface TaskStackViewScrollerCallbacks {
-        void onScrollChanged(float prevScroll, float curScroll, AnimationProps animation);
+        void onStackScrollChanged(float prevScroll, float curScroll, AnimationProps animation);
     }
 
     /**
@@ -106,7 +106,7 @@ public class TaskStackViewScroller {
         float prevStackScroll = mStackScrollP;
         mStackScrollP = s;
         if (mCb != null) {
-            mCb.onScrollChanged(prevStackScroll, mStackScrollP, animation);
+            mCb.onStackScrollChanged(prevStackScroll, mStackScrollP, animation);
         }
     }
 
