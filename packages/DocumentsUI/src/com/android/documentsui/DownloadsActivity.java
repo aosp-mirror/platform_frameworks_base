@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.widget.Toolbar;
 
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.util.Preconditions;
@@ -132,7 +133,7 @@ public class DownloadsActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc, SiblingProvider siblings) {
+    public void onDocumentPicked(DocumentInfo doc, Model model) {
         Preconditions.checkArgument(!doc.isDirectory());
         // First try managing the document; we expect manager to filter
         // based on authority, so we don't grant.

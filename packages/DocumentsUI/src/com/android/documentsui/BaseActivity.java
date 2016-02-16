@@ -50,6 +50,7 @@ import android.widget.Spinner;
 import com.android.documentsui.SearchManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
@@ -86,7 +87,7 @@ public abstract class BaseActivity extends Activity
 
     private boolean mNavDrawerHasFocus;
 
-    public abstract void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings);
+    public abstract void onDocumentPicked(DocumentInfo doc, Model model);
     public abstract void onDocumentsPicked(List<DocumentInfo> docs);
 
     abstract void onTaskFinished(Uri... uris);
@@ -700,18 +701,5 @@ public abstract class BaseActivity extends Activity
                 mOwner.openContainerDocument(mHome);
             }
         }
-    }
-
-    /**
-     * Interface providing access to current view of documents
-     * even when all documents are not homed to the same parent.
-     */
-    public interface SiblingProvider {
-        /**
-         * Returns the cursor for the selected document. The cursor can be used to retrieve
-         * details about a document and its siblings.
-         * @return
-         */
-        Cursor getCursor();
     }
 }
