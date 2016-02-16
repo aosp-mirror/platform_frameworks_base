@@ -200,19 +200,6 @@ public class RecentsTvView extends FrameLayout {
         EventBus.getDefault().unregister(this);
     }
 
-    /**
-     * This is called with the full size of the window since we are handling our own insets.
-     */
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mTaskStackHorizontalView != null && mTaskStackHorizontalView.getVisibility() != GONE) {
-            mTaskStackHorizontalView.layout(left, top, left + getMeasuredWidth(), top + getMeasuredHeight());
-        }
-
-        // Layout the empty view
-        mEmptyView.layout(left, top, right, bottom);
-    }
-
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mSystemInsets.set(insets.getSystemWindowInsets());

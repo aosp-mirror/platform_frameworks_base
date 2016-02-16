@@ -17,13 +17,38 @@
 */
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/guide_overlay"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    android:padding="3dp"
-    android:textSize="13sp"
-    android:textColor="#111111"
-    android:background="#99EEEEEE"
-    android:text="@string/pip_hold_home" />
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/guide_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:padding="3dp"
+        android:textSize="13sp"
+        android:textColor="#111111"
+        android:background="#99EEEEEE"
+        android:text="@string/pip_hold_home" />
+    <LinearLayout
+        android:id="@+id/guide_buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_fullscreen_white_24dp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_pause_white_24dp" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_close_white" />
+    </LinearLayout>
+</RelativeLayout>
