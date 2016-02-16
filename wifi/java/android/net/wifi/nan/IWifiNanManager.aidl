@@ -34,17 +34,18 @@ import android.net.wifi.nan.SubscribeSettings;
 interface IWifiNanManager
 {
     // client API
-    void connect(in IBinder binder, in IWifiNanEventListener listener, int events);
-    void disconnect(in IBinder binder);
-    void requestConfig(in ConfigRequest configRequest);
+    int connect(in IBinder binder, in IWifiNanEventListener listener, int events);
+    void disconnect(int clientId, in IBinder binder);
+    void requestConfig(int clientId, in ConfigRequest configRequest);
 
     // session API
-    int createSession(in IWifiNanSessionListener listener, int events);
-    void publish(int sessionId, in PublishData publishData, in PublishSettings publishSettings);
-    void subscribe(int sessionId, in SubscribeData subscribeData,
+    int createSession(int clientId, in IWifiNanSessionListener listener, int events);
+    void publish(int clientId, int sessionId, in PublishData publishData,
+            in PublishSettings publishSettings);
+    void subscribe(int clientId, int sessionId, in SubscribeData subscribeData,
             in SubscribeSettings subscribeSettings);
-    void sendMessage(int sessionId, int peerId, in byte[] message, int messageLength,
+    void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageLength,
             int messageId);
-    void stopSession(int sessionId);
-    void destroySession(int sessionId);
+    void stopSession(int clientId, int sessionId);
+    void destroySession(int clientId, int sessionId);
 }

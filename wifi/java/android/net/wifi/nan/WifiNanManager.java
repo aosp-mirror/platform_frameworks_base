@@ -42,7 +42,7 @@ public class WifiNanManager {
     private static final boolean VDBG = false; // STOPSHIP if true
 
     private IBinder mBinder;
-
+    private int mClientId = -1;
     private IWifiNanManager mService;
 
     /**
@@ -70,10 +70,14 @@ public class WifiNanManager {
             if (listener == null) {
                 throw new IllegalArgumentException("Invalid listener - must not be null");
             }
+            if (mClientId != -1) {
+                Log.w(TAG, "connect(): mClientId=" + mClientId
+                        + ": seems to calling connect() without disconnecting() first!");
+            }
             if (mBinder == null) {
                 mBinder = new Binder();
             }
-            mService.connect(mBinder, listener.callback, events);
+            mClientId = mService.connect(mBinder, listener.callback, events);
         } catch (RemoteException e) {
             Log.w(TAG, "connect RemoteException (FYI - ignoring): " + e);
         }
@@ -91,8 +95,9 @@ public class WifiNanManager {
     public void disconnect() {
         try {
             if (VDBG) Log.v(TAG, "disconnect()");
-            mService.disconnect(mBinder);
+            mService.disconnect(mClientId, mBinder);
             mBinder = null;
+            mClientId = -1;
         } catch (RemoteException e) {
             Log.w(TAG, "disconnect RemoteException (FYI - ignoring): " + e);
         }
@@ -114,7 +119,7 @@ public class WifiNanManager {
     public void requestConfig(ConfigRequest configRequest) {
         if (VDBG) Log.v(TAG, "requestConfig(): configRequest=" + configRequest);
         try {
-            mService.requestConfig(configRequest);
+            mService.requestConfig(mClientId, configRequest);
         } catch (RemoteException e) {
             Log.w(TAG, "requestConfig RemoteException (FYI - ignoring): " + e);
         }
@@ -169,9 +174,9 @@ public class WifiNanManager {
         int sessionId;
 
         try {
-            sessionId = mService.createSession(listener.callback, events);
+            sessionId = mService.createSession(mClientId, listener.callback, events);
             if (DBG) Log.d(TAG, "publish: session created - sessionId=" + sessionId);
-            mService.publish(sessionId, publishData, publishSettings);
+            mService.publish(mClientId, sessionId, publishData, publishSettings);
         } catch (RemoteException e) {
             Log.w(TAG, "createSession/publish RemoteException: " + e);
             return null;
@@ -198,7 +203,7 @@ public class WifiNanManager {
         }
 
         try {
-            mService.publish(sessionId, publishData, publishSettings);
+            mService.publish(mClientId, sessionId, publishData, publishSettings);
         } catch (RemoteException e) {
             Log.w(TAG, "publish RemoteException: " + e);
         }
@@ -252,9 +257,9 @@ public class WifiNanManager {
         int sessionId;
 
         try {
-            sessionId = mService.createSession(listener.callback, events);
+            sessionId = mService.createSession(mClientId, listener.callback, events);
             if (DBG) Log.d(TAG, "subscribe: session created - sessionId=" + sessionId);
-            mService.subscribe(sessionId, subscribeData, subscribeSettings);
+            mService.subscribe(mClientId, sessionId, subscribeData, subscribeSettings);
         } catch (RemoteException e) {
             Log.w(TAG, "createSession/subscribe RemoteException: " + e);
             return null;
@@ -284,7 +289,7 @@ public class WifiNanManager {
         }
 
         try {
-            mService.subscribe(sessionId, subscribeData, subscribeSettings);
+            mService.subscribe(mClientId, sessionId, subscribeData, subscribeSettings);
         } catch (RemoteException e) {
             Log.w(TAG, "subscribe RemoteException: " + e);
         }
@@ -297,7 +302,7 @@ public class WifiNanManager {
         if (DBG) Log.d(TAG, "Stop NAN session #" + sessionId);
 
         try {
-            mService.stopSession(sessionId);
+            mService.stopSession(mClientId, sessionId);
         } catch (RemoteException e) {
             Log.w(TAG, "stopSession RemoteException (FYI - ignoring): " + e);
         }
@@ -310,7 +315,7 @@ public class WifiNanManager {
         if (DBG) Log.d(TAG, "Destroy NAN session #" + sessionId);
 
         try {
-            mService.destroySession(sessionId);
+            mService.destroySession(mClientId, sessionId);
         } catch (RemoteException e) {
             Log.w(TAG, "destroySession RemoteException (FYI - ignoring): " + e);
         }
@@ -326,7 +331,7 @@ public class WifiNanManager {
                 Log.v(TAG, "sendMessage(): sessionId=" + sessionId + ", peerId=" + peerId
                         + ", messageLength=" + messageLength + ", messageId=" + messageId);
             }
-            mService.sendMessage(sessionId, peerId, message, messageLength, messageId);
+            mService.sendMessage(mClientId, sessionId, peerId, message, messageLength, messageId);
         } catch (RemoteException e) {
             Log.w(TAG, "subscribe RemoteException (FYI - ignoring): " + e);
         }
