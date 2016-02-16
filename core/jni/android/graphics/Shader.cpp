@@ -1,5 +1,4 @@
 #include "GraphicsJNI.h"
-#include "SkComposeShader.h"
 #include "SkGradientShader.h"
 #include "SkShader.h"
 #include "SkXfermode.h"
@@ -232,7 +231,7 @@ static jlong ComposeShader_create1(JNIEnv* env, jobject o,
     SkShader* shaderA = reinterpret_cast<SkShader *>(shaderAHandle);
     SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
     SkXfermode* mode = reinterpret_cast<SkXfermode *>(modeHandle);
-    SkShader* shader = new SkComposeShader(shaderA, shaderB, mode);
+    SkShader* shader = SkShader::CreateComposeShader(shaderA, shaderB, mode);
     return reinterpret_cast<jlong>(shader);
 }
 
@@ -243,7 +242,7 @@ static jlong ComposeShader_create2(JNIEnv* env, jobject o,
     SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
     SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(xfermodeHandle);
     SkAutoTUnref<SkXfermode> xfermode(SkXfermode::Create(mode));
-    SkShader* shader = new SkComposeShader(shaderA, shaderB, xfermode.get());
+    SkShader* shader = SkShader::CreateComposeShader(shaderA, shaderB, xfermode.get());
     return reinterpret_cast<jlong>(shader);
 }
 
