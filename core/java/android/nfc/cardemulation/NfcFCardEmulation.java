@@ -77,7 +77,7 @@ public final class NfcFCardEmulation {
                 throw new UnsupportedOperationException();
             }
             try {
-                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)) {
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF, 0)) {
                     Log.e(TAG, "This device does not support NFC-F card emulation");
                     throw new UnsupportedOperationException();
                 }

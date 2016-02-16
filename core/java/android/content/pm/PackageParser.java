@@ -2127,6 +2127,8 @@ public class PackageParser {
         // that may change.
         fi.name = sa.getNonResourceString(
                 com.android.internal.R.styleable.AndroidManifestUsesFeature_name);
+        fi.version = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestUsesFeature_version, 0);
         if (fi.name == null) {
             fi.reqGlEsVersion = sa.getInt(
                         com.android.internal.R.styleable.AndroidManifestUsesFeature_glEsVersion,

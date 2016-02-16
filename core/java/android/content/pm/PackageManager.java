@@ -3405,13 +3405,25 @@ public abstract class PackageManager {
     public abstract FeatureInfo[] getSystemAvailableFeatures();
 
     /**
-     * Check whether the given feature name is one of the available
-     * features as returned by {@link #getSystemAvailableFeatures()}.
+     * Check whether the given feature name is one of the available features as
+     * returned by {@link #getSystemAvailableFeatures()}. This tests for the
+     * presence of <em>any</em> version of the given feature name; use
+     * {@link #hasSystemFeature(String, int)} to check for a minimum version.
      *
-     * @return Returns true if the devices supports the feature, else
-     * false.
+     * @return Returns true if the devices supports the feature, else false.
      */
     public abstract boolean hasSystemFeature(String name);
+
+    /**
+     * Check whether the given feature name and version is one of the available
+     * features as returned by {@link #getSystemAvailableFeatures()}. Since
+     * features are defined to always be backwards compatible, this returns true
+     * if the available feature version is greater than or equal to the
+     * requested version.
+     *
+     * @return Returns true if the devices supports the feature, else false.
+     */
+    public abstract boolean hasSystemFeature(String name, int version);
 
     /**
      * Determine the best action to perform for a given Intent.  This is how

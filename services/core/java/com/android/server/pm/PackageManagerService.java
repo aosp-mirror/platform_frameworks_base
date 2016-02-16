@@ -3503,9 +3503,14 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public boolean hasSystemFeature(String name) {
+    public boolean hasSystemFeature(String name, int version) {
         synchronized (mPackages) {
-            return mAvailableFeatures.containsKey(name);
+            final FeatureInfo feat = mAvailableFeatures.get(name);
+            if (feat == null) {
+                return false;
+            } else {
+                return feat.version >= version;
+            }
         }
     }
 
@@ -16909,15 +16914,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 if (!checkin) {
                     pw.println("Features:");
                 }
-                Iterator<String> it = mAvailableFeatures.keySet().iterator();
-                while (it.hasNext()) {
-                    String name = it.next();
-                    if (!checkin) {
-                        pw.print("  ");
-                    } else {
+
+                for (FeatureInfo feat : mAvailableFeatures.values()) {
+                    if (checkin) {
                         pw.print("feat,");
+                        pw.print(feat.name);
+                        pw.print(",");
+                        pw.println(feat.version);
+                    } else {
+                        pw.print("  ");
+                        pw.print(feat.name);
+                        if (feat.version > 0) {
+                            pw.print(" version=");
+                            pw.print(feat.version);
+                        }
+                        pw.println();
                     }
-                    pw.println(name);
                 }
             }
 
