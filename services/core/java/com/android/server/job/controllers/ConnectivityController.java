@@ -59,14 +59,15 @@ public class ConnectivityController extends StateController implements
     public static ConnectivityController get(JobSchedulerService jms) {
         synchronized (sCreationLock) {
             if (mSingleton == null) {
-                mSingleton = new ConnectivityController(jms, jms.getContext());
+                mSingleton = new ConnectivityController(jms, jms.getContext(), jms.getLock());
             }
             return mSingleton;
         }
     }
 
-    private ConnectivityController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private ConnectivityController(StateChangedListener stateChangedListener, Context context,
+            Object lock) {
+        super(stateChangedListener, context, lock);
         // Register connectivity changed BR.
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -87,7 +88,7 @@ public class ConnectivityController extends StateController implements
     @Override
     public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
-            synchronized (mTrackedJobs) {
+            synchronized (mLock) {
                 // Register network active listener when the queue is about to become non-empty.
                 if (mTrackedJobs.isEmpty()) {
                     mConnectivityManager.addDefaultNetworkActiveListener(this);
@@ -102,7 +103,7 @@ public class ConnectivityController extends StateController implements
     @Override
     public void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
-            synchronized (mTrackedJobs) {
+            synchronized (mLock) {
                 mTrackedJobs.remove(jobStatus);
                 if (mTrackedJobs.isEmpty()) {
                     mConnectivityManager.removeDefaultNetworkActiveListener(this);
@@ -115,7 +116,7 @@ public class ConnectivityController extends StateController implements
      * @param userId Id of the user for whom we are updating the connectivity state.
      */
     private void updateTrackedJobs(int userId) {
-        synchronized (mTrackedJobs) {
+        synchronized (mLock) {
             boolean changed = false;
             for (JobStatus js : mTrackedJobs) {
                 if (js.getUserId() != userId) {
@@ -138,7 +139,7 @@ public class ConnectivityController extends StateController implements
      * We know the network has just come up. We want to run any jobs that are ready.
      */
     public synchronized void onNetworkActive() {
-        synchronized (mTrackedJobs) {
+        synchronized (mLock) {
             for (JobStatus js : mTrackedJobs) {
                 if (js.isReady()) {
                     if (DEBUG) {

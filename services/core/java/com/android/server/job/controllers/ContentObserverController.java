@@ -57,7 +57,7 @@ public class ContentObserverController extends StateController {
         synchronized (sCreationLock) {
             if (sController == null) {
                 sController = new ContentObserverController(taskManagerService,
-                        taskManagerService.getContext());
+                        taskManagerService.getContext(), taskManagerService.getLock());
             }
         }
         return sController;
@@ -66,17 +66,18 @@ public class ContentObserverController extends StateController {
     @VisibleForTesting
     public static ContentObserverController getForTesting(StateChangedListener stateChangedListener,
                                            Context context) {
-        return new ContentObserverController(stateChangedListener, context);
+        return new ContentObserverController(stateChangedListener, context, new Object());
     }
 
-    private ContentObserverController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private ContentObserverController(StateChangedListener stateChangedListener, Context context,
+                Object lock) {
+        super(stateChangedListener, context, lock);
     }
 
     @Override
     public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasContentTriggerConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 if (taskStatus.contentObserverJobInstance == null) {
                     taskStatus.contentObserverJobInstance = new JobInstance(taskStatus);
                 }
@@ -128,7 +129,7 @@ public class ContentObserverController extends StateController {
     @Override
     public void prepareForExecution(JobStatus taskStatus) {
         if (taskStatus.hasContentTriggerConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 if (taskStatus.contentObserverJobInstance != null) {
                     taskStatus.changedUris = taskStatus.contentObserverJobInstance.mChangedUris;
                     taskStatus.changedAuthorities
@@ -143,7 +144,7 @@ public class ContentObserverController extends StateController {
     @Override
     public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
         if (taskStatus.hasContentTriggerConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 if (!forUpdate) {
                     // We won't do this reset if being called for an update, because
                     // we know it will be immediately followed by maybeStartTrackingJob...
@@ -162,7 +163,7 @@ public class ContentObserverController extends StateController {
     public void rescheduleForFailure(JobStatus newJob, JobStatus failureToReschedule) {
         if (failureToReschedule.hasContentTriggerConstraint()
                 && newJob.hasContentTriggerConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 // Our job has failed, and we are scheduling a new job for it.
                 // Copy the last reported content changes in to the new job, so when
                 // we schedule the new one we will pick them up and report them again.
@@ -184,7 +185,7 @@ public class ContentObserverController extends StateController {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             boolean reportChange = false;
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 final int N = mJobs.size();
                 for (int i=0; i<N; i++) {
                     JobInstance inst = mJobs.get(i);
@@ -256,7 +257,7 @@ public class ContentObserverController extends StateController {
     @Override
     public void dumpControllerState(PrintWriter pw) {
         pw.println("Content.");
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             Iterator<JobStatus> it = mTrackedTasks.iterator();
             if (it.hasNext()) {
                 pw.print(String.valueOf(it.next().hashCode()));

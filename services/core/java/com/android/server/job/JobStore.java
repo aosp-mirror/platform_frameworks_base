@@ -70,6 +70,7 @@ public class JobStore {
     /** Threshold to adjust how often we want to write to the db. */
     private static final int MAX_OPS_BEFORE_WRITE = 1;
     final ArraySet<JobStatus> mJobSet;
+    final Object mLock;
     final Context mContext;
 
     private int mDirtyOperations;
@@ -85,7 +86,7 @@ public class JobStore {
         synchronized (sSingletonLock) {
             if (sSingleton == null) {
                 sSingleton = new JobStore(jobManagerService.getContext(),
-                        Environment.getDataDirectory());
+                        jobManagerService.getLock(), Environment.getDataDirectory());
             }
             return sSingleton;
         }
@@ -96,7 +97,7 @@ public class JobStore {
      */
     @VisibleForTesting
     public static JobStore initAndGetForTesting(Context context, File dataDir) {
-        JobStore jobStoreUnderTest = new JobStore(context, dataDir);
+        JobStore jobStoreUnderTest = new JobStore(context, new Object(), dataDir);
         jobStoreUnderTest.clear();
         return jobStoreUnderTest;
     }
@@ -104,7 +105,8 @@ public class JobStore {
     /**
      * Construct the instance of the job store. This results in a blocking read from disk.
      */
-    private JobStore(Context context, File dataDir) {
+    private JobStore(Context context, Object lock, File dataDir) {
+        mLock = lock;
         mContext = context;
         mDirtyOperations = 0;
 
@@ -266,14 +268,14 @@ public class JobStore {
 
     /**
      * Runnable that writes {@link #mJobSet} out to xml.
-     * NOTE: This Runnable locks on JobStore.this
+     * NOTE: This Runnable locks on mLock
      */
     private class WriteJobsMapToDiskRunnable implements Runnable {
         @Override
         public void run() {
             final long startElapsed = SystemClock.elapsedRealtime();
             List<JobStatus> mStoreCopy = new ArrayList<JobStatus>();
-            synchronized (JobStore.this) {
+            synchronized (mLock) {
                 // Copy over the jobs so we can release the lock before writing.
                 for (int i=0; i<mJobSet.size(); i++) {
                     JobStatus jobStatus = mJobSet.valueAt(i);
@@ -454,7 +456,7 @@ public class JobStore {
             try {
                 List<JobStatus> jobs;
                 FileInputStream fis = mJobsFile.openRead();
-                synchronized (JobStore.this) {
+                synchronized (mLock) {
                     jobs = readJobMapImpl(fis);
                     if (jobs != null) {
                         for (int i=0; i<jobs.size(); i++) {
@@ -678,8 +680,8 @@ public class JobStore {
             parser.nextTag(); // Consume </extras>
 
             JobStatus js = new JobStatus(
-                    jobBuilder.build(), uid, sourcePackageName, sourceUserId, elapsedRuntimes.first,
-                    elapsedRuntimes.second);
+                    mLock, jobBuilder.build(), uid, sourcePackageName, sourceUserId,
+                    elapsedRuntimes.first, elapsedRuntimes.second);
             return js;
         }
 
