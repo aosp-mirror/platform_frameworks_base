@@ -693,6 +693,11 @@ public class TaskStackLayoutAlgorithm {
         SystemServicesProxy ssp = Recents.getSystemServices();
 
         // Compute the focused and unfocused offset
+        float boundedStackScroll = Utilities.clamp(stackScroll, mMinScrollP, mMaxScrollP);
+        mUnfocusedRange.offset(boundedStackScroll);
+        mFocusedRange.offset(boundedStackScroll);
+        float boundedScrollUnfocusedRangeX = mUnfocusedRange.getNormalizedX(taskProgress);
+        float boundedScrollFocusedRangeX = mFocusedRange.getNormalizedX(taskProgress);
         mUnfocusedRange.offset(stackScroll);
         mFocusedRange.offset(stackScroll);
         boolean unfocusedVisible = mUnfocusedRange.isInRange(taskProgress);
@@ -729,15 +734,17 @@ public class TaskStackLayoutAlgorithm {
                     unfocusedRangeX)) * mStackRect.height());
             int focusedY = (int) ((1f - mFocusedCurveInterpolator.getInterpolation(
                     focusedRangeX)) * mStackRect.height());
-            float unfocusedDim = 1f - UNFOCUSED_DIM_INTERPOLATOR.getInterpolation(unfocusedRangeX);
-            float focusedDim = 1f - FOCUSED_DIM_INTERPOLATOR.getInterpolation(focusedRangeX);
+            float unfocusedDim = 1f - UNFOCUSED_DIM_INTERPOLATOR.getInterpolation(
+                    boundedScrollUnfocusedRangeX);
+            float focusedDim = 1f - FOCUSED_DIM_INTERPOLATOR.getInterpolation(
+                    boundedScrollFocusedRangeX);
 
             y = (mStackRect.top - mTaskRect.top) +
                     (int) Utilities.mapRange(focusState, unfocusedY, focusedY);
-            z = Utilities.mapRange(Utilities.clamp01(unfocusedRangeX), mMinTranslationZ,
-                    mMaxTranslationZ);
+            z = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedRangeX),
+                    mMinTranslationZ, mMaxTranslationZ);
             dimAlpha = DIM_MAX_VALUE * Utilities.mapRange(focusState, unfocusedDim, focusedDim);
-            viewOutlineAlpha = Utilities.mapRange(Utilities.clamp01(unfocusedRangeX),
+            viewOutlineAlpha = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedRangeX),
                     OUTLINE_ALPHA_MIN_VALUE, OUTLINE_ALPHA_MAX_VALUE);
         }
 
