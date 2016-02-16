@@ -3449,8 +3449,7 @@ public class PackageParser {
                 }
             } else if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
                 a.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
-            } else if (a.info.screenOrientation == SCREEN_ORIENTATION_UNSPECIFIED
-                    && (a.info.flags & FLAG_IMMERSIVE) == 0) {
+            } else if (!a.info.isFixedOrientation() && (a.info.flags & FLAG_IMMERSIVE) == 0) {
                 a.info.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
             }
 
