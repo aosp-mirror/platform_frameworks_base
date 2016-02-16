@@ -51,14 +51,15 @@ public class IdleController extends StateController {
     public static IdleController get(JobSchedulerService service) {
         synchronized (sCreationLock) {
             if (sController == null) {
-                sController = new IdleController(service, service.getContext());
+                sController = new IdleController(service, service.getContext(), service.getLock());
             }
             return sController;
         }
     }
 
-    private IdleController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private IdleController(StateChangedListener stateChangedListener, Context context,
+                Object lock) {
+        super(stateChangedListener, context, lock);
         initIdleStateTracking();
     }
 
@@ -68,7 +69,7 @@ public class IdleController extends StateController {
     @Override
     public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasIdleConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 mTrackedTasks.add(taskStatus);
                 taskStatus.idleConstraintSatisfied.set(mIdleTracker.isIdle());
             }
@@ -77,7 +78,7 @@ public class IdleController extends StateController {
 
     @Override
     public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             mTrackedTasks.remove(taskStatus);
         }
     }
@@ -86,7 +87,7 @@ public class IdleController extends StateController {
      * Interaction with the task manager service
      */
     void reportNewIdleState(boolean isIdle) {
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             for (JobStatus task : mTrackedTasks) {
                 task.idleConstraintSatisfied.set(isIdle);
             }
@@ -194,7 +195,7 @@ public class IdleController extends StateController {
 
     @Override
     public void dumpControllerState(PrintWriter pw) {
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             pw.print("Idle: ");
             pw.println(mIdleTracker.isIdle() ? "true" : "false");
             pw.println(mTrackedTasks.size());

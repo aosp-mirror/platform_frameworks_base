@@ -78,13 +78,15 @@ import com.android.server.job.controllers.TimeController;
  * Any function with the suffix 'Locked' also needs to lock on {@link #mJobs}.
  * @hide
  */
-public class JobSchedulerService extends com.android.server.SystemService
+public final class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
     public static final boolean DEBUG = false;
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT
             = ActivityManager.isLowRamDeviceStatic() ? 3 : 6;
     static final String TAG = "JobSchedulerService";
+    /** Global local for all job scheduler state. */
+    final Object mLock = new Object();
     /** Master list of jobs. */
     final JobStore mJobs;
 
@@ -207,6 +209,10 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     };
 
+    public Object getLock() {
+        return mLock;
+    }
+
     @Override
     public void onStartUser(int userHandle) {
         mStartedUsers.add(userHandle);
@@ -231,7 +237,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId) {
-        JobStatus jobStatus = new JobStatus(job, uId, packageName, userId);
+        JobStatus jobStatus = new JobStatus(getLock(), job, uId, packageName, userId);
         try {
             if (ActivityManagerNative.getDefault().getAppStartMode(uId,
                     job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
@@ -243,7 +249,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
         if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
         JobStatus toCancel;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
         }
         startTrackingJob(jobStatus, toCancel);
@@ -256,7 +262,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     public List<JobInfo> getPendingJobs(int uid) {
         ArrayList<JobInfo> outList = new ArrayList<JobInfo>();
-        synchronized (mJobs) {
+        synchronized (mLock) {
             ArraySet<JobStatus> jobs = mJobs.getJobs();
             for (int i=0; i<jobs.size(); i++) {
                 JobStatus job = jobs.valueAt(i);
@@ -270,7 +276,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void cancelJobsForUser(int userHandle) {
         List<JobStatus> jobsForUser;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             jobsForUser = mJobs.getJobsByUser(userHandle);
         }
         for (int i=0; i<jobsForUser.size(); i++) {
@@ -289,7 +295,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     public void cancelJobsForUid(int uid, boolean forceAll) {
         List<JobStatus> jobsForUid;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             jobsForUid = mJobs.getJobsByUid(uid);
         }
         for (int i=0; i<jobsForUid.size(); i++) {
@@ -317,7 +323,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     public void cancelJob(int uid, int jobId) {
         JobStatus toCancel;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
         }
         if (toCancel != null) {
@@ -328,7 +334,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private void cancelJobImpl(JobStatus cancelled) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
         stopTrackingJob(cancelled, true /* writeBack */);
-        synchronized (mJobs) {
+        synchronized (mLock) {
             // Remove from pending queue.
             mPendingJobs.remove(cancelled);
             // Cancel if running.
@@ -340,7 +346,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     void updateIdleMode(boolean enabled) {
         boolean changed = false;
         boolean rocking;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             if (mDeviceIdleMode != enabled) {
                 changed = true;
             }
@@ -352,7 +358,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     mControllers.get(i).deviceIdleModeChanged(enabled);
                 }
             }
-            synchronized (mJobs) {
+            synchronized (mLock) {
                 mDeviceIdleMode = enabled;
                 if (enabled) {
                     // When becoming idle, make sure no jobs are actively running.
@@ -451,7 +457,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // ignored; both services live in system_server
             }
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            synchronized (mJobs) {
+            synchronized (mLock) {
                 // Let's go!
                 mReadyToRock = true;
                 mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
@@ -487,7 +493,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private void startTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
         boolean update;
         boolean rocking;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             update = mJobs.add(jobStatus);
             rocking = mReadyToRock;
         }
@@ -509,7 +515,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private boolean stopTrackingJob(JobStatus jobStatus, boolean writeBack) {
         boolean removed;
         boolean rocking;
-        synchronized (mJobs) {
+        synchronized (mLock) {
             // Remove from store as well as controllers.
             removed = mJobs.remove(jobStatus, writeBack);
             rocking = mReadyToRock;
@@ -693,14 +699,14 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public void handleMessage(Message message) {
-            synchronized (mJobs) {
+            synchronized (mLock) {
                 if (!mReadyToRock) {
                     return;
                 }
             }
             switch (message.what) {
                 case MSG_JOB_EXPIRED:
-                    synchronized (mJobs) {
+                    synchronized (mLock) {
                         JobStatus runNow = (JobStatus) message.obj;
                         // runNow can be null, which is a controller's way of indicating that its
                         // state is such that all ready jobs should be run immediately.
@@ -712,7 +718,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     break;
                 case MSG_CHECK_JOB:
-                    synchronized (mJobs) {
+                    synchronized (mLock) {
                         if (mReportedActive) {
                             // if jobs are currently being run, queue all ready jobs for execution.
                             queueReadyJobsForExecutionLockedH();
@@ -723,7 +729,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
                     break;
                 case MSG_CHECK_JOB_GREEDY:
-                    synchronized (mJobs) {
+                    synchronized (mLock) {
                         queueReadyJobsForExecutionLockedH();
                     }
                     break;
@@ -879,7 +885,7 @@ public class JobSchedulerService extends com.android.server.SystemService
          * here is where we decide whether to actually execute it.
          */
         private void maybeRunPendingJobsH() {
-            synchronized (mJobs) {
+            synchronized (mLock) {
                 if (mDeviceIdleMode) {
                     // If device is idle, we will not schedule jobs to run.
                     return;
@@ -1185,7 +1191,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     void dumpInternal(PrintWriter pw) {
         final long now = SystemClock.elapsedRealtime();
-        synchronized (mJobs) {
+        synchronized (mLock) {
             pw.print("Started users: ");
             for (int i=0; i<mStartedUsers.size(); i++) {
                 pw.print("u" + mStartedUsers.get(i) + " ");
