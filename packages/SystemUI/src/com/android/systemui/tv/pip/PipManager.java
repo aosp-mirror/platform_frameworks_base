@@ -205,22 +205,10 @@ public class PipManager {
     public void closePip() {
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
-        StackInfo stackInfo = null;
         try {
-            stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-            if (stackInfo == null) {
-                return;
-            }
+            mActivityManager.removeStack(PINNED_STACK_ID);
         } catch (RemoteException e) {
-            Log.e(TAG, "getStackInfo failed", e);
-            return;
-        }
-        for (int taskId : stackInfo.taskIds) {
-            try {
-                mActivityManager.removeTask(taskId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "removeTask failed", e);
-            }
+            Log.e(TAG, "removeStack failed", e);
         }
     }
 

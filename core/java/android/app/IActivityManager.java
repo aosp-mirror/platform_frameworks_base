@@ -599,6 +599,8 @@ public interface IActivityManager extends IInterface {
 
     public void notifyPinnedStackAnimationEnded() throws RemoteException;
 
+    public void removeStack(int stackId) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -975,4 +977,5 @@ public interface IActivityManager extends IInterface {
     int STOP_LOCAL_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 364;
     int SUPPORTS_LOCAL_VOICE_INTERACTION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 365;
     int NOTIFY_PINNED_STACK_ANIMATION_ENDED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 366;
+    int REMOVE_STACK = IBinder.FIRST_CALL_TRANSACTION + 367;
 }
