@@ -190,8 +190,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_HOME_NOTHING = 0;
     static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 1;
     static final int LONG_PRESS_HOME_ASSIST = 2;
-    static final int LONG_PRESS_HOME_PICTURE_IN_PICTURE = 3;
-    static final int LAST_LONG_PRESS_HOME_BEHAVIOR = LONG_PRESS_HOME_PICTURE_IN_PICTURE;
+    static final int LAST_LONG_PRESS_HOME_BEHAVIOR = LONG_PRESS_HOME_ASSIST;
 
     static final int DOUBLE_TAP_HOME_NOTHING = 0;
     static final int DOUBLE_TAP_HOME_RECENT_SYSTEM_UI = 1;
@@ -1350,7 +1349,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void handleLongPressOnHome(int deviceId, KeyEvent event) {
+    private void handleLongPressOnHome(int deviceId) {
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_NOTHING) {
             return;
         }
@@ -1364,11 +1363,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case LONG_PRESS_HOME_ASSIST:
                 launchAssistAction(null, deviceId);
                 break;
-            case LONG_PRESS_HOME_PICTURE_IN_PICTURE:
-                requestTvPictureInPicture(event);
-                break;
             default:
-                Log.w(TAG, "Not defined home long press behavior: " + mLongPressOnHomeBehavior);
+                Log.w(TAG, "Undefined home long press behavior: " + mLongPressOnHomeBehavior);
                 break;
         }
     }
@@ -2940,7 +2936,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else if ((event.getFlags() & KeyEvent.FLAG_LONG_PRESS) != 0) {
                 if (!keyguardOn) {
-                    handleLongPressOnHome(event.getDeviceId(), event);
+                    handleLongPressOnHome(event.getDeviceId());
                 }
             }
             return -1;
