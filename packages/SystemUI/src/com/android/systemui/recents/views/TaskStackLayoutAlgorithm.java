@@ -108,8 +108,13 @@ public class TaskStackLayoutAlgorithm {
     // The scale factor to apply to the user movement in the stack to unfocus it
     private static final float UNFOCUS_MULTIPLIER = 0.8f;
 
+    // The distribution of view bounds alpha
+    // XXX: This is a hack because you can currently set the max alpha to be > 1f
+    public static final float OUTLINE_ALPHA_MIN_VALUE = 0f;
+    public static final float OUTLINE_ALPHA_MAX_VALUE = 2f;
+
     // The distribution of dim to apply to tasks in the stack
-    public static final float DIM_MAX_VALUE = 0.35f;
+    private static final float DIM_MAX_VALUE = 0.35f;
     private static final Path UNFOCUSED_DIM_PATH = new Path();
     private static final Path FOCUSED_DIM_PATH = new Path();
     static {
@@ -263,7 +268,7 @@ public class TaskStackLayoutAlgorithm {
     @ViewDebug.ExportedProperty(category="recents")
     private int mFocusedTopPeekHeight;
     @ViewDebug.ExportedProperty(category="recents")
-    private int mFocusedBottomPeekHeight;
+    private int mFocusedBottomTaskPeekHeight;
 
     // The offset from the top of the stack to the top of the bounds when the stack is scrolled to
     // the end
@@ -337,8 +342,8 @@ public class TaskStackLayoutAlgorithm {
         mFocusState = getDefaultFocusState();
         mFocusedTopPeekHeight =
                 res.getDimensionPixelSize(R.dimen.recents_layout_focused_top_peek_size);
-        mFocusedBottomPeekHeight =
-                res.getDimensionPixelSize(R.dimen.recents_layout_focused_bottom_peek_size);
+        mFocusedBottomTaskPeekHeight =
+                res.getDimensionPixelSize(R.dimen.recents_layout_focused_bottom_task_peek_size);
 
         mMinTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_min);
         mMaxTranslationZ = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
@@ -607,7 +612,7 @@ public class TaskStackLayoutAlgorithm {
 
             boolean isFrontMostTaskInGroup = task.group == null || task.group.isFrontMostTask(task);
             if (isFrontMostTaskInGroup) {
-                getStackTransform(taskProgress, mInitialScrollP, tmpTransform, null,
+                getStackTransform(taskProgress, mInitialScrollP, mFocusState, tmpTransform, null,
                         false /* ignoreSingleTaskCase */, false /* forceUpdate */);
                 float screenY = tmpTransform.rect.top;
                 boolean hasVisibleThumbnail = (prevScreenY - screenY) > taskBarHeight;
@@ -641,11 +646,11 @@ public class TaskStackLayoutAlgorithm {
      */
     public TaskViewTransform getStackTransform(Task task, float stackScroll,
             TaskViewTransform transformOut, TaskViewTransform frontTransform) {
-        return getStackTransform(task, stackScroll, transformOut, frontTransform,
+        return getStackTransform(task, stackScroll, mFocusState, transformOut, frontTransform,
                 false /* forceUpdate */);
     }
 
-    public TaskViewTransform getStackTransform(Task task, float stackScroll,
+    public TaskViewTransform getStackTransform(Task task, float stackScroll, float focusState,
         TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate) {
         if (mFreeformLayoutAlgorithm.isTransformAvailable(task, this)) {
             mFreeformLayoutAlgorithm.getTransform(task, transformOut, this);
@@ -656,7 +661,7 @@ public class TaskStackLayoutAlgorithm {
                 transformOut.reset();
                 return transformOut;
             }
-            getStackTransform(mTaskIndexMap.get(task.key), stackScroll, transformOut,
+            getStackTransform(mTaskIndexMap.get(task.key), stackScroll, focusState, transformOut,
                     frontTransform, false /* ignoreSingleTaskCase */, forceUpdate);
             return transformOut;
         }
@@ -682,7 +687,7 @@ public class TaskStackLayoutAlgorithm {
      *                             internally to ensure that we can calculate the transform for any
      *                             position in the stack.
      */
-    public void getStackTransform(float taskProgress, float stackScroll,
+    public void getStackTransform(float taskProgress, float stackScroll, float focusState,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
             boolean ignoreSingleTaskCase, boolean forceUpdate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -706,6 +711,7 @@ public class TaskStackLayoutAlgorithm {
         int y;
         float z;
         float dimAlpha;
+        float viewOutlineAlpha;
         if (!ssp.hasFreeformWorkspaceSupport() && mNumStackTasks == 1 && !ignoreSingleTaskCase) {
             // When there is exactly one task, then decouple the task from the stack and just move
             // in screen space
@@ -715,6 +721,7 @@ public class TaskStackLayoutAlgorithm {
             y = centerYOffset + getYForDeltaP(tmpP, 0);
             z = mMaxTranslationZ;
             dimAlpha = 0f;
+            viewOutlineAlpha = (OUTLINE_ALPHA_MIN_VALUE + OUTLINE_ALPHA_MAX_VALUE) / 2f;
 
         } else {
             // Otherwise, update the task to the stack layout
@@ -726,16 +733,20 @@ public class TaskStackLayoutAlgorithm {
             float focusedDim = 1f - FOCUSED_DIM_INTERPOLATOR.getInterpolation(focusedRangeX);
 
             y = (mStackRect.top - mTaskRect.top) +
-                    (int) Utilities.mapRange(mFocusState, unfocusedY, focusedY);
-            z = Utilities.clamp01(unfocusedRangeX) * mMaxTranslationZ;
-            dimAlpha = Utilities.mapRange(mFocusState, unfocusedDim, focusedDim);
+                    (int) Utilities.mapRange(focusState, unfocusedY, focusedY);
+            z = Utilities.mapRange(Utilities.clamp01(unfocusedRangeX), mMinTranslationZ,
+                    mMaxTranslationZ);
+            dimAlpha = DIM_MAX_VALUE * Utilities.mapRange(focusState, unfocusedDim, focusedDim);
+            viewOutlineAlpha = Utilities.mapRange(Utilities.clamp01(unfocusedRangeX),
+                    OUTLINE_ALPHA_MIN_VALUE, OUTLINE_ALPHA_MAX_VALUE);
         }
 
         // Fill out the transform
         transformOut.scale = 1f;
         transformOut.alpha = 1f;
         transformOut.translationZ = z;
-        transformOut.dimAlpha = DIM_MAX_VALUE * dimAlpha;
+        transformOut.dimAlpha = dimAlpha;
+        transformOut.viewOutlineAlpha = viewOutlineAlpha;
         transformOut.rect.set(mTaskRect);
         transformOut.rect.offset(x, y);
         Utilities.scaleRectAboutCenter(transformOut.rect, transformOut.scale);
@@ -788,8 +799,9 @@ public class TaskStackLayoutAlgorithm {
         // linear pieces that goes from (0,1) through (0.5, peek height offset),
         // (0.5, bottom task offsets), and (1,0).
         float topPeekHeightPct = (float) mFocusedTopPeekHeight / mStackRect.height();
-        float bottomPeekHeightPct = (float) Math.max(mFocusedBottomPeekHeight, mStackRect.bottom -
-                mTaskRect.bottom) / mStackRect.height();
+        float bottomPeekHeightPct = Math.max(
+                mSystemInsets.bottom + mFocusedRange.relativeMax * mFocusedBottomTaskPeekHeight,
+                mStackBottomOffset + mFocusedBottomTaskPeekHeight) / mStackRect.height();
         Path p = new Path();
         p.moveTo(0f, 1f);
         p.lineTo(0.5f, 1f - topPeekHeightPct);
@@ -835,10 +847,10 @@ public class TaskStackLayoutAlgorithm {
                 mFocusedRange.relativeMin);
         float max = Utilities.mapRange(mFocusState, mUnfocusedRange.relativeMax,
                 mFocusedRange.relativeMax);
-        getStackTransform(min, 0f, mBackOfStackTransform, null, true /* ignoreSingleTaskCase */,
-                true /* forceUpdate */);
-        getStackTransform(max, 0f, mFrontOfStackTransform, null, true /* ignoreSingleTaskCase */,
-                true /* forceUpdate */);
+        getStackTransform(min, 0f, mFocusState, mBackOfStackTransform, null,
+                true /* ignoreSingleTaskCase */, true /* forceUpdate */);
+        getStackTransform(max, 0f, mFocusState, mFrontOfStackTransform, null,
+                true /* ignoreSingleTaskCase */, true /* forceUpdate */);
         mBackOfStackTransform.visible = true;
         mFrontOfStackTransform.visible = true;
     }

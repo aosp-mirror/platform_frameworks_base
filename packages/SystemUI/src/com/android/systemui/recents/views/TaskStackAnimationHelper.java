@@ -458,7 +458,8 @@ public class TaskStackAnimationHelper {
         mStackView.cancelDeferredTaskViewLayoutAnimation();
 
         // Get the final set of task transforms
-        mStackView.getLayoutTaskTransforms(newScroll, stackTasks, mTmpFinalTaskTransforms);
+        mStackView.getLayoutTaskTransforms(newScroll, stackLayout.getFocusState(), stackTasks,
+                mTmpFinalTaskTransforms);
 
         // Focus the task view
         TaskView newFocusedTaskView = mStackView.getChildViewForTask(newFocusedTask);

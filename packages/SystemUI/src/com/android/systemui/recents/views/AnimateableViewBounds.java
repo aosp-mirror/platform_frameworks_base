@@ -81,6 +81,13 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
         }
     }
 
+    /**
+     * @return the outline alpha.
+     */
+    public float getAlpha() {
+        return mAlpha;
+    }
+
     /** Sets the top clip. */
     public void setClipTop(int top) {
         mClipRect.top = top;

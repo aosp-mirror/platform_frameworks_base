@@ -87,6 +87,7 @@ public class TaskViewTransform {
     public float scale = 1f;
     public float alpha = 1f;
     public float dimAlpha = 0f;
+    public float viewOutlineAlpha = 0f;
 
     public boolean visible = false;
 
@@ -102,6 +103,7 @@ public class TaskViewTransform {
         alpha = tv.getAlpha();
         visible = true;
         dimAlpha = tv.getDimAlpha();
+        viewOutlineAlpha = tv.getViewBounds().getAlpha();
         rect.set(tv.getLeft(), tv.getTop(), tv.getRight(), tv.getBottom());
     }
 
@@ -114,6 +116,7 @@ public class TaskViewTransform {
         alpha = other.alpha;
         visible = other.visible;
         dimAlpha = other.dimAlpha;
+        viewOutlineAlpha = other.viewOutlineAlpha;
         rect.set(other.rect);
     }
 
@@ -125,6 +128,7 @@ public class TaskViewTransform {
         scale = 1f;
         alpha = 1f;
         dimAlpha = 0f;
+        viewOutlineAlpha = 0f;
         visible = false;
         rect.setEmpty();
     }
