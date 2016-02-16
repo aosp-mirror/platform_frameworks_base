@@ -789,6 +789,22 @@ public class ActivityInfo extends ComponentInfo
         }
     }
 
+    /**
+     * Returns true if the activity's orientation is fixed.
+     * @hide
+     */
+    boolean isFixedOrientation() {
+        return screenOrientation == SCREEN_ORIENTATION_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_REVERSE_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_USER_LANDSCAPE
+                || screenOrientation == SCREEN_ORIENTATION_USER_PORTRAIT
+                || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+    }
+
     /** @hide */
     public static boolean isResizeableMode(int mode) {
         return mode == RESIZE_MODE_RESIZEABLE
