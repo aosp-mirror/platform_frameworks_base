@@ -665,6 +665,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void getCurrentTaskTransforms(ArrayList<Task> tasks,
             ArrayList<TaskViewTransform> transformsOut) {
         Utilities.matchTaskListSize(tasks, transformsOut);
+        float focusState = mLayoutAlgorithm.getFocusState();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
             TaskViewTransform transform = transformsOut.get(i);
@@ -673,7 +674,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 transform.fillIn(tv);
             } else {
                 mLayoutAlgorithm.getStackTransform(task, mStackScroller.getStackScroll(),
-                        transform, null, true /* forceUpdate */);
+                        focusState, transform, null, true /* forceUpdate */);
             }
             transform.visible = true;
         }
@@ -681,15 +682,15 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /**
      * Returns the task transforms for all the tasks in the stack if the stack was at the given
-     * {@param stackScroll}.
+     * {@param stackScroll} and {@param focusState}.
      */
-    public void getLayoutTaskTransforms(float stackScroll, ArrayList<Task> tasks,
+    public void getLayoutTaskTransforms(float stackScroll, float focusState, ArrayList<Task> tasks,
             ArrayList<TaskViewTransform> transformsOut) {
         Utilities.matchTaskListSize(tasks, transformsOut);
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
             TaskViewTransform transform = transformsOut.get(i);
-            mLayoutAlgorithm.getStackTransform(task, stackScroll, transform, null,
+            mLayoutAlgorithm.getStackTransform(task, stackScroll, focusState, transform, null,
                     true /* forceUpdate */);
             transform.visible = true;
         }
@@ -1510,7 +1511,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** TaskStackViewScroller.TaskStackViewScrollerCallbacks ****/
 
     @Override
-    public void onScrollChanged(float prevScroll, float curScroll, AnimationProps animation) {
+    public void onStackScrollChanged(float prevScroll, float curScroll, AnimationProps animation) {
         mUIDozeTrigger.poke();
         if (animation != null) {
             relayoutTaskViewsOnNextFrame(animation);
