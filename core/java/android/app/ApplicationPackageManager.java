@@ -450,8 +450,13 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public boolean hasSystemFeature(String name) {
+        return hasSystemFeature(name, 0);
+    }
+
+    @Override
+    public boolean hasSystemFeature(String name, int version) {
         try {
-            return mPM.hasSystemFeature(name);
+            return mPM.hasSystemFeature(name, version);
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }

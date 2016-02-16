@@ -577,7 +577,7 @@ final class DefaultPermissionGrantPolicy {
             }
 
             // Android Wear Home
-            if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+            if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
                 Intent homeIntent = new Intent(Intent.ACTION_MAIN);
                 homeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
 
@@ -612,7 +612,7 @@ final class DefaultPermissionGrantPolicy {
             PackageParser.Package dialerPackage, int userId) {
         if (doesPackageSupportRuntimePermissions(dialerPackage)) {
             boolean isPhonePermFixed =
-                    mService.hasSystemFeature(PackageManager.FEATURE_WATCH);
+                    mService.hasSystemFeature(PackageManager.FEATURE_WATCH, 0);
             grantRuntimePermissionsLPw(
                     dialerPackage, PHONE_PERMISSIONS, isPhonePermFixed, userId);
             grantRuntimePermissionsLPw(dialerPackage, CONTACTS_PERMISSIONS, userId);

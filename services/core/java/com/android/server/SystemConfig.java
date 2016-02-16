@@ -342,6 +342,7 @@ public class SystemConfig {
 
                 } else if ("feature".equals(name) && allowFeatures) {
                     String fname = parser.getAttributeValue(null, "name");
+                    int fversion = XmlUtils.readIntAttribute(null, "version", 0);
                     boolean allowed;
                     if (!lowRam) {
                         allowed = true;
@@ -353,7 +354,7 @@ public class SystemConfig {
                         Slog.w(TAG, "<feature> without name in " + permFile + " at "
                                 + parser.getPositionDescription());
                     } else if (allowed) {
-                        addFeature(fname);
+                        addFeature(fname, fversion);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
@@ -445,8 +446,8 @@ public class SystemConfig {
         // Some devices can be field-converted to FBE, so offer to splice in
         // those features if not already defined by the static config
         if (StorageManager.isNativeFileBasedEncryptionEnabled()) {
-            addFeature(PackageManager.FEATURE_FILE_BASED_ENCRYPTION);
-            addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS);
+            addFeature(PackageManager.FEATURE_FILE_BASED_ENCRYPTION, 0);
+            addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS, 0);
         }
 
         for (String featureName : mUnavailableFeatures) {
@@ -454,17 +455,21 @@ public class SystemConfig {
         }
     }
 
-    private void addFeature(String featureName) {
-        if (!mAvailableFeatures.containsKey(featureName)) {
-            final FeatureInfo fi = new FeatureInfo();
-            fi.name = featureName;
-            mAvailableFeatures.put(featureName, fi);
+    private void addFeature(String name, int version) {
+        FeatureInfo fi = mAvailableFeatures.get(name);
+        if (fi == null) {
+            fi = new FeatureInfo();
+            fi.name = name;
+            fi.version = version;
+            mAvailableFeatures.put(name, fi);
+        } else {
+            fi.version = Math.max(fi.version, version);
         }
     }
 
-    private void removeFeature(String featureName) {
-        if (mAvailableFeatures.remove(featureName) != null) {
-            Slog.d(TAG, "Removed unavailable feature " + featureName);
+    private void removeFeature(String name) {
+        if (mAvailableFeatures.remove(name) != null) {
+            Slog.d(TAG, "Removed unavailable feature " + name);
         }
     }
 

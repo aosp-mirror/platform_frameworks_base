@@ -267,7 +267,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
             onlyCoreApps = packageManager.isOnlyCoreApps();
             freeformWindowManagement = packageManager.hasSystemFeature(
-                    PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+                    PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT, 0);
         } catch (RemoteException e) {
             onlyCoreApps = false;
             freeformWindowManagement = false;
