@@ -40,6 +40,9 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
     // TODO: Replace this with a general X509TrustManager and use duck-typing.
     private final TrustManagerImpl mDelegate;
     private final NetworkSecurityConfig mNetworkSecurityConfig;
+    private final Object mIssuersLock = new Object();
+
+    private X509Certificate[] mIssuers;
 
     public NetworkSecurityTrustManager(NetworkSecurityConfig config) {
         if (config == null) {
@@ -139,6 +142,19 @@ public class NetworkSecurityTrustManager implements X509TrustManager {
 
     @Override
     public X509Certificate[] getAcceptedIssuers() {
-        return mDelegate.getAcceptedIssuers();
+        // TrustManagerImpl only looks at the provided KeyStore and not the TrustedCertificateStore
+        // for getAcceptedIssuers, so implement it here instead of delegating.
+        synchronized (mIssuersLock) {
+            if (mIssuers == null) {
+                Set<TrustAnchor> anchors = mNetworkSecurityConfig.getTrustAnchors();
+                X509Certificate[] issuers = new X509Certificate[anchors.size()];
+                int i = 0;
+                for (TrustAnchor anchor : anchors) {
+                    issuers[i++] = anchor.certificate;
+                }
+                mIssuers = issuers;
+            }
+            return mIssuers.clone();
+        }
     }
 }
