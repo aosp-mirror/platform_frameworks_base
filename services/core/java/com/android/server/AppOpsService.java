@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -67,6 +68,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
 import libcore.util.EmptyArray;
@@ -103,9 +105,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     };
 
-    final SparseArray<UidState> mUidStates = new SparseArray<>();
+    private final SparseArray<UidState> mUidStates = new SparseArray<>();
 
-    private final SparseArray<boolean[]> mOpRestrictions = new SparseArray<boolean[]>();
+    /** These are app op restrictions imposed per user from various parties */
+    private final ArrayMap<IBinder, SparseArray<boolean[]>> mOpUserRestrictions = new ArrayMap<>();
 
     private static final class UidState {
         public final int uid;
@@ -1263,17 +1266,21 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private boolean isOpRestricted(int uid, int code, String packageName) {
         int userHandle = UserHandle.getUserId(uid);
-        boolean[] opRestrictions = mOpRestrictions.get(userHandle);
-        if ((opRestrictions != null) && opRestrictions[code]) {
-            if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
-                synchronized (this) {
-                    Ops ops = getOpsLocked(uid, packageName, true);
-                    if ((ops != null) && ops.isPrivileged) {
-                        return false;
+        final int restrictionSetCount = mOpUserRestrictions.size();
+        for (int i = 0; i < restrictionSetCount; i++) {
+            SparseArray<boolean[]> perUserRestrictions = mOpUserRestrictions.valueAt(i);
+            boolean[] opRestrictions = perUserRestrictions.get(userHandle);
+            if (opRestrictions != null && opRestrictions[code]) {
+                if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
+                    synchronized (this) {
+                        Ops ops = getOpsLocked(uid, packageName, true);
+                        if ((ops != null) && ops.isPrivileged) {
+                            return false;
+                        }
                     }
                 }
+                return true;
             }
-            return true;
         }
         return false;
     }
@@ -2049,27 +2056,123 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
-    public void setUserRestrictions(Bundle restrictions, int userHandle) throws RemoteException {
+    public void setUserRestrictions(Bundle restrictions, IBinder token, int userHandle) {
         checkSystemUid("setUserRestrictions");
-        boolean[] opRestrictions = mOpRestrictions.get(userHandle);
-        if (opRestrictions == null) {
-            opRestrictions = new boolean[AppOpsManager._NUM_OP];
-            mOpRestrictions.put(userHandle, opRestrictions);
-        }
+        Preconditions.checkNotNull(token);
+        final boolean[] opRestrictions = getOrCreateUserRestrictionsForToken(token, userHandle);
         for (int i = 0; i < opRestrictions.length; ++i) {
             String restriction = AppOpsManager.opToRestriction(i);
-            if (restriction != null) {
-                opRestrictions[i] = restrictions.getBoolean(restriction, false);
-            } else {
-                opRestrictions[i] = false;
+            final boolean restricted = restriction != null
+                    && restrictions.getBoolean(restriction, false);
+            setUserRestrictionNoCheck(i, restricted, token, userHandle);
+        }
+    }
+
+    @Override
+    public void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle) {
+        if (Binder.getCallingPid() != Process.myPid()) {
+            mContext.enforcePermission(Manifest.permission.MANAGE_APP_OPS_RESTRICTIONS,
+                    Binder.getCallingPid(), Binder.getCallingUid(), null);
+        }
+        if (userHandle != UserHandle.getCallingUserId()) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission
+                    .INTERACT_ACROSS_USERS_FULL) != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(Manifest.permission
+                    .INTERACT_ACROSS_USERS) != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Need INTERACT_ACROSS_USERS_FULL or"
+                        + " INTERACT_ACROSS_USERS to interact cross user ");
             }
+        }
+        verifyIncomingOp(code);
+        Preconditions.checkNotNull(token);
+        setUserRestrictionNoCheck(code, restricted, token, userHandle);
+    }
+
+    private void setUserRestrictionNoCheck(int code, boolean restricted, IBinder token,
+            int userHandle) {
+        final boolean[] opRestrictions = getOrCreateUserRestrictionsForToken(token, userHandle);
+        if (opRestrictions[code] == restricted) {
+            return;
+        }
+        opRestrictions[code] = restricted;
+        if (!restricted) {
+            pruneUserRestrictionsForToken(token, userHandle);
+        }
+
+        final ArrayList<Callback> clonedCallbacks;
+        synchronized (this) {
+            ArrayList<Callback> callbacks = mOpModeWatchers.get(code);
+            if (callbacks == null) {
+                return;
+            }
+            clonedCallbacks = new ArrayList<>(callbacks);
+        }
+
+        // There are components watching for mode changes such as window manager
+        // and location manager which are in our process. The callbacks in these
+        // components may require permissions our remote caller does not have.
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final int callbackCount = clonedCallbacks.size();
+            for (int i = 0; i < callbackCount; i++) {
+                Callback callback = clonedCallbacks.get(i);
+                try {
+                    callback.mCallback.opChanged(code, -1, null);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Error dispatching op op change", e);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
     @Override
     public void removeUser(int userHandle) throws RemoteException {
         checkSystemUid("removeUser");
-        mOpRestrictions.remove(userHandle);
+        final int tokenCount = mOpUserRestrictions.size();
+        for (int i = tokenCount - 1; i >= 0; i--) {
+            SparseArray<boolean[]> opRestrictions = mOpUserRestrictions.valueAt(i);
+            if (opRestrictions != null) {
+                opRestrictions.remove(userHandle);
+                if (opRestrictions.size() <= 0) {
+                    mOpUserRestrictions.removeAt(i);
+                }
+            }
+        }
+    }
+
+
+    private void pruneUserRestrictionsForToken(IBinder token, int userHandle) {
+        SparseArray<boolean[]> perTokenRestrictions = mOpUserRestrictions.get(token);
+        if (perTokenRestrictions != null) {
+            final boolean[] opRestrictions = perTokenRestrictions.get(userHandle);
+            if (opRestrictions != null) {
+                for (boolean restriction : opRestrictions) {
+                    if (restriction) {
+                        return;
+                    }
+                }
+                perTokenRestrictions.remove(userHandle);
+                if (perTokenRestrictions.size() <= 0) {
+                    mOpUserRestrictions.remove(token);
+                }
+            }
+        }
+    }
+
+    private boolean[] getOrCreateUserRestrictionsForToken(IBinder token, int userHandle) {
+        SparseArray<boolean[]> perTokenRestrictions = mOpUserRestrictions.get(token);
+        if (perTokenRestrictions == null) {
+            perTokenRestrictions = new SparseArray<>();
+            mOpUserRestrictions.put(token, perTokenRestrictions);
+        }
+        boolean[] opRestrictions = perTokenRestrictions.get(userHandle);
+        if (opRestrictions == null) {
+            opRestrictions = new boolean[AppOpsManager._NUM_OP];
+            perTokenRestrictions.put(userHandle, opRestrictions);
+        }
+        return opRestrictions;
     }
 
     private void checkSystemUid(String function) {

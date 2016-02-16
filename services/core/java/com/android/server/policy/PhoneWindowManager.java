@@ -33,6 +33,7 @@ import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
 import android.app.ActivityManagerInternal;
@@ -2035,7 +2036,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 permission = android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
         }
         if (permission != null) {
-            if (permission == android.Manifest.permission.SYSTEM_ALERT_WINDOW) {
+            if (android.Manifest.permission.SYSTEM_ALERT_WINDOW.equals(permission)) {
                 final int callingUid = Binder.getCallingUid();
                 // system processes will be automatically allowed privilege to draw
                 if (callingUid == Process.SYSTEM_UID) {

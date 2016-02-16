@@ -1265,6 +1265,14 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    public void setUserRestriction(int code, boolean restricted, IBinder token) {
+        try {
+            mService.setUserRestriction(code, restricted, token, mContext.getUserId());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /** @hide */
     public void setMode(int code, int uid, String packageName, int mode) {
         try {
             mService.setMode(code, uid, packageName, mode);
