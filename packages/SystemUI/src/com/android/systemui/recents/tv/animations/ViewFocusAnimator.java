@@ -47,7 +47,7 @@ public class ViewFocusAnimator implements View.OnFocusChangeListener {
         mTargetView.setOnFocusChangeListener(this);
 
         TypedValue out = new TypedValue();
-        res.getValue(R.raw.unselected_scale, out, true);
+        res.getValue(R.integer.unselected_scale, out, true);
         mUnselectedScale = out.getFloat();
         mSelectedScaleDelta = res.getFraction(R.fraction.lb_focus_zoom_factor_medium, 1, 1) -
                 mUnselectedScale;
