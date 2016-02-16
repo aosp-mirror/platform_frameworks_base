@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <item format="float" type="raw" name="unselected_scale">1.0</item>
+    <item format="float" type="integer" name="unselected_scale">1.0</item>
 </resources>
