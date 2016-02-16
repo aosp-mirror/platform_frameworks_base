@@ -46,6 +46,7 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
+import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyListener;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -742,7 +743,7 @@ public class StatusBarHeaderView extends BaseStatusBarHeader implements View.OnC
         }
 
         @Override
-        public void onShowingDetail(final QSTile.DetailAdapter detail) {
+        public void onShowingDetail(final DetailAdapter detail, int x, int y) {
             mDetailTransitioning = true;
             post(new Runnable() {
                 @Override

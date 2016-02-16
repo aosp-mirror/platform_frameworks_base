@@ -1975,7 +1975,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public boolean isQsDetailShowing() {
-        return mQsContainer.getQsPanel().isShowingDetail();
+        return mQsContainer.isShowingDetail();
     }
 
     public void closeQsDetail() {
