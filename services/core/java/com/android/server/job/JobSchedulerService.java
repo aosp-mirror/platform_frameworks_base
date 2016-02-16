@@ -231,10 +231,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId) {
-        JobStatus jobStatus = new JobStatus(job, uId);
-        if (packageName != null) {
-            jobStatus.setSource(packageName, userId);
-        }
+        JobStatus jobStatus = new JobStatus(job, uId, packageName, userId);
         try {
             if (ActivityManagerNative.getDefault().getAppStartMode(uId,
                     job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {

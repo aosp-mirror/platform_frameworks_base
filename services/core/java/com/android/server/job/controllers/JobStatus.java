@@ -48,13 +48,13 @@ public class JobStatus {
 
     final JobInfo job;
     /** Uid of the package requesting this job. */
-    final int uId;
+    final int callingUid;
     final String name;
     final String tag;
 
-    String sourcePackageName;
-    int sourceUserId = -1;
-    int sourceUid = -1;
+    final String sourcePackageName;
+    final int sourceUserId;
+    final int sourceUid;
 
     // Constraints.
     final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
@@ -91,30 +91,55 @@ public class JobStatus {
 
     /** Provide a handle to the service that this job will be run on. */
     public int getServiceToken() {
-        return uId;
+        return callingUid;
     }
 
-    private JobStatus(JobInfo job, int uId, int numFailures) {
+    private JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
+                      int numFailures) {
         this.job = job;
-        this.uId = uId;
-        this.sourceUid = uId;
+        this.callingUid = callingUid;
         this.name = job.getService().flattenToShortString();
         this.tag = "*job*/" + this.name;
         this.numFailures = numFailures;
+
+        int tempSourceUid = -1;
+        if (sourceUserId != -1 && sourcePackageName != null) {
+            try {
+                tempSourceUid = AppGlobals.getPackageManager().getPackageUid(sourcePackageName, 0,
+                        sourceUserId);
+            } catch (RemoteException ex) {
+                // Can't happen, PackageManager runs in the same process.
+            }
+        }
+        if (tempSourceUid == -1) {
+            this.sourceUid = callingUid;
+            this.sourceUserId = UserHandle.getUserId(callingUid);
+            this.sourcePackageName = job.getService().getPackageName();
+        } else {
+            this.sourceUid = tempSourceUid;
+            this.sourceUserId = sourceUserId;
+            this.sourcePackageName = sourcePackageName;
+        }
     }
 
     /** Copy constructor. */
     public JobStatus(JobStatus jobStatus) {
-        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.getNumFailures());
-        this.sourceUserId = jobStatus.sourceUserId;
-        this.sourcePackageName = jobStatus.sourcePackageName;
+        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.getSourcePackageName(),
+                jobStatus.getSourceUserId(), jobStatus.getNumFailures());
         this.earliestRunTimeElapsedMillis = jobStatus.getEarliestRunTime();
         this.latestRunTimeElapsedMillis = jobStatus.getLatestRunTimeElapsed();
     }
 
-    /** Create a newly scheduled job. */
-    public JobStatus(JobInfo job, int uId) {
-        this(job, uId, 0);
+    /**
+     * Create a newly scheduled job.
+     * @param callingUid Uid of the package that scheduled this job.
+     * @param sourcePackageName Package name on whose behalf this job is scheduled. Null indicates
+     *                          the calling package is the source.
+     * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
+     *                     calling userId.
+     */
+    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId) {
+        this(job, callingUid, sourcePackageName, sourceUserId, 0);
 
         final long elapsedNow = SystemClock.elapsedRealtime();
 
@@ -136,9 +161,9 @@ public class JobStatus {
      * wallclock runtime rather than resetting it on every boot.
      * We consider a freshly loaded job to no longer be in back-off.
      */
-    public JobStatus(JobInfo job, int uId, long earliestRunTimeElapsedMillis,
-                      long latestRunTimeElapsedMillis) {
-        this(job, uId, 0);
+    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
+                     long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
+        this(job, callingUid, sourcePackageName, sourceUserId, 0);
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
@@ -147,9 +172,8 @@ public class JobStatus {
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
-        this(rescheduling.job, rescheduling.getUid(), backoffAttempt);
-        this.sourceUserId = rescheduling.sourceUserId;
-        this.sourcePackageName = rescheduling.sourcePackageName;
+        this(rescheduling.job, rescheduling.getUid(), rescheduling.getSourcePackageName(),
+                rescheduling.getSourceUserId(), backoffAttempt);
 
         earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
         latestRunTimeElapsedMillis = newLatestRuntimeElapsedMillis;
@@ -172,7 +196,7 @@ public class JobStatus {
     }
 
     public String getSourcePackageName() {
-        return sourcePackageName != null ? sourcePackageName : job.getService().getPackageName();
+        return sourcePackageName;
     }
 
     public int getSourceUid() {
@@ -180,18 +204,15 @@ public class JobStatus {
     }
 
     public int getSourceUserId() {
-        if (sourceUserId == -1) {
-            sourceUserId = getUserId();
-        }
         return sourceUserId;
     }
 
     public int getUserId() {
-        return UserHandle.getUserId(uId);
+        return UserHandle.getUserId(callingUid);
     }
 
     public int getUid() {
-        return uId;
+        return callingUid;
     }
 
     public String getName() {
@@ -278,7 +299,7 @@ public class JobStatus {
     }
 
     public boolean matches(int uid, int jobId) {
-        return this.job.getId() == jobId && this.uId == uid;
+        return this.job.getId() == jobId && this.callingUid == uid;
     }
 
     @Override
@@ -312,22 +333,6 @@ public class JobStatus {
         }
     }
 
-    public void setSource(String sourcePackageName, int sourceUserId) {
-        this.sourcePackageName = sourcePackageName;
-        this.sourceUserId = sourceUserId;
-        try {
-            sourceUid = AppGlobals.getPackageManager().getPackageUid(sourcePackageName, 0,
-                    sourceUserId);
-        } catch (RemoteException ex) {
-            // Can't happen, PackageManager runs in the same process.
-        }
-        if (sourceUid == -1) {
-            sourceUid = uId;
-            this.sourceUserId = getUserId();
-            this.sourcePackageName = null;
-        }
-    }
-
     /**
      * Convenience function to identify a job uniquely without pulling all the data that
      * {@link #toString()} returns.
@@ -338,7 +343,7 @@ public class JobStatus {
         sb.append(" jId=");
         sb.append(job.getId());
         sb.append(" uid=");
-        UserHandle.formatUid(sb, uId);
+        UserHandle.formatUid(sb, callingUid);
         sb.append(' ');
         sb.append(job.getService().flattenToShortString());
         return sb.toString();
@@ -346,7 +351,7 @@ public class JobStatus {
 
     // Dumpsys infrastructure
     public void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); UserHandle.formatUid(pw, uId);
+        pw.print(prefix); UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);
         pw.print(prefix);
         pw.print("Source: uid="); UserHandle.formatUid(pw, getSourceUid());
