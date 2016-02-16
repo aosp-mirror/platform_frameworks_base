@@ -161,12 +161,14 @@ static JNINativeMethod gMethods[] = {
   NATIVE_METHOD(StrictJarFile, nativeClose, "(J)V"),
 };
 
-void register_android_util_jar_StrictJarFile(JNIEnv* env) {
+int register_android_util_jar_StrictJarFile(JNIEnv* env) {
   jniRegisterNativeMethods(env, "android/util/jar/StrictJarFile", gMethods, NELEM(gMethods));
 
   zipEntryCtor = env->GetMethodID(JniConstants::zipEntryClass, "<init>",
       "(Ljava/lang/String;Ljava/lang/String;JJJII[BJ)V");
   LOG_ALWAYS_FATAL_IF(zipEntryCtor == NULL, "Unable to find ZipEntry.<init>");
+
+  return 0;
 }
 
 }; // namespace android
