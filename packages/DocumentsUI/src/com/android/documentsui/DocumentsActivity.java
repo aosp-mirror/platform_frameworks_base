@@ -134,9 +134,13 @@ public class DocumentsActivity extends BaseActivity {
         }
 
         if (state.action == ACTION_PICK_COPY_DESTINATION) {
+            // Indicates that a copy operation (or move) includes a directory.
+            // Why? Directory creation isn't supported by some roots (like Downloads).
+            // This allows us to restrict available roots to just those with support.
             state.directoryCopy = intent.getBooleanExtra(
                     Shared.EXTRA_DIRECTORY_COPY, false);
-            state.transferMode = intent.getIntExtra(FileOperationService.EXTRA_OPERATION,
+            state.copyOperationSubType = intent.getIntExtra(
+                    FileOperationService.EXTRA_OPERATION,
                     FileOperationService.OPERATION_COPY);
         }
     }
@@ -154,6 +158,9 @@ public class DocumentsActivity extends BaseActivity {
             showDrawer = false;
         }
         if (external && mState.action == ACTION_GET_CONTENT) {
+            showDrawer = true;
+        }
+        if (mState.action == ACTION_PICK_COPY_DESTINATION) {
             showDrawer = true;
         }
 
@@ -307,7 +314,7 @@ public class DocumentsActivity extends BaseActivity {
             mState.action == ACTION_PICK_COPY_DESTINATION) {
             final PickFragment pick = PickFragment.get(fm);
             if (pick != null) {
-                pick.setPickTarget(mState.action, mState.transferMode, cwd);
+                pick.setPickTarget(mState.action, mState.copyOperationSubType, cwd);
             }
         }
     }
@@ -420,7 +427,7 @@ public class DocumentsActivity extends BaseActivity {
             // Picking a copy destination is only used internally by us, so we
             // don't need to extend permissions to the caller.
             intent.putExtra(Shared.EXTRA_STACK, (Parcelable) mState.stack);
-            intent.putExtra(FileOperationService.EXTRA_OPERATION, mState.transferMode);
+            intent.putExtra(FileOperationService.EXTRA_OPERATION, mState.copyOperationSubType);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION

@@ -30,6 +30,7 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -83,10 +84,18 @@ public class State implements android.os.Parcelable {
     public boolean forceAdvanced;
     public boolean showAdvanced;
     public boolean restored;
+
+    // Indicates that a copy operation (or move) includes a directory.
+    // Why? Directory creation isn't supported by some roots (like Downloads).
+    // This allows us to restrict available roots to just those with support.
     public boolean directoryCopy;
     public boolean openableOnly;
-    /** Transfer mode for file copy/move operations. */
-    public int transferMode;
+
+    /**
+     * This is basically a sub-type for the copy operation. It can be either COPY or MOVE.
+     * The only legal values are: OPERATION_COPY, OPERATION_MOVE.
+     */
+    public @OpType int copyOperationSubType;
 
     /** Current user navigation stack; empty implies recents. */
     public DocumentStack stack = new DocumentStack();
