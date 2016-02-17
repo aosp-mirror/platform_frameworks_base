@@ -40,4 +40,15 @@ public class EventLogConstants {
     public static final int SYSUI_SHADE_GESTURE_SWIPE_DOWN_QS = 9;
     /** The user tapped on the status bar to open quick settings, from shade. */
     public static final int SYSUI_TAP_TO_OPEN_QS = 10;
+
+    /** Secondary user tries binding to the system sysui service */
+    public static final int SYSUI_RECENTS_CONNECTION_USER_BIND_SERVICE = 1;
+    /** Secondary user is bound to the system sysui service */
+    public static final int SYSUI_RECENTS_CONNECTION_USER_SYSTEM_BOUND = 2;
+    /** Secondary user loses connection after system sysui has died */
+    public static final int SYSUI_RECENTS_CONNECTION_USER_SYSTEM_UNBOUND = 3;
+    /** System sysui registers secondary user's callbacks */
+    public static final int SYSUI_RECENTS_CONNECTION_SYSTEM_REGISTER_USER = 4;
+    /** System sysui unregisters secondary user's callbacks (after death) */
+    public static final int SYSUI_RECENTS_CONNECTION_SYSTEM_UNREGISTER_USER = 5;
 }

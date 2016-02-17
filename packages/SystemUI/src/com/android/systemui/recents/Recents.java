@@ -31,10 +31,13 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 
+import com.android.systemui.EventLogConstants;
+import com.android.systemui.EventLogTags;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
@@ -83,20 +86,23 @@ public class Recents extends SystemUI
     private int mDraggingInRecentsCurrentUser;
 
     // Only For system user, this is the callbacks instance we return to each secondary user
-    private RecentsSystemUser mSystemUserCallbacks;
+    private RecentsSystemUser mSystemToUserCallbacks;
 
     // Only for secondary users, this is the callbacks instance provided by the system user to make
     // calls back
-    private IRecentsSystemUserCallbacks mCallbacksToSystemUser;
+    private IRecentsSystemUserCallbacks mUserToSystemCallbacks;
 
     // The set of runnables to run after binding to the system user's service.
     private final ArrayList<Runnable> mOnConnectRunnables = new ArrayList<>();
 
     // Only for secondary users, this is the death handler for the binder from the system user
-    private final IBinder.DeathRecipient mCallbacksToSystemUserDeathRcpt = new IBinder.DeathRecipient() {
+    private final IBinder.DeathRecipient mUserToSystemCallbacksDeathRcpt = new IBinder.DeathRecipient() {
         @Override
         public void binderDied() {
-            mCallbacksToSystemUser = null;
+            mUserToSystemCallbacks = null;
+            EventLog.writeEvent(EventLogTags.SYSUI_RECENTS_CONNECTION,
+                    EventLogConstants.SYSUI_RECENTS_CONNECTION_USER_SYSTEM_UNBOUND,
+                    sSystemServicesProxy.getProcessUser());
 
             // Retry after a fixed duration
             mHandler.postDelayed(new Runnable() {
@@ -109,16 +115,19 @@ public class Recents extends SystemUI
     };
 
     // Only for secondary users, this is the service connection we use to connect to the system user
-    private final ServiceConnection mServiceConnectionToSystemUser = new ServiceConnection() {
+    private final ServiceConnection mUserToSystemServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (service != null) {
-                mCallbacksToSystemUser = IRecentsSystemUserCallbacks.Stub.asInterface(
+                mUserToSystemCallbacks = IRecentsSystemUserCallbacks.Stub.asInterface(
                         service);
+                EventLog.writeEvent(EventLogTags.SYSUI_RECENTS_CONNECTION,
+                        EventLogConstants.SYSUI_RECENTS_CONNECTION_USER_SYSTEM_BOUND,
+                        sSystemServicesProxy.getProcessUser());
 
                 // Listen for system user's death, so that we can reconnect later
                 try {
-                    service.linkToDeath(mCallbacksToSystemUserDeathRcpt, 0);
+                    service.linkToDeath(mUserToSystemCallbacksDeathRcpt, 0);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Lost connection to (System) SystemUI", e);
                 }
@@ -142,7 +151,7 @@ public class Recents extends SystemUI
      * Returns the callbacks interface that non-system users can call.
      */
     public IBinder getSystemUserCallbacks() {
-        return mSystemUserCallbacks;
+        return mSystemToUserCallbacks;
     }
 
     public static RecentsTaskLoader getTaskLoader() {
@@ -190,7 +199,7 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(processUser)) {
             // For the system user, initialize an instance of the interface that we can pass to the
             // secondary user
-            mSystemUserCallbacks = new RecentsSystemUser(mContext, mImpl);
+            mSystemToUserCallbacks = new RecentsSystemUser(mContext, mImpl);
         } else {
             // For the secondary user, bind to the primary user's service to get a persistent
             // interface to register its implementation and to later update its state
@@ -224,9 +233,9 @@ public class Recents extends SystemUI
             mImpl.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
                     true /* animate */, false /* reloadTasks */);
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
                         callbacks.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
@@ -260,9 +269,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
                         callbacks.hideRecents(triggeredFromAltTab, triggeredFromHomeKey);
@@ -295,9 +304,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.toggleRecents();
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
                         callbacks.toggleRecents();
@@ -326,9 +335,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.preloadRecents();
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
                         callbacks.preloadRecents();
@@ -354,9 +363,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.cancelPreloadingRecents();
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
                         callbacks.cancelPreloadingRecents();
@@ -387,9 +396,9 @@ public class Recents extends SystemUI
             if (sSystemServicesProxy.isSystemUser(currentUser)) {
                 mImpl.dockTopTask(topTask.id, dragMode, stackCreateMode, initialBounds);
             } else {
-                if (mSystemUserCallbacks != null) {
+                if (mSystemToUserCallbacks != null) {
                     IRecentsNonSystemUserCallbacks callbacks =
-                            mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                            mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                     if (callbacks != null) {
                         try {
                             callbacks.dockTopTask(topTask.id, dragMode, stackCreateMode,
@@ -413,9 +422,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(mDraggingInRecentsCurrentUser)) {
             mImpl.onDraggingInRecents(distanceFromTop);
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(
                                 mDraggingInRecentsCurrentUser);
                 if (callbacks != null) {
                     try {
@@ -436,9 +445,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(mDraggingInRecentsCurrentUser)) {
             mImpl.onDraggingInRecentsEnded(velocity);
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(
                                 mDraggingInRecentsCurrentUser);
                 if (callbacks != null) {
                     try {
@@ -484,9 +493,9 @@ public class Recents extends SystemUI
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.onConfigurationChanged();
         } else {
-            if (mSystemUserCallbacks != null) {
+            if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
-                        mSystemUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
                 if (callbacks != null) {
                     try {
                         callbacks.onConfigurationChanged();
@@ -512,7 +521,7 @@ public class Recents extends SystemUI
                 @Override
                 public void run() {
                     try {
-                        mCallbacksToSystemUser.updateRecentsVisibility(event.visible);
+                        mUserToSystemCallbacks.updateRecentsVisibility(event.visible);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -533,7 +542,7 @@ public class Recents extends SystemUI
                 @Override
                 public void run() {
                     try {
-                        mCallbacksToSystemUser.startScreenPinning();
+                        mUserToSystemCallbacks.startScreenPinning();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -549,7 +558,7 @@ public class Recents extends SystemUI
                 @Override
                 public void run() {
                     try {
-                        mCallbacksToSystemUser.sendRecentsDrawnEvent();
+                        mUserToSystemCallbacks.sendRecentsDrawnEvent();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -565,7 +574,7 @@ public class Recents extends SystemUI
                 @Override
                 public void run() {
                     try {
-                        mCallbacksToSystemUser.sendDockingTopTaskEvent(event.dragMode);
+                        mUserToSystemCallbacks.sendDockingTopTaskEvent(event.dragMode);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -581,7 +590,7 @@ public class Recents extends SystemUI
                 @Override
                 public void run() {
                     try {
-                        mCallbacksToSystemUser.sendLaunchRecentsEvent();
+                        mUserToSystemCallbacks.sendLaunchRecentsEvent();
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }
@@ -599,7 +608,7 @@ public class Recents extends SystemUI
             @Override
             public void run() {
                 try {
-                    mCallbacksToSystemUser.registerNonSystemUserCallbacks(
+                    mUserToSystemCallbacks.registerNonSystemUserCallbacks(
                             new RecentsImplProxy(mImpl), processUser);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to register", e);
@@ -614,11 +623,14 @@ public class Recents extends SystemUI
      */
     private void postToSystemUser(final Runnable onConnectRunnable) {
         mOnConnectRunnables.add(onConnectRunnable);
-        if (mCallbacksToSystemUser == null) {
+        if (mUserToSystemCallbacks == null) {
             Intent systemUserServiceIntent = new Intent();
             systemUserServiceIntent.setClass(mContext, RecentsSystemUserService.class);
             boolean bound = mContext.bindServiceAsUser(systemUserServiceIntent,
-                    mServiceConnectionToSystemUser, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
+                    mUserToSystemServiceConnection, Context.BIND_AUTO_CREATE, UserHandle.SYSTEM);
+            EventLog.writeEvent(EventLogTags.SYSUI_RECENTS_CONNECTION,
+                    EventLogConstants.SYSUI_RECENTS_CONNECTION_USER_BIND_SERVICE,
+                    sSystemServicesProxy.getProcessUser());
             if (!bound) {
                 // Retry after a fixed duration
                 mHandler.postDelayed(new Runnable() {
