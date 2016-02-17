@@ -41,8 +41,7 @@
     <!-- Usage graph dimens -->
     <dimen name="usage_graph_area_height">122dp</dimen>
     <dimen name="usage_graph_margin_top_bottom">9dp</dimen>
-    <dimen name="usage_graph_padding_end">24dp</dimen>
-    <dimen name="usage_graph_labels_width">72dp</dimen>
+    <dimen name="usage_graph_labels_width">56dp</dimen>
     <dimen name="usage_graph_labels_padding">16dp</dimen>
 
     <dimen name="usage_graph_divider_size">1dp</dimen>
