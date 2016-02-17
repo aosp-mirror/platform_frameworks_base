@@ -55,9 +55,10 @@ import java.io.File;
  * <li>To get access to standard directories (like the {@link Environment#DIRECTORY_PICTURES}), they
  * can use the {@link #createAccessIntent(String)}. This is the recommend way, since it provides a
  * simpler API and narrows the access to the given directory (and its descendants).
- * <li>To get access to any directory (and its descendants), they can use the Storage Area Framework
- * APIs (such as {@link Intent#ACTION_OPEN_DOCUMENT} and {@link Intent#ACTION_OPEN_DOCUMENT_TREE},
- * although these APIs do not guarantee the user will select this specific volume.
+ * <li>To get access to any directory (and its descendants), they can use the Storage Acess
+ * Framework APIs (such as {@link Intent#ACTION_OPEN_DOCUMENT} and
+ * {@link Intent#ACTION_OPEN_DOCUMENT_TREE}, although these APIs do not guarantee the user will
+ * select this specific volume.
  * <li>To get read and write access to the primary storage volume, applications can declare the
  * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} and
  * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permissions respectively, with the
