@@ -1959,11 +1959,11 @@ public class LocationManager {
      * @hide
      */
     @TestApi
-    public int getGpsYearOfHardware() {
+    public int getGnssYearOfHardware() {
         try {
-            return mService.getGpsYearOfHardware();
+            return mService.getGnssYearOfHardware();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getGpsSystemInfo: ", e);
+            Log.e(TAG, "RemoteException in getGnssSystemInfo: ", e);
             return 0;
         }
     }

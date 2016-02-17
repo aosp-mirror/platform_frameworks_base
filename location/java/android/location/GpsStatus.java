@@ -147,7 +147,6 @@ public final class GpsStatus {
                     & GnssStatus.CONSTELLATION_TYPE_MASK;
             // Skip all non-GPS satellites.
             if (constellationType != GnssStatus.CONSTELLATION_GPS) {
-                // TODO: translate the defacto pre-N use of  prn's >32 to new struct
                 continue;
             }
             int prn = svidWithFlags[i] >> GnssStatus.SVID_SHIFT_WIDTH;

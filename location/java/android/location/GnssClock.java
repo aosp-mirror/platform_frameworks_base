@@ -73,7 +73,7 @@ public final class GnssClock implements Parcelable {
     private double mBiasUncertaintyInNs;
     private double mDriftInNsPerSec;
     private double mDriftUncertaintyInNsPerSec;
-    private long mTimeOfLastHwClockDiscontinuityInNs;
+    private int mHardwareClockDiscontinuityCount;
 
     GnssClock() {
         initialize();
@@ -93,7 +93,7 @@ public final class GnssClock implements Parcelable {
         mBiasUncertaintyInNs = clock.mBiasUncertaintyInNs;
         mDriftInNsPerSec = clock.mDriftInNsPerSec;
         mDriftUncertaintyInNsPerSec = clock.mDriftUncertaintyInNsPerSec;
-        mTimeOfLastHwClockDiscontinuityInNs = clock.mTimeOfLastHwClockDiscontinuityInNs;
+        mHardwareClockDiscontinuityCount = clock.mHardwareClockDiscontinuityCount;
     }
 
     /**
@@ -395,17 +395,17 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Gets time of last hardware clock discontinuity.
+     * Gets count of last hardware clock discontinuity.
      */
-    public long getTimeOfLastHwClockDiscontinuityInNs() {
-        return mTimeOfLastHwClockDiscontinuityInNs;
+    public int getHardwareClockDiscontinuityCount() {
+        return mHardwareClockDiscontinuityCount;
     }
 
     /**
-     * Sets time of last hardware clock discontinuity.
+     * Sets count of last hardware clock discontinuity.
      */
-    public void setTimeOfLastHwClockDiscontinuityInNs(long timeOfLastHwClockDiscontinuityInNs) {
-        mTimeOfLastHwClockDiscontinuityInNs = timeOfLastHwClockDiscontinuityInNs;
+    public void setHardwareClockDiscontinuityCount(int value) {
+        mHardwareClockDiscontinuityCount = value;
     }
 
     /**
@@ -431,7 +431,7 @@ public final class GnssClock implements Parcelable {
             gpsClock.mBiasUncertaintyInNs = parcel.readDouble();
             gpsClock.mDriftInNsPerSec = parcel.readDouble();
             gpsClock.mDriftUncertaintyInNsPerSec = parcel.readDouble();
-            gpsClock.mTimeOfLastHwClockDiscontinuityInNs = parcel.readLong();
+            gpsClock.mHardwareClockDiscontinuityCount = parcel.readInt();
 
             return gpsClock;
         }
@@ -442,6 +442,7 @@ public final class GnssClock implements Parcelable {
         }
     };
 
+    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mFlags);
         parcel.writeInt(mLeapSecond);
@@ -453,7 +454,7 @@ public final class GnssClock implements Parcelable {
         parcel.writeDouble(mBiasUncertaintyInNs);
         parcel.writeDouble(mDriftInNsPerSec);
         parcel.writeDouble(mDriftUncertaintyInNsPerSec);
-        parcel.writeLong(mTimeOfLastHwClockDiscontinuityInNs);
+        parcel.writeInt(mHardwareClockDiscontinuityCount);
     }
 
     @Override
@@ -497,9 +498,9 @@ public final class GnssClock implements Parcelable {
                 "DriftUncertaintyInNsPerSec",
                 hasDriftUncertaintyInNsPerSec() ? mDriftUncertaintyInNsPerSec : null));
 
-        builder.append(String.format(format, "TimeOfLastHwClockDiscontinuityInNs",
+        builder.append(String.format(format, "HardwareClockDiscontinuityCount",
                 getType() == CLOCK_TYPE_LOCAL_HW_TIME
-                        ? mTimeOfLastHwClockDiscontinuityInNs : null));
+                        ? mHardwareClockDiscontinuityCount : null));
 
         return builder.toString();
     }
@@ -515,7 +516,7 @@ public final class GnssClock implements Parcelable {
         resetBiasUncertaintyInNs();
         resetDriftInNsPerSec();
         resetDriftUncertaintyInNsPerSec();
-        setTimeOfLastHwClockDiscontinuityInNs(Long.MIN_VALUE);
+        setHardwareClockDiscontinuityCount(Integer.MIN_VALUE);
     }
 
     private void setFlag(short flag) {
