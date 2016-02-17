@@ -2702,6 +2702,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (info == null) {
             throw new IllegalArgumentException("Bad admin: " + adminReceiver);
         }
+        if (!info.getActivityInfo().applicationInfo.isInternal()) {
+            throw new IllegalArgumentException("Only apps in internal storage can be active admin: "
+                    + adminReceiver);
+        }
         synchronized (this) {
             long ident = mInjector.binderClearCallingIdentity();
             try {
