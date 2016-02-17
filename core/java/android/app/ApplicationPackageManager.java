@@ -1907,13 +1907,14 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId) {
+    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
+            int userId) {
         try {
-            return mPM.setPackageSuspendedAsUser(packageName, suspended, userId);
+            return mPM.setPackagesSuspendedAsUser(packageNames, suspended, userId);
         } catch (RemoteException e) {
             // Should never happen!
         }
-        return false;
+        return packageNames;
     }
 
     @Override

@@ -5302,19 +5302,24 @@ public abstract class PackageManager {
     public abstract boolean isSignedByExactly(String packageName, KeySet ks);
 
     /**
-     * Puts the package in a suspended state, making the package un-runnable,
-     * but it doesn't remove the data or the actual package file. The application notifications
-     * will be hidden and also the application will not show up in recents.
+     * Puts the package in a suspended state, where attempts at starting activities are denied.
      *
-     * @param packageName The name of the package to set the suspended status.
-     * @param suspended If set to {@code true} than the package will be suspended, if set to
-     * {@code false} the package will be unsuspended.
+     * <p>It doesn't remove the data or the actual package file. The application notifications
+     * will be hidden, the application will not show up in recents, will not be able to show
+     * toasts or dialogs or ring the device.
+     *
+     * @param packageNames The names of the packages to set the suspended status.
+     * @param suspended If set to {@code true} than the packages will be suspended, if set to
+     * {@code false} the packages will be unsuspended.
      * @param userId The user id.
+     *
+     * @return an array of package names for which the suspended status is not set as requested in
+     * this method.
      *
      * @hide
      */
-    public abstract boolean setPackageSuspendedAsUser(
-            String packageName, boolean suspended, @UserIdInt int userId);
+    public abstract String[] setPackagesSuspendedAsUser(
+            String[] packageNames, boolean suspended, @UserIdInt int userId);
 
     /**
      * @see #setPackageSuspendedAsUser(String, boolean, int)

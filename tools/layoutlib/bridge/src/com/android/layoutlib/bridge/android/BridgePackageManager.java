@@ -784,8 +784,9 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId) {
-        return false;
+    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
+            int userId) {
+        return new String[]{};
     }
 
     @Override
