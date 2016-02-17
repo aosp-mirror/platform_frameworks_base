@@ -536,4 +536,6 @@ interface IPackageManager {
     boolean setRequiredForSystemUser(String packageName, boolean systemUserApp);
 
     String getServicesSystemSharedLibraryPackageName();
+
+    boolean isPackageDeviceAdminOnAnyUser(String packageName);
 }

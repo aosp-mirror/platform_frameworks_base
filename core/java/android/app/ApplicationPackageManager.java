@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.XmlRes;
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -1759,7 +1760,7 @@ public class ApplicationPackageManager extends PackageManager {
         return candidates;
     }
 
-    private static boolean isPackageCandidateVolume(
+    private boolean isPackageCandidateVolume(
             ContextImpl context, ApplicationInfo app, VolumeInfo vol) {
         final boolean forceAllowOnExternal = Settings.Global.getInt(
                 context.getContentResolver(), Settings.Global.FORCE_ALLOW_ON_EXTERNAL, 0) != 0;
@@ -1787,6 +1788,15 @@ public class ApplicationPackageManager extends PackageManager {
         // Moving into an ASEC on public primary is only option internal
         if (vol.isPrimaryPhysical()) {
             return app.isInternal();
+        }
+
+        // Some apps can't be moved. (e.g. device admins)
+        try {
+            if (mPM.isPackageDeviceAdminOnAnyUser(app.packageName)) {
+                return false;
+            }
+        } catch (RemoteException e) {
+            throw new RuntimeException("Package manager has died", e);
         }
 
         // Otherwise we can move to any private volume
