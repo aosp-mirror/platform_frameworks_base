@@ -284,7 +284,7 @@ public abstract class BaseActivity extends Activity
                 if (dir != null) {
                     dir.pasteFromClipboard();
                 }
-              return true;
+                return true;
 
             case R.id.menu_advanced:
                 setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
@@ -456,7 +456,7 @@ public abstract class BaseActivity extends Activity
         DirectoryFragment dir = getDirectoryFragment();
         if (dir != null) {
             dir.onSortOrderChanged();
-        };
+        }
     }
 
     /**
@@ -474,7 +474,7 @@ public abstract class BaseActivity extends Activity
         DirectoryFragment dir = getDirectoryFragment();
         if (dir != null) {
             dir.onViewModeChanged();
-        };
+        }
     }
 
     public void setPending(boolean pending) {
@@ -562,9 +562,7 @@ public abstract class BaseActivity extends Activity
             }
         }
 
-        if (size > 1) {
-            mState.stack.pop();
-            refreshCurrentRootAndDirectory(ANIM_LEAVE);
+        if (popDir()) {
             return;
         }
 
@@ -604,7 +602,11 @@ public abstract class BaseActivity extends Activity
                 return true;
             }
         } else if (keyCode == KeyEvent.KEYCODE_TAB) {
+            // Tab toggles focus on the navigation drawer.
             toggleNavDrawerFocus();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_DEL) {
+            popDir();
             return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -640,6 +642,21 @@ public abstract class BaseActivity extends Activity
             Log.w(mTag, "Failed to find root", e);
             return null;
         }
+    }
+
+    /**
+     * Pops the top entry off the directory stack, and returns the user to the previous directory.
+     * If the directory stack only contains one item, this method does nothing.
+     *
+     * @return Whether the stack was popped.
+     */
+    private boolean popDir() {
+        if (mState.stack.size() > 1) {
+            mState.stack.pop();
+            refreshCurrentRootAndDirectory(ANIM_LEAVE);
+            return true;
+        }
+        return false;
     }
 
     private static final class PickRootTask extends PairedTask<BaseActivity, Void, DocumentInfo> {
