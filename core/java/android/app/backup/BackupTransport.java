@@ -501,7 +501,7 @@ public class BackupTransport {
      * @param packageName ID of package to provide the quota.
      * @param isFullBackup If set, transport should return limit for full data backup, otherwise
      *                     for key-value backup.
-     * @return Current limit on full data backup size in bytes.
+     * @return Current limit on backup size in bytes.
      */
     public long getBackupQuota(String packageName, boolean isFullBackup) {
         return Long.MAX_VALUE;
