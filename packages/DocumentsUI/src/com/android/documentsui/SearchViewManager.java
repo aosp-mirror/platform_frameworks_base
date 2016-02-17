@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import android.annotation.Nullable;
+import android.os.Bundle;
 import android.provider.DocumentsContract.Root;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,28 +33,27 @@ import com.android.documentsui.model.RootInfo;
 /**
  * Manages searching UI behavior.
  */
-final class SearchManager implements
+final class SearchViewManager implements
         SearchView.OnCloseListener, OnQueryTextListener, OnClickListener, OnFocusChangeListener {
 
     public interface SearchManagerListener {
-        void onSearchChanged();
-
-        void onSearchQueryChanged(String query);
+        void onSearchChanged(@Nullable String query);
     }
 
     public static final String TAG = "SearchManger";
 
     private SearchManagerListener mListener;
-    private String currentSearch;
     private boolean mSearchExpanded;
+    private String mCurrentSearch;
     private boolean mIgnoreNextClose;
 
     private DocumentsToolbar mActionBar;
     private MenuItem mMenu;
     private SearchView mView;
 
-    public SearchManager(SearchManagerListener listener) {
+    public SearchViewManager(SearchManagerListener listener, @Nullable Bundle savedState) {
         mListener = listener;
+        mCurrentSearch = savedState != null ? savedState.getString(Shared.EXTRA_QUERY) : null;
     }
 
     public void setSearchMangerListener(SearchManagerListener listener) {
@@ -69,6 +70,8 @@ final class SearchManager implements
         mView.setOnCloseListener(this);
         mView.setOnSearchClickListener(this);
         mView.setOnQueryTextFocusChangeListener(this);
+
+        restoreSearch();
     }
 
     /**
@@ -80,12 +83,12 @@ final class SearchManager implements
             return;
         }
 
-        if (currentSearch != null) {
+        if (mCurrentSearch != null) {
             mMenu.expandActionView();
 
             mView.setIconified(false);
             mView.clearFocus();
-            mView.setQuery(currentSearch, false);
+            mView.setQuery(mCurrentSearch, false);
         } else {
             mView.clearFocus();
             if (!mView.isIconified()) {
@@ -108,13 +111,11 @@ final class SearchManager implements
             return;
         }
 
-        mMenu.setVisible(visible);
         if (!visible) {
-            currentSearch = null;
-            if (mListener != null) {
-                mListener.onSearchQueryChanged(currentSearch);
-            }
+            mCurrentSearch = null;
         }
+
+        mMenu.setVisible(visible);
     }
 
     /**
@@ -133,12 +134,35 @@ final class SearchManager implements
         return false;
     }
 
+    private void restoreSearch() {
+        if (isSearching()) {
+            onSearchExpanded();
+            mView.setIconified(false);
+            mView.setQuery(mCurrentSearch, false);
+            mView.clearFocus();
+        }
+    }
+
+    private void onSearchExpanded() {
+        mSearchExpanded = true;
+        mView.setBackgroundColor(
+                mView.getResources().getColor(R.color.menu_search_background, null));
+    }
+
     boolean isSearching() {
-        return currentSearch != null;
+        return mCurrentSearch != null;
     }
 
     boolean isExpanded() {
         return mSearchExpanded;
+    }
+
+    /**
+     * Called when owning activity is saving state to be used to restore state during creation.
+     * @param state Bundle to save state too
+     */
+    public void onSaveInstanceState(Bundle state) {
+        state.putString(Shared.EXTRA_QUERY, mCurrentSearch);
     }
 
     /**
@@ -159,11 +183,10 @@ final class SearchManager implements
                 mView.getResources().getColor(android.R.color.transparent, null));
 
         // Refresh the directory if a search was done
-        if (currentSearch != null) {
-            currentSearch = null;
+        if (mCurrentSearch != null) {
+            mCurrentSearch = null;
             if (mListener != null) {
-                mListener.onSearchQueryChanged(currentSearch);
-                mListener.onSearchChanged();
+                mListener.onSearchChanged(mCurrentSearch);
             }
         }
         return false;
@@ -176,18 +199,15 @@ final class SearchManager implements
      */
     @Override
     public void onClick(View v) {
-        mSearchExpanded = true;
-        mView.setBackgroundColor(
-                mView.getResources().getColor(R.color.menu_search_background, null));
+        onSearchExpanded();
     }
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        currentSearch = query;
+        mCurrentSearch = query;
         mView.clearFocus();
         if (mListener != null) {
-            mListener.onSearchQueryChanged(currentSearch);
-            mListener.onSearchChanged();
+            mListener.onSearchChanged(mCurrentSearch);
         }
         return true;
     }
@@ -195,7 +215,7 @@ final class SearchManager implements
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (!hasFocus) {
-            if (currentSearch == null) {
+            if (mCurrentSearch == null) {
                 mView.setIconified(true);
             } else if (TextUtils.isEmpty(mView.getQuery())) {
                 cancelSearch();
@@ -207,4 +227,9 @@ final class SearchManager implements
     public boolean onQueryTextChange(String newText) {
         return false;
     }
+
+    String getCurrentSearch() {
+        return mCurrentSearch;
+    }
+
 }

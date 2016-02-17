@@ -53,19 +53,22 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private final RootInfo mRoot;
     private final Uri mUri;
     private final int mUserSortOrder;
+    private final boolean mSearchMode;
 
     private DocumentInfo mDoc;
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
+
     public DirectoryLoader(Context context, int type, RootInfo root, DocumentInfo doc, Uri uri,
-            int userSortOrder) {
+            int userSortOrder, boolean inSearchMode) {
         super(context, ProviderExecutor.forAuthority(root.authority));
         mType = type;
         mRoot = root;
         mUri = uri;
         mUserSortOrder = userSortOrder;
         mDoc = doc;
+        mSearchMode = inSearchMode;
     }
 
     @Override
@@ -83,7 +86,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         final DirectoryResult result = new DirectoryResult();
 
         // Use default document when searching
-        if (mType == DirectoryFragment.TYPE_SEARCH) {
+        if (mSearchMode) {
             final Uri docUri = DocumentsContract.buildDocumentUri(
                     mRoot.authority, mRoot.documentId);
             try {
@@ -106,7 +109,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         }
 
         // Search always uses ranking from provider
-        if (mType == DirectoryFragment.TYPE_SEARCH) {
+        if (mSearchMode) {
             result.sortOrder = State.SORT_ORDER_UNKNOWN;
         }
 
@@ -127,7 +130,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
             cursor = new RootCursorWrapper(mUri.getAuthority(), mRoot.rootId, cursor, -1);
 
-            if (mType == DirectoryFragment.TYPE_SEARCH) {
+            if (mSearchMode) {
                 // Filter directories out of search results, for now
                 cursor = new FilteringCursorWrapper(cursor, null, SEARCH_REJECT_MIMES);
             }

@@ -23,9 +23,11 @@ import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_LEAVE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -46,7 +48,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Spinner;
 
-import com.android.documentsui.SearchManager.SearchManagerListener;
+import com.android.documentsui.SearchViewManager.SearchManagerListener;
 import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.dirlist.Model;
@@ -64,14 +66,12 @@ import java.util.concurrent.Executor;
 public abstract class BaseActivity extends Activity
         implements SearchManagerListener, NavigationView.Environment {
 
-    static final String EXTRA_STATE = "state";
-
     // See comments where this const is referenced for details.
     private static final int DRAWER_NO_FIDDLE_DELAY = 1500;
 
     State mState;
     RootsCache mRoots;
-    SearchManager mSearchManager;
+    SearchViewManager mSearchManager;
     DrawerController mDrawer;
     NavigationView mNavigator;
 
@@ -121,7 +121,7 @@ public abstract class BaseActivity extends Activity
                     }
                 });
 
-        mSearchManager = new SearchManager(this);
+        mSearchManager = new SearchViewManager(this, icicle);
 
         DocumentsToolbar toolbar = (DocumentsToolbar) findViewById(R.id.toolbar);
         setActionBar(toolbar);
@@ -141,6 +141,7 @@ public abstract class BaseActivity extends Activity
         boolean showMenu = super.onCreateOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.activity, menu);
+        mNavigator.update();
         mSearchManager.install((DocumentsToolbar) findViewById(R.id.toolbar));
 
         return showMenu;
@@ -188,7 +189,7 @@ public abstract class BaseActivity extends Activity
 
     private State getState(@Nullable Bundle icicle) {
         if (icicle != null) {
-            State state = icicle.<State>getParcelable(EXTRA_STATE);
+            State state = icicle.<State>getParcelable(Shared.EXTRA_STATE);
             if (DEBUG) Log.d(mTag, "Recovered existing state object: " + state);
             return state;
         }
@@ -224,6 +225,9 @@ public abstract class BaseActivity extends Activity
     }
 
     void onRootPicked(RootInfo root) {
+        // Clicking on the current root removes search
+        mSearchManager.cancelSearch();
+
         // Skip refreshing if root nor directory didn't change
         if (root.equals(getCurrentRoot()) && mState.stack.size() == 1) {
             return;
@@ -233,7 +237,6 @@ public abstract class BaseActivity extends Activity
 
         // Clear entire backstack and start in new root
         mState.onRootChanged(root);
-        mSearchManager.update(root);
 
         // Recents is always in memory, so we just load it directly.
         // Otherwise we delegate loading data from disk to a task
@@ -370,18 +373,18 @@ public abstract class BaseActivity extends Activity
      * e.g. The current directory name displayed on the action bar won't get updated.
      */
     @Override
-    public void onSearchChanged() {
-        refreshDirectory(ANIM_NONE);
+    public void onSearchChanged(@Nullable String query) {
+        // We should not get here if root is not searchable
+        checkState(canSearchRoot());
+        reloadSearch(query);
     }
 
-    /**
-     * Called when search query changed.
-     * Updates the state object.
-     * @param query - New query
-     */
-    @Override
-    public void onSearchQueryChanged(String query) {
-        mState.currentSearch = query;
+    private void reloadSearch(String query) {
+        FragmentManager fm = getFragmentManager();
+        RootInfo root = getCurrentRoot();
+        DocumentInfo cwd = getCurrentDirectory();
+
+        DirectoryFragment.reloadSearch(fm, root, cwd, query);
     }
 
     final List<String> getExcludedAuthorities() {
@@ -486,7 +489,8 @@ public abstract class BaseActivity extends Activity
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        state.putParcelable(EXTRA_STATE, mState);
+        state.putParcelable(Shared.EXTRA_STATE, mState);
+        mSearchManager.onSaveInstanceState(state);
     }
 
     @Override

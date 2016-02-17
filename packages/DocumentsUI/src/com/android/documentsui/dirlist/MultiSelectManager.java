@@ -687,7 +687,7 @@ public final class MultiSelectManager {
          * Returns an unordered array of selected positions (including any
          * provisional selections current in effect).
          */
-        private List<String> toList() {
+        public List<String> toList() {
             ArrayList<String> selection = new ArrayList<String>(mSelection);
             selection.addAll(mProvisionalSelection);
             return selection;
