@@ -17,50 +17,40 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumenti"</string>
-    <!-- no translation found for files_label (6051402950202690279) -->
-    <skip />
-    <!-- no translation found for downloads_label (959113951084633612) -->
-    <skip />
+    <string name="files_label" msgid="6051402950202690279">"Fajlovi"</string>
+    <string name="downloads_label" msgid="959113951084633612">"Preuzimanja"</string>
     <string name="title_open" msgid="4353228937663917801">"Otvori iz"</string>
-    <string name="title_save" msgid="2433679664882857999">"Pohrani u"</string>
-    <!-- no translation found for menu_create_dir (2547620241173881754) -->
-    <skip />
+    <string name="title_save" msgid="2433679664882857999">"Sačuvaj u"</string>
+    <string name="menu_create_dir" msgid="2547620241173881754">"Nova fascikla"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Prikaz u vidu mreže"</string>
     <string name="menu_list" msgid="7279285939892417279">"Prikaz u vidu liste"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Sortiraj po"</string>
     <string name="menu_search" msgid="3816712084502856974">"Traži"</string>
     <string name="menu_settings" msgid="8239065133341597825">"Postavke pohrane"</string>
     <string name="menu_open" msgid="432922957274920903">"Otvori"</string>
-    <string name="menu_save" msgid="2394743337684426338">"Pohrani"</string>
+    <string name="menu_save" msgid="2394743337684426338">"Sačuvaj"</string>
     <string name="menu_share" msgid="3075149983979628146">"Podijeli"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Izbriši"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Odaberi sve"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Kopiraj na..."</string>
-    <!-- no translation found for menu_move (1828090633118079817) -->
-    <skip />
-    <!-- no translation found for menu_new_window (1226032889278727538) -->
-    <skip />
-    <!-- no translation found for menu_copy_to_clipboard (489311381979634291) -->
-    <skip />
-    <!-- no translation found for menu_paste_from_clipboard (2071583031180257091) -->
-    <skip />
-    <string name="menu_advanced_show" msgid="4693652895715631401">"Pokaži interni prostor"</string>
-    <string name="menu_advanced_hide" msgid="4218809952721972589">"Sakrij interni prostor"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"Pokaži veličinu datoteke"</string>
-    <string name="menu_file_size_hide" msgid="8881975928502581042">"Sakrij veličinu datoteke"</string>
+    <string name="menu_move" msgid="1828090633118079817">"Premjesti u..."</string>
+    <string name="menu_new_window" msgid="1226032889278727538">"Novi prozor"</string>
+    <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopiraj"</string>
+    <string name="menu_paste_from_clipboard" msgid="2071583031180257091">"Zalijepi"</string>
+    <string name="menu_advanced_show" msgid="4693652895715631401">"Pokaži internu pohranu"</string>
+    <string name="menu_advanced_hide" msgid="4218809952721972589">"Sakrij internu pohranu"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Pokaži veličinu fajla"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Sakrij veličinu fajla"</string>
     <string name="button_select" msgid="527196987259139214">"Odaberi"</string>
     <string name="button_copy" msgid="8706475544635021302">"Kopiraj"</string>
-    <!-- no translation found for button_move (2202666023104202232) -->
-    <skip />
-    <!-- no translation found for button_dismiss (3714065566893946085) -->
-    <skip />
-    <!-- no translation found for button_retry (4392027584153752797) -->
-    <skip />
+    <string name="button_move" msgid="2202666023104202232">"Premjesti"</string>
+    <string name="button_dismiss" msgid="3714065566893946085">"Odbaci"</string>
+    <string name="button_retry" msgid="4392027584153752797">"Pokušajte ponovo"</string>
     <string name="sort_name" msgid="9183560467917256779">"Po nazivu"</string>
     <string name="sort_date" msgid="586080032956151448">"Po datumu izmjene"</string>
     <string name="sort_size" msgid="3350681319735474741">"Po veličini"</string>
-    <string name="drawer_open" msgid="4545466532430226949">"Pokaži ishodišta"</string>
-    <string name="drawer_close" msgid="7602734368552123318">"Sakrij ishodišta"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"Pokaži korijeni"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"Sakrij korijenske foldere"</string>
     <string name="save_error" msgid="6167009778003223664">"Pohranjivanje dokumenta nije uspjelo"</string>
     <string name="create_error" msgid="3735649141335444215">"Kreiranje mape nije uspjelo"</string>
     <string name="query_error" msgid="5999895349602476581">"Trenutno nije moguće učitati sadržaj"</string>
@@ -76,21 +66,26 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nije moguće obrisati neke dokumente"</string>
     <string name="share_via" msgid="8966594246261344259">"Podijeli preko"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiraju se fajlovi"</string>
-    <!-- no translation found for move_notification_title (6193835179777284805) -->
-    <skip />
+    <string name="move_notification_title" msgid="6193835179777284805">"Premještanje fajlova"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Još <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Kopira se <xliff:g id="COUNT_1">%1$d</xliff:g> fajl.</item>
       <item quantity="few">Kopiraju se <xliff:g id="COUNT_1">%1$d</xliff:g> fajla.</item>
       <item quantity="other">Kopira se <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova.</item>
     </plurals>
-    <!-- no translation found for move_begin (8430330882138871643) -->
-    <!-- no translation found for deleting (5054338566802559411) -->
-    <!-- no translation found for undo (7905788502491742328) -->
-    <skip />
+    <plurals name="move_begin" formatted="false" msgid="8430330882138871643">
+      <item quantity="one">Premješta se <xliff:g id="COUNT_1">%1$d</xliff:g> fajl.</item>
+      <item quantity="few">Premještaju se <xliff:g id="COUNT_1">%1$d</xliff:g> fajla.</item>
+      <item quantity="other">Premješta se <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova.</item>
+    </plurals>
+    <plurals name="deleting" formatted="false" msgid="5054338566802559411">
+      <item quantity="one">Briše se <xliff:g id="COUNT_1">%1$d</xliff:g> fajl.</item>
+      <item quantity="few">Brišu se <xliff:g id="COUNT_1">%1$d</xliff:g> fajla.</item>
+      <item quantity="other">Briše se <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova.</item>
+    </plurals>
+    <string name="undo" msgid="7905788502491742328">"Vrati"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"Priprema se kopiranje..."</string>
-    <!-- no translation found for move_preparing (2772219441375531410) -->
-    <skip />
+    <string name="move_preparing" msgid="2772219441375531410">"Priprema za premještanje..."</string>
     <string name="delete_preparing" msgid="5655813182533491992">"Pripremanje za brisanje…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one">Nije moguće kopirati <xliff:g id="COUNT_1">%1$d</xliff:g> fajl</item>
@@ -112,9 +107,12 @@
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Nisu kopirani sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Nisu premješteni sljedeći fajlovi: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="copy_converted_warning_content" msgid="5753861488218674361">"Ove datoteke su pretvorene u drugi format: <xliff:g id="LIST">%1$s</xliff:g>"</string>
-    <!-- no translation found for clipboard_files_clipped (855459017537058539) -->
-    <!-- no translation found for clipboard_files_cannot_paste (2878324825602325706) -->
-    <skip />
+    <plurals name="clipboard_files_clipped" formatted="false" msgid="855459017537058539">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> fajl je kopiran u međuspremnik.</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> fajla su kopirana u međuspremnik.</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> fajlova je kopirano u međuspremnik.</item>
+    </plurals>
+    <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"Odabrani fajlovi se ne mogu zalijepiti na ovu lokaciju."</string>
     <string name="menu_rename" msgid="7678802479104285353">"Preimenuj"</string>
     <string name="rename_error" msgid="4203041674883412606">"Nije uspjelo preimenovanje dokumenta"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Neke od datoteka su pretvorene"</string>
