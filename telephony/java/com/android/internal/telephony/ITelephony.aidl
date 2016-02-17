@@ -543,27 +543,30 @@ interface ITelephony {
      *
      * Input parameters equivalent to TS 27.007 AT+CCHO command.
      *
+     * @param subId The subscription to use.
      * @param AID Application id. See ETSI 102.221 and 101.220.
      * @return an IccOpenLogicalChannelResponse object.
      */
-    IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID);
+    IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID);
 
     /**
      * Closes a previously opened logical channel to the ICC card.
      *
      * Input parameters equivalent to TS 27.007 AT+CCHC command.
      *
+     * @param subId The subscription to use.
      * @param channel is the channel id to be closed as retruned by a
      *            successful iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
-    boolean iccCloseLogicalChannel(int channel);
+    boolean iccCloseLogicalChannel(int subId, int channel);
 
     /**
      * Transmit an APDU to the ICC card over a logical channel.
      *
      * Input parameters equivalent to TS 27.007 AT+CGLA command.
      *
+     * @param subId The subscription to use.
      * @param channel is the channel id to be closed as retruned by a
      *            successful iccOpenLogicalChannel.
      * @param cla Class of the APDU command.
@@ -576,7 +579,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    String iccTransmitApduLogicalChannel(int channel, int cla, int instruction,
+    String iccTransmitApduLogicalChannel(int subId, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
     /**
@@ -584,6 +587,7 @@ interface ITelephony {
      *
      * Input parameters equivalent to TS 27.007 AT+CSIM command.
      *
+     * @param subId The subscription to use.
      * @param cla Class of the APDU command.
      * @param instruction Instruction of the APDU command.
      * @param p1 P1 value of the APDU command.
@@ -594,12 +598,13 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    String iccTransmitApduBasicChannel(int cla, int instruction,
+    String iccTransmitApduBasicChannel(int subId, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
     /**
      * Returns the response APDU for a command APDU sent through SIM_IO.
      *
+     * @param subId The subscription to use.
      * @param fileID
      * @param command
      * @param p1 P1 value of the APDU command.
@@ -608,12 +613,13 @@ interface ITelephony {
      * @param filePath
      * @return The APDU response.
      */
-    byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
+    byte[] iccExchangeSimIO(int subId, int fileID, int command, int p1, int p2, int p3,
             String filePath);
 
     /**
      * Send ENVELOPE to the SIM and returns the response.
      *
+     * @param subId The subscription to use.
      * @param contents  String containing SAT/USAT response in hexadecimal
      *                  format starting with command tag. See TS 102 223 for
      *                  details.
@@ -621,7 +627,7 @@ interface ITelephony {
      *         being the status word. If the command fails, returns an empty
      *         string.
      */
-    String sendEnvelopeWithStatus(String content);
+    String sendEnvelopeWithStatus(int subId, String content);
 
     /**
      * Read one of the NV items defined in {@link RadioNVItems} / {@code ril_nv_items.h}.
@@ -773,9 +779,10 @@ interface ITelephony {
      *
      * TODO: Add a link to documentation.
      *
+     * @param subId The subscription to use.
      * @return carrier privilege status defined in TelephonyManager.
      */
-    int getCarrierPrivilegeStatus();
+    int getCarrierPrivilegeStatus(int subId);
 
     /**
      * Similar to above, but check for the package whose name is pkgName.
@@ -847,10 +854,11 @@ interface ITelephony {
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *  or has to be carrier app - see #hasCarrierPrivileges.
      *
+     * @param subId The subscription to use.
      * @param brand The brand name to display/set.
      * @return true if the operation was executed correctly.
      */
-    boolean setOperatorBrandOverride(String brand);
+    boolean setOperatorBrandOverride(int subId, String brand);
 
     /**
      * Override the roaming indicator for the current ICCID.
@@ -863,13 +871,14 @@ interface ITelephony {
      *
      * <p>Requires that the caller have carrier privilege. See #hasCarrierPrivileges.
      *
+     * @param subId for which the roaming overrides apply.
      * @param gsmRoamingList - List of MCCMNCs to be considered roaming for 3GPP RATs.
      * @param gsmNonRoamingList - List of MCCMNCs to be considered not roaming for 3GPP RATs.
      * @param cdmaRoamingList - List of SIDs to be considered roaming for 3GPP2 RATs.
      * @param cdmaNonRoamingList - List of SIDs to be considered not roaming for 3GPP2 RATs.
      * @return true if the operation was executed correctly.
      */
-    boolean setRoamingOverride(in List<String> gsmRoamingList,
+    boolean setRoamingOverride(int subId, in List<String> gsmRoamingList,
             in List<String> gsmNonRoamingList, in List<String> cdmaRoamingList,
             in List<String> cdmaNonRoamingList);
 
