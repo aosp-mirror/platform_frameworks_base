@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"स्क्रीन पिन करना"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"खोज"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ नहीं किया जा सका."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में अक्षम किया गया."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"इतिहास"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"साफ़ करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
@@ -479,7 +478,7 @@
     <string name="color_apply" msgid="9212602012641034283">"लागू करें"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"से‍ेटिंग की पुष्टि करें"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"कुछ रंग सेटिंग इस डिवाइस को अनुपयोगी बना सकती हैं. इन रंग सेटिंग की पुष्टि करने के लिए ठीक क्लिक करें, अन्यथा 10 सेकंड के बाद ये सेटिंग रीसेट हो जाएंगी."</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"बैटरी (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"बैटरी उपयोग"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज किए जाने के दौरान बैटरी सेवर उपलब्ध नहीं है"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"बैटरी सेवर"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>

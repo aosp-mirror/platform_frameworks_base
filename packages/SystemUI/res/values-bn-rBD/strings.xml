@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"স্ক্রীন পিন করা"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"অনুসন্ধান"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> শুরু করা যায়নি৷"</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"নিরাপদ মোডে <xliff:g id="APP">%s</xliff:g> অক্ষম করা হয়েছে৷"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ইতিহাস"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"সাফ করুন"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
@@ -479,7 +478,7 @@
     <string name="color_apply" msgid="9212602012641034283">"প্রয়োগ করুন"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"সেটিংস নিশ্চিত করুন"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"কিছু রঙের সেটিংস এই ডিভাইসকে ব্যবহারের অযোগ্য করে দিতে পারে৷ এই রঙের সেটিংস নিশ্চিত করতে ওকে এ ক্লিক করুন, অন্যথায় ১০ সেকেন্ড পরে এই সেটিংস পুনরায় সেট হবে৷"</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"ব্যাটারি (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"ব্যাটারির ব্যবহার"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"চার্জ করার সময় ব্যাটারি সেভার উপলব্ধ নয়"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ব্যাটারি সেভার"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"কার্য-সম্পাদনা ও পশ্চাদপট ডেটাকে কমিয়ে দেয়"</string>

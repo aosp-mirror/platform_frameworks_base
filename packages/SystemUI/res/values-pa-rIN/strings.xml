@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ਸਕ੍ਰੀਨ ਪਿਨਿੰਗ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ਖੋਜੋ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਚਾਲੂ ਨਹੀਂ ਕਰ ਸਕਿਆ।"</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ਨੂੰ ਸੁਰੱਖਿਅਤ-ਮੋਡ ਵਿੱਚ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ।"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ਇਤਿਹਾਸ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ਸਾਫ਼ ਕਰੋ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ਹੌਰੀਜ਼ੌਂਟਲ ਸਪਲਿਟ"</string>
@@ -479,7 +478,7 @@
     <string name="color_apply" msgid="9212602012641034283">"ਲਾਗੂ ਕਰੋ"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ਸੈਟਿੰਗਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ਕੁਝ ਰੰਗ ਸੈਟਿੰਗਾਂ ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਬੇਕਾਰ ਕਰ ਸਕਦੀਆਂ ਹਨ। ਇਹਨਾਂ ਰੰਗ ਸੈਟਿੰਗਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ ਠੀਕ \'ਤੇ ਕਲਿੱਕ ਕਰੋ, ਨਹੀਂ ਤਾਂ ਇਹ ਸੈਟਿੰਗਾਂ 10 ਸਕਿੰਟ ਬਾਅਦ ਮੁੜ-ਸੈੱਟ ਹੋ ਜਾਣਗੀਆਂ।"</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"ਬੈਟਰੀ (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"ਬੈਟਰੀ ਵਰਤੋਂ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ਬੈਟਰੀ ਸੇਵਰ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ਕਾਰਗੁਜ਼ਾਰੀ ਅਤੇ ਬੈਕਗ੍ਰਾਊਂਡ ਡੈਟੇ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ"</string>
