@@ -526,8 +526,8 @@ public class ZenModePanel extends LinearLayout {
             setToMidnight(nextAlarm);
 
             if (weekRange.compareTo(nextAlarm) >= 0) {
-                return ZenModeConfig.toNextAlarmCondition(mContext, now, nextAlarmMs,
-                        ActivityManager.getCurrentUser());
+                return ZenModeConfig.toNextAlarmCondition(mContext, now,
+                        nextAlarmMs, ActivityManager.getCurrentUser());
             }
         }
         return null;
