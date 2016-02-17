@@ -18,6 +18,7 @@ package com.android.internal.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.Printer;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
@@ -826,7 +828,14 @@ public class InputMethodUtils {
         private final HashMap<String, InputMethodInfo> mMethodMap;
         private final ArrayList<InputMethodInfo> mMethodList;
 
+        /**
+         * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
+         */
+        private final HashMap<String, String> mCopyOnWriteDataStore = new HashMap<>();
+
+        private boolean mCopyOnWrite = false;
         private String mEnabledInputMethodsStrCache;
+        @UserIdInt
         private int mCurrentUserId;
         private int[] mCurrentProfileIds = new int[0];
 
@@ -879,48 +888,85 @@ public class InputMethodUtils {
             return imsList;
         }
 
+        @Deprecated
         public InputMethodSettings(
                 Resources res, ContentResolver resolver,
                 HashMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-                int userId) {
-            setCurrentUserId(userId);
+                @UserIdInt int userId) {
+            this(res, resolver, methodMap, methodList, userId, false /* copyOnWrite */);
+        }
+
+        public InputMethodSettings(
+                Resources res, ContentResolver resolver,
+                HashMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
+                @UserIdInt int userId, boolean copyOnWrite) {
             mRes = res;
             mResolver = resolver;
             mMethodMap = methodMap;
             mMethodList = methodList;
+            switchCurrentUser(userId, copyOnWrite);
         }
 
-        public void setCurrentUserId(int userId) {
+        /**
+         * Must be called when the current user is changed.
+         *
+         * @param userId The user ID.
+         * @param copyOnWrite If {@code true}, for each settings key
+         * (e.g. {@link Settings.Secure#ACTION_INPUT_METHOD_SUBTYPE_SETTINGS}) we use the actual
+         * settings on the {@link Settings.Secure} until we do the first write operation.
+         */
+        public void switchCurrentUser(@UserIdInt int userId, boolean copyOnWrite) {
             if (DEBUG) {
-                Slog.d(TAG, "--- Swtich the current user from " + mCurrentUserId + " to " + userId);
+                Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
             }
-            // IMMS settings are kept per user, so keep track of current user
+            if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
+                mCopyOnWriteDataStore.clear();
+                mEnabledInputMethodsStrCache = "";
+                // TODO: mCurrentProfileIds should be cleared here.
+            }
             mCurrentUserId = userId;
+            mCopyOnWrite = copyOnWrite;
+            // TODO: mCurrentProfileIds should be updated here.
         }
 
         private void putString(final String key, final String str) {
-            Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+            if (mCopyOnWrite) {
+                mCopyOnWriteDataStore.put(key, str);
+            } else {
+                Settings.Secure.putStringForUser(mResolver, key, str, mCurrentUserId);
+            }
         }
 
         private String getString(final String key) {
+            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
+                final String result = mCopyOnWriteDataStore.get(key);
+                return result != null ? result : "";
+            }
             return Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
         }
 
         private void putInt(final String key, final int value) {
-            Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+            if (mCopyOnWrite) {
+                mCopyOnWriteDataStore.put(key, String.valueOf(value));
+            } else {
+                Settings.Secure.putIntForUser(mResolver, key, value, mCurrentUserId);
+            }
         }
 
         private int getInt(final String key, final int defaultValue) {
+            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
+                final String result = mCopyOnWriteDataStore.get(key);
+                return result != null ? Integer.valueOf(result) : 0;
+            }
             return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
         }
 
         private void putBoolean(final String key, final boolean value) {
-            Settings.Secure.putIntForUser(mResolver, key, value ? 1 : 0, mCurrentUserId);
+            putInt(key, value ? 1 : 0);
         }
 
         private boolean getBoolean(final String key, final boolean defaultValue) {
-            return Settings.Secure.getIntForUser(mResolver, key, defaultValue ? 1 : 0,
-                    mCurrentUserId) == 1;
+            return getInt(key, defaultValue ? 1 : 0) == 1;
         }
 
         public void setCurrentProfileIds(int[] currentProfileIds) {
@@ -1290,6 +1336,7 @@ public class InputMethodUtils {
             putBoolean(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD, show);
         }
 
+        @UserIdInt
         public int getCurrentUserId() {
             return mCurrentUserId;
         }
@@ -1323,6 +1370,13 @@ public class InputMethodUtils {
                         imi, getEnabledInputMethodSubtypeListLocked(context, imi, true));
             }
             return enabledInputMethodAndSubtypes;
+        }
+
+        public void dumpLocked(final Printer pw, final String prefix) {
+            pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
+            pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
+            pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
+            pw.println(prefix + "mEnabledInputMethodsStrCache=" + mEnabledInputMethodsStrCache);
         }
     }
 
