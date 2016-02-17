@@ -4982,6 +4982,17 @@ public final class ContactsContract {
      */
     protected interface PhoneLookupColumns {
         /**
+         *  The ID of the data row.
+         *  <P>Type: INTEGER</P>
+         */
+        public static final String DATA_ID = "data_id";
+        /**
+         * A reference to the {@link ContactsContract.Contacts#_ID} that this
+         * data belongs to.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String CONTACT_ID = "contact_id";
+        /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
          */
@@ -5053,6 +5064,18 @@ public final class ContactsContract {
      * <td>{@link #_ID}</td>
      * <td>read-only</td>
      * <td>Contact ID.</td>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #CONTACT_ID}</td>
+     * <td>read-only</td>
+     * <td>Contact ID.</td>
+     * </tr>
+     * <tr>
+     * <td>long</td>
+     * <td>{@link #DATA_ID}</td>
+     * <td>read-only</td>
+     * <td>Data ID.</td>
      * </tr>
      * <tr>
      * <td>String</td>
