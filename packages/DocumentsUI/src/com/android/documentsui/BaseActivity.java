@@ -23,7 +23,6 @@ import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_LEAVE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
 import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -464,8 +463,7 @@ public abstract class BaseActivity extends Activity
      * Set mode based on explicit user action.
      */
     void setViewMode(@ViewMode int mode) {
-        checkState(mState.stack.root != null);
-        LocalPreferences.setViewMode(this, mState.stack.root, mode);
+        LocalPreferences.setViewMode(this, getCurrentRoot(), mode);
         mState.derivedMode = mode;
 
         // view icon needs to be updated, but we *could* do it
