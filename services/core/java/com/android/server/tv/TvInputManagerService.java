@@ -769,9 +769,9 @@ public final class TvInputManagerService extends SystemService {
         }
     }
 
-    private void setTvInputInfoLocked(UserState userState, TvInputInfo inputInfo) {
+    private void updateTvInputInfoLocked(UserState userState, TvInputInfo inputInfo) {
         if (DEBUG) {
-            Slog.d(TAG, "setTvInputInfoLocked(inputInfo=" + inputInfo + ")");
+            Slog.d(TAG, "updateTvInputInfoLocked(inputInfo=" + inputInfo + ")");
         }
         String inputId = inputInfo.getId();
         TvInputState inputState = userState.inputMap.get(inputId);
@@ -779,16 +779,13 @@ public final class TvInputManagerService extends SystemService {
             Slog.e(TAG, "failed to set input info - unknown input id " + inputId);
             return;
         }
-        if (inputState.info.equals(inputInfo)) {
-            return;
-        }
         inputState.info = inputInfo;
 
         for (ITvInputManagerCallback callback : userState.callbackSet) {
             try {
-                callback.onTvInputInfoChanged(inputInfo);
+                callback.onTvInputInfoUpdated(inputInfo);
             } catch (RemoteException e) {
-                Slog.e(TAG, "failed to report changed input info to callback", e);
+                Slog.e(TAG, "failed to report updated input info to callback", e);
             }
         }
     }
@@ -845,7 +842,7 @@ public final class TvInputManagerService extends SystemService {
             }
         }
 
-        public void setTvInputInfo(TvInputInfo inputInfo, int userId) {
+        public void updateTvInputInfo(TvInputInfo inputInfo, int userId) {
             String inputInfoPackageName = inputInfo.getServiceInfo().packageName;
             String callingPackageName = getCallingPackageName();
             if (!TextUtils.equals(inputInfoPackageName, callingPackageName)) {
@@ -854,12 +851,12 @@ public final class TvInputManagerService extends SystemService {
             }
 
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "setTvInputInfo");
+                    Binder.getCallingUid(), userId, "updateTvInputInfo");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
-                    setTvInputInfoLocked(userState, inputInfo);
+                    updateTvInputInfoLocked(userState, inputInfo);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
