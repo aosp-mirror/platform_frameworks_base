@@ -102,6 +102,9 @@ page.tags=permissions,normal
   <li>{@link android.Manifest.permission#GET_PACKAGE_SIZE GET_PACKAGE_SIZE}
   </li>
 
+  <li>{@link android.Manifest.permission#INSTALL_SHORTCUT INSTALL_SHORTCUT}
+  </li>
+
   <li>{@link android.Manifest.permission#INTERNET INTERNET}
   </li>
 
@@ -133,6 +136,9 @@ page.tags=permissions,normal
   REQUEST_INSTALL_PACKAGES}
   </li>
 
+  <li>{@link android.Manifest.permission#SET_ALARM SET_ALARM}
+  </li>
+
   <li>{@link android.Manifest.permission#SET_TIME_ZONE SET_TIME_ZONE}
   </li>
 
@@ -146,6 +152,9 @@ page.tags=permissions,normal
   <li>{@link android.Manifest.permission#TRANSMIT_IR TRANSMIT_IR}
   </li>
 
+  <li>{@link android.Manifest.permission#UNINSTALL_SHORTCUT UNINSTALL_SHORTCUT}
+  </li>
+
   <li>{@link android.Manifest.permission#USE_FINGERPRINT USE_FINGERPRINT}
   </li>
 
@@ -157,14 +166,5 @@ page.tags=permissions,normal
 
   <li>{@link android.Manifest.permission#WRITE_SYNC_SETTINGS
   WRITE_SYNC_SETTINGS}
-  </li>
-
-  <li>{@link android.Manifest.permission#SET_ALARM SET_ALARM}
-  </li>
-
-  <li>{@link android.Manifest.permission#INSTALL_SHORTCUT INSTALL_SHORTCUT}
-  </li>
-
-  <li>{@link android.Manifest.permission#UNINSTALL_SHORTCUT UNINSTALL_SHORTCUT}
   </li>
 </ul>
