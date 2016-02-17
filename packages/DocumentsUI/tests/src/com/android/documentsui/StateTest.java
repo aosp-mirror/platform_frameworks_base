@@ -23,18 +23,44 @@ import com.android.documentsui.model.DocumentInfo;
 
 @SmallTest
 public class StateTest extends AndroidTestCase {
-    public void testPushDocument() {
-        final State state = new State();
-        final DocumentInfo infoFirst = new DocumentInfo();
-        infoFirst.displayName = "firstDirectory";
-        final DocumentInfo infoSecond = new DocumentInfo();
-        infoSecond.displayName = "secondDirectory";
-        assertFalse(state.hasLocationChanged());
-        state.pushDocument(infoFirst);
-        state.pushDocument(infoSecond);
-        assertTrue(state.hasLocationChanged());
-        assertEquals("secondDirectory", state.stack.getFirst().displayName);
-        state.popDocument();
-        assertEquals("firstDirectory", state.stack.getFirst().displayName);
+
+    private static final DocumentInfo DIR_1;
+    private static final DocumentInfo DIR_2;
+
+    private State mState;
+
+    static {
+        DIR_1 = new DocumentInfo();
+        DIR_1.displayName = "firstDirectory";
+        DIR_2 = new DocumentInfo();
+        DIR_2.displayName = "secondDirectory";
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        mState = new State();
+    }
+
+    public void testInitialStateEmpty() {
+        assertFalse(mState.hasLocationChanged());
+    }
+
+    public void testPushDocument_ChangesLocation() {
+        mState.pushDocument(DIR_1);
+        mState.pushDocument(DIR_2);
+        assertTrue(mState.hasLocationChanged());
+    }
+
+    public void testPushDocument_ModifiesStack() {
+        mState.pushDocument(DIR_1);
+        mState.pushDocument(DIR_2);
+        assertEquals(DIR_2, mState.stack.getFirst());
+    }
+
+    public void testPopDocument_ModifiesStack() {
+        mState.pushDocument(DIR_1);
+        mState.pushDocument(DIR_2);
+        mState.popDocument();
+        assertEquals(DIR_1, mState.stack.getFirst());
     }
 }

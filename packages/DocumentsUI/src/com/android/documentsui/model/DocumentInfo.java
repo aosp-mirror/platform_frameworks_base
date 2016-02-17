@@ -39,6 +39,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ProtocolException;
 import java.text.Collator;
+import java.util.Objects;
 
 /**
  * Representation of a {@link Document}.
@@ -263,16 +264,23 @@ public class DocumentInfo implements Durable, Parcelable {
         return derivedUri.hashCode() + mimeType.hashCode();
     }
 
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        } else if (!(other instanceof DocumentInfo)) {
+    public boolean equals(Object o) {
+        if (o == null) {
             return false;
         }
 
-        DocumentInfo that = (DocumentInfo) other;
-        // Uri + mime type should be totally unique.
-        return derivedUri.equals(that.derivedUri) && mimeType.equals(that.mimeType);
+        if (this == o) {
+            return true;
+        }
+
+        if (o instanceof DocumentInfo) {
+            DocumentInfo other = (DocumentInfo) o;
+            // Uri + mime type should be totally unique.
+            return Objects.equals(derivedUri, other.derivedUri)
+                    && Objects.equals(mimeType, other.mimeType);
+        }
+
+        return false;
     }
 
     public static String getCursorString(Cursor cursor, String columnName) {
