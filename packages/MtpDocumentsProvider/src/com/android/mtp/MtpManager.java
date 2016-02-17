@@ -151,8 +151,8 @@ class MtpManager {
                 roots = new MtpRoot[0];
             }
             devices.add(new MtpDeviceRecord(
-                    device.getDeviceId(), name, opened, roots, operationsSupported,
-                    eventsSupported));
+                    device.getDeviceId(), name, device.getSerialNumber(), opened, roots,
+                    operationsSupported, eventsSupported));
         }
         return devices.toArray(new MtpDeviceRecord[devices.size()]);
     }

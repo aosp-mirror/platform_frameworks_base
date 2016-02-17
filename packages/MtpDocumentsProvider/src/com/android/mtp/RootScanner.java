@@ -71,8 +71,7 @@ final class RootScanner {
      * Notifies a change of the roots list via ContentResolver.
      */
     void notifyChange() {
-        final Uri uri =
-                DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
+        final Uri uri = DocumentsContract.buildRootsUri(MtpDocumentsProvider.AUTHORITY);
         mResolver.notifyChange(uri, null, false);
     }
 

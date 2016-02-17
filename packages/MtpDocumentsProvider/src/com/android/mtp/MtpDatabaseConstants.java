@@ -30,7 +30,7 @@ import java.util.Map;
  * Class containing MtpDatabase constants.
  */
 class MtpDatabaseConstants {
-    static final int DATABASE_VERSION = 3;
+    static final int DATABASE_VERSION = 4;
     static final String DATABASE_NAME = "database";
 
     static final int FLAG_DATABASE_IN_MEMORY = 1;
@@ -62,6 +62,7 @@ class MtpDatabaseConstants {
     static final String COLUMN_PARENT_DOCUMENT_ID = "parent_document_id";
     static final String COLUMN_DOCUMENT_TYPE = "document_type";
     static final String COLUMN_ROW_STATE = "row_state";
+    static final String COLUMN_MAPPING_KEY = "column_mapping_key";
 
     /**
      * The state represents that the row has a valid object handle.
@@ -82,16 +83,6 @@ class MtpDatabaseConstants {
      * but their document ID will be reuse when the device/storage is connected again.
      */
     static final int ROW_STATE_DISCONNECTED = 2;
-
-    /**
-     * Mapping mode that uses MTP identifier to find corresponding rows.
-     */
-    static final int MAP_BY_MTP_IDENTIFIER = 0;
-
-    /**
-     * Mapping mode that uses name to find corresponding rows.
-     */
-    static final int MAP_BY_NAME = 1;
 
     @IntDef(value = { DOCUMENT_TYPE_DEVICE, DOCUMENT_TYPE_STORAGE, DOCUMENT_TYPE_OBJECT })
     @Retention(RetentionPolicy.SOURCE)
@@ -125,6 +116,7 @@ class MtpDatabaseConstants {
             COLUMN_PARENT_DOCUMENT_ID + " INTEGER," +
             COLUMN_ROW_STATE + " INTEGER NOT NULL," +
             COLUMN_DOCUMENT_TYPE + " INTEGER NOT NULL," +
+            COLUMN_MAPPING_KEY + " STRING," +
             Document.COLUMN_MIME_TYPE + " TEXT NOT NULL," +
             Document.COLUMN_DISPLAY_NAME + " TEXT NOT NULL," +
             Document.COLUMN_SUMMARY + " TEXT," +
@@ -174,7 +166,7 @@ class MtpDatabaseConstants {
 
     private static String createJoinFromClosure(
             String table1, String table2, String column1, String column2) {
-        return table1 + " INNER JOIN " + table2 +
+        return table1 + " LEFT JOIN " + table2 +
                 " ON " + table1 + "." + column1 + " = " + table2 + "." + column2;
     }
 }
