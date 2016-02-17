@@ -2623,13 +2623,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final int uid = msg.arg1;
                     final PackageManager pm = mContext.getPackageManager();
                     final String[] packages = pm.getPackagesForUid(uid);
-                    final int userId = UserHandle.getUserId(uid);
-                    for (String packageName : packages) {
-                        final Intent intent =
-                                new Intent(ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED);
-                        intent.setPackage(packageName);
-                        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+                    if (packages != null) {
+                        final int userId = UserHandle.getUserId(uid);
+                        for (String packageName : packages) {
+                            final Intent intent = new Intent(
+                                    ConnectivityManager.ACTION_RESTRICT_BACKGROUND_CHANGED);
+                            intent.setPackage(packageName);
+                            intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                            mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+                        }
+                    } else {
+                        Slog.w(TAG, "no packages for uid " + uid);
                     }
                     return true;
                 }
