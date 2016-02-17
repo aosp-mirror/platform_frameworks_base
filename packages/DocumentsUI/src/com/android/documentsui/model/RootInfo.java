@@ -276,12 +276,21 @@ public class RootInfo implements Durable, Parcelable {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof RootInfo) {
-            final RootInfo root = (RootInfo) o;
-            return Objects.equals(authority, root.authority) && Objects.equals(rootId, root.rootId);
-        } else {
+        if (o == null) {
             return false;
         }
+
+        if (this == o) {
+            return true;
+        }
+
+        if (o instanceof RootInfo) {
+            RootInfo other = (RootInfo) o;
+            return Objects.equals(authority, other.authority)
+                    && Objects.equals(rootId, other.rootId);
+        }
+
+        return false;
     }
 
     @Override
