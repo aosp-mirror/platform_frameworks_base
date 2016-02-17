@@ -4311,6 +4311,24 @@ public final class ViewRootImpl implements ViewParent,
         private int processPointerEvent(QueuedInputEvent q) {
             final MotionEvent event = (MotionEvent)q.mEvent;
 
+            mAttachInfo.mUnbufferedDispatchRequested = false;
+            final View eventTarget =
+                    (event.isFromSource(InputDevice.SOURCE_MOUSE) && mCapturingView != null) ?
+                            mCapturingView : mView;
+            mAttachInfo.mHandlingPointerEvent = true;
+            boolean handled = eventTarget.dispatchPointerEvent(event);
+            maybeUpdatePointerIcon(event);
+            mAttachInfo.mHandlingPointerEvent = false;
+            if (mAttachInfo.mUnbufferedDispatchRequested && !mUnbufferedInputDispatch) {
+                mUnbufferedInputDispatch = true;
+                if (mConsumeBatchedInputScheduled) {
+                    scheduleConsumeBatchedInputImmediately();
+                }
+            }
+            return handled ? FINISH_HANDLED : FORWARD;
+        }
+
+        private void maybeUpdatePointerIcon(MotionEvent event) {
             if (event.getPointerCount() == 1
                     && event.isFromSource(InputDevice.SOURCE_MOUSE)) {
                 if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
@@ -4327,19 +4345,6 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
             }
-
-            mAttachInfo.mUnbufferedDispatchRequested = false;
-            final View eventTarget =
-                    (event.isFromSource(InputDevice.SOURCE_MOUSE) && mCapturingView != null) ?
-                            mCapturingView : mView;
-            boolean handled = eventTarget.dispatchPointerEvent(event);
-            if (mAttachInfo.mUnbufferedDispatchRequested && !mUnbufferedInputDispatch) {
-                mUnbufferedInputDispatch = true;
-                if (mConsumeBatchedInputScheduled) {
-                    scheduleConsumeBatchedInputImmediately();
-                }
-            }
-            return handled ? FINISH_HANDLED : FORWARD;
         }
 
         private int processTrackballEvent(QueuedInputEvent q) {
