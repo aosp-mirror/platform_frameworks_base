@@ -30,7 +30,9 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.Protocol;
 
 import java.util.List;
@@ -78,6 +80,8 @@ public class WifiScanner {
     public static final int REASON_INVALID_REQUEST = -3;
     /** Invalid request */
     public static final int REASON_NOT_AUTHORIZED = -4;
+    /** An outstanding request with the same listener hasn't finished yet. */
+    public static final int REASON_DUPLICATE_REQEUST = -5;
 
     /** @hide */
     public static final String GET_AVAILABLE_CHANNELS_EXTRA = "Channels";
@@ -464,8 +468,11 @@ public class WifiScanner {
      *                 scans should also not share this object.
      */
     public void startBackgroundScan(ScanSettings settings, ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, putListener(listener), settings);
+        sAsyncChannel.sendMessage(CMD_START_BACKGROUND_SCAN, 0, key, settings);
     }
     /**
      * stop an ongoing wifi scan
@@ -473,8 +480,11 @@ public class WifiScanner {
      *  #startBackgroundScan}
      */
     public void stopBackgroundScan(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, removeListener(listener));
+        sAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, key);
     }
     /**
      * reports currently available scan results on appropriate listeners
@@ -495,8 +505,11 @@ public class WifiScanner {
      *                 scans should also not share this object.
      */
     public void startScan(ScanSettings settings, ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, putListener(listener), settings);
+        sAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, key, settings);
     }
 
     /**
@@ -505,8 +518,11 @@ public class WifiScanner {
      * @param listener
      */
     public void stopScan(ScanListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, removeListener(listener));
+        sAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, key);
     }
 
     /** specifies information about an access point of interest */
@@ -638,8 +654,11 @@ public class WifiScanner {
      *                 provided on {@link #stopTrackingWifiChange}
      */
     public void startTrackingWifiChange(WifiChangeListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, putListener(listener));
+        sAsyncChannel.sendMessage(CMD_START_TRACKING_CHANGE, 0, key);
     }
 
     /**
@@ -648,8 +667,10 @@ public class WifiScanner {
      * #stopTrackingWifiChange}
      */
     public void stopTrackingWifiChange(WifiChangeListener listener) {
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, removeListener(listener));
+        sAsyncChannel.sendMessage(CMD_STOP_TRACKING_CHANGE, 0, key);
     }
 
     /** @hide */
@@ -734,11 +755,14 @@ public class WifiScanner {
      */
     public void startTrackingBssids(BssidInfo[] bssidInfos,
                                     int apLostThreshold, BssidListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = addListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
         HotlistSettings settings = new HotlistSettings();
         settings.bssidInfos = bssidInfos;
         settings.apLostThreshold = apLostThreshold;
-        sAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, putListener(listener), settings);
+        sAsyncChannel.sendMessage(CMD_SET_HOTLIST, 0, key, settings);
     }
 
     /**
@@ -746,8 +770,11 @@ public class WifiScanner {
      * @param listener same object provided in {@link #startTrackingBssids}
      */
     public void stopTrackingBssids(BssidListener listener) {
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        int key = removeListener(listener);
+        if (key == INVALID_KEY) return;
         validateChannel();
-        sAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, removeListener(listener));
+        sAsyncChannel.sendMessage(CMD_RESET_HOTLIST, 0, key);
     }
 
 
@@ -816,7 +843,7 @@ public class WifiScanner {
 
     private static final Object sThreadRefLock = new Object();
     private static int sThreadRefCount;
-    private static HandlerThread sHandlerThread;
+    private static Handler sInternalHandler;
 
     /**
      * Create a new WifiScanner instance.
@@ -828,12 +855,29 @@ public class WifiScanner {
      * @hide
      */
     public WifiScanner(Context context, IWifiScanner service) {
-        mContext = context;
-        mService = service;
-        init();
+        this(context, service, null, true);
     }
 
-    private void init() {
+    /**
+     * Create a new WifiScanner instance.
+     *
+     * @param context The application context.
+     * @param service The IWifiScanner Binder interface
+     * @param looper Looper for running WifiScanner operations. If null, a handler thread will be
+     *          created for running WifiScanner operations.
+     * @param waitForConnection If true, this will not return until a connection to Wifi Scanner
+     *          service is established.
+     * @hide
+     */
+    @VisibleForTesting
+    public WifiScanner(Context context, IWifiScanner service, Looper looper,
+            boolean waitForConnection) {
+        mContext = context;
+        mService = service;
+        init(looper, waitForConnection);
+    }
+
+    private void init(Looper looper, boolean waitForConnection) {
         synchronized (sThreadRefLock) {
             if (++sThreadRefCount == 1) {
                 Messenger messenger = null;
@@ -850,17 +894,23 @@ public class WifiScanner {
                     return;
                 }
 
-                sHandlerThread = new HandlerThread("WifiScanner");
                 sAsyncChannel = new AsyncChannel();
                 sConnected = new CountDownLatch(1);
 
-                sHandlerThread.start();
-                Handler handler = new ServiceHandler(sHandlerThread.getLooper());
-                sAsyncChannel.connect(mContext, handler, messenger);
-                try {
-                    sConnected.await();
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "interrupted wait at init");
+                if (looper == null) {
+                    HandlerThread thread = new HandlerThread("WifiScanner");
+                    thread.start();
+                    sInternalHandler = new ServiceHandler(thread.getLooper());
+                } else {
+                    sInternalHandler = new ServiceHandler(looper);
+                }
+                sAsyncChannel.connect(mContext, sInternalHandler, messenger);
+                if (waitForConnection) {
+                    try {
+                        sConnected.await();
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "interrupted wait at init");
+                    }
                 }
             }
         }
@@ -869,6 +919,30 @@ public class WifiScanner {
     private void validateChannel() {
         if (sAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
+    }
+
+    // Add a listener into listener map. If the listener already exists, return INVALID_KEY and
+    // send an error message to internal handler; Otherwise add the listener to the listener map and
+    // return the key of the listener.
+    private int addListener(ActionListener listener) {
+        synchronized (sListenerMap) {
+            boolean keyExists = (getListenerKey(listener) != INVALID_KEY);
+            // Note we need to put the listener into listener map even if it's a duplicate as the
+            // internal handler will need the key to find the listener. In case of duplicates,
+            // removing duplicate key logic will be handled in internal handler.
+            int key = putListener(listener);
+            if (keyExists) {
+                if (DBG) Log.d(TAG, "listener key already exists");
+                OperationResult operationResult = new OperationResult(REASON_DUPLICATE_REQEUST,
+                        "Outstanding request with same key not stopped yet");
+                Message message = Message.obtain(sInternalHandler, CMD_OP_FAILED, 0, key,
+                        operationResult);
+                message.sendToTarget();
+                return INVALID_KEY;
+            } else {
+                return key;
+            }
+        }
     }
 
     private static int putListener(Object listener) {
@@ -914,7 +988,10 @@ public class WifiScanner {
 
     private static int removeListener(Object listener) {
         int key = getListenerKey(listener);
-        if (key == INVALID_KEY) return key;
+        if (key == INVALID_KEY) {
+            Log.e(TAG, "listener cannot be found");
+            return key;
+        }
         synchronized (sListenerMapLock) {
             sListenerMap.remove(key);
             return key;
