@@ -4275,6 +4275,7 @@ package android.app {
 
   public class DownloadManager {
     method public long addCompletedDownload(java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, long, boolean);
+    method public long addCompletedDownload(java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, long, boolean, android.net.Uri, android.net.Uri);
     method public long enqueue(android.app.DownloadManager.Request);
     method public static java.lang.Long getMaxBytesOverMobile(android.content.Context);
     method public java.lang.String getMimeTypeForDownloadedFile(long);
