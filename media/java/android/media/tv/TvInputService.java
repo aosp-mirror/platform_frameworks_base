@@ -255,23 +255,31 @@ public abstract class TvInputService extends Service {
         return null;
     }
 
-
     /**
-     * Sets the TvInputInfo for this TV input.
+     * Updates the <code>TvInputInfo</code> for an existing TV input. A TV input service
+     * implementation may call this method to pass the application and system an up-to-date
+     * <code>TvInputInfo</code> object that describes itself.
      *
-     * <p>The system service automatically creates the TvInputInfo for each TV input based on
-     * information collected from the AndroidManifest.xml, thus it is not necessary to call this
-     * method unless the TV input has additional information to pass such as ability to record and
-     * tuner count. Attempting to change information about a TV input that the calling package does
-     * not own does nothing.
+     * <p>The system automatically creates a <code>TvInputInfo</code> object for each TV input,
+     * based on the information collected from the <code>AndroidManifest.xml</code>, thus it is not
+     * necessary to call this method unless such information has changed dynamically. This may be
+     * also used to pass additional information that is not specified by the manifest file, such as
+     * ability to record and tuner count. Use {@link TvInputInfo.Builder} to build a new
+     * <code>TvInputInfo</code> object.
+     *
+     * <p>Attempting to change information about a TV input that the calling package does not own
+     * does nothing.
      *
      * @param context The application context.
-     * @param inputInfo The TvInputInfo object that contains that new information.
+     * @param inputInfo The <code>TvInputInfo</code> object that contains new information.
+     * @see TvInputManager.TvInputCallback#onTvInputInfoUpdated(TvInputInfo)
      */
-    public static final void setTvInputInfo(Context context, TvInputInfo inputInfo) {
+    public static final void updateTvInputInfo(Context context, TvInputInfo inputInfo) {
         TvInputManager manager = (TvInputManager) context.getSystemService(
                 Context.TV_INPUT_SERVICE);
-        manager.setTvInputInfo(inputInfo);
+        if (manager != null) {
+            manager.updateTvInputInfo(inputInfo);
+        }
     }
 
     private boolean isPassthroughInput(String inputId) {
