@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
+import android.media.soundtrigger.SoundTriggerDetector;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -28,6 +29,7 @@ import android.util.Log;
 
 import com.android.internal.app.ISoundTriggerService;
 
+import java.lang.RuntimeException;
 import java.util.UUID;
 
 /**
@@ -56,6 +58,9 @@ public class SoundTriggerUtil {
      */
     public boolean addOrUpdateSoundModel(GenericSoundModel soundModel) {
         try {
+            if (soundModel == null) {
+                throw new RuntimeException("Bad sound model");
+            }
             mSoundTriggerService.updateSoundModel(soundModel);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in updateSoundModel", e);
@@ -112,4 +117,10 @@ public class SoundTriggerUtil {
     public void deleteSoundModelUsingManager(UUID modelId) {
             mSoundTriggerManager.deleteModel(modelId);
     }
+
+    public SoundTriggerDetector createSoundTriggerDetector(UUID modelId,
+            SoundTriggerDetector.Callback callback) {
+        return mSoundTriggerManager.createSoundTriggerDetector(modelId, callback, null);
+    }
+
 }
