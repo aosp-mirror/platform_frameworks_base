@@ -39,11 +39,13 @@ public:
     ~AnimatorManager();
 
     void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
+    void removeAnimator(const sp<BaseRenderNodeAnimator>& animator);
 
     void setAnimationHandle(AnimationHandle* handle);
     bool hasAnimationHandle() { return mAnimationHandle; }
 
     void pushStaging();
+    void onAnimatorTargetChanged(BaseRenderNodeAnimator* animator);
 
     // Returns the combined dirty mask of all animators run
     uint32_t animate(TreeInfo& info);
@@ -62,15 +64,10 @@ public:
 private:
     uint32_t animateCommon(TreeInfo& info);
 
-    // This would remove the animator from mAnimators list. It should only be called during
-    // push staging.
-    void removeActiveAnimator(const sp<BaseRenderNodeAnimator>& animator);
-
     RenderNode& mParent;
     AnimationHandle* mAnimationHandle;
 
     // To improve the efficiency of resizing & removing from the vector
-    // use manual ref counting instead of sp<>.
     std::vector< sp<BaseRenderNodeAnimator> > mNewAnimators;
     std::vector< sp<BaseRenderNodeAnimator> > mAnimators;
 };
