@@ -20,6 +20,7 @@ import android.media.AudioManager;
 import android.media.AudioRecordConfiguration;
 import android.media.AudioSystem;
 import android.media.IRecordingConfigDispatcher;
+import android.media.MediaRecorder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -48,6 +49,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * Implementation of android.media.AudioSystem.AudioRecordingCallback
      */
     public void onRecordingConfigurationChanged(int event, int session, int source) {
+        if (MediaRecorder.isSystemOnlyAudioSource(source)) {
+            return;
+        }
         if (updateSnapshot(event, session, source)) {
             final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
             synchronized(mClients) {
