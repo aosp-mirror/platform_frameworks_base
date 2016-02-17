@@ -28,6 +28,19 @@
 
 namespace android {
 
+FileStream::FileStream(const int fd)
+    : mPosition(0),
+      mSize(0) {
+    mFile = fdopen(fd, "r");
+    if (mFile == NULL) {
+        return;
+    }
+    // Get the size.
+    fseek(mFile, 0l, SEEK_END);
+    mSize = ftell(mFile);
+    fseek(mFile, 0l, SEEK_SET);
+}
+
 FileStream::FileStream(const String8 filename)
     : mPosition(0),
       mSize(0) {
