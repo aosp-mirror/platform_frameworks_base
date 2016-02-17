@@ -890,7 +890,7 @@
     <string name="yes" msgid="5362982303337969312">"تأیید"</string>
     <string name="no" msgid="5141531044935541497">"لغو"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"توجه"</string>
-    <string name="loading" msgid="7933681260296021180">"در حال بارگیری..."</string>
+    <string name="loading" msgid="7933681260296021180">"در حال بارکردن…"</string>
     <string name="capital_on" msgid="1544682755514494298">"روشن"</string>
     <string name="capital_off" msgid="6815870386972805832">"خاموش"</string>
     <string name="whichApplication" msgid="4533185947064773386">"تکمیل عملکرد با استفاده از"</string>
@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"برای گزینه‌های بیشتر لمس کنید."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏غیرفعال‌کردن اشکال‌زدایی‌USB: با لمس آن."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"گزارش اشکال را با سرپرست سیستم به اشتراک می‌گذارید؟"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"سرپرست فناوری اطلاعات شما برای کمک به عیب‌یابی، گزارش اشکال درخواست کرد"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"پذیرفتن"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"نپذیرفتن"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"درحال گرفتن گزارش اشکال…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"برای لغو کردن لمس کنید"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغییر صفحه‌کلید"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"انتخاب صفحه‌کلیدها"</string>
     <string name="show_ime" msgid="2506087537466597099">"وقتی صفحه‌کلید فیزیکی فعال است این ویرایشگر را روی صفحه نگه‌می‌دارد"</string>
