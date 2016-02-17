@@ -10506,6 +10506,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 continue;
             }
 
+            child.getVisibleBounds(mTmpRect);
+            if (!mTmpRect.contains(x, y)) {
+                continue;
+            }
+
             child.getTouchableRegion(mTmpRegion);
 
             final int touchFlags = flags &
