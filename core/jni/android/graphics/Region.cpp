@@ -212,17 +212,16 @@ static jlong Region_createFromParcel(JNIEnv* env, jobject clazz, jobject parcel)
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    const size_t size = p->readInt32();
-    const void* regionData = p->readInplace(size);
-    if (regionData == nullptr) {
+    std::vector<int32_t> rects;
+    p->readInt32Vector(&rects);
+
+    if ((rects.size() % 4) != 0) {
         return 0;
     }
 
     SkRegion* region = new SkRegion;
-    size_t actualSize = region->readFromMemory(regionData, size);
-    if (size != actualSize) {
-        delete region;
-        return 0;
+    for (size_t x = 0; x + 4 <= rects.size(); x += 4) {
+        region->op(rects[x], rects[x+1], rects[x+2], rects[x+3], SkRegion::kUnion_Op);
     }
 
     return reinterpret_cast<jlong>(region);
@@ -237,19 +236,18 @@ static jboolean Region_writeToParcel(JNIEnv* env, jobject clazz, jlong regionHan
 
     android::Parcel* p = android::parcelForJavaObject(env, parcel);
 
-    const size_t size = region->writeToMemory(nullptr);
-    p->writeInt32(size);
-    void* dst = p->writeInplace(size);
-    if (dst == nullptr) {
-        ALOGE("Region.writeToParcel could not write %zi bytes", size);
-        return JNI_FALSE;
-    }
-    const size_t sizeWritten = region->writeToMemory(dst);
-    if (sizeWritten != size) {
-        ALOGE("SkRegion::writeToMemory should have written %zi bytes but wrote %zi",
-                size, sizeWritten);
+    std::vector<int32_t> rects;
+    SkRegion::Iterator it(*region);
+    while (!it.done()) {
+        const SkIRect& r = it.rect();
+        rects.push_back(r.fLeft);
+        rects.push_back(r.fTop);
+        rects.push_back(r.fRight);
+        rects.push_back(r.fBottom);
+        it.next();
     }
 
+    p->writeInt32Vector(rects);
     return JNI_TRUE;
 }
 
