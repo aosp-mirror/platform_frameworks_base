@@ -2156,15 +2156,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             } break;
             case VR_MODE_CHANGE_MSG: {
                 VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-                final boolean vrMode = msg.arg1 != 0;
-                vrService.setVrMode(vrMode);
-
-                if (mInVrMode != vrMode) {
-                    synchronized (ActivityManagerService.this) {
+                final ActivityRecord r = (ActivityRecord) msg.obj;
+                boolean vrMode;
+                ComponentName requestedPackage;
+                int userId;
+                synchronized (ActivityManagerService.this) {
+                    vrMode = r.requestedVrComponent != null;
+                    requestedPackage = r.requestedVrComponent;
+                    userId = r.userId;
+                    if (mInVrMode != vrMode) {
                         mInVrMode = vrMode;
                         mShowDialogs = shouldShowDialogs(mConfiguration, mInVrMode);
                     }
                 }
+                vrService.setVrMode(vrMode, requestedPackage, userId);
             } break;
             }
         }
@@ -2937,7 +2942,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void applyUpdateVrModeLocked(ActivityRecord r) {
         mHandler.sendMessage(
-                mHandler.obtainMessage(VR_MODE_CHANGE_MSG, (r.isVrActivity) ? 1 : 0, 0));
+                mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -12030,23 +12035,49 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void setVrMode(IBinder token, boolean enabled) {
+    public int setVrMode(IBinder token, boolean enabled, ComponentName packageName) {
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
             throw new UnsupportedOperationException("VR mode not supported on this device!");
         }
 
+        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+
+        ActivityRecord r;
+        synchronized (this) {
+            r = ActivityRecord.isInStackLocked(token);
+        }
+
+        if (r == null) {
+            throw new IllegalArgumentException();
+        }
+
+        int err;
+        if ((err = vrService.hasVrPackage(packageName, r.userId)) !=
+                VrManagerInternal.NO_ERROR) {
+            return err;
+        }
+
         synchronized(this) {
-            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                throw new IllegalArgumentException();
-            }
-            r.isVrActivity = enabled;
+            r.requestedVrComponent = (enabled) ? packageName : null;
 
             // Update associated state if this activity is currently focused
             if (r == mFocusedActivity) {
                 applyUpdateVrModeLocked(r);
             }
+            return 0;
         }
+    }
+
+    @Override
+    public boolean isVrModePackageEnabled(ComponentName packageName) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+            throw new UnsupportedOperationException("VR mode not supported on this device!");
+        }
+
+        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
+
+        return vrService.hasVrPackage(packageName, UserHandle.getCallingUserId()) ==
+                VrManagerInternal.NO_ERROR;
     }
 
     public boolean isTopActivityImmersive() {

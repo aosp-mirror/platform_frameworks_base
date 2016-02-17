@@ -69,16 +69,6 @@ import java.util.List;
  *         &lt;action android:name="android.service.notification.NotificationListenerService" />
  *     &lt;/intent-filter>
  * &lt;/service></pre>
- * <p> Typically, while enabled in user settings, this service will be bound on boot or when a
- * settings change occurs that could affect whether this service should run.  However, for some
- * system usage modes, the you may instead specify that this service is instead bound and unbound
- * in response to mode changes by including a category in the intent filter.  Currently
- * supported categories are:
- * <ul>
- *   <li>{@link #CATEGORY_VR_NOTIFICATIONS} - this service is bound when an Activity has enabled
- *   VR mode. {@see android.app.Activity#setVrMode(boolean)}.</li>
- * </ul>
- * </p>
  */
 public abstract class NotificationListenerService extends Service {
     // TAG = "NotificationListenerService[MySubclass]"
@@ -194,17 +184,6 @@ public abstract class NotificationListenerService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE
             = "android.service.notification.NotificationListenerService";
-
-    /**
-     * If this category is declared in the application manifest for a service of this type, this
-     * service will be bound when VR mode is enabled, and unbound when VR mode is disabled rather
-     * than the normal lifecycle for a notification service.
-     *
-     * {@see android.app.Activity#setVrMode(boolean)}
-     */
-    @SdkConstant(SdkConstant.SdkConstantType.INTENT_CATEGORY)
-    public static final String CATEGORY_VR_NOTIFICATIONS =
-        "android.intent.category.vr.notifications";
 
     @Override
     protected void attachBaseContext(Context base) {

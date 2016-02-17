@@ -38,6 +38,7 @@ package android {
     field public static final java.lang.String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
     field public static final java.lang.String BIND_VOICE_INTERACTION = "android.permission.BIND_VOICE_INTERACTION";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
+    field public static final java.lang.String BIND_VR_LISTENER_SERVICE = "android.permission.BIND_VR_LISTENER_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final java.lang.String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
@@ -3604,7 +3605,7 @@ package android.app {
     method public deprecated void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
-    method public void setVrMode(boolean);
+    method public void setVrModeEnabled(boolean, android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method public boolean shouldShowRequestPermissionRationale(java.lang.String);
     method public boolean shouldUpRecreateTask(android.content.Intent);
     method public boolean showAssist(android.os.Bundle);
@@ -32169,6 +32170,7 @@ package android.provider {
     field public static final java.lang.String ACTION_VOICE_CONTROL_BATTERY_SAVER_MODE = "android.settings.VOICE_CONTROL_BATTERY_SAVER_MODE";
     field public static final java.lang.String ACTION_VOICE_CONTROL_DO_NOT_DISTURB_MODE = "android.settings.VOICE_CONTROL_DO_NOT_DISTURB_MODE";
     field public static final java.lang.String ACTION_VOICE_INPUT_SETTINGS = "android.settings.VOICE_INPUT_SETTINGS";
+    field public static final java.lang.String ACTION_VR_LISTENER_SETTINGS = "android.settings.VR_LISTENER_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_IP_SETTINGS = "android.settings.WIFI_IP_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_SETTINGS = "android.settings.WIFI_SETTINGS";
     field public static final java.lang.String ACTION_WIRELESS_SETTINGS = "android.settings.WIRELESS_SETTINGS";
@@ -34486,7 +34488,6 @@ package android.service.notification {
     method public static void requestRebind(android.content.ComponentName) throws android.os.RemoteException;
     method public final void requestUnbind() throws android.os.RemoteException;
     method public final void setNotificationsShown(java.lang.String[]);
-    field public static final java.lang.String CATEGORY_VR_NOTIFICATIONS = "android.intent.category.vr.notifications";
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_ALARMS = 4; // 0x4
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
@@ -34777,6 +34778,17 @@ package android.service.voice {
     ctor public VoiceInteractionSessionService();
     method public android.os.IBinder onBind(android.content.Intent);
     method public abstract android.service.voice.VoiceInteractionSession onNewSession(android.os.Bundle);
+  }
+
+}
+
+package android.service.vr {
+
+  public abstract class VrListenerService extends android.app.Service {
+    ctor public VrListenerService();
+    method public static final boolean isVrModePackageEnabled(android.content.Context, android.content.ComponentName);
+    method public android.os.IBinder onBind(android.content.Intent);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.vr.VrListenerService";
   }
 
 }

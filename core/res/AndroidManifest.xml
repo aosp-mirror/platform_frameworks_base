@@ -2929,6 +2929,12 @@
     <permission android:name="android.permission.WRITE_BLOCKED_NUMBERS"
                 android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.service.vr.VrListenerService}, to ensure that only
+         the system can bind to it.
+         <p>Protection level: signature -->
+    <permission android:name="android.permission.BIND_VR_LISTENER_SERVICE"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
