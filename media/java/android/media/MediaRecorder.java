@@ -277,6 +277,30 @@ public class MediaRecorder
         public static final int HOTWORD = 1999;
     }
 
+    // TODO make AudioSource static (API change) and move this method inside the AudioSource class
+    /**
+     * @hide
+     * @param source An audio source to test
+     * @return true if the source is only visible to system components
+     */
+    public static boolean isSystemOnlyAudioSource(int source) {
+        switch(source) {
+        case AudioSource.DEFAULT:
+        case AudioSource.MIC:
+        case AudioSource.VOICE_UPLINK:
+        case AudioSource.VOICE_DOWNLINK:
+        case AudioSource.VOICE_CALL:
+        case AudioSource.CAMCORDER:
+        case AudioSource.VOICE_RECOGNITION:
+        case AudioSource.VOICE_COMMUNICATION:
+        //case REMOTE_SUBMIX:  considered "system" as it requires system permissions
+        case AudioSource.UNPROCESSED:
+            return false;
+        default:
+            return true;
+        }
+    }
+
     /**
      * Defines the video source. These constants are used with
      * {@link MediaRecorder#setVideoSource(int)}.
