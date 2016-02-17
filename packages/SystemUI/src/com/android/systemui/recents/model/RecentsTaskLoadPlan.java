@@ -212,8 +212,7 @@ public class RecentsTaskLoadPlan {
 
         // Initialize the stacks
         mStack = new TaskStack();
-        mStack.setTasks(allTasks, false /* notifyStackChanges */);
-        mStack.createAffiliatedGroupings(mContext);
+        mStack.setTasks(mContext, allTasks, false /* notifyStackChanges */);
     }
 
     /**

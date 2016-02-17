@@ -513,8 +513,9 @@ public class Recents extends SystemUI
      * Handle Recents activity visibility changed.
      */
     public final void onBusEvent(final RecentsVisibilityChangedEvent event) {
-        int processUser = event.systemServicesProxy.getProcessUser();
-        if (event.systemServicesProxy.isSystemUser(processUser)) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        int processUser = ssp.getProcessUser();
+        if (ssp.isSystemUser(processUser)) {
             mImpl.onVisibilityChanged(event.applicationContext, event.visible);
         } else {
             postToSystemUser(new Runnable() {

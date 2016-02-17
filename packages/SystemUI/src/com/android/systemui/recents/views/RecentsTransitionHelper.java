@@ -177,6 +177,7 @@ public class RecentsTransitionHelper {
             // Keep track of failed launches
             EventBus.getDefault().send(new LaunchTaskFailedEvent());
         }
+
         if (transitionFuture != null) {
             IRemoteCallback.Stub callback = null;
             if (animStartedListener != null) {

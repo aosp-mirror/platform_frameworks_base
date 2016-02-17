@@ -16,9 +16,11 @@
 
 package com.android.systemui.recents.views;
 
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -56,25 +58,41 @@ public class SystemBarScrimViews {
                 View.VISIBLE : View.INVISIBLE);
     }
 
+    /**
+     * Animates the nav bar scrim visibility.
+     */
+    public void animateNavBarScrimVisibility(boolean visible, AnimationProps animation) {
+        int toY = 0;
+        if (visible) {
+            mNavBarScrimView.setVisibility(View.VISIBLE);
+            mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
+        } else {
+            toY = mNavBarScrimView.getMeasuredHeight();
+        }
+        if (animation != AnimationProps.IMMEDIATE) {
+            mNavBarScrimView.animate()
+                    .translationY(toY)
+                    .setDuration(animation.getDuration(AnimationProps.BOUNDS))
+                    .setInterpolator(animation.getInterpolator(AnimationProps.BOUNDS))
+                    .start();
+        } else {
+            mNavBarScrimView.setTranslationY(toY);
+        }
+    }
+
     /**** EventBus events ****/
 
     /**
      * Starts animating the scrim views when entering Recents.
      */
     public final void onBusEvent(EnterRecentsWindowAnimationCompletedEvent event) {
-        if (mHasNavBarScrim && mShouldAnimateNavBarScrim) {
-            mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
-            mNavBarScrimView.animate()
-                    .translationY(0)
-                    .setDuration(mNavBarScrimEnterDuration)
-                    .setInterpolator(Interpolators.DECELERATE_QUINT)
-                    .withStartAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            mNavBarScrimView.setVisibility(View.VISIBLE);
-                        }
-                    })
-                    .start();
+        if (mHasNavBarScrim) {
+            AnimationProps animation = mShouldAnimateNavBarScrim
+                    ? new AnimationProps()
+                            .setDuration(AnimationProps.BOUNDS, mNavBarScrimEnterDuration)
+                            .setInterpolator(AnimationProps.BOUNDS, Interpolators.DECELERATE_QUINT)
+                    : AnimationProps.IMMEDIATE;
+            animateNavBarScrimVisibility(true, animation);
         }
     }
 
@@ -83,13 +101,12 @@ public class SystemBarScrimViews {
      * going home).
      */
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
-        if (mHasNavBarScrim && mShouldAnimateNavBarScrim) {
-            mNavBarScrimView.animate()
-                    .translationY(mNavBarScrimView.getMeasuredHeight())
-                    .setStartDelay(0)
-                    .setDuration(TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION)
-                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                    .start();
+        if (mHasNavBarScrim) {
+            AnimationProps animation = new AnimationProps()
+                    .setDuration(AnimationProps.BOUNDS,
+                            TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION)
+                    .setInterpolator(AnimationProps.BOUNDS, Interpolators.FAST_OUT_SLOW_IN);
+            animateNavBarScrimVisibility(false, animation);
         }
     }
 }

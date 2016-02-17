@@ -294,7 +294,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
         // Notify that recents is now visible
         SystemServicesProxy ssp = Recents.getSystemServices();
-        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, true));
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
 
         if (mPipManager.isPipShown()) {
             // Place mPipView at the PIP bounds for fine tuned focus handling.
@@ -343,8 +343,7 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
         mPipManager.removeListener(mPipListener);
         mIgnoreAltTabRelease = false;
         // Notify that recents is now hidden
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, ssp, false));
+        EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, false));
 
         // Workaround for b/22542869, if the RecentsActivity is started again, but without going
         // through SystemUI, we need to reset the config launch flags to ensure that we do not
