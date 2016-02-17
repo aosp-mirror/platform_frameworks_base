@@ -16,12 +16,8 @@
 
 package com.android.systemui.qs;
 
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorListenerAdapter;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -29,16 +25,11 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
-import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
 import com.android.systemui.qs.customize.QSCustomizer;
@@ -60,21 +51,14 @@ public class QSPanel extends FrameLayout implements Tunable {
 
     protected final Context mContext;
     protected final ArrayList<TileRecord> mRecords = new ArrayList<TileRecord>();
-    private final View mDetail;
-    private final ViewGroup mDetailContent;
-    private final TextView mDetailSettingsButton;
-    private final TextView mDetailDoneButton;
     protected final View mBrightnessView;
-    private final QSDetailClipper mClipper;
     private final H mHandler = new H();
 
     private int mPanelPaddingBottom;
     private int mBrightnessPaddingTop;
     private boolean mExpanded;
     private boolean mListening;
-    private boolean mClosingDetail;
 
-    private Record mDetailRecord;
     private Callback mCallback;
     private BrightnessController mBrightnessController;
     protected QSTileHost mHost;
@@ -86,6 +70,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     protected QSTileLayout mTileLayout;
 
     private QSCustomizer mCustomizePanel;
+    private Record mDetailRecord;
 
     public QSPanel(Context context) {
         this(context, null);
@@ -95,14 +80,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         super(context, attrs);
         mContext = context;
 
-        mDetail = LayoutInflater.from(context).inflate(R.layout.qs_detail, this, false);
-        mDetailContent = (ViewGroup) mDetail.findViewById(android.R.id.content);
-        mDetailSettingsButton = (TextView) mDetail.findViewById(android.R.id.button2);
-        mDetailDoneButton = (TextView) mDetail.findViewById(android.R.id.button1);
-        updateDetailText();
-        mDetail.setVisibility(GONE);
-        mDetail.setClickable(true);
-        addView(mDetail);
 
         mQsContainer = new LinearLayout(mContext);
         mQsContainer.setOrientation(LinearLayout.VERTICAL);
@@ -132,21 +109,16 @@ public class QSPanel extends FrameLayout implements Tunable {
         mFooter = new QSFooter(this, context);
         mQsContainer.addView(mFooter.getView());
 
-        mClipper = new QSDetailClipper(mDetail);
         updateResources();
 
         mBrightnessController = new BrightnessController(getContext(),
                 (ImageView) findViewById(R.id.brightness_icon),
                 (ToggleSlider) findViewById(R.id.brightness_slider));
 
-        mDetailDoneButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                announceForAccessibility(
-                        mContext.getString(R.string.accessibility_desc_quick_settings));
-                closeDetail();
-            }
-        });
+    }
+
+    public boolean isShowingCustomize() {
+        return mCustomizePanel != null && mCustomizePanel.isCustomizing();
     }
 
     @Override
@@ -189,11 +161,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         mCustomizePanel.setHost(mHost);
     }
 
-    private void updateDetailText() {
-        mDetailDoneButton.setText(R.string.quick_settings_done);
-        mDetailSettingsButton.setText(R.string.quick_settings_more_settings);
-    }
-
     public void setBrightnessMirror(BrightnessMirrorController c) {
         super.onFinishInflate();
         ToggleSlider brightnessSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
@@ -227,7 +194,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         if (mListening) {
             refreshAllTiles();
         }
-        updateDetailText();
         if (mTileLayout != null) {
             mTileLayout.updateResources();
         }
@@ -236,18 +202,6 @@ public class QSPanel extends FrameLayout implements Tunable {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        FontSizeUtils.updateFontSize(mDetailDoneButton, R.dimen.qs_detail_button_text_size);
-        FontSizeUtils.updateFontSize(mDetailSettingsButton, R.dimen.qs_detail_button_text_size);
-
-        // We need to poke the detail views as well as they might not be attached to the view
-        // hierarchy but reused at a later point.
-        int count = mRecords.size();
-        for (int i = 0; i < count; i++) {
-            View detailView = mRecords.get(i).detailView;
-            if (detailView != null) {
-                detailView.dispatchConfigurationChanged(newConfig);
-            }
-        }
         mFooter.onConfigurationChanged();
     }
 
@@ -295,7 +249,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     public void showDetailAdapter(boolean show, DetailAdapter adapter, int[] locationInWindow) {
         int xInWindow = locationInWindow[0];
         int yInWindow = locationInWindow[1];
-        mDetail.getLocationInWindow(locationInWindow);
+        ((View) getParent()).getLocationInWindow(locationInWindow);
 
         Record r = new Record();
         r.detailAdapter = adapter;
@@ -320,9 +274,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         for (QSTile<?> tile : tiles) {
             addTile(tile);
         }
-        if (isShowingDetail()) {
-            mDetail.bringToFront();
-        }
     }
 
     private void drawTile(TileRecord r, QSTile.State state) {
@@ -340,9 +291,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         final QSTile.Callback callback = new QSTile.Callback() {
             @Override
             public void onStateChanged(QSTile.State state) {
-                if (!r.openingDetail) {
-                    drawTile(r, state);
-                }
+                drawTile(r, state);
             }
 
             @Override
@@ -417,11 +366,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         tile.click();
     }
 
-    public boolean isShowingDetail() {
-        return mDetailRecord != null
-                || (mCustomizePanel != null && mCustomizePanel.isCustomizing());
-    }
-
     public void closeDetail() {
         if (mCustomizePanel != null && mCustomizePanel.isCustomizing()) {
             // Treat this as a detail panel for now, to make things easy.
@@ -429,10 +373,6 @@ public class QSPanel extends FrameLayout implements Tunable {
             return;
         }
         showDetail(false, mDetailRecord);
-    }
-
-    public boolean isClosingDetail() {
-        return mClosingDetail;
     }
 
     public int getGridHeight() {
@@ -465,58 +405,25 @@ public class QSPanel extends FrameLayout implements Tunable {
         }
         r.tile.setDetailListening(show);
         int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + r.tileView.getHeight() / 2;
+        int y = r.tileView.getTop() + mTileLayout.getOffsetTop(r) + r.tileView.getHeight() / 2
+                + getTop();
         handleShowDetailImpl(r, show, x, y);
     }
 
     private void handleShowDetailImpl(Record r, boolean show, int x, int y) {
-        boolean visibleDiff = (mDetailRecord != null) != show;
-        if (!visibleDiff && mDetailRecord == r) return;  // already in right state
-        DetailAdapter detailAdapter = null;
-        AnimatorListener listener = null;
-        if (show) {
-            detailAdapter = r.detailAdapter;
-            r.detailView = detailAdapter.createDetailView(mContext, r.detailView, mDetailContent);
-            if (r.detailView == null) throw new IllegalStateException("Must return detail view");
-
-            final Intent settingsIntent = detailAdapter.getSettingsIntent();
-            mDetailSettingsButton.setVisibility(settingsIntent != null ? VISIBLE : GONE);
-            mDetailSettingsButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mHost.startActivityDismissingKeyguard(settingsIntent);
-                }
-            });
-
-            mDetailContent.removeAllViews();
-            mDetail.bringToFront();
-            mDetailContent.addView(r.detailView);
-            MetricsLogger.visible(mContext, detailAdapter.getMetricsCategory());
-            announceForAccessibility(mContext.getString(
-                    R.string.accessibility_quick_settings_detail,
-                    detailAdapter.getTitle()));
-            setDetailRecord(r);
-            listener = mHideGridContentWhenDone;
-            if (r instanceof TileRecord && visibleDiff) {
-                ((TileRecord) r).openingDetail = true;
-            }
-        } else {
-            if (mDetailRecord != null) {
-                MetricsLogger.hidden(mContext, mDetailRecord.detailAdapter.getMetricsCategory());
-            }
-            mClosingDetail = true;
-            setGridContentVisibility(true);
-            listener = mTeardownDetailWhenDone;
-            fireScanStateChanged(false);
-        }
-        sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-        fireShowingDetail(show ? detailAdapter : null);
-        if (visibleDiff) {
-            mClipper.animateCircularClip(x, y, show, listener);
-        }
+        setDetailRecord(show ? r : null);
+        fireShowingDetail(show ? r.detailAdapter : null, x, y);
     }
 
-    private void setGridContentVisibility(boolean visible) {
+    private void setDetailRecord(Record r) {
+        if (r == mDetailRecord) return;
+        mDetailRecord = r;
+        final boolean scanState = mDetailRecord instanceof TileRecord
+                && ((TileRecord) mDetailRecord).scanState;
+        fireScanStateChanged(scanState);
+    }
+
+    void setGridContentVisibility(boolean visible) {
         int newVis = visible ? VISIBLE : INVISIBLE;
         mQsContainer.setVisibility(newVis);
         if (mGridContentVisible != visible) {
@@ -532,9 +439,9 @@ public class QSPanel extends FrameLayout implements Tunable {
         }
     }
 
-    private void fireShowingDetail(QSTile.DetailAdapter detail) {
+    private void fireShowingDetail(DetailAdapter detail, int x, int y) {
         if (mCallback != null) {
-            mCallback.onShowingDetail(detail);
+            mCallback.onShowingDetail(detail, x, y);
         }
     }
 
@@ -548,14 +455,6 @@ public class QSPanel extends FrameLayout implements Tunable {
         if (mCallback != null) {
             mCallback.onScanStateChanged(state);
         }
-    }
-
-    private void setDetailRecord(Record r) {
-        if (r == mDetailRecord) return;
-        mDetailRecord = r;
-        final boolean scanState = mDetailRecord instanceof TileRecord
-                && ((TileRecord) mDetailRecord).scanState;
-        fireScanStateChanged(scanState);
     }
 
     public void clickTile(ComponentName tile) {
@@ -581,7 +480,6 @@ public class QSPanel extends FrameLayout implements Tunable {
     }
 
     protected static class Record {
-        View detailView;
         DetailAdapter detailAdapter;
         int x;
         int y;
@@ -591,45 +489,10 @@ public class QSPanel extends FrameLayout implements Tunable {
         public QSTile<?> tile;
         public QSTileBaseView tileView;
         public boolean scanState;
-        public boolean openingDetail;
     }
 
-    private final AnimatorListenerAdapter mTeardownDetailWhenDone = new AnimatorListenerAdapter() {
-        public void onAnimationEnd(Animator animation) {
-            mDetailContent.removeAllViews();
-            setDetailRecord(null);
-            mClosingDetail = false;
-        };
-    };
-
-    private final AnimatorListenerAdapter mHideGridContentWhenDone = new AnimatorListenerAdapter() {
-        public void onAnimationCancel(Animator animation) {
-            // If we have been cancelled, remove the listener so that onAnimationEnd doesn't get
-            // called, this will avoid accidentally turning off the grid when we don't want to.
-            animation.removeListener(this);
-            redrawTile();
-        };
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            // Only hide content if still in detail state.
-            if (mDetailRecord != null) {
-                setGridContentVisibility(false);
-                redrawTile();
-            }
-        }
-
-        private void redrawTile() {
-            if (mDetailRecord instanceof TileRecord) {
-                final TileRecord tileRecord = (TileRecord) mDetailRecord;
-                tileRecord.openingDetail = false;
-                drawTile(tileRecord, tileRecord.tile.getState());
-            }
-        }
-    };
-
     public interface Callback {
-        void onShowingDetail(QSTile.DetailAdapter detail);
+        void onShowingDetail(DetailAdapter detail, int x, int y);
         void onToggleStateChanged(boolean state);
         void onScanStateChanged(boolean state);
     }
