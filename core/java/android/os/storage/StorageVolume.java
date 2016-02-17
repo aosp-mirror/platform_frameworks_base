@@ -102,6 +102,19 @@ public class StorageVolume implements Parcelable {
     // Also sent on ACTION_MEDIA_UNSHARED, which is @hide
     public static final String EXTRA_STORAGE_VOLUME = "android.os.storage.extra.STORAGE_VOLUME";
 
+    /**
+     * Name of the String extra used by {@link #createAccessIntent(String) createAccessIntent}.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DIRECTORY_NAME = "android.os.storage.extra.DIRECTORY_NAME";
+
+    /**
+     * Name of the intent used by {@link #createAccessIntent(String) createAccessIntent}.
+     */
+    private static final String ACTION_OPEN_EXTERNAL_DIRECTORY =
+            "android.os.storage.action.OPEN_EXTERNAL_DIRECTORY";
+
     /** {@hide} */
     public static final int STORAGE_ID_INVALID = 0x00000000;
     /** {@hide} */
@@ -318,8 +331,9 @@ public class StorageVolume implements Parcelable {
      * @see DocumentsContract
      */
     public Intent createAccessIntent(@NonNull String directoryName) {
-        final Intent intent = new Intent(Intent.ACTION_OPEN_EXTERNAL_DIRECTORY);
-        intent.setData(Uri.fromFile(new File(mPath, directoryName)));
+        final Intent intent = new Intent(ACTION_OPEN_EXTERNAL_DIRECTORY);
+        intent.putExtra(EXTRA_STORAGE_VOLUME, this);
+        intent.putExtra(EXTRA_DIRECTORY_NAME, directoryName);
         return intent;
     }
 

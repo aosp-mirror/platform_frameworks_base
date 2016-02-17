@@ -3187,44 +3187,6 @@ public class Intent implements Parcelable, Cloneable {
             ACTION_OPEN_DOCUMENT_TREE = "android.intent.action.OPEN_DOCUMENT_TREE";
 
     /**
-     * Activity Action: Give access to a standard storage directory after obtaining the user's
-     * approval.
-     * <p>
-     * When invoked, the system will ask the user to grant access to the requested directory (and
-     * its descendants).
-     * <p>
-     * To gain access to descendant (child, grandchild, etc) documents, use
-     * {@link DocumentsContract#buildDocumentUriUsingTree(Uri, String)} and
-     * {@link DocumentsContract#buildChildDocumentsUriUsingTree(Uri, String)} with the returned URI.
-     * <p>
-     * Input: full path to a standard directory, in the form of
-     * {@code STORAGE_ROOT + STANDARD_DIRECTORY}, where {@code STORAGE_ROOT} is the physical path of
-     * a storage container, and {@code STANDARD_DIRECTORY} is one of
-     * {@link Environment#DIRECTORY_MUSIC}, {@link Environment#DIRECTORY_PODCASTS},
-     * {@link Environment#DIRECTORY_RINGTONES}, {@link Environment#DIRECTORY_ALARMS},
-     * {@link Environment#DIRECTORY_NOTIFICATIONS}, {@link Environment#DIRECTORY_PICTURES},
-     * {@link Environment#DIRECTORY_MOVIES}, {@link Environment#DIRECTORY_DOWNLOADS},
-     * {@link Environment#DIRECTORY_DCIM}, or {@link Environment#DIRECTORY_DOCUMENTS}
-     * <p>
-     * For example, to open the "Pictures" folder in the default external storage, the intent's data
-     * would be: {@code Uri.fromFile(new File(Environment.getExternalStorageDirectory(),
-     * Environment.DIRECTORY_PICTURES))}.
-     * <p>
-     * Output: The URI representing the requested directory tree.
-     *
-     * @see DocumentsContract
-     *
-     * {@removed}
-     *
-     * Will be removed / hidden before N is published; apps should use
-     * {@link android.os.storage.StorageManager#getVolumeList()} and
-     * {@link android.os.storage.StorageVolume#createAccessIntent(String)} instead.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String
-            ACTION_OPEN_EXTERNAL_DIRECTORY = "android.intent.action.OPEN_EXTERNAL_DIRECTORY";
-
-    /**
      * Broadcast Action: List of dynamic sensor is changed due to new sensor being connected or
      * exisiting sensor being disconnected.
      *
@@ -8958,7 +8920,6 @@ public class Intent implements Parcelable, Cloneable {
                 case ACTION_MEDIA_SCANNER_SCAN_FILE:
                 case ACTION_PACKAGE_NEEDS_VERIFICATION:
                 case ACTION_PACKAGE_VERIFIED:
-                case ACTION_OPEN_EXTERNAL_DIRECTORY: // TODO: temporary until bug 26742218 is fixed
                     // Ignore legacy actions
                     break;
                 default:
