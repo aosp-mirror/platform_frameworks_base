@@ -1,0 +1,178 @@
+page.title=Set Up the SDK
+page.image=images/cards/card-set-up_16-9_2x.png
+
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+      <ol>
+        <li><a href="#get-as13">Get Android Studio 1.3</a></li>
+        <li><a href="#get-sdk">Get the Android 6.0 SDK</a></li>
+        <li><a href="#create-update">Create or Update a Project</a></li>
+        <li><a href="#setup-test">Set Up for Testing</a></li>
+      </ol>
+  </div>
+</div>
+
+<p>With Developer Preview 3, the <strong>official Android 6.0 SDK is now available</strong> from the Android SDK
+Manager. This document assumes that you are familiar with Android app development, such
+as using the Android SDK Manager and creating projects. If you are new to
+Android, see <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First
+App</a> training lesson first.</p>
+
+
+<h2 id="get-as13">Get Android Studio 1.3</h2>
+
+<p>
+  It is highly recommended that you install the Android Studio 1.3 to work best with
+  the Android 6.0 SDK. Please update your Android Studio installation to version 1.3 or
+  higher, or follow the instructions for
+  <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Installing Android Studio</a>.
+</p>
+
+
+<h2 id="get-sdk">Get the Android 6.0 SDK</h2>
+
+<p>To add the Android 6.0 SDK components to your development environment:</p>
+
+<ol>
+  <li>Launch Android Studio 1.3 or higher.
+  </li>
+
+  <li>Open the <strong>Settings</strong> window (on Windows, you can do this
+  by choosing <strong>File &gt; Settings</strong>). Choose the
+  <strong>Appearance &amp; Behavior &gt; System
+  Settings &gt; Updates</strong> panel.
+
+    <p class="aside">On Mac OS X, you can find the <strong>Appearance &amp;
+    Behavior</strong> panel
+    in Android Studio's <strong>Preferences</strong> window.</p>
+  </li>
+
+  <li>On the <strong>Updates</strong> panel, choose the option for
+  <strong>Automatically check updates for Android SDK: Preview Channel</strong>.
+  </li>
+
+  <li>Launch the <strong>Android SDK Manager</strong>. (With Android Studio 1.3,
+  the SDK Manager is integrated into Android Studio instead of being a
+  standalone application.)
+  </li>
+
+  <li>Under the <strong>Platforms</strong> section, select <strong>Android 6.0</strong>.
+  </li>
+
+  <li>In the <strong>Tools</strong> section, select the latest Android <strong>
+    SDK Tools</strong>, <strong>Platform-tools</strong>, and
+    <strong>Build-tools</strong>.
+  </li>
+
+  <li>Click <strong>Install packages</strong> and accept the licensing
+    agreement for all of the packages.
+  </li>
+
+  <li>Verify that the Android 6.0 SDK is installed by opening the <strong>
+    Settings</strong> window and choosing the <strong>Appearance &amp; Behavior
+    &gt; System Settings &gt; Android SDK</strong> panel.</li>
+
+  <li>On the <strong>Android SDK</strong> panel, choose
+    the <strong>SDK Platforms</strong> tab. <strong>Android 6.0</strong> should be listed as <em>Installed</em>. Also, open the
+    <strong>SDK Tools</strong> tab to verify that the latest tools are
+    installed.
+  </li>
+</ol>
+<p>After completing these steps, the preview components are available in your development
+  environment. </p>
+
+
+<h2 id="create-update">Create or Update a Project</h2>
+
+<p>
+  In order to use the preview APIs, you must create or update a development project to use
+  the preview components.
+</p>
+
+
+<h3 id="create">Create a new project</h3>
+
+<p>
+  We recommend using Android Studio to create a project with the preview. Follow the steps
+  described in <a href="{@docRoot}sdk/installing/create-project.html">Creating a Project</a>
+  until you arrive at the <em>Form Factors</em> screen in the project wizard. Then perform
+  the following steps to create a project configured for the preview.
+</p>
+
+<ul>
+  <li>Check <strong>Phone and Tablet</strong>.</li>
+  <li>Select <strong>API 23: Android 6.0 (Marshmallow)</strong> in <strong>Minimum
+    SDK</strong>.</li>
+</ul>
+
+
+<h3 id="update">Update an existing project</h3>
+
+<p>
+  For existing projects, if you are using Android 6.0 APIs (API level 23) you must
+  modify the project configuration. In your development environment, open the
+  <code>build.gradle</code> file for your module and
+  set these values as follows:
+</p>
+
+<ul>
+  <li><code>compileSdkVersion</code> is set to <code>'23'</code></li>
+  <li><code>targetSdkVersion</code> is set to <code>'23'</code></li>
+</ul>
+
+
+<h2 id="setup-test">Set Up for Testing</h2>
+
+<p>
+  Testing an app with the preview requires that you have a device or virtual device configured with
+  the preview version of the platform. If you have a compatible device, you can install the preview
+  platform for testing. Otherwise, you can configure a virtual device for testing.
+</p>
+
+<h3 id="setup-device">Set up a physical device</h3>
+
+<p>
+  If you have a Nexus 5, Nexus 6, Nexus 9, or Android TV, you can install a preview
+  system image on these devices for testing your app.
+  You can set up a virtual device with the preview version of the platform from within Android Studio
+  using the Android Virtual Device Manager tool.
+</p>
+
+<p class="caution">
+  <strong>Important:</strong> Installing a preview image on a device <em>removes all data from
+  it</em>, so you should backup any data before installing a preview image.
+</p>
+
+<h3 id="setupAVD">Set up a virtual device</h3>
+
+<p>
+  You can set up virtual device with the preview version of the platform from within Android Studio
+  using the Android Virtual Device Manager tool.
+</p>
+
+<p>To create an AVD with the AVD Manager:</p>
+
+<ol>
+  <li>Install the Preview SDK in your development environment, as described
+      in <a href="{@docRoot}preview/setup-sdk.html">Setting Up the Preview
+      SDK.</a></li>
+  <li>Follow the steps in
+      <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD
+      Manager</a>. Use the following settings:
+    <ul>
+      <li><strong>Device:</strong> Nexus 5, Nexus 6, Nexus 9, or Android TV</li>
+      <li><strong>Target:</strong>
+       Android M (Preview) - API Level M</li>
+      <li><strong>ABI:</strong> x86</li>
+    </ul>
+  </li>
+</ol>
+
+<p>
+  For more information about creating virtual devices for testing, see <a href=
+  "{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.
+</p>

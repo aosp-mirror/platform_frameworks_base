@@ -1,0 +1,533 @@
+page.title=Support and Release Notes
+page.tags="preview", "developer preview"
+page.image=images/cards/card-support_16-9_2x.png
+
+@jd:body
+
+<div class="cols" style=
+"background-color:#f2daf5; padding: 5px 0;margin-bottom:1em; text-align:center;">
+<h3>
+    Developer Preview 3 is now available
+  </h3>
+  <p>Includes final SDK and near-final system images</p>
+   <div style="margin:auto 1em">
+ <ul class="dac-section-links">
+    <li class="dac-section-link">
+      <a href="#preview3-notes">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Read the Notes</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="#preview3-get">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Get the Update</a>
+    </li>
+
+    <li class="dac-section-link">
+      <a href="https://code.google.com/p/android-developer-preview/">
+      <span class="dac-sprite dac-auto-chevron"></span>
+      Report Issues</a>
+    </li>
+  </ul>
+  </div>
+</div>
+
+<p>
+  Two primary support channels are available to you when developing and testing
+  with the Android M Developer Preview. If you've encountered bugs or have
+  feedback about the M Developer Preview, you can <a href=
+  "https://code.google.com/p/android-developer-preview/">create an issue</a> on
+  our issue tracker. We'll triage the issue for further review and provide
+  updates as needed.
+</p>
+
+<p>
+  To discuss issues or ideas with other developers working with Android M, join
+  the <a href="http://g.co/dev/AndroidMDevPreview">M Developer Preview Google+
+  community</a>.
+</p>
+
+<h2 id="preview3-notes">
+  Developer Preview 3
+</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-9of16">
+      <p>
+        <em>Date: August 2015<br>
+        Build: MPA44I<br>
+        Hardware support: Nexus 5, 6, 9, Player<br>
+        Emulator support: x86 &amp; ARM 32/64-bit<br>
+        Google Play services: 7.8</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<p>
+  Developer Preview 3 is the <strong>final incremental update</strong>
+  to the Android M preview platform that was originally released in May 2015.
+  The update includes <strong>final APIs and the official Android 6.0 SDK</strong>,
+  as well as near-final system images for testing your apps. The
+  updated system images bring a variety of fixes and enhancements across
+  the system, including those related to issues reported by developers
+  through the external issue tracker.
+</p>
+
+<p>
+  If you are currently developing or testing on Android M, you should <strong>update
+  your environment</strong> as soon as possible, so that
+  you can begin <strong>final compatibility testing</strong> in preparation for
+  the public release to device manufacturers later this year.</p>
+
+<p class="important">Updating to the Android 6.0 SDK and the latest
+   system images 3 ensures that you are building against final
+   platform APIs in <strong>API level 23</strong> and testing
+   against final behaviors. If you are just getting started,
+   follow the instructions in <a href=
+  "/preview/setup-sdk.html">Set up the Preview SDK</a>.
+</p>
+
+<h3>
+  What's included
+</h3>
+
+<p>
+  Developer Preview 3 includes the official Android 6.0
+  SDK as well as updated preview system images, documentation,
+  and samples for developing against the Android 6.0
+  development platform.
+</p>
+
+<ul>
+  <li>
+    <strong>SDK platform</strong> and <strong>system images</strong> (Nexus and
+    emulator) for building and testing. You can download the Android 6.0 SDK and tools from
+    the SDK Manager, and the system images are available by over-the-air (OTA)
+    update or download (see below).
+  </li>
+
+  <li>
+    <strong>Updated documentation</strong>. The <a href=
+    "{@docRoot}preview/behavior-changes.html">Behavior Changes</a>, <a href=
+    "{@docRoot}preview/api-overview.html">API Overview</a>, and <a href=
+    "{@docRoot}preview/features/runtime-permissions.html">Permissions</a> documents have
+    been updated to reflect the latest changes in the platform. An updated
+    <a href="/preview/download.html">Developer Documentation download
+    package</a> is available, including full reference docs and API diff
+    reports. Reference documentation is also now <a
+    href="{@docRoot}reference/packages.html">available online</a>.
+  </li>
+
+  <li>
+    <strong>Translations</strong> of the documentation are available. Use
+    the language selector at the bottom right corner of any page to switch
+    languages. Note that some of the translated docs are not yet updated for
+    Developer Preview 3.
+  </li>
+
+  <li>The <a href="{@docRoot}preview/samples.html">Android M code samples</a> are also
+  updated to account for API and behavior changes:
+    <ul>
+      <li>
+        <a href=
+        "https://github.com/googlesamples/android-RuntimePermissions">RuntimePermissions</a>
+        and <a href=
+        "https://github.com/googlesamples/android-RuntimePermissionsBasic">RuntimePermissionsBasic</a>
+        are updated to reflect latest permissions API changes, including
+        <code>shouldShowRequestPermissionRationale()</code>.
+      </li>
+      <li>
+        Other samples are updated to support runtime permissions.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="changes">
+  Key changes
+</h3>
+<ul>
+  <li>General
+    <ul>
+      <li>Updated the Fingerprint API to enables better error reporting,
+        better fingerprint enrollment experience, and enumeration support for greater
+        reliability.</li>
+      <li>Modified app access to BLE and Wi-Fi scans to require the location permisssion when they
+        target Android 6.0 (API level 23) or higher. Apps targeting API 22 or earlier can
+        still perform BTLE and WiFi scans, but only when they are in the foreground. While in the background, those apps will get no results from BTLE and WiFi scans.</li>
+    </ul>
+  </li>
+  <li>Permission changes
+    <ul>
+      <li>Updated the user interface for permissions and enhanced some of the permissions
+        behaviors.</li>
+      <li>The {@link android.Manifest.permission#GET_ACCOUNTS} permission is now a member of the
+        {@link android.Manifest.permission_group#CONTACTS} permission group and it has a
+        {@code android:protectionLevel} of {@code dangerous}. This change means that when
+        targeting Android 6.0 (API level 23), you must check for and request this permission if
+        your app requires it.
+      </li>
+
+      <li>The {@code android.permission.READ_PROFILE} and {@code android.permission.WRITE_PROFILE}
+       permissions have been removed from the {@link android.Manifest.permission_group#CONTACTS}
+       permission group.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  For a complete list of changes, including renamed and removed APIs, see the API Diff report for
+  <a href="{@docRoot}sdk/api_diff/23/changes.html">API level 22 to 23</a>.
+</p>
+
+<h3 id="ki">
+  Known issues
+</h3>
+
+<ul>
+  <li>General issues:
+    <ul>
+      <li>On LTE devices, including Nexus 9, GPS is not functioning properly, which may
+        interfere with navigation services.
+      </li>
+      <li>During Hangouts calls, users may experience distorted or low audio on some devices.
+      </li>
+      <li>The Google Apps Device Policy app bundled with MPA44G is unable to set up an Android for
+Work Profile, so you cannot create a new Work Profile with that version of the app. This issue is
+resolved in the Google Apps Device Policy app bundled with MPA44I. Other apps that provide Android
+for Work functionality remain unaffected on either build.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  For a complete list of reported issues, please refer to the <a href=
+  "https://code.google.com/p/android/issues/list">open issues list</a> on the
+  Developer Preview <a href=
+  "https://code.google.com/p/android-developer-preview/">issue tracker</a>.
+</p>
+
+<h3 id="preview3-get">
+  Get Developer Preview 3
+</h3>
+
+<p>
+  You can download the official Android 6.0 SDK platform and
+  Developer Preview 3 emulator images from the SDK Manager.
+</p>
+
+<p>
+  Developer Preview 3 system images for supported Nexus devices are available
+  by download and by over-the-air (OTA) update. The OTA update is available
+  only to supported devices that are currently running a Developer Preview build.
+  If your device is running a Developer Preview build, you should automatically receive
+  the OTA update within a few days of availability.
+</p>
+
+<p>
+  For instructions on how to download and flash your device to the latest Developer
+  Preview, see the links and instructions on the <a href=
+  "{@docRoot}preview/download.html">Downloads</a> page.
+</p>
+
+<p>
+  For instructions on how to start developing and testing with Android 6.0
+  Marshmallow, read <a href="{@docRoot}preview/setup-sdk.html">Setting
+  up the SDK</a>.
+</p>
+
+<h2 id="preview2-notes">
+  Developer Preview 2
+</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-9of16">
+      <p>
+        <em>Date: July 2015<br>
+        Builds: MPZ79M (Nexus 5, 6, 9), MPZ79N (Nexus Player)<br>
+        Hardware support: Nexus 5, 6, 9, Player<br>
+        Emulator support: x86 &amp; ARM 32/64-bit<br>
+        Google Play services: 7.6</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<p>
+  Android M Developer Preview 2 is an <strong>incremental update</strong> to
+  the Android M preview platform that was originally released in May 2015. The
+  update includes a variety of enhancements and bug fixes made across the
+  system, including those related to issues reported by developers through the
+  external issue tracker.
+</p>
+
+<p>
+  If you are currently developing or testing on Android M, you should
+  <strong>update your environment</strong> to Developer Preview 2 as soon as
+  possible. This ensures that you are building with the latest platform APIs
+  and testing against the latest behaviors. If you are just getting started
+  with the Android M Developer Preview SDK, follow the instructions in <a href=
+  "{@docRoot}preview/setup-sdk.html">Set up the Preview SDK</a>, then update your
+  environment for Developer Preview 2.
+</p>
+
+<h3>
+  What's included
+</h3>
+
+<p>
+  Developer Preview 2 includes an updated SDK with system images,
+  documentation, and samples for developing against the latest Android M
+  platform.
+</p>
+
+<ul>
+  <li>
+    <strong>SDK platform</strong> and <strong>system images</strong> (Nexus and
+    emulator) for building and testing. You can download the updated tools from
+    the SDK Manager, and the system images are available by over-the-air (OTA)
+    update or download (see below).
+  </li>
+
+  <li>
+    <strong>Updated documentation</strong>. The <a href=
+    "{@docRoot}preview/behavior-changes.html">Behavior Changes</a>, <a href=
+    "{@docRoot}preview/api-overview.html">API Overview</a>, and <a href=
+    "{@docRoot}preview/features/runtime-permissions.html">Permissions</a> documents have
+    been updated to reflect the latest changes in the platform. An updated
+    <a href="{@docRoot}preview/download.html">Developer Documentation download
+    package</a> is available, including full reference docs and API diff
+    reports.
+  </li>
+
+  <li>
+    <strong>Translations</strong> of the documentation are now available. Use
+    the language selector at the bottom right corner of any page to switch
+    languages. Note that some of the translated docs are not yet updated for
+    Developer Preview 2 (coming soon).
+  </li>
+
+  <li>The <a href="{@docRoot}preview/samples.html">Android M code samples</a> are also
+  updated to account for API and behavior changes:
+    <ul>
+      <li>
+        <a href=
+        "https://github.com/googlesamples/android-RuntimePermissions">RuntimePermissions</a>
+        / <a href=
+        "https://github.com/googlesamples/android-RuntimePermissionsBasic">RuntimePermissionsBasic</a>
+        are updated to reflect latest permissions API changes, including
+        <code>shouldShowRequestPermissionRationale()</code>.
+      </li>
+      <li>
+        <a href=
+        "https://github.com/googlesamples/android-FingerprintDialog">FingerprintDialog</a>
+        adds a flow to ask for passwords when new fingerprints are added as
+        well as a preference if the app will use fingerprints as a method of
+        authentication.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="changes-p2">
+  Key changes
+</h3>
+
+<ul>
+  <li>Permissions changes
+    <ul>
+      <li>The <code>android.permission.USE_FINGERPRINT</code> permission now
+      has "normal" protection level, so it is no longer necessary to request
+      this permission directly from the user. The <code>USE_FINGERPRINT</code>
+      permission enables fingerprints to be enabled for authentication, but
+      does not give the requesting app access to the enrollment/fingerprint
+      administration flow.
+      </li>
+
+      <li>The <code>android.permission.WRITE_EXTERNAL_STORAGE</code> permission
+      has protection level "dangerous", meaning that apps wanting to write to
+      external storage will need to request permission from the user at
+      runtime. Both <code>READ_EXTERNAL_STORAGE</code> and
+      <code>WRITE_EXTERNAL_STORAGE</code> are members of the
+      <code>STORAGE</code> permission group.
+      </li>
+
+      <li>Remote Bluetooth/Wi-Fi MAC's now require either the
+      <code>android.permission.ACCESS_COARSE_LOCATION</code> or
+      <code>android.permission.ACCESS_FINE_LOCATION</code> permission.
+      </li>
+
+      <li>Some accounts and identity permissions are moved to
+      <code>CONTACTS</code> permissions group and others are removed or granted
+      based on account type. In particular,
+      <code>android.permission.USE_CREDENTIALS</code>,
+      <code>android.permission.MANAGE_ACCOUNTS</code>, and
+      <code>android.permission.AUTHENTICATE_ACCOUNTS</code> are ungrouped
+      pending further changes in a later release.
+      </li>
+
+      <li>The Wi-Fi permissions
+      <code>android.permission.CHANGE_WIFI_STATE</code>,
+      <code>android.permission.CHANGE_WIMAX_STATE</code>, and
+      <code>android.permission.CHANGE_WIFI_MULTICAST_STATE</code> now have
+      protection level "normal".
+      </li>
+
+      <li>The Bluetooth permissions <code>android.permission.BLUETOOTH</code>
+      and <code>android.permission.BLUETOOTH_ADMIN</code> now have protection
+      level "normal".
+      </li>
+
+      <li>Bookmarks and subscribed feeds permissions are removed.
+      </li>
+
+      <li>Apps included in the system image are no longer granted dangerous
+      permissions automatically. All apps should check for and request
+      permissions at runtime.
+      </li>
+
+      <li>Introduces the utility method
+      <code>Activity.shouldShowRequestPermissionRationale(String)</code>, which
+      lets your app see whether users have previously rejected a permission
+      request. This lets you know that your app should explain the the user why
+      it needs that permission. For more information see the <a href=
+      "{@docRoot}preview/features/runtime-permissions.html#explain-need">Permissions</a>
+      developer guide.
+      </li>
+    </ul>
+  </li>
+
+  <li>Other changes
+    <ul>
+      <li>The <code>android.app.AssistContent</code> and
+      <code>android.app.AssistStructure</code> classes are moved into a new
+      package, <code>android.app.assist</code>.
+      </li>
+
+      <li>Bluetooth Stylus APIs are updated and include new callback events.
+      The <code>View.OnStylusButtonPressListener</code> class is renamed to
+      <code>View.OnContextClickListener</code> and
+      <code>GestureDetector.OnStylusButtonPressListener</code> class to <code>
+        GestureDetector.OnContextClickListener</code>.
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  For a complete list of changes, including renamed and removed APIs, please
+  refer to the API Diff Reports included in the <a href=
+  "{@docRoot}preview/download.html#docs">Developer Documentation download package</a>.
+</p>
+
+<h3 id="ki-p2">
+  Known issues
+</h3>
+
+<ul>
+  <li>General issues:
+    <ul>
+      <li>The system Messenger app crashes on the 64-bit emulator.</li>
+      <li>After updating to Developer Preview 2, Contacts sync experiences
+      intermittent issues. The workaround is to clear and re-sync Contact Storage
+      data after update. To clear data, go to <strong>Settings &gt; Apps &gt; Show
+      system &gt; Contacts Storage</strong>. Select "Storage" and then
+      <strong>Clear data</strong>.</li>
+      <li>In YouTube app, it's not possible to share a video. The share window is
+      blank.</li>
+      <li>The bundled Google Apps Device Policy app included in Developer Preview 2 is unable to
+      properly set up an Android for Work Profile, so you cannot create a new Work Profile with this
+      app after you update. This issue is specific to the Google Apps Device Policy app, and not the
+      Android for Work platform (or our partner EMM providers). As a workaround for users of the
+      Google Apps Device Policy app, be sure to create a Work Profile in Developer Preview 1 before
+      updating to Developer Preview 2.
+      </li>
+    </ul>
+  </li>
+  <li>Issues specific to MPZ79N on Nexus Player:
+    <ul>
+      <li>Bluetooth share crashes after clearing data. Please <strong>do not
+      clear app data for system services</strong>, otherwise you will need to Factory
+      Reset your device</li>
+      <li>Remote control can experience intermittent connectivity issues. </li>
+      <li>Movies show black screen with some ANRs on exiting the video.</li>
+      <li>In YouTube app, lower-resolution videos have a green bar at the top
+      and some color-ghosting</li>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  For a complete list of reported issues, please refer to the <a href=
+  "https://code.google.com/p/android/issues/list">open issues list</a> on the
+  Developer Preview <a href=
+  "https://code.google.com/p/android-developer-preview/">issue tracker</a>.
+</p>
+
+<h3 id="preview2-get">
+  Get Developer Preview 2
+</h3>
+
+<p>
+  You can download the Developer Preview 2 platform and emulator images from
+  the SDK Manager.
+</p>
+
+<p>
+  Developer Preview 2 system images for supported Nexus devices are available
+  by download and by over-the-air (OTA) update. The OTA update is available
+  only to supported devices that are currently running Developer Preview 1. If
+  your devices are running Developer Preview 1, you should automatically receive
+  the OTA update within a few days of availability.
+</p>
+
+<p>
+  If you are just getting started with Android M Developer Preview, and want
+  to receive Developer Preview 2 via OTA, download the appropriate
+  Developer Preview 1 <a href="{@docRoot}preview/download_mp1.html#images">
+  system image</a>, and flash it to your device. Then,
+  leave the device powered on for several hours. It registers with the
+  OTA service, and receives Developer Preview 2 by OTA.
+</p>
+
+<p>
+  For instructions on how to download and flash your device to the Developer
+  Preview, see the links and instructions on the <a href=
+  "{@docRoot}preview/download.html">Downloads</a> page.
+</p>
+
+<p>
+  For instructions on how to start developing and testing with Android M, read
+  <a href="{@docRoot}preview/setup-sdk.html">Setting up the SDK</a>.
+</p>
+
+<h2 id="preview1-notes">
+  Developer Preview 1
+</h2>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col-6of12">
+      <p>
+        <em>Date: May 2015<br>
+        Build: MPZ44Q<br>
+        Hardware support: Nexus 5, 6, 9, Player<br>
+        Emulator support: x86 &amp; ARM (32/64-bit)<br>
+        Google Play services: 7.5</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+<p>
+  Initial release.
+</p>
+
+
