@@ -3004,6 +3004,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
+        // TODO: The following code should find better place to live.
+        if (!resetDefaultEnabledIme) {
+            boolean enabledImeFound = false;
+            final List<InputMethodInfo> enabledImes = mSettings.getEnabledInputMethodListLocked();
+            final int N = enabledImes.size();
+            for (int i = 0; i < N; ++i) {
+                final InputMethodInfo imi = enabledImes.get(i);
+                if (mMethodList.contains(imi)) {
+                    enabledImeFound = true;
+                    break;
+                }
+            }
+            if (!enabledImeFound) {
+                Slog.i(TAG, "All the enabled IMEs are gone. Reset default enabled IMEs.");
+                resetDefaultEnabledIme = true;
+                resetSelectedInputMethodAndSubtypeLocked("");
+            }
+        }
+
         if (resetDefaultEnabledIme) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
                     InputMethodUtils.getDefaultEnabledImes(mContext, mSystemReady, mMethodList);
