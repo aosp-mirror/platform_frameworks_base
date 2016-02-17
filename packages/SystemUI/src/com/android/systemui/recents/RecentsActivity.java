@@ -230,7 +230,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * Dismisses the history view back into the stack view.
      */
     boolean dismissHistory() {
-        if (mRecentsView.isHistoryVisible()) {
+        if (RecentsDebugFlags.Static.EnableHistory && mRecentsView.isHistoryVisible()) {
             EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
             return true;
         }
@@ -447,7 +447,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Reset some states
         mIgnoreAltTabRelease = false;
-        if (mRecentsView.isHistoryVisible()) {
+        if (RecentsDebugFlags.Static.EnableHistory && mRecentsView.isHistoryVisible()) {
             EventBus.getDefault().send(new HideHistoryEvent(false /* animate */));
         }
 
@@ -503,13 +503,16 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, mRecentsView.isHistoryVisible());
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            outState.putBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, mRecentsView.isHistoryVisible());
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.getBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, false)) {
+        if (RecentsDebugFlags.Static.EnableHistory &&
+                savedInstanceState.getBoolean(KEY_SAVED_STATE_HISTORY_VISIBLE, false)) {
             EventBus.getDefault().send(new ShowHistoryEvent());
         }
     }
@@ -603,7 +606,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     /**** EventBus events ****/
 
     public final void onBusEvent(ToggleRecentsEvent event) {
-        if (!dismissHistory()) {
+        if (!RecentsDebugFlags.Static.EnableHistory || !dismissHistory()) {
             RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
             if (launchState.launchedFromHome) {
                 dismissRecentsToHome(true /* animateTaskViews */);
@@ -614,7 +617,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {
-        if (!dismissHistory()) {
+        if (!RecentsDebugFlags.Static.EnableHistory || !dismissHistory()) {
             final RecentsDebugFlags debugFlags = Recents.getDebugFlags();
 
             // Start dozing after the recents button is clicked
@@ -651,7 +654,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
         } else if (event.triggeredFromHomeKey) {
             // Otherwise, dismiss Recents to Home
-            if (mRecentsView.isHistoryVisible()) {
+            if (RecentsDebugFlags.Static.EnableHistory && mRecentsView.isHistoryVisible()) {
                 // If the history view is visible, then just cross-fade home
                 ActivityOptions opts = ActivityOptions.makeCustomAnimation(RecentsActivity.this,
                                 R.anim.recents_to_launcher_enter,

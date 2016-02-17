@@ -467,12 +467,13 @@ public class TaskStackAnimationHelper {
 
         // Setup the end listener to return all the hidden views to the view pool after the
         // focus animation
-        AnimatorListenerAdapter endListener = new AnimatorListenerAdapter() {
+        ReferenceCountedTrigger postAnimTrigger = new ReferenceCountedTrigger();
+        postAnimTrigger.addLastDecrementRunnable(new Runnable() {
             @Override
-            public void onAnimationEnd(Animator animation) {
+            public void run() {
                 mStackView.bindVisibleTaskViews(newScroll);
             }
-        };
+        });
 
         List<TaskView> taskViews = mStackView.getTaskViews();
         int taskViewCount = taskViews.size();
@@ -513,7 +514,8 @@ public class TaskStackAnimationHelper {
             AnimationProps anim = new AnimationProps()
                     .setDuration(AnimationProps.BOUNDS, duration)
                     .setInterpolator(AnimationProps.BOUNDS, interpolator)
-                    .setListener(endListener);
+                    .setListener(postAnimTrigger.decrementOnAnimationEnd());
+            postAnimTrigger.increment();
             mStackView.updateTaskViewToTransform(tv, toTransform, anim);
         }
         return willScroll;
