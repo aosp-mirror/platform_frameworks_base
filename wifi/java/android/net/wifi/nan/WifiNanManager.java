@@ -130,21 +130,19 @@ public class WifiNanManager {
      * operation will result in callbacks to the indicated listener:
      * {@link WifiNanSessionListener NanSessionListener.on*}.
      *
-     * @param publishData The {@link PublishData} specifying the contents of the
-     *            publish session.
-     * @param publishSettings The {@link PublishSettings} specifying the
-     *            settings for the publish session.
-     * @param listener The {@link WifiNanSessionListener} derived objects to be used
-     *            for the event callbacks specified by {@code events}.
+     * @param publishConfig The {@link PublishConfig} specifying the
+     *            configuration of the publish session.
+     * @param listener The {@link WifiNanSessionListener} derived objects to be
+     *            used for the event callbacks specified by {@code events}.
      * @param events The list of events to be delivered to the {@code listener}
      *            object. An OR'd value of {@link WifiNanSessionListener
      *            NanSessionListener.LISTEN_*}.
      * @return The {@link WifiNanPublishSession} which can be used to further
      *         control the publish session.
      */
-    public WifiNanPublishSession publish(PublishData publishData, PublishSettings publishSettings,
+    public WifiNanPublishSession publish(PublishConfig publishConfig,
             WifiNanSessionListener listener, int events) {
-        return publishRaw(publishData, publishSettings, listener,
+        return publishRaw(publishConfig, listener,
                 events | WifiNanSessionListener.LISTEN_HIDDEN_FLAGS);
     }
 
@@ -153,18 +151,18 @@ public class WifiNanManager {
      *
      * @hide
      */
-    public WifiNanPublishSession publishRaw(PublishData publishData,
-            PublishSettings publishSettings, WifiNanSessionListener listener, int events) {
-        if (VDBG) Log.v(TAG, "publish(): data='" + publishData + "', settings=" + publishSettings);
+    public WifiNanPublishSession publishRaw(PublishConfig publishConfig,
+            WifiNanSessionListener listener, int events) {
+        if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
 
-        if (publishSettings.mPublishType == PublishSettings.PUBLISH_TYPE_UNSOLICITED
-                && publishData.mRxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish data & settings: UNSOLICITED "
+        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED
+                && publishConfig.mRxFilterLength != 0) {
+            throw new IllegalArgumentException("Invalid publish config: UNSOLICITED "
                     + "publishes (active) can't have an Rx filter");
         }
-        if (publishSettings.mPublishType == PublishSettings.PUBLISH_TYPE_SOLICITED
-                && publishData.mTxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish data & settings: SOLICITED "
+        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_SOLICITED
+                && publishConfig.mTxFilterLength != 0) {
+            throw new IllegalArgumentException("Invalid publish config: SOLICITED "
                     + "publishes (passive) can't have a Tx filter");
         }
         if (listener == null) {
@@ -176,7 +174,7 @@ public class WifiNanManager {
         try {
             sessionId = mService.createSession(mClientId, listener.callback, events);
             if (DBG) Log.d(TAG, "publish: session created - sessionId=" + sessionId);
-            mService.publish(mClientId, sessionId, publishData, publishSettings);
+            mService.publish(mClientId, sessionId, publishConfig);
         } catch (RemoteException e) {
             Log.w(TAG, "createSession/publish RemoteException: " + e);
             return null;
@@ -188,47 +186,45 @@ public class WifiNanManager {
     /**
      * {@hide}
      */
-    public void publish(int sessionId, PublishData publishData, PublishSettings publishSettings) {
-        if (VDBG) Log.v(TAG, "publish(): data='" + publishData + "', settings=" + publishSettings);
+    public void publish(int sessionId, PublishConfig publishConfig) {
+        if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
 
-        if (publishSettings.mPublishType == PublishSettings.PUBLISH_TYPE_UNSOLICITED
-                && publishData.mRxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish data & settings: UNSOLICITED "
+        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED
+                && publishConfig.mRxFilterLength != 0) {
+            throw new IllegalArgumentException("Invalid publish config: UNSOLICITED "
                     + "publishes (active) can't have an Rx filter");
         }
-        if (publishSettings.mPublishType == PublishSettings.PUBLISH_TYPE_SOLICITED
-                && publishData.mTxFilterLength != 0) {
-            throw new IllegalArgumentException("Invalid publish data & settings: SOLICITED "
+        if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_SOLICITED
+                && publishConfig.mTxFilterLength != 0) {
+            throw new IllegalArgumentException("Invalid publish config: SOLICITED "
                     + "publishes (passive) can't have a Tx filter");
         }
 
         try {
-            mService.publish(mClientId, sessionId, publishData, publishSettings);
+            mService.publish(mClientId, sessionId, publishConfig);
         } catch (RemoteException e) {
             Log.w(TAG, "publish RemoteException: " + e);
         }
     }
+
     /**
      * Request a NAN subscribe session. The results of the subscribe session
      * operation will result in callbacks to the indicated listener:
      * {@link WifiNanSessionListener NanSessionListener.on*}.
      *
-     * @param subscribeData The {@link SubscribeData} specifying the contents of
-     *            the subscribe session.
-     * @param subscribeSettings The {@link SubscribeSettings} specifying the
-     *            settings for the subscribe session.
-     * @param listener The {@link WifiNanSessionListener} derived objects to be used
-     *            for the event callbacks specified by {@code events}.
+     * @param subscribeConfig The {@link SubscribeConfig} specifying the
+     *            configuration of the subscribe session.
+     * @param listener The {@link WifiNanSessionListener} derived objects to be
+     *            used for the event callbacks specified by {@code events}.
      * @param events The list of events to be delivered to the {@code listener}
      *            object. An OR'd value of {@link WifiNanSessionListener
      *            NanSessionListener.LISTEN_*}.
      * @return The {@link WifiNanSubscribeSession} which can be used to further
      *         control the subscribe session.
      */
-    public WifiNanSubscribeSession subscribe(SubscribeData subscribeData,
-            SubscribeSettings subscribeSettings,
+    public WifiNanSubscribeSession subscribe(SubscribeConfig subscribeConfig,
             WifiNanSessionListener listener, int events) {
-        return subscribeRaw(subscribeData, subscribeSettings, listener,
+        return subscribeRaw(subscribeConfig, listener,
                 events | WifiNanSessionListener.LISTEN_HIDDEN_FLAGS);
     }
 
@@ -237,21 +233,21 @@ public class WifiNanManager {
      *
      * @hide
      */
-    public WifiNanSubscribeSession subscribeRaw(SubscribeData subscribeData,
-            SubscribeSettings subscribeSettings, WifiNanSessionListener listener, int events) {
+    public WifiNanSubscribeSession subscribeRaw(SubscribeConfig subscribeConfig,
+            WifiNanSessionListener listener, int events) {
         if (VDBG) {
-            Log.v(TAG, "subscribe(): data='" + subscribeData + "', settings=" + subscribeSettings);
+            Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
 
-        if (subscribeSettings.mSubscribeType == SubscribeSettings.SUBSCRIBE_TYPE_ACTIVE
-                && subscribeData.mRxFilterLength != 0) {
+        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_ACTIVE
+                && subscribeConfig.mRxFilterLength != 0) {
             throw new IllegalArgumentException(
-                    "Invalid subscribe data & settings: ACTIVE subscribes can't have an Rx filter");
+                    "Invalid subscribe config: ACTIVE subscribes can't have an Rx filter");
         }
-        if (subscribeSettings.mSubscribeType == SubscribeSettings.SUBSCRIBE_TYPE_PASSIVE
-                && subscribeData.mTxFilterLength != 0) {
+        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE
+                && subscribeConfig.mTxFilterLength != 0) {
             throw new IllegalArgumentException(
-                    "Invalid subscribe data & settings: PASSIVE subscribes can't have a Tx filter");
+                    "Invalid subscribe config: PASSIVE subscribes can't have a Tx filter");
         }
 
         int sessionId;
@@ -259,7 +255,7 @@ public class WifiNanManager {
         try {
             sessionId = mService.createSession(mClientId, listener.callback, events);
             if (DBG) Log.d(TAG, "subscribe: session created - sessionId=" + sessionId);
-            mService.subscribe(mClientId, sessionId, subscribeData, subscribeSettings);
+            mService.subscribe(mClientId, sessionId, subscribeConfig);
         } catch (RemoteException e) {
             Log.w(TAG, "createSession/subscribe RemoteException: " + e);
             return null;
@@ -271,25 +267,24 @@ public class WifiNanManager {
     /**
      * {@hide}
      */
-    public void subscribe(int sessionId, SubscribeData subscribeData,
-            SubscribeSettings subscribeSettings) {
+    public void subscribe(int sessionId, SubscribeConfig subscribeConfig) {
         if (VDBG) {
-            Log.v(TAG, "subscribe(): data='" + subscribeData + "', settings=" + subscribeSettings);
+            Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
 
-        if (subscribeSettings.mSubscribeType == SubscribeSettings.SUBSCRIBE_TYPE_ACTIVE
-                && subscribeData.mRxFilterLength != 0) {
+        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_ACTIVE
+                && subscribeConfig.mRxFilterLength != 0) {
             throw new IllegalArgumentException(
-                    "Invalid subscribe data & settings: ACTIVE subscribes can't have an Rx filter");
+                    "Invalid subscribe config: ACTIVE subscribes can't have an Rx filter");
         }
-        if (subscribeSettings.mSubscribeType == SubscribeSettings.SUBSCRIBE_TYPE_PASSIVE
-                && subscribeData.mTxFilterLength != 0) {
+        if (subscribeConfig.mSubscribeType == SubscribeConfig.SUBSCRIBE_TYPE_PASSIVE
+                && subscribeConfig.mTxFilterLength != 0) {
             throw new IllegalArgumentException(
-                    "Invalid subscribe data & settings: PASSIVE subscribes can't have a Tx filter");
+                    "Invalid subscribe config: PASSIVE subscribes can't have a Tx filter");
         }
 
         try {
-            mService.subscribe(mClientId, sessionId, subscribeData, subscribeSettings);
+            mService.subscribe(mClientId, sessionId, subscribeConfig);
         } catch (RemoteException e) {
             Log.w(TAG, "subscribe RemoteException: " + e);
         }

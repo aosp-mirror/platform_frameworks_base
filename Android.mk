@@ -480,10 +480,8 @@ aidl_files := \
 	frameworks/base/media/java/android/media/browse/MediaBrowser.aidl \
 	frameworks/base/wifi/java/android/net/wifi/ScanSettings.aidl \
 	frameworks/base/wifi/java/android/net/wifi/nan/ConfigRequest.aidl \
-	frameworks/base/wifi/java/android/net/wifi/nan/PublishData.aidl \
-	frameworks/base/wifi/java/android/net/wifi/nan/SubscribeData.aidl \
-	frameworks/base/wifi/java/android/net/wifi/nan/PublishSettings.aidl \
-	frameworks/base/wifi/java/android/net/wifi/nan/SubscribeSettings.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/PublishConfig.aidl \
+	frameworks/base/wifi/java/android/net/wifi/nan/SubscribeConfig.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pInfo.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pDeviceList.aidl \
 	frameworks/base/wifi/java/android/net/wifi/p2p/WifiP2pConfig.aidl \
