@@ -540,6 +540,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *            provider.
      * @param signal used by the caller to signal if the request should be
      *            cancelled. May be null.
+     * @see #getDocumentStreamTypes(String, String)
      */
     @SuppressWarnings("unused")
     public AssetFileDescriptor openTypedDocument(
@@ -926,6 +927,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
      * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
+     * @see #getDocumentStreamTypes(String, String)
      */
     @Override
     public final AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
@@ -938,12 +940,62 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @see #openDocumentThumbnail(String, Point, CancellationSignal)
      * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
+     * @see #getDocumentStreamTypes(String, String)
      */
     @Override
     public final AssetFileDescriptor openTypedAssetFile(
             Uri uri, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
             throws FileNotFoundException {
         return openTypedAssetFileImpl(uri, mimeTypeFilter, opts, signal);
+    }
+
+    /**
+     * Return a list of streamable MIME types matching the filter, which can be passed to
+     * {@link #openTypedDocument(String, String, Bundle, CancellationSignal)}.
+     *
+     * <p>The default implementation returns a MIME type provided by
+     * {@link #queryDocument(String, String[])} as long as it matches the filter and the document
+     * does not have the {@link Document#FLAG_VIRTUAL_DOCUMENT} flag set.
+     *
+     * @see #getStreamTypes(Uri, String)
+     * @see #openTypedDocument(String, String, Bundle, CancellationSignal)
+     */
+    public String[] getDocumentStreamTypes(String documentId, String mimeTypeFilter) {
+        Cursor cursor = null;
+        try {
+            cursor = queryDocument(documentId, null);
+            if (cursor.moveToFirst()) {
+                final String mimeType =
+                    cursor.getString(cursor.getColumnIndexOrThrow(Document.COLUMN_MIME_TYPE));
+                final long flags =
+                    cursor.getLong(cursor.getColumnIndexOrThrow(Document.COLUMN_FLAGS));
+                if ((flags & Document.FLAG_VIRTUAL_DOCUMENT) == 0 && mimeType != null &&
+                        mimeTypeMatches(mimeTypeFilter, mimeType)) {
+                    return new String[] { mimeType };
+                }
+            }
+        } catch (FileNotFoundException e) {
+            return null;
+        } finally {
+            IoUtils.closeQuietly(cursor);
+        }
+
+        // No streamable MIME types.
+        return null;
+    }
+
+    /**
+     * Called by a client to determine the types of data streams that this content provider
+     * support for the given URI.
+     *
+     * <p>Overriding this method is deprecated. Override {@link #openTypedDocument} instead.
+     *
+     * @see #getDocumentStreamTypes(String, String)
+     */
+    @Override
+    public String[] getStreamTypes(Uri uri, String mimeTypeFilter) {
+        enforceTree(uri);
+        return getDocumentStreamTypes(getDocumentId(uri), mimeTypeFilter);
     }
 
     /**
@@ -970,5 +1022,22 @@ public abstract class DocumentsProvider extends ContentProvider {
         }
         // For any other yet unhandled case, let the provider subclass handle it.
         return openTypedDocument(documentId, mimeTypeFilter, opts, signal);
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean mimeTypeMatches(String filter, String test) {
+        if (test == null) {
+            return false;
+        } else if (filter == null || "*/*".equals(filter)) {
+            return true;
+        } else if (filter.equals(test)) {
+            return true;
+        } else if (filter.endsWith("/*")) {
+            return filter.regionMatches(0, test, 0, filter.indexOf('/'));
+        } else {
+            return false;
+        }
     }
 }

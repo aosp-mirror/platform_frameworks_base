@@ -31738,6 +31738,7 @@ package android.provider {
     method public java.lang.String createDocument(java.lang.String, java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
     method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public void deleteDocument(java.lang.String) throws java.io.FileNotFoundException;
+    method public java.lang.String[] getDocumentStreamTypes(java.lang.String, java.lang.String);
     method public java.lang.String getDocumentType(java.lang.String) throws java.io.FileNotFoundException;
     method public final java.lang.String getType(android.net.Uri);
     method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
