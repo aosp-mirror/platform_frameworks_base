@@ -908,6 +908,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    void cancelInitializingActivities() {
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                stacks.get(stackNdx).cancelInitializingActivities();
+            }
+        }
+    }
+
     void reportActivityVisibleLocked(ActivityRecord r) {
         sendWaitingVisibleReportLocked(r);
     }
