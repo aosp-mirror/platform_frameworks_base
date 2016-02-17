@@ -536,7 +536,11 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
         @Override
         public void onItemStateChanged(String modelId, boolean selected) {
             final Cursor cursor = mModel.getItem(modelId);
-            checkNotNull(cursor, "Cursor cannot be null.");
+            if (cursor == null) {
+                Log.e(TAG, "Model returned null cursor for document: " + modelId
+                        + ". Ignoring state changed event.");
+                return;
+            }
 
             // TODO: Should this be happening in onSelectionChanged? Technically this callback is
             // triggered on "silent" selection updates (i.e. we might be reacting to unfinalized

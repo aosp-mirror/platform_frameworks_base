@@ -22,30 +22,36 @@ import android.test.suitebuilder.annotation.SmallTest;
 @SmallTest
 public class DocumentInfoTest extends AndroidTestCase {
 
+    private static final DocumentInfo TEST_DOC
+            = createDocInfo("authority.a", "doc.1", "text/plain");
+
     public void testEquals() throws Exception {
-        DocumentInfo doc = createDocInfo("authority.a", "doc.1", "text/plain");
-        assertEquals(doc, doc);
+        assertEquals(TEST_DOC, TEST_DOC);
+        assertEquals(TEST_DOC, createDocInfo("authority.a", "doc.1", "text/plain"));
+    }
+
+    public void testEquals_HandlesNulls() throws Exception {
+        assertFalse(TEST_DOC.equals(null));
+    }
+
+    public void testEquals_HandlesNullFields() throws Exception {
+        assertFalse(TEST_DOC.equals(new DocumentInfo()));
+        assertFalse(new DocumentInfo().equals(TEST_DOC));
     }
 
     public void testNotEquals_differentAuthority() throws Exception {
-        DocumentInfo docA = createDocInfo("authority.a", "doc.1", "text/plain");
-        DocumentInfo docB = createDocInfo("authority.b", "doc.1", "text/plain");
-        assertFalse(docA.equals(docB));
+        assertFalse(TEST_DOC.equals(createDocInfo("authority.b", "doc.1", "text/plain")));
     }
 
     public void testNotEquals_differentDocId() throws Exception {
-        DocumentInfo docA = createDocInfo("authority.a", "doc.1", "text/plain");
-        DocumentInfo docB = createDocInfo("authority.a", "doc.2", "text/plain");
-        assertFalse(docA.equals(docB));
+        assertFalse(TEST_DOC.equals(createDocInfo("authority.a", "doc.2", "text/plain")));
     }
 
     public void testNotEquals_differentMimetype() throws Exception {
-        DocumentInfo docA = createDocInfo("authority.a", "doc.1", "text/plain");
-        DocumentInfo docB = createDocInfo("authority.a", "doc.1", "image/png");
-        assertFalse(docA.equals(docB));
+        assertFalse(TEST_DOC.equals(createDocInfo("authority.a", "doc.1", "image/png")));
     }
 
-    private DocumentInfo createDocInfo(String authority, String docId, String mimeType) {
+    private static DocumentInfo createDocInfo(String authority, String docId, String mimeType) {
         DocumentInfo doc = new DocumentInfo();
         doc.authority = authority;
         doc.documentId = docId;
