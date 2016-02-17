@@ -19,9 +19,12 @@ package com.android.systemui.recents;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.systemui.EventLogConstants;
+import com.android.systemui.EventLogTags;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
@@ -46,7 +49,8 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     }
 
     @Override
-    public void registerNonSystemUserCallbacks(final IBinder nonSystemUserCallbacks, int userId) {
+    public void registerNonSystemUserCallbacks(final IBinder nonSystemUserCallbacks,
+            final int userId) {
         try {
             final IRecentsNonSystemUserCallbacks callback =
                     IRecentsNonSystemUserCallbacks.Stub.asInterface(nonSystemUserCallbacks);
@@ -54,9 +58,14 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
                 @Override
                 public void binderDied() {
                     mNonSystemUserRecents.removeAt(mNonSystemUserRecents.indexOfValue(callback));
+                    EventLog.writeEvent(EventLogTags.SYSUI_RECENTS_CONNECTION,
+                            EventLogConstants.SYSUI_RECENTS_CONNECTION_SYSTEM_UNREGISTER_USER,
+                            userId);
                 }
             }, 0);
             mNonSystemUserRecents.put(userId, callback);
+            EventLog.writeEvent(EventLogTags.SYSUI_RECENTS_CONNECTION,
+                    EventLogConstants.SYSUI_RECENTS_CONNECTION_SYSTEM_REGISTER_USER, userId);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register NonSystemUserCallbacks", e);
         }
