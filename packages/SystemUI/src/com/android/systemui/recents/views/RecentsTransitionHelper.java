@@ -49,6 +49,7 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
@@ -99,8 +100,7 @@ public class RecentsTransitionHelper {
 
         final ActivityOptions.OnAnimationStartedListener animStartedListener;
         final IAppTransitionAnimationSpecsFuture transitionFuture;
-        if (task.thumbnail != null && task.thumbnail.getWidth() > 0 &&
-                task.thumbnail.getHeight() > 0) {
+        if (taskView != null) {
             transitionFuture = getAppTransitionFuture(task, stackView, destinationStack);
             animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
                 @Override
@@ -266,7 +266,11 @@ public class RecentsTransitionHelper {
         // If this is a full screen stack, the transition will be towards the single, full screen
         // task. We only need the transition spec for this task.
         List<AppTransitionAnimationSpec> specs = new ArrayList<>();
-        if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+
+        // TODO: Sometimes targetStackId is not initialized after reboot, so we also have to
+        // check for INVALID_STACK_ID
+        if (targetStackId == FULLSCREEN_WORKSPACE_STACK_ID || targetStackId == DOCKED_STACK_ID
+                || targetStackId == INVALID_STACK_ID) {
             if (taskView == null) {
                 specs.add(composeOffscreenAnimationSpec(task, offscreenTaskRect));
             } else {
