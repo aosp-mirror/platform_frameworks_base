@@ -25,8 +25,8 @@ import com.android.internal.util.WakeupMessage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.DhcpResults;
 import android.net.BaseDhcpStateMachine;
+import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
@@ -246,6 +246,11 @@ public class DhcpClient extends BaseDhcpStateMachine {
     }
 
     public static BaseDhcpStateMachine makeDhcpStateMachine(
+            Context context, StateMachine controller, String intf) {
+        return makeDhcpClient(context, controller, intf);
+    }
+
+    public static DhcpClient makeDhcpClient(
             Context context, StateMachine controller, String intf) {
         DhcpClient client = new DhcpClient(context, controller, intf);
         client.start();
@@ -822,7 +827,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
             super.enter();
             mOneshotTimeoutAlarm.cancel();
             notifySuccess();
-            // TODO: DhcpStateMachine only supports renewing at 50% of the lease time, and does not
+            // TODO: DhcpStateMachine only supported renewing at 50% of the lease time, and did not
             // support rebinding. Once the legacy DHCP client is gone, fix this.
             scheduleRenew();
         }
@@ -890,7 +895,7 @@ public class DhcpClient extends BaseDhcpStateMachine {
         }
     }
 
-    // Not implemented. DhcpStateMachine does not implement it either.
+    // Not implemented. DhcpStateMachine did not implement it either.
     class DhcpRebindingState extends LoggingState {
     }
 
