@@ -308,14 +308,31 @@ public abstract class BackupAgent extends ContextWrapper {
         final String packageName = getPackageName();
         final ApplicationInfo appInfo = getApplicationInfo();
 
-        String rootDir = new File(appInfo.dataDir).getCanonicalPath();
-        String filesDir = getFilesDir().getCanonicalPath();
-        String nobackupDir = getNoBackupFilesDir().getCanonicalPath();
-        String databaseDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
-        String sharedPrefsDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
-        String cacheDir = getCacheDir().getCanonicalPath();
-        String codeCacheDir = getCodeCacheDir().getCanonicalPath();
-        String libDir = (appInfo.nativeLibraryDir != null)
+        // System apps have control over where their default storage context
+        // is pointed, so we're always explicit when building paths.
+        final Context ceContext = createCredentialEncryptedStorageContext();
+        final String rootDir = ceContext.getDataDir().getCanonicalPath();
+        final String filesDir = ceContext.getFilesDir().getCanonicalPath();
+        final String noBackupDir = ceContext.getNoBackupFilesDir().getCanonicalPath();
+        final String databaseDir = ceContext.getDatabasePath("foo").getParentFile()
+                .getCanonicalPath();
+        final String sharedPrefsDir = ceContext.getSharedPreferencesPath("foo").getParentFile()
+                .getCanonicalPath();
+        final String cacheDir = ceContext.getCacheDir().getCanonicalPath();
+        final String codeCacheDir = ceContext.getCodeCacheDir().getCanonicalPath();
+
+        final Context deContext = createDeviceEncryptedStorageContext();
+        final String deviceRootDir = deContext.getDataDir().getCanonicalPath();
+        final String deviceFilesDir = deContext.getFilesDir().getCanonicalPath();
+        final String deviceNoBackupDir = deContext.getNoBackupFilesDir().getCanonicalPath();
+        final String deviceDatabaseDir = deContext.getDatabasePath("foo").getParentFile()
+                .getCanonicalPath();
+        final String deviceSharedPrefsDir = deContext.getSharedPreferencesPath("foo")
+                .getParentFile().getCanonicalPath();
+        final String deviceCacheDir = deContext.getCacheDir().getCanonicalPath();
+        final String deviceCodeCacheDir = deContext.getCodeCacheDir().getCanonicalPath();
+
+        final String libDir = (appInfo.nativeLibraryDir != null)
                 ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
                 : null;
 
@@ -325,16 +342,23 @@ public abstract class BackupAgent extends ContextWrapper {
         final ArraySet<String> traversalExcludeSet = new ArraySet<String>();
 
         // Add the directories we always exclude.
+        traversalExcludeSet.add(filesDir);
+        traversalExcludeSet.add(noBackupDir);
+        traversalExcludeSet.add(databaseDir);
+        traversalExcludeSet.add(sharedPrefsDir);
         traversalExcludeSet.add(cacheDir);
         traversalExcludeSet.add(codeCacheDir);
-        traversalExcludeSet.add(nobackupDir);
+
+        traversalExcludeSet.add(deviceFilesDir);
+        traversalExcludeSet.add(deviceNoBackupDir);
+        traversalExcludeSet.add(deviceDatabaseDir);
+        traversalExcludeSet.add(deviceSharedPrefsDir);
+        traversalExcludeSet.add(deviceCacheDir);
+        traversalExcludeSet.add(deviceCodeCacheDir);
+
         if (libDir != null) {
             traversalExcludeSet.add(libDir);
         }
-
-        traversalExcludeSet.add(databaseDir);
-        traversalExcludeSet.add(sharedPrefsDir);
-        traversalExcludeSet.add(filesDir);
 
         // Root dir first.
         applyXmlFiltersAndDoFullBackupForDomain(
@@ -342,12 +366,23 @@ public abstract class BackupAgent extends ContextWrapper {
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(rootDir);
 
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.DEVICE_ROOT_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(deviceRootDir);
+
         // Data dir next.
         traversalExcludeSet.remove(filesDir);
         applyXmlFiltersAndDoFullBackupForDomain(
-                packageName, FullBackup.DATA_TREE_TOKEN, manifestIncludeMap,
+                packageName, FullBackup.FILES_TREE_TOKEN, manifestIncludeMap,
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(filesDir);
+
+        traversalExcludeSet.remove(deviceFilesDir);
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.DEVICE_FILES_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(deviceFilesDir);
 
         // Database directory.
         traversalExcludeSet.remove(databaseDir);
@@ -356,12 +391,24 @@ public abstract class BackupAgent extends ContextWrapper {
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(databaseDir);
 
+        traversalExcludeSet.remove(deviceDatabaseDir);
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.DEVICE_DATABASE_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(deviceDatabaseDir);
+
         // SharedPrefs.
         traversalExcludeSet.remove(sharedPrefsDir);
         applyXmlFiltersAndDoFullBackupForDomain(
                 packageName, FullBackup.SHAREDPREFS_TREE_TOKEN, manifestIncludeMap,
                 manifestExcludeSet, traversalExcludeSet, data);
         traversalExcludeSet.add(sharedPrefsDir);
+
+        traversalExcludeSet.remove(deviceSharedPrefsDir);
+        applyXmlFiltersAndDoFullBackupForDomain(
+                packageName, FullBackup.DEVICE_SHAREDPREFS_TREE_TOKEN, manifestIncludeMap,
+                manifestExcludeSet, traversalExcludeSet, data);
+        traversalExcludeSet.add(deviceSharedPrefsDir);
 
         // getExternalFilesDir() location associated with this app.  Technically there should
         // not be any files here if the app does not properly have permission to access
@@ -445,27 +492,49 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public final void fullBackupFile(File file, FullBackupDataOutput output) {
         // Look up where all of our various well-defined dir trees live on this device
-        String mainDir;
-        String filesDir;
-        String nbFilesDir;
-        String dbDir;
-        String spDir;
-        String cacheDir;
-        String codeCacheDir;
-        String libDir;
+        final String rootDir;
+        final String filesDir;
+        final String nbFilesDir;
+        final String dbDir;
+        final String spDir;
+        final String cacheDir;
+        final String codeCacheDir;
+        final String deviceRootDir;
+        final String deviceFilesDir;
+        final String deviceNbFilesDir;
+        final String deviceDbDir;
+        final String deviceSpDir;
+        final String deviceCacheDir;
+        final String deviceCodeCacheDir;
+        final String libDir;
+
         String efDir = null;
         String filePath;
 
         ApplicationInfo appInfo = getApplicationInfo();
 
         try {
-            mainDir = new File(appInfo.dataDir).getCanonicalPath();
-            filesDir = getFilesDir().getCanonicalPath();
-            nbFilesDir = getNoBackupFilesDir().getCanonicalPath();
-            dbDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
-            spDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
-            cacheDir = getCacheDir().getCanonicalPath();
-            codeCacheDir = getCodeCacheDir().getCanonicalPath();
+            // System apps have control over where their default storage context
+            // is pointed, so we're always explicit when building paths.
+            final Context ceContext = createCredentialEncryptedStorageContext();
+            rootDir = ceContext.getDataDir().getCanonicalPath();
+            filesDir = ceContext.getFilesDir().getCanonicalPath();
+            nbFilesDir = ceContext.getNoBackupFilesDir().getCanonicalPath();
+            dbDir = ceContext.getDatabasePath("foo").getParentFile().getCanonicalPath();
+            spDir = ceContext.getSharedPreferencesPath("foo").getParentFile().getCanonicalPath();
+            cacheDir = ceContext.getCacheDir().getCanonicalPath();
+            codeCacheDir = ceContext.getCodeCacheDir().getCanonicalPath();
+
+            final Context deContext = createDeviceEncryptedStorageContext();
+            deviceRootDir = deContext.getDataDir().getCanonicalPath();
+            deviceFilesDir = deContext.getFilesDir().getCanonicalPath();
+            deviceNbFilesDir = deContext.getNoBackupFilesDir().getCanonicalPath();
+            deviceDbDir = deContext.getDatabasePath("foo").getParentFile().getCanonicalPath();
+            deviceSpDir = deContext.getSharedPreferencesPath("foo").getParentFile()
+                    .getCanonicalPath();
+            deviceCacheDir = deContext.getCacheDir().getCanonicalPath();
+            deviceCodeCacheDir = deContext.getCodeCacheDir().getCanonicalPath();
+
             libDir = (appInfo.nativeLibraryDir == null)
                     ? null
                     : new File(appInfo.nativeLibraryDir).getCanonicalPath();
@@ -489,8 +558,11 @@ public abstract class BackupAgent extends ContextWrapper {
 
         if (filePath.startsWith(cacheDir)
                 || filePath.startsWith(codeCacheDir)
-                || filePath.startsWith(libDir)
-                || filePath.startsWith(nbFilesDir)) {
+                || filePath.startsWith(nbFilesDir)
+                || filePath.startsWith(deviceCacheDir)
+                || filePath.startsWith(deviceCodeCacheDir)
+                || filePath.startsWith(deviceNbFilesDir)
+                || filePath.startsWith(libDir)) {
             Log.w(TAG, "lib, cache, code_cache, and no_backup files are not backed up");
             return;
         }
@@ -504,11 +576,23 @@ public abstract class BackupAgent extends ContextWrapper {
             domain = FullBackup.SHAREDPREFS_TREE_TOKEN;
             rootpath = spDir;
         } else if (filePath.startsWith(filesDir)) {
-            domain = FullBackup.DATA_TREE_TOKEN;
+            domain = FullBackup.FILES_TREE_TOKEN;
             rootpath = filesDir;
-        } else if (filePath.startsWith(mainDir)) {
+        } else if (filePath.startsWith(rootDir)) {
             domain = FullBackup.ROOT_TREE_TOKEN;
-            rootpath = mainDir;
+            rootpath = rootDir;
+        } else if (filePath.startsWith(deviceDbDir)) {
+            domain = FullBackup.DEVICE_DATABASE_TREE_TOKEN;
+            rootpath = deviceDbDir;
+        } else if (filePath.startsWith(deviceSpDir)) {
+            domain = FullBackup.DEVICE_SHAREDPREFS_TREE_TOKEN;
+            rootpath = deviceSpDir;
+        } else if (filePath.startsWith(deviceFilesDir)) {
+            domain = FullBackup.DEVICE_FILES_TREE_TOKEN;
+            rootpath = deviceFilesDir;
+        } else if (filePath.startsWith(deviceRootDir)) {
+            domain = FullBackup.DEVICE_ROOT_TREE_TOKEN;
+            rootpath = deviceRootDir;
         } else if ((efDir != null) && filePath.startsWith(efDir)) {
             domain = FullBackup.MANAGED_EXTERNAL_TREE_TOKEN;
             rootpath = efDir;
