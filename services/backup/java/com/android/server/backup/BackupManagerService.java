@@ -191,7 +191,8 @@ public class BackupManagerService {
     // 1 : initial release
     // 2 : no format change per se; version bump to facilitate PBKDF2 version skew detection
     // 3 : introduced "_meta" metadata file; no other format change per se
-    static final int BACKUP_FILE_VERSION = 3;
+    // 4 : added support for new device-encrypted storage locations
+    static final int BACKUP_FILE_VERSION = 4;
     static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
     static final int BACKUP_PW_FILE_VERSION = 2;
     static final String BACKUP_METADATA_FILENAME = "_meta";
@@ -347,13 +348,13 @@ public class BackupManagerService {
         }
 
         @Override
-        public void onBootPhase(int phase) {
-            if (phase == PHASE_SYSTEM_SERVICES_READY) {
-                sInstance.initialize(UserHandle.USER_SYSTEM);
-            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+        public void onUnlockUser(int userId) {
+            if (userId == UserHandle.USER_SYSTEM) {
+                sInstance.initialize(userId);
+
                 ContentResolver r = sInstance.mContext.getContentResolver();
-                boolean areEnabled = Settings.Secure.getInt(r,
-                        Settings.Secure.BACKUP_ENABLED, 0) != 0;
+                boolean areEnabled = Settings.Secure.getIntForUser(r,
+                        Settings.Secure.BACKUP_ENABLED, 0, userId) != 0;
                 try {
                     sInstance.setBackupEnabled(areEnabled);
                 } catch (RemoteException e) {

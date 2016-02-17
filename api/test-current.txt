@@ -8012,6 +8012,7 @@ package android.content {
     method public final int getColor(int);
     method public final android.content.res.ColorStateList getColorStateList(int);
     method public abstract android.content.ContentResolver getContentResolver();
+    method public abstract java.io.File getDataDir();
     method public abstract java.io.File getDatabasePath(java.lang.String);
     method public abstract java.io.File getDir(java.lang.String, int);
     method public final android.graphics.drawable.Drawable getDrawable(int);
@@ -8205,6 +8206,7 @@ package android.content {
     method public java.lang.ClassLoader getClassLoader();
     method public java.io.File getCodeCacheDir();
     method public android.content.ContentResolver getContentResolver();
+    method public java.io.File getDataDir();
     method public java.io.File getDatabasePath(java.lang.String);
     method public java.io.File getDir(java.lang.String, int);
     method public java.io.File getExternalCacheDir();
@@ -37631,6 +37633,7 @@ package android.test.mock {
     method public java.lang.ClassLoader getClassLoader();
     method public java.io.File getCodeCacheDir();
     method public android.content.ContentResolver getContentResolver();
+    method public java.io.File getDataDir();
     method public java.io.File getDatabasePath(java.lang.String);
     method public java.io.File getDir(java.lang.String, int);
     method public java.io.File getExternalCacheDir();

@@ -811,6 +811,25 @@ public abstract class Context {
     public abstract File getSharedPreferencesPath(String name);
 
     /**
+     * Returns the absolute path to the directory on the filesystem where all
+     * private files belonging to this app are stored. This is the top-level
+     * directory under which {@link #getFilesDir()}, {@link #getCacheDir()}, etc
+     * are contained. Apps should <em>not</em> create any files or directories
+     * as direct children of this directory, since it's a reserved namespace
+     * belonging to the platform. Instead, use {@link #getDir(String, int)} or
+     * other storage APIs.
+     * <p>
+     * The returned path may change over time if the calling app is moved to an
+     * adopted storage device, so only relative paths should be persisted.
+     * <p>
+     * No additional permissions are required for the calling app to read or
+     * write files under the returned path.
+     *
+     * @see #getDir(String, int)
+     */
+    public abstract File getDataDir();
+
+    /**
      * Returns the absolute path to the directory on the filesystem where files
      * created with {@link #openFileOutput} are stored.
      * <p>
