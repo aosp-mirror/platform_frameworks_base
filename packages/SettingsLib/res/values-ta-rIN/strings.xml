@@ -165,7 +165,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"எப்போதும் வைஃபை ரோமிங் ஸ்கேன்களை அனுமதி"</string>
     <string name="legacy_dhcp_client" msgid="694426978909127287">"அதிகாரப்பூர்வ DHCP க்ளையன்ட்டைப் பயன்படுத்து"</string>
     <string name="mobile_data_always_on" msgid="7745605759775320362">"செல்லுலார் தரவு எப்போதும் இயக்கத்தில்"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"முழுமையான ஒலி அம்சத்தை முடக்கு"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wifi நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_aggressive_handover_summary" msgid="6328455667642570371">"இயக்கப்பட்டதும், வைஃபை சிக்னல் குறையும் போது, வைஃபை முழுமையாக ஒத்துழைக்காமல் இருப்பதால் செல்லுலாரின் தரவு இணைப்புக்கு மாறும்"</string>
@@ -186,7 +186,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"இந்த அமைப்பு மேம்பட்டப் பயன்பாட்டிற்காக மட்டுமே. உங்கள் சாதனம் மற்றும் அதில் உள்ள பயன்பாடுகளைச் சிதைக்கும் அல்லது தவறாகச் செயல்படும் வகையில் பாதிப்பை ஏற்படுத்தும்."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB பயன்பாடுகளை சரிபார்"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"தீங்கு விளைவிக்கும் செயல்பாட்டை அறிய ADB/ADT மூலம் நிறுவப்பட்டப் பயன்பாடுகளைச் சரிபார்."</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"பேரிரைச்சல் அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் முழுமையான ஒலி அம்சத்தை முடக்கும்."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"மிகவும் அதிகமான ஒலியளவு அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கும்."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"அக முனையம்"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் பயன்பாட்டை இயக்கு"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP சரிபார்ப்பு"</string>
@@ -296,6 +296,8 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"வண்ணத்திருத்தம்"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
+    <!-- no translation found for power_remaining_duration_only (4400068916452346544) -->
+    <skip />
     <string name="power_discharging_duration" msgid="1605929174734600590">"தோராயம்: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> உள்ளது"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"முழு சார்ஜிற்கு: <xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -312,4 +314,8 @@
     <string name="battery_info_status_full" msgid="2824614753861462808">"முழுமை"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"நிர்வாகி முடக்கியுள்ளார்"</string>
     <string name="home" msgid="8263346537524314127">"முகப்பு"</string>
+    <!-- no translation found for charge_length_format (8978516217024434156) -->
+    <skip />
+    <!-- no translation found for remaining_length_format (7886337596669190587) -->
+    <skip />
 </resources>
