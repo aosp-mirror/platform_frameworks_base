@@ -43,6 +43,7 @@ import android.view.MenuItem;
 import com.android.documentsui.OperationDialogFragment.DialogType;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
@@ -272,24 +273,20 @@ public class FilesActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc, @Nullable SiblingProvider siblings) {
+    public void onDocumentPicked(DocumentInfo doc, Model model) {
         if (doc.isContainer()) {
             openContainerDocument(doc);
         } else {
-            openDocument(doc, siblings);
+            openDocument(doc, model);
         }
     }
 
     /**
      * Launches an intent to view the specified document.
      */
-    private void openDocument(DocumentInfo doc, @Nullable SiblingProvider siblings) {
-        Intent intent = null;
-        if (siblings != null) {
-            QuickViewIntentBuilder builder = new QuickViewIntentBuilder(
-                    getPackageManager(), getResources(), doc, siblings);
-            intent = builder.build();
-        }
+    private void openDocument(DocumentInfo doc, Model model) {
+        Intent intent = new QuickViewIntentBuilder(
+                getPackageManager(), getResources(), doc, model).build();
 
         if (intent != null) {
             // TODO: un-work around issue b/24963914. Should be fixed soon.

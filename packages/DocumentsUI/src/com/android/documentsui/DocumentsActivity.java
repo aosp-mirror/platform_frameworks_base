@@ -48,6 +48,7 @@ import android.view.MenuItem;
 import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.RecentsProvider.ResumeColumns;
 import com.android.documentsui.dirlist.DirectoryFragment;
+import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
@@ -328,7 +329,7 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     @Override
-    public void onDocumentPicked(DocumentInfo doc, SiblingProvider siblings) {
+    public void onDocumentPicked(DocumentInfo doc, Model model) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isContainer()) {
             openContainerDocument(doc);
