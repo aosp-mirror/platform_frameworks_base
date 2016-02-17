@@ -232,7 +232,6 @@ LOCAL_CFLAGS := \
 
 LOCAL_SRC_FILES += \
     $(hwui_test_common_src_files) \
-    tests/unit/BufferPoolTests.cpp \
     tests/unit/CanvasStateTests.cpp \
     tests/unit/ClipAreaTests.cpp \
     tests/unit/CrashHandlerInjector.cpp \

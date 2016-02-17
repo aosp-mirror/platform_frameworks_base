@@ -18,14 +18,12 @@
 
 #include <utils/RefBase.h>
 
-#include "BufferPool.h"
-
 namespace android {
 namespace uirenderer {
 
 class FrameMetricsObserver : public VirtualLightRefBase {
 public:
-    virtual void notify(BufferPool::Buffer* buffer, int dropCount);
+    virtual void notify(const int64_t* buffer);
 };
 
 }; // namespace uirenderer

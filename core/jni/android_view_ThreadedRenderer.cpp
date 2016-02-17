@@ -17,6 +17,7 @@
 #define LOG_TAG "ThreadedRenderer"
 
 #include <algorithm>
+#include <atomic>
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
@@ -231,28 +232,13 @@ class ObserverProxy;
 
 class NotifyHandler : public MessageHandler {
 public:
-    NotifyHandler(JavaVM* vm) : mVm(vm) {}
-
-    void setObserver(ObserverProxy* observer) {
-        mObserver = observer;
-    }
-
-    void setBuffer(BufferPool::Buffer* buffer) {
-        mBuffer = buffer;
-    }
-
-    void setDropCount(int dropCount) {
-        mDropCount = dropCount;
-    }
+    NotifyHandler(JavaVM* vm, ObserverProxy* observer) : mVm(vm), mObserver(observer) {}
 
     virtual void handleMessage(const Message& message);
 
 private:
-    JavaVM* mVm;
-
-    sp<ObserverProxy> mObserver;
-    BufferPool::Buffer* mBuffer = nullptr;
-    int mDropCount = 0;
+    JavaVM* const mVm;
+    ObserverProxy* const mObserver;
 };
 
 static jlongArray get_metrics_buffer(JNIEnv* env, jobject observer) {
@@ -265,6 +251,9 @@ static jlongArray get_metrics_buffer(JNIEnv* env, jobject observer) {
     return reinterpret_cast<jlongArray>(buffer);
 }
 
+/*
+ * Implements JNI layer for hwui frame metrics reporting.
+ */
 class ObserverProxy : public FrameMetricsObserver {
 public:
     ObserverProxy(JavaVM *vm, jobject observer) : mVm(vm) {
@@ -284,7 +273,7 @@ public:
         mMessageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueLocal);
         LOG_ALWAYS_FATAL_IF(mMessageQueue == nullptr, "message queue not available");
 
-        mMessageHandler = new NotifyHandler(mVm);
+        mMessageHandler = new NotifyHandler(mVm, this);
         LOG_ALWAYS_FATAL_IF(mMessageHandler == nullptr,
                 "OOM: unable to allocate NotifyHandler");
     }
@@ -298,18 +287,53 @@ public:
         return mObserverWeak;
     }
 
-    virtual void notify(BufferPool::Buffer* buffer, int dropCount) {
-        buffer->incRef();
-        mMessageHandler->setBuffer(buffer);
-        mMessageHandler->setObserver(this);
-        mMessageHandler->setDropCount(dropCount);
-        mMessageQueue->getLooper()->sendMessage(mMessageHandler, mMessage);
+    bool getNextBuffer(JNIEnv* env, jlongArray sink, int* dropCount) {
+        FrameMetricsNotification& elem = mRingBuffer[mNextInQueue];
+
+        if (elem.hasData.load()) {
+            env->SetLongArrayRegion(sink, 0, kBufferSize, elem.buffer);
+            *dropCount = elem.dropCount;
+            mNextInQueue = (mNextInQueue + 1) % kRingSize;
+            elem.hasData = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual void notify(const int64_t* stats) {
+        FrameMetricsNotification& elem = mRingBuffer[mNextFree];
+
+        if (!elem.hasData.load()) {
+            memcpy(elem.buffer, stats, kBufferSize * sizeof(stats[0]));
+
+            elem.dropCount = mDroppedReports;
+            mDroppedReports = 0;
+
+            incStrong(nullptr);
+            mNextFree = (mNextFree + 1) % kRingSize;
+            elem.hasData = true;
+
+            mMessageQueue->getLooper()->sendMessage(mMessageHandler, mMessage);
+        } else {
+            mDroppedReports++;
+        }
     }
 
 private:
     static const int kBufferSize = static_cast<int>(FrameInfoIndex::NumIndexes);
+    static constexpr int kRingSize = 3;
 
-    JavaVM* mVm;
+    class FrameMetricsNotification {
+    public:
+        FrameMetricsNotification() : hasData(false) {}
+
+        std::atomic_bool hasData;
+        int64_t buffer[kBufferSize];
+        int dropCount = 0;
+    };
+
+    JavaVM* const mVm;
     jweak mObserverWeak;
     jobject mJavaBufferGlobal;
 
@@ -317,28 +341,28 @@ private:
     sp<NotifyHandler> mMessageHandler;
     Message mMessage;
 
+    int mNextFree = 0;
+    int mNextInQueue = 0;
+    FrameMetricsNotification mRingBuffer[kRingSize];
+
+    int mDroppedReports = 0;
 };
 
 void NotifyHandler::handleMessage(const Message& message) {
     JNIEnv* env = getenv(mVm);
 
-    ObserverProxy* observer = mObserver.get();
-    LOG_ALWAYS_FATAL_IF(observer == nullptr, "received message with no observer configured");
-    LOG_ALWAYS_FATAL_IF(mBuffer == nullptr, "received message with no data to report");
-
-    jobject target = env->NewLocalRef(observer->getObserverReference());
+    jobject target = env->NewLocalRef(mObserver->getObserverReference());
 
     if (target != nullptr) {
         jlongArray javaBuffer = get_metrics_buffer(env, target);
-        env->SetLongArrayRegion(javaBuffer,
-                0, mBuffer->getSize(), mBuffer->getBuffer());
-        env->CallVoidMethod(target, gFrameMetricsObserverClassInfo.callback,
-                mDropCount);
+        int dropCount = 0;
+        while (mObserver->getNextBuffer(env, javaBuffer, &dropCount)) {
+            env->CallVoidMethod(target, gFrameMetricsObserverClassInfo.callback, dropCount);
+        }
         env->DeleteLocalRef(target);
     }
 
-    mBuffer->release();
-    mObserver.clear();
+    mObserver->decStrong(nullptr);
 }
 
 static void android_view_ThreadedRenderer_setAtlas(JNIEnv* env, jobject clazz,
