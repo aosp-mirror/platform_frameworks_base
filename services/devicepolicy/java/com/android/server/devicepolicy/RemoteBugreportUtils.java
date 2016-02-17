@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.annotation.IntDef;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -24,13 +25,26 @@ import android.text.format.DateUtils;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Utilities class for the remote bugreport operation.
  */
 class RemoteBugreportUtils {
 
-    static final int REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID = 678435657;
-    static final int REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID = 590907895;
+    static final int NOTIFICATION_ID = 678432343;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        NOTIFICATION_BUGREPORT_STARTED,
+        NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED,
+        NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED
+    })
+    @interface RemoteBugreportNotificationType {}
+    static final int NOTIFICATION_BUGREPORT_STARTED = 1;
+    static final int NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED = 2;
+    static final int NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED = 3;
 
     static final long REMOTE_BUGREPORT_TIMEOUT_MILLIS = 10 * DateUtils.MINUTE_IN_MILLIS;
 
@@ -47,65 +61,57 @@ class RemoteBugreportUtils {
 
     static final String BUGREPORT_MIMETYPE = "application/vnd.android.bugreport";
 
-    static Notification buildRemoteBugreportConsentNotification(Context context) {
-        PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(
-                context, REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID,
-                new Intent(ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED),
-                        PendingIntent.FLAG_CANCEL_CURRENT);
-        PendingIntent pendingIntentDecline = PendingIntent.getBroadcast(
-                context, REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID,
-                new Intent(ACTION_REMOTE_BUGREPORT_SHARING_DECLINED),
-                        PendingIntent.FLAG_CANCEL_CURRENT);
-
-        return new Notification.Builder(context)
-                .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                .setContentTitle(context.getString(
-                        R.string.share_remote_bugreport_notification_title))
-                .setTicker(context.getString(R.string.share_remote_bugreport_notification_title))
-                .setContentText(context.getString(
-                        R.string.share_remote_bugreport_notification_message))
-                .setStyle(new Notification.BigTextStyle().bigText(context.getString(
-                        R.string.share_remote_bugreport_notification_message)))
-                .addAction(new Notification.Action.Builder(null /* icon */,
-                        context.getString(R.string.share_remote_bugreport_notification_decline),
-                        pendingIntentDecline).build())
-                .addAction(new Notification.Action.Builder(null /* icon */,
-                        context.getString(R.string.share_remote_bugreport_notification_accept),
-                        pendingIntentAccept).build())
-                .setOngoing(true)
-                .setLocalOnly(true)
-                .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setPriority(Notification.PRIORITY_MAX)
-                .setVibrate(new long[0])
-                .build();
-    }
-
-    static Notification buildRemoteBugreportInProgressNotification(Context context,
-            boolean canCancelBugreport) {
+    static Notification buildNotification(Context context,
+            @RemoteBugreportNotificationType int type) {
         Notification.Builder builder = new Notification.Builder(context)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
-                .setContentTitle(context.getString(
-                        R.string.remote_bugreport_progress_notification_title))
-                .setTicker(context.getString(
-                        R.string.remote_bugreport_progress_notification_title))
                 .setOngoing(true)
                 .setLocalOnly(true)
                 .setColor(context.getColor(
-                        com.android.internal.R.color.system_notification_accent_color))
-                .setPriority(Notification.PRIORITY_HIGH);
+                        com.android.internal.R.color.system_notification_accent_color));
 
-        if (canCancelBugreport) {
-            PendingIntent pendingIntentCancel = PendingIntent.getBroadcast(context,
-                    REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID,
-                    new Intent(ACTION_REMOTE_BUGREPORT_SHARING_DECLINED),
+        if (type == NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED) {
+            builder.setContentTitle(context.getString(
+                            R.string.sharing_remote_bugreport_notification_title))
+                    .setContentText(context.getString(
+                            R.string.sharing_remote_bugreport_notification_message))
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setProgress(0, 0, true)
+                    .setStyle(new Notification.BigTextStyle().bigText(context.getString(
+                            R.string.sharing_remote_bugreport_notification_message)));
+        } else {
+            PendingIntent pendingIntentAccept = PendingIntent.getBroadcast(context, NOTIFICATION_ID,
+                    new Intent(ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED),
                     PendingIntent.FLAG_CANCEL_CURRENT);
-            String message = context.getString(
-                    R.string.remote_bugreport_progress_notification_message_can_cancel);
-            builder.setContentText(message)
-                    .setContentIntent(pendingIntentCancel)
-                    .setStyle(new Notification.BigTextStyle().bigText(message));
+            PendingIntent pendingIntentDecline = PendingIntent.getBroadcast(context,
+                    NOTIFICATION_ID, new Intent(ACTION_REMOTE_BUGREPORT_SHARING_DECLINED),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            builder.addAction(new Notification.Action.Builder(null /* icon */, context.getString(
+                            R.string.share_remote_bugreport_notification_decline),
+                            pendingIntentDecline).build())
+                    .addAction(new Notification.Action.Builder(null /* icon */, context.getString(
+                            R.string.share_remote_bugreport_notification_accept),
+                            pendingIntentAccept).build())
+                    .setContentTitle(context.getString(
+                            R.string.share_remote_bugreport_notification_title));
+
+            if (type == NOTIFICATION_BUGREPORT_STARTED) {
+                builder.setContentText(context.getString(
+                                R.string.share_remote_bugreport_notification_message))
+                        .setStyle(new Notification.BigTextStyle().bigText(context.getString(
+                                R.string.share_remote_bugreport_notification_message)))
+                        .setProgress(0, 0, true)
+                        .setPriority(Notification.PRIORITY_MAX)
+                        .setVibrate(new long[0]);
+            } else if (type == NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED) {
+                builder.setContentText(context.getString(
+                                R.string.share_finished_remote_bugreport_notification_message))
+                        .setStyle(new Notification.BigTextStyle().bigText(context.getString(
+                                R.string.share_finished_remote_bugreport_notification_message)))
+                        .setPriority(Notification.PRIORITY_HIGH);
+            }
         }
+
         return builder.build();
     }
 }

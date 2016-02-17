@@ -341,7 +341,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             mInjector.getNotificationManager().cancel(LOG_TAG,
-                    RemoteBugreportUtils.REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID);
+                    RemoteBugreportUtils.NOTIFICATION_ID);
             if (RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED.equals(action)) {
                 onBugreportSharingAccepted();
             } else if (RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_DECLINED
@@ -442,9 +442,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 filterConsent.addAction(
                         RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED);
                 mContext.registerReceiver(mRemoteBugreportConsentReceiver, filterConsent);
-                mInjector.getNotificationManager().notify(
-                        LOG_TAG, RemoteBugreportUtils.REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID,
-                        RemoteBugreportUtils.buildRemoteBugreportConsentNotification(mContext));
+                mInjector.getNotificationManager().notify(LOG_TAG,
+                        RemoteBugreportUtils.NOTIFICATION_ID,
+                        RemoteBugreportUtils.buildNotification(mContext,
+                                RemoteBugreportUtils.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED));
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
@@ -5050,13 +5051,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mRemoteBugreportServiceIsActive.set(true);
             mRemoteBugreportSharingAccepted.set(false);
             registerRemoteBugreportReceivers();
-            mInjector.getNotificationManager().notify(
-                    LOG_TAG, RemoteBugreportUtils.REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID,
-                    RemoteBugreportUtils.buildRemoteBugreportConsentNotification(mContext));
-            mInjector.getNotificationManager().notify(
-                    LOG_TAG, RemoteBugreportUtils.REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID,
-                    RemoteBugreportUtils.buildRemoteBugreportInProgressNotification(mContext,
-                            /* canCancelBugReport */ true));
+            mInjector.getNotificationManager().notify(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+                    RemoteBugreportUtils.buildNotification(mContext,
+                            RemoteBugreportUtils.NOTIFICATION_BUGREPORT_STARTED));
             mHandler.postDelayed(mRemoteBugreportTimeoutRunnable,
                     RemoteBugreportUtils.REMOTE_BUGREPORT_TIMEOUT_MILLIS);
             return true;
@@ -5106,8 +5103,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void onBugreportFinished(Intent intent) {
         mHandler.removeCallbacks(mRemoteBugreportTimeoutRunnable);
         mRemoteBugreportServiceIsActive.set(false);
-        mInjector.getNotificationManager().cancel(LOG_TAG,
-                RemoteBugreportUtils.REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID);
         Uri bugreportUri = intent.getData();
         String bugreportUriString = null;
         if (bugreportUri != null) {
@@ -5117,8 +5112,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 RemoteBugreportUtils.EXTRA_REMOTE_BUGREPORT_HASH);
         if (mRemoteBugreportSharingAccepted.get()) {
             shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
+            mInjector.getNotificationManager().cancel(LOG_TAG,
+                    RemoteBugreportUtils.NOTIFICATION_ID);
         } else {
             setDeviceOwnerRemoteBugreportUriAndHash(bugreportUriString, bugreportHash);
+            mInjector.getNotificationManager().notify(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+                    RemoteBugreportUtils.buildNotification(mContext,
+                            RemoteBugreportUtils.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED));
         }
         mContext.unregisterReceiver(mRemoteBugreportFinishedReceiver);
     }
@@ -5129,10 +5129,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 RemoteBugreportUtils.REMOTE_BUGREPORT_SERVICE);
         mRemoteBugreportSharingAccepted.set(false);
         setDeviceOwnerRemoteBugreportUriAndHash(null, null);
-        mInjector.getNotificationManager().cancel(LOG_TAG,
-                RemoteBugreportUtils.REMOTE_BUGREPORT_CONSENT_NOTIFICATION_ID);
-        mInjector.getNotificationManager().cancel(LOG_TAG,
-                RemoteBugreportUtils.REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID);
+        mInjector.getNotificationManager().cancel(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID);
         Bundle extras = new Bundle();
         extras.putInt(DeviceAdminReceiver.EXTRA_BUGREPORT_FAILURE_REASON,
                 DeviceAdminReceiver.BUGREPORT_FAILURE_FAILED_COMPLETING);
@@ -5152,10 +5149,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (bugreportUriString != null) {
             shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
         } else if (mRemoteBugreportServiceIsActive.get()) {
-            mInjector.getNotificationManager().notify(LOG_TAG,
-                    RemoteBugreportUtils.REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID,
-                    RemoteBugreportUtils.buildRemoteBugreportInProgressNotification(mContext,
-                            /* canCancelBugReport */ false));
+            mInjector.getNotificationManager().notify(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+                    RemoteBugreportUtils.buildNotification(mContext,
+                            RemoteBugreportUtils.NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED));
         }
     }
 
@@ -5169,8 +5165,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mRemoteBugreportSharingAccepted.set(false);
         setDeviceOwnerRemoteBugreportUriAndHash(null, null);
-        mInjector.getNotificationManager().cancel(LOG_TAG,
-                RemoteBugreportUtils.REMOTE_BUGREPORT_IN_PROGRESS_NOTIFICATION_ID);
         sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_BUGREPORT_SHARING_DECLINED, null);
     }
 
