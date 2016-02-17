@@ -1606,10 +1606,6 @@ public final class ViewRootImpl implements ViewParent,
                         frame.height() < desiredWindowHeight && frame.height() != mHeight));
         windowShouldResize |= mDragResizing && mResizeMode == RESIZE_MODE_FREEFORM;
 
-        // If the backdrop frame doesn't equal to a frame, we are starting a resize operation, so
-        // force it to be resized.
-        windowShouldResize |= !mPendingBackDropFrame.equals(mWinFrame);
-
         // If the activity was just relaunched, it might have unfrozen the task bounds (while
         // relaunching), so we need to force a call into window manager to pick up the latest
         // bounds.
