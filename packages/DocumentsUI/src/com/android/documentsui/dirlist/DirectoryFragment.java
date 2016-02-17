@@ -101,6 +101,7 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
+
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
@@ -130,6 +131,11 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     public static final int ANIM_LEAVE = 3;
     public static final int ANIM_ENTER = 4;
 
+    @IntDef(flag = true, value = {
+            REQUEST_COPY_DESTINATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RequestCode {}
     public static final int REQUEST_COPY_DESTINATION = 1;
 
     static final boolean DEBUG_ENABLE_DND = true;
@@ -377,19 +383,24 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // There's only one request code right now. Replace this with a switch statement or
-        // something more scalable when more codes are added.
-        if (requestCode != REQUEST_COPY_DESTINATION) {
-            return;
+    public void onActivityResult(@RequestCode int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case REQUEST_COPY_DESTINATION:
+                handleCopyResult(resultCode, data);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown request code: " + requestCode);
         }
+    }
+
+    private void handleCopyResult(int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_CANCELED || data == null) {
             // User pressed the back button or otherwise cancelled the destination pick. Don't
             // proceed with the copy.
             return;
         }
 
-        int operationType = data.getIntExtra(
+        @OpType int operationType = data.getIntExtra(
                 FileOperationService.EXTRA_OPERATION,
                 FileOperationService.OPERATION_COPY);
 
@@ -808,23 +819,41 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                 getActivity(),
                 DocumentsActivity.class);
 
+        // Set an appropriate title on the drawer when it is shown in the picker.
+        // Coupled with the fact that we auto-open the drawer for copy/move operations
+        // it should basically be the thing people see first.
+        int drawerTitleId = mode == FileOperationService.OPERATION_MOVE
+                ? R.string.menu_move : R.string.menu_copy;
+        intent.putExtra(DocumentsContract.EXTRA_PROMPT, getResources().getString(drawerTitleId));
+
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
+                // TODO: Can this move to Fragment bundle state?
                 getDisplayState().selectedDocumentsForCopy = docs;
 
-                boolean directoryCopy = false;
-                for (DocumentInfo info : docs) {
-                    if (Document.MIME_TYPE_DIR.equals(info.mimeType)) {
-                        directoryCopy = true;
-                        break;
-                    }
-                }
-                intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, directoryCopy);
+                // Determine if there is a directory in the set of documents
+                // to be copied? Why? Directory creation isn't supported by some roots
+                // (like Downloads). This informs DocumentsActivity (the "picker")
+                // to restrict available roots to just those with support.
+                intent.putExtra(Shared.EXTRA_DIRECTORY_COPY, hasDirectory(docs));
                 intent.putExtra(FileOperationService.EXTRA_OPERATION, mode);
+
+                // This just identifies the type of request...we'll check it
+                // when we reveive a response.
                 startActivityForResult(intent, REQUEST_COPY_DESTINATION);
             }
+
         }.execute(selected);
+    }
+
+    private static boolean hasDirectory(List<DocumentInfo> docs) {
+        for (DocumentInfo info : docs) {
+            if (Document.MIME_TYPE_DIR.equals(info.mimeType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void renameDocuments(Selection selected) {
