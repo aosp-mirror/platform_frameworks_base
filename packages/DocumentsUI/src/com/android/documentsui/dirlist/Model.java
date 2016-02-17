@@ -33,7 +33,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-import com.android.documentsui.BaseActivity.SiblingProvider;
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.RootCursorWrapper;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
@@ -48,7 +47,7 @@ import java.util.Map;
  * The data model for the current loaded directory.
  */
 @VisibleForTesting
-public class Model implements SiblingProvider {
+public class Model {
     private static final String TAG = "Model";
 
     private boolean mIsLoading;
@@ -358,7 +357,7 @@ public class Model implements SiblingProvider {
         return (l == -1) ? Long.MAX_VALUE : l;
     }
 
-    @Nullable Cursor getItem(String modelId) {
+    public @Nullable Cursor getItem(String modelId) {
         Integer pos = mPositions.get(modelId);
         if (pos != null) {
             mCursor.moveToPosition(pos);
@@ -386,14 +385,6 @@ public class Model implements SiblingProvider {
             docs.add(doc);
         }
         return docs;
-    }
-
-    @Override
-    public Cursor getCursor() {
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            throw new IllegalStateException("Can't call getCursor from non-main thread.");
-        }
-        return mCursor;
     }
 
     void addUpdateListener(UpdateListener listener) {

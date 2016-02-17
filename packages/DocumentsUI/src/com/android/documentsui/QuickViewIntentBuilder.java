@@ -34,8 +34,10 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.documentsui.BaseActivity.SiblingProvider;
+import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
+
+import java.util.List;
 
 /**
  * Provides support for gather a list of quick-viewable files into a quick view intent.
@@ -43,7 +45,7 @@ import com.android.documentsui.model.DocumentInfo;
 final class QuickViewIntentBuilder {
 
     private final DocumentInfo mDocument;
-    private final SiblingProvider mSiblings;
+    private final Model mModel;
 
     private final PackageManager mPkgManager;
     private final Resources mResources;
@@ -55,12 +57,12 @@ final class QuickViewIntentBuilder {
             PackageManager pkgManager,
             Resources resources,
             DocumentInfo doc,
-            SiblingProvider siblings) {
+            Model model) {
 
         mPkgManager = pkgManager;
         mResources = resources;
         mDocument = doc;
-        mSiblings = siblings;
+        mModel = model;
     }
 
     /**
@@ -78,9 +80,9 @@ final class QuickViewIntentBuilder {
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setPackage(trustedPkg);
             if (hasRegisteredHandler(intent)) {
-                Cursor cursor = mSiblings.getCursor();
-                for (int i = 0; i < cursor.getCount(); i++) {
-                    onNextItem(i, cursor);
+                List<String> siblingIds = mModel.getModelIds();
+                for (int i = 0; i < siblingIds.size(); i++) {
+                    onNextItem(i, siblingIds);
                 }
                 intent.putExtra(Intent.EXTRA_INDEX, mDocumentLocation);
                 intent.setClipData(mClipData);
@@ -99,8 +101,12 @@ final class QuickViewIntentBuilder {
         return intent.resolveActivity(mPkgManager) != null;
     }
 
-    private void onNextItem(int index, Cursor cursor) {
-        cursor.moveToPosition(index);
+    private void onNextItem(int index, List<String> siblingIds) {
+        final Cursor cursor = mModel.getItem(siblingIds.get(index));
+
+        if (cursor == null) {
+            return;
+        }
 
         String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
