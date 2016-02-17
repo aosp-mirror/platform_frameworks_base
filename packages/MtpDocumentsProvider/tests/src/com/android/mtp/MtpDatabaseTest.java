@@ -76,8 +76,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
     public void testPutSingleStorageDocuments() throws Exception {
         mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(0, "Device", true, new MtpRoot[0], null, null));
+        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", null /* deviceKey */, true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -391,9 +391,9 @@ public class MtpDatabaseTest extends AndroidTestCase {
         };
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device A", true, new MtpRoot[0], null, null));
+                0, "Device A", "Device key A", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                1, "Device B", true, new MtpRoot[0], null, null));
+                1, "Device B", "Device key B", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -435,9 +435,9 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device A", true, new MtpRoot[0], null, null));
+                0, "Device A", "Device key A", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                1, "Device B", true, new MtpRoot[0], null, null));
+                1, "Device B", "Device key B", true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -567,10 +567,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         });
         mDatabase.getMapper().clearMapping();
 
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", false,  new MtpRoot[0], null, null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        addTestDevice();
 
         try (final Cursor cursor = mDatabase.queryRoots(resources, rootColumns)) {
             assertEquals(1, cursor.getCount());
@@ -584,10 +581,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         });
         mDatabase.getMapper().clearMapping();
 
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", false,  new MtpRoot[0], null, null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
         mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
@@ -910,7 +904,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
     public void testGetClosedDevice() throws Exception {
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", /* opened is */ false, new MtpRoot[0], null, null));
+                0, "Device", null /* deviceKey */, /* opened is */ false, new MtpRoot[0], null,
+                null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         final String[] columns = new String [] {
@@ -927,10 +922,71 @@ public class MtpDatabaseTest extends AndroidTestCase {
         }
     }
 
+    public void testMappingWithoutKey() throws FileNotFoundException {
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", null /* device key */, /* opened is */ true, new MtpRoot[0], null,
+                null));
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", null /* device key */, /* opened is */ true, new MtpRoot[0], null,
+                null));
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        try (final Cursor cursor =
+                mDatabase.queryRoots(resources, strings(DocumentsContract.Root.COLUMN_ROOT_ID))) {
+            assertEquals(1, cursor.getCount());
+            assertTrue(cursor.moveToNext());
+            assertEquals(1, cursor.getLong(0));
+        }
+    }
+
+    public void testMappingFailsWithoutKey() throws FileNotFoundException {
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", null /* device key */, /* opened is */ true, new MtpRoot[0], null,
+                null));
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        // MTP identifier is cleared here. Mapping no longer works without device key.
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        mDatabase.getMapper().startAddingDocuments(null);
+        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", null /* device key */, /* opened is */ true, new MtpRoot[0], null,
+                null));
+        mDatabase.getMapper().stopAddingDocuments(null);
+
+        try (final Cursor cursor =
+                mDatabase.queryRoots(resources, strings(DocumentsContract.Root.COLUMN_ROOT_ID))) {
+            assertEquals(1, cursor.getCount());
+            assertTrue(cursor.moveToNext());
+            assertEquals(2, cursor.getLong(0));
+        }
+    }
+
+    public void testUpdateDocumentWithoutChange() throws FileNotFoundException {
+        mDatabase.getMapper().startAddingDocuments(null);
+        assertTrue(mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
+                null)));
+        assertFalse(mDatabase.getMapper().stopAddingDocuments(null));
+
+        mDatabase.getMapper().startAddingDocuments(null);
+        assertFalse(mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
+                null)));
+        assertFalse(mDatabase.getMapper().stopAddingDocuments(null));
+    }
+
     private void addTestDevice() throws FileNotFoundException {
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", /* opened is */ true, new MtpRoot[0], null, null));
+                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
+                null));
         mDatabase.getMapper().stopAddingDocuments(null);
     }
 
