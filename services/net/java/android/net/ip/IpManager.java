@@ -17,9 +17,7 @@
 package android.net.ip;
 
 import android.content.Context;
-import android.net.BaseDhcpStateMachine;
 import android.net.DhcpResults;
-import android.net.DhcpStateMachine;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -31,7 +29,6 @@ import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -185,7 +182,7 @@ public class IpManager extends StateMachine {
      * Non-final member variables accessed only from within our StateMachine.
      */
     private IpReachabilityMonitor mIpReachabilityMonitor;
-    private BaseDhcpStateMachine mDhcpStateMachine;
+    private DhcpClient mDhcpClient;
     private DhcpResults mDhcpResults;
     private ProvisioningConfiguration mConfiguration;
 
@@ -619,7 +616,7 @@ public class IpManager extends StateMachine {
     class StoppingState extends State {
         @Override
         public void enter() {
-            if (mDhcpStateMachine == null) {
+            if (mDhcpClient == null) {
                 // There's no DHCPv4 for which to wait; proceed to stopped.
                 transitionTo(mStoppedState);
             }
@@ -629,7 +626,7 @@ public class IpManager extends StateMachine {
         public boolean processMessage(Message msg) {
             switch (msg.what) {
                 case DhcpClient.CMD_ON_QUIT:
-                    mDhcpStateMachine = null;
+                    mDhcpClient = null;
                     transitionTo(mStoppedState);
                     break;
 
@@ -678,9 +675,12 @@ public class IpManager extends StateMachine {
                 }
             } else {
                 // Start DHCPv4.
-                makeDhcpStateMachine();
-                mDhcpStateMachine.registerForPreDhcpNotification();
-                mDhcpStateMachine.sendMessage(DhcpClient.CMD_START_DHCP);
+                mDhcpClient = DhcpClient.makeDhcpClient(
+                        mContext,
+                        IpManager.this,
+                        mInterfaceName);
+                mDhcpClient.registerForPreDhcpNotification();
+                mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
             }
         }
 
@@ -691,9 +691,9 @@ public class IpManager extends StateMachine {
                 mIpReachabilityMonitor = null;
             }
 
-            if (mDhcpStateMachine != null) {
-                mDhcpStateMachine.sendMessage(DhcpClient.CMD_STOP_DHCP);
-                mDhcpStateMachine.doQuit();
+            if (mDhcpClient != null) {
+                mDhcpClient.sendMessage(DhcpClient.CMD_STOP_DHCP);
+                mDhcpClient.doQuit();
             }
 
             resetLinkProperties();
@@ -724,8 +724,8 @@ public class IpManager extends StateMachine {
                     // It's possible to reach here if, for example, someone
                     // calls completedPreDhcpAction() after provisioning with
                     // a static IP configuration.
-                    if (mDhcpStateMachine != null) {
-                        mDhcpStateMachine.sendMessage(DhcpClient.CMD_PRE_DHCP_ACTION_COMPLETE);
+                    if (mDhcpClient != null) {
+                        mDhcpClient.sendMessage(DhcpClient.CMD_PRE_DHCP_ACTION_COMPLETE);
                     }
                     break;
 
@@ -775,7 +775,7 @@ public class IpManager extends StateMachine {
                 case DhcpClient.CMD_ON_QUIT:
                     // DHCPv4 quit early for some reason.
                     Log.e(mTag, "Unexpected CMD_ON_QUIT.");
-                    mDhcpStateMachine = null;
+                    mDhcpClient = null;
                     break;
 
                 default:
@@ -797,24 +797,6 @@ public class IpManager extends StateMachine {
             }
 
             return true;
-        }
-
-        private void makeDhcpStateMachine() {
-            final boolean usingLegacyDhcp = (Settings.Global.getInt(
-                    mContext.getContentResolver(),
-                    Settings.Global.LEGACY_DHCP_CLIENT, 0) == 1);
-
-            if (usingLegacyDhcp) {
-                mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
-                        mContext,
-                        IpManager.this,
-                        mInterfaceName);
-            } else {
-                mDhcpStateMachine = DhcpClient.makeDhcpStateMachine(
-                        mContext,
-                        IpManager.this,
-                        mInterfaceName);
-            }
         }
     }
 }
