@@ -17,6 +17,8 @@
 package com.android.documentsui;
 
 import static android.os.Environment.isStandardDirectory;
+import static android.os.storage.StorageVolume.EXTRA_DIRECTORY_NAME;
+import static android.os.storage.StorageVolume.EXTRA_STORAGE_VOLUME;
 import static com.android.documentsui.Shared.DEBUG;
 
 import android.app.Activity;
@@ -35,9 +37,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
 import android.text.TextUtils;
@@ -63,16 +67,31 @@ public class OpenExternalDirectoryActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         final Intent intent = getIntent();
-        if (intent == null || intent.getData() == null) {
-            Log.d(TAG, "missing intent or intent data: " + intent);
+        if (intent == null) {
+            if (DEBUG) Log.d(TAG, "missing intent");
+            setResult(RESULT_CANCELED);
+            finish();
+            return;
+        }
+        final Parcelable storageVolume = intent.getParcelableExtra(EXTRA_STORAGE_VOLUME);
+        if (!(storageVolume instanceof StorageVolume)) {
+            if (DEBUG)
+                Log.d(TAG, "extra " + EXTRA_STORAGE_VOLUME + " is not a StorageVolume: "
+                        + storageVolume);
+            setResult(RESULT_CANCELED);
+            finish();
+            return;
+        }
+        final String directoryName = intent.getStringExtra(EXTRA_DIRECTORY_NAME);
+        if (directoryName == null) {
+            if (DEBUG) Log.d(TAG, "missing extra " + EXTRA_DIRECTORY_NAME + " on " + intent);
             setResult(RESULT_CANCELED);
             finish();
             return;
         }
 
-        final String path = intent.getData().getPath();
         final int userId = UserHandle.myUserId();
-        if (!showFragment(this, userId, path)) {
+        if (!showFragment(this, userId, (StorageVolume) storageVolume, directoryName)) {
             setResult(RESULT_CANCELED);
             finish();
             return;
@@ -80,20 +99,20 @@ public class OpenExternalDirectoryActivity extends Activity {
     }
 
     /**
-     * Validates the given {@code path} and display the appropriate dialog asking the user to grant
-     * access to it.
+     * Validates the given path (volume + directory) and display the appropriate dialog asking the
+     * user to grant access to it.
      */
-    static boolean showFragment(Activity activity, int userId, String path) {
-        Log.d(TAG, "showFragment() for path " + path + " and user " + userId);
-        if (path == null) {
-            Log.e(TAG, "INTERNAL ERROR: showFragment() with null path");
-            return false;
-        }
+    private static boolean showFragment(Activity activity, int userId, StorageVolume storageVolume,
+            String directoryName) {
+        if (DEBUG)
+            Log.d(TAG, "showFragment() for volume " + storageVolume.dump() + ", directory "
+                    + directoryName + ", and user " + userId);
         File file;
         try {
-            file = new File(new File(path).getCanonicalPath());
+            file = new File(storageVolume.getPathFile(), directoryName).getCanonicalFile();
         } catch (IOException e) {
-            Log.e(TAG, "Could not get canonical file from " + path);
+            Log.e(TAG, "Could not get canonical file for volume " + storageVolume.dump()
+                    + " and directory " + directoryName);
             return false;
         }
         final StorageManager sm =
@@ -104,7 +123,9 @@ public class OpenExternalDirectoryActivity extends Activity {
 
         // Verify directory is valid.
         if (TextUtils.isEmpty(directory) || !isStandardDirectory(directory)) {
-            Log.d(TAG, "Directory '" + directory + "' is not standard (full path: '" + path + "')");
+            if (DEBUG)
+                Log.d(TAG, "Directory '" + directory + "' is not standard (full path: '"
+                        + file.getAbsolutePath() + "')");
             return false;
         }
 
@@ -123,7 +144,7 @@ public class OpenExternalDirectoryActivity extends Activity {
             }
         }
         if (volumeLabel == null) {
-            Log.e(TAG, "Could not get volume for " + path);
+            Log.e(TAG, "Could not get volume for " + file);
             return false;
         }
 
@@ -165,13 +186,13 @@ public class OpenExternalDirectoryActivity extends Activity {
         final File userPath = volume.getPathForUser(userId);
         final String path = userPath == null ? null : volume.getPathForUser(userId).getPath();
         final boolean isVisible = volume.isVisibleForWrite(userId);
-        if (DEBUG) {
+        if (DEBUG)
             Log.d(TAG, "Volume: " + volume + " userId: " + userId + " root: " + root
                     + " volumePath: " + volume.getPath().getPath()
                     + " pathForUser: " + path
                     + " internalPathForUser: " + volume.getInternalPath()
                     + " isVisible: " + isVisible);
-        }
+
         return volume.isVisibleForWrite(userId) && root.equals(path);
     }
 
