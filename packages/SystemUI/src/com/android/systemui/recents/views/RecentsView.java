@@ -143,21 +143,24 @@ public class RecentsView extends FrameLayout {
         final float cornerRadius = context.getResources().getDimensionPixelSize(
                 R.dimen.recents_task_view_rounded_corners_radius);
         LayoutInflater inflater = LayoutInflater.from(context);
-        mHistoryButton = (TextView) inflater.inflate(R.layout.recents_history_button, this, false);
-        mHistoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EventBus.getDefault().send(new ToggleHistoryEvent());
-            }
-        });
-        addView(mHistoryButton);
-        mHistoryButton.setClipToOutline(true);
-        mHistoryButton.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
-            }
-        });
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            mHistoryButton = (TextView) inflater.inflate(R.layout.recents_history_button, this,
+                    false);
+            mHistoryButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    EventBus.getDefault().send(new ToggleHistoryEvent());
+                }
+            });
+            addView(mHistoryButton);
+            mHistoryButton.setClipToOutline(true);
+            mHistoryButton.setOutlineProvider(new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
+                }
+            });
+        }
         mEmptyView = inflater.inflate(R.layout.recents_empty, this, false);
         addView(mEmptyView);
 
@@ -331,7 +334,9 @@ public class RecentsView extends FrameLayout {
         mTaskStackView.setVisibility(View.INVISIBLE);
         mEmptyView.setVisibility(View.VISIBLE);
         mEmptyView.bringToFront();
-        mHistoryButton.bringToFront();
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            mHistoryButton.bringToFront();
+        }
     }
 
     /**
@@ -347,7 +352,9 @@ public class RecentsView extends FrameLayout {
         if (mSearchBar != null) {
             mSearchBar.bringToFront();
         }
-        mHistoryButton.bringToFront();
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            mHistoryButton.bringToFront();
+        }
     }
 
     @Override
@@ -397,21 +404,23 @@ public class RecentsView extends FrameLayout {
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
         }
 
-        // Measure the history view
-        if (mHistoryView != null && mHistoryView.getVisibility() != GONE) {
-            measureChild(mHistoryView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
-        }
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            // Measure the history view
+            if (mHistoryView != null && mHistoryView.getVisibility() != GONE) {
+                measureChild(mHistoryView, MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+                        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            }
 
-        // Measure the history button within the constraints of the space above the stack
-        Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
-        measureChild(mHistoryButton,
-                MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.AT_MOST),
-                MeasureSpec.makeMeasureSpec(historyButtonRect.height(), MeasureSpec.AT_MOST));
-        if (mHistoryClearAllButton != null && mHistoryClearAllButton.getVisibility() != GONE) {
-            measureChild(mHistoryClearAllButton,
+            // Measure the history button within the constraints of the space above the stack
+            Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
+            measureChild(mHistoryButton,
                     MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.AT_MOST),
                     MeasureSpec.makeMeasureSpec(historyButtonRect.height(), MeasureSpec.AT_MOST));
+            if (mHistoryClearAllButton != null && mHistoryClearAllButton.getVisibility() != GONE) {
+                measureChild(mHistoryClearAllButton,
+                    MeasureSpec.makeMeasureSpec(historyButtonRect.width(), MeasureSpec.AT_MOST),
+                    MeasureSpec.makeMeasureSpec(historyButtonRect.height(), MeasureSpec.AT_MOST));
+            }
         }
 
         setMeasuredDimension(width, height);
@@ -443,36 +452,39 @@ public class RecentsView extends FrameLayout {
             mEmptyView.layout(left, top, right, bottom);
         }
 
-        // Layout the history view
-        if (mHistoryView != null && mHistoryView.getVisibility() != GONE) {
-            mHistoryView.layout(left, top, right, bottom);
-        }
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            // Layout the history view
+            if (mHistoryView != null && mHistoryView.getVisibility() != GONE) {
+                mHistoryView.layout(left, top, right, bottom);
+            }
 
-        // Layout the history button such that its drawable is start-aligned with the stack,
-        // vertically centered in the available space above the stack
-        Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
-        int historyLeft = isLayoutRtl()
-                ? historyButtonRect.right + mHistoryButton.getPaddingStart()
-                        - mHistoryButton.getMeasuredWidth()
-                : historyButtonRect.left - mHistoryButton.getPaddingStart();
-        int historyTop = historyButtonRect.top +
-                (historyButtonRect.height() - mHistoryButton.getMeasuredHeight()) / 2;
-        mHistoryButton.layout(historyLeft, historyTop,
-                historyLeft + mHistoryButton.getMeasuredWidth(),
-                historyTop + mHistoryButton.getMeasuredHeight());
+            // Layout the history button such that its drawable is start-aligned with the stack,
+            // vertically centered in the available space above the stack
+            Rect historyButtonRect = mTaskStackView.mLayoutAlgorithm.mHistoryButtonRect;
+            int historyLeft = isLayoutRtl()
+                    ? historyButtonRect.right + mHistoryButton.getPaddingStart()
+                    - mHistoryButton.getMeasuredWidth()
+                    : historyButtonRect.left - mHistoryButton.getPaddingStart();
+            int historyTop = historyButtonRect.top +
+                    (historyButtonRect.height() - mHistoryButton.getMeasuredHeight()) / 2;
+            mHistoryButton.layout(historyLeft, historyTop,
+                    historyLeft + mHistoryButton.getMeasuredWidth(),
+                    historyTop + mHistoryButton.getMeasuredHeight());
 
-        // Layout the history clear all button such that it is end-aligned with the stack,
-        // vertically centered in the available space above the stack
-        if (mHistoryClearAllButton != null && mHistoryClearAllButton.getVisibility() != GONE) {
-            int clearAllLeft = isLayoutRtl()
-                    ? historyButtonRect.left - mHistoryClearAllButton.getPaddingStart()
-                    : historyButtonRect.right + mHistoryClearAllButton.getPaddingStart()
-                            - mHistoryClearAllButton.getMeasuredWidth();
-            int clearAllTop = historyButtonRect.top +
-                    (historyButtonRect.height() - mHistoryClearAllButton.getMeasuredHeight()) / 2;
-            mHistoryClearAllButton.layout(clearAllLeft, clearAllTop,
-                    clearAllLeft + mHistoryClearAllButton.getMeasuredWidth(),
-                    clearAllTop + mHistoryClearAllButton.getMeasuredHeight());
+            // Layout the history clear all button such that it is end-aligned with the stack,
+            // vertically centered in the available space above the stack
+            if (mHistoryClearAllButton != null && mHistoryClearAllButton.getVisibility() != GONE) {
+                int clearAllLeft = isLayoutRtl()
+                        ? historyButtonRect.left - mHistoryClearAllButton.getPaddingStart()
+                        : historyButtonRect.right + mHistoryClearAllButton.getPaddingStart()
+                        - mHistoryClearAllButton.getMeasuredWidth();
+                int clearAllTop = historyButtonRect.top +
+                        (historyButtonRect.height() - mHistoryClearAllButton.getMeasuredHeight()) /
+                                2;
+                mHistoryClearAllButton.layout(clearAllLeft, clearAllTop,
+                        clearAllLeft + mHistoryClearAllButton.getMeasuredWidth(),
+                        clearAllTop + mHistoryClearAllButton.getMeasuredHeight());
+            }
         }
 
         if (mAwaitingFirstLayout) {
@@ -540,9 +552,11 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(DismissRecentsToHomeAnimationStarted event) {
-        // Hide the history button
         int taskViewExitToHomeDuration = TaskStackAnimationHelper.EXIT_TO_HOME_TRANSLATION_DURATION;
-        hideHistoryButton(taskViewExitToHomeDuration, false /* translate */);
+        if (RecentsDebugFlags.Static.EnableHistory) {
+            // Hide the history button
+            hideHistoryButton(taskViewExitToHomeDuration, false /* translate */);
+        }
         animateBackgroundScrim(0f, taskViewExitToHomeDuration);
     }
 
@@ -675,11 +689,17 @@ public class RecentsView extends FrameLayout {
             // Reset the view state
             mAwaitingFirstLayout = true;
             mLastTaskLaunchedWasFreeform = false;
-            hideHistoryButton(0, false /* translate */);
+            if (RecentsDebugFlags.Static.EnableHistory) {
+                hideHistoryButton(0, false /* translate */);
+            }
         }
     }
 
     public final void onBusEvent(ToggleHistoryEvent event) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         if (mHistoryView != null && mHistoryView.isVisible()) {
             EventBus.getDefault().send(new HideHistoryEvent(true /* animate */));
         } else {
@@ -688,6 +708,10 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(ShowHistoryEvent event) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         if (mHistoryView == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
             mHistoryView = (RecentsHistoryView) inflater.inflate(R.layout.recents_history, this,
@@ -746,6 +770,10 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(HideHistoryEvent event) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         // Animate the empty view in parallel with the history view (the task view animations are
         // handled in TaskStackView)
         Rect stackRect = mTaskStackView.mLayoutAlgorithm.mStackRect;
@@ -765,10 +793,18 @@ public class RecentsView extends FrameLayout {
     }
 
     public final void onBusEvent(ShowHistoryButtonEvent event) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         showHistoryButton(150, event.translate);
     }
 
     public final void onBusEvent(HideHistoryButtonEvent event) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         hideHistoryButton(100, true /* translate */);
     }
 
@@ -776,6 +812,10 @@ public class RecentsView extends FrameLayout {
      * Shows the history button.
      */
     private void showHistoryButton(final int duration, final boolean translate) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         if (mHistoryButton.getVisibility() == View.INVISIBLE) {
             mHistoryButton.setVisibility(View.VISIBLE);
@@ -808,6 +848,10 @@ public class RecentsView extends FrameLayout {
      * Hides the history button.
      */
     private void hideHistoryButton(int duration, boolean translate) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         final ReferenceCountedTrigger postAnimationTrigger = new ReferenceCountedTrigger();
         hideHistoryButton(duration, translate, postAnimationTrigger);
         postAnimationTrigger.flushLastDecrementRunnables();
@@ -818,6 +862,10 @@ public class RecentsView extends FrameLayout {
      */
     private void hideHistoryButton(int duration, boolean translate,
             final ReferenceCountedTrigger postAnimationTrigger) {
+        if (!RecentsDebugFlags.Static.EnableHistory) {
+            return;
+        }
+
         if (mHistoryButton.getVisibility() == View.VISIBLE) {
             if (translate) {
                 mHistoryButton.animate()
