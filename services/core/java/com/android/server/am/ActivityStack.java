@@ -1902,7 +1902,7 @@ final class ActivityStack {
             return false;
         }
 
-        cancelInitializingActivities();
+        mStackSupervisor.cancelInitializingActivities();
 
         // Find the first activity that is not finishing.
         final ActivityRecord next = topRunningActivityLocked();
