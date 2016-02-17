@@ -859,7 +859,7 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public boolean setPackageSuspendedAsUser(String packageName, boolean hidden, int userId) {
+    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean hidden, int userId) {
         throw new UnsupportedOperationException();
     }
 

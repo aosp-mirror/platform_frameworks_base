@@ -5930,7 +5930,7 @@ package android.app.admin {
     method public void setMaximumTimeToLock(android.content.ComponentName, long);
     method public void setOrganizationColor(android.content.ComponentName, int);
     method public void setOrganizationName(android.content.ComponentName, java.lang.String);
-    method public boolean setPackageSuspended(android.content.ComponentName, java.lang.String, boolean);
+    method public java.lang.String[] setPackagesSuspended(android.content.ComponentName, java.lang.String[], boolean);
     method public void setPasswordExpirationTimeout(android.content.ComponentName, long);
     method public void setPasswordHistoryLength(android.content.ComponentName, int);
     method public void setPasswordMinimumLength(android.content.ComponentName, int);

@@ -178,7 +178,8 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         try {
-            mInterface.setPackageSuspendedAsUser(packageName, suspendedState, userId);
+            mInterface.setPackagesSuspendedAsUser(new String[]{packageName}, suspendedState,
+                    userId);
             pw.println("Package " + packageName + " new suspended state: "
                     + mInterface.isPackageSuspendedForUser(packageName, userId));
             return 0;
