@@ -1940,6 +1940,15 @@ public abstract class TvInputService extends Service {
          * </ul>
          */
         public void onHardwareVideoUnavailable(int reason) { }
+
+        @Override
+        void release() {
+            if (mHardwareSession != null) {
+                mHardwareSession.release();
+                mHardwareSession = null;
+            }
+            super.release();
+        }
     }
 
     /** @hide */
