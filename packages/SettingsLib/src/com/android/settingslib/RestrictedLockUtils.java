@@ -21,10 +21,8 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.UserInfo;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -227,8 +225,7 @@ public class RestrictedLockUtils {
             int userId) {
         IPackageManager ipm = AppGlobals.getPackageManager();
         try {
-            ApplicationInfo ai = ipm.getApplicationInfo(packageName, 0, userId);
-            if (ai != null && ((ai.flags & ApplicationInfo.FLAG_SUSPENDED) != 0)) {
+            if (ipm.isPackageSuspendedForUser(packageName, userId)) {
                 return getProfileOrDeviceOwner(context, userId);
             }
         } catch (RemoteException e) {

@@ -493,9 +493,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 continue;
             }
             try {
-                ApplicationInfo ai = mPackageManager.getApplicationInfo(
-                        provider.info.provider.getPackageName(), 0, provider.getUserId());
-                boolean suspended = (ai.flags & ApplicationInfo.FLAG_SUSPENDED) != 0;
+                boolean suspended = mPackageManager.isPackageSuspendedForUser(
+                        provider.info.provider.getPackageName(), provider.getUserId());
                 if (provider.setMaskedBySuspendedPackageLocked(suspended)) {
                     if (provider.isMaskedLocked()) {
                         maskWidgetsViewsLocked(provider);

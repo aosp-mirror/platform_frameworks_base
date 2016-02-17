@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -884,7 +882,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkAudioOperation(int code, int usage, int uid, String packageName) {
-        if (isApplicationSuspended(packageName, uid)) {
+        if (isPackageSuspendedForUser(packageName, uid)) {
             Log.i(TAG, "Audio disabled for suspended package=" + packageName + " for uid=" + uid);
             return AppOpsManager.MODE_IGNORED;
         }
@@ -898,21 +896,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         return checkOperation(code, uid, packageName);
     }
 
-    private boolean isApplicationSuspended(String pkg, int uid) {
-        int userId = UserHandle.getUserId(uid);
-
-        ApplicationInfo ai;
+    private boolean isPackageSuspendedForUser(String pkg, int uid) {
         try {
-            ai = AppGlobals.getPackageManager().getApplicationInfo(pkg, 0, userId);
-            if (ai == null) {
-                Log.w(TAG, "No application info for package " + pkg + " and user " + userId);
-                return false;
-            }
+            return AppGlobals.getPackageManager().isPackageSuspendedForUser(
+                    pkg, UserHandle.getUserId(uid));
         } catch (RemoteException re) {
             throw new SecurityException("Could not talk to package manager service");
         }
-
-        return ((ai.flags & FLAG_SUSPENDED) != 0);
     }
 
     private int checkRestrictionLocked(int code, int usage, int uid, String packageName) {

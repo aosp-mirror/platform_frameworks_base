@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationAssistantService.REASON_APP_CANCEL_ALL;
 import static android.service.notification.NotificationAssistantService.REASON_DELEGATE_CANCEL;
@@ -461,7 +460,7 @@ public class NotificationManagerService extends SystemService {
     /** Use this to check if a package can post a notification or toast. */
     private boolean checkNotificationOp(String pkg, int uid) {
         return mAppOps.checkOp(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
-                == AppOpsManager.MODE_ALLOWED && !isApplicationSuspended(pkg, uid);
+                == AppOpsManager.MODE_ALLOWED && !isPackageSuspendedForUser(pkg, uid);
     }
 
     private static final class ToastRecord
@@ -1134,14 +1133,14 @@ public class NotificationManagerService extends SystemService {
             }
 
             final boolean isSystemToast = isCallerSystem() || ("android".equals(pkg));
-            final boolean isApplicationSuspended =
-                    isApplicationSuspended(pkg, Binder.getCallingUid());
+            final boolean isPackageSuspended =
+                    isPackageSuspendedForUser(pkg, Binder.getCallingUid());
 
             if (ENABLE_BLOCKED_TOASTS && (!noteNotificationOp(pkg, Binder.getCallingUid())
-                    || isApplicationSuspended)) {
+                    || isPackageSuspended)) {
                 if (!isSystemToast) {
                     Slog.e(TAG, "Suppressing toast from package " + pkg
-                            + (isApplicationSuspended
+                            + (isPackageSuspended
                                     ? " due to package suspended by administrator."
                                     : " by user request."));
                     return;
@@ -1276,7 +1275,7 @@ public class NotificationManagerService extends SystemService {
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
             checkCallerIsSystemOrSameApp(pkg);
             return (mAppOps.checkOpNoThrow(AppOpsManager.OP_POST_NOTIFICATION, uid, pkg)
-                    == AppOpsManager.MODE_ALLOWED) && !isApplicationSuspended(pkg, uid);
+                    == AppOpsManager.MODE_ALLOWED) && !isPackageSuspendedForUser(pkg, uid);
         }
 
         @Override
@@ -2384,13 +2383,13 @@ public class NotificationManagerService extends SystemService {
 
                 // why is this here?
                 savePolicyFile();
-                final boolean isApplicationSuspended = isApplicationSuspended(pkg, callingUid);
+                final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
 
                 // blocked apps/topics
                 if (r.getImportance() == NotificationListenerService.Ranking.IMPORTANCE_NONE
-                        || !noteNotificationOp(pkg, callingUid) || isApplicationSuspended) {
+                        || !noteNotificationOp(pkg, callingUid) || isPackageSuspended) {
                     if (!isSystemNotification) {
-                        if (isApplicationSuspended) {
+                        if (isPackageSuspended) {
                             Slog.e(TAG, "Suppressing notification from package due to package "
                                     + "suspended by administrator.");
                             mUsageStats.registerSuspendedByAdmin(r);
@@ -3492,23 +3491,13 @@ public class NotificationManagerService extends SystemService {
         return true;
     }
 
-    private boolean isApplicationSuspended(String pkg, int uid) {
+    private boolean isPackageSuspendedForUser(String pkg, int uid) {
         int userId = UserHandle.getUserId(uid);
-        ApplicationInfo ai;
         try {
-            // TODO: it might be faster to return a boolean from package manager rather than the
-            // whole application info. Revisit and make the API change.
-            ai = AppGlobals.getPackageManager().getApplicationInfo(pkg,
-                    PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
-            if (ai == null) {
-                Slog.w(TAG, "No application info for package " + pkg + " and user " + userId);
-                return false;
-            }
+            return AppGlobals.getPackageManager().isPackageSuspendedForUser(pkg, userId);
         } catch (RemoteException re) {
             throw new SecurityException("Could not talk to package manager service");
         }
-
-        return ((ai.flags & FLAG_SUSPENDED) != 0);
     }
 
     private class TrimCache {
