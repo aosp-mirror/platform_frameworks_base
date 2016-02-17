@@ -275,6 +275,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private void processBatchedEvents(long frameNanos) {
         MotionEventHolder current = mEventQueue;
+        if (current == null) {
+            return;
+        }
         while (current.next != null) {
             current = current.next;
         }
@@ -403,6 +406,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
     }
 
     private void disableFeatures() {
+        // Give the features a chance to process any batched events so we'll keep a consistent
+        // event stream
+        processBatchedEvents(Long.MAX_VALUE);
         if (mMotionEventInjector != null) {
             mAms.setMotionEventInjector(null);
             mMotionEventInjector.onDestroy();
