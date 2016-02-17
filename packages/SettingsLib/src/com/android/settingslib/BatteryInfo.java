@@ -149,7 +149,7 @@ public class BatteryInfo {
         String remaining = "";
         if (remainingTimeUs != 0) {
             remaining = context.getString(R.string.remaining_length_format,
-                    Formatter.formatShortElapsedTime(context, remainingTimeUs));
+                    Formatter.formatShortElapsedTime(context, remainingTimeUs / 1000));
         }
         view.setBottomLabels(new CharSequence[] { timeString, remaining});
 

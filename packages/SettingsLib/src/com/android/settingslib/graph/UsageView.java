@@ -18,8 +18,10 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.SparseIntArray;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.android.settingslib.R;
 
@@ -56,6 +58,24 @@ public class UsageView extends FrameLayout {
             }
             for (TextView v : mBottomLabels) {
                 v.setTextColor(color);
+            }
+        }
+        if (a.hasValue(R.styleable.UsageView_android_gravity)) {
+            int gravity = a.getInt(R.styleable.UsageView_android_gravity, 0);
+            if (gravity == Gravity.END) {
+                LinearLayout layout = (LinearLayout) findViewById(R.id.graph_label_group);
+                LinearLayout labels = (LinearLayout) findViewById(R.id.label_group);
+                // Swap the children order.
+                layout.removeView(labels);
+                layout.addView(labels);
+                // Set gravity.
+                labels.setGravity(Gravity.END);
+                // Swap the bottom label padding
+                LinearLayout bottomLabels = (LinearLayout) findViewById(R.id.bottom_label_group);
+                bottomLabels.setPadding(bottomLabels.getPaddingRight(), bottomLabels.getPaddingTop(),
+                        bottomLabels.getPaddingLeft(), bottomLabels.getPaddingBottom());
+            } else if (gravity != Gravity.START) {
+                throw new IllegalArgumentException("Unsupported gravity " + gravity);
             }
         }
         mUsageGraph.setAccentColor(a.getColor(R.styleable.UsageView_android_colorAccent, 0));
