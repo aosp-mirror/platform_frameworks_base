@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"관리자와 버그 보고서를 공유하시겠습니까?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"IT 관리자가 문제해결을 위해 버그 보고서를 요청했습니다."</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"수락"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"거절"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"버그 보고서 가져오는 중..."</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"취소하려면 터치하세요."</string>
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"키보드 선택"</string>
     <string name="show_ime" msgid="2506087537466597099">"물리적 키보드가 활성 상태인 경우 화면에 켜 둠"</string>

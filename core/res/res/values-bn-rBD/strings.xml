@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"আরো বিকল্পের জন্য স্পর্শ করুন৷"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ডিবাগিং সংযুক্ত হয়েছে"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ডিবাগিং অক্ষম করতে স্পর্শ করুন৷"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"প্রশাসকের সাথে ত্রুটির প্রতিবেদন শেয়ার করবেন?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"আপনার IT প্রশাসক সমস্যা নিবারণে সহায়তা করতে একটি ত্রুটির প্রতিবেদন চেয়েছেন"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"স্বীকার করুন"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"অস্বীকার করুন"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"ত্রুটির প্রতিবেদন নেওয়া হচ্ছে..."</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"বাতিল করতে স্পর্শ করুন"</string>
     <string name="select_input_method" msgid="8547250819326693584">"কীবোর্ড পরিবর্তন করুন"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"কীবোর্ড চয়ন করুন"</string>
     <string name="show_ime" msgid="2506087537466597099">"ফিজিক্যাল কীবোর্ড সক্রিয় থাকার সময় এটিকে স্ক্রীনে রাখুন"</string>
@@ -1430,7 +1436,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"বাতিল করা হয়েছে"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"সামগ্রী লেখায় ত্রুটি হয়েছে"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"অজানা"</string>
-    <string name="reason_service_unavailable" msgid="7824008732243903268">"মুদ্রণ পরিষেবা সক্ষম করা নেই"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"প্রিন্ট পরিষেবা সক্ষম করা নেই"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> পরিষেবা ইনস্টল হয়েছে"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"সক্ষম করতে আলতো চাপুন"</string>
     <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"প্রশাসক পিন লিখুন"</string>

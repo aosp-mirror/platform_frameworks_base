@@ -1055,12 +1055,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB නිදොස්කරණය අබල කිරීමට ස්පර්ශ කරන්න."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"පරිපාලක සමඟ දෝෂ වාර්තාවක් බෙදා ගන්නද?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"දෝෂාවේක්ෂණය සඳහා උදවු කිරීමට ඔබේ IT පරිපාලක දෝෂ වාර්තාවක් ඉල්ලා ඇත"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"පිළිගන්න"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ප්‍රතික්ෂේප කරන්න"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"දෝෂ වාර්තාවක් ගනිමින්…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"අවලංගු කිරීමට ස්පර්ශ කරන්න"</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"යතුරු පුවරු තෝරන්න"</string>
     <string name="show_ime" msgid="2506087537466597099">"භෞතික යතුරු පුවරුව සක්‍රිය අතරතුර එය තිරය මත තබා ගන්න"</string>

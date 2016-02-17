@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Daha fazla seçenek için dokunun."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hata ayıklaması bağlandı"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB hata ayıklama özelliğini devre dışı bırakmak için dokunun."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Hata raporu yöneticiyle paylaşılsın mı?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"BT yöneticiniz, sorun gidermeye yardımcı olması için bir hata raporu istedi"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"KABUL ET"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REDDET"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Hata raporu alınıyor…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"İptal etmek için dokunun"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klavyeyi değiştir"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Klavyeyi seç"</string>
     <string name="show_ime" msgid="2506087537466597099">"Fiziksel klavye etkin durumdayken ekranda tut"</string>
@@ -1558,10 +1564,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"Bazı işlevler sınırlı olabilir"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Kilidi açmak için dokunun"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Kullanıcı verileri kilitlendi"</string>
-    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
-    <skip />
-    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
-    <skip />
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"İş profili kilitlendi"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"İş profilinin kilidini açmak için hafifçe dokunun"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> cihazına bağlandı"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dosyaları görüntülemek için hafifçe dokunun"</string>
     <string name="pin_target" msgid="3052256031352291362">"Sabitle"</string>
