@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -40,6 +43,9 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
     static final int FORCE_CLOSE = 1;
     static final int WAIT = 2;
     static final int WAIT_AND_REPORT = 3;
+
+    public static final int CANT_SHOW = -1;
+    public static final int ALREADY_SHOWING = -2;
 
     private final ActivityManagerService mService;
     private final ProcessRecord mProc;
@@ -132,6 +138,10 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             Intent appErrorIntent = null;
+
+            MetricsLogger.action(getContext(), MetricsProto.MetricsEvent.ACTION_APP_ANR,
+                    msg.what);
+
             switch (msg.what) {
                 case FORCE_CLOSE:
                     // Kill the application.

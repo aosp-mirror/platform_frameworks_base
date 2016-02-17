@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import com.android.internal.app.ProcessMap;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.server.Watchdog;
 
@@ -403,6 +405,10 @@ class AppErrors {
         Intent appErrorIntent = null;
         final long ident = Binder.clearCallingIdentity();
         try {
+            MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_CRASH, res);
+            if (res == AppErrorDialog.TIMEOUT) {
+                res = AppErrorDialog.FORCE_QUIT;
+            }
             if (res == AppErrorDialog.RESET) {
                 String[] packageList = r.getPackageList();
                 if (packageList != null) {
@@ -697,7 +703,7 @@ class AppErrors {
             if (proc != null && proc.crashDialog != null) {
                 Slog.e(TAG, "App already has crash dialog: " + proc);
                 if (res != null) {
-                    res.set(0);
+                    res.set(AppErrorDialog.ALREADY_SHOWING);
                 }
                 return;
             }
@@ -710,7 +716,7 @@ class AppErrors {
             if (isBackground && !showBackground) {
                 Slog.w(TAG, "Skipping crash dialog of " + proc + ": background");
                 if (res != null) {
-                    res.set(0);
+                    res.set(AppErrorDialog.BACKGROUND_USER);
                 }
                 return;
             }
@@ -724,7 +730,7 @@ class AppErrors {
                 // The device is asleep, so just pretend that the user
                 // saw a crash dialog and hit "force quit".
                 if (res != null) {
-                    res.set(0);
+                    res.set(AppErrorDialog.CANT_SHOW);
                 }
             }
         }
@@ -920,6 +926,8 @@ class AppErrors {
             ProcessRecord proc = (ProcessRecord)data.get("app");
             if (proc != null && proc.anrDialog != null) {
                 Slog.e(TAG, "App already has anr dialog: " + proc);
+                MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
+                        AppNotRespondingDialog.ALREADY_SHOWING);
                 return;
             }
 
@@ -939,6 +947,8 @@ class AppErrors {
                 d.show();
                 proc.anrDialog = d;
             } else {
+                MetricsLogger.action(mContext, MetricsProto.MetricsEvent.ACTION_APP_ANR,
+                        AppNotRespondingDialog.CANT_SHOW);
                 // Just kill the app if there is no dialog to be shown.
                 mService.killAppAtUsersRequest(proc, null);
             }
