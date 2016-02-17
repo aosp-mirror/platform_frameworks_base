@@ -1734,8 +1734,8 @@ final class ActivityStack {
 
         // This activity is not currently visible, but is running. Tell it to become visible.
         if (r.state == ActivityState.RESUMED || r == starting) {
-            Slog.d(TAG_VISIBILITY, "Not making visible, r=" + r + " state=" + r.state
-                    + " starting=" + starting);
+            if (DEBUG_VISIBILITY) Slog.d(TAG_VISIBILITY,
+                    "Not making visible, r=" + r + " state=" + r.state + " starting=" + starting);
             return;
         }
 
