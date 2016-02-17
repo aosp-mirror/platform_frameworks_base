@@ -23,11 +23,13 @@ import static android.service.notification.NotificationListenerService.Ranking.I
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
+import android.os.Build;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -144,6 +146,22 @@ public final class NotificationRecord {
         stats.isNoisy = isNoisy;
         if (!isNoisy && importance > IMPORTANCE_DEFAULT) {
             importance = IMPORTANCE_DEFAULT;
+        }
+
+        try {
+            final ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
+                    sbn.getPackageName(), 0);
+            if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.N) {
+                if (isNoisy) {
+                    if (importance >= IMPORTANCE_HIGH) {
+                        importance = IMPORTANCE_MAX;
+                    } else {
+                        importance = IMPORTANCE_HIGH;
+                    }
+                }
+            }
+        } catch (NameNotFoundException e) {
+            // oh well.
         }
 
         if (n.fullScreenIntent != null) {
