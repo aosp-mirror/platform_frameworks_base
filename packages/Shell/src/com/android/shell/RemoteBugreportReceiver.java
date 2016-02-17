@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 
 /**
  * Receiver that handles finished remote bugreports, by re-sending
@@ -43,12 +44,16 @@ public class RemoteBugreportReceiver extends BroadcastReceiver {
     private static final String EXTRA_REMOTE_BUGREPORT_HASH =
             "android.intent.extra.REMOTE_BUGREPORT_HASH";
 
-    /** Always keep just the last remote bugreport zip file */
-    private static final int MIN_KEEP_COUNT = 1;
+    /** Always keep just the last remote bugreport's files around. */
+    private static final int REMOTE_BUGREPORT_FILES_AMOUNT = 3;
+
+    /** Always keep remote bugreport files created in the last day. */
+    private static final long MIN_KEEP_AGE = DateUtils.DAY_IN_MILLIS;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        cleanupOldFiles(this, intent, INTENT_REMOTE_BUGREPORT_FINISHED, MIN_KEEP_COUNT, 0);
+        cleanupOldFiles(this, intent, INTENT_REMOTE_BUGREPORT_FINISHED,
+                REMOTE_BUGREPORT_FILES_AMOUNT, MIN_KEEP_AGE);
 
         final File bugreportFile = getFileExtra(intent, EXTRA_BUGREPORT);
         final Uri bugreportUri = getUri(context, bugreportFile);
