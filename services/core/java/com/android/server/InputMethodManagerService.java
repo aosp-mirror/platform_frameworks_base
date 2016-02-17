@@ -857,7 +857,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
-                mRes, context.getContentResolver(), mMethodMap, mMethodList, userId);
+                mRes, context.getContentResolver(), mMethodMap, mMethodList, userId, !mSystemReady);
 
         // Let the package manager query which are the default imes
         // as they get certain permissions granted by default.
@@ -872,7 +872,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // TODO: We are switching the current user id in the settings
                             // object to query it and then revert the user id. Ideally, we
                             // should call a API in settings with the user id as an argument.
-                            mSettings.setCurrentUserId(userId);
+                            mSettings.switchCurrentUser(userId, true /* copyOnWrite */);
                             List<InputMethodInfo> imes = mSettings
                                     .getEnabledInputMethodListLocked();
                             String[] packageNames = null;
@@ -884,7 +884,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                     packageNames[i] = ime.getPackageName();
                                 }
                             }
-                            mSettings.setCurrentUserId(currentUserId);
+                            // If the system is not ready, then we use copy-on-write mode.
+                            final boolean useCopyOnWriteSettings = !mSystemReady;
+                            mSettings.switchCurrentUser(currentUserId, useCopyOnWriteSettings);
                             return packageNames;
                         }
                     }
@@ -1020,7 +1022,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
-        mSettings.setCurrentUserId(newUserId);
+
+        // If the system is not ready, then we use copy-on-write settings.
+        final boolean useCopyOnWriteSettings = !mSystemReady;
+        mSettings.switchCurrentUser(newUserId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         // InputMethodFileManager should be reset when the user is changed
         mFileManager = new InputMethodFileManager(mMethodMap, newUserId);
@@ -1079,6 +1084,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (!mSystemReady) {
                 mSystemReady = true;
+                final int currentUserId = mSettings.getCurrentUserId();
+                mSettings.switchCurrentUser(currentUserId, false /* copyOnWrite */);
                 mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
@@ -3000,7 +3007,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (resetDefaultEnabledIme) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
                     InputMethodUtils.getDefaultEnabledImes(mContext, mSystemReady, mMethodList);
-            for (int i = 0; i < defaultEnabledIme.size(); ++i) {
+            final int N = defaultEnabledIme.size();
+            for (int i = 0; i < N; ++i) {
                 final InputMethodInfo imi =  defaultEnabledIme.get(i);
                 if (DEBUG) {
                     Slog.d(TAG, "--- enable ime = " + imi);
@@ -3362,16 +3370,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        // Workaround.
-        // ASEC is not ready in the IMMS constructor. Accordingly, forward-locked
-        // IMEs are not recognized and considered uninstalled.
-        // Actually, we can't move everything after SystemReady because
-        // IMMS needs to run in the encryption lock screen. So, we just skip changing
-        // the default IME here and try cheking the default IME again in systemReady().
-        // TODO: Do nothing before system ready and implement a separated logic for
-        // the encryption lock screen.
-        // TODO: ASEC should be ready before IMMS is instantiated.
-        if (mSystemReady && !setSubtypeOnly) {
+        if (!setSubtypeOnly) {
             // Set InputMethod here
             mSettings.putSelectedInputMethod(imi != null ? imi.getId() : "");
         }
@@ -3852,6 +3851,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mSettingsObserver=" + mSettingsObserver);
             p.println("  mSwitchingController:");
             mSwitchingController.dump(p);
+            p.println("  mSettings:");
+            mSettings.dumpLocked(p, "    ");
         }
 
         p.println(" ");
