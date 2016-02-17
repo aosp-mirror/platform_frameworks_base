@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Gamitin ang network na ito nang walang pagbabago"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Huwag gamitin ang network na ito"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Mag-sign in sa network"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"May mga isyu sa seguridad ang network kung saan mo sinusubukang sumali."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Halimbawa, maaaring hindi sa organisasyong ipinapakita ang page sa pag-log in."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Magpatuloy pa rin sa pamamagitan ng browser"</string>
 </resources>

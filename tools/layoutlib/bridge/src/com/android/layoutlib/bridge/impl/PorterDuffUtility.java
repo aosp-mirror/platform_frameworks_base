@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 
 import android.graphics.BlendComposite;
 import android.graphics.BlendComposite.BlendingMode;
+import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter_Delegate;
 import android.graphics.PorterDuffXfermode_Delegate;
@@ -34,6 +35,8 @@ import java.awt.Composite;
  */
 public final class PorterDuffUtility {
 
+    private static final int MODES_COUNT = Mode.values().length;
+
     // Make the class non-instantiable.
     private PorterDuffUtility() {
     }
@@ -43,12 +46,11 @@ public final class PorterDuffUtility {
      * {@link Mode#SRC_OVER} for invalid modes.
      */
     public static Mode getPorterDuffMode(int porterDuffMode) {
-        Mode[] values = Mode.values();
-        if (porterDuffMode >= 0 && porterDuffMode < values.length) {
-            return values[porterDuffMode];
+        if (porterDuffMode >= 0 && porterDuffMode < MODES_COUNT) {
+            return PorterDuff.intToMode(porterDuffMode);
         }
         Bridge.getLog().error(LayoutLog.TAG_BROKEN,
-                String.format("Unknown PorterDuff.Mode: %1$d", porterDuffMode), null /*data*/);
+                String.format("Unknown PorterDuff.Mode: %1$d", porterDuffMode), null);
         assert false;
         return Mode.SRC_OVER;
     }

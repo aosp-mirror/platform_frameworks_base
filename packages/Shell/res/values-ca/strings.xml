@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Protecció"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"S\'ha registrat l\'informe d\'error"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Llisca cap a l\'esquerra per compartir l\'informe d\'errors."</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Fes lliscar el dit cap a l\'esquerra per compartir l\'informe d\'errors."</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Toca aquí per compartir el teu informe d\'error."</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Els informes d\'error contenen dades dels diferents fitxers de registre del sistema, inclosa informació privada i personal. Comparteix els informes d\'error només amb les aplicacions i amb les persones en qui confies."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Mostra aquest missatge la propera vegada"</string>

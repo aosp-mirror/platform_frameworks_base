@@ -239,6 +239,7 @@ abstract class PackageSettingBase extends SettingBase {
         keySetData = base.keySetData;
         verificationInfo = base.verificationInfo;
         installerPackageName = base.installerPackageName;
+        volumeUuid = base.volumeUuid;
     }
 
     private PackageUserState modifyUserState(int userId) {

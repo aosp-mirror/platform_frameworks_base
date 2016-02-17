@@ -59,6 +59,7 @@ class UserUsageStatsService {
     private final Context mContext;
     private final UsageStatsDatabase mDatabase;
     private final IntervalStats[] mCurrentStats;
+    private IntervalStats mAppIdleRollingWindow;
     private boolean mStatsChanged = false;
     private final UnixCalendar mDailyExpiryDate;
     private final StatsUpdatedListener mListener;
@@ -67,6 +68,7 @@ class UserUsageStatsService {
 
     interface StatsUpdatedListener {
         void onStatsUpdated();
+        long getAppIdleRollingWindowDurationMillis();
     }
 
     UserUsageStatsService(Context context, int userId, File usageStatsDir,
@@ -134,6 +136,8 @@ class UserUsageStatsService {
             stat.updateConfigurationStats(null, stat.lastTimeSaved);
         }
 
+        refreshAppIdleRollingWindow(currentTimeMillis, deviceUsageTime);
+
         if (mDatabase.isNewUpdate()) {
             initializeDefaultsForApps(currentTimeMillis, deviceUsageTime,
                     mDatabase.isFirstUpdate());
@@ -159,18 +163,23 @@ class UserUsageStatsService {
                 for (IntervalStats stats : mCurrentStats) {
                     stats.update(packageName, currentTimeMillis, Event.SYSTEM_INTERACTION);
                     stats.updateBeginIdleTime(packageName, deviceUsageTime);
-                    mStatsChanged = true;
                 }
+                mAppIdleRollingWindow.update(packageName, currentTimeMillis,
+                        Event.SYSTEM_INTERACTION);
+                mAppIdleRollingWindow.updateBeginIdleTime(packageName, deviceUsageTime);
+                mStatsChanged = true;
             }
         }
         // Persist the new OTA-related access stats.
         persistActiveStats();
     }
 
-    void onTimeChanged(long oldTime, long newTime, boolean resetBeginIdleTime) {
+    void onTimeChanged(long oldTime, long newTime, long deviceUsageTime,
+                       boolean resetBeginIdleTime) {
         persistActiveStats();
         mDatabase.onTimeChanged(newTime - oldTime);
         loadActiveStats(newTime, /* force= */ true, resetBeginIdleTime);
+        refreshAppIdleRollingWindow(newTime, deviceUsageTime);
     }
 
     void reportEvent(UsageEvents.Event event, long deviceUsageTime) {
@@ -182,7 +191,7 @@ class UserUsageStatsService {
 
         if (event.mTimeStamp >= mDailyExpiryDate.getTimeInMillis()) {
             // Need to rollover
-            rolloverStats(event.mTimeStamp);
+            rolloverStats(event.mTimeStamp, deviceUsageTime);
         }
 
         final IntervalStats currentDailyStats = mCurrentStats[UsageStatsManager.INTERVAL_DAILY];
@@ -212,6 +221,11 @@ class UserUsageStatsService {
             }
         }
 
+        if (event.mEventType != Event.CONFIGURATION_CHANGE) {
+            mAppIdleRollingWindow.update(event.mPackage, event.mTimeStamp, event.mEventType);
+            mAppIdleRollingWindow.updateBeginIdleTime(event.mPackage, deviceUsageTime);
+        }
+
         notifyStatsChanged();
     }
 
@@ -223,6 +237,7 @@ class UserUsageStatsService {
         for (IntervalStats stats : mCurrentStats) {
             stats.updateBeginIdleTime(packageName, beginIdleTime);
         }
+        mAppIdleRollingWindow.updateBeginIdleTime(packageName, beginIdleTime);
         notifyStatsChanged();
     }
 
@@ -230,6 +245,7 @@ class UserUsageStatsService {
         for (IntervalStats stats : mCurrentStats) {
             stats.updateSystemLastUsedTime(packageName, lastUsedTime);
         }
+        mAppIdleRollingWindow.updateSystemLastUsedTime(packageName, lastUsedTime);
         notifyStatsChanged();
     }
 
@@ -388,9 +404,8 @@ class UserUsageStatsService {
     }
 
     long getBeginIdleTime(String packageName) {
-        final IntervalStats yearly = mCurrentStats[UsageStatsManager.INTERVAL_YEARLY];
         UsageStats packageUsage;
-        if ((packageUsage = yearly.packageStats.get(packageName)) == null) {
+        if ((packageUsage = mAppIdleRollingWindow.packageStats.get(packageName)) == null) {
             return -1;
         } else {
             return packageUsage.getBeginIdleTime();
@@ -398,9 +413,8 @@ class UserUsageStatsService {
     }
 
     long getSystemLastUsedTime(String packageName) {
-        final IntervalStats yearly = mCurrentStats[UsageStatsManager.INTERVAL_YEARLY];
         UsageStats packageUsage;
-        if ((packageUsage = yearly.packageStats.get(packageName)) == null) {
+        if ((packageUsage = mAppIdleRollingWindow.packageStats.get(packageName)) == null) {
             return -1;
         } else {
             return packageUsage.getLastTimeSystemUsed();
@@ -421,7 +435,7 @@ class UserUsageStatsService {
         }
     }
 
-    private void rolloverStats(final long currentTimeMillis) {
+    private void rolloverStats(final long currentTimeMillis, final long deviceUsageTime) {
         final long startTime = SystemClock.elapsedRealtime();
         Slog.i(TAG, mLogPrefix + "Rolling over usage stats");
 
@@ -461,6 +475,8 @@ class UserUsageStatsService {
             }
         }
         persistActiveStats();
+
+        refreshAppIdleRollingWindow(currentTimeMillis, deviceUsageTime);
 
         final long totalTime = SystemClock.elapsedRealtime() - startTime;
         Slog.i(TAG, mLogPrefix + "Rolling over usage stats complete. Took " + totalTime
@@ -521,6 +537,7 @@ class UserUsageStatsService {
                 }
             }
         }
+
         mStatsChanged = false;
         mDailyExpiryDate.setTimeInMillis(currentTimeMillis);
         mDailyExpiryDate.addDays(1);
@@ -528,6 +545,71 @@ class UserUsageStatsService {
         Slog.i(TAG, mLogPrefix + "Rollover scheduled @ " +
                 sDateFormat.format(mDailyExpiryDate.getTimeInMillis()) + "(" +
                 tempCal.getTimeInMillis() + ")");
+    }
+
+    private static void mergePackageStats(IntervalStats dst, IntervalStats src,
+                                          final long deviceUsageTime) {
+        dst.endTime = Math.max(dst.endTime, src.endTime);
+
+        final int srcPackageCount = src.packageStats.size();
+        for (int i = 0; i < srcPackageCount; i++) {
+            final String packageName = src.packageStats.keyAt(i);
+            final UsageStats srcStats = src.packageStats.valueAt(i);
+            UsageStats dstStats = dst.packageStats.get(packageName);
+            if (dstStats == null) {
+                dstStats = new UsageStats(srcStats);
+                dst.packageStats.put(packageName, dstStats);
+            } else {
+                dstStats.add(src.packageStats.valueAt(i));
+            }
+
+            // App idle times can not begin in the future. This happens if we had a time change.
+            if (dstStats.mBeginIdleTime > deviceUsageTime) {
+                dstStats.mBeginIdleTime = deviceUsageTime;
+            }
+        }
+    }
+
+    /**
+     * App idle operates on a rolling window of time. When we roll over time, we end up with a
+     * period of time where in-memory stats are empty and we don't hit the disk for older stats
+     * for performance reasons. Suddenly all apps will become idle.
+     *
+     * Instead, at times we do a deep query to find all the apps that have run in the past few
+     * days and keep the cached data up to date.
+     *
+     * @param currentTimeMillis
+     */
+    void refreshAppIdleRollingWindow(final long currentTimeMillis, final long deviceUsageTime) {
+        // Start the rolling window for AppIdle requests.
+        final long startRangeMillis = currentTimeMillis -
+                mListener.getAppIdleRollingWindowDurationMillis();
+
+        List<IntervalStats> stats = mDatabase.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                startRangeMillis, currentTimeMillis, new StatCombiner<IntervalStats>() {
+                    @Override
+                    public void combine(IntervalStats stats, boolean mutable,
+                                        List<IntervalStats> accumulatedResult) {
+                        IntervalStats accum;
+                        if (accumulatedResult.isEmpty()) {
+                            accum = new IntervalStats();
+                            accum.beginTime = stats.beginTime;
+                            accumulatedResult.add(accum);
+                        } else {
+                            accum = accumulatedResult.get(0);
+                        }
+
+                        mergePackageStats(accum, stats, deviceUsageTime);
+                    }
+                });
+
+        if (stats == null || stats.isEmpty()) {
+            mAppIdleRollingWindow = new IntervalStats();
+            mergePackageStats(mAppIdleRollingWindow,
+                    mCurrentStats[UsageStatsManager.INTERVAL_YEARLY], deviceUsageTime);
+        } else {
+            mAppIdleRollingWindow = stats.get(0);
+        }
     }
 
     //
@@ -552,6 +634,9 @@ class UserUsageStatsService {
             pw.println(" stats");
             printIntervalStats(pw, mCurrentStats[interval], screenOnTime, true);
         }
+
+        pw.println("AppIdleRollingWindow cache");
+        printIntervalStats(pw, mAppIdleRollingWindow, screenOnTime, true);
     }
 
     private String formatDateTime(long dateTime, boolean pretty) {

@@ -29,11 +29,6 @@
     <string-array translatable="false" name="config_tether_apndata">
         <item>SFR option modem,websfr,,,,,,,,,208,10,,DUN</item>
         <item>[ApnSettingV3]INTERNET NRJ,internetnrj,,,,,,,,,208,10,,DUN,,,true,0,,,,,,,gid,4E</item>
-        <item>[ApnSettingV3]Auchan,wap65,,,,,,,,,208,10,,DUN,,,true,0,,,,,,,spn,A MOBILE</item>
-        <item>[ApnSettingV3]LeclercMobile,wap66,,,,,,,,,208,10,,DUN,,,true,0,,,,,,,spn,LeclercMobile</item>
-        <item>[ApnSettingV3]Coriolis,fnetcoriolis,,,,,,,,,208,10,,DUN,,,true,0,,,,,,,gid,12</item>
-        <item>[ApnSettingV3]WEB La Poste Mobile,wapdebitel,,,,,,,,,208,10,,DUN,,,true,0,,,,,,,gid,4C</item>
-        <item>[ApnSettingV3]Darty Surf Mails,wap68,,,,,,,,,208,10,,DUN,,,true,0,,,,,,,gid,44</item>
     </string-array>
 
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">

@@ -428,6 +428,15 @@ public class CarrierConfigManager {
     public static final String KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL = "hide_preferred_network_type_bool";
 
     /**
+     * Determine whether user can switch Wi-Fi preferred or Cellular preferred in calling preference.
+     * Some operators support Wi-Fi Calling only, not VoLTE.
+     * They don't need "Cellular preferred" option.
+     * In this case, set uneditalbe attribute for preferred preference.
+     * @hide
+     */
+    public static final String KEY_EDITABLE_WFC_MODE_BOOL = "editable_wfc_mode_bool";
+
+    /**
      * Specifies the amount of gap to be added in millis between postdial DTMF tones. When a
      * non-zero value is specified, the UE shall wait for the specified amount of time before it
      * sends out successive DTMF tones on the network.
@@ -448,6 +457,13 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_ALLOW_ADDING_APNS_BOOL = "allow_adding_apns_bool";
+
+    /**
+     * Boolean indicating if intent for emergency call state changes should be broadcast
+     * @hide
+     */
+    public static final String KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL =
+            "broadcast_emergency_call_state_changes_bool";
 
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
@@ -547,6 +563,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_VAL_STRING, "");
         sDefaults.putBoolean(KEY_CSP_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_ADDING_APNS_BOOL, true);
+        sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
 
         sDefaults.putStringArray(KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY, null);
@@ -560,6 +577,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
+        sDefaults.putBoolean(KEY_EDITABLE_WFC_MODE_BOOL, true);
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
 
         // MMS defaults
@@ -612,12 +630,15 @@ public class CarrierConfigManager {
     @Nullable
     public PersistableBundle getConfigForSubId(int subId) {
         try {
-            return getICarrierConfigLoader().getConfigForSubId(subId);
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error getting config for subId " + subId
+                        + " ICarrierConfigLoader is null");
+                return null;
+            }
+            return loader.getConfigForSubId(subId);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error getting config for subId " + Integer.toString(subId) + ": "
-                    + ex.toString());
-        } catch (NullPointerException ex) {
-            Rlog.e(TAG, "Error getting config for subId " + Integer.toString(subId) + ": "
+            Rlog.e(TAG, "Error getting config for subId " + subId + ": "
                     + ex.toString());
         }
         return null;
@@ -653,10 +674,14 @@ public class CarrierConfigManager {
      */
     public void notifyConfigChangedForSubId(int subId) {
         try {
-            getICarrierConfigLoader().notifyConfigChangedForSubId(subId);
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error reloading config for subId=" + subId
+                        + " ICarrierConfigLoader is null");
+                return;
+            }
+            loader.notifyConfigChangedForSubId(subId);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error reloading config for subId=" + subId + ": " + ex.toString());
-        } catch (NullPointerException ex) {
             Rlog.e(TAG, "Error reloading config for subId=" + subId + ": " + ex.toString());
         }
     }
@@ -673,10 +698,14 @@ public class CarrierConfigManager {
     @SystemApi
     public void updateConfigForPhoneId(int phoneId, String simState) {
         try {
-            getICarrierConfigLoader().updateConfigForPhoneId(phoneId, simState);
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error updating config for phoneId=" + phoneId
+                        + " ICarrierConfigLoader is null");
+                return;
+            }
+            loader.updateConfigForPhoneId(phoneId, simState);
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "Error updating config for phoneId=" + phoneId + ": " + ex.toString());
-        } catch (NullPointerException ex) {
             Rlog.e(TAG, "Error updating config for phoneId=" + phoneId + ": " + ex.toString());
         }
     }
@@ -693,6 +722,7 @@ public class CarrierConfigManager {
     }
 
     /** @hide */
+    @Nullable
     private ICarrierConfigLoader getICarrierConfigLoader() {
         return ICarrierConfigLoader.Stub
                 .asInterface(ServiceManager.getService(Context.CARRIER_CONFIG_SERVICE));

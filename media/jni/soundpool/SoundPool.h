@@ -180,6 +180,7 @@ public:
 
     // called from SoundPoolThread
     void sampleLoaded(int sampleID);
+    sp<Sample> findSample(int sampleID);
 
     // called from AudioTrack thread
     void done_l(SoundChannel* channel);
@@ -191,8 +192,7 @@ public:
 private:
     SoundPool() {} // no default constructor
     bool startThreads();
-    void doLoad(sp<Sample>& sample);
-    sp<Sample> findSample(int sampleID) { return mSamples.valueFor(sampleID); }
+    sp<Sample> findSample_l(int sampleID);
     SoundChannel* findChannel (int channelID);
     SoundChannel* findNextChannel (int channelID);
     SoundChannel* allocateChannel_l(int priority, int sampleID);

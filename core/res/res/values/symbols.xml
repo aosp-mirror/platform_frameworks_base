@@ -308,6 +308,7 @@
   <java-symbol type="bool" name="config_wifi_enable_5GHz_preference" />
   <java-symbol type="bool" name="config_wifi_revert_country_code_on_cellular_loss" />
   <java-symbol type="bool" name="config_wifi_enable_wifi_firmware_debugging" />
+  <java-symbol type="bool" name="config_wifi_turn_off_during_emergency_call" />
   <java-symbol type="bool" name="config_supportMicNearUltrasound" />
   <java-symbol type="bool" name="config_supportSpeakerNearUltrasound" />
   <java-symbol type="integer" name="config_wifi_framework_5GHz_preference_boost_threshold" />
@@ -445,7 +446,6 @@
   <java-symbol type="dimen" name="notification_large_icon_circle_padding" />
   <java-symbol type="dimen" name="notification_badge_size" />
   <java-symbol type="dimen" name="immersive_mode_cling_width" />
-  <java-symbol type="dimen" name="circular_display_mask_offset" />
   <java-symbol type="dimen" name="accessibility_magnification_indicator_width" />
   <java-symbol type="dimen" name="circular_display_mask_thickness" />
 

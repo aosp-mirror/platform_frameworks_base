@@ -398,17 +398,24 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * this camera device.</p>
      * <p>For devices at the LEGACY level or above:</p>
      * <ul>
-     * <li>This list will always include (30, 30).</li>
-     * <li>Also, for constant-framerate recording, for each normal
+     * <li>
+     * <p>For constant-framerate recording, for each normal
+     * {@link android.media.CamcorderProfile CamcorderProfile}, that is, a
      * {@link android.media.CamcorderProfile CamcorderProfile} that has
      * {@link android.media.CamcorderProfile#quality quality} in
      * the range [{@link android.media.CamcorderProfile#QUALITY_LOW QUALITY_LOW},
      * {@link android.media.CamcorderProfile#QUALITY_2160P QUALITY_2160P}], if the profile is
      * supported by the device and has
      * {@link android.media.CamcorderProfile#videoFrameRate videoFrameRate} <code>x</code>, this list will
-     * always include (<code>x</code>,<code>x</code>).</li>
-     * <li>For preview streaming use case, this list will always include (<code>min</code>, <code>max</code>) where
-     * <code>min</code> &lt;= 15 and <code>max</code> &gt;= 30.</li>
+     * always include (<code>x</code>,<code>x</code>).</p>
+     * </li>
+     * <li>
+     * <p>Also, a camera device must either not support any
+     * {@link android.media.CamcorderProfile CamcorderProfile},
+     * or support at least one
+     * normal {@link android.media.CamcorderProfile CamcorderProfile} that has
+     * {@link android.media.CamcorderProfile#videoFrameRate videoFrameRate} <code>x</code> &gt;= 24.</p>
+     * </li>
      * </ul>
      * <p>For devices at the LIMITED level or above:</p>
      * <ul>

@@ -22,5 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Dodirnite za dijeljenje prijave programske pogreške"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Prijave programskih pogrešaka sadržavaju podatke iz različitih datoteka zapisnika sustava, uključujući osobne i privatne informacije. Prijave programskih pogrešaka dijelite samo s aplikacijama i osobama koje smatrate pouzdanima."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Prikaži tu poruku sljedeći put"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Izvj. o prog. pogreš."</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Izvješća o programskim pogreškama"</string>
 </resources>

@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Käytä tätä verkkoa sellaisenaan"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Älä käytä tätä verkkoa"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Kirjaudu verkkoon"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Verkossa, johon yrität muodostaa yhteyttä, on turvallisuusongelmia."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Kirjautumissivu ei välttämättä kuulu näytetylle organisaatiolle."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Jatka silti selaimen kautta."</string>
 </resources>

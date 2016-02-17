@@ -22,5 +22,5 @@
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Kliknij, by udostępnić raport o błędach"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Raporty o błędach zawierają dane z różnych plików dzienników systemu, w tym dane osobowe i prywatne. Udostępniaj je tylko aplikacjom i osobom, którym ufasz."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Pokaż ten komunikat następnym razem"</string>
-    <string name="bugreport_storage_title" msgid="5332488144740527109">"Raporty o błędach"</string>
+    <string name="bugreport_storage_title" msgid="5332488144740527109">"Zgłoszenia błędów"</string>
 </resources>

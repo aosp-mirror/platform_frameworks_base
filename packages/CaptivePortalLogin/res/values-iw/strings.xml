@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"השתמש ברשת זו כפי שהיא"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"אל תשתמש ברשת זו"</string>
     <string name="action_bar_label" msgid="917235635415966620">"היכנס לרשת"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"יש בעיות אבטחה ברשת שאליה אתה מנסה להתחבר."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"לדוגמה, ייתכן שדף ההתחברות אינו שייך לארגון המוצג."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"המשך בכל זאת באמצעות דפדפן"</string>
 </resources>

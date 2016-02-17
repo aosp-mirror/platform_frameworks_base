@@ -19,6 +19,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.Animator.AnimatorListener;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
@@ -139,6 +140,16 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     /** Local, mutable animator set. */
     private final AnimatorSet mAnimatorSet = new AnimatorSet();
+
+    // Setup a value animator to get animation update callbacks.
+    private final ValueAnimator mUpdateAnim = ValueAnimator.ofFloat(0f, 1f);
+    private final ValueAnimator.AnimatorUpdateListener mUpdateListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    invalidateSelf();
+                }
+            };
 
     /**
      * The resources against which this drawable was created. Used to attempt
@@ -605,6 +616,32 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         if (!mHasAnimatorSet) {
             mAnimatedVectorState.prepareLocalAnimators(mAnimatorSet, mRes);
             mHasAnimatorSet = true;
+            // Setup an infinitely running ValueAnimator, start it when AnimatorSet starts and
+            // end it when AnimatorSet ends, so we get the animation update timing for
+            // invalidating the drawable. Ideally, we would set an update listener on AnimatorSet,
+            // but since AnimatorSet doesn't support that yet, this is the alternative to achieve
+            // the same goal.
+            mUpdateAnim.setRepeatCount(ValueAnimator.INFINITE);
+            mUpdateAnim.addUpdateListener(mUpdateListener);
+            mAnimatorSet.addListener(new AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    mUpdateAnim.start();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mUpdateAnim.end();
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                }
+            });
             mRes = null;
         }
     }

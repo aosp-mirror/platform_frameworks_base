@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Uporabljajte to omrežje, »kakršno je«"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Ne uporabljajte tega omrežja"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Prijavite se v omrežje"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Omrežje, ki se mu poskušate pridružiti, ima varnostne težave."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Stran za prijavo na primer morda ne pripada prikazani organizaciji."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Vseeno nadaljuj v brskalniku"</string>
 </resources>

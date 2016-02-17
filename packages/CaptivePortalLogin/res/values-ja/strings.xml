@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"このネットワークをそのまま使用する"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"このネットワークを使用しない"</string>
     <string name="action_bar_label" msgid="917235635415966620">"ネットワークにログイン"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"接続しようとしているネットワークにセキュリティの問題があります。"</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"たとえば、ログインページが表示されている組織に属していない可能性があります。"</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"ブラウザから続行"</string>
 </resources>

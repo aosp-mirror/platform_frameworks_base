@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Энэ сүлжээг ашиглана уу"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Энэ сүлжээг бүү ашиглана уу"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Сүлжээнд нэвтэрнэ үү"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Таны нэгдэх гэж буй сүлжээ аюулгүй байдлын асуудалтай байна."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Жишээлбэл нэвтрэх хуудас нь харагдах байгууллагынх биш байж болзошгүй."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Ямартаа ч хөтчөөр үргэлжлүүлэх"</string>
 </resources>

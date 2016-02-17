@@ -77,8 +77,8 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     }
 
 #if DEBUG_SHADOW
-    ALOGD("light center %f %f %f",
-            adjustedLightCenter.x, adjustedLightCenter.y, adjustedLightCenter.z);
+    ALOGD("light center %f %f %f %d",
+            adjustedLightCenter.x, adjustedLightCenter.y, adjustedLightCenter.z, lightRadius);
 #endif
     if (isnan(adjustedLightCenter.x)
             || isnan(adjustedLightCenter.y)

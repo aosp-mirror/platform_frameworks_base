@@ -45,6 +45,16 @@ public class OuterClass {
         }
     }
 
+    public static class StaticInnerClass {
+        public StaticInnerClass() {
+        }
+
+        // StaticInnerClass.get returns 100 + a + b
+        public int get(int a, long b) {
+            return 100 + a + (int) b;
+        }
+    }
+
     @SuppressWarnings("unused")
     private String privateMethod() {
         return "outerPrivateMethod";

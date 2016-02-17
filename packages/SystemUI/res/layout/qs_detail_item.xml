@@ -60,6 +60,7 @@
         android:clickable="true"
         android:focusable="true"
         android:scaleType="center"
+        android:contentDescription="@*android:string/media_route_controller_disconnect"
         android:src="@drawable/ic_qs_cancel" />
 
 </LinearLayout>

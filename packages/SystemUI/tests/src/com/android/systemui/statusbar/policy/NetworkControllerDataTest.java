@@ -114,6 +114,21 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.QS_DATA_4G);
     }
 
+    public void testDataChangeWithoutConnectionState() {
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verifyDataIndicators(TelephonyIcons.DATA_LTE[1][0 /* No direction */],
+                TelephonyIcons.QS_DATA_LTE);
+
+        Mockito.when(mServiceState.getDataNetworkType())
+                .thenReturn(TelephonyManager.NETWORK_TYPE_HSPA);
+        updateServiceState();
+        verifyDataIndicators(TelephonyIcons.DATA_H[1][0 /* No direction */],
+                TelephonyIcons.QS_DATA_H);
+    }
+
     public void testDataActivity() {
         setupDefaultSignal();
 

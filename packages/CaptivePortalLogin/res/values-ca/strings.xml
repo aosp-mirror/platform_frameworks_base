@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Fes servir aquesta xarxa tal com està."</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"No facis servir aquesta xarxa."</string>
     <string name="action_bar_label" msgid="917235635415966620">"Inicia la sessió a la xarxa"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"La xarxa a què et vols connectar té problemes de seguretat."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Per exemple, la pàgina d\'inici de sessió podria no pertànyer a l\'organització que es mostra."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Continua igualment mitjançant el navegador"</string>
 </resources>

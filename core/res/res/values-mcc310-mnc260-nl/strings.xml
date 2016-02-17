@@ -23,10 +23,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="7239039348648848288">"Als je wilt bellen en berichten wilt verzenden via wifi, moet je eerst je provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via \'Instellingen\'."</item>
+    <item msgid="7239039348648848288">"Als u wilt bellen en berichten wilt verzenden via wifi, moet u eerst uw provider vragen deze service in te stellen. Schakel bellen via wifi vervolgens opnieuw in via \'Instellingen\'."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="483847327467331298">"Registreren bij je provider"</item>
+    <item msgid="483847327467331298">"Registreren bij uw provider"</item>
   </string-array>
     <string name="wfcSpnFormat" msgid="4982938551498609442">"Bellen via wifi van %s"</string>
 </resources>

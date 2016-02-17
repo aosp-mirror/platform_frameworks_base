@@ -71,9 +71,8 @@ public class StatusBar extends CustomBar {
         // FIXME: use FILL_H?
         setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
 
-        Integer color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
-        setBackgroundColor(
-                color == null ? Config.getStatusBarColor(simulatedPlatformVersion) : color);
+        int color = getBarColor(ATTR_COLOR, ATTR_TRANSLUCENT);
+        setBackgroundColor(color == 0 ? Config.getStatusBarColor(simulatedPlatformVersion) : color);
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.

@@ -16937,8 +16937,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     protected boolean verifyDrawable(Drawable who) {
-        return who == mBackground || (mScrollCache != null && mScrollCache.scrollBar == who)
-                || (mForegroundInfo != null && mForegroundInfo.mDrawable == who);
+        // Avoid verifying the scroll bar drawable so that we don't end up in
+        // an invalidation loop. This effectively prevents the scroll bar
+        // drawable from triggering invalidations and scheduling runnables.
+        return who == mBackground || (mForegroundInfo != null && mForegroundInfo.mDrawable == who);
     }
 
     /**

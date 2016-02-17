@@ -1,0 +1,165 @@
+<!--
+  ~ Copyright (C) 2015 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.test.uibench">
+
+    <application
+        android:allowBackup="false"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+        tools:ignore="MissingApplicationIcon">
+        <uses-library android:name="android.test.runner" />
+
+        <!-- Root navigation activity -->
+        <activity
+            android:name=".MainActivity"
+            android:label="UiBench">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- General -->
+        <activity
+            android:name=".DialogListActivity"
+            android:label="General/Dialog List" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".GlTextureViewActivity"
+            android:label="General/GL TextureView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".FullscreenOverdrawActivity"
+            android:label="General/Fullscreen Overdraw" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".InvalidateActivity"
+            android:label="General/Invalidate" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TrivialAnimationActivity"
+            android:label="General/Trivial Animation" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TrivialListActivity"
+            android:label="General/Trivial ListView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TrivialRecyclerViewActivity"
+            android:label="General/Trivial Recycler ListView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ActivityTransition"
+            android:label="Transitions/Activity Transition" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ActivityTransitionDetails"
+            android:label="Transitions/Activity Transition " >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <!-- Part of ActivityTransition test above, so not in TEST category -->
+            </intent-filter>
+        </activity>
+
+        <!-- Rendering -->
+        <activity
+            android:name=".BitmapUploadActivity"
+            android:label="Rendering/Bitmap Upload" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ShadowGridActivity"
+            android:label="Rendering/Shadow Grid" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- Inflation -->
+        <activity
+            android:name=".InflatingListActivity"
+            android:label="Inflation/Inflating ListView" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+
+        <!-- Text -->
+        <activity
+            android:name=".EditTextTypeActivity"
+            android:label="Text/EditText Typing" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TextCacheLowHitrateActivity"
+            android:label="Text/Layout Cache Low Hitrate" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".TextCacheHighHitrateActivity"
+            android:label="Text/Layout Cache High Hitrate" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

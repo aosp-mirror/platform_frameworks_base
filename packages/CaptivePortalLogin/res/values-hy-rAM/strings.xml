@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Օգտագործել այս ցանցն ինչպես կա"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Չօգտագործել այս ցանցը"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Մուտք գործել ցանց"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Ցանցը, որին փորձում եք միանալ, անվտանգության խնդիրներ ունի:"</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Օրինակ՝ մուտքի էջը կարող է ցուցադրված կազմակերպության էջը չլինել:"</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Շարունակել այնուամենայնիվ դիտարկիչի միջոցով"</string>
 </resources>

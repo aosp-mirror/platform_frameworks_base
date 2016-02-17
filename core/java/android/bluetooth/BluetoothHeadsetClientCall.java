@@ -19,6 +19,8 @@ package android.bluetooth;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.UUID;
+
 /**
  * This class represents a single call, its state and properties.
  * It implements {@link Parcelable} for inter-process message passing.
@@ -67,14 +69,21 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     private String mNumber;
     private boolean mMultiParty;
     private final boolean mOutgoing;
+    private final UUID mUUID;
 
     /**
      * Creates BluetoothHeadsetClientCall instance.
      */
     public BluetoothHeadsetClientCall(BluetoothDevice device, int id, int state, String number,
             boolean multiParty, boolean outgoing) {
+        this(device, id, UUID.randomUUID(), state, number, multiParty, outgoing);
+    }
+
+    public BluetoothHeadsetClientCall(BluetoothDevice device, int id, UUID uuid, int state,
+            String number, boolean multiParty, boolean outgoing) {
         mDevice = device;
         mId = id;
+        mUUID = uuid;
         mState = state;
         mNumber = number != null ? number : "";
         mMultiParty = multiParty;
@@ -134,6 +143,16 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     }
 
     /**
+     * Gets call's UUID.
+     *
+     * @return call uuid
+     * @hide
+     */
+    public UUID getUUID() {
+        return mUUID;
+    }
+
+    /**
      * Gets call's current state.
      *
      * @return state of this particular phone call.
@@ -172,10 +191,16 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     }
 
     public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean loggable) {
         StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mDevice: ");
-        builder.append(mDevice);
+        builder.append(loggable ? mDevice.hashCode() : mDevice);
         builder.append(", mId: ");
         builder.append(mId);
+        builder.append(", mUUID: ");
+        builder.append(mUUID);
         builder.append(", mState: ");
         switch (mState) {
             case CALL_STATE_ACTIVE: builder.append("ACTIVE"); break;
@@ -189,7 +214,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
             default: builder.append(mState); break;
         }
         builder.append(", mNumber: ");
-        builder.append(mNumber);
+        builder.append(loggable ? mNumber.hashCode() : mNumber);
         builder.append(", mMultiParty: ");
         builder.append(mMultiParty);
         builder.append(", mOutgoing: ");
@@ -206,8 +231,8 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
                 @Override
                 public BluetoothHeadsetClientCall createFromParcel(Parcel in) {
                     return new BluetoothHeadsetClientCall((BluetoothDevice)in.readParcelable(null),
-                            in.readInt(), in.readInt(), in.readString(),
-                            in.readInt() == 1, in.readInt() == 1);
+                            in.readInt(), UUID.fromString(in.readString()), in.readInt(),
+                            in.readString(), in.readInt() == 1, in.readInt() == 1);
                 }
 
                 @Override
@@ -220,6 +245,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeParcelable(mDevice, 0);
         out.writeInt(mId);
+        out.writeString(mUUID.toString());
         out.writeInt(mState);
         out.writeString(mNumber);
         out.writeInt(mMultiParty ? 1 : 0);

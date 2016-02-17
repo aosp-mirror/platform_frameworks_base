@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Erabili sare hau bere horretan"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Ez erabili sare hau"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Hasi saioa sarean"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Erabili nahi duzun sareak segurtasun-arazoak ditu."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Adibidez, baliteke saioa hasteko orria adierazitako erakundearena ez izatea."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Jarraitu arakatzailearen bidez, halere"</string>
 </resources>

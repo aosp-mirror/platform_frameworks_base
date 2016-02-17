@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"මෙම ජාලය ලෙසම භාවිතා කරන්න"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"මෙම ජාලය භාවිතා කරන්න එපා"</string>
     <string name="action_bar_label" msgid="917235635415966620">"ජාලයට පුරනය වන්න"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"ඔබ සම්බන්ධ වීමට උත්සහ කරන ජාලයේ ආරක්ෂක ගැටළු ඇත."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"උදාහරණයක් ලෙස, පුරනය වන පිටුව පෙන්වා ඇති සංවිධානයට අයිති නැති විය හැක."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"කෙසේ වුවත් බ්‍රවුසරය හරහා ඉදිරියට යන්න"</string>
 </resources>

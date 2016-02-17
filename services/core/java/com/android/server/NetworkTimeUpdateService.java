@@ -30,6 +30,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.NtpTrustedTime;
@@ -75,6 +76,7 @@ public class NetworkTimeUpdateService {
     private SettingsObserver mSettingsObserver;
     // The last time that we successfully fetched the NTP time.
     private long mLastNtpFetchTime = NOT_SET;
+    private final PowerManager.WakeLock mWakeLock;
 
     // Normal polling frequency
     private final long mPollingIntervalMs;
@@ -104,6 +106,9 @@ public class NetworkTimeUpdateService {
                 com.android.internal.R.integer.config_ntpRetry);
         mTimeErrorThresholdMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_ntpThreshold);
+
+        mWakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
+                PowerManager.PARTIAL_WAKE_LOCK, TAG);
     }
 
     /** Initialize the receivers and initiate the first NTP request */
@@ -148,7 +153,15 @@ public class NetworkTimeUpdateService {
     private void onPollNetworkTime(int event) {
         // If Automatic time is not set, don't bother.
         if (!isAutomaticTimeRequested()) return;
+        mWakeLock.acquire();
+        try {
+            onPollNetworkTimeUnderWakeLock(event);
+        } finally {
+            mWakeLock.release();
+        }
+    }
 
+    private void onPollNetworkTimeUnderWakeLock(int event) {
         final long refTime = SystemClock.elapsedRealtime();
         // If NITZ time was received less than mPollingIntervalMs time ago,
         // no need to sync to NTP.

@@ -64,6 +64,11 @@ public class LockPatternUtils {
     private static final boolean DEBUG = false;
 
     /**
+     * The key to identify when the lock pattern enabled flag is being acccessed for legacy reasons.
+     */
+    public static final String LEGACY_LOCK_PATTERN_ENABLED = "legacy_lock_pattern_enabled";
+
+    /**
      * The number of incorrect attempts before which we fall back on an alternative
      * method of verifying the user, and resetting their lock pattern.
      */
@@ -983,6 +988,19 @@ public class LockPatternUtils {
      */
     public boolean isLockPatternEnabled(int userId) {
         return isLockPatternEnabled(getKeyguardStoredPasswordQuality(userId), userId);
+    }
+
+    @Deprecated
+    public boolean isLegacyLockPatternEnabled(int userId) {
+        // Note: this value should default to {@code true} to avoid any reset that might result.
+        // We must use a special key to read this value, since it will by default return the value
+        // based on the new logic.
+        return getBoolean(LEGACY_LOCK_PATTERN_ENABLED, true, userId);
+    }
+
+    @Deprecated
+    public void setLegacyLockPatternEnabled(int userId) {
+        setBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, true, userId);
     }
 
     private boolean isLockPatternEnabled(int mode, int userId) {

@@ -1719,7 +1719,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 BasePermission bp = mSettings.mPermissions.get(permission);
                 if (bp != null && (bp.isRuntime() || bp.isDevelopment())
                         && (grantedPermissions == null
-                               || ArrayUtils.contains(grantedPermissions, permission))) {
+                               || ArrayUtils.contains(grantedPermissions, permission))
+                        && (getPermissionFlags(permission, pkg.packageName, userId)
+                                & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) == 0) {
                     grantRuntimePermission(pkg.packageName, permission, userId);
                 }
             }
@@ -2736,26 +2738,38 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public int getPackageUid(String packageName, int userId) {
+        return getPackageUidEtc(packageName, 0, userId);
+    }
+
+    @Override
+    public int getPackageUidEtc(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) return -1;
         enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, "get package uid");
 
         // reader
         synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if(p != null) {
+            final PackageParser.Package p = mPackages.get(packageName);
+            if (p != null) {
                 return UserHandle.getUid(userId, p.applicationInfo.uid);
             }
-            PackageSetting ps = mSettings.mPackages.get(packageName);
-            if((ps == null) || (ps.pkg == null) || (ps.pkg.applicationInfo == null)) {
-                return -1;
+            if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    return UserHandle.getUid(userId, ps.appId);
+                }
             }
-            p = ps.pkg;
-            return p != null ? UserHandle.getUid(userId, p.applicationInfo.uid) : -1;
         }
+
+        return -1;
     }
 
     @Override
-    public int[] getPackageGids(String packageName, int userId) throws RemoteException {
+    public int[] getPackageGids(String packageName, int userId) {
+        return getPackageGidsEtc(packageName, 0, userId);
+    }
+
+    @Override
+    public int[] getPackageGidsEtc(String packageName, int flags, int userId) {
         if (!sUserManager.exists(userId)) {
             return null;
         }
@@ -2765,13 +2779,16 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // reader
         synchronized (mPackages) {
-            PackageParser.Package p = mPackages.get(packageName);
-            if (DEBUG_PACKAGE_INFO) {
-                Log.v(TAG, "getPackageGids" + packageName + ": " + p);
-            }
+            final PackageParser.Package p = mPackages.get(packageName);
             if (p != null) {
                 PackageSetting ps = (PackageSetting) p.mExtras;
                 return ps.getPermissionsState().computeGids(userId);
+            }
+            if ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    return ps.getPermissionsState().computeGids(userId);
+                }
             }
         }
 
@@ -15966,13 +15983,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MOVE_PACKAGE, null);
 
         final int moveId = mNextMoveId.getAndIncrement();
-        try {
-            movePackageInternal(packageName, volumeUuid, moveId);
-        } catch (PackageManagerException e) {
-            Slog.w(TAG, "Failed to move " + packageName, e);
-            mMoveCallbacks.notifyStatusChanged(moveId,
-                    PackageManager.MOVE_FAILED_INTERNAL_ERROR);
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    movePackageInternal(packageName, volumeUuid, moveId);
+                } catch (PackageManagerException e) {
+                    Slog.w(TAG, "Failed to move " + packageName, e);
+                    mMoveCallbacks.notifyStatusChanged(moveId,
+                            PackageManager.MOVE_FAILED_INTERNAL_ERROR);
+                }
+            }
+        });
         return moveId;
     }
 

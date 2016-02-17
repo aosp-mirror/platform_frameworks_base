@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Використовувати цю мережу як є"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Не використовувати цю мережу"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Увійти в мережу"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"У мережі, до якої ви намагаєтеся під’єднатись, є проблеми з безпекою."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Наприклад, сторінка входу може не належати вказаній організації."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Усе одно продовжити у веб-переглядачі"</string>
 </resources>

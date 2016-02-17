@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Žiadosť o pripojenie"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> žiada o nastavenie pripojenia VPN, pomocou ktorého bude môcť sledovať sieťové prenosy. Povoľte iba v prípade, že zdroju dôverujete. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; sa zobrazuje v hornej časti obrazovky, keď je pripojenie VPN aktívne."</string>
+    <string name="warning" msgid="809658604548412033">"Aplikácia <xliff:g id="APP">%s</xliff:g> žiada o nastavenie pripojenia VPN, pomocou ktorého bude môcť sledovať návštevnosť siete. Povoľte iba v prípade, že zdroju dôverujete. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; – keď je sieť VPN aktívna, zobrazuje sa v hornej časti obrazovky."</string>
     <string name="legacy_title" msgid="192936250066580964">"Sieť VPN je pripojená"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurovať"</string>
     <string name="disconnect" msgid="971412338304200056">"Odpojiť"</string>

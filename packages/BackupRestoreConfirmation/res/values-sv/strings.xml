@@ -19,7 +19,7 @@
     <string name="backup_confirm_title" msgid="827563724209303345">"Fullständig säkerhetskopiering"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Fullständig återställning"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"En fullständig säkerhetskopia av alla data till en ansluten dator har begärts. Vill du tillåta detta?\n\nOm du inte själv begärde säkerhetskopian ska du inte tillåta detta."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"Säkerhetskopiera data"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"Säkerhetskopiera mina data"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Säkerhetskopiera inte"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"En fullständig återställning av alla data från en ansluten dator har begärts. Vill du tillåta detta? \n \n Om du inte själv har begärt återställningen ska du inte tillåta den. Alla data som finns på enheten kommer då att ersättas!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Återställ mina data"</string>

@@ -562,10 +562,11 @@ is sensitive to delays or lag in sound input or output.</td>
     <tr>
        <td rowspan="6">Camera</td>
        <td><code>android.hardware.camera</code></td>
-       <td>The application uses the device's camera. If the device supports
-           multiple cameras, the application uses the camera that facing
-           away from the screen.</td>
-       <td></td>
+       <td>The application uses the device's back-facing (main) camera.</td>
+       <td>Devices with only a front-facing camera do not list this feature, so the
+           <code>android.hardware.camera.any</code> feature should be
+           used instead if a camera facing any direction is acceptable for the
+           application.</td>
     </tr>
 <tr>
   <td><code>android.hardware.camera.autofocus</code></td>

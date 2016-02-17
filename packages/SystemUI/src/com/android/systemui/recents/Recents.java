@@ -34,6 +34,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.MutableBoolean;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -280,6 +281,12 @@ public class Recents extends SystemUI
     @ProxyFromPrimaryToCurrentUser
     @Override
     public void showRecents(boolean triggeredFromAltTab, View statusBarView) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (mSystemServicesProxy.isForegroundUserOwner()) {
             showRecentsInternal(triggeredFromAltTab);
         } else {
@@ -304,6 +311,12 @@ public class Recents extends SystemUI
     @ProxyFromPrimaryToCurrentUser
     @Override
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (mSystemServicesProxy.isForegroundUserOwner()) {
             hideRecentsInternal(triggeredFromAltTab, triggeredFromHomeKey);
         } else {
@@ -330,6 +343,12 @@ public class Recents extends SystemUI
     @ProxyFromPrimaryToCurrentUser
     @Override
     public void toggleRecents(Display display, int layoutDirection, View statusBarView) {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (mSystemServicesProxy.isForegroundUserOwner()) {
             toggleRecentsInternal();
         } else {
@@ -353,6 +372,12 @@ public class Recents extends SystemUI
     @ProxyFromPrimaryToCurrentUser
     @Override
     public void preloadRecents() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         if (mSystemServicesProxy.isForegroundUserOwner()) {
             preloadRecentsInternal();
         } else {
@@ -469,6 +494,12 @@ public class Recents extends SystemUI
 
     @Override
     public void showNextAffiliatedTask() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         // Keep track of when the affiliated task is triggered
         MetricsLogger.count(mContext, "overview_affiliated_task_next", 1);
         showRelativeAffiliatedTask(true);
@@ -476,6 +507,12 @@ public class Recents extends SystemUI
 
     @Override
     public void showPrevAffiliatedTask() {
+        // Ensure the device has been provisioned before allowing the user to interact with
+        // recents
+        if (!isDeviceProvisioned()) {
+            return;
+        }
+
         // Keep track of when the affiliated task is triggered
         MetricsLogger.count(mContext, "overview_affiliated_task_prev", 1);
         showRelativeAffiliatedTask(false);
@@ -885,6 +922,14 @@ public class Recents extends SystemUI
         if (statusBar != null) {
             statusBar.showScreenPinningRequest(false);
         }
+    }
+
+    /**
+     * @return whether this device is provisioned.
+     */
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, 0) != 0;
     }
 
     /**

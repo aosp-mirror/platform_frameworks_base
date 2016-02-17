@@ -18,18 +18,18 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Volledige back-up"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Volledig herstel"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Er is een volledige back-up van alle gegevens naar een verbonden desktopcomputer aangevraagd. Wil je dit toestaan?\n\nAls je de back-up niet zelf hebt aangevraagd, moet je niet toestaan dat de bewerking wordt uitgevoerd."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Er is een volledige back-up van alle gegevens naar een verbonden desktopcomputer aangevraagd. Wilt u dit toestaan?\n\nAls u de back-up zelf niet heeft aangevraagd, moet u niet toestaan dat de bewerking wordt uitgevoerd."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Back-up maken van mijn gegevens"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Geen back-up maken"</string>
-    <string name="restore_confirm_text" msgid="7499866728030461776">"Er is volledig herstel van alle gegevens van een verbonden desktopcomputer aangevraagd. Wil je dit toestaan?\n\nAls je het herstel niet zelf hebt aangevraagd, moet je niet toestaan dat de bewerking wordt uitgevoerd. Bij herstel worden alle gegevens op het apparaat vervangen."</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"Er is volledig herstel van alle gegevens van een verbonden desktopcomputer aangevraagd. Wilt u dit toestaan?\n\nAls u het herstel zelf niet heeft aangevraagd, moet u niet toestaan dat de bewerking wordt uitgevoerd. Bij herstel worden alle gegevens op het apparaat vervangen."</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"Mijn gegevens herstellen"</string>
     <string name="deny_restore_button_label" msgid="1724367334453104378">"Niet herstellen"</string>
-    <string name="current_password_text" msgid="8268189555578298067">"Geef hieronder je huidige back-upwachtwoord op:"</string>
-    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Geef hieronder je wachtwoord voor apparaatcodering op."</string>
-    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Geef hieronder je wachtwoord voor apparaatversleuteling op. Dit wordt ook gebruikt om het back-uparchief te versleutelen."</string>
-    <string name="backup_enc_password_text" msgid="4981585714795233099">"Geef een wachtwoord op dat u wilt gebruiken voor het coderen van de gegevens van de volledige back-up. Als u dit leeg laat, wordt je huidige back-upwachtwoord gebruikt:"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"Geef hieronder uw huidige back-upwachtwoord op:"</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"Geef hieronder uw wachtwoord voor apparaatcodering op."</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"Geef hieronder uw wachtwoord voor apparaatversleuteling op. Dit wordt ook gebruikt om het back-uparchief te versleutelen."</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"Geef een wachtwoord op dat u wilt gebruiken voor het coderen van de gegevens van de volledige back-up. Als u dit leeg laat, wordt uw huidige back-upwachtwoord gebruikt:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Als u de gegevens van de volledige back-up wilt versleutelen, geeft u daarvoor hieronder een wachtwoord op:"</string>
-    <string name="backup_enc_password_required" msgid="7889652203371654149">"Aangezien je apparaat is gecodeerd, moet u je back-up coderen. Geef hieronder een wachtwoord op:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Aangezien uw apparaat is gecodeerd, moet u uw back-up coderen. Geef hieronder een wachtwoord op:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Als deze herstelgegevens zijn gecodeerd, geeft u hieronder het wachtwoord op:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Back-up starten..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Back-up voltooid"</string>

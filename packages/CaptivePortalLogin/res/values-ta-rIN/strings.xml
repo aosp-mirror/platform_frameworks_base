@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"இந்த நெட்வொர்க்கைப் பயன்படுத்து"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"இந்த நெட்வொர்க்கைப் பயன்படுத்த வேண்டாம்"</string>
     <string name="action_bar_label" msgid="917235635415966620">"நெட்வொர்க்கில் உள்நுழையவும்"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"நீங்கள் சேர முயற்சிக்கும் நெட்வொர்க்கில் பாதுகாப்புச் சிக்கல்கள் உள்ளன."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"எடுத்துக்காட்டாக, உள்நுழைவுப் பக்கமானது காட்டப்படும் அமைப்பிற்குச் சொந்தமானதாக இல்லாமல் இருக்கலாம்."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"பரவாயில்லை, உலாவி வழியாகத் தொடரவும்"</string>
 </resources>

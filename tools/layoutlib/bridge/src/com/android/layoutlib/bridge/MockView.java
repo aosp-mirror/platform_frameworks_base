@@ -17,39 +17,90 @@
 package com.android.layoutlib.bridge;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 /**
  * Base class for mocked views.
- *
- * TODO: implement onDraw and draw a rectangle in a random color with the name of the class
- * (or better the id of the view).
+ * <p/>
+ * FrameLayout with a single TextView. Doesn't allow adding any other views to itself.
  */
-public class MockView extends TextView {
+public class MockView extends FrameLayout {
+
+    private final TextView mView;
+
+    public MockView(Context context) {
+        this(context, null);
+    }
 
     public MockView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MockView(Context context, AttributeSet attrs, int defStyle) {
-        this(context, attrs, defStyle, 0);
+    public MockView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
     }
 
     public MockView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-
-        setText(this.getClass().getSimpleName());
-        setTextColor(0xFF000000);
+        mView = new TextView(context, attrs);
+        mView.setTextColor(0xFF000000);
         setGravity(Gravity.CENTER);
+        setText(getClass().getSimpleName());
+        addView(mView);
+        setBackgroundColor(0xFF7F7F7F);
+    }
+
+    // Only allow adding one TextView.
+    @Override
+    public void addView(View child) {
+        if (child == mView) {
+            super.addView(child);
+        }
     }
 
     @Override
-    public void onDraw(Canvas canvas) {
-        canvas.drawARGB(0xFF, 0x7F, 0x7F, 0x7F);
+    public void addView(View child, int index) {
+        if (child == mView) {
+            super.addView(child, index);
+        }
+    }
 
-        super.onDraw(canvas);
+    @Override
+    public void addView(View child, int width, int height) {
+        if (child == mView) {
+            super.addView(child, width, height);
+        }
+    }
+
+    @Override
+    public void addView(View child, ViewGroup.LayoutParams params) {
+        if (child == mView) {
+            super.addView(child, params);
+        }
+    }
+
+    @Override
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        if (child == mView) {
+            super.addView(child, index, params);
+        }
+    }
+
+    // The following methods are called by the IDE via reflection, and should be considered part
+    // of the API.
+    // Historically, MockView used to be a textView and had these methods. Now, we simply delegate
+    // them to the contained textView.
+
+    public void setText(CharSequence text) {
+        mView.setText(text);
+    }
+
+    public void setGravity(int gravity) {
+        mView.setGravity(gravity);
     }
 }

@@ -33,7 +33,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
@@ -117,11 +116,11 @@ abstract class CustomBar extends LinearLayout {
                 density = iconLoader.getDensity();
                 String path = iconLoader.getPath();
                 // look for a cached bitmap
-                Bitmap bitmap = Bridge.getCachedBitmap(path, true /*isFramework*/);
+                Bitmap bitmap = Bridge.getCachedBitmap(path, Boolean.TRUE /*isFramework*/);
                 if (bitmap == null) {
                     try {
                         bitmap = Bitmap_Delegate.createBitmap(stream, false /*isMutable*/, density);
-                        Bridge.setCachedBitmap(path, bitmap, true /*isFramework*/);
+                        Bridge.setCachedBitmap(path, bitmap, Boolean.TRUE /*isFramework*/);
                     } catch (IOException e) {
                         return;
                     }
@@ -228,18 +227,16 @@ abstract class CustomBar extends LinearLayout {
      * Find the background color for this bar from the theme attributes. Only relevant to StatusBar
      * and NavigationBar.
      * <p/>
-     * Returns null if not found.
+     * Returns 0 if not found.
      *
      * @param colorAttrName the attribute name for the background color
      * @param translucentAttrName the attribute name for the translucency property of the bar.
      *
      * @throws NumberFormatException if color resolved to an invalid string.
      */
-    @Nullable
-    protected Integer getBarColor(@NonNull String colorAttrName,
-            @NonNull String translucentAttrName) {
+    protected int getBarColor(@NonNull String colorAttrName, @NonNull String translucentAttrName) {
         if (!Config.isGreaterOrEqual(mSimulatedPlatformVersion, LOLLIPOP)) {
-            return null;
+            return 0;
         }
         RenderResources renderResources = getContext().getRenderResources();
         // First check if the bar is translucent.
@@ -254,11 +251,10 @@ abstract class CustomBar extends LinearLayout {
         if (transparent) {
             return getColor(renderResources, colorAttrName);
         }
-        return null;
+        return 0;
     }
 
-    @Nullable
-    private static Integer getColor(RenderResources renderResources, String attr) {
+    private static int getColor(RenderResources renderResources, String attr) {
         // From ?attr/foo to @color/bar. This is most likely an ItemResourceValue.
         ResourceValue resource = renderResources.findItemInTheme(attr, true);
         // Form @color/bar to the #AARRGGBB
@@ -279,7 +275,7 @@ abstract class CustomBar extends LinearLayout {
                 }
             }
         }
-        return null;
+        return 0;
     }
 
     private ResourceValue getResourceValue(String reference) {

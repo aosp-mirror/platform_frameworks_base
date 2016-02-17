@@ -63,7 +63,9 @@ interface IPackageManager {
     boolean isPackageAvailable(String packageName, int userId);
     PackageInfo getPackageInfo(String packageName, int flags, int userId);
     int getPackageUid(String packageName, int userId);
+    int getPackageUidEtc(String packageName, int flags, int userId);
     int[] getPackageGids(String packageName, int userId);
+    int[] getPackageGidsEtc(String packageName, int flags, int userId);
 
     String[] currentToCanonicalPackageNames(in String[] names);
     String[] canonicalToCurrentPackageNames(in String[] names);

@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Naudoti šį tinklą tokį, koks yra"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Nenaudoti šio tinklo"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Prisijungti prie tinklo"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Kilo tinklo, prie kurio bandote prisijungti, problemų."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Pavyzdžiui, prisijungimo puslapis gali nepriklausyti rodomai organizacijai."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Vis tiek tęsti naudojant naršyklę"</string>
 </resources>

@@ -48,8 +48,8 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
  */
 public class KeyguardIndicationController {
 
-    private static final String TAG = "KeyguardIndicationController";
-    private static final boolean DEBUG_CHARGING_CURRENT = false;
+    private static final String TAG = "KeyguardIndication";
+    private static final boolean DEBUG_CHARGING_SPEED = false;
 
     private static final int MSG_HIDE_TRANSIENT = 1;
     private static final int MSG_CLEAR_FP_MSG = 2;
@@ -72,7 +72,7 @@ public class KeyguardIndicationController {
     private boolean mPowerPluggedIn;
     private boolean mPowerCharged;
     private int mChargingSpeed;
-    private int mChargingCurrent;
+    private int mChargingWattage;
     private String mMessageToShowOnScreenOn;
 
     public KeyguardIndicationController(Context context, KeyguardIndicationTextView textView,
@@ -173,8 +173,8 @@ public class KeyguardIndicationController {
         }
         if (mPowerPluggedIn) {
             String indication = computePowerIndication();
-            if (DEBUG_CHARGING_CURRENT) {
-                indication += ",  " + (mChargingCurrent / 1000) + " mA";
+            if (DEBUG_CHARGING_SPEED) {
+                indication += ",  " + (mChargingWattage / 1000) + " mW";
             }
             return indication;
         }
@@ -231,7 +231,7 @@ public class KeyguardIndicationController {
                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
-            mChargingCurrent = status.maxChargingCurrent;
+            mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             updateIndication();
         }

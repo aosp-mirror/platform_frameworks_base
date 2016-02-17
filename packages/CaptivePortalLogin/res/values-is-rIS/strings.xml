@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Nota þetta net óbreytt"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Ekki nota þetta net"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Skrá inn á net"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Öryggisvandamál eru á netinu sem þú ert að reyna að tengjast."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Til dæmis getur verið að innskráningarsíðan tilheyri ekki fyrirtækinu sem birtist."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Halda samt áfram í vafra"</string>
 </resources>

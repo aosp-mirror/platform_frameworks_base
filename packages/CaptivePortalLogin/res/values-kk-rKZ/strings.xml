@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Осы желіні бар күйінде пайдалану"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Осы желіні пайдаланбау"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Желіге кіру"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Қосылайын деп жатқан желіңіз қауіпсіз болуы мүмкін."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Мысалы, кіру беті көрсетілген ұйымға тиесілі болмауы мүмкін."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Бәрібір браузер арқылы жалғастыру"</string>
 </resources>

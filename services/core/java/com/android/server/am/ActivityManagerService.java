@@ -321,6 +321,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     // before we decide it must be hung.
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
 
+    // How long we will retain processes hosting content providers in the "last activity"
+    // state before allowing them to drop down to the regular cached LRU list.  This is
+    // to avoid thrashing of provider processes under low memory situations.
+    static final int CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
+
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real, when the process was
     // started with a wrapper for instrumentation (such as Valgrind) because it
@@ -368,6 +373,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     // This is the amount of time an app needs to be running a foreground service before
     // we will consider it to be doing interaction for usage stats.
     static final int SERVICE_USAGE_INTERACTION_TIME = 30*60*1000;
+
+    // Maximum amount of time we will allow to elapse before re-reporting usage stats
+    // interaction with foreground processes.
+    static final long USAGE_STATS_INTERACTION_INTERVAL = 24*60*60*1000L;
 
     // Maximum number of users we allow to be running at a time.
     static final int MAX_RUNNING_USERS = 3;
@@ -9431,6 +9440,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (conn.stableCount == 0 && conn.unstableCount == 0) {
                 cpr.connections.remove(conn);
                 conn.client.conProviders.remove(conn);
+                if (conn.client.setProcState < ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                    // The client is more important than last activity -- note the time this
+                    // is happening, so we keep the old provider process around a bit as last
+                    // activity to avoid thrashing it.
+                    if (cpr.proc != null) {
+                        cpr.proc.lastProviderTime = SystemClock.uptimeMillis();
+                    }
+                }
                 stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid, cpr.name);
                 return true;
             }
@@ -15080,6 +15097,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print(" Lost RAM: "); pw.print(memInfo.getTotalSizeKb()
                         - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                         - memInfo.getKernelUsedSizeKb()); pw.println(" kB");
+            } else {
+                pw.print("lostram,"); pw.println(memInfo.getTotalSizeKb()
+                        - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                        - memInfo.getKernelUsedSizeKb());
             }
             if (!brief) {
                 if (memInfo.getZramTotalSizeKb() != 0) {
@@ -18204,6 +18225,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
+        if (app.lastProviderTime > 0 && (app.lastProviderTime+CONTENT_PROVIDER_RETAIN_TIME) > now) {
+            if (adj > ProcessList.PREVIOUS_APP_ADJ) {
+                adj = ProcessList.PREVIOUS_APP_ADJ;
+                schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+                app.cached = false;
+                app.adjType = "provider";
+            }
+            if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
+            }
+        }
+
         if (mayBeTop && procState > ActivityManager.PROCESS_STATE_TOP) {
             // A client of one of our services or providers is in the top state.  We
             // *may* want to be in the top state, but not if we are already running in
@@ -18665,7 +18698,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private final boolean applyOomAdjLocked(ProcessRecord app, boolean doingAll, long now) {
+    private final boolean applyOomAdjLocked(ProcessRecord app, boolean doingAll, long now,
+            long nowElapsed) {
         boolean success = true;
 
         if (app.curRawAdj != app.setRawAdj) {
@@ -18711,8 +18745,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 }
-                Process.setSwappiness(app.pid,
-                        app.curSchedGroup <= Process.THREAD_GROUP_BG_NONINTERACTIVE);
             }
         }
         if (app.repForegroundActivities != app.foregroundActivities) {
@@ -18769,7 +18801,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.setProcState != app.curProcState) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG_OOM_ADJ,
                     "Proc state change of " + app.processName
-                    + " to " + app.curProcState);
+                            + " to " + app.curProcState);
             boolean setImportant = app.setProcState < ActivityManager.PROCESS_STATE_SERVICE;
             boolean curImportant = app.curProcState < ActivityManager.PROCESS_STATE_SERVICE;
             if (setImportant && !curImportant) {
@@ -18780,14 +18812,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
                 synchronized (stats) {
                     app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
-                            app.pid, SystemClock.elapsedRealtime());
+                            app.pid, nowElapsed);
                 }
                 app.lastCpuTime = app.curCpuTime;
 
             }
             // Inform UsageStats of important process state change
             // Must be called before updating setProcState
-            maybeUpdateUsageStatsLocked(app);
+            maybeUpdateUsageStatsLocked(app, nowElapsed);
 
             app.setProcState = app.curProcState;
             if (app.setProcState >= ActivityManager.PROCESS_STATE_HOME) {
@@ -18798,6 +18830,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 app.procStateChanged = true;
             }
+        } else if (app.reportedInteraction && (nowElapsed-app.interactionEventTime)
+                > USAGE_STATS_INTERACTION_INTERVAL) {
+            // For apps that sit around for a long time in the interactive state, we need
+            // to report this at least once a day so they don't go idle.
+            maybeUpdateUsageStatsLocked(app, nowElapsed);
         }
 
         if (changes != 0) {
@@ -18892,7 +18929,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void maybeUpdateUsageStatsLocked(ProcessRecord app) {
+    private void maybeUpdateUsageStatsLocked(ProcessRecord app, long nowElapsed) {
         if (DEBUG_USAGE_STATS) {
             Slog.d(TAG, "Checking proc [" + Arrays.toString(app.getPackageList())
                     + "] state changes: old = " + app.setProcState + ", new = "
@@ -18909,19 +18946,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             isInteraction = true;
             app.fgInteractionTime = 0;
         } else if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
-            final long now = SystemClock.elapsedRealtime();
             if (app.fgInteractionTime == 0) {
-                app.fgInteractionTime = now;
+                app.fgInteractionTime = nowElapsed;
                 isInteraction = false;
             } else {
-                isInteraction = now > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
+                isInteraction = nowElapsed > app.fgInteractionTime + SERVICE_USAGE_INTERACTION_TIME;
             }
         } else {
             isInteraction = app.curProcState
                     <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
             app.fgInteractionTime = 0;
         }
-        if (isInteraction && !app.reportedInteraction) {
+        if (isInteraction && (!app.reportedInteraction
+                || (nowElapsed-app.interactionEventTime) > USAGE_STATS_INTERACTION_INTERVAL)) {
+            app.interactionEventTime = nowElapsed;
             String[] packages = app.getPackageList();
             if (packages != null) {
                 for (int i = 0; i < packages.length; i++) {
@@ -18931,6 +18969,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         app.reportedInteraction = isInteraction;
+        if (!isInteraction) {
+            app.interactionEventTime = 0;
+        }
     }
 
     private final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
@@ -18953,7 +18994,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         computeOomAdjLocked(app, cachedAdj, TOP_APP, doingAll, now);
 
-        return applyOomAdjLocked(app, doingAll, now);
+        return applyOomAdjLocked(app, doingAll, now, SystemClock.elapsedRealtime());
     }
 
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
@@ -19045,6 +19086,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
         final long now = SystemClock.uptimeMillis();
+        final long nowElapsed = SystemClock.elapsedRealtime();
         final long oldTime = now - ProcessList.MAX_EMPTY_TIME;
         final int N = mLruProcesses.size();
 
@@ -19171,7 +19213,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                applyOomAdjLocked(app, true, now);
+                applyOomAdjLocked(app, true, now, nowElapsed);
 
                 // Count the number of process types.
                 switch (app.curProcState) {

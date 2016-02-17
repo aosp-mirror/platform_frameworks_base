@@ -1781,6 +1781,13 @@ public abstract class Connection extends Conferenceable {
     public void onReject(String replyMessage) {}
 
     /**
+     * Notifies the Connection of a request to silence the ringer.
+     *
+     * @hide
+     */
+    public void onSilence() {}
+
+    /**
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
     public void onPostDialContinue(boolean proceed) {}

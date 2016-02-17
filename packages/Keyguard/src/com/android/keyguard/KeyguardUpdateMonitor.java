@@ -75,6 +75,7 @@ import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_MAX_CHARGING_CURRENT;
+import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 
@@ -154,6 +155,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      * receive the cancellation done signal, we should start listening again.
      */
     private static final int FINGERPRINT_STATE_CANCELLING_RESTARTING = 3;
+
+    private static final int DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT = 5000000;
 
     private static KeyguardUpdateMonitor sInstance;
 
@@ -616,10 +619,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
                 final int level = intent.getIntExtra(EXTRA_LEVEL, 0);
                 final int health = intent.getIntExtra(EXTRA_HEALTH, BATTERY_HEALTH_UNKNOWN);
-                final int maxChargingCurrent = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+
+                final int maxChargingMicroAmp = intent.getIntExtra(EXTRA_MAX_CHARGING_CURRENT, -1);
+                int maxChargingMicroVolt = intent.getIntExtra(EXTRA_MAX_CHARGING_VOLTAGE, -1);
+                final int maxChargingMicroWatt;
+
+                if (maxChargingMicroVolt <= 0) {
+                    maxChargingMicroVolt = DEFAULT_CHARGING_VOLTAGE_MICRO_VOLT;
+                }
+                if (maxChargingMicroAmp > 0) {
+                    // Calculating muW = muA * muV / (10^6 mu^2 / mu); splitting up the divisor
+                    // to maintain precision equally on both factors.
+                    maxChargingMicroWatt = (maxChargingMicroAmp / 1000)
+                            * (maxChargingMicroVolt / 1000);
+                } else {
+                    maxChargingMicroWatt = -1;
+                }
                 final Message msg = mHandler.obtainMessage(
                         MSG_BATTERY_UPDATE, new BatteryStatus(status, level, plugged, health,
-                        maxChargingCurrent));
+                                maxChargingMicroWatt));
                 mHandler.sendMessage(msg);
             } else if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
@@ -803,13 +821,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         public final int level;
         public final int plugged;
         public final int health;
-        public final int maxChargingCurrent;
-        public BatteryStatus(int status, int level, int plugged, int health, int maxChargingCurrent) {
+        public final int maxChargingWattage;
+        public BatteryStatus(int status, int level, int plugged, int health,
+                int maxChargingWattage) {
             this.status = status;
             this.level = level;
             this.plugged = plugged;
             this.health = health;
-            this.maxChargingCurrent = maxChargingCurrent;
+            this.maxChargingWattage = maxChargingWattage;
         }
 
         /**
@@ -841,9 +860,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         public final int getChargingSpeed(int slowThreshold, int fastThreshold) {
-            return maxChargingCurrent <= 0 ? CHARGING_UNKNOWN :
-                    maxChargingCurrent < slowThreshold ? CHARGING_SLOWLY :
-                    maxChargingCurrent > fastThreshold ? CHARGING_FAST :
+            return maxChargingWattage <= 0 ? CHARGING_UNKNOWN :
+                    maxChargingWattage < slowThreshold ? CHARGING_SLOWLY :
+                    maxChargingWattage > fastThreshold ? CHARGING_FAST :
                     CHARGING_REGULAR;
         }
     }
@@ -1419,7 +1438,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         // change in charging current while plugged in
-        if (nowPluggedIn && current.maxChargingCurrent != old.maxChargingCurrent) {
+        if (nowPluggedIn && current.maxChargingWattage != old.maxChargingWattage) {
             return true;
         }
 

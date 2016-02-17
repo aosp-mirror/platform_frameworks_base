@@ -5,7 +5,4 @@
     <string name="action_use_network" msgid="6076184727448466030">"Upotrebljavaj ovu mrežu u zatečenom stanju"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Ne upotrebljavaj ovu mrežu"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Prijava na mrežu"</string>
-    <string name="ssl_error_warning" msgid="6653188881418638872">"Mreža kojoj se pokušavate pridružiti ima sigurnosne poteškoće."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Na primjer, stranica za prijavu možda ne pripada prikazanoj organizaciji."</string>
-    <string name="ssl_error_continue" msgid="6492718244923937110">"Ipak nastavi putem preglednika"</string>
 </resources>

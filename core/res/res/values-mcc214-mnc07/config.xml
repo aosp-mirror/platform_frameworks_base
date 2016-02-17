@@ -28,7 +28,6 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string-array translatable="false" name="config_tether_apndata">
         <item>Conexión Compartida,movistar.es,,,MOVISTAR,MOVISTAR,,,,,214,07,1,DUN</item>
-        <item>[ApnSettingV3]Jazztel Internet,jazzinternet,,,,,,,,,214,07,,DUN,,,true,0,,,,,,,spn,JAZZTEL</item>
     </string-array>
 
 </resources>
