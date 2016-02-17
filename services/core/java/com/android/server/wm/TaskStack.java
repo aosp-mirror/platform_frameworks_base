@@ -898,7 +898,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     boolean isVisibleLocked() {
-        final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded();
+        final boolean keyguardOn = mService.mPolicy.isKeyguardShowingOrOccluded()
+                && !mService.mAnimator.mKeyguardGoingAway;
         if (keyguardOn && !StackId.isAllowedOverLockscreen(mStackId)) {
             // The keyguard is showing and the stack shouldn't show on top of the keyguard.
             return false;

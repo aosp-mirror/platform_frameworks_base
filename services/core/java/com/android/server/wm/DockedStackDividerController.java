@@ -102,7 +102,9 @@ public class DockedStackDividerController implements DimLayerUser {
             return;
         }
         TaskStack stack = mDisplayContent.mService.mStackIdToStack.get(DOCKED_STACK_ID);
-        final boolean visible = stack != null && stack.isVisibleLocked();
+
+        // If the stack is invisible, we policy force hide it in WindowAnimator.shouldForceHide
+        final boolean visible = stack != null;
         if (mLastVisibility == visible && !force) {
             return;
         }

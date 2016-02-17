@@ -2409,7 +2409,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_WALLPAPER:
             case TYPE_DREAM:
             case TYPE_KEYGUARD_SCRIM:
-            case TYPE_DOCK_DIVIDER:
                 return false;
             default:
                 // Hide only windows below the keyguard host window.
