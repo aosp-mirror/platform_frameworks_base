@@ -90,16 +90,20 @@ public class QSCustomizer extends LinearLayout implements AnimatorListener, OnCl
     }
 
     public void show(int x, int y) {
-        isShown = true;
-        mPhoneStatusBar.getStatusBarWindow().addView(this);
-        setTileSpecs();
-        mClipper.animateCircularClip(x, y, true, this);
-        new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
+        if (!isShown) {
+            isShown = true;
+            mPhoneStatusBar.getStatusBarWindow().addView(this);
+            setTileSpecs();
+            mClipper.animateCircularClip(x, y, true, this);
+            new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
+        }
     }
 
     public void hide(int x, int y) {
-        isShown = false;
-        mClipper.animateCircularClip(x, y, false, this);
+        if (isShown) {
+            isShown = false;
+            mClipper.animateCircularClip(x, y, false, this);
+        }
     }
 
     public boolean isCustomizing() {
