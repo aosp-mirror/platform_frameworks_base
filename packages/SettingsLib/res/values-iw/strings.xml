@@ -296,6 +296,8 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"תיקון צבע"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"תכונה זו היא ניסיונית ועשויה להשפיע על הביצועים."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"נעקף על ידי <xliff:g id="TITLE">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_duration_only (4400068916452346544) -->
+    <skip />
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - ‏<xliff:g id="TIME">%2$s</xliff:g> בקירוב עד לסיום"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> ‏- <xliff:g id="TIME">%2$s</xliff:g> עד למילוי"</string>
@@ -312,4 +314,8 @@
     <string name="battery_info_status_full" msgid="2824614753861462808">"מלא"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"הושבת על ידי מנהל המערכת"</string>
     <string name="home" msgid="8263346537524314127">"דף הבית"</string>
+    <!-- no translation found for charge_length_format (8978516217024434156) -->
+    <skip />
+    <!-- no translation found for remaining_length_format (7886337596669190587) -->
+    <skip />
 </resources>
