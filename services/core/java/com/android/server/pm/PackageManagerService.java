@@ -10673,44 +10673,63 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public boolean setPackageSuspendedAsUser(String packageName, boolean suspended, int userId) {
+    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
+            int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
         enforceCrossUserPermission(Binder.getCallingUid(), userId, true, true,
-                "setPackageSuspended for user " + userId);
+                "setPackagesSuspended for user " + userId);
 
-        if (!canSuspendPackageForUser(packageName, userId)) {
-            return false;
+        if (ArrayUtils.isEmpty(packageNames)) {
+            return packageNames;
         }
 
-        long callingId = Binder.clearCallingIdentity();
-        try {
-            boolean changed = false;
-            boolean success = false;
-            int appId = -1;
-            synchronized (mPackages) {
-                final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
-                if (pkgSetting != null) {
+        // List of package names for whom the suspended state has changed.
+        List<String> changedPackages = new ArrayList<>(packageNames.length);
+        // List of package names for whom the suspended state is not set as requested in this
+        // method.
+        List<String> unactionedPackages = new ArrayList<>(packageNames.length);
+        for (int i = 0; i < packageNames.length; i++) {
+            String packageName = packageNames[i];
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                boolean changed = false;
+                final int appId;
+                synchronized (mPackages) {
+                    final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+                    if (pkgSetting == null) {
+                        Slog.w(TAG, "Could not find package setting for package \"" + packageName
+                                + "\". Skipping suspending/un-suspending.");
+                        unactionedPackages.add(packageName);
+                        continue;
+                    }
+                    appId = pkgSetting.appId;
                     if (pkgSetting.getSuspended(userId) != suspended) {
+                        if (!canSuspendPackageForUser(packageName, userId)) {
+                            unactionedPackages.add(packageName);
+                            continue;
+                        }
                         pkgSetting.setSuspended(suspended, userId);
                         mSettings.writePackageRestrictionsLPr(userId);
-                        appId = pkgSetting.appId;
                         changed = true;
+                        changedPackages.add(packageName);
                     }
-                    success = true;
                 }
-            }
 
-            if (changed) {
-                sendPackagesSuspendedForUser(new String[]{packageName}, userId, suspended);
-                if (suspended) {
+                if (changed && suspended) {
                     killApplication(packageName, UserHandle.getUid(userId, appId),
                             "suspending package");
                 }
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
             }
-            return success;
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
         }
+
+        if (!changedPackages.isEmpty()) {
+            sendPackagesSuspendedForUser(changedPackages.toArray(
+                    new String[changedPackages.size()]), userId, suspended);
+        }
+
+        return unactionedPackages.toArray(new String[unactionedPackages.size()]);
     }
 
     @Override
