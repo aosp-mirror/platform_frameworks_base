@@ -1357,7 +1357,7 @@ class WindowStateAnimator {
             }
         } else {
             if (DEBUG_ANIM && isAnimating()) {
-                //Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
+                Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
             displayed = true;
         }
