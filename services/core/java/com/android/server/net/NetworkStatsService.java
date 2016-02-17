@@ -57,6 +57,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.NetworkManagementService.LIMIT_GLOBAL_ALERT;
 import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
@@ -72,6 +73,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.DataUsageRequest;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
@@ -90,8 +92,10 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -152,6 +156,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final TrustedTime mTime;
     private final TelephonyManager mTeleManager;
     private final NetworkStatsSettings mSettings;
+    private final NetworkStatsObservers mStatsObservers;
 
     private final File mSystemDir;
     private final File mBaseDir;
@@ -233,43 +238,65 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
 
-    private final Handler mHandler;
+    /** Must be set in factory by calling #setHandler. */
+    private Handler mHandler;
+    private Handler.Callback mHandlerCallback;
 
     private boolean mSystemReady;
     private long mPersistThreshold = 2 * MB_IN_BYTES;
     private long mGlobalAlertBytes;
 
-    public NetworkStatsService(
-            Context context, INetworkManagementService networkManager, IAlarmManager alarmManager) {
-        this(context, networkManager, alarmManager, NtpTrustedTime.getInstance(context),
-                getDefaultSystemDir(), new DefaultNetworkStatsSettings(context));
-    }
-
     private static File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
     }
 
-    public NetworkStatsService(Context context, INetworkManagementService networkManager,
-            IAlarmManager alarmManager, TrustedTime time, File systemDir,
-            NetworkStatsSettings settings) {
+    private static File getDefaultBaseDir() {
+        File baseDir = new File(getDefaultSystemDir(), "netstats");
+        baseDir.mkdirs();
+        return baseDir;
+    }
+
+    public static NetworkStatsService create(Context context,
+                INetworkManagementService networkManager) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock =
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        NetworkStatsService service = new NetworkStatsService(context, networkManager, alarmManager,
+                wakeLock, NtpTrustedTime.getInstance(context), TelephonyManager.getDefault(),
+                new DefaultNetworkStatsSettings(context), new NetworkStatsObservers(),
+                getDefaultSystemDir(), getDefaultBaseDir());
+
+        HandlerThread handlerThread = new HandlerThread(TAG);
+        Handler.Callback callback = new HandlerCallback(service);
+        handlerThread.start();
+        Handler handler = new Handler(handlerThread.getLooper(), callback);
+        service.setHandler(handler, callback);
+        return service;
+    }
+
+    @VisibleForTesting
+    NetworkStatsService(Context context, INetworkManagementService networkManager,
+            AlarmManager alarmManager, PowerManager.WakeLock wakeLock, TrustedTime time,
+            TelephonyManager teleManager, NetworkStatsSettings settings,
+            NetworkStatsObservers statsObservers, File systemDir, File baseDir) {
         mContext = checkNotNull(context, "missing Context");
         mNetworkManager = checkNotNull(networkManager, "missing INetworkManagementService");
+        mAlarmManager = checkNotNull(alarmManager, "missing AlarmManager");
         mTime = checkNotNull(time, "missing TrustedTime");
-        mTeleManager = checkNotNull(TelephonyManager.getDefault(), "missing TelephonyManager");
         mSettings = checkNotNull(settings, "missing NetworkStatsSettings");
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mTeleManager = checkNotNull(teleManager, "missing TelephonyManager");
+        mWakeLock = checkNotNull(wakeLock, "missing WakeLock");
+        mStatsObservers = checkNotNull(statsObservers, "missing NetworkStatsObservers");
+        mSystemDir = checkNotNull(systemDir, "missing systemDir");
+        mBaseDir = checkNotNull(baseDir, "missing baseDir");
+    }
 
-        final PowerManager powerManager = (PowerManager) context.getSystemService(
-                Context.POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-
-        HandlerThread thread = new HandlerThread(TAG);
-        thread.start();
-        mHandler = new Handler(thread.getLooper(), mHandlerCallback);
-
-        mSystemDir = checkNotNull(systemDir);
-        mBaseDir = new File(systemDir, "netstats");
-        mBaseDir.mkdirs();
+    @VisibleForTesting
+    void setHandler(Handler handler, Handler.Callback callback) {
+        mHandler = handler;
+        mHandlerCallback = callback;
     }
 
     public void bindConnectivityManager(IConnectivityManager connManager) {
@@ -733,6 +760,46 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         registerGlobalAlert();
     }
 
+    @Override
+    public DataUsageRequest registerDataUsageCallback(String callingPackage,
+                DataUsageRequest request, Messenger messenger, IBinder binder) {
+        checkNotNull(callingPackage, "calling package is null");
+        checkNotNull(request, "DataUsageRequest is null");
+        checkNotNull(request.templates, "NetworkTemplate is null");
+        checkArgument(request.templates.length > 0);
+        checkNotNull(messenger, "messenger is null");
+        checkNotNull(binder, "binder is null");
+
+        int callingUid = Binder.getCallingUid();
+        @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(callingPackage);
+        DataUsageRequest normalizedRequest;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            normalizedRequest = mStatsObservers.register(request, messenger, binder,
+                    callingUid, accessLevel);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        // Create baseline stats
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_PERFORM_POLL, FLAG_PERSIST_ALL));
+
+        return normalizedRequest;
+   }
+
+    @Override
+    public void unregisterDataUsageRequest(DataUsageRequest request) {
+        checkNotNull(request, "DataUsageRequest is null");
+
+        int callingUid = Binder.getCallingUid();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mStatsObservers.unregister(request, callingUid);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     /**
      * Update {@link NetworkStatsRecorder} and {@link #mGlobalAlertBytes} to
      * reflect current {@link #mPersistThreshold} value. Always defers to
@@ -945,6 +1012,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, null, currentTime);
         mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
         mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+
+        // We need to make copies of member fields that are sent to the observer to avoid
+        // a race condition between the service handler thread and the observer's
+        mStatsObservers.updateStats(xtSnapshot, uidSnapshot, new ArrayMap<>(mActiveIfaces),
+                new ArrayMap<>(mActiveUidIfaces), vpnArray, currentTime);
     }
 
     /**
@@ -1243,21 +1315,28 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    private Handler.Callback mHandlerCallback = new Handler.Callback() {
+    @VisibleForTesting
+    static class HandlerCallback implements Handler.Callback {
+        private final NetworkStatsService mService;
+
+        HandlerCallback(NetworkStatsService service) {
+            this.mService = service;
+        }
+
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_PERFORM_POLL: {
                     final int flags = msg.arg1;
-                    performPoll(flags);
+                    mService.performPoll(flags);
                     return true;
                 }
                 case MSG_UPDATE_IFACES: {
-                    updateIfaces();
+                    mService.updateIfaces();
                     return true;
                 }
                 case MSG_REGISTER_GLOBAL_ALERT: {
-                    registerGlobalAlert();
+                    mService.registerGlobalAlert();
                     return true;
                 }
                 default: {
@@ -1265,7 +1344,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
             }
         }
-    };
+    }
 
     private void assertBandwidthControlEnabled() {
         if (!isBandwidthControlEnabled()) {
