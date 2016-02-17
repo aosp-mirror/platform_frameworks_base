@@ -65,34 +65,15 @@ public class IpManager extends StateMachine {
     private static final boolean VDBG = false;
 
     /**
-     * Callbacks for both configuration of IpManager and for handling
-     * events as desired.
+     * Callbacks for handling IpManager events.
      */
     public static class Callback {
-        /**
-         * Configuration callbacks.
-         *
-         * Override methods as desired in order to control which features
-         * IpManager will use at run time.
-         */
-
-        // An IpReachabilityMonitor will always be started, if only for logging.
-        // This method is checked before probing neighbors and before calling
-        // onProvisioningLost() (see below).
-        public boolean usingIpReachabilityMonitor() {
-            return false;
-        }
-
-        /**
-         * Event callbacks.
-         *
-         * Override methods as desired in order to handle event callbacks
-         * as IpManager invokes them.
-         */
-
-        // Implementations must call IpManager#completedPreDhcpAction().
-        // TODO: Remove this requirement, perhaps via some
-        // registerForPreDhcpAction()-style mechanism.
+        // In order to receive onPreDhcpAction(), call #withPreDhcpAction()
+        // when constructing a ProvisioningConfiguration.
+        //
+        // Implementations of onPreDhcpAction() must call
+        // IpManager#completedPreDhcpAction() to indicate that DHCP is clear
+        // to proceed.
         public void onPreDhcpAction() {}
         public void onPostDhcpAction() {}
 
@@ -113,6 +94,9 @@ public class IpManager extends StateMachine {
         // Called when the internal IpReachabilityMonitor (if enabled) has
         // detected the loss of a critical number of required neighbors.
         public void onReachabilityLost(String logMsg) {}
+
+        // Called when the IpManager state machine terminates.
+        public void onQuit() {}
     }
 
     /**
@@ -267,6 +251,17 @@ public class IpManager extends StateMachine {
         mContext = null;
         mNwService = null;
         mNetlinkTracker = null;
+    }
+
+    @Override
+    protected void onQuitting() {
+        mCallback.onQuit();
+    }
+
+    // Shut down this IpManager instance altogether.
+    public void shutdown() {
+        stop();
+        quit();
     }
 
     public static ProvisioningConfiguration.Builder buildProvisioningConfiguration() {
