@@ -840,7 +840,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // If there is already an animation in progress, don't interfere with it.
         if (mColorFadeOnAnimator.isStarted()
                 || mColorFadeOffAnimator.isStarted()) {
-            return;
+            if (target != Display.STATE_ON) {
+                return;
+            }
+            // If display state changed to on, proceed and stop the color fade and turn screen on.
+            mPendingScreenOff = false;
         }
 
         // If we were in the process of turning off the screen but didn't quite
