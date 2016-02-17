@@ -20,6 +20,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
@@ -30,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
@@ -47,7 +49,9 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private NextAlarmController mNextAlarmController;
     private SettingsButton mSettingsButton;
     private View mSettingsContainer;
+
     private TextView mAlarmStatus;
+    private TextView mAlarmStatusCollapsed;
 
     private QSPanel mQsPanel;
 
@@ -56,19 +60,21 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private ViewGroup mExpandedGroup;
     private ViewGroup mDateTimeGroup;
-    private View mEmergencyOnly;
-    private TextView mQsDetailHeaderTitle;
+    private ViewGroup mDateTimeAlarmGroup;
+    private TextView mEmergencyOnly;
+
     private boolean mListening;
     private AlarmManager.AlarmClockInfo mNextAlarm;
 
     private QuickQSPanel mHeaderQsPanel;
     private boolean mShowEmergencyCallsOnly;
-    private float mDateTimeTranslation;
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
-    private View mQsDetailHeaderBack;
 
-    private final int[] mTmpInt2 = new int[2];
+    private float mDateTimeTranslation;
+    private float mDateTimeAlarmTranslation;
+    private float mExpansionFraction;
+    private float mDateScaleFactor;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -78,11 +84,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mEmergencyOnly = findViewById(R.id.header_emergency_calls_only);
-        mDateTimeTranslation = mContext.getResources().getDimension(
-                R.dimen.qs_date_anim_translation);
+        mEmergencyOnly = (TextView) findViewById(R.id.header_emergency_calls_only);
+
+        mDateTimeAlarmGroup = (ViewGroup) findViewById(R.id.date_time_alarm_group);
+        mDateTimeAlarmGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
-        mDateTimeGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
+
         mExpandedGroup = (ViewGroup) findViewById(R.id.expanded_group);
 
         mHeaderQsPanel = (QuickQSPanel) findViewById(R.id.quick_qs_panel);
@@ -91,6 +98,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
 
+        mAlarmStatusCollapsed = (TextView) findViewById(R.id.alarm_status_collapsed);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
 
@@ -110,6 +118,29 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                         getHeight()));
             }
         });
+        updateResources();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateResources();
+    }
+
+    private void updateResources() {
+        FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
+        FontSizeUtils.updateFontSize(mEmergencyOnly, R.dimen.qs_emergency_calls_only_text_size);
+
+        mDateTimeTranslation = mContext.getResources().getDimension(
+                R.dimen.qs_date_anim_translation);
+        mDateTimeAlarmTranslation = mContext.getResources().getDimension(
+                R.dimen.qs_date_alarm_anim_translation);
+        float dateCollapsedSize = mContext.getResources().getDimension(
+                R.dimen.qs_date_collapsed_text_size);
+        float dateExpandedSize = mContext.getResources().getDimension(
+                R.dimen.qs_date_text_size);
+        mDateScaleFactor = dateExpandedSize / dateCollapsedSize - 1;
+        updateDateTimePosition();
     }
 
     @Override
@@ -140,13 +171,39 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void setExpansion(float headerExpansionFraction) {
+        mExpansionFraction = headerExpansionFraction;
+
         mExpandedGroup.setAlpha(headerExpansionFraction);
         mExpandedGroup.setVisibility(headerExpansionFraction > 0 ? View.VISIBLE : View.INVISIBLE);
+
         mHeaderQsPanel.setAlpha(1 - headerExpansionFraction);
         mHeaderQsPanel.setVisibility(headerExpansionFraction < 1 ? View.VISIBLE : View.INVISIBLE);
 
-        mDateTimeGroup.setTranslationY(headerExpansionFraction * mDateTimeTranslation);
+        mAlarmStatus.setAlpha(headerExpansionFraction);
+        mAlarmStatusCollapsed.setAlpha(1 - headerExpansionFraction);
+        updateAlarmVisibilities();
+
+        float textScale = headerExpansionFraction * mDateScaleFactor;
+        mDateTimeGroup.setScaleX(1 + textScale);
+        mDateTimeGroup.setScaleY(1 + textScale);
+        mDateTimeGroup.setTranslationX(textScale * mDateTimeGroup.getWidth() / 2);
+        mDateTimeGroup.setTranslationY(textScale * mDateTimeGroup.getHeight() / 2);
+        updateDateTimePosition();
+
         mEmergencyOnly.setAlpha(headerExpansionFraction);
+    }
+
+    private void updateAlarmVisibilities() {
+        mAlarmStatus.setVisibility(mAlarmShowing && mExpansionFraction > 0
+                ? View.VISIBLE : View.INVISIBLE);
+        mAlarmStatusCollapsed.setVisibility(mAlarmShowing && mExpansionFraction < 1
+                ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    private void updateDateTimePosition() {
+        float translation = mAlarmShowing ? mDateTimeAlarmTranslation
+                : mDateTimeTranslation;
+        mDateTimeAlarmGroup.setTranslationY(mExpansionFraction * translation);
     }
 
     public void setListening(boolean listening) {
@@ -160,11 +217,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void updateEverything() {
+        updateDateTimePosition();
         updateVisibilities();
     }
 
     private void updateVisibilities() {
-        mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.GONE);
+        updateAlarmVisibilities();
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
