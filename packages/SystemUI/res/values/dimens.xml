@@ -162,7 +162,10 @@
     <dimen name="qs_tile_margin">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
-    <dimen name="qs_date_anim_translation">44.5dp</dimen>
+    <dimen name="qs_date_anim_translation">36dp</dimen>
+    <dimen name="qs_date_alarm_anim_translation">26dp</dimen>
+    <dimen name="qs_date_collapsed_text_size">14sp</dimen>
+    <dimen name="qs_date_text_size">16sp</dimen>
     <dimen name="qs_page_indicator_size">12dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
@@ -597,9 +600,6 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="fab_elevation">12dp</dimen>
     <dimen name="fab_press_translation_z">9dp</dimen>
-
-    <!-- TODO: Remove this -->
-    <dimen name="qs_header_neg_padding">-8dp</dimen>
 
     <!-- How high we lift the divider when touching -->
     <dimen name="docked_stack_divider_lift_elevation">4dp</dimen>
