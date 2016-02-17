@@ -26,11 +26,11 @@ import android.util.Log;
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are registered when a
  * publish or subscribe session is created using
- * {@link WifiNanManager#publish(PublishData, PublishSettings, WifiNanSessionListener, int)}
- * or
- * {@link WifiNanManager#subscribe(SubscribeData, SubscribeSettings, WifiNanSessionListener, int)}
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionListener, int)} or
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionListener, int)}
  * . These are callbacks applying to a specific NAN session. Events
- * corresponding to the NAN link are delivered using {@link WifiNanEventListener}.
+ * corresponding to the NAN link are delivered using
+ * {@link WifiNanEventListener}.
  * <p>
  * A single listener is registered at session creation - it cannot be replaced.
  * <p>
@@ -150,8 +150,8 @@ public class WifiNanSessionListener {
      * {@link WifiNanSessionListener#onPublishTerminated(int)} and
      * {@link WifiNanSessionListener#onSubscribeTerminated(int)} callbacks.
      * Indicates that publish or subscribe session is done - i.e. all the
-     * requested operations (per {@link PublishSettings} or
-     * {@link SubscribeSettings}) have been executed.
+     * requested operations (per {@link PublishConfig} or
+     * {@link SubscribeConfig}) have been executed.
      */
     public static final int TERMINATE_REASON_DONE = 0;
 

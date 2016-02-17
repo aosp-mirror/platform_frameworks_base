@@ -16,4 +16,4 @@
 
 package android.net.wifi.nan;
 
-parcelable SubscribeSettings;
+parcelable SubscribeConfig;
