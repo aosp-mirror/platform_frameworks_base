@@ -536,7 +536,20 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     void setDragResizing(boolean dragResizing) {
-        mDragResizing = dragResizing;
+        if (mDragResizing != dragResizing) {
+            mDragResizing = dragResizing;
+            resetDragResizingChangeReported();
+        }
+    }
+
+    void resetDragResizingChangeReported() {
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState win = windows.get(winNdx);
+                win.resetDragResizingChangeReported();
+            }
+        }
     }
 
     boolean isDragResizing() {
