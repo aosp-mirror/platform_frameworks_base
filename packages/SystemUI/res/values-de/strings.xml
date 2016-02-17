@@ -479,7 +479,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Übernehmen"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Einstellungen bestätigen"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Einige Farbeinstellungen können dazu führen, dass das Gerät nicht mehr genutzt werden kann. Klicke auf \"OK\", um diese Farbeinstellungen zu bestätigen. Anderenfalls werden diese Einstellungen in 10 Sekunden zurückgesetzt."</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"Akku (<xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <!-- no translation found for battery_panel_title (7944156115535366613) -->
+    <skip />
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Der Energiesparmodus ist beim Aufladen nicht verfügbar."</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Energiesparmodus"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduzierung der Leistung und Hintergrunddaten"</string>

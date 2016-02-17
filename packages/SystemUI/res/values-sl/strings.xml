@@ -303,8 +303,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pripenjanje zaslona"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"iskanje"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikacije <xliff:g id="APP">%s</xliff:g> ni bilo mogoče zagnati."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacija <xliff:g id="APP">%s</xliff:g> je v varnem načinu onemogočena."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Zgodovina"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Izbriši"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Razdeli vodoravno"</string>
@@ -481,7 +480,7 @@
     <string name="color_apply" msgid="9212602012641034283">"Uporabi"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Potrditev nastavitev"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Zaradi nekaterih barvnih nastavitev lahko postane ta naprava neuporabna. Kliknite »V redu«, če želite potrditi te barvne nastavitve. V nasprotnem primeru se bodo čez 10 sekund ponastavile na prvotno vrednost."</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"Akumulator (<xliff:g id="ID_1">%1$d</xliff:g> %%)"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Poraba akumulatorja"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Varčevanje z energijo akumulatorja med polnjenjem ni na voljo"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Varčevanje z energijo akumulatorja"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Omeji zmogljivost delovanja in prenos podatkov v ozadju"</string>
