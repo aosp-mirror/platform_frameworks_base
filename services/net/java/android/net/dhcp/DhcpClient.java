@@ -19,6 +19,7 @@ package android.net.dhcp;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
+import com.android.internal.util.MessageUtils;
 import com.android.internal.util.StateMachine;
 
 import android.app.AlarmManager;
@@ -34,7 +35,6 @@ import android.net.NetworkUtils;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -42,16 +42,15 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.lang.Thread;
 import java.net.Inet4Address;
-import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Random;
@@ -132,6 +131,11 @@ public class DhcpClient extends StateMachine {
     private static final int CMD_RECEIVED_PACKET  = PRIVATE_BASE + 2;
     private static final int CMD_TIMEOUT          = PRIVATE_BASE + 3;
     private static final int CMD_ONESHOT_TIMEOUT  = PRIVATE_BASE + 4;
+
+    // For message logging.
+    private static final Class[] sMessageClasses = { DhcpClient.class };
+    private static final SparseArray<String> sMessageNames =
+            MessageUtils.findMessageNames(sMessageClasses);
 
     // DHCP parameters that we request.
     private static final byte[] REQUESTED_PARAMS = new byte[] {
@@ -497,30 +501,7 @@ public class DhcpClient extends StateMachine {
         }
 
         private String messageName(int what) {
-            switch (what) {
-                case CMD_START_DHCP:
-                    return "CMD_START_DHCP";
-                case CMD_STOP_DHCP:
-                    return "CMD_STOP_DHCP";
-                case CMD_RENEW_DHCP:
-                    return "CMD_RENEW_DHCP";
-                case CMD_PRE_DHCP_ACTION:
-                    return "CMD_PRE_DHCP_ACTION";
-                case CMD_PRE_DHCP_ACTION_COMPLETE:
-                    return "CMD_PRE_DHCP_ACTION_COMPLETE";
-                case CMD_POST_DHCP_ACTION:
-                    return "CMD_POST_DHCP_ACTION";
-                case CMD_KICK:
-                    return "CMD_KICK";
-                case CMD_RECEIVED_PACKET:
-                    return "CMD_RECEIVED_PACKET";
-                case CMD_TIMEOUT:
-                    return "CMD_TIMEOUT";
-                case CMD_ONESHOT_TIMEOUT:
-                    return "CMD_ONESHOT_TIMEOUT";
-                default:
-                    return Integer.toString(what);
-            }
+            return sMessageNames.get(what, Integer.toString(what));
         }
 
         private String messageToString(Message message) {
