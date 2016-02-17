@@ -155,10 +155,6 @@ public class WifiScanner {
      * Do not place scans in the chip's scan history buffer
      */
     public static final int REPORT_EVENT_NO_BATCH = (1 << 2);
-    /**
-     * report full scan results and completion event to the context hub
-     */
-    public static final int REPORT_EVENT_CONTEXT_HUB = (1 << 3);
 
     /**
      * scan configuration parameters to be sent to {@link #startBackgroundScan}
