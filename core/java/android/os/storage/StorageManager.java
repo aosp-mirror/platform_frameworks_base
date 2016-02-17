@@ -865,7 +865,12 @@ public class StorageManager {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Gets the list of shared/external storage volumes available to the current user.
+     *
+     * <p>It always contains the primary storage volume, plus any additional external volume(s)
+     * available in the device, such as SD cards or attached USB drives.
+     */
     public @NonNull StorageVolume[] getVolumeList() {
         return getVolumeList(mContext.getUserId(), 0);
     }
@@ -914,7 +919,9 @@ public class StorageManager {
         return paths;
     }
 
-    /** {@hide} */
+    /**
+     * Gets the primary shared/external storage volume available to the current user.
+     */
     public @NonNull StorageVolume getPrimaryVolume() {
         return getPrimaryVolume(getVolumeList());
     }
