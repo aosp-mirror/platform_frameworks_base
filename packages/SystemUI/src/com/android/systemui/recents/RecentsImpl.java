@@ -406,9 +406,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         SystemServicesProxy ssp = Recents.getSystemServices();
         ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
         MutableBoolean topTaskHome = new MutableBoolean(true);
-        RecentsTaskLoader loader = Recents.getTaskLoader();
-        sInstanceLoadPlan = loader.createLoadPlan(mContext);
         if (topTask != null && !ssp.isRecentsTopMost(topTask, topTaskHome)) {
+            RecentsTaskLoader loader = Recents.getTaskLoader();
+            sInstanceLoadPlan = loader.createLoadPlan(mContext);
             sInstanceLoadPlan.preloadRawTasks(topTaskHome.value);
             loader.preloadTasks(sInstanceLoadPlan, topTask.id, topTaskHome.value);
             TaskStack stack = sInstanceLoadPlan.getTaskStack();
