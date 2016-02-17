@@ -21,10 +21,8 @@ import android.app.PendingIntent;
 import android.net.wifi.nan.ConfigRequest;
 import android.net.wifi.nan.IWifiNanEventListener;
 import android.net.wifi.nan.IWifiNanSessionListener;
-import android.net.wifi.nan.PublishData;
-import android.net.wifi.nan.PublishSettings;
-import android.net.wifi.nan.SubscribeData;
-import android.net.wifi.nan.SubscribeSettings;
+import android.net.wifi.nan.PublishConfig;
+import android.net.wifi.nan.SubscribeConfig;
 
 /**
  * Interface that WifiNanService implements
@@ -40,10 +38,8 @@ interface IWifiNanManager
 
     // session API
     int createSession(int clientId, in IWifiNanSessionListener listener, int events);
-    void publish(int clientId, int sessionId, in PublishData publishData,
-            in PublishSettings publishSettings);
-    void subscribe(int clientId, int sessionId, in SubscribeData subscribeData,
-            in SubscribeSettings subscribeSettings);
+    void publish(int clientId, int sessionId, in PublishConfig publishConfig);
+    void subscribe(int clientId, int sessionId, in SubscribeConfig subscribeConfig);
     void sendMessage(int clientId, int sessionId, int peerId, in byte[] message, int messageLength,
             int messageId);
     void stopSession(int clientId, int sessionId);
