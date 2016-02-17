@@ -144,11 +144,11 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mContractedChild != null) {
             int heightSpec;
+            int size = Math.min(maxSize, mSmallHeight);
             if (shouldContractedBeFixedSize()) {
-                int size = Math.min(maxSize, mSmallHeight);
                 heightSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
             } else {
-                heightSpec = MeasureSpec.makeMeasureSpec(maxSize, MeasureSpec.AT_MOST);
+                heightSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.AT_MOST);
             }
             mContractedChild.measure(widthMeasureSpec, heightSpec);
             int measuredHeight = mContractedChild.getMeasuredHeight();

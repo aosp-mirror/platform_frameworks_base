@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ import java.util.ArrayList;
 public abstract class ExpandableView extends FrameLayout {
 
     protected OnHeightChangedListener mOnHeightChangedListener;
-    protected int mMaxViewHeight;
     private int mActualHeight;
     protected int mClipTopAmount;
     private boolean mActualHeightInitialized;
@@ -49,8 +47,6 @@ public abstract class ExpandableView extends FrameLayout {
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mMaxViewHeight = getResources().getDimensionPixelSize(
-                R.dimen.notification_max_height);
     }
 
     @Override
