@@ -29,6 +29,7 @@
         <attr name="sideLabels" format="reference" />
         <attr name="bottomLabels" format="reference" />
         <attr name="textColor" format="color" />
+        <attr name="android:gravity" />
     </declare-styleable>
 
 </resources>
