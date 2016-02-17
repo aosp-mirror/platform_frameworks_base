@@ -158,7 +158,7 @@ public class BugreportProgressService extends Service {
     static final long POLLING_FREQUENCY = 2 * DateUtils.SECOND_IN_MILLIS;
 
     /** How long (in ms) a dumpstate process will be monitored if it didn't show progress. */
-    private static final long INACTIVITY_TIMEOUT = 3 * DateUtils.MINUTE_IN_MILLIS;
+    private static final long INACTIVITY_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
 
     /** System properties used for monitoring progress. */
     private static final String DUMPSTATE_PREFIX = "dumpstate.";
@@ -586,6 +586,12 @@ public class BugreportProgressService extends Service {
         final String name, title, description;
         final BugreportInfo info = getInfo(id);
         if (info == null) {
+            // Most likely am killed Shell before user tapped the notification. Since system might
+            // be too busy anwyays, it's better to ignore the notification and switch back to the
+            // non-interactive mode (where the bugerport will be shared upon completion).
+            Log.d(TAG, "launchBugreportInfoDialog(" + id + "): cancel notification");
+            // TODO: add test case to make sure notification is canceled.
+            NotificationManager.from(mContext).cancel(TAG, id);
             return;
         }
 
@@ -604,6 +610,15 @@ public class BugreportProgressService extends Service {
      * upon receiving a {@link #INTENT_BUGREPORT_STARTED}.
      */
     private void takeScreenshot(int id, boolean delayed) {
+        if (getInfo(id) == null) {
+            // Most likely am killed Shell before user tapped the notification. Since system might
+            // be too busy anwyays, it's better to ignore the notification and switch back to the
+            // non-interactive mode (where the bugerport will be shared upon completion).
+            Log.d(TAG, "takeScreenshot(" + id + ", " + delayed + "): cancel notification");
+            // TODO: add test case to make sure notification is canceled.
+            NotificationManager.from(mContext).cancel(TAG, id);
+            return;
+        }
         setTakingScreenshot(true);
         if (delayed) {
             collapseNotificationBar();
@@ -1126,7 +1141,7 @@ public class BugreportProgressService extends Service {
         }
         info.title = title;
         info.description = description;
-        if (name != null && !info.name.equals(name)) {
+        if (name != null && !name.equals(info.name)) {
             info.name = name;
             updateProgress(info);
         }
