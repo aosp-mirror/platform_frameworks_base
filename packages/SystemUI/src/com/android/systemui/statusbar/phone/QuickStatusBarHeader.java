@@ -21,14 +21,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.keyguard.KeyguardStatusView;
@@ -50,17 +48,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private SettingsButton mSettingsButton;
     private View mSettingsContainer;
     private TextView mAlarmStatus;
-    private View mQsDetailHeader;
 
-    private ImageView mQsDetailHeaderProgress;
     private QSPanel mQsPanel;
-    private Switch mQsDetailHeaderSwitch;
 
     private boolean mExpanded;
     private boolean mAlarmShowing;
-    private boolean mShowingDetail;
 
-    private boolean mDetailTransitioning;
     private ViewGroup mExpandedGroup;
     private ViewGroup mDateTimeGroup;
     private View mEmergencyOnly;
@@ -100,13 +93,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setOnClickListener(this);
-
-        mQsDetailHeader = findViewById(R.id.qs_detail_header);
-        mQsDetailHeader.setAlpha(0);
-        mQsDetailHeaderBack = mQsDetailHeader.findViewById(com.android.internal.R.id.up);
-        mQsDetailHeaderTitle = (TextView) mQsDetailHeader.findViewById(android.R.id.title);
-        mQsDetailHeaderSwitch = (Switch) mQsDetailHeader.findViewById(android.R.id.toggle);
-        mQsDetailHeaderProgress = (ImageView) findViewById(R.id.qs_detail_header_progress);
 
         mMultiUserSwitch = (MultiUserSwitch) findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = (ImageView) mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -179,17 +165,12 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private void updateVisibilities() {
         mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.GONE);
-        mQsDetailHeader.setVisibility(mExpanded && mShowingDetail ? View.VISIBLE : View.INVISIBLE);
         mEmergencyOnly.setVisibility(mExpanded && mShowEmergencyCallsOnly
                 ? View.VISIBLE : View.INVISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
         mMultiUserSwitch.setVisibility(mMultiUserSwitch.hasMultipleUsers() ? View.VISIBLE
                 : View.GONE);
-    }
-
-    private boolean hasMultiUsers() {
-        return false;
     }
 
     private void updateListeners() {
@@ -210,7 +191,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mQsPanel = qsPanel;
         setupHost(qsPanel.getHost());
         if (mQsPanel != null) {
-            mQsPanel.setCallback(mQsPanelCallback);
             mMultiUserSwitch.setQsPanel(qsPanel);
         }
     }
@@ -290,121 +270,4 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
             }
         }
     }
-
-    private final QSPanel.Callback mQsPanelCallback = new QSPanel.Callback() {
-        private boolean mScanState;
-
-        @Override
-        public void onShowingDetail(final QSTile.DetailAdapter detail) {
-            mDetailTransitioning = true;
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    handleShowingDetail(detail);
-                }
-            });
-        }
-
-        @Override
-        public void onToggleStateChanged(final boolean state) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    handleToggleStateChanged(state);
-                }
-            });
-
-        }
-
-        @Override
-        public void onScanStateChanged(final boolean state) {
-            post(new Runnable() {
-                @Override
-                public void run() {
-                    handleScanStateChanged(state);
-                }
-            });
-        }
-
-        private void handleToggleStateChanged(boolean state) {
-            mQsDetailHeaderSwitch.setChecked(state);
-        }
-
-        private void handleScanStateChanged(boolean state) {
-            if (mScanState == state) return;
-            mScanState = state;
-            final Animatable anim = (Animatable) mQsDetailHeaderProgress.getDrawable();
-            if (state) {
-                mQsDetailHeaderProgress.animate().alpha(1f);
-                anim.start();
-            } else {
-                mQsDetailHeaderProgress.animate().alpha(0f);
-                anim.stop();
-            }
-        }
-
-        private void handleShowingDetail(final QSTile.DetailAdapter detail) {
-            final boolean showingDetail = detail != null;
-            transition(mDateTimeGroup, !showingDetail);
-            transition(mExpandedGroup, !showingDetail);
-            if (mAlarmShowing) {
-                transition(mAlarmStatus, !showingDetail);
-            }
-            transition(mQsDetailHeader, showingDetail);
-            mShowingDetail = showingDetail;
-            if (showingDetail) {
-                mQsDetailHeaderTitle.setText(detail.getTitle());
-                final Boolean toggleState = detail.getToggleState();
-                if (toggleState == null) {
-                    mQsDetailHeaderSwitch.setVisibility(INVISIBLE);
-                    mQsDetailHeader.setClickable(false);
-                } else {
-                    mQsDetailHeaderSwitch.setVisibility(VISIBLE);
-                    mQsDetailHeaderSwitch.setChecked(toggleState);
-                    mQsDetailHeader.setClickable(true);
-                    mQsDetailHeader.setOnClickListener(new OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            boolean checked = !mQsDetailHeaderSwitch.isChecked();
-                            mQsDetailHeaderSwitch.setChecked(checked);
-                            detail.setToggleState(checked);
-                        }
-                    });
-                }
-                mQsDetailHeaderBack.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        v.getLocationInWindow(mTmpInt2);
-                        mTmpInt2[0] += v.getWidth() / 2;
-                        mTmpInt2[1] += v.getHeight() / 2;
-                        mQsPanel.showDetailAdapter(false, null, mTmpInt2);
-                    }
-                });
-            } else {
-                mQsDetailHeader.setClickable(false);
-            }
-        }
-
-        private void transition(final View v, final boolean in) {
-            if (in) {
-                v.bringToFront();
-                v.setVisibility(VISIBLE);
-            }
-            if (v.hasOverlappingRendering()) {
-                v.animate().withLayer();
-            }
-            v.animate()
-                    .alpha(in ? 1 : 0)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!in) {
-                                v.setVisibility(INVISIBLE);
-                            }
-                            mDetailTransitioning = false;
-                        }
-                    })
-                    .start();
-        }
-    };
 }

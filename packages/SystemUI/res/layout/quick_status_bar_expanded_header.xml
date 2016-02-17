@@ -159,14 +159,6 @@
         android:clipChildren="false"
         android:clipToPadding="false" />
 
-    <include
-        android:id="@+id/qs_detail_header"
-        layout="@layout/qs_detail_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        />
-
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
         android:src="@drawable/indeterminate_anim"
