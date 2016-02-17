@@ -15,6 +15,7 @@
  */
 
 package com.android.server.soundtrigger;
+import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -47,13 +48,14 @@ import java.util.UUID;
  * @hide
  */
 public class SoundTriggerService extends SystemService {
-    static final String TAG = "SoundTriggerService";
-    static final boolean DEBUG = false;
+    private static final String TAG = "SoundTriggerService";
+    private static final boolean DEBUG = true;
 
     final Context mContext;
     private final SoundTriggerServiceStub mServiceStub;
     private final LocalSoundTriggerService mLocalSoundTriggerService;
     private SoundTriggerDbHelper mDbHelper;
+    private SoundTriggerHelper mSoundTriggerHelper;
 
     public SoundTriggerService(Context context) {
         super(context);
@@ -71,7 +73,8 @@ public class SoundTriggerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
-            mLocalSoundTriggerService.initSoundTriggerHelper();
+            initSoundTriggerHelper();
+            mLocalSoundTriggerService.setSoundTriggerHelper(mSoundTriggerHelper);
         } else if (PHASE_THIRD_PARTY_APPS_CAN_START == phase) {
             mDbHelper = new SoundTriggerDbHelper(mContext);
         }
@@ -83,6 +86,20 @@ public class SoundTriggerService extends SystemService {
 
     @Override
     public void onSwitchUser(int userHandle) {
+    }
+
+    private synchronized void initSoundTriggerHelper() {
+        if (mSoundTriggerHelper == null) {
+            mSoundTriggerHelper = new SoundTriggerHelper(mContext);
+        }
+    }
+
+    private synchronized boolean isInitialized() {
+        if (mSoundTriggerHelper == null ) {
+            Slog.e(TAG, "SoundTriggerHelper not initialized.");
+            return false;
+        }
+        return true;
     }
 
     class SoundTriggerServiceStub extends ISoundTriggerService.Stub {
@@ -102,19 +119,32 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
-        public void startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback) {
+        public int startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback,
+                RecognitionConfig config) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
             }
+            if (!isInitialized()) return STATUS_ERROR;
+
+            GenericSoundModel model = getSoundModel(parcelUuid);
+            if (model == null) {
+                Slog.e(TAG, "Null model in database for id: " + parcelUuid);
+                return STATUS_ERROR;
+            }
+
+            return mSoundTriggerHelper.startGenericRecognition(parcelUuid.getUuid(), model,
+                    callback, config);
         }
 
         @Override
-        public void stopRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback) {
+        public int stopRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             if (DEBUG) {
                 Slog.i(TAG, "stopRecognition(): Uuid : " + parcelUuid);
             }
+            if (!isInitialized()) return STATUS_ERROR;
+            return mSoundTriggerHelper.stopGenericRecognition(parcelUuid.getUuid(), callback);
         }
 
         @Override
@@ -123,10 +153,8 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "getSoundModel(): id = " + soundModelId);
             }
-            SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(soundModelId.getUuid());
-            if (model == null) {
-                Slog.e(TAG, "Null model in database.");
-            }
+            SoundTrigger.GenericSoundModel model = mDbHelper.getGenericSoundModel(
+                    soundModelId.getUuid());
             return model;
         }
 
@@ -157,37 +185,48 @@ public class SoundTriggerService extends SystemService {
             mContext = context;
         }
 
-        void initSoundTriggerHelper() {
-            if (mSoundTriggerHelper == null) {
-                mSoundTriggerHelper = new SoundTriggerHelper(mContext);
-            }
+        synchronized void setSoundTriggerHelper(SoundTriggerHelper helper) {
+            mSoundTriggerHelper = helper;
         }
 
         @Override
         public int startRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
                 IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig) {
-            return mSoundTriggerHelper.startRecognition(keyphraseId, soundModel, listener,
+            if (!isInitialized()) return STATUS_ERROR;
+            return mSoundTriggerHelper.startKeyphraseRecognition(keyphraseId, soundModel, listener,
                     recognitionConfig);
         }
 
         @Override
-        public int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener) {
-            return mSoundTriggerHelper.stopRecognition(keyphraseId, listener);
+        public synchronized int stopRecognition(int keyphraseId, IRecognitionStatusCallback listener) {
+            if (!isInitialized()) return STATUS_ERROR;
+            return mSoundTriggerHelper.stopKeyphraseRecognition(keyphraseId, listener);
         }
 
         @Override
         public void stopAllRecognitions() {
+            if (!isInitialized()) return;
             mSoundTriggerHelper.stopAllRecognitions();
         }
 
         @Override
         public ModuleProperties getModuleProperties() {
+            if (!isInitialized()) return null;
             return mSoundTriggerHelper.getModuleProperties();
         }
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!isInitialized()) return;
             mSoundTriggerHelper.dump(fd, pw, args);
+        }
+
+        private synchronized boolean isInitialized() {
+            if (mSoundTriggerHelper == null ) {
+                Slog.e(TAG, "SoundTriggerHelper not initialized.");
+                return false;
+            }
+            return true;
         }
     }
 

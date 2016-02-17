@@ -18,6 +18,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     >
 
     <Button
@@ -37,7 +42,57 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/start_recog"
+        android:onClick="onStartRecognitionButtonClicked"
+        android:padding="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_recog"
+        android:onClick="onStopRecognitionButtonClicked"
+        android:padding="20dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/unenroll"
         android:onClick="onUnEnrollButtonClicked"
         android:padding="20dp" />
+
+</LinearLayout>
+
+<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:orientation="vertical">
+   <RadioButton android:id="@+id/model_one"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/model_one"
+        android:onClick="onRadioButtonClicked"/>
+   <RadioButton android:id="@+id/model_two"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/model_two"
+        android:onClick="onRadioButtonClicked"/>
+   <RadioButton android:id="@+id/model_three"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/model_three"
+        android:onClick="onRadioButtonClicked"/>
+</RadioGroup>
+
+    <TextView
+        android:id="@+id/console"
+        android:gravity="left"
+        android:paddingTop="20pt"
+        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:maxLines="40"
+        android:textSize="14dp"
+        android:scrollbars = "vertical"
+        android:text="@string/none">
+     </TextView>
 </LinearLayout>
