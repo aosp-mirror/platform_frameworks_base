@@ -7777,11 +7777,18 @@ public final class Settings {
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
 
          /**
-         * If 1, the activity manager will aggressively finish activities and
+         * If not 0, the activity manager will aggressively finish activities and
          * processes as soon as they are no longer needed.  If 0, the normal
          * extended lifetime is used.
          */
         public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
+
+        /**
+         * @hide
+         * If not 0, the activity manager will implement a looser version of background
+         * check that is more compatible with existing apps.
+         */
+        public static final String LENIENT_BACKGROUND_CHECK = "lenient_background_check";
 
         /**
          * Use Dock audio output for media:

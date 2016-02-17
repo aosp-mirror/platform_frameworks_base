@@ -273,6 +273,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
+import static android.provider.Settings.Global.LENIENT_BACKGROUND_CHECK;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
@@ -1290,6 +1291,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     String mOrigDebugApp = null;
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
+    boolean mLenientBackgroundCheck = false;
     boolean mForceResizableActivities;
     boolean mSupportsFreeformWindowManagement;
     boolean mSupportsPictureInPicture;
@@ -7490,7 +7492,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     int checkAllowBackgroundLocked(int uid, String packageName, int callingPid) {
         UidRecord uidRec = mActiveUids.get(uid);
-        if (uidRec == null || uidRec.idle) {
+        if (!mLenientBackgroundCheck) {
+            if (uidRec == null
+                    || uidRec.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                if (mAppOpsService.noteOperation(AppOpsManager.OP_RUN_IN_BACKGROUND, uid,
+                        packageName) != AppOpsManager.MODE_ALLOWED) {
+                    return ActivityManager.APP_START_MODE_DELAYED;
+                }
+            }
+
+        } else if (uidRec == null || uidRec.idle) {
             if (callingPid >= 0) {
                 ProcessRecord proc;
                 synchronized (mPidsSelfLocked) {
@@ -11376,12 +11387,36 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.SET_ALWAYS_FINISH,
                 "setAlwaysFinish()");
 
-        Settings.Global.putInt(
-                mContext.getContentResolver(),
-                Settings.Global.ALWAYS_FINISH_ACTIVITIES, enabled ? 1 : 0);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.ALWAYS_FINISH_ACTIVITIES, enabled ? 1 : 0);
 
-        synchronized (this) {
-            mAlwaysFinishActivities = enabled;
+            synchronized (this) {
+                mAlwaysFinishActivities = enabled;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
+    public void setLenientBackgroundCheck(boolean enabled) {
+        enforceCallingPermission(android.Manifest.permission.SET_PROCESS_LIMIT,
+                "setLenientBackgroundCheck()");
+
+        long ident = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.LENIENT_BACKGROUND_CHECK, enabled ? 1 : 0);
+
+            synchronized (this) {
+                mLenientBackgroundCheck = enabled;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -12278,6 +12313,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
+        final boolean lenientBackgroundCheck =
+                Settings.Global.getInt(resolver, LENIENT_BACKGROUND_CHECK, 0) != 0;
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
@@ -12295,6 +12332,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mDebugApp = mOrigDebugApp = debugApp;
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
             mAlwaysFinishActivities = alwaysFinishActivities;
+            mLenientBackgroundCheck = lenientBackgroundCheck;
             mForceResizableActivities = forceResizable;
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mSupportsFreeformWindowManagement = freeformWindowManagement || forceResizable;
@@ -14074,8 +14112,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (dumpPackage == null) {
-            if (mAlwaysFinishActivities || mController != null) {
+            if (mAlwaysFinishActivities || mLenientBackgroundCheck || mController != null) {
                 pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
+                        + " mLenientBackgroundCheck=" + mLenientBackgroundCheck
                         + " mController=" + mController);
             }
             if (dumpAll) {
