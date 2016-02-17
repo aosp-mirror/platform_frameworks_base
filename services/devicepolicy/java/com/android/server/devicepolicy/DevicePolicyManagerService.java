@@ -5398,6 +5398,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             enforceCanSetDeviceOwnerLocked(userId);
+            if (getActiveAdminUncheckedLocked(admin, userId) == null) {
+                throw new IllegalArgumentException("Not active admin: " + admin);
+            }
 
             // Shutting down backup manager service permanently.
             long ident = mInjector.binderClearCallingIdentity();
@@ -5573,6 +5576,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             enforceCanSetProfileOwnerLocked(userHandle);
+
+            if (getActiveAdminUncheckedLocked(who, userHandle) == null) {
+                throw new IllegalArgumentException("Not active admin: " + who);
+            }
+
             mOwners.setProfileOwner(who, ownerName, userHandle);
             mOwners.writeProfileOwner(userHandle);
             return true;
