@@ -5131,6 +5131,11 @@ package android.app {
     method public android.app.PendingIntent getReplyPendingIntent();
   }
 
+  public static class Notification.DecoratedCustomViewStyle extends android.app.Notification.Style {
+    ctor public Notification.DecoratedCustomViewStyle();
+    ctor public Notification.DecoratedCustomViewStyle(android.app.Notification.Builder);
+  }
+
   public static abstract interface Notification.Extender {
     method public abstract android.app.Notification.Builder extend(android.app.Notification.Builder);
   }

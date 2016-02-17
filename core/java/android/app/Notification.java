@@ -3338,7 +3338,7 @@ public class Notification implements Parcelable
          *   3. Standard template view
          */
         public RemoteViews makeContentView() {
-            if (mN.contentView != null) {
+            if (mN.contentView != null && (mStyle == null || !mStyle.displayCustomViewInline())) {
                 return mN.contentView;
             } else if (mStyle != null) {
                 final RemoteViews styleView = mStyle.makeContentView();
@@ -3354,7 +3354,8 @@ public class Notification implements Parcelable
          */
         public RemoteViews makeBigContentView() {
             RemoteViews result = null;
-            if (mN.bigContentView != null) {
+            if (mN.bigContentView != null
+                    && (mStyle == null || !mStyle.displayCustomViewInline())) {
                 return mN.bigContentView;
             } else if (mStyle != null) {
                 result = mStyle.makeBigContentView();
@@ -3395,7 +3396,8 @@ public class Notification implements Parcelable
          * Construct a RemoteViews for the final heads-up notification layout.
          */
         public RemoteViews makeHeadsUpContentView() {
-            if (mN.headsUpContentView != null) {
+            if (mN.headsUpContentView != null
+                    && (mStyle == null ||  !mStyle.displayCustomViewInline())) {
                 return mN.headsUpContentView;
             } else if (mStyle != null) {
                     final RemoteViews styleView = mStyle.makeHeadsUpContentView();
@@ -3556,8 +3558,9 @@ public class Notification implements Parcelable
         }
 
         private static Class<? extends Style> getNotificationStyleClass(String templateClass) {
-            Class<? extends Style>[] classes = new Class[]{
-                    BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class};
+            Class<? extends Style>[] classes = new Class[] {
+                    BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
+                    DecoratedCustomViewStyle.class };
             for (Class<? extends Style> innerClass : classes) {
                 if (templateClass.equals(innerClass.getName())) {
                     return innerClass;
@@ -3818,6 +3821,14 @@ public class Notification implements Parcelable
          */
         public boolean hasSummaryInHeader() {
             return true;
+        }
+
+        /**
+         * @hide
+         * @return Whether custom content views are displayed inline in the style
+         */
+        public boolean displayCustomViewInline() {
+            return false;
         }
     }
 
@@ -4452,6 +4463,115 @@ public class Notification implements Parcelable
         @Override
         protected boolean hasProgress() {
             return false;
+        }
+    }
+
+    /**
+     * Notification style for custom views that are decorated by the system
+     *
+     * <p>Instead of providing a notification that is completely custom, a developer can set this
+     * style and still obtain system decorations like the notification header with the expand
+     * affordance and actions.
+     *
+     * <p>Use {@link android.app.Notification.Builder#setCustomContentView(RemoteViews)},
+     * {@link android.app.Notification.Builder#setCustomBigContentView(RemoteViews)} and
+     * {@link android.app.Notification.Builder#setCustomHeadsUpContentView(RemoteViews)} to set the
+     * corresponding custom views to display.
+     *
+     * To use this style with your Notification, feed it to
+     * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.Builder()
+     *     .setSmallIcon(R.drawable.ic_stat_player)
+     *     .setLargeIcon(albumArtBitmap))
+     *     .setCustomContentView(contentView);
+     *     .setStyle(<b>new Notification.DecoratedCustomViewStyle()</b>)
+     *     .build();
+     * </pre>
+     */
+    public static class DecoratedCustomViewStyle extends Style {
+
+        public DecoratedCustomViewStyle() {
+        }
+
+        public DecoratedCustomViewStyle(Builder builder) {
+            setBuilder(builder);
+        }
+
+        /**
+         * @hide
+         */
+        public boolean displayCustomViewInline() {
+            return true;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView() {
+            return makeStandardTemplateWithCustomContent(mBuilder.mN.contentView);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeBigContentView() {
+            return makeDecoratedBigContentView();
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView() {
+            return makeDecoratedHeadsUpContentView();
+        }
+
+        /**
+         * @hide
+         */
+        private RemoteViews makeDecoratedHeadsUpContentView() {
+            RemoteViews headsUpContentView = mBuilder.mN.headsUpContentView == null
+                    ? mBuilder.mN.contentView
+                    : mBuilder.mN.headsUpContentView;
+            if (mBuilder.mActions.size() == 0) {
+               return makeStandardTemplateWithCustomContent(headsUpContentView);
+            }
+            RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
+                        mBuilder.getBigBaseLayoutResource());
+            remoteViews.removeAllViews(R.id.notification_main_column);
+            remoteViews.addView(R.id.notification_main_column, headsUpContentView);
+            return remoteViews;
+        }
+
+        /**
+         * @hide
+         */
+        private RemoteViews makeStandardTemplateWithCustomContent(RemoteViews customContent) {
+            RemoteViews remoteViews = mBuilder.applyStandardTemplate(
+                    mBuilder.getBaseLayoutResource());
+            remoteViews.removeAllViews(R.id.notification_main_column);
+            remoteViews.addView(R.id.notification_main_column, customContent);
+            return remoteViews;
+        }
+
+        /**
+         * @hide
+         */
+        private RemoteViews makeDecoratedBigContentView() {
+            RemoteViews bigContentView = mBuilder.mN.bigContentView == null
+                    ? mBuilder.mN.contentView
+                    : mBuilder.mN.bigContentView;
+            if (mBuilder.mActions.size() == 0) {
+                return makeStandardTemplateWithCustomContent(bigContentView);
+            }
+            RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
+                    mBuilder.getBigBaseLayoutResource());
+            remoteViews.removeAllViews(R.id.notification_main_column);
+            remoteViews.addView(R.id.notification_main_column, bigContentView);
+            return remoteViews;
         }
     }
 
