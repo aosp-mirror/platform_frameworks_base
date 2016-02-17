@@ -40,16 +40,12 @@ public class ScheduleCalendar {
         updateDays();
     }
 
-    public long nextScheduleStart(long time) {
-        if (mSchedule == null || mDays.size() == 0) return Long.MAX_VALUE;
-        final long start = getTime(time, mSchedule.startHour, mSchedule.startMinute);
-        for (int i = 0; i < Calendar.SATURDAY; i++) {
-            final long t = addDays(start, i);
-            if (t > time && isInSchedule(t)) {
-                return t;
+    public void maybeSetNextAlarm(long now, long nextAlarm) {
+        if (mSchedule != null) {
+            if (mSchedule.exitAtAlarm && now > mSchedule.nextAlarm) {
+                mSchedule.nextAlarm = nextAlarm;
             }
         }
-        return Long.MAX_VALUE;
     }
 
     public void setTimeZone(TimeZone tz) {
@@ -60,7 +56,13 @@ public class ScheduleCalendar {
         if (mSchedule == null) return 0;
         final long nextStart = getNextTime(now, mSchedule.startHour, mSchedule.startMinute);
         final long nextEnd = getNextTime(now, mSchedule.endHour, mSchedule.endMinute);
-        return Math.min(nextStart, nextEnd);
+        long nextScheduleTime = Math.min(nextStart, nextEnd);
+
+        if (mSchedule.exitAtAlarm && mSchedule.nextAlarm > now) {
+            return Math.min(nextScheduleTime, mSchedule.nextAlarm);
+        } else {
+            return nextScheduleTime;
+        }
     }
 
     private long getNextTime(long now, int hr, int min) {
@@ -84,7 +86,15 @@ public class ScheduleCalendar {
         if (end <= start) {
             end = addDays(end, 1);
         }
-        return isInSchedule(-1, time, start, end) || isInSchedule(0, time, start, end);
+        boolean isInSchedule =
+                isInSchedule(-1, time, start, end) || isInSchedule(0, time, start, end);
+        if (isInSchedule && mSchedule.exitAtAlarm
+                && mSchedule.nextAlarm != 0
+                && time >= mSchedule.nextAlarm) {
+            return false;
+        } else {
+            return isInSchedule;
+        }
     }
 
     private boolean isInSchedule(int daysOffset, long time, long start, long end) {
