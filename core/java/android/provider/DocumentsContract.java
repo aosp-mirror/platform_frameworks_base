@@ -39,6 +39,7 @@ import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.RemoteException;
+import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -62,7 +63,8 @@ import java.util.List;
  * All client apps must hold a valid URI permission grant to access documents,
  * typically issued when a user makes a selection through
  * {@link Intent#ACTION_OPEN_DOCUMENT}, {@link Intent#ACTION_CREATE_DOCUMENT},
- * {@link Intent#ACTION_OPEN_DOCUMENT_TREE}, or {@link Intent#ACTION_OPEN_EXTERNAL_DIRECTORY}.
+ * {@link Intent#ACTION_OPEN_DOCUMENT_TREE}, or
+ * {@link StorageVolume#createAccessIntent(String) StorageVolume.createAccessIntent}.
  *
  * @see DocumentsProvider
  */

@@ -8539,7 +8539,6 @@ package android.content {
     field public static final java.lang.String ACTION_NEW_OUTGOING_CALL = "android.intent.action.NEW_OUTGOING_CALL";
     field public static final java.lang.String ACTION_OPEN_DOCUMENT = "android.intent.action.OPEN_DOCUMENT";
     field public static final java.lang.String ACTION_OPEN_DOCUMENT_TREE = "android.intent.action.OPEN_DOCUMENT_TREE";
-    field public static final java.lang.String ACTION_OPEN_EXTERNAL_DIRECTORY = "android.intent.action.OPEN_EXTERNAL_DIRECTORY";
     field public static final java.lang.String ACTION_PACKAGES_SUSPENDED = "android.intent.action.PACKAGES_SUSPENDED";
     field public static final java.lang.String ACTION_PACKAGES_UNSUSPENDED = "android.intent.action.PACKAGES_UNSUSPENDED";
     field public static final java.lang.String ACTION_PACKAGE_ADDED = "android.intent.action.PACKAGE_ADDED";
@@ -29375,9 +29374,25 @@ package android.os.storage {
 
   public class StorageManager {
     method public java.lang.String getMountedObbPath(java.lang.String);
+    method public android.os.storage.StorageVolume getPrimaryVolume();
+    method public android.os.storage.StorageVolume[] getVolumeList();
     method public boolean isObbMounted(java.lang.String);
     method public boolean mountObb(java.lang.String, java.lang.String, android.os.storage.OnObbStateChangeListener);
     method public boolean unmountObb(java.lang.String, boolean, android.os.storage.OnObbStateChangeListener);
+  }
+
+  public class StorageVolume implements android.os.Parcelable {
+    method public android.content.Intent createAccessIntent(java.lang.String);
+    method public int describeContents();
+    method public java.lang.String getDescription(android.content.Context);
+    method public java.lang.String getState();
+    method public java.lang.String getUuid();
+    method public boolean isEmulated();
+    method public boolean isPrimary();
+    method public boolean isRemovable();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.storage.StorageVolume> CREATOR;
+    field public static final java.lang.String EXTRA_STORAGE_VOLUME = "android.os.storage.extra.STORAGE_VOLUME";
   }
 
 }

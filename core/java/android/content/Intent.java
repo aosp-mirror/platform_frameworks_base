@@ -3213,6 +3213,12 @@ public class Intent implements Parcelable, Cloneable {
      * Output: The URI representing the requested directory tree.
      *
      * @see DocumentsContract
+     *
+     * {@removed}
+     *
+     * Will be removed / hidden before N is published; apps should use
+     * {@link android.os.storage.StorageManager#getVolumeList()} and
+     * {@link android.os.storage.StorageVolume#createAccessIntent(String)} instead.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String
