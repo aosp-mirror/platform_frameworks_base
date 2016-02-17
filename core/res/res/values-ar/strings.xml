@@ -1085,12 +1085,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"المس للحصول على مزيد من الخيارات."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏تم توصيل تصحيح أخطاء USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏المس لتعطيل تصحيح أخطاء USB."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"هل تريد مشاركة تقرير الأخطاء مع المشرف؟"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"طلب مشرف تكنولوجيا المعلومات الحصول على تقرير بالأخطاء للمساعدة في تحري الخلل وإصلاحه"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"قبول"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"رفض"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"جارٍ الحصول على تقرير بالأخطاء…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"المس للإلغاء"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغيير لوحة المفاتيح"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"اختيار لوحات المفاتيح"</string>
     <string name="show_ime" msgid="2506087537466597099">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>

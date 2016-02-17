@@ -1069,12 +1069,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Za več možnosti se dotaknite."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Iskanje in odpravljanje napak USB je povezano"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotaknite se, če želite onemogočiti iskanje in odpravljanje napak prek vrat USB."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Želite skrbniku poslati poročilo o napakah?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"Skrbnik IT je zahteval poročilo o napakah za pomoč pri odpravljanju napak"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"SPREJMEM"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"NE SPREJMEM"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Zajemanje poročila o napakah …"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Če želite prekiniti, se dotaknite"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Sprememba tipkovnice"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Izbira tipkovnic"</string>
     <string name="show_ime" msgid="2506087537466597099">"Ohrani na zaslonu, dokler je aktivna fizična tipkovnica"</string>

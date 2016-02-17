@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"കൂടുതൽ ഓപ്‌ഷനുകൾക്ക് സ്‌പർശിക്കൂ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ഡീബഗ്ഗിംഗ് ഓഫാക്കാൻ സ്‌പർശിക്കൂ."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"അഡ്‌മിനുമായി ബഗ് റിപ്പോർട്ട് പങ്കിടണോ?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"പ്രശ്നം പരിഹരിക്കുന്നതിന് നിങ്ങളുടെ ഐടി അഡ്‌മിൻ ഒരു ബഗ് റിപ്പോർട്ട് അഭ്യർത്ഥിച്ചു"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"അംഗീകരിക്കുക"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"നിരസിക്കുക"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"ബഗ് റിപ്പോർട്ട് എടുക്കുന്നു…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"റദ്ദാക്കുന്നതിന് സ്പർശിക്കുക"</string>
     <string name="select_input_method" msgid="8547250819326693584">"കീബോഡ് മാറ്റുക"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"കീബോർഡുകൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="show_ime" msgid="2506087537466597099">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
@@ -1220,7 +1226,7 @@
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"ഡോട്ട്."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"ഹോമിലേക്ക് നാവിഗേറ്റുചെയ്യുക"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"മുകളിലേക്ക് നാവിഗേറ്റുചെയ്യുക"</string>
-    <string name="action_menu_overflow_description" msgid="2295659037509008453">"കൂടുതല്‍ ഓപ്‌ഷനുകള്‍"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"കൂടുതൽ‍ ഓപ്‌ഷനുകള്‍"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"ആന്തരിക സ്റ്റോറേജ്"</string>
@@ -1529,7 +1535,7 @@
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB പെരിഫറൽ പോർട്ട്"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_product_name" msgid="4971827859165280403">"USB പെരിഫറൽ പോർട്ട്"</string>
-    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതല്‍ ഓപ്ഷനുകള്‍"</string>
+    <string name="floating_toolbar_open_overflow_description" msgid="4797287862999444631">"കൂടുതൽ‍ ഓപ്ഷനുകള്‍"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="559796923090723804">"ഓവർഫ്ലോ അടയ്‌ക്കുക"</string>
     <string name="maximize_button_text" msgid="7543285286182446254">"വലുതാക്കുക"</string>
     <string name="close_button_text" msgid="3937902162644062866">"അടയ്‌ക്കുക"</string>

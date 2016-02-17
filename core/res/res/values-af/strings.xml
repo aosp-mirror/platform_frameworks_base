@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Raak vir meer opsies."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-ontfouter gekoppel"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Raak om USB-ontfouting te deaktiveer."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Deel foutverslag met administrateur?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"Jou IT-administrateur het \'n foutverslag versoek om met foutsporing te help"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"AANVAAR"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"WEIER"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Neem tans foutverslag …"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Raak om te kanselleer"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Verander sleutelbord"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Kies sleutelborde"</string>
     <string name="show_ime" msgid="2506087537466597099">"Hou dit op die skerm terwyl fisieke sleutelbord aktief is"</string>

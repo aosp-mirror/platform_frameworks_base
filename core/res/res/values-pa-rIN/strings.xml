@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਸਪਰਸ਼ ਕਰੋ।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ਡੀਬਗਿੰਗ ਕਨੈਕਟ ਕੀਤੀ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB ਡੀਬਗਿੰਗ ਨੂੰ ਅਸਮਰੱਥ ਬਣਾਉਣ ਲਈ ਛੋਹਵੋ।"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"ਕੀ ਪ੍ਰਸ਼ਾਸਕ ਨਾਲ ਬੱਗ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰਨੀ ਹੈ?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"ਸਮੱਸਿਆ ਦੇ ਨਿਪਟਾਰੇ ਵਿੱਚ ਮਦਦ ਲਈ ਤੁਹਾਡੇ IT ਪ੍ਰਸ਼ਾਸਕ ਨੇ ਇੱਕ ਬੱਗ ਰਿਪੋਰਟ ਦੀ ਬੇਨਤੀ ਕੀਤੀ"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ਸਵੀਕਾਰ ਕਰੋ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ਅਸਵੀਕਾਰ ਕਰੋ"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"ਬੱਗ ਰਿਪਰੋਟ ਪ੍ਰਾਪਤ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"ਰੱਦ ਕਰਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ਕੀਬੋਰਡ ਬਦਲੋ"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"ਕੀਬੋਰਡਸ ਚੁਣੋ"</string>
     <string name="show_ime" msgid="2506087537466597099">"ਭੌਤਿਕ ਕੀ-ਬੋਰਡ ਸਰਗਰਮ ਹੋਣ ਦੌਰਾਨ ਇਸ ਨੂੰ ਸਕ੍ਰੀਨ \'ਤੇ ਬਣਾਈ ਰੱਖੋ"</string>

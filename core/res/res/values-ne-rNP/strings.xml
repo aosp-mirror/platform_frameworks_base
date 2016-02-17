@@ -1059,12 +1059,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"थप विकल्पहरूका लागि छुनुहोस्।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"प्रशासकसँग बग रिपोर्ट साझेदारी गर्ने हो?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"तपाईंको IT व्यवस्थापकले समस्या निवारणमा मद्दत गर्न बग रिपोर्ट अनुरोध गर्नुभयो"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार गर्नुहोस्"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार गर्नुहोस्"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"बग रिपोर्ट लिँदै..."</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"रद्द गर्न छुनुहोस्"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"कीबोर्ड छान्नुहोस्"</string>
     <string name="show_ime" msgid="2506087537466597099">"भौतिक किबोर्ड सक्रिय हुँदा यसलाई स्क्रिनमा राख्नुहोस्"</string>
