@@ -150,6 +150,26 @@ public interface RILConstants {
     int PREFERRED_NETWORK_MODE      = SystemProperties.getInt("ro.telephony.default_network",
             NETWORK_MODE_WCDMA_PREF);
 
+    int BAND_MODE_UNSPECIFIED = 0;      //"unspecified" (selected by baseband automatically)
+    int BAND_MODE_EURO = 1;             //"EURO band" (GSM-900 / DCS-1800 / WCDMA-IMT-2000)
+    int BAND_MODE_USA = 2;              //"US band" (GSM-850 / PCS-1900 / WCDMA-850 / WCDMA-PCS-1900)
+    int BAND_MODE_JPN = 3;              //"JPN band" (WCDMA-800 / WCDMA-IMT-2000)
+    int BAND_MODE_AUS = 4;              //"AUS band" (GSM-900 / DCS-1800 / WCDMA-850 / WCDMA-IMT-2000)
+    int BAND_MODE_AUS_2 = 5;            //"AUS band 2" (GSM-900 / DCS-1800 / WCDMA-850)
+    int BAND_MODE_CELL_800 = 6;         //"Cellular" (800-MHz Band)
+    int BAND_MODE_PCS = 7;              //"PCS" (1900-MHz Band)
+    int BAND_MODE_JTACS = 8;            //"Band Class 3" (JTACS Band)
+    int BAND_MODE_KOREA_PCS = 9;        //"Band Class 4" (Korean PCS Band)
+    int BAND_MODE_5_450M = 10;          //"Band Class 5" (450-MHz Band)
+    int BAND_MODE_IMT2000 = 11;         //"Band Class 6" (2-GMHz IMT2000 Band)
+    int BAND_MODE_7_700M_2 = 12;        //"Band Class 7" (Upper 700-MHz Band)
+    int BAND_MODE_8_1800M = 13;         //"Band Class 8" (1800-MHz Band)
+    int BAND_MODE_9_900M = 14;          //"Band Class 9" (900-MHz Band)
+    int BAND_MODE_10_800M_2 = 15;       //"Band Class 10" (Secondary 800-MHz Band)
+    int BAND_MODE_EURO_PAMR_400M = 16;  //"Band Class 11" (400-MHz European PAMR Band)
+    int BAND_MODE_AWS = 17;             //"Band Class 15" (AWS Band)
+    int BAND_MODE_USA_2500M = 18;       //"Band Class 16" (US 2.5-GHz Band)
+
     int CDMA_CELL_BROADCAST_SMS_DISABLED = 1;
     int CDMA_CELL_BROADCAST_SMS_ENABLED  = 0;
 
