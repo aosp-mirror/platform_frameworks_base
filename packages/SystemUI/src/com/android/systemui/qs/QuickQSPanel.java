@@ -17,12 +17,10 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import com.android.systemui.R;
@@ -103,7 +101,7 @@ public class QuickQSPanel extends QSPanel {
 
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
 
-        private final ImageView mDownArrow;
+        private final Space mEndSpacer;
 
         public HeaderTileLayout(Context context) {
             super(context);
@@ -112,16 +110,10 @@ public class QuickQSPanel extends QSPanel {
             setGravity(Gravity.CENTER_VERTICAL);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-            int padding =
-                    mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
-            mDownArrow = new ImageView(context);
-            mDownArrow.setImageResource(R.drawable.ic_expand_more);
-            mDownArrow.setImageTintList(ColorStateList.valueOf(context.getResources().getColor(
-                    android.R.color.white, null)));
-            mDownArrow.setLayoutParams(generateLayoutParams());
-            mDownArrow.setPadding(padding, padding, padding, padding);
+            mEndSpacer = new Space(context);
+            mEndSpacer.setLayoutParams(generateLayoutParams());
             updateDownArrowMargin();
-            addView(mDownArrow);
+            addView(mEndSpacer);
             setOrientation(LinearLayout.HORIZONTAL);
         }
 
@@ -132,10 +124,10 @@ public class QuickQSPanel extends QSPanel {
         }
 
         private void updateDownArrowMargin() {
-            LayoutParams params = (LayoutParams) mDownArrow.getLayoutParams();
+            LayoutParams params = (LayoutParams) mEndSpacer.getLayoutParams();
             params.setMarginStart(mContext.getResources().getDimensionPixelSize(
                     R.dimen.qs_expand_margin));
-            mDownArrow.setLayoutParams(params);
+            mEndSpacer.setLayoutParams(params);
         }
 
         @Override

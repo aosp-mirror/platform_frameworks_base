@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,15 +37,21 @@ import com.android.systemui.R;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QuickQSPanel;
+import com.android.systemui.qs.TouchAnimator;
+import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
+import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmController.NextAlarmChangeCallback, View.OnClickListener {
+        NextAlarmChangeCallback, OnClickListener, Listener {
 
     private static final String TAG = "QuickStatusBarHeader";
+
+    private static final float EXPAND_INDICATOR_THRESHOLD = .8f;
+
     private ActivityStarter mActivityStarter;
     private NextAlarmController mNextAlarmController;
     private SettingsButton mSettingsButton;
@@ -58,10 +65,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private boolean mExpanded;
     private boolean mAlarmShowing;
 
-    private ViewGroup mExpandedGroup;
     private ViewGroup mDateTimeGroup;
     private ViewGroup mDateTimeAlarmGroup;
     private TextView mEmergencyOnly;
+
+    private ExpandableIndicator mExpandIndicator;
 
     private boolean mListening;
     private AlarmManager.AlarmClockInfo mNextAlarm;
@@ -73,8 +81,15 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     private float mDateTimeTranslation;
     private float mDateTimeAlarmTranslation;
-    private float mExpansionFraction;
     private float mDateScaleFactor;
+    private float mGearTranslation;
+
+    private TouchAnimator mAnimator;
+    private TouchAnimator mSecondHalfAnimator;
+    private TouchAnimator mFirstHalfAnimator;
+    private TouchAnimator mDateSizeAnimator;
+    private TouchAnimator mAlarmTranslation;
+    private float mExpansionAmount;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -89,8 +104,10 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mDateTimeAlarmGroup = (ViewGroup) findViewById(R.id.date_time_alarm_group);
         mDateTimeAlarmGroup.findViewById(R.id.empty_time_view).setVisibility(View.GONE);
         mDateTimeGroup = (ViewGroup) findViewById(R.id.date_time_group);
+        mDateTimeGroup.setPivotX(0);
+        mDateTimeGroup.setPivotY(0);
 
-        mExpandedGroup = (ViewGroup) findViewById(R.id.expanded_group);
+        mExpandIndicator = (ExpandableIndicator) findViewById(R.id.expand_indicator);
 
         mHeaderQsPanel = (QuickQSPanel) findViewById(R.id.quick_qs_panel);
 
@@ -131,6 +148,8 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         FontSizeUtils.updateFontSize(mAlarmStatus, R.dimen.qs_date_collapsed_size);
         FontSizeUtils.updateFontSize(mEmergencyOnly, R.dimen.qs_emergency_calls_only_text_size);
 
+        mGearTranslation = mContext.getResources().getDimension(R.dimen.qs_header_gear_translation);
+
         mDateTimeTranslation = mContext.getResources().getDimension(
                 R.dimen.qs_date_anim_translation);
         mDateTimeAlarmTranslation = mContext.getResources().getDimension(
@@ -139,8 +158,31 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
                 R.dimen.qs_date_collapsed_text_size);
         float dateExpandedSize = mContext.getResources().getDimension(
                 R.dimen.qs_date_text_size);
-        mDateScaleFactor = dateExpandedSize / dateCollapsedSize - 1;
+        mDateScaleFactor = dateExpandedSize / dateCollapsedSize;
         updateDateTimePosition();
+
+        mAnimator = new TouchAnimator.Builder()
+                .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
+                .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
+                .addFloat(mSettingsButton, "rotation", -90, 0)
+                .setListener(this)
+                .build();
+        mSecondHalfAnimator = new TouchAnimator.Builder()
+                .addFloat(mSettingsButton, "rotation", -90, 0)
+                .addFloat(mAlarmStatus, "alpha", 0, 1)
+                .addFloat(mEmergencyOnly, "alpha", 0, 1)
+                .setStartDelay(.5f)
+                .build();
+        mFirstHalfAnimator = new TouchAnimator.Builder()
+                .addFloat(mAlarmStatusCollapsed, "alpha", 1, 0)
+                .addFloat(mHeaderQsPanel, "alpha", 1, 0)
+                .setEndDelay(.5f)
+                .build();
+        mDateSizeAnimator = new TouchAnimator.Builder()
+                .addFloat(mDateTimeGroup, "scaleX", 1, mDateScaleFactor)
+                .addFloat(mDateTimeGroup, "scaleY", 1, mDateScaleFactor)
+                .setStartDelay(.36f)
+                .build();
     }
 
     @Override
@@ -165,45 +207,52 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         if (nextAlarm != null) {
             mAlarmStatus.setText(KeyguardStatusView.formatNextAlarm(getContext(), nextAlarm));
         }
-        mAlarmShowing = nextAlarm != null;
-        updateEverything();
+        if (mAlarmShowing != (nextAlarm != null)) {
+            mAlarmShowing = nextAlarm != null;
+            updateEverything();
+        }
     }
 
     @Override
     public void setExpansion(float headerExpansionFraction) {
-        mExpansionFraction = headerExpansionFraction;
+        mExpansionAmount = headerExpansionFraction;
+        mAnimator.setPosition(headerExpansionFraction);
+        mSecondHalfAnimator.setPosition(headerExpansionFraction);
+        mFirstHalfAnimator.setPosition(headerExpansionFraction);
+        mDateSizeAnimator.setPosition(headerExpansionFraction);
+        mAlarmTranslation.setPosition(headerExpansionFraction);
 
-        mExpandedGroup.setAlpha(headerExpansionFraction);
-        mExpandedGroup.setVisibility(headerExpansionFraction > 0 ? View.VISIBLE : View.INVISIBLE);
-
-        mHeaderQsPanel.setAlpha(1 - headerExpansionFraction);
-        mHeaderQsPanel.setVisibility(headerExpansionFraction < 1 ? View.VISIBLE : View.INVISIBLE);
-
-        mAlarmStatus.setAlpha(headerExpansionFraction);
-        mAlarmStatusCollapsed.setAlpha(1 - headerExpansionFraction);
         updateAlarmVisibilities();
 
-        float textScale = headerExpansionFraction * mDateScaleFactor;
-        mDateTimeGroup.setScaleX(1 + textScale);
-        mDateTimeGroup.setScaleY(1 + textScale);
-        mDateTimeGroup.setTranslationX(textScale * mDateTimeGroup.getWidth() / 2);
-        mDateTimeGroup.setTranslationY(textScale * mDateTimeGroup.getHeight() / 2);
-        updateDateTimePosition();
+        mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
+    }
 
-        mEmergencyOnly.setAlpha(headerExpansionFraction);
+    @Override
+    public void onAnimationAtStart() {
+    }
+
+    @Override
+    public void onAnimationAtEnd() {
+        mHeaderQsPanel.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void onAnimationStarted() {
+        mHeaderQsPanel.setVisibility(View.VISIBLE);
     }
 
     private void updateAlarmVisibilities() {
-        mAlarmStatus.setVisibility(mAlarmShowing && mExpansionFraction > 0
-                ? View.VISIBLE : View.INVISIBLE);
-        mAlarmStatusCollapsed.setVisibility(mAlarmShowing && mExpansionFraction < 1
-                ? View.VISIBLE : View.INVISIBLE);
+        mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
+        mAlarmStatusCollapsed.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void updateDateTimePosition() {
-        float translation = mAlarmShowing ? mDateTimeAlarmTranslation
-                : mDateTimeTranslation;
-        mDateTimeAlarmGroup.setTranslationY(mExpansionFraction * translation);
+        // This one has its own because we have to rebuild it every time the alarm state changes.
+        mAlarmTranslation = new TouchAnimator.Builder()
+                .addFloat(mDateTimeAlarmGroup, "translationY", 0, mAlarmShowing
+                        ? mDateTimeAlarmTranslation : mDateTimeTranslation)
+                .build();
+        mAlarmTranslation.setPosition(mExpansionAmount);
     }
 
     public void setListening(boolean listening) {
