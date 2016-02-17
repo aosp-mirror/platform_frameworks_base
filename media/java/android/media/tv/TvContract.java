@@ -969,8 +969,9 @@ public final class TvContract {
          * The title of this TV program.
          *
          * <p>If this program is an episodic TV show, it is recommended that the title is the series
-         * title and its related fields ({@link #COLUMN_SEASON_NUMBER},
-         * {@link #COLUMN_EPISODE_NUMBER}, and {@link #COLUMN_EPISODE_TITLE}) are filled in.
+         * title and its related fields ({@link #COLUMN_SEASON_TITLE} and/or
+         * {@link #COLUMN_SEASON_DISPLAY_NUMBER}, {@link #COLUMN_SEASON_DISPLAY_NUMBER},
+         * {@link #COLUMN_EPISODE_DISPLAY_NUMBER}, and {@link #COLUMN_EPISODE_TITLE}) are filled in.
          *
          * <p>Type: TEXT
          */
@@ -982,8 +983,39 @@ public final class TvContract {
          * <p>Can be empty.
          *
          * <p>Type: INTEGER
+         *
+         * @deprecated Use {@link #COLUMN_SEASON_DISPLAY_NUMBER} instead.
          */
+        @Deprecated
         public static final String COLUMN_SEASON_NUMBER = "season_number";
+
+        /**
+         * The season display number of this TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the season number. (e.g. 1, 2 or 3) Note that the value
+         * does not necessarily be numeric. (e.g. 12B)
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_SEASON_DISPLAY_NUMBER = "season_display_number";
+
+        /**
+         * The title of the season for this TV program for episodic TV shows.
+         *
+         * <p>This is an optional field supplied only when the season has a special title
+         * (e.g. The Final Season). If provided, the applications should display it instead of
+         * {@link #COLUMN_SEASON_DISPLAY_NUMBER}, and should display it without alterations.
+         * (e.g. for "The Final Season", displayed string should be "The Final Season", not
+         * "Season The Final Season"). When displaying multiple programs, the order should be based
+         * on {@link #COLUMN_SEASON_DISPLAY_NUMBER}, even when {@link #COLUMN_SEASON_TITLE} exists.
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_SEASON_TITLE = "season_title";
 
         /**
          * The episode number of this TV program for episodic TV shows.
@@ -991,8 +1023,23 @@ public final class TvContract {
          * <p>Can be empty.
          *
          * <p>Type: INTEGER
+         *
+         * @deprecated Use {@link #COLUMN_EPISODE_DISPLAY_NUMBER} instead.
          */
+        @Deprecated
         public static final String COLUMN_EPISODE_NUMBER = "episode_number";
+
+        /**
+         * The episode display number of this TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the episode number. (e.g. 1, 2 or 3) Note that the value
+         * does not necessarily be numeric. (e.g. 12B)
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_EPISODE_DISPLAY_NUMBER = "episode_display_number";
 
         /**
          * The episode title of this TV program for episodic TV shows.
@@ -1465,8 +1512,9 @@ public final class TvContract {
          * The title of this recorded TV program.
          *
          * <p>If this recorded program is an episodic TV show, it is recommended that the title is
-         * the series title and its related fields ({@link #COLUMN_SEASON_NUMBER},
-         * {@link #COLUMN_EPISODE_NUMBER}, and {@link #COLUMN_EPISODE_TITLE}) are filled in.
+         * the series title and its related fields ({@link #COLUMN_SEASON_TITLE} and/or
+         * {@link #COLUMN_SEASON_DISPLAY_NUMBER}, {@link #COLUMN_EPISODE_DISPLAY_NUMBER},
+         * and {@link #COLUMN_EPISODE_TITLE}) are filled in.
          *
          * <p>Type: TEXT
          * @see Programs#COLUMN_TITLE
@@ -1474,24 +1522,46 @@ public final class TvContract {
         public static final String COLUMN_TITLE = Programs.COLUMN_TITLE;
 
         /**
-         * The season number of this recorded TV program for episodic TV shows.
+         * The season display number of this recorded TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the season number. (e.g. 1, 2 or 3) Note that the value
+         * does not necessarily be numeric. (e.g. 12B)
          *
          * <p>Can be empty.
          *
-         * <p>Type: INTEGER
-         * @see Programs#COLUMN_SEASON_NUMBER
+         * <p>Type: TEXT
          */
-        public static final String COLUMN_SEASON_NUMBER = Programs.COLUMN_SEASON_NUMBER;
+        public static final String COLUMN_SEASON_DISPLAY_NUMBER =
+                Programs.COLUMN_SEASON_DISPLAY_NUMBER;
 
         /**
-         * The episode number of this recorded TV program for episodic TV shows.
+         * The title of the season for this recorded TV program for episodic TV shows.
+         *
+         * <p>This is an optional field supplied only when the season has a special title
+         * (e.g. The Final Season). If provided, the applications should display it instead of
+         * {@link #COLUMN_SEASON_DISPLAY_NUMBER} without alterations.
+         * (e.g. for "The Final Season", displayed string should be "The Final Season", not
+         * "Season The Final Season"). When displaying multiple programs, the order should be based
+         * on {@link #COLUMN_SEASON_DISPLAY_NUMBER}, even when {@link #COLUMN_SEASON_TITLE} exists.
          *
          * <p>Can be empty.
          *
-         * <p>Type: INTEGER
-         * @see Programs#COLUMN_EPISODE_NUMBER
+         * <p>Type: TEXT
          */
-        public static final String COLUMN_EPISODE_NUMBER = Programs.COLUMN_EPISODE_NUMBER;
+        public static final String COLUMN_SEASON_TITLE = Programs.COLUMN_SEASON_TITLE;
+
+        /**
+         * The episode display number of this recorded TV program for episodic TV shows.
+         *
+         * <p>This is used to indicate the episode number. (e.g. 1, 2 or 3) Note that the value
+         * does not necessarily be numeric. (e.g. 12B)
+         *
+         * <p>Can be empty.
+         *
+         * <p>Type: TEXT
+         */
+        public static final String COLUMN_EPISODE_DISPLAY_NUMBER =
+                Programs.COLUMN_EPISODE_DISPLAY_NUMBER;
 
         /**
          * The episode title of this recorded TV program for episodic TV shows.
