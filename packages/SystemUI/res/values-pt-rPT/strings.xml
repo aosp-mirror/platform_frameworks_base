@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fixação no ecrã"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"pesquisar"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Não foi possível iniciar o <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"O <xliff:g id="APP">%s</xliff:g> está desativado no modo de segurança."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Histórico"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Limpar"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisão horizontal"</string>
@@ -479,7 +478,7 @@
     <string name="color_apply" msgid="9212602012641034283">"Aplicar"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirmar as definições"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Algumas definições de cor podem tornar este dispositivo instável. Clique em OK para confirmar estas definições de cor. Caso contrário, estas definições serão repostas após 10 segundos."</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"Bateria (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Utiliz. da bateria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Poupança de bateria não disponível durante o carregamento"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Poupança de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduz o desempenho e os dados de segundo plano"</string>

@@ -31,7 +31,7 @@
       <item quantity="one">Un ecran în Recente</item>
     </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nicio notificare"</string>
-    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"În desfăşurare"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"În desfășurare"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificări"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateria este aproape descărcată"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Procent rămas din baterie: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
@@ -58,7 +58,7 @@
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Deschideţi <xliff:g id="ACTIVITY">%1$s</xliff:g> la conectarea acestui accesoriu USB?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Aplic. instal. nu funcţ. cu acest acces. USB. Aflați despre acest accesoriu la <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Accesoriu USB"</string>
-    <string name="label_view" msgid="6304565553218192990">"Afişaţi"</string>
+    <string name="label_view" msgid="6304565553218192990">"Afișați"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Utilizaţi în mod prestabilit pt. acest dispoz. USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Utiliz. în mod prestabilit pt. acest accesoriu USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Permiteți depanarea USB?"</string>
@@ -480,7 +480,8 @@
     <string name="color_apply" msgid="9212602012641034283">"Aplicați"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirmați setările"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Unele setări pentru culori pot face dispozitivul să nu mai funcționeze. Dați clic pe OK pentru a confirma aceste setări pentru culori. În caz contrar, acestea se vor reseta după 10 secunde."</string>
-    <string name="battery_panel_title" msgid="3476715163685592453">"Baterie (<xliff:g id="ID_1">%1$d</xliff:g>%%)"</string>
+    <!-- no translation found for battery_panel_title (7944156115535366613) -->
+    <skip />
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Economisirea bateriei nu este disponibilă pe durata încărcării"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economisirea bateriei"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce performanța și datele de fundal"</string>
