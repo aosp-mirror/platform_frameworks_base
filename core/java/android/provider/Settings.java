@@ -6743,6 +6743,16 @@ public final class Settings {
        public static final String STORAGE_BENCHMARK_INTERVAL = "storage_benchmark_interval";
 
        /**
+        * Whether to disable the automatic scheduling of system updates.
+        * 1 = system updates won't be automatically scheduled (will always
+        * present notification instead).
+        * 0 = system updates will be automatically scheduled. (default)
+        * @hide
+        */
+       @SystemApi
+       public static final String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
+
+       /**
         * Whether the package manager should send package verification broadcasts for verifiers to
         * review apps prior to installation.
         * 1 = request apps to be verified prior to installation, if a verifier exists.
