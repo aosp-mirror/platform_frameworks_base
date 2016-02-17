@@ -849,6 +849,8 @@ public class DevicePolicyManager {
      * this will trigger entering a new password for the parent of the profile.
      * For all other cases it will trigger entering a new password for the user
      * or profile it is launched from.
+     *
+     * @see #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PASSWORD
@@ -1179,7 +1181,8 @@ public class DevicePolicyManager {
      * restrictive as what has been set.  Note that the current password
      * will remain until the user has set a new one, so the change does not
      * take place immediately.  To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.
+     * {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after calling this method.
      *
      * <p>Quality constants are ordered so that higher values are more restrictive;
      * thus the highest requested quality constant (between the policy set here,
@@ -1189,6 +1192,10 @@ public class DevicePolicyManager {
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param quality The new desired quality.  One of
@@ -1208,8 +1215,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current minimum password quality for all admins of this user
-     * and its profiles or a particular one.
+     * Retrieve the current minimum password quality for a particular admin or all admins that set
+     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
+     *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      */
@@ -1236,7 +1249,8 @@ public class DevicePolicyManager {
      * restrictive as what has been set.  Note that the current password
      * will remain until the user has set a new one, so the change does not
      * take place immediately.  To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value.  This
+     * {@link #ACTION_SET_NEW_PASSWORD}  or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value.  This
      * constraint is only imposed if the administrator has also requested either
      * {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX},
      * {@link #PASSWORD_QUALITY_ALPHABETIC}, {@link #PASSWORD_QUALITY_ALPHANUMERIC},
@@ -1245,6 +1259,10 @@ public class DevicePolicyManager {
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param length The new desired minimum password length.  A value of 0
@@ -1261,7 +1279,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current minimum password length for all admins of this
+     * Retrieve the current minimum password length for a particular admin or all admins that set
+     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
+     *
      * user and its profiles or a particular one.
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
@@ -1289,7 +1314,8 @@ public class DevicePolicyManager {
      * not at least as restrictive as what has been set. Note that the current
      * password will remain until the user has set a new one, so the change does
      * not take place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * {@link #ACTION_SET_NEW_PASSWORD}  or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
      * default value is 0.
@@ -1297,6 +1323,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
@@ -1315,12 +1345,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current number of upper case letters required in the
-     * password for all admins of this user and its profiles or a particular one.
+     * Retrieve the current number of upper case letters required in the password
+     * for a particular admin or all admins that set retrictions on this user and
+     * its participating profiles. Restrictions on profiles that have a separate challenge
+     * are not taken into account.
      * This is the same value as set by
-     * {#link {@link #setPasswordMinimumUpperCase(ComponentName, int)}
+     * {@link #setPasswordMinimumUpperCase(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to
      *            aggregate all admins.
@@ -1350,7 +1386,8 @@ public class DevicePolicyManager {
      * not at least as restrictive as what has been set. Note that the current
      * password will remain until the user has set a new one, so the change does
      * not take place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
      * default value is 0.
@@ -1358,6 +1395,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
@@ -1376,12 +1417,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current number of lower case letters required in the
-     * password for all admins of this user and its profiles or a particular one.
+     * Retrieve the current number of lower case letters required in the password
+     * for a particular admin or all admins that set retrictions on this user
+     * and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
      * This is the same value as set by
-     * {#link {@link #setPasswordMinimumLowerCase(ComponentName, int)}
+     * {@link #setPasswordMinimumLowerCase(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to
      *            aggregate all admins.
@@ -1411,7 +1458,8 @@ public class DevicePolicyManager {
      * restrictive as what has been set. Note that the current password will
      * remain until the user has set a new one, so the change does not take
      * place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
      * default value is 1.
@@ -1419,6 +1467,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
@@ -1436,11 +1488,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current number of letters required in the password for all
-     * admins or a particular one. This is the same value as
-     * set by {#link {@link #setPasswordMinimumLetters(ComponentName, int)}
+     * Retrieve the current number of letters required in the password
+     * for a particular admin or all admins that set retrictions on this user
+     * and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
+     * This is the same value as set by
+     * {@link #setPasswordMinimumLetters(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to
      *            aggregate all admins.
@@ -1469,7 +1528,8 @@ public class DevicePolicyManager {
      * not at least as restrictive as what has been set. Note that the current
      * password will remain until the user has set a new one, so the change does
      * not take place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
      * default value is 1.
@@ -1477,6 +1537,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
@@ -1495,11 +1559,17 @@ public class DevicePolicyManager {
 
     /**
      * Retrieve the current number of numerical digits required in the password
-     * for all admins of this user and its profiles or a particular one.
+     * for a particular admin or all admins that set retrictions on this user
+     * and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
      * This is the same value as set by
-     * {#link {@link #setPasswordMinimumNumeric(ComponentName, int)}
+     * {@link #setPasswordMinimumNumeric(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to
      *            aggregate all admins.
@@ -1528,7 +1598,8 @@ public class DevicePolicyManager {
      * restrictive as what has been set. Note that the current password will
      * remain until the user has set a new one, so the change does not take
      * place immediately. To prompt the user for a new password, use
-     * {@link #ACTION_SET_NEW_PASSWORD} after setting this value. This
+     * {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value. This
      * constraint is only imposed if the administrator has also requested
      * {@link #PASSWORD_QUALITY_COMPLEX} with {@link #setPasswordQuality}. The
      * default value is 1.
@@ -1536,6 +1607,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
@@ -1553,11 +1628,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current number of symbols required in the password for all
-     * admins or a particular one. This is the same value as
-     * set by {#link {@link #setPasswordMinimumSymbols(ComponentName, int)}
+     * Retrieve the current number of symbols required in the password
+     * for a particular admin or all admins that set retrictions on this user
+     * and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account. This is the same value as
+     * set by {@link #setPasswordMinimumSymbols(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to
      *            aggregate all admins.
@@ -1586,7 +1667,8 @@ public class DevicePolicyManager {
      * to enter a new password that is not at least as restrictive as what has
      * been set. Note that the current password will remain until the user has
      * set a new one, so the change does not take place immediately. To prompt
-     * the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} after
+     * the user for a new password, use {@link #ACTION_SET_NEW_PASSWORD} or
+     * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after
      * setting this value. This constraint is only imposed if the administrator
      * has also requested {@link #PASSWORD_QUALITY_COMPLEX} with
      * {@link #setPasswordQuality}. The default value is 0.
@@ -1594,6 +1676,10 @@ public class DevicePolicyManager {
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated
      *            with.
@@ -1611,12 +1697,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current number of non-letter characters required in the
-     * password for all admins of this user and its profiles or a particular one.
+     * Retrieve the current number of non-letter characters required in the password
+     * for a particular admin or all admins that set retrictions on this user
+     * and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
      * This is the same value as set by
-     * {#link {@link #setPasswordMinimumNonLetter(ComponentName, int)}
+     * {@link #setPasswordMinimumNonLetter(ComponentName, int)}
      * and only applies when the password quality is
      * {@link #PASSWORD_QUALITY_COMPLEX}.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to
      *            aggregate all admins.
@@ -1644,7 +1736,8 @@ public class DevicePolicyManager {
    * enter a new password that is the same as any password in the history. Note
    * that the current password will remain until the user has set a new one, so
    * the change does not take place immediately. To prompt the user for a new
-   * password, use {@link #ACTION_SET_NEW_PASSWORD} after setting this value.
+   * password, use {@link #ACTION_SET_NEW_PASSWORD} or
+   * {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} after setting this value.
    * This constraint is only imposed if the administrator has also requested
    * either {@link #PASSWORD_QUALITY_NUMERIC}, {@link #PASSWORD_QUALITY_NUMERIC_COMPLEX}
    * {@link #PASSWORD_QUALITY_ALPHABETIC}, or {@link #PASSWORD_QUALITY_ALPHANUMERIC}
@@ -1654,6 +1747,10 @@ public class DevicePolicyManager {
    * The calling device admin must have requested
    * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call this
    * method; if it has not, a security exception will be thrown.
+   *
+   * <p>This method can be called on the {@link DevicePolicyManager} instance
+   * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+   * restrictions on the parent profile.
    *
    * @param admin Which {@link DeviceAdminReceiver} this request is associated
    *        with.
@@ -1688,6 +1785,10 @@ public class DevicePolicyManager {
      * <p> Note that setting the password will automatically reset the expiration time for all
      * active admins. Active admins do not need to explicitly call this method in that case.
      *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param timeout The limit (in ms) that a password can remain in effect. A value of 0
      *        means there is no restriction (unlimited).
@@ -1706,7 +1807,12 @@ public class DevicePolicyManager {
      * Get the password expiration timeout for the given admin. The expiration timeout is the
      * recurring expiration timeout provided in the call to
      * {@link #setPasswordExpirationTimeout(ComponentName, long)} for the given admin or the
-     * aggregate of all policy administrators if {@code admin} is null.
+     * aggregate of all participating policy administrators if {@code admin} is null. Admins that
+     * have set restrictions on profiles that have a separate challenge are not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate all admins.
      * @return The timeout for the given admin or the minimum of all timeouts
@@ -1723,14 +1829,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Get the current password expiration time for the given admin or an aggregate of
-     * all admins of this user and its profiles if admin is null. If the password is
-     * expired, this will return the time since the password expired as a negative number.
-     * If admin is null, then a composite of all expiration timeouts is returned
-     * - which will be the minimum of all timeouts.
+     * Get the current password expiration time for a particular admin or all admins that set
+     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account. If admin is {@code null}, then a composite
+     * of all expiration times is returned - which will be the minimum of all of them.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * the password expiration for the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate all admins.
-     * @return The password expiration time, in ms.
+     * @return The password expiration time, in milliseconds since epoch.
      */
     public long getPasswordExpiration(@Nullable ComponentName admin) {
         if (mService != null) {
@@ -1744,8 +1853,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current password history length for all admins of this
-     * user and its profiles or a particular one.
+     * Retrieve the current password history length for a particular admin or all admins that
+     * set retrictions on this user and its participating profiles. Restrictions on profiles that
+     * have a separate challenge are not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
+     *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      * @return The length of the password history
@@ -1779,12 +1894,17 @@ public class DevicePolicyManager {
 
     /**
      * Determine whether the current password the user has set is sufficient
-     * to meet the policy requirements (quality, minimum length) that have been
-     * requested by the admins of this user and its profiles that don't have a separate challenge.
+     * to meet the policy requirements (e.g. quality, minimum length) that have been
+     * requested by the admins of this user and its participating profiles.
+     * Restrictions on profiles that have a separate challenge are not taken into account.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_LIMIT_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to determine
+     * if the password set on the parent profile is sufficient.
      *
      * @return Returns true if the password meets the current requirements, else false.
      */
@@ -1801,7 +1921,7 @@ public class DevicePolicyManager {
 
     /**
      * Determine whether the current profile password the user has set is sufficient
-     * to meet the policy requirements (quality, minimum length) that have been
+     * to meet the policy requirements (e.g. quality, minimum length) that have been
      * requested by the admins of the parent user and its profiles.
      *
      * @param userHandle the userId of the profile to check the password for.
@@ -1822,6 +1942,10 @@ public class DevicePolicyManager {
     /**
      * Retrieve the number of times the user has failed at entering a
      * password since that last successful password entry.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * the number of failed password attemts for the parent user.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to be able to call
@@ -1871,7 +1995,7 @@ public class DevicePolicyManager {
 
     /**
      * Setting this to a value greater than zero enables a built-in policy
-     * that will perform a device wipe after too many incorrect
+     * that will perform a device or profile wipe after too many incorrect
      * device-unlock passwords have been entered.  This built-in policy combines
      * watching for failed passwords and wiping the device, and requires
      * that you request both {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} and
@@ -1882,11 +2006,15 @@ public class DevicePolicyManager {
      * failure to a server), you should implement
      * {@link DeviceAdminReceiver#onPasswordFailed(Context, android.content.Intent)}
      * instead.  Do not use this API, because if the maximum count is reached,
-     * the device will be wiped immediately, and your callback will not be invoked.
+     * the device or profile will be wiped immediately, and your callback will not be invoked.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * a value on the parent profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param num The number of failed password attempts at which point the
-     * device will wipe its data.
+     * device or profile will be wiped.
      */
     public void setMaximumFailedPasswordsForWipe(@NonNull ComponentName admin, int num) {
         if (mService != null) {
@@ -1899,9 +2027,15 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current maximum number of login attempts that are allowed
-     * before the device wipes itself, for all admins of this user and its profiles
-     * or a particular one.
+     * Retrieve the current maximum number of login attempts that are allowed before the device
+     * or profile is wiped, for a particular admin or all admins that set retrictions on this user
+     * and its participating profiles. Restrictions on profiles that have a separate challenge are
+     * not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * the value for the parent profile.
+     *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      */
@@ -2018,6 +2152,10 @@ public class DevicePolicyManager {
      * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to set
+     * restrictions on the parent profile.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param timeMs The new desired maximum time to lock in milliseconds.
      * A value of 0 means there is no restriction.
@@ -2033,8 +2171,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Retrieve the current maximum time to unlock for all admins of this user
-     * and its profiles or a particular one.
+     * Retrieve the current maximum time to unlock for a particular admin or all admins that set
+     * retrictions on this user and its participating profiles. Restrictions on profiles that have
+     * a separate challenge are not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
+     *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
      * all admins.
      * @return time in milliseconds for the given admin or the minimum value (strictest) of
@@ -2063,6 +2207,10 @@ public class DevicePolicyManager {
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} to be able to call
      * this method; if it has not, a security exception will be thrown.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to lock
+     * the parent profile.
      */
     public void lockNow() {
         if (mService != null) {
@@ -2561,7 +2709,7 @@ public class DevicePolicyManager {
         try {
             return mService.removeKeyPair(admin, alias);
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
         }
         return false;
     }
@@ -2884,17 +3032,25 @@ public class DevicePolicyManager {
      * this method; if it has not, a security exception will be thrown.
      *
      * <p>Calling this from a managed profile before version
-     * {@link android.os.Build.VERSION_CODES#M} will throw a security exception.
-     *
-     * <p>From version {@link android.os.Build.VERSION_CODES#M} a profile owner can set:
+     * {@link android.os.Build.VERSION_CODES#M} will throw a security exception. From version
+     * {@link android.os.Build.VERSION_CODES#M} the profile owner of a managed profile can set:
      * <ul>
-     * <li>{@link #KEYGUARD_DISABLE_TRUST_AGENTS}, {@link #KEYGUARD_DISABLE_FINGERPRINT}
-     *      these will affect the profile's parent user.
-     * <li>{@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS} this will affect notifications
-     * generated by applications in the managed profile.
+     * <li>{@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which affects the parent user, but only if there
+     *      is no separate challenge set on the managed profile.
+     * <li>{@link #KEYGUARD_DISABLE_FINGERPRINT} which affects the managed profile challenge if
+     *      there is one, or the parent user otherwise.
+     * <li>{@link #KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS} which affects notifications
+     *      generated by applications in the managed profile.
      * </ul>
-     * <p>Requests to disable other features on a managed profile will be ignored. The admin
-     * can check which features have been disabled by calling
+     *
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} and {@link #KEYGUARD_DISABLE_FINGERPRINT} can also be
+     * set on the {@link DevicePolicyManager} instance returned by
+     * {@link #getParentProfileInstance(ComponentName)} in order to set restrictions on the
+     * parent profile.
+     *
+     * <p>Requests to disable other features on a managed profile will be ignored.
+     *
+     * <p>The admin can check which features have been disabled by calling
      * {@link #getKeyguardDisabledFeatures(ComponentName)}
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -2916,7 +3072,13 @@ public class DevicePolicyManager {
 
     /**
      * Determine whether or not features have been disabled in keyguard either by the calling
-     * admin, if specified, or all admins.
+     * admin, if specified, or all admins that set retrictions on this user and its participating
+     * profiles. Restrictions on profiles that have a separate challenge are not taken into account.
+     *
+     * <p>This method can be called on the {@link DevicePolicyManager} instance
+     * returned by {@link #getParentProfileInstance(ComponentName)} in order to retrieve
+     * restrictions on the parent profile.
+     *
      * @param admin The name of the admin component to check, or {@code null} to check whether any
      * admins have disabled features in keyguard.
      * @return bitfield of flags. See {@link #setKeyguardDisabledFeatures(ComponentName, int)}
@@ -3489,7 +3651,7 @@ public class DevicePolicyManager {
             try {
                 return mService.setPackageSuspended(admin, packageName, suspended);
             } catch (RemoteException re) {
-                Log.w(TAG, "Failed talking with device policy service", re);
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
             }
         }
         return false;
@@ -3507,7 +3669,7 @@ public class DevicePolicyManager {
             try {
                 return mService.getPackageSuspended(admin, packageName);
             } catch (RemoteException e) {
-                Log.w(TAG, "Failed talking with device policy service", e);
+                Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             }
         }
         return false;
@@ -5772,7 +5934,7 @@ public class DevicePolicyManager {
         try {
             mService.setAffiliationIds(admin, new ArrayList<String>(ids));
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
         }
     }
 
@@ -5787,7 +5949,7 @@ public class DevicePolicyManager {
         try {
             return mService != null && mService.isAffiliatedUser();
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed talking with device policy service", e);
+            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
             return false;
         }
     }
