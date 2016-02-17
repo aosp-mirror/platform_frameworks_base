@@ -424,9 +424,7 @@ public class PipManager {
         }
         Intent intent = new Intent(mContext, PipMenuActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchStackId(PINNED_STACK_ID);
-        mContext.startActivity(intent, options.toBundle());
+        mContext.startActivity(intent);
     }
 
     public void addListener(Listener listener) {
