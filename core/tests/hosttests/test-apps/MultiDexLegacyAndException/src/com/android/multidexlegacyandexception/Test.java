@@ -15,14 +15,13 @@
  */
 package com.android.multidexlegacyandexception;
 
-import android.test.ActivityInstrumentationTestCase2;
-
 /**
  * Run the tests with: <code>adb shell am instrument -w
  com.android.multidexlegacyandexception/android.test.InstrumentationTestRunner
 </code>
  */
-public class Test extends ActivityInstrumentationTestCase2<MainActivity> {
+@SuppressWarnings("deprecation")
+public class Test extends android.test.ActivityInstrumentationTestCase2<MainActivity> {
     public Test() {
         super(MainActivity.class);
     }
