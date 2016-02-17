@@ -31487,6 +31487,8 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.PhoneLookupColumns {
+    field public static final java.lang.String CONTACT_ID = "contact_id";
+    field public static final java.lang.String DATA_ID = "data_id";
     field public static final java.lang.String LABEL = "label";
     field public static final java.lang.String NORMALIZED_NUMBER = "normalized_number";
     field public static final java.lang.String NUMBER = "number";
