@@ -316,7 +316,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * @param parentDocumentId the parent of the document to move.
      */
     @SuppressWarnings("unused")
-    public boolean removeDocument(String documentId, String parentDocumentId)
+    public void removeDocument(String documentId, String parentDocumentId)
             throws FileNotFoundException {
         throw new UnsupportedOperationException("Remove not supported");
     }
