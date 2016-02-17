@@ -15,6 +15,14 @@ package android.app.admin {
 
 }
 
+package android.content {
+
+  public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final java.lang.String ACTION_OPEN_EXTERNAL_DIRECTORY = "android.intent.action.OPEN_EXTERNAL_DIRECTORY";
+  }
+
+}
+
 package android.content.pm {
 
   public class PackageInfo implements android.os.Parcelable {
