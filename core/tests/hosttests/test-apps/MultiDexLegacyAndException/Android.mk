@@ -29,6 +29,8 @@ LOCAL_PACKAGE_NAME := MultiDexLegacyAndException
 
 LOCAL_DEX_PREOPT := false
 
+LOCAL_JAVACFLAGS := -nowarn
+
 mainDexList:= \
     $(call intermediates-dir-for,APPS,$(LOCAL_PACKAGE_NAME),$(LOCAL_IS_HOST_MODULE),common)/maindex.list
 
