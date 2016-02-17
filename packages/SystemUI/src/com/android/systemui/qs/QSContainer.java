@@ -40,6 +40,7 @@ public class QSContainer extends FrameLayout {
 
     private int mHeightOverride = -1;
     private QSPanel mQSPanel;
+    private QSDetail mQSDetail;
     protected BaseStatusBarHeader mHeader;
     private float mQsExpansion;
     private boolean mQsExpanded;
@@ -57,6 +58,8 @@ public class QSContainer extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mQSPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
+        mQSDetail = (QSDetail) findViewById(R.id.qs_detail);
+        mQSDetail.setQsPanel(mQSPanel);
         mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
     }
 
@@ -82,7 +85,7 @@ public class QSContainer extends FrameLayout {
      * during closing the detail panel, this already returns the smaller height.
      */
     public int getDesiredHeight() {
-        if (mQSPanel.isClosingDetail()) {
+        if (mQSDetail.isClosingDetail()) {
             return mQSPanel.getGridHeight() + mHeader.getCollapsedHeight() + getPaddingBottom();
         } else {
             return getMeasuredHeight();
@@ -94,6 +97,7 @@ public class QSContainer extends FrameLayout {
         int height = (int) (mQsExpansion * (heightOverride - mHeader.getCollapsedHeight()))
                 + mHeader.getCollapsedHeight();
         setBottom(getTop() + height);
+        mQSDetail.setBottom(getTop() + height);
     }
 
     private void updateQsState() {
@@ -113,6 +117,10 @@ public class QSContainer extends FrameLayout {
 
     public QSPanel getQsPanel() {
         return mQSPanel;
+    }
+
+    public boolean isShowingDetail() {
+        return mQSPanel.isShowingCustomize() || mQSDetail.isShowingDetail();
     }
 
     public void setHeaderClickable(boolean clickable) {
@@ -154,6 +162,7 @@ public class QSContainer extends FrameLayout {
         }
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
         mQSPanel.setTranslationY(translationScaleY * mQSPanel.getHeight());
+        mQSDetail.setFullyExpanded(expansion == 1);
         updateBottom();
     }
 
