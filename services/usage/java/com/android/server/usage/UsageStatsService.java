@@ -74,6 +74,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 
@@ -125,6 +126,7 @@ public class UsageStatsService extends SystemService implements
     Handler mHandler;
     AppOpsManager mAppOps;
     UserManager mUserManager;
+    PackageManager mPackageManager;
     AppWidgetManager mAppWidgetManager;
     IDeviceIdleController mDeviceIdleController;
     private DisplayManager mDisplayManager;
@@ -157,7 +159,7 @@ public class UsageStatsService extends SystemService implements
     public void onStart() {
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
-
+        mPackageManager = getContext().getPackageManager();
         mHandler = new H(BackgroundThread.get().getLooper());
 
         File systemDataDir = new File(Environment.getDataDirectory(), "system");
@@ -296,9 +298,8 @@ public class UsageStatsService extends SystemService implements
     private void initializeDefaultsForSystemApps(int userId) {
         Slog.d(TAG, "Initializing defaults for system apps on user " + userId);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
-        List<PackageInfo> packages = getContext().getPackageManager().getInstalledPackagesAsUser(
-                PackageManager.MATCH_DISABLED_COMPONENTS
-                | PackageManager.MATCH_UNINSTALLED_PACKAGES,
+        List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
+                PackageManager.MATCH_DISABLED_COMPONENTS,
                 userId);
         final int packageCount = packages.size();
         for (int i = 0; i < packageCount; i++) {
@@ -398,31 +399,38 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
-    /** Check all running users' or specified user's apps to see if they enter an idle state. */
-    void checkIdleStates(int checkUserId) {
+    /**
+     * Check all running users' or specified user's apps to see if they enter an idle state.
+     * @return Returns whether checking should continue periodically.
+     */
+    boolean checkIdleStates(int checkUserId) {
         if (!mAppIdleEnabled) {
-            return;
+            return false;
         }
 
-        final int[] userIds;
+        final int[] runningUserIds;
         try {
-            if (checkUserId == UserHandle.USER_ALL) {
-                userIds = ActivityManagerNative.getDefault().getRunningUserIds();
-            } else {
-                userIds = new int[] { checkUserId };
+            runningUserIds = ActivityManagerNative.getDefault().getRunningUserIds();
+            if (checkUserId != UserHandle.USER_ALL
+                    && !ArrayUtils.contains(runningUserIds, checkUserId)) {
+                return false;
             }
         } catch (RemoteException re) {
-            return;
+            return false;
         }
 
         final long elapsedRealtime = SystemClock.elapsedRealtime();
-        for (int i = 0; i < userIds.length; i++) {
-            final int userId = userIds[i];
-            List<PackageInfo> packages =
-                    getContext().getPackageManager().getInstalledPackagesAsUser(
-                            PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_UNINSTALLED_PACKAGES,
-                            userId);
+        for (int i = 0; i < runningUserIds.length; i++) {
+            final int userId = runningUserIds[i];
+            if (checkUserId != UserHandle.USER_ALL && checkUserId != userId) {
+                continue;
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Checking idle state for user " + userId);
+            }
+            List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
+                    PackageManager.MATCH_DISABLED_COMPONENTS,
+                    userId);
             synchronized (mLock) {
                 final int packageCount = packages.size();
                 for (int p = 0; p < packageCount; p++) {
@@ -439,6 +447,11 @@ public class UsageStatsService extends SystemService implements
                 }
             }
         }
+        if (DEBUG) {
+            Slog.d(TAG, "checkIdleStates took "
+                    + (SystemClock.elapsedRealtime() - elapsedRealtime));
+        }
+        return true;
     }
 
     /** Check if it's been a while since last parole and let idle apps do some work */
@@ -459,7 +472,7 @@ public class UsageStatsService extends SystemService implements
 
     private void notifyBatteryStats(String packageName, int userId, boolean idle) {
         try {
-            final int uid = AppGlobals.getPackageManager().getPackageUid(packageName,
+            final int uid = mPackageManager.getPackageUidAsUser(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
             if (idle) {
                 mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_PACKAGE_INACTIVE,
@@ -468,7 +481,7 @@ public class UsageStatsService extends SystemService implements
                 mBatteryStats.noteEvent(BatteryStats.HistoryItem.EVENT_PACKAGE_ACTIVE,
                         packageName, uid);
             }
-        } catch (RemoteException re) {
+        } catch (NameNotFoundException | RemoteException e) {
         }
     }
 
@@ -592,7 +605,7 @@ public class UsageStatsService extends SystemService implements
             // Only force the sync adapters to active if the provider is not in the same package and
             // the sync adapter is a system package.
             try {
-                PackageInfo pi = AppGlobals.getPackageManager().getPackageInfo(
+                PackageInfo pi = mPackageManager.getPackageInfoAsUser(
                         packageName, PackageManager.MATCH_SYSTEM_ONLY, userId);
                 if (pi == null || pi.applicationInfo == null) {
                     continue;
@@ -600,7 +613,7 @@ public class UsageStatsService extends SystemService implements
                 if (!packageName.equals(providerPkgName)) {
                     forceIdleState(packageName, userId, false);
                 }
-            } catch (RemoteException re) {
+            } catch (NameNotFoundException e) {
                 // Shouldn't happen
             }
         }
@@ -725,7 +738,7 @@ public class UsageStatsService extends SystemService implements
 
     int getAppId(String packageName) {
         try {
-            ApplicationInfo ai = getContext().getPackageManager().getApplicationInfo(packageName,
+            ApplicationInfo ai = mPackageManager.getApplicationInfo(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES
                             | PackageManager.MATCH_DISABLED_COMPONENTS);
             return ai.uid;
@@ -772,12 +785,8 @@ public class UsageStatsService extends SystemService implements
             }
         } catch (RemoteException re) {
         }
-        // TODO: Optimize this check
-        if (isActiveDeviceAdmin(packageName, userId)) {
-            return false;
-        }
 
-        if (isCarrierApp(packageName)) {
+        if (isActiveDeviceAdmin(packageName, userId)) {
             return false;
         }
 
@@ -790,7 +799,17 @@ public class UsageStatsService extends SystemService implements
             return false;
         }
 
-        return isAppIdleUnfiltered(packageName, userId, elapsedRealtime);
+        if (!isAppIdleUnfiltered(packageName, userId, elapsedRealtime)) {
+            return false;
+        }
+
+        // Check this last, as it is the most expensive check
+        // TODO: Optimize this by fetching the carrier privileged apps ahead of time
+        if (isCarrierApp(packageName)) {
+            return false;
+        }
+
+        return true;
     }
 
     int[] getIdleUidsForUser(int userId) {
@@ -803,7 +822,7 @@ public class UsageStatsService extends SystemService implements
         List<ApplicationInfo> apps;
         try {
             ParceledListSlice<ApplicationInfo> slice = AppGlobals.getPackageManager()
-                    .getInstalledApplications(PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+                    .getInstalledApplications(/* flags= */ 0, userId);
             if (slice == null) {
                 return new int[0];
             }
@@ -833,7 +852,9 @@ public class UsageStatsService extends SystemService implements
                 uidStates.setValueAt(index, value + 1 + (idle ? 1<<16 : 0));
             }
         }
-
+        if (DEBUG) {
+            Slog.d(TAG, "getIdleUids took " + (SystemClock.elapsedRealtime() - elapsedRealtime));
+        }
         int numIdle = 0;
         for (int i = uidStates.size() - 1; i >= 0; i--) {
             int value = uidStates.valueAt(i);
@@ -865,15 +886,7 @@ public class UsageStatsService extends SystemService implements
     private boolean isActiveDeviceAdmin(String packageName, int userId) {
         DevicePolicyManager dpm = getContext().getSystemService(DevicePolicyManager.class);
         if (dpm == null) return false;
-        List<ComponentName> components = dpm.getActiveAdminsAsUser(userId);
-        if (components == null) return false;
-        final int size = components.size();
-        for (int i = 0; i < size; i++) {
-            if (components.get(i).getPackageName().equals(packageName)) {
-                return true;
-            }
-        }
-        return false;
+        return dpm.packageHasActiveAdmins(packageName, userId);
     }
 
     private boolean isCarrierApp(String packageName) {
@@ -1011,10 +1024,11 @@ public class UsageStatsService extends SystemService implements
                     break;
 
                 case MSG_CHECK_IDLE_STATES:
-                    checkIdleStates(msg.arg1);
-                    mHandler.sendMessageDelayed(mHandler.obtainMessage(
-                            MSG_CHECK_IDLE_STATES, msg.arg1, 0),
-                            mCheckIdleIntervalMillis);
+                    if (checkIdleStates(msg.arg1)) {
+                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                                MSG_CHECK_IDLE_STATES, msg.arg1, 0),
+                                mCheckIdleIntervalMillis);
+                    }
                     break;
 
                 case MSG_ONE_TIME_CHECK_IDLE_STATES:
