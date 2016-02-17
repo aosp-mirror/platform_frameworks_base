@@ -727,11 +727,17 @@ public final class TvInputManager {
         }
 
         /**
-         * This is called when the information about a given TV input has been changed.
+         * This is called when the information about an existing TV input has been updated.
          *
-         * @param inputInfo TvInputInfo object that contains the information about the TV input.
+         * <p>Because the system automatically creates a <code>TvInputInfo</code> object for each TV
+         * input based on the information collected from the <code>AndroidManifest.xml</code>, this
+         * method is only called back when such information has changed dynamically or when the TV
+         * input service implementation wants to pass additional information that is not specified
+         * by the manifest file, such as ability to record and tuner count.
+         *
+         * @param inputInfo The <code>TvInputInfo</code> object that contains new information.
          */
-        public void onTvInputInfoChanged(TvInputInfo inputInfo) {
+        public void onTvInputInfoUpdated(TvInputInfo inputInfo) {
         }
     }
 
@@ -784,11 +790,11 @@ public final class TvInputManager {
             });
         }
 
-        public void postTvInputInfoChanged(final TvInputInfo inputInfo) {
+        public void postTvInputInfoUpdated(final TvInputInfo inputInfo) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mCallback.onTvInputInfoChanged(inputInfo);
+                    mCallback.onTvInputInfoUpdated(inputInfo);
                 }
             });
         }
@@ -1077,10 +1083,10 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTvInputInfoChanged(TvInputInfo inputInfo) {
+            public void onTvInputInfoUpdated(TvInputInfo inputInfo) {
                 synchronized (mLock) {
                     for (TvInputCallbackRecord record : mCallbackRecords) {
-                        record.postTvInputInfoChanged(inputInfo);
+                        record.postTvInputInfoUpdated(inputInfo);
                     }
                 }
             }
@@ -1131,19 +1137,19 @@ public final class TvInputManager {
     }
 
     /**
-     * Sets a new TvInputInfo object for a given input.
+     * Updates information about an existing TV input.
      *
      * <p>This is called internally only by {@link TvInputService}.
      *
-     * @param inputInfo The TvInputInfo object to set.
+     * @param inputInfo The <code>TvInputInfo</code> object that contains new information.
      * @throws IllegalArgumentException if the argument is {@code null}.
      */
-    void setTvInputInfo(@NonNull TvInputInfo inputInfo) {
+    void updateTvInputInfo(@NonNull TvInputInfo inputInfo) {
         Preconditions.checkNotNull(inputInfo);
         try {
-            mService.setTvInputInfo(inputInfo, mUserId);
+            mService.updateTvInputInfo(inputInfo, mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException("Error trying to set " + inputInfo, e);
+            throw new RuntimeException("Error trying to update " + inputInfo, e);
         }
     }
 
