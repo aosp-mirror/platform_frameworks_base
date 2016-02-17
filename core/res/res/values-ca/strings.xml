@@ -1053,12 +1053,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca per veure més opcions."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Vols compartir l\'informe d\'errors amb l\'administrador?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"El teu administrador de TI ha sol·licitat un informe d\'errors per tal de resoldre problemes"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPTA"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REBUTJA"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"S\'està creant l\'informe d\'errors…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Toca per cancel·lar"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Tria els teclats"</string>
     <string name="show_ime" msgid="2506087537466597099">"El deixa a la pantalla mentre el teclat físic està actiu"</string>
@@ -1556,7 +1562,7 @@
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació de SMS per veure\'ls"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Algunes funcions es limitaran"</string>
-    <string name="user_encrypted_message" msgid="4923292604515744267">"Toca per desbloquejar-lo"</string>
+    <string name="user_encrypted_message" msgid="4923292604515744267">"Toca per desbloquejar"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Dades d\'usuari bloquejades"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil professional bloquejat"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"Toca per desbloquejar el perfil"</string>

@@ -1069,12 +1069,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Kliknij, by zobaczyć więcej opcji."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Podłączono moduł debugowania USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknij, aby wyłączyć debugowanie USB."</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"Udostępnić raport o błędzie administratorowi?"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"Administrator poprosił o raport o błędzie, który pomoże w rozwiązaniu problemu"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"AKCEPTUJ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ODRZUĆ"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"Zgłaszam błąd…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"Kliknij, by anulować"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmień klawiaturę"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"Wybierz klawiatury"</string>
     <string name="show_ime" msgid="2506087537466597099">"Pozostaw na ekranie, gdy aktywna jest klawiatura fizyczna"</string>
@@ -1596,10 +1602,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"Niektóre funkcje mogą być niedostępne"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Kliknij, by odblokować"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Dane użytkownika zablokowane"</string>
-    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
-    <skip />
-    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
-    <skip />
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil do pracy zablokowany"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Kliknij, by odblokować profil"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Połączono z: <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Dotknij, by wyświetlić pliki"</string>
     <string name="pin_target" msgid="3052256031352291362">"Przypnij"</string>

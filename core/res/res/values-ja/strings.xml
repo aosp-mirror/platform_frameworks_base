@@ -1054,12 +1054,18 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"タップしてその他のオプションを表示"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="3116061729914615290">"管理者とバグレポートを共有しますか？"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="1310517845557771773">"IT 管理者からトラブルシューティングに役立てるためバグレポートを共有するようリクエストがありました"</string>
+    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <skip />
+    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
+    <skip />
+    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
+    <skip />
+    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
+    <skip />
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"同意する"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"同意しない"</string>
-    <string name="remote_bugreport_progress_notification_title" msgid="2785600634417078622">"バグレポートを取得しています…"</string>
-    <string name="remote_bugreport_progress_notification_message_can_cancel" msgid="5743435483005099451">"キャンセルするにはタップしてください"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
     <string name="configure_input_methods" msgid="4769971288371946846">"キーボードの選択"</string>
     <string name="show_ime" msgid="2506087537466597099">"物理キーボードが有効になっている間は、画面に表示されます"</string>
@@ -1564,10 +1570,8 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"一部機能が制限されている可能性"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"ロック解除するにはタップします"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"ユーザーデータはロック状態です"</string>
-    <!-- no translation found for profile_encrypted_detail (3700965619978314974) -->
-    <skip />
-    <!-- no translation found for profile_encrypted_message (6964994232310195874) -->
-    <skip />
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"仕事用プロファイル: ロック"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"タップしてプロファイルをロック解除"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> に接続しました"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"タップしてファイルを表示"</string>
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>
