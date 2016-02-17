@@ -82,6 +82,9 @@ public class UserDetailView extends PseudoGridView {
             }
             v.setActivated(item.isCurrent);
             v.setDisabledByAdmin(item.isDisabledByAdmin);
+            if (!item.isSwitchToEnabled) {
+                v.setEnabled(false);
+            }
             v.setTag(item);
             return v;
         }
@@ -94,7 +97,7 @@ public class UserDetailView extends PseudoGridView {
                 final Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
                         mContext, tag.enforcedAdmin);
                 mController.startActivity(intent);
-            } else {
+            } else if (tag.isSwitchToEnabled) {
                 MetricsLogger.action(mContext, MetricsEvent.QS_SWITCH_USER);
                 switchTo(tag);
             }

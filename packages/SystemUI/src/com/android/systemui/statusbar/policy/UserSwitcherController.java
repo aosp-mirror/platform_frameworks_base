@@ -99,6 +99,7 @@ public class UserSwitcherController {
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
     private boolean mPauseRefreshUsers;
+    private boolean mAllowUserSwitchingWhenSystemUserLocked;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
 
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
@@ -115,6 +116,7 @@ public class UserSwitcherController {
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_STOPPING);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
                 null /* permission */, null /* scheduler */);
 
@@ -130,6 +132,10 @@ public class UserSwitcherController {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.ADD_USERS_WHEN_LOCKED), true,
                 mSettingsObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(
+                        Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED),
+                true, mSettingsObserver);
         // Fetch initial values.
         mSettingsObserver.onChange(false);
 
@@ -180,6 +186,8 @@ public class UserSwitcherController {
                 }
                 ArrayList<UserRecord> records = new ArrayList<>(infos.size());
                 int currentId = ActivityManager.getCurrentUser();
+                boolean allowUserSwitching = mAllowUserSwitchingWhenSystemUserLocked
+                        || mUserManager.isUserUnlocked(UserHandle.SYSTEM);
                 UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
                 int avatarSize = mContext.getResources()
@@ -190,10 +198,11 @@ public class UserSwitcherController {
                     if (isCurrent) {
                         currentUserInfo = info;
                     }
+                    boolean switchToEnabled = allowUserSwitching || isCurrent;
                     if (info.isGuest()) {
                         guestRecord = new UserRecord(info, null /* picture */,
                                 true /* isGuest */, isCurrent, false /* isAddUser */,
-                                false /* isRestricted */);
+                                false /* isRestricted */, switchToEnabled);
                     } else if (info.isEnabled() && info.supportsSwitchToByUser()) {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
@@ -206,7 +215,8 @@ public class UserSwitcherController {
                         }
                         int index = isCurrent ? 0 : records.size();
                         records.add(index, new UserRecord(info, picture, false /* isGuest */,
-                                isCurrent, false /* isAddUser */, false /* isRestricted */));
+                                isCurrent, false /* isAddUser */, false /* isRestricted */,
+                                switchToEnabled));
                     }
                 }
 
@@ -228,7 +238,7 @@ public class UserSwitcherController {
                         if (canCreateGuest) {
                             guestRecord = new UserRecord(null /* info */, null /* picture */,
                                     true /* isGuest */, false /* isCurrent */,
-                                    false /* isAddUser */, createIsRestricted);
+                                    false /* isAddUser */, createIsRestricted, allowUserSwitching);
                             checkIfAddUserDisallowedByAdminOnly(guestRecord);
                             records.add(guestRecord);
                         }
@@ -241,7 +251,7 @@ public class UserSwitcherController {
                 if (!mSimpleUserSwitcher && canCreateUser) {
                     UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
                             false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                            createIsRestricted);
+                            createIsRestricted, allowUserSwitching);
                     checkIfAddUserDisallowedByAdminOnly(addUserRecord);
                     records.add(addUserRecord);
                 }
@@ -463,6 +473,12 @@ public class UserSwitcherController {
             } else if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
                 forcePictureLoadForId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                         UserHandle.USER_NULL);
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(intent.getAction())) {
+                // Unlocking the system user may require a refresh
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                if (userId != UserHandle.USER_SYSTEM) {
+                    return;
+                }
             }
             refreshUsers(forcePictureLoadForId);
             if (unpauseRefreshUsers) {
@@ -525,6 +541,9 @@ public class UserSwitcherController {
                     SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
             mAddUsersWhenLocked = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
+            mAllowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
             refreshUsers(UserHandle.USER_NULL);
         };
     };
@@ -646,26 +665,29 @@ public class UserSwitcherController {
         public final boolean isRestricted;
         public boolean isDisabledByAdmin;
         public EnforcedAdmin enforcedAdmin;
+        public boolean isSwitchToEnabled;
 
         public UserRecord(UserInfo info, Bitmap picture, boolean isGuest, boolean isCurrent,
-                boolean isAddUser, boolean isRestricted) {
+                boolean isAddUser, boolean isRestricted, boolean isSwitchToEnabled) {
             this.info = info;
             this.picture = picture;
             this.isGuest = isGuest;
             this.isCurrent = isCurrent;
             this.isAddUser = isAddUser;
             this.isRestricted = isRestricted;
+            this.isSwitchToEnabled = isSwitchToEnabled;
         }
 
         public UserRecord copyWithIsCurrent(boolean _isCurrent) {
-            return new UserRecord(info, picture, isGuest, _isCurrent, isAddUser, isRestricted);
+            return new UserRecord(info, picture, isGuest, _isCurrent, isAddUser, isRestricted,
+                    isSwitchToEnabled);
         }
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("UserRecord(");
             if (info != null) {
-                sb.append("name=\"" + info.name + "\" id=" + info.id);
+                sb.append("name=\"").append(info.name).append("\" id=").append(info.id);
             } else {
                 if (isGuest) {
                     sb.append("<add guest placeholder>");
@@ -680,7 +702,10 @@ public class UserSwitcherController {
             if (isRestricted) sb.append(" <isRestricted>");
             if (isDisabledByAdmin) {
                 sb.append(" <isDisabledByAdmin>");
-                sb.append(" enforcedAdmin=" + enforcedAdmin);
+                sb.append(" enforcedAdmin=").append(enforcedAdmin);
+            }
+            if (isSwitchToEnabled) {
+                sb.append(" <isSwitchToEnabled>");
             }
             sb.append(')');
             return sb.toString();

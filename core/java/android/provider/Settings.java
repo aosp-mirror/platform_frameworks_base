@@ -8140,6 +8140,15 @@ public final class Settings {
                 "uninstalled_ephemeral_app_cache_duration_millis";
 
         /**
+         * Allows switching users when system user is locked.
+         * <p>
+         * Type: int
+         * @hide
+         */
+        public static final String ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED =
+                "allow_user_switching_when_system_user_locked";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
