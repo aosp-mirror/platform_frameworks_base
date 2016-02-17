@@ -1672,6 +1672,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String args[]) {
+      mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
       if (mBluetoothBinder == null) {
         writer.println("Bluetooth Service not connected");
       } else {
