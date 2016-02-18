@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE;
@@ -133,11 +134,14 @@ class WindowSurfaceController {
         Slog.i(TAG, "Destroying surface " + this + " called by " + Debug.getCallers(4));
         //        }
         try {
-            mSurfaceControl.destroy();
-            mSurfaceShown = false;
-            mSurfaceControl = null;
+            if (mSurfaceControl != null) {
+                mSurfaceControl.destroy();
+            }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error destroying surface in: " + this, e);
+        } finally {
+            mSurfaceShown = false;
+            mSurfaceControl = null;
         }
     }
 

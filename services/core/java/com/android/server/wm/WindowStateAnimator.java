@@ -600,119 +600,118 @@ class WindowStateAnimator {
             return mSurfaceController;
         }
 
-        if (mSurfaceController == null) {
-            if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
-                    "createSurface " + this + ": mDrawState=DRAW_PENDING");
-            mDrawState = DRAW_PENDING;
-            if (w.mAppToken != null) {
-                if (w.mAppToken.mAppAnimator.animation == null) {
-                    w.mAppToken.allDrawn = false;
-                    w.mAppToken.deferClearAllDrawn = false;
-                } else {
-                    // Currently animating, persist current state of allDrawn until animation
-                    // is complete.
-                    w.mAppToken.deferClearAllDrawn = true;
-                }
-            }
-
-            mService.makeWindowFreezingScreenIfNeededLocked(w);
-
-            int flags = SurfaceControl.HIDDEN;
-            final WindowManager.LayoutParams attrs = w.mAttrs;
-
-            if (mService.isSecureLocked(w)) {
-                flags |= SurfaceControl.SECURE;
-            }
-
-            mTmpSize.set(w.mFrame.left + w.mXOffset, w.mFrame.top + w.mYOffset, 0, 0);
-            calculateSurfaceBounds(w, attrs);
-            final int width = mTmpSize.width();
-            final int height = mTmpSize.height();
-
-            if (DEBUG_VISIBILITY) {
-                Slog.v(TAG, "Creating surface in session "
-                        + mSession.mSurfaceSession + " window " + this
-                        + " w=" + width + " h=" + height
-                        + " x=" + mTmpSize.left + " y=" + mTmpSize.top
-                        + " format=" + attrs.format + " flags=" + flags);
-            }
-
-            // We may abort, so initialize to defaults.
-            mLastSystemDecorRect.set(0, 0, 0, 0);
-            mHasClipRect = false;
-            mClipRect.set(0, 0, 0, 0);
-            mLastClipRect.set(0, 0, 0, 0);
-
-            // Set up surface control with initial size.
-            try {
-
-                final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
-                final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-                if (!PixelFormat.formatHasAlpha(attrs.format)
-                        // Don't make surface with surfaceInsets opaque as they display a
-                        // translucent shadow.
-                        && attrs.surfaceInsets.left == 0
-                        && attrs.surfaceInsets.top == 0
-                        && attrs.surfaceInsets.right == 0
-                        && attrs.surfaceInsets.bottom == 0
-                        // Don't make surface opaque when resizing to reduce the amount of
-                        // artifacts shown in areas the app isn't drawing content to.
-                        && !w.isDragResizing()) {
-                    flags |= SurfaceControl.OPAQUE;
-                }
-
-                mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
-                        attrs.getTitle().toString(),
-                        width, height, format, flags, this);
-
-                w.setHasSurface(true);
-
-                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                    Slog.i(TAG, "  CREATE SURFACE "
-                            + mSurfaceController + " IN SESSION "
-                            + mSession.mSurfaceSession
-                            + ": pid=" + mSession.mPid + " format="
-                            + attrs.format + " flags=0x"
-                            + Integer.toHexString(flags)
-                            + " / " + this);
-                }
-            } catch (OutOfResourcesException e) {
-                w.setHasSurface(false);
-                Slog.w(TAG, "OutOfResourcesException creating surface");
-                mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
-                mDrawState = NO_SURFACE;
-                return null;
-            } catch (Exception e) {
-                w.setHasSurface(false);
-                Slog.e(TAG, "Exception creating surface", e);
-                mDrawState = NO_SURFACE;
-                return null;
-            }
-
-            if (WindowManagerService.localLOGV) {
-                Slog.v(TAG, "Got surface: " + mSurfaceController
-                        + ", set left=" + w.mFrame.left + " top=" + w.mFrame.top
-                        + ", animLayer=" + mAnimLayer);
-            }
-
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
-                WindowManagerService.logSurface(w, "CREATE pos=("
-                        + w.mFrame.left + "," + w.mFrame.top + ") ("
-                        + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
-            }
-
-            // Start a new transaction and apply position & offset.
-            final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
-            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
-                    "POS " + mTmpSize.left + ", " + mTmpSize.top, false);
-            mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack,
-                    mAnimLayer);
-            mLastHidden = true;
-
-            if (WindowManagerService.localLOGV) Slog.v(
-                    TAG, "Created surface " + this);
+        if (mSurfaceController != null) {
+            return mSurfaceController;
         }
+
+        w.setHasSurface(false);
+
+        if (DEBUG_ANIM || DEBUG_ORIENTATION) Slog.i(TAG,
+                "createSurface " + this + ": mDrawState=DRAW_PENDING");
+
+        mDrawState = DRAW_PENDING;
+        if (w.mAppToken != null) {
+            if (w.mAppToken.mAppAnimator.animation == null) {
+                w.mAppToken.allDrawn = false;
+                w.mAppToken.deferClearAllDrawn = false;
+            } else {
+                // Currently animating, persist current state of allDrawn until animation
+                // is complete.
+                w.mAppToken.deferClearAllDrawn = true;
+            }
+        }
+
+        mService.makeWindowFreezingScreenIfNeededLocked(w);
+
+        int flags = SurfaceControl.HIDDEN;
+        final WindowManager.LayoutParams attrs = w.mAttrs;
+
+        if (mService.isSecureLocked(w)) {
+            flags |= SurfaceControl.SECURE;
+        }
+
+        mTmpSize.set(w.mFrame.left + w.mXOffset, w.mFrame.top + w.mYOffset, 0, 0);
+        calculateSurfaceBounds(w, attrs);
+        final int width = mTmpSize.width();
+        final int height = mTmpSize.height();
+
+        if (DEBUG_VISIBILITY) {
+            Slog.v(TAG, "Creating surface in session "
+                    + mSession.mSurfaceSession + " window " + this
+                    + " w=" + width + " h=" + height
+                    + " x=" + mTmpSize.left + " y=" + mTmpSize.top
+                    + " format=" + attrs.format + " flags=" + flags);
+        }
+
+        // We may abort, so initialize to defaults.
+        mLastSystemDecorRect.set(0, 0, 0, 0);
+        mHasClipRect = false;
+        mClipRect.set(0, 0, 0, 0);
+        mLastClipRect.set(0, 0, 0, 0);
+
+        // Set up surface control with initial size.
+        try {
+
+            final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
+            final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
+            if (!PixelFormat.formatHasAlpha(attrs.format)
+                    // Don't make surface with surfaceInsets opaque as they display a
+                    // translucent shadow.
+                    && attrs.surfaceInsets.left == 0
+                    && attrs.surfaceInsets.top == 0
+                    && attrs.surfaceInsets.right == 0
+                    && attrs.surfaceInsets.bottom == 0
+                    // Don't make surface opaque when resizing to reduce the amount of
+                    // artifacts shown in areas the app isn't drawing content to.
+                    && !w.isDragResizing()) {
+                flags |= SurfaceControl.OPAQUE;
+            }
+
+            mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
+                    attrs.getTitle().toString(),
+                    width, height, format, flags, this);
+
+            w.setHasSurface(true);
+
+            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                Slog.i(TAG, "  CREATE SURFACE "
+                        + mSurfaceController + " IN SESSION "
+                        + mSession.mSurfaceSession
+                        + ": pid=" + mSession.mPid + " format="
+                        + attrs.format + " flags=0x"
+                        + Integer.toHexString(flags)
+                        + " / " + this);
+            }
+        } catch (OutOfResourcesException e) {
+            Slog.w(TAG, "OutOfResourcesException creating surface");
+            mService.reclaimSomeSurfaceMemoryLocked(this, "create", true);
+            mDrawState = NO_SURFACE;
+            return null;
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception creating surface", e);
+            mDrawState = NO_SURFACE;
+            return null;
+        }
+
+        if (WindowManagerService.localLOGV) Slog.v(TAG, "Got surface: " + mSurfaceController
+                + ", set left=" + w.mFrame.left + " top=" + w.mFrame.top
+                + ", animLayer=" + mAnimLayer);
+
+        if (SHOW_LIGHT_TRANSACTIONS) {
+            Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
+            WindowManagerService.logSurface(w, "CREATE pos=("
+                    + w.mFrame.left + "," + w.mFrame.top + ") ("
+                    + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
+        }
+
+        // Start a new transaction and apply position & offset.
+        final int layerStack = w.getDisplayContent().getDisplay().getLayerStack();
+        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
+                "POS " + mTmpSize.left + ", " + mTmpSize.top, false);
+        mSurfaceController.setPositionAndLayer(mTmpSize.left, mTmpSize.top, layerStack, mAnimLayer);
+        mLastHidden = true;
+
+        if (WindowManagerService.localLOGV) Slog.v(TAG, "Created surface " + this);
         return mSurfaceController;
     }
 
@@ -783,59 +782,59 @@ class WindowStateAnimator {
 
         mWin.mSurfaceSaved = false;
 
-        if (mSurfaceController != null) {
-            int i = mWin.mChildWindows.size();
-            // When destroying a surface we want to make sure child windows
-            // are hidden. If we are preserving the surface until redraw though
-            // we intend to swap it out with another surface for resizing. In this case
-            // the window always remains visible to the user and the child windows
-            // should likewise remain visable.
-            while (!mDestroyPreservedSurfaceUponRedraw && i > 0) {
-                i--;
-                WindowState c = mWin.mChildWindows.get(i);
-                c.mAttachedHidden = true;
-            }
-
-            try {
-                if (DEBUG_VISIBILITY) logWithStack(TAG, "Window " + this + " destroying surface "
-                        + mSurfaceController + ", session " + mSession);
-                if (mSurfaceDestroyDeferred) {
-                    if (mSurfaceController != null && mPendingDestroySurface != mSurfaceController) {
-                        if (mPendingDestroySurface != null) {
-                            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                                WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
-                            }
-                            mPendingDestroySurface.destroyInTransaction();
-                        }
-                        mPendingDestroySurface = mSurfaceController;
-                    }
-                } else {
-                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
-                        WindowManagerService.logSurface(mWin, "DESTROY", true);
-                    }
-                    destroySurface();
-                }
-                // Don't hide wallpaper if we're deferring the surface destroy
-                // because of a surface change.
-                if (!mDestroyPreservedSurfaceUponRedraw) {
-                    mWallpaperControllerLocked.hideWallpapers(mWin);
-                }
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Exception thrown when destroying Window " + this
-                    + " surface " + mSurfaceController + " session " + mSession
-                    + ": " + e.toString());
-            }
-
-            // Whether the surface was preserved (and copied to mPendingDestroySurface) or not, it
-            // needs to be cleared to match the WindowState.mHasSurface state. It is also necessary
-            // so it can be recreated successfully in mPendingDestroySurface case.
-            mWin.setHasSurface(false);
-            if (mSurfaceController != null) {
-                mSurfaceController.setShown(false);
-            }
-            mSurfaceController = null;
-            mDrawState = NO_SURFACE;
+        if (mSurfaceController == null) {
+            return;
         }
+
+        int i = mWin.mChildWindows.size();
+        // When destroying a surface we want to make sure child windows are hidden. If we are
+        // preserving the surface until redraw though we intend to swap it out with another surface
+        // for resizing. In this case the window always remains visible to the user and the child
+        // windows should likewise remain visible.
+        while (!mDestroyPreservedSurfaceUponRedraw && i > 0) {
+            i--;
+            WindowState c = mWin.mChildWindows.get(i);
+            c.mAttachedHidden = true;
+        }
+
+        try {
+            if (DEBUG_VISIBILITY) logWithStack(TAG, "Window " + this + " destroying surface "
+                    + mSurfaceController + ", session " + mSession);
+            if (mSurfaceDestroyDeferred) {
+                if (mSurfaceController != null && mPendingDestroySurface != mSurfaceController) {
+                    if (mPendingDestroySurface != null) {
+                        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                            WindowManagerService.logSurface(mWin, "DESTROY PENDING", true);
+                        }
+                        mPendingDestroySurface.destroyInTransaction();
+                    }
+                    mPendingDestroySurface = mSurfaceController;
+                }
+            } else {
+                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+                    WindowManagerService.logSurface(mWin, "DESTROY", true);
+                }
+                destroySurface();
+            }
+            // Don't hide wallpaper if we're deferring the surface destroy
+            // because of a surface change.
+            if (!mDestroyPreservedSurfaceUponRedraw) {
+                mWallpaperControllerLocked.hideWallpapers(mWin);
+            }
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Exception thrown when destroying Window " + this
+                + " surface " + mSurfaceController + " session " + mSession + ": " + e.toString());
+        }
+
+        // Whether the surface was preserved (and copied to mPendingDestroySurface) or not, it
+        // needs to be cleared to match the WindowState.mHasSurface state. It is also necessary
+        // so it can be recreated successfully in mPendingDestroySurface case.
+        mWin.setHasSurface(false);
+        if (mSurfaceController != null) {
+            mSurfaceController.setShown(false);
+        }
+        mSurfaceController = null;
+        mDrawState = NO_SURFACE;
     }
 
     void destroyDeferredSurfaceLocked() {
@@ -1746,8 +1745,18 @@ class WindowStateAnimator {
     }
 
     void destroySurface() {
-        mSurfaceController.destroyInTransaction();
-        mSurfaceController = null;
+        try {
+            if (mSurfaceController != null) {
+                mSurfaceController.destroyInTransaction();
+            }
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Exception thrown when destroying surface " + this
+                    + " surface " + mSurfaceController + " session " + mSession + ": " + e);
+        } finally {
+            mWin.setHasSurface(false);
+            mSurfaceController = null;
+            mDrawState = NO_SURFACE;
+        }
     }
 
     void setMoveAnimation(int left, int top) {
