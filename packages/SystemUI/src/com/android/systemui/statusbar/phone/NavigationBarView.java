@@ -79,7 +79,7 @@ public class NavigationBarView extends LinearLayout {
     private Drawable mBackAltCarModeIcon, mBackAltLandCarModeIcon;
     private Drawable mHomeDefaultIcon, mHomeCarModeIcon;
     private Drawable mRecentIcon;
-    private Drawable mRecentLandIcon;
+    private Drawable mDockedIcon;
 
     private NavigationBarGestureHelper mGestureHelper;
     private DeadZone mDeadZone;
@@ -97,6 +97,7 @@ public class NavigationBarView extends LinearLayout {
     private boolean mLayoutTransitionsEnabled = true;
     private boolean mWakeAndUnlocking;
     private boolean mCarMode = false;
+    private boolean mDockedStackExists;
 
     private final SparseArray<ButtonDispatcher> mButtonDisatchers = new SparseArray<>();
 
@@ -280,7 +281,7 @@ public class NavigationBarView extends LinearLayout {
         mHomeDefaultIcon = ctx.getDrawable(R.drawable.ic_sysbar_home);
 
         mRecentIcon = ctx.getDrawable(R.drawable.ic_sysbar_recent);
-        mRecentLandIcon = mRecentIcon;
+        mDockedIcon = ctx.getDrawable(R.drawable.ic_sysbar_docked);
         getCarModeIcons(ctx);
     }
 
@@ -335,8 +336,7 @@ public class NavigationBarView extends LinearLayout {
 
         getBackButton().setImageDrawable(backIcon);
 
-        getRecentsButton().setImageDrawable(
-                mVertical ? mRecentLandIcon : mRecentIcon);
+        updateRecentsIcon();
 
         if (mCarMode) {
             getHomeButton().setImageDrawable(mHomeCarModeIcon);
@@ -507,7 +507,8 @@ public class NavigationBarView extends LinearLayout {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            updateRecentsIcon(exists);
+                            mDockedStackExists = exists;
+                            updateRecentsIcon();
                         }
                     });
                 }
@@ -517,10 +518,8 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
-    private void updateRecentsIcon(boolean dockedStackExists) {
-        getRecentsButton().setImageResource(dockedStackExists
-                ? R.drawable.ic_sysbar_docked
-                : R.drawable.ic_sysbar_recent);
+    private void updateRecentsIcon() {
+        getRecentsButton().setImageDrawable(mDockedStackExists ? mDockedIcon : mRecentIcon);
     }
 
     public boolean isVertical() {
