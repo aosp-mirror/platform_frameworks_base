@@ -940,35 +940,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void resetDefaultImeLocked(Context context) {
         // Do not reset the default (current) IME when it is a 3rd-party IME
-        if (mCurMethodId != null
-                && !InputMethodUtils.isSystemIme(mMethodMap.get(mCurMethodId))) {
+        if (mCurMethodId != null && !InputMethodUtils.isSystemIme(mMethodMap.get(mCurMethodId))) {
             return;
         }
-
-        InputMethodInfo defIm = null;
-        for (InputMethodInfo imi : mMethodList) {
-            if (defIm == null && mSystemReady) {
-                final Locale systemLocale = context.getResources().getConfiguration().locale;
-                if (InputMethodUtils.isSystemImeThatHasSubtypeOf(imi, context,
-                        true /* checkDefaultAttribute */, systemLocale, false /* checkCountry */,
-                        InputMethodUtils.SUBTYPE_MODE_ANY)) {
-                    defIm = imi;
-                    Slog.i(TAG, "Selected default: " + imi.getId());
-                }
-            }
+        final List<InputMethodInfo> suitableImes = InputMethodUtils.getDefaultEnabledImes(
+                context, mSystemReady, mSettings.getEnabledInputMethodListLocked());
+        if (suitableImes.isEmpty()) {
+            Slog.i(TAG, "No default found");
+            return;
         }
-        if (defIm == null && mMethodList.size() > 0) {
-            defIm = InputMethodUtils.getMostApplicableDefaultIME(
-                    mSettings.getEnabledInputMethodListLocked());
-            if (defIm != null) {
-                Slog.i(TAG, "Default found, using " + defIm.getId());
-            } else {
-                Slog.i(TAG, "No default found");
-            }
-        }
-        if (defIm != null) {
-            setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
-        }
+        final InputMethodInfo defIm = suitableImes.get(0);
+        Slog.i(TAG, "Default found, using " + defIm.getId());
+        setSelectedInputMethodAndSubtypeLocked(defIm, NOT_A_SUBTYPE_ID, false);
     }
 
     private void resetAllInternalStateLocked(final boolean updateOnlyWhenLocaleChanged,
