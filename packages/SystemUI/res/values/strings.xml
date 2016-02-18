@@ -1182,7 +1182,7 @@
     <string name="overview_disable_fast_toggle_via_button_desc">Disable launch timeout while paging</string>
 
     <!-- Toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=60]-->
-    <string name="overview_nav_bar_gesture">Enable split-screen swipe-up accelerator</string>
+    <string name="overview_nav_bar_gesture">Enable split-screen swipe-up gesture</string>
     <!-- Description for the toggle to enable the gesture to enter split-screen by swiping up from the Overview button. [CHAR LIMIT=NONE]-->
     <string name="overview_nav_bar_gesture_desc">Enable gesture to enter split-screen by swiping up from the Overview button</string>
 
