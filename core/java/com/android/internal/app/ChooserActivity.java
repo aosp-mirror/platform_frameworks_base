@@ -311,24 +311,6 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public boolean shouldAutoLaunchSingleChoice(TargetInfo target) {
-        final Intent intent = target.getResolvedIntent();
-        final ResolveInfo resolve = target.getResolveInfo();
-
-        // When GET_CONTENT is handled by the DocumentsUI system component,
-        // we're okay automatically launching it, since it offers it's own
-        // intent disambiguation UI.
-        if (intent != null && Intent.ACTION_GET_CONTENT.equals(intent.getAction())
-                && resolve != null && resolve.priority > 0
-                && resolve.activityInfo != null && DocumentsContract.PACKAGE_DOCUMENTS_UI
-                        .equals(resolve.activityInfo.packageName)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
     public void showTargetDetails(ResolveInfo ri) {
         ComponentName name = ri.activityInfo.getComponentName();
         boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
