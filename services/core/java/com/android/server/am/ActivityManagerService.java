@@ -18629,8 +18629,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                         }
                         if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                            if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
-                                schedGroup = Process.THREAD_GROUP_DEFAULT;
+                            // This will treat important bound services identically to
+                            // the top app, which may behave differently than generic
+                            // foreground work.
+                            if (client.curSchedGroup > schedGroup) {
+                                if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
+                                    schedGroup = client.curSchedGroup;
+                                } else {
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                }
                             }
                             if (clientProcState <= ActivityManager.PROCESS_STATE_TOP) {
                                 if (clientProcState == ActivityManager.PROCESS_STATE_TOP) {
@@ -18694,11 +18701,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     final ActivityRecord a = cr.activity;
                     if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
                         if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ &&
-                                (a.visible || a.state == ActivityState.RESUMED
-                                 || a.state == ActivityState.PAUSING)) {
+                            (a.visible || a.state == ActivityState.RESUMED ||
+                             a.state == ActivityState.PAUSING)) {
                             adj = ProcessList.FOREGROUND_APP_ADJ;
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                                schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
+                                    schedGroup = Process.THREAD_GROUP_TOP_APP;
+                                } else {
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                }
                             }
                             app.cached = false;
                             app.adjType = "service";
@@ -18778,7 +18789,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (procState > clientProcState) {
                     procState = clientProcState;
                 }
-                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                if (client.curSchedGroup > schedGroup) {
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                 }
             }
