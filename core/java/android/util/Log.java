@@ -377,8 +377,9 @@ public final class Log {
      * Helper function for long messages. Uses the LineBreakBufferedWriter to break
      * up long messages and stacktraces along newlines, but tries to write in large
      * chunks. This is to avoid truncation.
+     * @hide
      */
-    private static int printlns(int bufID, int priority, String tag, String msg,
+    public static int printlns(int bufID, int priority, String tag, String msg,
             Throwable tr) {
         ImmediateLogWriter logWriter = new ImmediateLogWriter(bufID, priority, tag);
         // Acceptable buffer size. Get the native buffer size, subtract two zero terminators,
