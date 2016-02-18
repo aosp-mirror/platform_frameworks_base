@@ -124,7 +124,6 @@ final class DefaultPermissionGrantPolicy {
 
     private final PackageManagerService mService;
 
-    private PackagesProvider mImePackagesProvider;
     private PackagesProvider mLocationPackagesProvider;
     private PackagesProvider mVoiceInteractionPackagesProvider;
     private PackagesProvider mSmsAppPackagesProvider;
@@ -134,10 +133,6 @@ final class DefaultPermissionGrantPolicy {
 
     public DefaultPermissionGrantPolicy(PackageManagerService service) {
         mService = service;
-    }
-
-    public void setImePackagesProviderLPr(PackagesProvider provider) {
-        mImePackagesProvider = provider;
     }
 
     public void setLocationPackagesProviderLPw(PackagesProvider provider) {
@@ -198,7 +193,6 @@ final class DefaultPermissionGrantPolicy {
     private void grantDefaultSystemHandlerPermissions(int userId) {
         Log.i(TAG, "Granting permissions to default platform handlers for user " + userId);
 
-        final PackagesProvider imePackagesProvider;
         final PackagesProvider locationPackagesProvider;
         final PackagesProvider voiceInteractionPackagesProvider;
         final PackagesProvider smsAppPackagesProvider;
@@ -207,7 +201,6 @@ final class DefaultPermissionGrantPolicy {
         final SyncAdapterPackagesProvider syncAdapterPackagesProvider;
 
         synchronized (mService.mPackages) {
-            imePackagesProvider = mImePackagesProvider;
             locationPackagesProvider = mLocationPackagesProvider;
             voiceInteractionPackagesProvider = mVoiceInteractionPackagesProvider;
             smsAppPackagesProvider = mSmsAppPackagesProvider;
@@ -216,8 +209,6 @@ final class DefaultPermissionGrantPolicy {
             syncAdapterPackagesProvider = mSyncAdapterPackagesProvider;
         }
 
-        String[] imePackageNames = (imePackagesProvider != null)
-                ? imePackagesProvider.getPackages(userId) : null;
         String[] voiceInteractPackageNames = (voiceInteractionPackagesProvider != null)
                 ? voiceInteractionPackagesProvider.getPackages(userId) : null;
         String[] locationPackageNames = (locationPackagesProvider != null)
@@ -498,17 +489,6 @@ final class DefaultPermissionGrantPolicy {
             if (browserPackage != null
                     && doesPackageSupportRuntimePermissions(browserPackage)) {
                 grantRuntimePermissionsLPw(browserPackage, LOCATION_PERMISSIONS, userId);
-            }
-
-            // IME
-            if (imePackageNames != null) {
-                for (String imePackageName : imePackageNames) {
-                    PackageParser.Package imePackage = getSystemPackageLPr(imePackageName);
-                    if (imePackage != null
-                            && doesPackageSupportRuntimePermissions(imePackage)) {
-                        grantRuntimePermissionsLPw(imePackage, CONTACTS_PERMISSIONS, userId);
-                    }
-                }
             }
 
             // Voice interaction
