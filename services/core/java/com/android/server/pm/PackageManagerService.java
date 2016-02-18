@@ -3340,11 +3340,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + " with flags 0x" + Integer.toHexString(flags), new Throwable());
         }
 
-        // Safe mode means we shouldn't match any third-party components
-        if (mSafeMode) {
-            flags |= PackageManager.MATCH_SYSTEM_ONLY;
-        }
-
         return updateFlags(flags, userId);
     }
 
@@ -3352,6 +3347,11 @@ public class PackageManagerService extends IPackageManager.Stub {
      * Update given flags when being used to request {@link ResolveInfo}.
      */
     int updateFlagsForResolve(int flags, int userId, Object cookie) {
+        // Safe mode means we shouldn't match any third-party components
+        if (mSafeMode) {
+            flags |= PackageManager.MATCH_SYSTEM_ONLY;
+        }
+
         return updateFlagsForComponent(flags, userId, cookie);
     }
 
