@@ -985,7 +985,7 @@ public class InputMethodUtils {
             }
         }
 
-        public List<InputMethodInfo> getEnabledInputMethodListLocked() {
+        public ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
             return createEnabledInputMethodListLocked(
                     getEnabledInputMethodsAndSubtypeListLocked());
         }
@@ -1092,7 +1092,7 @@ public class InputMethodUtils {
             return isRemoved;
         }
 
-        private List<InputMethodInfo> createEnabledInputMethodListLocked(
+        private ArrayList<InputMethodInfo> createEnabledInputMethodListLocked(
                 List<Pair<String, ArrayList<String>>> imsList) {
             final ArrayList<InputMethodInfo> res = new ArrayList<>();
             for (Pair<String, ArrayList<String>> ims: imsList) {
