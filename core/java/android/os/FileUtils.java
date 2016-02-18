@@ -307,7 +307,11 @@ public class FileUtils {
         }
     }
 
-   /**
+    public static void stringToFile(File file, String string) throws IOException {
+        stringToFile(file.getAbsolutePath(), string);
+    }
+
+    /**
      * Writes string to file. Basically same as "echo -n $string > $filename"
      *
      * @param filename

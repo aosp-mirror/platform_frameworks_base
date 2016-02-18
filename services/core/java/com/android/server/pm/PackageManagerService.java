@@ -18012,6 +18012,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final PackageSetting ps;
         synchronized (mPackages) {
             ps = mSettings.mPackages.get(pkg.packageName);
+            mSettings.writeKernelMappingLPr(ps);
         }
 
         final UserManager um = mContext.getSystemService(UserManager.class);
