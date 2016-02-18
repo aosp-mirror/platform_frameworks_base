@@ -46,7 +46,7 @@
         <include layout="@layout/volume_zen_footer" />
 
         <!-- Only shown from Tuner setting -->
-        <include layout="@layout/zen_mode_panel" />
+        <include layout="@layout/tuner_zen_mode_panel" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -50,30 +50,6 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
-            android:gravity="end">
+    <include layout="@layout/qs_detail_buttons" />
 
-        <TextView
-                android:id="@android:id/button2"
-                style="@style/QSBorderlessButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:minWidth="132dp"
-                android:textAppearance="@style/TextAppearance.QS.DetailButton"
-                android:focusable="true" />
-
-        <TextView
-                android:id="@android:id/button1"
-                style="@style/QSBorderlessButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="88dp"
-                android:textAppearance="@style/TextAppearance.QS.DetailButton"
-                android:focusable="true"/>
-
-    </LinearLayout>
 </com.android.systemui.qs.QSDetail>

@@ -810,12 +810,6 @@
     <!-- Interruption level: Alarms only.  Optimized for narrow two-line display. [CHAR LIMIT=40] -->
     <string name="interruption_level_alarms_twoline">Alarms\nonly</string>
 
-    <!-- Interruption level: All interruptions. [CHAR LIMIT=40] -->
-    <string name="interruption_level_all">All</string>
-
-    <!-- Interruption level: All interruptions.  Optimized for narrow two-line display. [CHAR LIMIT=40] -->
-    <string name="interruption_level_all_twoline">All\n</string>
-
     <!-- Indication on the keyguard that is shown when the device is charging. [CHAR LIMIT=40]-->
     <string name="keyguard_indication_charging_time">Charging (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> until full)</string>
 

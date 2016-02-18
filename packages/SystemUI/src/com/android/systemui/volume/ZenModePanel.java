@@ -190,12 +190,6 @@ public class ZenModePanel extends LinearLayout {
         mZenAlarmWarning = (TextView) findViewById(R.id.zen_alarm_warning);
     }
 
-    public void addNoneButton() {
-        mZenButtons.addButton(R.string.interruption_level_all_twoline,
-                R.string.interruption_level_all,
-                Global.ZEN_MODE_OFF);
-    }
-
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
