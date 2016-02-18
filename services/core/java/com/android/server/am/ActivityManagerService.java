@@ -6430,6 +6430,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (mLockScreenShown == LOCK_SCREEN_SHOWN) {
                     mLockScreenShown = LOCK_SCREEN_HIDDEN;
                     updateSleepIfNeededLocked();
+
+                    // Some stack visibility might change (e.g. docked stack)
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 }
             }
         } finally {
