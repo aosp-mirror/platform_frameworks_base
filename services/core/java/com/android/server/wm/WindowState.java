@@ -1868,6 +1868,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     public void restoreSavedSurface() {
+        if (!mSurfaceSaved) {
+            return;
+        }
         mSurfaceSaved = false;
         setHasSurface(true);
         mWinAnimator.mDrawState = WindowStateAnimator.READY_TO_SHOW;
