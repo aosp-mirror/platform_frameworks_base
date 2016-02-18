@@ -308,6 +308,10 @@ public final class CreateInfo implements ICreateInfo {
             "java.nio.charset.Charsets",                       "java.nio.charset.StandardCharsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
+            // Use android.icu.text versions of DateFormat and SimpleDateFormat since the
+            // original ones do not match the Android implementation
+            "java.text.DateFormat",                            "android.icu.text.DateFormat",
+            "java.text.SimpleDateFormat",                      "android.icu.text.SimpleDateFormat"
         };
 
     private final static String[] EXCLUDED_CLASSES =
