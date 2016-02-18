@@ -71,11 +71,6 @@ public class FileOperationService extends Service implements Job.Listener {
     // such case, this needs to be replaced with pairs of parent and child.
     public static final String EXTRA_SRC_PARENT = "com.android.documentsui.SRC_PARENT";
 
-    public static final int OPERATION_UNKNOWN = -1;
-    public static final int OPERATION_COPY = 1;
-    public static final int OPERATION_MOVE = 2;
-    public static final int OPERATION_DELETE = 3;
-
     @IntDef(flag = true, value = {
             OPERATION_UNKNOWN,
             OPERATION_COPY,
@@ -84,6 +79,10 @@ public class FileOperationService extends Service implements Job.Listener {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OpType {}
+    public static final int OPERATION_UNKNOWN = -1;
+    public static final int OPERATION_COPY = 1;
+    public static final int OPERATION_MOVE = 2;
+    public static final int OPERATION_DELETE = 3;
 
     // TODO: Move it to a shared file when more operations are implemented.
     public static final int FAILURE_COPY = 1;
