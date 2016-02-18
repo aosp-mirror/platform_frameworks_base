@@ -103,6 +103,7 @@ class StubMethodAdapter extends MethodVisitor {
                 mParentVisitor.visitInsn(Opcodes.ICONST_1);
                 mParentVisitor.visitInsn(Opcodes.IRETURN);
                 mParentVisitor.visitLabel(l1);
+                mParentVisitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                 mParentVisitor.visitInsn(Opcodes.ICONST_0);
                 break;
             case Type.CHAR:
