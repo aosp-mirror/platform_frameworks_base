@@ -27,7 +27,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.BaseDhcpStateMachine;
 import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
@@ -85,7 +84,7 @@ import static android.net.dhcp.DhcpPacket.*;
  *
  * @hide
  */
-public class DhcpClient extends BaseDhcpStateMachine {
+public class DhcpClient extends StateMachine {
 
     private static final String TAG = "DhcpClient";
     private static final boolean DBG = true;
@@ -240,14 +239,8 @@ public class DhcpClient extends BaseDhcpStateMachine {
                 CMD_ONESHOT_TIMEOUT);
     }
 
-    @Override
     public void registerForPreDhcpNotification() {
         mRegisteredForPreDhcpNotification = true;
-    }
-
-    public static BaseDhcpStateMachine makeDhcpStateMachine(
-            Context context, StateMachine controller, String intf) {
-        return makeDhcpClient(context, controller, intf);
     }
 
     public static DhcpClient makeDhcpClient(
@@ -483,12 +476,12 @@ public class DhcpClient extends BaseDhcpStateMachine {
      *
      * @hide
      */
-    @Override
     public void doQuit() {
         Log.d(TAG, "doQuit");
         quit();
     }
 
+    @Override
     protected void onQuitting() {
         Log.d(TAG, "onQuitting");
         mController.sendMessage(CMD_ON_QUIT);
