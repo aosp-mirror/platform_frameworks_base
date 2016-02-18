@@ -103,21 +103,32 @@ public:
         return nullptr;
     }
 
+    bool verbose() override {
+        return mVerbose;
+    }
+
+    void setVerbose(bool val) {
+        mVerbose = val;
+    }
+
 private:
     StdErrDiagnostics mDiagnostics;
+    bool mVerbose = false;
 };
 
 /**
  * Entry point for dump command.
  */
 int dump(const std::vector<StringPiece>& args) {
-    //DumpOptions options;
-    Flags flags = Flags();
+    bool verbose = false;
+    Flags flags = Flags()
+            .optionalSwitch("-v", "increase verbosity of output", &verbose);
     if (!flags.parse("aapt2 dump", args, &std::cerr)) {
         return 1;
     }
 
     DumpContext context;
+    context.setVerbose(verbose);
 
     for (const std::string& arg : flags.getArgs()) {
         tryDumpFile(&context, arg);

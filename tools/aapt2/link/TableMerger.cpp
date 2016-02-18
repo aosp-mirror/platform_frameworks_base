@@ -98,8 +98,7 @@ bool TableMerger::mergeAndMangle(const Source& src, const StringPiece16& package
                 return false;
             }
 
-            mFilesToMerge[ResourceKeyRef(name, config)] = FileToMerge{
-                    f, oldFile->getSource(), util::utf16ToUtf8(*newFile->path) };
+            newFile->file = f;
             return true;
         };
 
@@ -198,10 +197,6 @@ bool TableMerger::doMerge(const Source& src,
             for (auto& srcValue : srcEntry->values) {
                 ResourceConfigValue* dstValue = dstEntry->findValue(srcValue->config,
                                                                     srcValue->product);
-
-                const bool stripConfig = mOptions.filter ?
-                        !mOptions.filter->match(srcValue->config) : false;
-
                 if (dstValue) {
                     const int collisionResult = ResourceTable::resolveValueCollision(
                             dstValue->value.get(), srcValue->value.get());
@@ -225,10 +220,6 @@ bool TableMerger::doMerge(const Source& src,
                         continue;
                     }
 
-                }
-
-                if (stripConfig) {
-                    continue;
                 }
 
                 if (!dstValue) {
@@ -286,6 +277,7 @@ bool TableMerger::mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, b
     std::unique_ptr<FileReference> fileRef = util::make_unique<FileReference>(
             table.stringPool.makeRef(path));
     fileRef->setSource(fileDesc.source);
+    fileRef->file = file;
 
     ResourceTablePackage* pkg = table.createPackage(fileDesc.name.package, 0x0);
     pkg->findOrCreateType(fileDesc.name.type)
@@ -293,15 +285,8 @@ bool TableMerger::mergeFileImpl(const ResourceFile& fileDesc, io::IFile* file, b
             ->findOrCreateValue(fileDesc.config, {})
             ->value = std::move(fileRef);
 
-    auto callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
-                       FileReference* newFile, FileReference* oldFile) -> bool {
-        mFilesToMerge[ResourceKeyRef(name, config)] = FileToMerge{
-                file, oldFile->getSource(), util::utf16ToUtf8(*newFile->path) };
-        return true;
-    };
-
     return doMerge(file->getSource(), &table, pkg,
-                   false /* mangle */, overlay /* overlay */, true /* allow new */, callback);
+                   false /* mangle */, overlay /* overlay */, true /* allow new */, {});
 }
 
 bool TableMerger::mergeFile(const ResourceFile& fileDesc, io::IFile* file) {
