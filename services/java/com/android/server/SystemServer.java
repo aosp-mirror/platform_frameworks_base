@@ -760,7 +760,7 @@ public final class SystemServer {
 
                 traceBeginAndSlog("StartNetworkStatsService");
                 try {
-                    networkStats = new NetworkStatsService(context, networkManagement, alarm);
+                    networkStats = NetworkStatsService.create(context, networkManagement);
                     ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkStats Service", e);

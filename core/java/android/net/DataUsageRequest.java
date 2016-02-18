@@ -34,6 +34,11 @@ public class DataUsageRequest implements Parcelable {
     /**
      * @hide
      */
+    public static final String PARCELABLE_KEY = "DataUsageRequest";
+
+    /**
+     * @hide
+     */
     public static final int REQUEST_ID_UNSET = 0;
 
     /**
