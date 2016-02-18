@@ -914,6 +914,17 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="restoreAnyVersion" format="boolean" />
 
+    <!-- Indicates that full-data backup operations for this application may
+         be performed even if the application is in a foreground-equivalent
+         state.  <em>Use with caution!</em>  Setting this flag to <code>true</code>
+         can impact app behavior while the user is interacting with the device.
+
+         <p>If unspecified, the default value of this attribute is <code>false</code>,
+         which means that the OS will avoid backing up the application while it is
+         running in the foreground (such as a music app that is actively playing
+         music via a service in the startForeground() state). -->
+    <attr name="backupInForeground" format="boolean" />
+
     <!-- The default install location defined by an application. -->
     <attr name="installLocation">
         <!-- Let the system decide ideal install location -->
@@ -1247,6 +1258,7 @@
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
+        <attr name="backupInForeground" />
         <attr name="neverEncrypt" />
         <!-- Request that your application's processes be created with
              a large Dalvik heap.  This applies to <em>all</em> processes
