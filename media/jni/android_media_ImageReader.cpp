@@ -1243,6 +1243,14 @@ static jint Image_getFormat(JNIEnv* env, jobject thiz, jint readerFormat)
         int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
                 static_cast<PublicFormat>(readerFormat));
         int32_t fmt = applyFormatOverrides(buffer->flexFormat, readerHalFormat);
+        // Override the image format to HAL_PIXEL_FORMAT_YCbCr_420_888 if the actual format is
+        // NV21 or YV12. This could only happen when the Gralloc HAL version is v0.1 thus doesn't
+        // support lockycbcr(), the CpuConsumer need to use the lock() method in the
+        // lockNextBuffer() call. For Gralloc HAL v0.2 or newer, this format should already be
+        // overridden to HAL_PIXEL_FORMAT_YCbCr_420_888 for the flexible YUV compatible formats.
+        if (fmt == HAL_PIXEL_FORMAT_YCrCb_420_SP || fmt == HAL_PIXEL_FORMAT_YV12) {
+            fmt = HAL_PIXEL_FORMAT_YCbCr_420_888;
+        }
         PublicFormat publicFmt = android_view_Surface_mapHalFormatDataspaceToPublicFormat(
                 fmt, buffer->dataSpace);
         return static_cast<jint>(publicFmt);
