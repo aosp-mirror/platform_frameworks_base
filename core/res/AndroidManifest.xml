@@ -237,12 +237,21 @@
 
     <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
-    <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="com.android.nfc.action.LLCP_UP" />
+    <protected-broadcast android:name="com.android.nfc.action.LLCP_DOWN" />
+    <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
+    <protected-broadcast android:name="com.android.nfc.handover.action.ALLOW_CONNECT" />
+    <protected-broadcast android:name="com.android.nfc.handover.action.DENY_CONNECT" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.AID_SELECTED" />
-
-    <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <!-- For NFC to BT handover -->
+    <protected-broadcast android:name="android.btopp.intent.action.WHITELIST_DEVICE" />
+    <protected-broadcast android:name="android.btopp.intent.action.STOP_HANDOVER_TRANSFER" />
+    <protected-broadcast android:name="android.nfc.handover.intent.action.HANDOVER_SEND" />
+    <protected-broadcast android:name="android.nfc.handover.intent.action.HANDOVER_SEND_MULTIPLE" />
 
     <protected-broadcast android:name="android.intent.action.CLEAR_DNS_CACHE" />
     <protected-broadcast android:name="android.intent.action.PROXY_CHANGE" />
