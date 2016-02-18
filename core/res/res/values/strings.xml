@@ -2922,9 +2922,9 @@
     <!-- Title of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
     <string name="share_remote_bugreport_notification_title">Share bug report?</string>
     <!-- Title of notification shown to indicate that bug report is still being collected after sharing was accepted. -->
-    <string name="sharing_remote_bugreport_notification_title">Sharing bug report</string>
+    <string name="sharing_remote_bugreport_notification_title">Sharing bug report\u2026</string>
     <!-- Message of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
-    <string name="share_remote_bugreport_notification_message">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared. This may temporarily slow down your device.</string>
+    <string name="share_remote_bugreport_notification_message">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared and your device may temporarily slow down.</string>
     <!-- Message of notification shown to ask for user consent for sharing a bugreport that was requested remotely by the IT administrator. -->
     <string name="share_finished_remote_bugreport_notification_message">Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared.</string>
     <!-- Message of notification shown to shown to indicate that bug report is still being collected after sharing was accepted. -->
