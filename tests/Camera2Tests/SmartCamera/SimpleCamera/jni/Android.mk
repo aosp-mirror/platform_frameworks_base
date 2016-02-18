@@ -38,6 +38,8 @@ LOCAL_SRC_FILES := contrast.cpp \
                 sobeloperator.cpp \
                 stats_scorer.cpp
 
+LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
+
 LOCAL_STATIC_LIBRARIES += \
     libcutils
 
