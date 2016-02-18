@@ -9000,11 +9000,10 @@ public class WindowManagerService extends IWindowManager.Stub
         EventLog.writeEvent(EventLogTags.WM_NO_SURFACE_MEMORY, winAnimator.mWin.toString(),
                 winAnimator.mSession.mPid, operation);
 
-        long callingIdentity = Binder.clearCallingIdentity();
+        final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            // There was some problem...   first, do a sanity check of the
-            // window list to make sure we haven't left any dangling surfaces
-            // around.
+            // There was some problem...   first, do a sanity check of the window list to make sure
+            // we haven't left any dangling surfaces around.
 
             Slog.i(TAG_WM, "Out of memory for surface!  Looking for leaks...");
             final int numDisplays = mDisplayContents.size();
@@ -9013,28 +9012,27 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int numWindows = windows.size();
                 for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
                     final WindowState ws = windows.get(winNdx);
-                    WindowStateAnimator wsa = ws.mWinAnimator;
-                    if (wsa.mSurfaceController != null) {
-                        if (!mSessions.contains(wsa.mSession)) {
-                            Slog.w(TAG_WM, "LEAKED SURFACE (session doesn't exist): "
-                                    + ws + " surface=" + wsa.mSurfaceController
-                                    + " token=" + ws.mToken
-                                    + " pid=" + ws.mSession.mPid
-                                    + " uid=" + ws.mSession.mUid);
-                            wsa.destroySurface();
-                            ws.setHasSurface(false);
-                            mForceRemoves.add(ws);
-                            leakedSurface = true;
-                        } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
-                            Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
-                                    + ws + " surface=" + wsa.mSurfaceController
-                                    + " token=" + ws.mAppToken
-                                    + " saved=" + ws.mAppToken.hasSavedSurface());
-                            if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", false);
-                            wsa.destroySurface();
-                            ws.setHasSurface(false);
-                            leakedSurface = true;
-                        }
+                    final WindowStateAnimator wsa = ws.mWinAnimator;
+                    if (wsa.mSurfaceController == null) {
+                        continue;
+                    }
+                    if (!mSessions.contains(wsa.mSession)) {
+                        Slog.w(TAG_WM, "LEAKED SURFACE (session doesn't exist): "
+                                + ws + " surface=" + wsa.mSurfaceController
+                                + " token=" + ws.mToken
+                                + " pid=" + ws.mSession.mPid
+                                + " uid=" + ws.mSession.mUid);
+                        wsa.destroySurface();
+                        mForceRemoves.add(ws);
+                        leakedSurface = true;
+                    } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
+                        Slog.w(TAG_WM, "LEAKED SURFACE (app token hidden): "
+                                + ws + " surface=" + wsa.mSurfaceController
+                                + " token=" + ws.mAppToken
+                                + " saved=" + ws.mAppToken.hasSavedSurface());
+                        if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", false);
+                        wsa.destroySurface();
+                        leakedSurface = true;
                     }
                 }
             }
@@ -9077,8 +9075,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (surfaceController != null) {
                     if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) logSurface(winAnimator.mWin,
                             "RECOVER DESTROY", false);
-                    surfaceController.destroyInTransaction();
-                    winAnimator.mWin.setHasSurface(false);
+                    winAnimator.destroySurface();
                     scheduleRemoveStartingWindowLocked(winAnimator.mWin.mAppToken);
                 }
 
