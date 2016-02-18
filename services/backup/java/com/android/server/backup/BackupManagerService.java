@@ -16,6 +16,8 @@
 
 package com.android.server.backup;
 
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND;
+
 import android.app.ActivityManagerNative;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
@@ -4929,7 +4931,9 @@ public class BackupManagerService {
                             continue;
                         }
 
-                        headBusy = mActivityManager.isAppForeground(appInfo.applicationInfo.uid);
+                        final int privFlags = appInfo.applicationInfo.privateFlags;
+                        headBusy = (privFlags & PRIVATE_FLAG_BACKUP_IN_FOREGROUND) == 0
+                                && mActivityManager.isAppForeground(appInfo.applicationInfo.uid);
 
                         if (headBusy) {
                             final long nextEligible = System.currentTimeMillis()

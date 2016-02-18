@@ -523,6 +523,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int PRIVATE_FLAG_RESIZEABLE_ACTIVITIES = 1 << 11;
 
     /**
+     * Value for {@link #privateFlags}: {@code true} means the OS should go ahead and
+     * run full-data backup operations for the app even when it is in a
+     * foreground-equivalent run state.  Defaults to {@code false} if unspecified.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_BACKUP_IN_FOREGROUND = 1 << 12;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * {@hide}
      */
