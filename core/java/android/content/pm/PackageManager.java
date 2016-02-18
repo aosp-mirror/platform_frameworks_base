@@ -1233,6 +1233,14 @@ public abstract class PackageManager {
     public static final int MOVE_FAILED_OPERATION_PENDING = -7;
 
     /**
+     * Error code that is passed to the {@link IPackageMoveObserver} if the
+     * specified package cannot be moved since it contains a device admin.
+     *
+     * @hide
+     */
+    public static final int MOVE_FAILED_DEVICE_ADMIN = -8;
+
+    /**
      * Flag parameter for {@link #movePackage} to indicate that
      * the package should be moved to internal storage if its
      * been installed on external media.
