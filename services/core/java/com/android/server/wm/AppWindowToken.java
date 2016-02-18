@@ -393,7 +393,9 @@ class AppWindowToken extends WindowToken {
         int numDrawn = 0;
         for (int i = windows.size() - 1; i >= 0; i--) {
             WindowState w = windows.get(i);
-            w.restoreSavedSurface();
+            if (w.hasSavedSurface()) {
+                w.restoreSavedSurface();
+            }
             if (w != startingWindow && !w.mAppDied
                     && (!mAppAnimator.freezingScreen || !w.mAppFreezing)) {
                 numInteresting++;
@@ -403,7 +405,7 @@ class AppWindowToken extends WindowToken {
             }
         }
 
-        allDrawn |= (numInteresting == numDrawn);
+        allDrawn |= (numInteresting > 0) && (numInteresting == numDrawn);
 
         if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.d(TAG,
                 "restoreSavedSurfaces: " + appWindowToken + " allDrawn=" + allDrawn);

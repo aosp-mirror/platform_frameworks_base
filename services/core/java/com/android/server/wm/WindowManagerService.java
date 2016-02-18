@@ -4224,6 +4224,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 wtoken.removeAllWindows();
             } else if (visible) {
                 wtoken.mAppStopped = false;
+                wtoken.setWindowsExiting(false);
             }
 
             // If we are preparing an app transition, then delay changing
@@ -4241,7 +4242,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 wtoken.inPendingTransaction = true;
                 if (visible) {
-                    wtoken.setWindowsExiting(false);
                     mOpeningApps.add(wtoken);
                     wtoken.startingMoved = false;
                     wtoken.mEnteringAnimation = true;
