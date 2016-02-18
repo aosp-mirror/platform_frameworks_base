@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.net;
 
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
@@ -43,6 +43,7 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.anyLong;
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -54,7 +55,10 @@ import android.app.AlarmManager;
 import android.app.IAlarmListener;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
+import android.app.usage.NetworkStatsManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.DataUsageRequest;
 import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsSession;
@@ -65,7 +69,17 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.os.ConditionVariable;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.INetworkManagementService;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Messenger;
+import android.os.MessageQueue;
+import android.os.MessageQueue.IdleHandler;
+import android.os.Message;
+import android.os.PowerManager;
 import android.os.WorkSource;
 import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
@@ -74,6 +88,7 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.util.TrustedTime;
 
 import com.android.internal.net.VpnInfo;
+import com.android.server.BroadcastInterceptingContext;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
@@ -85,6 +100,7 @@ import org.easymock.EasyMock;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -113,16 +129,20 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private static final int UID_BLUE = 1002;
     private static final int UID_GREEN = 1003;
 
+    private static final long WAIT_TIMEOUT = 2 * 1000;  // 2 secs
+    private static final int INVALID_TYPE = -1;
+
     private long mElapsedRealtime;
 
     private BroadcastInterceptingContext mServiceContext;
     private File mStatsDir;
 
     private INetworkManagementService mNetManager;
-    private IAlarmManager mAlarmManager;
     private TrustedTime mTime;
     private NetworkStatsSettings mSettings;
     private IConnectivityManager mConnManager;
+    private IdleableHandlerThread mHandlerThread;
+    private Handler mHandler;
 
     private NetworkStatsService mService;
     private INetworkStatsSession mSession;
@@ -139,13 +159,28 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         }
 
         mNetManager = createMock(INetworkManagementService.class);
-        mAlarmManager = createMock(IAlarmManager.class);
+
+        // TODO: Mock AlarmManager when migrating this test to Mockito.
+        AlarmManager alarmManager = (AlarmManager) mServiceContext
+                .getSystemService(Context.ALARM_SERVICE);
         mTime = createMock(TrustedTime.class);
         mSettings = createMock(NetworkStatsSettings.class);
         mConnManager = createMock(IConnectivityManager.class);
 
+        PowerManager powerManager = (PowerManager) mServiceContext.getSystemService(
+                Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock =
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
         mService = new NetworkStatsService(
-                mServiceContext, mNetManager, mAlarmManager, mTime, mStatsDir, mSettings);
+                mServiceContext, mNetManager, alarmManager, wakeLock, mTime,
+                TelephonyManager.getDefault(), mSettings, new NetworkStatsObservers(),
+                mStatsDir, getBaseDir(mStatsDir));
+        mHandlerThread = new IdleableHandlerThread("HandlerThread");
+        mHandlerThread.start();
+        Handler.Callback callback = new NetworkStatsService.HandlerCallback(mService);
+        mHandler = new Handler(mHandlerThread.getLooper(), callback);
+        mService.setHandler(mHandler, callback);
         mService.bindConnectivityManager(mConnManager);
 
         mElapsedRealtime = 0L;
@@ -178,7 +213,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mStatsDir = null;
 
         mNetManager = null;
-        mAlarmManager = null;
         mTime = null;
         mSettings = null;
         mConnManager = null;
@@ -217,7 +251,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
@@ -234,7 +268,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 4096L, 4L, 8192L, 8L, 0);
@@ -282,7 +316,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xFAAD, 6);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 1024L, 8L, 2048L, 16L, 0);
@@ -362,7 +396,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         history = mSession.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
@@ -380,7 +414,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify identical stats, but spread across 4 buckets now
         history = mSession.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
@@ -420,7 +454,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xF00D, 10);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateImsi1, 2048L, 16L, 512L, 4L, 0);
@@ -446,7 +480,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         replay();
         mService.forceUpdateIfaces();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
         verifyAndReset();
 
         // create traffic on second network
@@ -465,7 +499,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_BLUE, 0xFAAD, 10);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify original history still intact
         assertNetworkTotal(sTemplateImsi1, 2048L, 16L, 512L, 4L, 0);
@@ -511,7 +545,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xFAAD, 10);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 4128L, 258L, 544L, 34L, 0);
@@ -578,7 +612,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xF00D, 5);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateImsi1, UID_RED, 1024L, 8L, 1024L, 8L, 5);
@@ -598,7 +632,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         replay();
         mService.forceUpdateIfaces();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
         verifyAndReset();
 
         // create traffic on second network
@@ -616,7 +650,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xFAAD, 5);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify that ALL_MOBILE template combines both
         assertUidTotal(sTemplateImsi1, UID_RED, 1536L, 12L, 1280L, 10L, 10);
@@ -652,7 +686,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xF00D, 1);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateWifi, UID_RED, 50L, 5L, 50L, 5L, 1);
@@ -671,7 +705,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // first verify entire history present
         NetworkStats stats = mSession.getSummaryForAllUid(
@@ -722,7 +756,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xF00D, 1);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateWifi, UID_RED, 128L, 2L, 128L, 2L, 1);
@@ -744,7 +778,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mService.incrementOperationCount(UID_RED, 0xFAAD, 1);
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // test that we combined correctly
         assertUidTotal(sTemplateWifi, UID_RED, 160L, 4L, 160L, 4L, 2);
@@ -795,7 +829,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertUidTotal(sTemplateImsi1, UID_RED, 128L, 2L, 128L, 2L, 0);
@@ -843,7 +877,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectNetworkStatsPoll();
 
         replay();
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        forcePollAndWaitForIdle();
 
         // verify service recorded history
         assertNetworkTotal(sTemplateImsi1, 2048L, 16L, 512L, 4L, 0);
@@ -851,6 +885,285 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         assertUidTotal(sTemplateImsi1, UID_TETHERING, 1920L, 14L, 384L, 2L, 0);
         verifyAndReset();
 
+    }
+
+    public void testRegisterDataUsageCallback_network() throws Exception {
+        // pretend that wifi network comes online; service should ask about full
+        // network state, and poll any existing interfaces before updating.
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkState(buildWifiState());
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
+
+        replay();
+        mService.forceUpdateIfaces();
+
+        // verify service has empty history for wifi
+        assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
+        verifyAndReset();
+
+        String callingPackage = "the.calling.package";
+        long thresholdInBytes = 1L;  // very small; should be overriden by framework
+        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateWifi };
+        DataUsageRequest inputRequest = new DataUsageRequest(
+                DataUsageRequest.REQUEST_ID_UNSET, templates, null /* uids */, thresholdInBytes);
+
+        // Create a messenger that waits for callback activity
+        ConditionVariable cv = new ConditionVariable(false);
+        LatchedHandler latchedHandler = new LatchedHandler(Looper.getMainLooper(), cv);
+        Messenger messenger = new Messenger(latchedHandler);
+
+        // Allow binder to connect
+        IBinder mockBinder = createMock(IBinder.class);
+        mockBinder.linkToDeath((IBinder.DeathRecipient) anyObject(), anyInt());
+        EasyMock.replay(mockBinder);
+
+        // Force poll
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+        replay();
+
+        // Register and verify request and that binder was called
+        DataUsageRequest request =
+                mService.registerDataUsageCallback(callingPackage, inputRequest,
+                        messenger, mockBinder);
+        assertTrue(request.requestId > 0);
+        assertTrue(Arrays.deepEquals(templates, request.templates));
+        assertNull(request.uids);
+        long minThresholdInBytes = 2 * 1024 * 1024; // 2 MB
+        assertEquals(minThresholdInBytes, request.thresholdInBytes);
+
+        // Send dummy message to make sure that any previous message has been handled
+        mHandler.sendMessage(mHandler.obtainMessage(-1));
+        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+
+        verifyAndReset();
+
+        // Make sure that the caller binder gets connected
+        EasyMock.verify(mockBinder);
+        EasyMock.reset(mockBinder);
+
+        // modify some number on wifi, and trigger poll event
+        // not enough traffic to call data usage callback
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 1024L, 1L, 2048L, 2L));
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+
+        replay();
+        forcePollAndWaitForIdle();
+
+        // verify service recorded history
+        verifyAndReset();
+        assertNetworkTotal(sTemplateWifi, 1024L, 1L, 2048L, 2L, 0);
+
+        // make sure callback has not being called
+        assertEquals(INVALID_TYPE, latchedHandler.mLastMessageType);
+
+        // and bump forward again, with counters going higher. this is
+        // important, since it will trigger the data usage callback
+        incrementCurrentTime(DAY_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(new NetworkStats(getElapsedRealtime(), 1)
+                .addIfaceValues(TEST_IFACE, 4096000L, 4L, 8192000L, 8L));
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+
+        replay();
+        forcePollAndWaitForIdle();
+
+        // verify service recorded history
+        assertNetworkTotal(sTemplateWifi, 4096000L, 4L, 8192000L, 8L, 0);
+        verifyAndReset();
+
+        // Wait for the caller to ack receipt of CALLBACK_LIMIT_REACHED
+        assertTrue(cv.block(WAIT_TIMEOUT));
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.mLastMessageType);
+        cv.close();
+
+        // Allow binder to disconnect
+        expect(mockBinder.unlinkToDeath((IBinder.DeathRecipient) anyObject(), anyInt()))
+                .andReturn(true);
+        EasyMock.replay(mockBinder);
+
+        // Unregister request
+        mService.unregisterDataUsageRequest(request);
+
+        // Wait for the caller to ack receipt of CALLBACK_RELEASED
+        assertTrue(cv.block(WAIT_TIMEOUT));
+        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.mLastMessageType);
+
+        // Make sure that the caller binder gets disconnected
+        EasyMock.verify(mockBinder);
+    }
+
+    public void testRegisterDataUsageCallback_uids() throws Exception {
+        // pretend that network comes online
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkState(buildMobile3gState(IMSI_1, true /* isRoaming */));
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+        expectBandwidthControlCheck();
+
+        replay();
+        mService.forceUpdateIfaces();
+        verifyAndReset();
+
+        String callingPackage = "the.calling.package";
+        long thresholdInBytes = 10 * 1024 * 1024;  // 10 MB
+        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1, sTemplateImsi2 };
+        int[] uids = new int[] { UID_RED };
+        DataUsageRequest inputRequest = new DataUsageRequest(
+                DataUsageRequest.REQUEST_ID_UNSET, templates, uids, thresholdInBytes);
+
+        // Create a messenger that waits for callback activity
+        ConditionVariable cv = new ConditionVariable(false);
+        cv.close();
+        LatchedHandler latchedHandler = new LatchedHandler(Looper.getMainLooper(), cv);
+        Messenger messenger = new Messenger(latchedHandler);
+
+        // Allow binder to connect
+        IBinder mockBinder = createMock(IBinder.class);
+        mockBinder.linkToDeath((IBinder.DeathRecipient) anyObject(), anyInt());
+        EasyMock.replay(mockBinder);
+
+        // Force poll
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectNetworkStatsPoll();
+        replay();
+
+        // Register and verify request and that binder was called
+        DataUsageRequest request =
+                mService.registerDataUsageCallback(callingPackage, inputRequest,
+                        messenger, mockBinder);
+        assertTrue(request.requestId > 0);
+        assertTrue(Arrays.deepEquals(templates, request.templates));
+        assertTrue(Arrays.equals(uids, request.uids));
+        assertEquals(thresholdInBytes, request.thresholdInBytes);
+
+        // Wait for service to handle internal MSG_REGISTER_DATA_USAGE_LISTENER
+        mHandler.sendMessage(mHandler.obtainMessage(-1));
+        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+
+        verifyAndReset();
+
+        // Make sure that the caller binder gets connected
+        EasyMock.verify(mockBinder);
+        EasyMock.reset(mockBinder);
+
+        // modify some number on mobile interface, and trigger poll event
+        // not enough traffic to call data usage callback
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT, 128L, 2L,
+                        128L, 2L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT, 64L, 1L, 64L,
+                        1L, 0L));
+        expectNetworkStatsPoll();
+
+        replay();
+        forcePollAndWaitForIdle();
+
+        // verify service recorded history
+        assertUidTotal(sTemplateImsi1, UID_RED, 128L, 2L, 128L, 2L, 0);
+
+        // verify entire history present
+        NetworkStats stats = mSession.getSummaryForAllUid(
+                sTemplateImsi1, Long.MIN_VALUE, Long.MAX_VALUE, true);
+        assertEquals(2, stats.size());
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING, 128L, 2L,
+                128L, 2L, 0);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_ROAMING, 64L, 1L, 64L,
+                1L, 0);
+
+        verifyAndReset();
+
+        // make sure callback has not being called
+        assertEquals(INVALID_TYPE, latchedHandler.mLastMessageType);
+
+        // and bump forward again, with counters going higher. this is
+        // important, since it will trigger the data usage callback
+        incrementCurrentTime(DAY_IN_MILLIS);
+        expectCurrentTime();
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_DEFAULT,
+                        128000000L, 2L, 128000000L, 2L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_DEFAULT,
+                        64000000L, 1L, 64000000L, 1L, 0L));
+        expectNetworkStatsPoll();
+
+        replay();
+        forcePollAndWaitForIdle();
+
+        // verify service recorded history
+        assertUidTotal(sTemplateImsi1, UID_RED, 128000000L, 2L, 128000000L, 2L, 0);
+
+        // verify entire history present
+        stats = mSession.getSummaryForAllUid(
+                sTemplateImsi1, Long.MIN_VALUE, Long.MAX_VALUE, true);
+        assertEquals(2, stats.size());
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, ROAMING_ROAMING,
+                128000000L, 2L, 128000000L, 2L, 0);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, ROAMING_ROAMING,
+                64000000L, 1L, 64000000L, 1L, 0);
+
+        verifyAndReset();
+
+        // Wait for the caller to ack receipt of CALLBACK_LIMIT_REACHED
+        assertTrue(cv.block(WAIT_TIMEOUT));
+        assertEquals(NetworkStatsManager.CALLBACK_LIMIT_REACHED, latchedHandler.mLastMessageType);
+        cv.close();
+
+        // Allow binder to disconnect
+        expect(mockBinder.unlinkToDeath((IBinder.DeathRecipient) anyObject(), anyInt()))
+                .andReturn(true);
+        EasyMock.replay(mockBinder);
+
+        // Unregister request
+        mService.unregisterDataUsageRequest(request);
+
+        // Wait for the caller to ack receipt of CALLBACK_RELEASED
+        assertTrue(cv.block(WAIT_TIMEOUT));
+        assertEquals(NetworkStatsManager.CALLBACK_RELEASED, latchedHandler.mLastMessageType);
+
+        // Make sure that the caller binder gets disconnected
+        EasyMock.verify(mockBinder);
+    }
+
+    public void testUnregisterDataUsageCallback_unknown_noop() throws Exception {
+        String callingPackage = "the.calling.package";
+        long thresholdInBytes = 10 * 1024 * 1024;  // 10 MB
+        NetworkTemplate[] templates = new NetworkTemplate[] { sTemplateImsi1, sTemplateImsi2 };
+        DataUsageRequest unknownRequest = new DataUsageRequest(
+                2, templates, null /* uids */, thresholdInBytes);
+
+        mService.unregisterDataUsageRequest(unknownRequest);
+    }
+
+    private static File getBaseDir(File statsDir) {
+        File baseDir = new File(statsDir, "netstats");
+        baseDir.mkdirs();
+        return baseDir;
     }
 
     private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long rxPackets,
@@ -894,16 +1207,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void expectSystemReady() throws Exception {
-        mAlarmManager.remove(isA(PendingIntent.class), EasyMock.<IAlarmListener>isNull());
-        expectLastCall().anyTimes();
-
-        mAlarmManager.set(eq(getContext().getPackageName()),
-                eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), anyLong(),
-                anyInt(), isA(PendingIntent.class), EasyMock.<IAlarmListener>isNull(),
-                EasyMock.<String>isNull(), EasyMock.<WorkSource>isNull(),
-                EasyMock.<AlarmManager.AlarmClockInfo>isNull());
-        expectLastCall().anyTimes();
-
         mNetManager.setGlobalAlert(anyLong());
         expectLastCall().atLeastOnce();
 
@@ -1093,11 +1396,75 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private void replay() {
-        EasyMock.replay(mNetManager, mAlarmManager, mTime, mSettings, mConnManager);
+        EasyMock.replay(mNetManager, mTime, mSettings, mConnManager);
     }
 
     private void verifyAndReset() {
-        EasyMock.verify(mNetManager, mAlarmManager, mTime, mSettings, mConnManager);
-        EasyMock.reset(mNetManager, mAlarmManager, mTime, mSettings, mConnManager);
+        EasyMock.verify(mNetManager, mTime, mSettings, mConnManager);
+        EasyMock.reset(mNetManager, mTime, mSettings, mConnManager);
     }
+
+    private void forcePollAndWaitForIdle() {
+        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
+        // Send dummy message to make sure that any previous message has been handled
+        mHandler.sendMessage(mHandler.obtainMessage(-1));
+        mHandlerThread.waitForIdle(WAIT_TIMEOUT);
+    }
+
+    static class LatchedHandler extends Handler {
+        private final ConditionVariable mCv;
+        int mLastMessageType = INVALID_TYPE;
+
+        LatchedHandler(Looper looper, ConditionVariable cv) {
+            super(looper);
+            mCv = cv;
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            mLastMessageType = msg.what;
+            mCv.open();
+            super.handleMessage(msg);
+        }
+    }
+
+    /**
+     * A subclass of HandlerThread that allows callers to wait for it to become idle. waitForIdle
+     * will return immediately if the handler is already idle.
+     */
+    static class IdleableHandlerThread extends HandlerThread {
+        private IdleHandler mIdleHandler;
+
+        public IdleableHandlerThread(String name) {
+            super(name);
+        }
+
+        public void waitForIdle(long timeoutMs) {
+            final ConditionVariable cv = new ConditionVariable();
+            final MessageQueue queue = getLooper().getQueue();
+
+            synchronized (queue) {
+                if (queue.isIdle()) {
+                    return;
+                }
+
+                assertNull("BUG: only one idle handler allowed", mIdleHandler);
+                mIdleHandler = new IdleHandler() {
+                    public boolean queueIdle() {
+                        cv.open();
+                        mIdleHandler = null;
+                        return false;  // Remove the handler.
+                    }
+                };
+                queue.addIdleHandler(mIdleHandler);
+            }
+
+            if (!cv.block(timeoutMs)) {
+                fail("HandlerThread " + getName() + " did not become idle after " + timeoutMs
+                        + " ms");
+                queue.removeIdleHandler(mIdleHandler);
+            }
+        }
+    }
+
 }

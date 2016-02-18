@@ -19,6 +19,7 @@ package com.android.server.net;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.net.NetworkStats;
@@ -54,7 +55,7 @@ import libcore.io.IoUtils;
  * Logic to record deltas between periodic {@link NetworkStats} snapshots into
  * {@link NetworkStatsHistory} that belong to {@link NetworkStatsCollection}.
  * Keeps pending changes in memory until they pass a specific threshold, in
- * bytes. Uses {@link FileRotator} for persistence logic.
+ * bytes. Uses {@link FileRotator} for persistence logic if present.
  * <p>
  * Not inherently thread safe.
  */
@@ -86,6 +87,29 @@ public class NetworkStatsRecorder {
 
     private WeakReference<NetworkStatsCollection> mComplete;
 
+    /**
+     * Non-persisted recorder, with only one bucket. Used by {@link NetworkStatsObservers}.
+     */
+    public NetworkStatsRecorder() {
+        mRotator = null;
+        mObserver = null;
+        mDropBox = null;
+        mCookie = null;
+
+        // set the bucket big enough to have all data in one bucket, but allow some
+        // slack to avoid overflow
+        mBucketDuration = YEAR_IN_MILLIS;
+        mOnlyTags = false;
+
+        mPending = null;
+        mSinceBoot = new NetworkStatsCollection(mBucketDuration);
+
+        mPendingRewriter = null;
+    }
+
+    /**
+     * Persisted recorder.
+     */
     public NetworkStatsRecorder(FileRotator rotator, NonMonotonicObserver<String> observer,
             DropBoxManager dropBox, String cookie, long bucketDuration, boolean onlyTags) {
         mRotator = checkNotNull(rotator, "missing FileRotator");
@@ -110,14 +134,24 @@ public class NetworkStatsRecorder {
 
     public void resetLocked() {
         mLastSnapshot = null;
-        mPending.reset();
-        mSinceBoot.reset();
-        mComplete.clear();
+        if (mPending != null) {
+            mPending.reset();
+        }
+        if (mSinceBoot != null) {
+            mSinceBoot.reset();
+        }
+        if (mComplete != null) {
+            mComplete.clear();
+        }
     }
 
     public NetworkStats.Entry getTotalSinceBootLocked(NetworkTemplate template) {
         return mSinceBoot.getSummary(template, Long.MIN_VALUE, Long.MAX_VALUE,
                 NetworkStatsAccess.Level.DEVICE).getTotal(null);
+    }
+
+    public NetworkStatsCollection getSinceBoot() {
+        return mSinceBoot;
     }
 
     /**
@@ -127,6 +161,7 @@ public class NetworkStatsRecorder {
      * as reference is valid.
      */
     public NetworkStatsCollection getOrLoadCompleteLocked() {
+        checkNotNull(mRotator, "missing FileRotator");
         NetworkStatsCollection res = mComplete != null ? mComplete.get() : null;
         if (res == null) {
             res = loadLocked(Long.MIN_VALUE, Long.MAX_VALUE);
@@ -136,6 +171,7 @@ public class NetworkStatsRecorder {
     }
 
     public NetworkStatsCollection getOrLoadPartialLocked(long start, long end) {
+        checkNotNull(mRotator, "missing FileRotator");
         NetworkStatsCollection res = mComplete != null ? mComplete.get() : null;
         if (res == null) {
             res = loadLocked(start, end);
@@ -205,7 +241,9 @@ public class NetworkStatsRecorder {
 
             // only record tag data when requested
             if ((entry.tag == TAG_NONE) != mOnlyTags) {
-                mPending.recordData(ident, entry.uid, entry.set, entry.tag, start, end, entry);
+                if (mPending != null) {
+                    mPending.recordData(ident, entry.uid, entry.set, entry.tag, start, end, entry);
+                }
 
                 // also record against boot stats when present
                 if (mSinceBoot != null) {
@@ -231,6 +269,7 @@ public class NetworkStatsRecorder {
      * {@link #mPersistThresholdBytes}.
      */
     public void maybePersistLocked(long currentTimeMillis) {
+        checkNotNull(mRotator, "missing FileRotator");
         final long pendingBytes = mPending.getTotalBytes();
         if (pendingBytes >= mPersistThresholdBytes) {
             forcePersistLocked(currentTimeMillis);
@@ -243,6 +282,7 @@ public class NetworkStatsRecorder {
      * Force persisting any pending deltas.
      */
     public void forcePersistLocked(long currentTimeMillis) {
+        checkNotNull(mRotator, "missing FileRotator");
         if (mPending.isDirty()) {
             if (LOGD) Slog.d(TAG, "forcePersistLocked() writing for " + mCookie);
             try {
@@ -264,20 +304,26 @@ public class NetworkStatsRecorder {
      * to {@link TrafficStats#UID_REMOVED}.
      */
     public void removeUidsLocked(int[] uids) {
-        try {
-            // Rewrite all persisted data to migrate UID stats
-            mRotator.rewriteAll(new RemoveUidRewriter(mBucketDuration, uids));
-        } catch (IOException e) {
-            Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
-            recoverFromWtf();
-        } catch (OutOfMemoryError e) {
-            Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
-            recoverFromWtf();
+        if (mRotator != null) {
+            try {
+                // Rewrite all persisted data to migrate UID stats
+                mRotator.rewriteAll(new RemoveUidRewriter(mBucketDuration, uids));
+            } catch (IOException e) {
+                Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
+                recoverFromWtf();
+            } catch (OutOfMemoryError e) {
+                Log.wtf(TAG, "problem removing UIDs " + Arrays.toString(uids), e);
+                recoverFromWtf();
+            }
         }
 
         // Remove any pending stats
-        mPending.removeUids(uids);
-        mSinceBoot.removeUids(uids);
+        if (mPending != null) {
+            mPending.removeUids(uids);
+        }
+        if (mSinceBoot != null) {
+            mSinceBoot.removeUids(uids);
+        }
 
         // Clear UID from current stats snapshot
         if (mLastSnapshot != null) {
@@ -361,6 +407,8 @@ public class NetworkStatsRecorder {
     }
 
     public void importLegacyNetworkLocked(File file) throws IOException {
+        checkNotNull(mRotator, "missing FileRotator");
+
         // legacy file still exists; start empty to avoid double importing
         mRotator.deleteAll();
 
@@ -379,6 +427,8 @@ public class NetworkStatsRecorder {
     }
 
     public void importLegacyUidLocked(File file) throws IOException {
+        checkNotNull(mRotator, "missing FileRotator");
+
         // legacy file still exists; start empty to avoid double importing
         mRotator.deleteAll();
 
@@ -397,7 +447,9 @@ public class NetworkStatsRecorder {
     }
 
     public void dumpLocked(IndentingPrintWriter pw, boolean fullHistory) {
-        pw.print("Pending bytes: "); pw.println(mPending.getTotalBytes());
+        if (mPending != null) {
+            pw.print("Pending bytes: "); pw.println(mPending.getTotalBytes());
+        }
         if (fullHistory) {
             pw.println("Complete history:");
             getOrLoadCompleteLocked().dump(pw);

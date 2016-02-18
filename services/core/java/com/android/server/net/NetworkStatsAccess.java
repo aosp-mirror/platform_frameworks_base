@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
+import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.net.TrafficStats.UID_TETHERING;
 
@@ -48,6 +49,7 @@ public final class NetworkStatsAccess {
     @IntDef({
             Level.DEFAULT,
             Level.USER,
+            Level.DEVICESUMMARY,
             Level.DEVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -147,6 +149,12 @@ public final class NetworkStatsAccess {
                 // Device-level access - can access usage for any uid.
                 return true;
             case NetworkStatsAccess.Level.DEVICESUMMARY:
+                // Can access usage for any app running in the same user, along
+                // with some special uids (system, removed, or tethering) and
+                // anonymized uids
+                return uid == android.os.Process.SYSTEM_UID || uid == UID_REMOVED
+                        || uid == UID_TETHERING || uid == UID_ALL
+                        || UserHandle.getUserId(uid) == UserHandle.getUserId(callerUid);
             case NetworkStatsAccess.Level.USER:
                 // User-level access - can access usage for any app running in the same user, along
                 // with some special uids (system, removed, or tethering).
