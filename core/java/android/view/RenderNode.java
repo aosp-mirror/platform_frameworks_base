@@ -775,10 +775,6 @@ public class RenderNode {
         mOwningView.mAttachInfo.mViewRootImpl.registerAnimatingRenderNode(this);
     }
 
-    public boolean isAttached() {
-        return mOwningView != null && mOwningView.mAttachInfo != null;
-    }
-
     public void addAnimator(AnimatedVectorDrawable.VectorDrawableAnimator animatorSet) {
         if (mOwningView == null || mOwningView.mAttachInfo == null) {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
