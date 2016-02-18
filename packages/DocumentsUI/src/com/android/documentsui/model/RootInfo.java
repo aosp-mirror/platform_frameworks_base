@@ -249,6 +249,26 @@ public class RootInfo implements Durable, Parcelable {
         return (flags & Root.FLAG_HAS_SETTINGS) != 0;
     }
 
+    public boolean supportsChildren() {
+        return (flags & Root.FLAG_SUPPORTS_IS_CHILD) != 0;
+    }
+
+    public boolean supportsCreate() {
+        return (flags & Root.FLAG_SUPPORTS_CREATE) != 0;
+    }
+
+    public boolean isAdvanced() {
+        return (flags & Root.FLAG_ADVANCED) != 0;
+    }
+
+    public boolean isLocalOnly() {
+        return (flags & Root.FLAG_LOCAL_ONLY) != 0;
+    }
+
+    public boolean isEmpty() {
+        return (flags & Root.FLAG_EMPTY) != 0;
+    }
+
     public Drawable loadIcon(Context context) {
         if (derivedIcon != 0) {
             return context.getDrawable(derivedIcon);
