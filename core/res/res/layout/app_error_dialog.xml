@@ -66,7 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/aerr_mute"
-            android:drawableStart="@drawable/ic_close"
+            android:drawableStart="@drawable/ic_eject_24dp"
             style="@style/aerr_list_item"
     />
 
