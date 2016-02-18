@@ -19,6 +19,9 @@ package com.android.server.wm;
 import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
@@ -606,5 +609,40 @@ class DisplayContent {
     TaskStack getDockedStackLocked() {
         final TaskStack stack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
         return (stack != null && stack.isVisibleLocked()) ? stack : null;
+    }
+
+    /**
+     * Find the visible, touch-deliverable window under the given point
+     */
+    WindowState getTouchableWinAtPointLocked(float xf, float yf) {
+        WindowState touchedWin = null;
+        final int x = (int) xf;
+        final int y = (int) yf;
+
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            WindowState window = mWindows.get(i);
+            final int flags = window.mAttrs.flags;
+            if (!window.isVisibleLw()) {
+                continue;
+            }
+            if ((flags & FLAG_NOT_TOUCHABLE) != 0) {
+                continue;
+            }
+
+            window.getVisibleBounds(mTmpRect);
+            if (!mTmpRect.contains(x, y)) {
+                continue;
+            }
+
+            window.getTouchableRegion(mTmpRegion);
+
+            final int touchFlags = flags & (FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL);
+            if (mTmpRegion.contains(x, y) || touchFlags == 0) {
+                touchedWin = window;
+                break;
+            }
+        }
+
+        return touchedWin;
     }
 }

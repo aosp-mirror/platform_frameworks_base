@@ -666,13 +666,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowContentFrameStats mTempWindowRenderStats;
 
-    private static final int DRAG_FLAGS_URI_ACCESS = View.DRAG_FLAG_GLOBAL_URI_READ |
-            View.DRAG_FLAG_GLOBAL_URI_WRITE;
-
-    private static final int DRAG_FLAGS_URI_PERMISSIONS = DRAG_FLAGS_URI_ACCESS |
-            View.DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION |
-            View.DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION;
-
     final class DragInputEventReceiver extends InputEventReceiver {
         // Set, if stylus button was down at the start of the drag.
         private boolean mStylusButtonDownAtStart;
@@ -718,7 +711,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             if (DEBUG_DRAG) Slog.d(TAG_WM, "Button no longer pressed; dropping at "
                                     + newX + "," + newY);
                             synchronized (mWindowMap) {
-                                endDrag = completeDropLw(newX, newY);
+                                endDrag = mDragState.notifyDropLw(newX, newY);
                             }
                         } else {
                             synchronized (mWindowMap) {
@@ -732,7 +725,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (DEBUG_DRAG) Slog.d(TAG_WM, "Got UP on move channel; dropping at "
                                 + newX + "," + newY);
                         synchronized (mWindowMap) {
-                            endDrag = completeDropLw(newX, newY);
+                            endDrag = mDragState.notifyDropLw(newX, newY);
                         }
                     } break;
 
@@ -760,25 +753,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 finishInputEvent(event, handled);
             }
         }
-    }
-
-    private boolean completeDropLw(float x, float y) {
-        WindowState dropTargetWin = getTouchableWinAtPointLocked(mDragState.mDisplay, x, y);
-
-        DropPermissionsHandler dropPermissions = null;
-        if (dropTargetWin != null &&
-                (mDragState.mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
-                (mDragState.mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
-            dropPermissions = new DropPermissionsHandler(
-                    mDragState.mData,
-                    mDragState.mUid,
-                    dropTargetWin.getOwningPackage(),
-                    mDragState.mFlags & DRAG_FLAGS_URI_PERMISSIONS,
-                    mDragState.mSourceUserId,
-                    UserHandle.getUserId(dropTargetWin.getOwningUid()));
-        }
-
-        return mDragState.notifyDropLw(dropTargetWin, dropPermissions, x, y);
     }
 
     /**
@@ -10483,48 +10457,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Find the visible, touch-deliverable window under the given point
-     */
-    WindowState getTouchableWinAtPointLocked(Display display, float xf, float yf) {
-        WindowState touchedWin = null;
-        final int x = (int) xf;
-        final int y = (int) yf;
-
-        final WindowList windows = getWindowListLocked(display);
-        if (windows == null) {
-            return null;
-        }
-        final int N = windows.size();
-        for (int i = N - 1; i >= 0; i--) {
-            WindowState child = windows.get(i);
-            final int flags = child.mAttrs.flags;
-            if (!child.isVisibleLw()) {
-                continue;
-            }
-            if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
-                continue;
-            }
-
-            child.getVisibleBounds(mTmpRect);
-            if (!mTmpRect.contains(x, y)) {
-                continue;
-            }
-
-            child.getTouchableRegion(mTmpRegion);
-
-            final int touchFlags = flags &
-                    (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
-            if (mTmpRegion.contains(x, y) || touchFlags == 0) {
-                touchedWin = child;
-                break;
-            }
-        }
-
-        return touchedWin;
-    }
-
     private MousePositionTracker mMousePositionTracker = new MousePositionTracker();
 
     private static class MousePositionTracker implements PointerEventListener {
@@ -10577,8 +10509,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent == null) {
                 return;
             }
-            Display display = displayContent.getDisplay();
-            WindowState windowUnderPointer = getTouchableWinAtPointLocked(display, mouseX, mouseY);
+            WindowState windowUnderPointer =
+                    displayContent.getTouchableWinAtPointLocked(mouseX, mouseY);
             if (windowUnderPointer != callingWin) {
                 return;
             }
@@ -10592,11 +10524,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void restorePointerIconLocked(Display display, float latestX, float latestY) {
+    void restorePointerIconLocked(DisplayContent displayContent, float latestX, float latestY) {
         // Mouse position tracker has not been getting updates while dragging, update it now.
         mMousePositionTracker.updatePosition(latestX, latestY);
 
-        WindowState windowUnderPointer = getTouchableWinAtPointLocked(display, latestX, latestY);
+        WindowState windowUnderPointer =
+                displayContent.getTouchableWinAtPointLocked(latestX, latestY);
         if (windowUnderPointer != null) {
             try {
                 windowUnderPointer.mClient.updatePointerIcon(
