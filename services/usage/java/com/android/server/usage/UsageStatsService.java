@@ -431,17 +431,17 @@ public class UsageStatsService extends SystemService implements
             List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
                     PackageManager.MATCH_DISABLED_COMPONENTS,
                     userId);
-            synchronized (mLock) {
-                final int packageCount = packages.size();
-                for (int p = 0; p < packageCount; p++) {
-                    final PackageInfo pi = packages.get(p);
-                    final String packageName = pi.packageName;
-                    final boolean isIdle = isAppIdleFiltered(packageName,
-                            UserHandle.getAppId(pi.applicationInfo.uid),
-                            userId, elapsedRealtime);
-                    mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
-                            userId, isIdle ? 1 : 0, packageName));
-                    if (isIdle) {
+            final int packageCount = packages.size();
+            for (int p = 0; p < packageCount; p++) {
+                final PackageInfo pi = packages.get(p);
+                final String packageName = pi.packageName;
+                final boolean isIdle = isAppIdleFiltered(packageName,
+                        UserHandle.getAppId(pi.applicationInfo.uid),
+                        userId, elapsedRealtime);
+                mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
+                        userId, isIdle ? 1 : 0, packageName));
+                if (isIdle) {
+                    synchronized (mLock) {
                         mAppIdleHistory.setIdle(packageName, userId, elapsedRealtime);
                     }
                 }
