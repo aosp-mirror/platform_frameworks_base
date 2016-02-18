@@ -263,8 +263,8 @@ public class Notification implements Parcelable
      * The view that will represent this notification in the notification list (which is pulled
      * down from the status bar).
      *
-     * As of N, this field is not used. The notification view is determined by the inputs to
-     * {@link Notification.Builder}; a custom RemoteViews can optionally be
+     * As of N, this field may be null. The notification view is determined by the inputs
+     * to {@link Notification.Builder}; a custom RemoteViews can optionally be
      * supplied with {@link Notification.Builder#setCustomContentView(RemoteViews)}.
      */
     @Deprecated
@@ -275,7 +275,7 @@ public class Notification implements Parcelable
      * opportunity to show more detail. The system UI may choose to show this
      * instead of the normal content view at its discretion.
      *
-     * As of N, this field is not used. The expanded notification view is determined by the
+     * As of N, this field may be null. The expanded notification view is determined by the
      * inputs to {@link Notification.Builder}; a custom RemoteViews can optionally be
      * supplied with {@link Notification.Builder#setCustomBigContentView(RemoteViews)}.
      */
@@ -289,7 +289,7 @@ public class Notification implements Parcelable
      * choose to show this as a heads-up notification, which will pop up so the user can see
      * it without leaving their current activity.
      *
-     * As of N, this field is not used. The heads-up notification view is determined by the
+     * As of N, this field may be null. The heads-up notification view is determined by the
      * inputs to {@link Notification.Builder}; a custom RemoteViews can optionally be
      * supplied with {@link Notification.Builder#setCustomHeadsUpContentView(RemoteViews)}.
      */
@@ -2129,8 +2129,23 @@ public class Notification implements Parcelable
      * </pre>
      */
     public static class Builder {
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT =
+                "android.rebuild.contentViewActionCount";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT
+                = "android.rebuild.bigViewActionCount";
+        /**
+         * @hide
+         */
+        public static final String EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT
+                = "android.rebuild.hudViewActionCount";
+
         private static final int MAX_ACTION_BUTTONS = 3;
-        private static final float LARGE_TEXT_SCALE = 1.3f;
 
         private Context mContext;
         private Notification mN;
@@ -3566,19 +3581,6 @@ public class Notification implements Parcelable
             return null;
         }
 
-        private void setBuilderContentView(Notification n, RemoteViews contentView) {
-            n.contentView = contentView;
-        }
-
-        private void setBuilderBigContentView(Notification n, RemoteViews bigContentView) {
-            n.bigContentView = bigContentView;
-        }
-
-        private void setBuilderHeadsUpContentView(Notification n,
-                RemoteViews headsUpContentView) {
-            n.headsUpContentView = headsUpContentView;
-        }
-
         /**
          * @deprecated Use {@link #build()} instead.
          */
@@ -3606,6 +3608,28 @@ public class Notification implements Parcelable
                 mStyle.buildStyled(mN);
             }
 
+            if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
+                if (mN.contentView == null) {
+                    mN.contentView = makeContentView();
+                    mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
+                            mN.contentView.getSequenceNumber());
+                }
+                if (mN.bigContentView == null) {
+                    mN.bigContentView = makeBigContentView();
+                    if (mN.bigContentView != null) {
+                        mN.extras.putInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT,
+                                mN.bigContentView.getSequenceNumber());
+                    }
+                }
+                if (mN.headsUpContentView == null) {
+                    mN.headsUpContentView = makeHeadsUpContentView();
+                    if (mN.headsUpContentView != null) {
+                        mN.extras.putInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT,
+                                mN.headsUpContentView.getSequenceNumber());
+                    }
+                }
+            }
+
             if ((mN.defaults & DEFAULT_LIGHTS) != 0) {
                 mN.flags |= FLAG_SHOW_LIGHTS;
             }
@@ -3621,6 +3645,40 @@ public class Notification implements Parcelable
         public Notification buildInto(Notification n) {
             build().cloneInto(n, true);
             return n;
+        }
+
+        /**
+         * @hide
+         */
+        public static void stripForDelivery(Notification n) {
+            String templateClass = n.extras.getString(EXTRA_TEMPLATE);
+            if (TextUtils.isEmpty(templateClass)) {
+                return;
+            }
+            // Only strip views for known Styles because we won't know how to
+            // re-create them otherwise.
+            if (getNotificationStyleClass(templateClass) == null) {
+                return;
+            }
+            // Get rid of unmodified BuilderRemoteViews.
+            if (n.contentView instanceof BuilderRemoteViews &&
+                    n.extras.getInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT, -1) ==
+                            n.contentView.getSequenceNumber()) {
+                n.contentView = null;
+                n.extras.remove(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT);
+            }
+            if (n.bigContentView instanceof BuilderRemoteViews &&
+                    n.extras.getInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT, -1) ==
+                            n.bigContentView.getSequenceNumber()) {
+                n.bigContentView = null;
+                n.extras.remove(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT);
+            }
+            if (n.headsUpContentView instanceof BuilderRemoteViews &&
+                    n.extras.getInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT, -1) ==
+                            n.headsUpContentView.getSequenceNumber()) {
+                n.headsUpContentView = null;
+                n.extras.remove(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT);
+            }
         }
 
         private int getBaseLayoutResource() {
