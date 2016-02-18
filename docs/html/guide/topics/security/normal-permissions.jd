@@ -132,6 +132,10 @@ page.tags=permissions,normal
   <li>{@link android.Manifest.permission#REORDER_TASKS REORDER_TASKS}
   </li>
 
+  <li>{@link android.Manifest.permission#REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+  REQUEST_IGNORE_BATTERY_OPTIMIZATIONS}
+  </li>
+
   <li>{@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES
   REQUEST_INSTALL_PACKAGES}
   </li>
