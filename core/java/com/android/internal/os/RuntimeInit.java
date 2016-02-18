@@ -57,8 +57,7 @@ public class RuntimeInit {
     private static final native void nativeSetExitWithoutCleanup(boolean exitWithoutCleanup);
 
     private static int Clog_e(String tag, String msg, Throwable tr) {
-        return Log.println_native(Log.LOG_ID_CRASH, Log.ERROR, tag,
-                msg + '\n' + Log.getStackTraceString(tr));
+        return Log.printlns(Log.LOG_ID_CRASH, Log.ERROR, tag, msg, tr);
     }
 
     /**
