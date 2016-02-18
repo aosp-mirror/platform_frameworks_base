@@ -149,8 +149,9 @@ public final class NotificationRecord {
         }
 
         try {
-            final ApplicationInfo applicationInfo = mContext.getPackageManager().getApplicationInfo(
-                    sbn.getPackageName(), 0);
+            final ApplicationInfo applicationInfo =
+                    mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
+                            0, sbn.getUser().getIdentifier());
             if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.N) {
                 if (isNoisy) {
                     if (importance >= IMPORTANCE_HIGH) {
