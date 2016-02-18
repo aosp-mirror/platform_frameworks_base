@@ -654,15 +654,14 @@ namespace PaintGlue {
         size_t measuredCount = 0;
         float measured = 0;
 
-        Layout layout;
-        MinikinUtils::doLayout(&layout, &paint, bidiFlags, typeface, text, 0, count, count);
-        float* advances = new float[count];
-        layout.getAdvances(advances);
+        std::unique_ptr<float[]> advancesArray(new float[count]);
+        MinikinUtils::measureText(&paint, bidiFlags, typeface, text, 0, count, count,
+                advancesArray.get());
 
         for (int i = 0; i < count; i++) {
             // traverse in the given direction
             int index = forwardScan ? i : (count - i - 1);
-            float width = advances[index];
+            float width = advancesArray[index];
             if (measured + width > maxWidth) {
                 break;
             }
@@ -672,7 +671,6 @@ namespace PaintGlue {
             }
             measured += width;
         }
-        delete[] advances;
 
         if (jmeasured && env->GetArrayLength(jmeasured) > 0) {
             AutoJavaFloatArray autoMeasured(env, jmeasured, 1);
@@ -824,10 +822,15 @@ namespace PaintGlue {
 
     static jfloat doRunAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jint offset) {
-        Layout layout;
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, buf, start, count, bufSize);
-        return getRunAdvance(layout, buf, start, count, offset);
+        if (offset == count) {
+            return MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count,
+                    bufSize, nullptr);
+        }
+        std::unique_ptr<float[]> advancesArray(new float[count]);
+        MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
+                advancesArray.get());
+        return getRunAdvance(advancesArray.get(), buf, start, count, offset);
     }
 
     static jfloat getRunAdvance___CIIIIZI_F(JNIEnv *env, jclass, jlong paintHandle,
@@ -845,11 +848,13 @@ namespace PaintGlue {
 
     static jint doOffsetForAdvance(const Paint* paint, TypefaceImpl* typeface, const jchar buf[],
             jint start, jint count, jint bufSize, jboolean isRtl, jfloat advance) {
-        Layout layout;
         int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
-        MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, buf, start, count, bufSize);
-        return getOffsetForAdvance(layout, buf, start, count, advance);
+        std::unique_ptr<float[]> advancesArray(new float[count]);
+        MinikinUtils::measureText(paint, bidiFlags, typeface, buf, start, count, bufSize,
+                advancesArray.get());
+        return getOffsetForAdvance(advancesArray.get(), buf, start, count, advance);
     }
+
     static jint getOffsetForAdvance___CIIIIZF_I(JNIEnv *env, jclass, jlong paintHandle,
             jlong typefaceHandle, jcharArray text, jint start, jint end, jint contextStart,
             jint contextEnd, jboolean isRtl, jfloat advance) {
