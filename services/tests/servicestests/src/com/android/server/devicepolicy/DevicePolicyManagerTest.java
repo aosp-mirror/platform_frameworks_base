@@ -1668,7 +1668,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // that the test user is not affiliated anymore.
         dpm.clearProfileOwner(admin2);
         final ComponentName admin = new ComponentName("test", "test");
-        markPackageAsInstalled(admin.getPackageName(), null, DpmMockContext.CALLER_USER_HANDLE);
+
+        setUpPackageManagerForFakeAdmin(admin, DpmMockContext.CALLER_UID,
+                /* enabledSetting =*/ PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                /* appTargetSdk = */ null, admin2);
+
+        dpm.setActiveAdmin(admin, /* refreshing =*/ true, DpmMockContext.CALLER_USER_HANDLE);
         assertTrue(dpm.setProfileOwner(admin, "owner-name", DpmMockContext.CALLER_USER_HANDLE));
         assertFalse(dpm.isAffiliatedUser());
 
