@@ -758,7 +758,7 @@ public class KeyguardViewMediator extends SystemUI {
                 mPendingLock = false;
             }
         }
-        doKeyguardLaterLockedForChildProfiles();
+        doKeyguardForChildProfilesLocked();
         KeyguardUpdateMonitor.getInstance(mContext).dispatchFinishedGoingToSleep(why);
     }
 
@@ -781,8 +781,7 @@ public class KeyguardViewMediator extends SystemUI {
 
         long timeout;
 
-        if ((mLockPatternUtils.isSeparateProfileChallengeEnabled(userId))
-                || policyTimeout <= 0) {
+        if (policyTimeout <= 0) {
             timeout = lockAfterTimeout;
         } else {
             // From DisplaySettings
@@ -815,23 +814,31 @@ public class KeyguardViewMediator extends SystemUI {
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, when, sender);
         if (DEBUG) Log.d(TAG, "setting alarm to turn off keyguard, seq = "
                          + mDelayedShowingSequence);
-        doKeyguardLaterLockedForChildProfiles();
+        doKeyguardLaterForChildProfilesLocked();
     }
 
-    private void doKeyguardLaterLockedForChildProfiles() {
+    private void doKeyguardLaterForChildProfilesLocked() {
         UserManager um = UserManager.get(mContext);
         List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
-        if (profiles.size() > 1) {
-            for (UserInfo info : profiles) {
-                if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
-                    long userTimeout = getLockTimeout(info.id);
-                    long userWhen = SystemClock.elapsedRealtime() + userTimeout;
-                    Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
-                    lockIntent.putExtra(Intent.EXTRA_USER_ID, info.id);
-                    PendingIntent lockSender = PendingIntent.getBroadcast(
-                            mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, userWhen, lockSender);
-                }
+        for (UserInfo info : profiles) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
+                long userTimeout = getLockTimeout(info.id);
+                long userWhen = SystemClock.elapsedRealtime() + userTimeout;
+                Intent lockIntent = new Intent(DELAYED_LOCK_PROFILE_ACTION);
+                lockIntent.putExtra(Intent.EXTRA_USER_ID, info.id);
+                PendingIntent lockSender = PendingIntent.getBroadcast(
+                        mContext, 0, lockIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, userWhen, lockSender);
+            }
+        }
+    }
+
+    private void doKeyguardForChildProfilesLocked() {
+        UserManager um = UserManager.get(mContext);
+        List<UserInfo> profiles = um.getEnabledProfiles(UserHandle.myUserId());
+        for (UserInfo info : profiles) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(info.id)) {
+                lockProfile(info.id);
             }
         }
     }
