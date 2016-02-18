@@ -238,6 +238,9 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mAnimatorSet.recordLastSeenTarget((DisplayListCanvas) canvas);
         }
         mAnimatedVectorState.mVectorDrawable.draw(canvas);
+        if (isStarted()) {
+            invalidateSelf();
+        }
     }
 
     @Override
@@ -608,6 +611,10 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         return mAnimatorSet.isRunning();
     }
 
+    private boolean isStarted() {
+        return mAnimatorSet.isStarted();
+    }
+
     /**
      * Resets the AnimatedVectorDrawable to the start state as specified in the animators.
      */
@@ -619,6 +626,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     @Override
     public void start() {
         ensureAnimatorSet();
+
+        // If any one of the animator has not ended, do nothing.
+        if (isStarted()) {
+            return;
+        }
+
         mAnimatorSet.start();
         invalidateSelf();
     }
@@ -639,7 +652,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     @Override
     public void stop() {
         mAnimatorSet.end();
-        invalidateSelf();
     }
 
     /**
@@ -762,9 +774,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      * @hide
      */
     public static class VectorDrawableAnimator {
-        private static final int NONE = 0;
-        private static final int START_ANIMATION = 1;
-        private static final int REVERSE_ANIMATION = 2;
         private AnimatorListener mListener = null;
         private final LongArray mStartDelays = new LongArray();
         private PropertyValuesHolder.PropertyValues mTmpValues =
@@ -773,6 +782,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private boolean mContainsSequentialAnimators = false;
         private boolean mStarted = false;
         private boolean mInitialized = false;
+        private boolean mAnimationPending = false;
         private boolean mIsReversible = false;
         // This needs to be set before parsing starts.
         private boolean mShouldIgnoreInvalidAnim;
@@ -780,8 +790,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private final VirtualRefBasePtr mSetRefBasePtr;
         private WeakReference<RenderNode> mTarget = null;
         private WeakReference<RenderNode> mLastSeenTarget = null;
-        private int mLastListenerId = 0;
-        private int mPendingAnimationAction = NONE;
+
 
         VectorDrawableAnimator() {
             mSetPtr = nCreateAnimatorSet();
@@ -801,7 +810,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mInitialized = true;
 
             // Check reversible.
-            mIsReversible = true;
             if (mContainsSequentialAnimators) {
                 mIsReversible = false;
             } else {
@@ -813,6 +821,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                     }
                 }
             }
+            mIsReversible = true;
         }
 
         private void parseAnimatorSet(AnimatorSet set, long startTime) {
@@ -1033,22 +1042,27 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
          * to the last seen RenderNode target and start right away.
          */
         protected void recordLastSeenTarget(DisplayListCanvas canvas) {
-            mLastSeenTarget = new WeakReference<RenderNode>(
-                    RenderNodeAnimatorSetHelper.getTarget(canvas));
-            if (mPendingAnimationAction != NONE) {
+            if (mAnimationPending) {
+                mLastSeenTarget = new WeakReference<RenderNode>(
+                        RenderNodeAnimatorSetHelper.getTarget(canvas));
                 if (DBG_ANIMATION_VECTOR_DRAWABLE) {
                     Log.d(LOGTAG, "Target is set in the next frame");
                 }
-                if (mPendingAnimationAction == START_ANIMATION) {
-                    start();
-                } else if (mPendingAnimationAction == REVERSE_ANIMATION) {
-                    reverse();
-                }
-                mPendingAnimationAction = NONE;
+                mAnimationPending = false;
+                start();
+            } else {
+                mLastSeenTarget = new WeakReference<RenderNode>(
+                        RenderNodeAnimatorSetHelper.getTarget(canvas));
             }
+
         }
 
         private boolean setTarget(RenderNode node) {
+            if (mTarget != null && mTarget.get() != null) {
+                // TODO: Maybe we want to support target change.
+                throw new IllegalStateException("Target already set!");
+            }
+
             node.addAnimator(this);
             mTarget = new WeakReference<RenderNode>(node);
             return true;
@@ -1067,8 +1081,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 return;
             }
 
+            if (mStarted) {
+                return;
+            }
+
             if (!useLastSeenTarget()) {
-                mPendingAnimationAction = START_ANIMATION;
+                mAnimationPending = true;
                 return;
             }
 
@@ -1076,45 +1094,38 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 Log.d(LOGTAG, "Target is set. Starting VDAnimatorSet from java");
             }
 
-            mStarted = true;
-            nStart(mSetPtr, this, ++mLastListenerId);
+           nStart(mSetPtr, this);
             if (mListener != null) {
                 mListener.onAnimationStart(null);
             }
+            mStarted = true;
         }
 
         public void end() {
-            if (mInitialized && useLastSeenTarget()) {
-                // If no target has ever been set, no-op
+            if (mInitialized && mStarted) {
                 nEnd(mSetPtr);
+                onAnimationEnd();
             }
         }
 
-        public void reset() {
-            if (mInitialized && useLastSeenTarget()) {
-                // If no target has ever been set, no-op
-                nReset(mSetPtr);
+        void reset() {
+            if (!mInitialized) {
+                return;
             }
+            // TODO: Need to implement reset.
+            Log.w(LOGTAG, "Reset is yet to be implemented");
+            nReset(mSetPtr);
         }
 
         // Current (imperfect) Java AnimatorSet cannot be reversed when the set contains sequential
         // animators or when the animator set has a start delay
         void reverse() {
-            if (!mIsReversible || !mInitialized) {
+            if (!mIsReversible) {
                 return;
             }
-            if (!useLastSeenTarget()) {
-                mPendingAnimationAction = REVERSE_ANIMATION;
-                return;
-            }
-            if (DBG_ANIMATION_VECTOR_DRAWABLE) {
-                Log.d(LOGTAG, "Target is set. Reversing VDAnimatorSet from java");
-            }
-            mStarted = true;
-            nReverse(mSetPtr, this, ++mLastListenerId);
-            if (mListener != null) {
-                mListener.onAnimationStart(null);
-            }
+            // TODO: Need to support reverse (non-public API)
+            Log.w(LOGTAG, "Reverse is yet to be implemented");
+            nReverse(mSetPtr, this);
         }
 
         public long getAnimatorNativePtr() {
@@ -1144,13 +1155,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mListener = null;
         }
 
-        private void onAnimationEnd(int listenerId) {
-            if (listenerId != mLastListenerId) {
-                return;
-            }
-            if (DBG_ANIMATION_VECTOR_DRAWABLE) {
-                Log.d(LOGTAG, "on finished called from native");
-            }
+        private void onAnimationEnd() {
             mStarted = false;
             if (mListener != null) {
                 mListener.onAnimationEnd(null);
@@ -1159,8 +1164,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         // onFinished: should be called from native
-        private static void callOnFinished(VectorDrawableAnimator set, int id) {
-            set.onAnimationEnd(id);
+        private static void callOnFinished(VectorDrawableAnimator set) {
+            if (DBG_ANIMATION_VECTOR_DRAWABLE) {
+                Log.d(LOGTAG, "on finished called from native");
+            }
+            set.onAnimationEnd();
         }
     }
 
@@ -1180,8 +1188,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static native long nCreateRootAlphaPropertyHolder(long nativePtr, float startValue,
             float endValue);
     private static native void nSetPropertyHolderData(long nativePtr, float[] data, int length);
-    private static native void nStart(long animatorSetPtr, VectorDrawableAnimator set, int id);
-    private static native void nReverse(long animatorSetPtr, VectorDrawableAnimator set, int id);
+    private static native void nStart(long animatorSetPtr, VectorDrawableAnimator set);
+    private static native void nReverse(long animatorSetPtr, VectorDrawableAnimator set);
     private static native void nEnd(long animatorSetPtr);
     private static native void nReset(long animatorSetPtr);
 }
