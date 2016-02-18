@@ -23,13 +23,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.os.Binder;
+import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.AndroidRuntimeException;
@@ -41,6 +46,7 @@ import android.webkit.WebViewFactory;
 
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -102,6 +108,27 @@ public class WebViewUpdateService extends SystemService {
                         return;
                     }
 
+                    // Ensure that we only heed PACKAGE_CHANGED intents if they change an entire
+                    // package, not just a component
+                    if (intent.getAction().equals(Intent.ACTION_PACKAGE_CHANGED)) {
+                        if (!WebViewFactory.entirePackageChanged(intent)) {
+                            return;
+                        }
+                    }
+
+                    if (intent.getAction().equals(Intent.ACTION_USER_ADDED)) {
+                        int userId =
+                            intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+                        handleNewUser(userId);
+                        return;
+                    }
+
+                    updateFallbackState(context, intent);
+
+                    // TODO(gsennton) for now don't update WebView on PACKAGE_CHANGED as this will
+                    // change the current behaviour even more, instead do this in a follow-up.
+                    if (intent.getAction().equals(Intent.ACTION_PACKAGE_CHANGED)) return;
+
                     for (WebViewProviderInfo provider : WebViewFactory.getWebViewPackages()) {
                         String webviewPackage = "package:" + provider.packageName;
 
@@ -154,10 +181,165 @@ public class WebViewUpdateService extends SystemService {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
+        // Make sure we only receive intents for WebView packages from our config file.
+        for (WebViewProviderInfo provider : WebViewFactory.getWebViewPackages()) {
+            filter.addDataSchemeSpecificPart(provider.packageName, PatternMatcher.PATTERN_LITERAL);
+        }
         getContext().registerReceiver(mWebViewUpdatedReceiver, filter);
 
+        IntentFilter userAddedFilter = new IntentFilter();
+        userAddedFilter.addAction(Intent.ACTION_USER_ADDED);
+        getContext().registerReceiver(mWebViewUpdatedReceiver, userAddedFilter);
+
         publishBinderService("webviewupdate", new BinderService());
+    }
+
+    private static boolean existsValidNonFallbackProvider(WebViewProviderInfo[] providers) {
+        for (WebViewProviderInfo provider : providers) {
+            if (provider.isAvailableByDefault() && provider.isEnabled()
+                    && provider.isValidProvider() && !provider.isFallbackPackage()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void enablePackageForUser(String packageName, boolean enable, int userId) {
+        try {
+            AppGlobals.getPackageManager().setApplicationEnabledSetting(
+                    packageName,
+                    enable ? PackageManager.COMPONENT_ENABLED_STATE_DEFAULT :
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0,
+                    userId, null);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Tried to disable " + packageName + " for user " + userId + ": " + e);
+        }
+    }
+
+    /**
+     * Called when a new user has been added to update the state of its fallback package.
+     */
+    void handleNewUser(int userId) {
+        if (!isFallbackLogicEnabled()) return;
+
+        WebViewProviderInfo[] webviewProviders = WebViewFactory.getWebViewPackages();
+        WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
+        if (fallbackProvider == null) return;
+        boolean existsValidNonFallbackProvider =
+            existsValidNonFallbackProvider(webviewProviders);
+
+        enablePackageForUser(fallbackProvider.packageName, !existsValidNonFallbackProvider,
+                userId);
+    }
+
+    /**
+     * Handle the enabled-state of our fallback package, i.e. if there exists some non-fallback
+     * package that is valid (and available by default) then disable the fallback package,
+     * otherwise, enable the fallback package.
+     */
+    void updateFallbackState(final Context context, final Intent intent) {
+        if (!isFallbackLogicEnabled()) return;
+
+        WebViewProviderInfo[] webviewProviders = WebViewFactory.getWebViewPackages();
+
+        if (intent != null && (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)
+                    || intent.getAction().equals(Intent.ACTION_PACKAGE_CHANGED))) {
+            // A package was changed / updated / downgraded, early out if it is not one of the
+            // webview packages that are available by default.
+            String changedPackage = null;
+            for (WebViewProviderInfo provider : webviewProviders) {
+                String webviewPackage = "package:" + provider.packageName;
+                if (webviewPackage.equals(intent.getDataString())) {
+                    if (provider.isAvailableByDefault()) {
+                        changedPackage = provider.packageName;
+                    }
+                    break;
+                }
+            }
+            if (changedPackage == null) return;
+        }
+
+        // If there exists a valid and enabled non-fallback package - disable the fallback
+        // package, otherwise, enable it.
+        WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
+        if (fallbackProvider == null) return;
+        boolean existsValidNonFallbackProvider = existsValidNonFallbackProvider(webviewProviders);
+
+        if (existsValidNonFallbackProvider
+                // During an OTA the primary user's WebView state might differ from other users', so
+                // ignore the state of that user during boot.
+                && (fallbackProvider.isEnabled() || intent == null)) {
+            // Uninstall and disable fallback package for all users.
+            context.getPackageManager().deletePackage(fallbackProvider.packageName,
+                    new IPackageDeleteObserver.Stub() {
+                public void packageDeleted(String packageName, int returnCode) {
+                    // Ignore returnCode since the deletion could fail, e.g. we might be trying
+                    // to delete a non-updated system-package (and we should still disable the
+                    // package)
+                    UserManager userManager =
+                        (UserManager)context.getSystemService(Context.USER_SERVICE);
+                    // Disable the fallback package for all users.
+                    for(UserInfo userInfo : userManager.getUsers()) {
+                        enablePackageForUser(packageName, false, userInfo.id);
+                    }
+                }
+            }, PackageManager.DELETE_SYSTEM_APP | PackageManager.DELETE_ALL_USERS);
+        } else if (!existsValidNonFallbackProvider
+                // During an OTA the primary user's WebView state might differ from other users', so
+                // ignore the state of that user during boot.
+                && (!fallbackProvider.isEnabled() || intent==null)) {
+            // Enable the fallback package for all users.
+            UserManager userManager =
+                (UserManager)context.getSystemService(Context.USER_SERVICE);
+            for(UserInfo userInfo : userManager.getUsers()) {
+                enablePackageForUser(fallbackProvider.packageName, true, userInfo.id);
+            }
+        }
+    }
+
+    private static boolean isFallbackLogicEnabled() {
+        // Note that this is enabled by default (i.e. if the setting hasn't been set).
+        return Settings.Global.getInt(AppGlobals.getInitialApplication().getContentResolver(),
+                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED, 1) == 1;
+    }
+
+    private static void enableFallbackLogic(boolean enable) {
+        Settings.Global.putInt(AppGlobals.getInitialApplication().getContentResolver(),
+                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED, enable ? 1 : 0);
+    }
+
+    /**
+     * Returns the only fallback provider, or null if there is none.
+     */
+    private static WebViewProviderInfo getFallbackProvider(WebViewProviderInfo[] webviewPackages) {
+        for (WebViewProviderInfo provider : webviewPackages) {
+            if (provider.isFallbackPackage()) {
+                return provider;
+            }
+        }
+        return null;
+    }
+
+    private static boolean containsAvailableNonFallbackProvider(
+            WebViewProviderInfo[] webviewPackages) {
+        for (WebViewProviderInfo provider : webviewPackages) {
+            if (provider.isAvailableByDefault() && provider.isEnabled()
+                    && provider.isValidProvider() && !provider.isFallbackPackage()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isFallbackPackage(String packageName) {
+        if (packageName == null || !isFallbackLogicEnabled()) return false;
+
+        WebViewProviderInfo[] webviewPackages = WebViewFactory.getWebViewPackages();
+        WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewPackages);
+        return (fallbackProvider != null
+                && packageName.equals(fallbackProvider.packageName));
     }
 
     /**
@@ -167,6 +349,7 @@ public class WebViewUpdateService extends SystemService {
      * Currently, this means spawning the child processes which will create the relro files.
      */
     public void prepareWebViewInSystemServer() {
+        updateFallbackState(getContext(), null);
         try {
             synchronized(this) {
                 updateValidWebViewPackages();
@@ -182,8 +365,10 @@ public class WebViewUpdateService extends SystemService {
 
     /**
      * Change WebView provider and provider setting and kill packages using the old provider.
+     * Return the new provider (in case we are in the middle of creating relro files this new
+     * provider will not be in use directly, but will when the relros are done).
      */
-    private void changeProviderAndSetting(String newProviderName) {
+    private String changeProviderAndSetting(String newProviderName) {
         PackageInfo oldPackage = null;
         PackageInfo newPackage = null;
         synchronized(this) {
@@ -195,14 +380,14 @@ public class WebViewUpdateService extends SystemService {
                 if (oldPackage != null && newPackage.packageName.equals(oldPackage.packageName)) {
                     // If we don't perform the user change, revert the settings change.
                     updateUserSetting(newPackage.packageName);
-                    return;
+                    return newPackage.packageName;
                 }
             } catch (WebViewFactory.MissingWebViewPackageException e) {
                 Slog.e(TAG, "Tried to change WebView provider but failed to fetch WebView package "
                         + e);
                 // If we don't perform the user change but don't have an installed WebView package,
                 // we will have changed the setting and it will be used when a package is available.
-                return;
+                return newProviderName;
             }
             onWebViewProviderChanged(newPackage);
         }
@@ -214,7 +399,7 @@ public class WebViewUpdateService extends SystemService {
             }
         } catch (RemoteException e) {
         }
-        return;
+        return newPackage.packageName;
     }
 
     /**
@@ -349,6 +534,14 @@ public class WebViewUpdateService extends SystemService {
 
     private class BinderService extends IWebViewUpdateService.Stub {
 
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
+            (new WebViewUpdateServiceShellCommand(this)).exec(
+                    this, in, out, err, args, resultReceiver);
+        }
+
+
         /**
          * The shared relro process calls this to notify us that it's done trying to create a relro
          * file. This method gets called even if the relro creation has failed or the process
@@ -423,7 +616,7 @@ public class WebViewUpdateService extends SystemService {
          * This is called from DeveloperSettings when the user changes WebView provider.
          */
         @Override // Binder call
-        public void changeProviderAndSetting(String newProvider) {
+        public String changeProviderAndSetting(String newProvider) {
             if (getContext().checkCallingPermission(
                         android.Manifest.permission.WRITE_SECURE_SETTINGS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -435,7 +628,7 @@ public class WebViewUpdateService extends SystemService {
                 throw new SecurityException(msg);
             }
 
-            WebViewUpdateService.this.changeProviderAndSetting(newProvider);
+            return WebViewUpdateService.this.changeProviderAndSetting(newProvider);
         }
 
         @Override // Binder call
@@ -452,6 +645,27 @@ public class WebViewUpdateService extends SystemService {
                     return null;
                 return WebViewUpdateService.this.mCurrentWebViewPackage.packageName;
             }
+        }
+
+        @Override // Binder call
+        public boolean isFallbackPackage(String packageName) {
+            return WebViewUpdateService.isFallbackPackage(packageName);
+        }
+
+        @Override // Binder call
+        public void enableFallbackLogic(boolean enable) {
+            if (getContext().checkCallingPermission(
+                        android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                String msg = "Permission Denial: enableFallbackLogic() from pid="
+                        + Binder.getCallingPid()
+                        + ", uid=" + Binder.getCallingUid()
+                        + " requires " + android.Manifest.permission.WRITE_SECURE_SETTINGS;
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+
+            WebViewUpdateService.enableFallbackLogic(enable);
         }
     }
 }
