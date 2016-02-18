@@ -27,8 +27,6 @@ import android.content.ClipDescription;
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.Rect;
-import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.IBinder;
 import android.os.Message;
@@ -71,6 +69,13 @@ import java.util.ArrayList;
 class DragState {
     private static final long ANIMATION_DURATION_MS = 500;
 
+    private static final int DRAG_FLAGS_URI_ACCESS = View.DRAG_FLAG_GLOBAL_URI_READ |
+            View.DRAG_FLAG_GLOBAL_URI_WRITE;
+
+    private static final int DRAG_FLAGS_URI_PERMISSIONS = DRAG_FLAGS_URI_ACCESS |
+            View.DRAG_FLAG_GLOBAL_PERSISTABLE_URI_PERMISSION |
+            View.DRAG_FLAG_GLOBAL_PREFIX_URI_PERMISSION;
+
     final WindowManagerService mService;
     IBinder mToken;
     SurfaceControl mSurfaceControl;
@@ -95,10 +100,7 @@ class DragState {
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
-    Display mDisplay;
-
-    private final Region mTmpRegion = new Region();
-    private final Rect mTmpRect = new Rect();
+    DisplayContent mDisplayContent;
 
     private Animation mAnimation;
     final Transformation mTransformation = new Transformation();
@@ -131,11 +133,12 @@ class DragState {
      * @param display The Display that the window being dragged is on.
      */
     void register(Display display) {
-        mDisplay = display;
         if (DEBUG_DRAG) Slog.d(TAG_WM, "registering drag input channel");
         if (mClientChannel != null) {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
         } else {
+            mDisplayContent = mService.getDisplayContentLocked(display.getDisplayId());
+
             InputChannel[] channels = InputChannel.openInputChannelPair("drag");
             mServerChannel = channels[0];
             mClientChannel = channels[1];
@@ -149,7 +152,7 @@ class DragState {
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
             mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
-                    mDisplay.getDisplayId());
+                    display.getDisplayId());
             mDragWindowHandle.name = "drag";
             mDragWindowHandle.inputChannel = mServerChannel;
             mDragWindowHandle.layer = getDragLayerLw();
@@ -174,7 +177,7 @@ class DragState {
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
             Point p = new Point();
-            mDisplay.getRealSize(p);
+            display.getRealSize(p);
             mDragWindowHandle.frameRight = p.x;
             mDragWindowHandle.frameBottom = p.y;
 
@@ -244,12 +247,10 @@ class DragState {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
         }
 
-        final WindowList windows = mService.getWindowListLocked(mDisplay);
-        if (windows != null) {
-            final int N = windows.size();
-            for (int i = 0; i < N; i++) {
-                sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
-            }
+        final WindowList windows = mDisplayContent.getWindowList();
+        final int N = windows.size();
+        for (int i = 0; i < N; i++) {
+            sendDragStartedLw(windows.get(i), touchX, touchY, mDataDescription);
         }
     }
 
@@ -379,7 +380,7 @@ class DragState {
     private void cleanUpDragLw() {
         broadcastDragEndedLw();
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
-            mService.restorePointerIconLocked(mDisplay, mCurrentX, mCurrentY);
+            mService.restorePointerIconLocked(mDisplayContent, mCurrentX, mCurrentY);
         }
 
         // stop intercepting input
@@ -418,7 +419,7 @@ class DragState {
 
     void notifyLocationLw(float x, float y) {
         // Tell the affected window
-        WindowState touchedWin = mService.getTouchableWinAtPointLocked(mDisplay, x, y);
+        WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
         if (touchedWin == null) {
             if (DEBUG_DRAG) Slog.d(TAG_WM, "No touched win at x=" + x + " y=" + y);
             return;
@@ -463,16 +464,17 @@ class DragState {
         mTargetWindow = touchedWin;
     }
 
-    // Tell the drop target about the data.  Returns 'true' if we can immediately
+    // Find the drop target and tell it about the data.  Returns 'true' if we can immediately
     // dispatch the global drag-ended message, 'false' if we need to wait for a
     // result from the recipient.
-    boolean notifyDropLw(WindowState touchedWin, IDropPermissions dropPermissions,
-            float x, float y) {
+    boolean notifyDropLw(float x, float y) {
         if (mAnimation != null) {
             return false;
         }
         mCurrentX = x;
         mCurrentY = y;
+
+        WindowState touchedWin = mDisplayContent.getTouchableWinAtPointLocked(x, y);
 
         if (!isWindowNotified(touchedWin)) {
             // "drop" outside a valid window -- no recipient to apply a
@@ -484,7 +486,21 @@ class DragState {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "sending DROP to " + touchedWin);
         }
-        if (mSourceUserId != UserHandle.getUserId(touchedWin.getOwningUid())){
+
+        final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
+
+        DropPermissionsHandler dropPermissions = null;
+        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 &&
+                (mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
+            dropPermissions = new DropPermissionsHandler(
+                    mData,
+                    mUid,
+                    touchedWin.getOwningPackage(),
+                    mFlags & DRAG_FLAGS_URI_PERMISSIONS,
+                    mSourceUserId,
+                    targetUserId);
+        }
+        if (mSourceUserId != targetUserId){
             mData.fixUris(mSourceUserId);
         }
         final int myPid = Process.myPid();
