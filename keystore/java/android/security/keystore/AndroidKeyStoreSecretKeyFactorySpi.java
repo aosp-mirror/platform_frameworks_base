@@ -167,6 +167,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         boolean userAuthenticationRequirementEnforcedBySecureHardware = (userAuthenticationRequired)
                 && (keymasterHwEnforcedUserAuthenticators != 0)
                 && (keymasterSwEnforcedUserAuthenticators == 0);
+        boolean userAuthenticationValidWhileOnBody =
+                keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
 
         return new KeyInfo(entryAlias,
                 insideSecureHardware,
@@ -182,7 +184,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 blockModes,
                 userAuthenticationRequired,
                 (int) userAuthenticationValidityDurationSeconds,
-                userAuthenticationRequirementEnforcedBySecureHardware);
+                userAuthenticationRequirementEnforcedBySecureHardware,
+                userAuthenticationValidWhileOnBody);
     }
 
     @Override
