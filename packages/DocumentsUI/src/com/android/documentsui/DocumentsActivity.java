@@ -34,7 +34,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -73,8 +72,6 @@ public class DocumentsActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-
-        final Resources res = getResources();
 
         if (mState.action == ACTION_CREATE) {
             final String mimeType = getIntent().getType();

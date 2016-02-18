@@ -50,7 +50,7 @@ public class RootsLoader extends AsyncTaskLoader<Collection<RootInfo>> {
         if (isReset()) {
             return;
         }
-        Collection<RootInfo> oldResult = mResult;
+
         mResult = result;
 
         if (isStarted()) {
