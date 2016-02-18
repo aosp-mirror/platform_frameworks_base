@@ -72,8 +72,7 @@ public class ApkSignatureSchemeV2Verifier {
      * <p>The attribute contains a comma-separated set of signature scheme IDs.
      */
     public static final String SF_ATTRIBUTE_ANDROID_APK_SIGNED_NAME = "X-Android-APK-Signed";
-    // TODO: Change the value when signing scheme finalized.
-    public static final int SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID = 1234567890;
+    public static final int SF_ATTRIBUTE_ANDROID_APK_SIGNED_ID = 2;
 
     /**
      * Verifies APK Signature Scheme v2 signatures of the provided APK and returns the certificates
