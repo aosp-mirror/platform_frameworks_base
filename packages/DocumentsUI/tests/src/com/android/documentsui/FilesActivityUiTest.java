@@ -52,7 +52,7 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
                 "Videos",
                 "Audio",
                 "Downloads",
-                "Home",
+                "Documents",
                 ROOT_0_ID,
                 ROOT_1_ID);
     }
@@ -64,11 +64,11 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         bot.assertHasDocuments("file0.log", "file1.png", "file2.csv");
     }
 
-    public void testLoadsHomeByDefault() throws Exception {
+    public void testLoadsHomeDirectoryByDefault() throws Exception {
         initTestFiles();
 
         device.waitForIdle();
-        bot.assertWindowTitle("Home");
+        bot.assertWindowTitle("Documents");
     }
 
     public void testRootClickSetsWindowTitle() throws Exception {
