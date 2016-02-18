@@ -169,77 +169,18 @@ public final class NinePatch_Delegate {
         sManager.removeJavaReferenceFor(chunk);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static void nativeDraw(long canvas_instance, RectF loc, Bitmap bitmap_instance,
-            long chunk, long paint_instance_or_null, int destDensity, int srcDensity) {
-        draw(canvas_instance,
-                (int) loc.left, (int) loc.top, (int) loc.right, (int) loc.bottom,
-                bitmap_instance, chunk, paint_instance_or_null,
-                destDensity, srcDensity);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void nativeDraw(long canvas_instance, Rect loc, Bitmap bitmap_instance,
-            long chunk, long paint_instance_or_null, int destDensity, int srcDensity) {
-        draw(canvas_instance,
-                loc.left, loc.top, loc.right, loc.bottom,
-                bitmap_instance, chunk, paint_instance_or_null,
-                destDensity, srcDensity);
-    }
 
     @LayoutlibDelegate
     /*package*/ static long nativeGetTransparentRegion(Bitmap bitmap, long chunk, Rect location) {
         return 0;
     }
 
-    // ---- Private Helper methods ----
-
-    private static void draw(long canvas_instance,
-            final int left, final int top, final int right, final int bottom,
-            Bitmap bitmap_instance, long chunk, long paint_instance_or_null,
-            final int destDensity, final int srcDensity) {
-        // get the delegate from the native int.
-        final Bitmap_Delegate bitmap_delegate = Bitmap_Delegate.getDelegate(bitmap_instance);
-        if (bitmap_delegate == null) {
-            return;
-        }
-
-        byte[] c = null;
-        NinePatch_Delegate delegate = sManager.getDelegate(chunk);
+    static byte[] getChunk(long nativeNinePatch) {
+        NinePatch_Delegate delegate = sManager.getDelegate(nativeNinePatch);
         if (delegate != null) {
-            c = delegate.chunk;
+            return delegate.chunk;
         }
-        if (c == null) {
-            // not a 9-patch?
-            BufferedImage image = bitmap_delegate.getImage();
-            Canvas_Delegate.native_drawBitmap(null, canvas_instance, bitmap_instance,
-                    0f, 0f, (float)image.getWidth(), (float)image.getHeight(),
-                    (float)left, (float)top, (float)right, (float)bottom,
-                    paint_instance_or_null, destDensity, srcDensity);
-            return;
-        }
+        return null;
+    }
 
-        final NinePatchChunk chunkObject = getChunk(c);
-        assert chunkObject != null;
-        if (chunkObject == null) {
-            return;
-        }
-
-        Canvas_Delegate canvas_delegate = Canvas_Delegate.getDelegate(canvas_instance);
-        if (canvas_delegate == null) {
-            return;
-        }
-
-        // this one can be null
-        Paint_Delegate paint_delegate = Paint_Delegate.getDelegate(paint_instance_or_null);
-
-        canvas_delegate.getSnapshot().draw(new GcSnapshot.Drawable() {
-                @Override
-                public void draw(Graphics2D graphics, Paint_Delegate paint) {
-                    chunkObject.draw(bitmap_delegate.getImage(), graphics,
-                            left, top, right - left, bottom - top, destDensity, srcDensity);
-                }
-            }, paint_delegate, true /*compositeOnly*/, false /*forceSrcMode*/);
-
-     }
 }

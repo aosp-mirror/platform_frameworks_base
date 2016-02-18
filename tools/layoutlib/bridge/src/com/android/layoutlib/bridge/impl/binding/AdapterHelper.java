@@ -36,9 +36,9 @@ import android.widget.TextView;
 /**
  * A Helper class to do fake data binding in {@link AdapterView} objects.
  */
-@SuppressWarnings("deprecation")
 public class AdapterHelper {
 
+    @SuppressWarnings("deprecation")
     static Pair<View, Boolean> getView(AdapterItem item, AdapterItem parentItem, ViewGroup parent,
             LayoutlibCallback callback, ResourceReference adapterRef, boolean skipCallbackParser) {
         // we don't care about recycling here because we never scroll.

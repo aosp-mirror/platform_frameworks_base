@@ -21,6 +21,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.layoutlib.bridge.impl.GcSnapshot;
 import com.android.layoutlib.bridge.impl.PorterDuffUtility;
+import com.android.ninepatch.NinePatchChunk;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.annotation.Nullable;
@@ -37,6 +38,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+
+import libcore.util.NativeAllocationRegistry_Delegate;
 
 
 /**
@@ -57,6 +60,7 @@ public final class Canvas_Delegate {
     // ---- delegate manager ----
     private static final DelegateManager<Canvas_Delegate> sManager =
             new DelegateManager<Canvas_Delegate>(Canvas_Delegate.class);
+    private static long sFinalizer = -1;
 
 
     // ---- delegate helper data ----
@@ -158,6 +162,9 @@ public final class Canvas_Delegate {
 
         return canvasDelegate.mBitmap.getConfig() == Config.RGB_565;
     }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_setHighContrastText(long nativeCanvas, boolean highContrastText){}
 
     @LayoutlibDelegate
     /*package*/ static int native_getWidth(long nativeCanvas) {
@@ -749,6 +756,61 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
+    /*package*/ static void native_drawRegion(long nativeCanvas, long nativeRegion,
+            long nativePaint) {
+        // FIXME
+        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                "Some canvas paths may not be drawn", null, null);
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static void native_drawNinePatch(Canvas thisCanvas, long nativeCanvas,
+            long nativeBitmap, long ninePatch, final float dstLeft, final float dstTop,
+            final float dstRight, final float dstBottom, long nativePaintOrZero,
+            final int screenDensity, final int bitmapDensity) {
+
+        // get the delegate from the native int.
+        final Bitmap_Delegate bitmapDelegate = Bitmap_Delegate.getDelegate(nativeBitmap);
+        if (bitmapDelegate == null) {
+            return;
+        }
+
+        byte[] c = NinePatch_Delegate.getChunk(ninePatch);
+        if (c == null) {
+            // not a 9-patch?
+            BufferedImage image = bitmapDelegate.getImage();
+            drawBitmap(nativeCanvas, bitmapDelegate, nativePaintOrZero, 0, 0, image.getWidth(),
+                    image.getHeight(), (int) dstLeft, (int) dstTop, (int) dstRight,
+                    (int) dstBottom);
+            return;
+        }
+
+        final NinePatchChunk chunkObject = NinePatch_Delegate.getChunk(c);
+        assert chunkObject != null;
+        if (chunkObject == null) {
+            return;
+        }
+
+        Canvas_Delegate canvasDelegate = Canvas_Delegate.getDelegate(nativeCanvas);
+        if (canvasDelegate == null) {
+            return;
+        }
+
+        // this one can be null
+        Paint_Delegate paintDelegate = Paint_Delegate.getDelegate(nativePaintOrZero);
+
+        canvasDelegate.getSnapshot().draw(new GcSnapshot.Drawable() {
+            @Override
+            public void draw(Graphics2D graphics, Paint_Delegate paint) {
+                chunkObject.draw(bitmapDelegate.getImage(), graphics, (int) dstLeft, (int) dstTop,
+                        (int) (dstRight - dstLeft), (int) (dstBottom - dstTop), screenDensity,
+                        bitmapDensity);
+            }
+        }, paintDelegate, true, false);
+
+    }
+
+    @LayoutlibDelegate
     /*package*/ static void native_drawBitmap(Canvas thisCanvas, long nativeCanvas, Bitmap bitmap,
                                                  float left, float top,
                                                  long nativePaintOrZero,
@@ -934,19 +996,20 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void finalizer(long nativeCanvas) {
-        // get the delegate from the native int so that it can be disposed.
-        Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
-        if (canvasDelegate == null) {
-            return;
+    /*package*/ static long getNativeFinalizer() {
+        synchronized (Canvas_Delegate.class) {
+            if (sFinalizer == -1) {
+                sFinalizer = NativeAllocationRegistry_Delegate.createFinalizer(nativePtr -> {
+                    Canvas_Delegate delegate = sManager.getDelegate(nativePtr);
+                    if (delegate != null) {
+                        delegate.dispose();
+                    }
+                    sManager.removeJavaReferenceFor(nativePtr);
+                });
+            }
         }
-
-        canvasDelegate.dispose();
-
-        // remove it from the manager.
-        sManager.removeJavaReferenceFor(nativeCanvas);
+        return sFinalizer;
     }
-
 
     // ---- Private delegate/helper methods ----
 
