@@ -285,8 +285,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private static final RectF TEMP_RECTF = new RectF();
 
-    // XXX should be much larger
-    private static final int VERY_WIDE = 1024*1024;
+    /** @hide */
+    static final int VERY_WIDE = 1024 * 1024; // XXX should be much larger
     private static final int ANIMATED_SCROLL_GAP = 250;
 
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
