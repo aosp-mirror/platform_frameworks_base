@@ -25,9 +25,15 @@ import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
 import android.net.NetworkIdentity;
 import android.net.NetworkTemplate;
+import android.net.INetworkStatsService;
+import android.os.Binder;
 import android.os.Build;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 /**
@@ -75,16 +81,26 @@ import android.util.Log;
  * not included.
  */
 public class NetworkStatsManager {
-    private final static String TAG = "NetworkStatsManager";
+    private static final String TAG = "NetworkStatsManager";
+    private static final boolean DBG = false;
+
+    /** @hide */
+    public static final int CALLBACK_LIMIT_REACHED = 0;
+    /** @hide */
+    public static final int CALLBACK_RELEASED = 1;
 
     private final Context mContext;
+    private final INetworkStatsService mService;
 
     /**
      * {@hide}
      */
     public NetworkStatsManager(Context context) {
         mContext = context;
+        mService = INetworkStatsService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
     }
+
     /**
      * Query network usage statistics summaries. Result is summarised data usage for the whole
      * device. Result is a single Bucket aggregated over time, state, uid, tag and roaming. This
@@ -322,7 +338,40 @@ public class NetworkStatsManager {
         checkNotNull(policy, "DataUsagePolicy cannot be null");
         checkNotNull(callback, "DataUsageCallback cannot be null");
 
-        // TODO: Implement stub.
+        final Looper looper;
+        if (handler == null) {
+            looper = Looper.myLooper();
+        } else {
+            looper = handler.getLooper();
+        }
+
+        if (DBG) Log.d(TAG, "registerDataUsageCallback called with " + policy);
+
+        NetworkTemplate[] templates;
+        if (policy.subscriberIds == null || policy.subscriberIds.length == 0) {
+            templates = new NetworkTemplate[1];
+            templates[0] = createTemplate(policy.networkType, null /* subscriberId */);
+        } else {
+            templates = new NetworkTemplate[policy.subscriberIds.length];
+            for (int i = 0; i < policy.subscriberIds.length; i++) {
+                templates[i] = createTemplate(policy.networkType, policy.subscriberIds[i]);
+            }
+        }
+        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
+                templates, policy.uids, policy.thresholdInBytes);
+        try {
+            CallbackHandler callbackHandler = new CallbackHandler(looper, callback);
+            callback.request = mService.registerDataUsageCallback(
+                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
+                    new Binder());
+            if (DBG) Log.d(TAG, "registerDataUsageCallback returned " + callback.request);
+
+            if (callback.request == null) {
+                Log.e(TAG, "Request from callback is null; should not happen");
+            }
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when registering callback");
+        }
     }
 
     /**
@@ -331,9 +380,15 @@ public class NetworkStatsManager {
      * @param callback The {@link DataUsageCallback} used when registering.
      */
     public void unregisterDataUsageCallback(DataUsageCallback callback) {
-        checkNotNull(callback, "DataUsageCallback cannot be null");
-
-        // TODO: Implement stub.
+        if (callback == null || callback.request == null
+                || callback.request.requestId == DataUsageRequest.REQUEST_ID_UNSET) {
+            throw new IllegalArgumentException("Invalid DataUsageCallback");
+        }
+        try {
+            mService.unregisterDataUsageRequest(callback.request);
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when unregistering callback");
+        }
     }
 
     /**
@@ -365,5 +420,39 @@ public class NetworkStatsManager {
             }
         }
         return template;
+    }
+
+    private static class CallbackHandler extends Handler {
+        private DataUsageCallback mCallback;
+        CallbackHandler(Looper looper, DataUsageCallback callback) {
+            super(looper);
+            mCallback = callback;
+        }
+
+        @Override
+        public void handleMessage(Message message) {
+            DataUsageRequest request =
+                    (DataUsageRequest) getObject(message, DataUsageRequest.PARCELABLE_KEY);
+
+            switch (message.what) {
+                case CALLBACK_LIMIT_REACHED: {
+                    if (mCallback != null) {
+                        mCallback.onLimitReached();
+                    } else {
+                        Log.e(TAG, "limit reached with released callback for " + request);
+                    }
+                    break;
+                }
+                case CALLBACK_RELEASED: {
+                    if (DBG) Log.d(TAG, "callback released for " + request);
+                    mCallback = null;
+                    break;
+                }
+            }
+        }
+
+        private static Object getObject(Message msg, String key) {
+            return msg.getData().getParcelable(key);
+        }
     }
 }

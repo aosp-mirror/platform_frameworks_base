@@ -135,7 +135,11 @@ public class NetworkStatsCollection implements FileRotator.Reader {
     }
 
     public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel) {
-        final int callerUid = Binder.getCallingUid();
+        return getRelevantUids(accessLevel, Binder.getCallingUid());
+    }
+
+    public int[] getRelevantUids(@NetworkStatsAccess.Level int accessLevel,
+                final int callerUid) {
         IntArray uids = new IntArray();
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
@@ -169,7 +173,17 @@ public class NetworkStatsCollection implements FileRotator.Reader {
     public NetworkStatsHistory getHistory(
             NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end,
             @NetworkStatsAccess.Level int accessLevel) {
-        final int callerUid = Binder.getCallingUid();
+        return getHistory(template, uid, set, tag, fields, start, end, accessLevel,
+                Binder.getCallingUid());
+    }
+
+    /**
+     * Combine all {@link NetworkStatsHistory} in this collection which match
+     * the requested parameters.
+     */
+    public NetworkStatsHistory getHistory(
+            NetworkTemplate template, int uid, int set, int tag, int fields, long start, long end,
+            @NetworkStatsAccess.Level int accessLevel, int callerUid) {
         if (!NetworkStatsAccess.isAccessibleToUser(uid, callerUid, accessLevel)) {
             throw new SecurityException("Network stats history of uid " + uid
                     + " is forbidden for caller " + callerUid);
@@ -198,6 +212,15 @@ public class NetworkStatsCollection implements FileRotator.Reader {
      */
     public NetworkStats getSummary(NetworkTemplate template, long start, long end,
             @NetworkStatsAccess.Level int accessLevel) {
+        return getSummary(template, start, end, accessLevel, Binder.getCallingUid());
+    }
+
+    /**
+     * Summarize all {@link NetworkStatsHistory} in this collection which match
+     * the requested parameters.
+     */
+    public NetworkStats getSummary(NetworkTemplate template, long start, long end,
+            @NetworkStatsAccess.Level int accessLevel, int callerUid) {
         final long now = System.currentTimeMillis();
 
         final NetworkStats stats = new NetworkStats(end - start, 24);
@@ -207,7 +230,6 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
         NetworkStatsHistory.Entry historyEntry = null;
 
-        final int callerUid = Binder.getCallingUid();
         for (int i = 0; i < mStats.size(); i++) {
             final Key key = mStats.keyAt(i);
             if (templateMatches(template, key.ident)
