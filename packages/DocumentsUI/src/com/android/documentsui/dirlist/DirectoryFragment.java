@@ -1071,8 +1071,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             return false;
         }
 
-        // Can't copy folders to roots that don't support children.
-        if (!root.supportsChildren()) {
+        // Can't copy folders to downloads, because we don't show folders there.
+        if (!root.isDownloads()) {
             for (DocumentInfo docs : files) {
                 if (docs.isDirectory()) {
                     return false;
