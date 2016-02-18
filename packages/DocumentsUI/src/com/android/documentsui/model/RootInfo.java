@@ -241,8 +241,10 @@ public class RootInfo implements Durable, Parcelable {
     }
 
     public boolean isLibrary() {
-        return derivedType == TYPE_IMAGES || derivedType == TYPE_VIDEO || derivedType == TYPE_AUDIO
-                || derivedType == TYPE_RECENTS || derivedType == TYPE_DOWNLOADS;
+        return derivedType == TYPE_IMAGES
+                || derivedType == TYPE_VIDEO
+                || derivedType == TYPE_AUDIO
+                || derivedType == TYPE_RECENTS;
     }
 
     public boolean hasSettings() {
@@ -255,6 +257,14 @@ public class RootInfo implements Durable, Parcelable {
 
     public boolean supportsCreate() {
         return (flags & Root.FLAG_SUPPORTS_CREATE) != 0;
+    }
+
+    public boolean supportsRecents() {
+        return (flags & Root.FLAG_SUPPORTS_RECENTS) != 0;
+    }
+
+    public boolean supportsSearch() {
+        return (flags & Root.FLAG_SUPPORTS_SEARCH) != 0;
     }
 
     public boolean isAdvanced() {

@@ -88,7 +88,7 @@ import com.android.documentsui.Menus;
 import com.android.documentsui.MessageBar;
 import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
-import com.android.documentsui.RecentLoader;
+import com.android.documentsui.RecentsLoader;
 import com.android.documentsui.RootsCache;
 import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
@@ -320,7 +320,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
                                 context, mType, root, doc, contentsUri, state.userSortOrder);
                     case TYPE_RECENT_OPEN:
                         final RootsCache roots = DocumentsApplication.getRootsCache(context);
-                        return new RecentLoader(context, roots, state);
+                        return new RecentsLoader(context, roots, state);
                     default:
                         throw new IllegalStateException("Unknown type " + mType);
                 }
