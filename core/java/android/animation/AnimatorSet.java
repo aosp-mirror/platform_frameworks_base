@@ -807,8 +807,6 @@ public final class AnimatorSet extends Animator {
     }
 
     /**
-     * AnimatorSet is only reversible when the set contains no sequential animation, and no child
-     * animators have a start delay.
      * @hide
      */
     @Override
