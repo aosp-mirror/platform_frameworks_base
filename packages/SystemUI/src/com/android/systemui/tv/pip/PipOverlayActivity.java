@@ -50,8 +50,9 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
+        mGuideOverlayView.setVisibility(View.VISIBLE);
         mHandler.removeCallbacks(mHideGuideOverlayRunnable);
         mHandler.postDelayed(mHideGuideOverlayRunnable, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
     }
