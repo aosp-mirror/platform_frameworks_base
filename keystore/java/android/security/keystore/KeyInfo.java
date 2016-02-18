@@ -79,6 +79,7 @@ public class KeyInfo implements KeySpec {
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
+    private final boolean mUserAuthenticationValidWhileOnBody;
 
     /**
      * @hide
@@ -97,7 +98,8 @@ public class KeyInfo implements KeySpec {
             @KeyProperties.BlockModeEnum String[] blockModes,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean userAuthenticationRequirementEnforcedBySecureHardware) {
+            boolean userAuthenticationRequirementEnforcedBySecureHardware,
+            boolean userAuthenticationValidWhileOnBody) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
@@ -116,6 +118,7 @@ public class KeyInfo implements KeySpec {
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mUserAuthenticationRequirementEnforcedBySecureHardware =
                 userAuthenticationRequirementEnforcedBySecureHardware;
+        mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
     }
 
     /**
@@ -276,5 +279,15 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isUserAuthenticationRequirementEnforcedBySecureHardware() {
         return mUserAuthenticationRequirementEnforcedBySecureHardware;
+    }
+
+    /**
+     * Returns {@code true} if this key will remain usable after its specified validity duration
+     * for as long as the device remains on the user's body.  This is possible only for keys with
+     * a specified validity duration.  Always returns {@code false} on devices that lack a secure
+     * on-body sensor.
+     */
+    public boolean isUserAuthenticationValidWhileOnBody() {
+        return mUserAuthenticationValidWhileOnBody;
     }
 }
