@@ -18,6 +18,7 @@
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
 #include "ValueVisitor.h"
+#include "io/File.h"
 #include "util/Util.h"
 
 #include <androidfw/ResourceTypes.h>
@@ -190,6 +191,7 @@ bool FileReference::flatten(android::Res_value* outValue) const {
 
 FileReference* FileReference::clone(StringPool* newPool) const {
     FileReference* fr = new FileReference(newPool->makeRef(*path));
+    fr->file = file;
     fr->mComment = mComment;
     fr->mSource = mSource;
     return fr;

@@ -97,16 +97,6 @@ TEST_F(TableMergerTest, MergeFile) {
                                                                  test::parseConfigOrDie("hdpi-v4"));
     ASSERT_NE(nullptr, file);
     EXPECT_EQ(std::u16string(u"res/layout-hdpi-v4/main.xml"), *file->path);
-
-    ResourceName name = test::parseNameOrDie(u"@com.app.a:layout/main");
-    ResourceKeyRef key = { name, test::parseConfigOrDie("hdpi-v4") };
-
-    auto iter = merger.getFilesToMerge().find(key);
-    ASSERT_NE(merger.getFilesToMerge().end(), iter);
-
-    const FileToMerge& actualFileToMerge = iter->second;
-    EXPECT_EQ(&testFile, actualFileToMerge.file);
-    EXPECT_EQ(std::string("res/layout-hdpi-v4/main.xml"), actualFileToMerge.dstPath);
 }
 
 TEST_F(TableMergerTest, MergeFileOverlay) {
@@ -122,14 +112,6 @@ TEST_F(TableMergerTest, MergeFileOverlay) {
 
     ASSERT_TRUE(merger.mergeFile(fileDesc, &fileA));
     ASSERT_TRUE(merger.mergeFileOverlay(fileDesc, &fileB));
-
-    ResourceName name = test::parseNameOrDie(u"@com.app.a:xml/foo");
-    ResourceKeyRef key = { name, ConfigDescription{} };
-    auto iter = merger.getFilesToMerge().find(key);
-    ASSERT_NE(merger.getFilesToMerge().end(), iter);
-
-    const FileToMerge& actualFileToMerge = iter->second;
-    EXPECT_EQ(&fileB, actualFileToMerge.file);
 }
 
 TEST_F(TableMergerTest, MergeFileReferences) {
@@ -157,15 +139,6 @@ TEST_F(TableMergerTest, MergeFileReferences) {
     f = test::getValue<FileReference>(&finalTable, u"@com.app.a:xml/com.app.b$file");
     ASSERT_NE(f, nullptr);
     EXPECT_EQ(std::u16string(u"res/xml/com.app.b$file.xml"), *f->path);
-
-    ResourceName name = test::parseNameOrDie(u"@com.app.a:xml/com.app.b$file");
-    ResourceKeyRef key = { name, ConfigDescription{} };
-    auto iter = merger.getFilesToMerge().find(key);
-    ASSERT_NE(merger.getFilesToMerge().end(), iter);
-
-    const FileToMerge& actualFileToMerge = iter->second;
-    EXPECT_EQ(Source("res/xml/file.xml"), actualFileToMerge.file->getSource());
-    EXPECT_EQ(std::string("res/xml/com.app.b$file.xml"), actualFileToMerge.dstPath);
 }
 
 TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
@@ -242,38 +215,6 @@ TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
 
     ASSERT_TRUE(merger.merge({}, tableA.get()));
     ASSERT_FALSE(merger.mergeOverlay({}, tableB.get()));
-}
-
-TEST_F(TableMergerTest, MergeAndStripResourcesNotMatchingFilter) {
-    ResourceTable finalTable;
-    TableMergerOptions options;
-    options.autoAddOverlay = false;
-
-    AxisConfigFilter filter;
-    filter.addConfig(test::parseConfigOrDie("en"));
-    options.filter = &filter;
-
-    test::TestFile fileA("res/layout-en/main.xml"), fileB("res/layout-fr-rFR/main.xml");
-    const ResourceName name = test::parseNameOrDie(u"@com.app.a:layout/main");
-    const ConfigDescription configEn = test::parseConfigOrDie("en");
-    const ConfigDescription configFr = test::parseConfigOrDie("fr-rFR");
-
-    TableMerger merger(mContext.get(), &finalTable, options);
-    ASSERT_TRUE(merger.mergeFile(ResourceFile{ name, configEn }, &fileA));
-    ASSERT_TRUE(merger.mergeFile(ResourceFile{ name, configFr }, &fileB));
-
-    EXPECT_NE(nullptr, test::getValueForConfig<FileReference>(&finalTable,
-                                                              u"@com.app.a:layout/main",
-                                                              configEn));
-    EXPECT_EQ(nullptr, test::getValueForConfig<FileReference>(&finalTable,
-                                                              u"@com.app.a:layout/main",
-                                                              configFr));
-
-    EXPECT_NE(merger.getFilesToMerge().end(),
-              merger.getFilesToMerge().find(ResourceKeyRef(name, configEn)));
-
-    EXPECT_EQ(merger.getFilesToMerge().end(),
-              merger.getFilesToMerge().find(ResourceKeyRef(name, configFr)));
 }
 
 } // namespace aapt

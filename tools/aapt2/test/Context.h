@@ -71,6 +71,10 @@ public:
         assert(mNameMangler && "test name mangler not set");
         return mNameMangler.get();
     }
+
+    bool verbose() override {
+        return false;
+    }
 };
 
 class ContextBuilder {

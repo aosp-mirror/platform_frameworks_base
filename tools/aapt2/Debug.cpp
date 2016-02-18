@@ -30,7 +30,8 @@
 
 namespace aapt {
 
-struct PrintVisitor : public ValueVisitor {
+class PrintVisitor : public ValueVisitor {
+public:
     using ValueVisitor::visit;
 
     void visit(Attribute* attr) override {
@@ -69,7 +70,11 @@ struct PrintVisitor : public ValueVisitor {
         for (const auto& entry : style->entries) {
             std::cout << "\n        ";
             if (entry.key.name) {
-                std::cout << entry.key.name.value().package << ":" << entry.key.name.value().entry;
+                const ResourceName& name = entry.key.name.value();
+                if (!name.package.empty()) {
+                    std::cout << name.package << ":";
+                }
+                std::cout << name.entry;
             }
 
             if (entry.key.id) {
@@ -89,7 +94,21 @@ struct PrintVisitor : public ValueVisitor {
     }
 
     void visit(Styleable* styleable) override {
-        styleable->print(&std::cout);
+        std::cout << "(styleable)";
+        for (const auto& attr : styleable->entries) {
+            std::cout << "\n        ";
+            if (attr.name) {
+                const ResourceName& name = attr.name.value();
+                if (!name.package.empty()) {
+                    std::cout << name.package << ":";
+                }
+                std::cout << name.entry;
+            }
+
+            if (attr.id) {
+                std::cout << "(" << attr.id.value() << ")";
+            }
+        }
     }
 
     void visitItem(Item* item) override {
@@ -97,7 +116,9 @@ struct PrintVisitor : public ValueVisitor {
     }
 };
 
-void Debug::printTable(ResourceTable* table) {
+void Debug::printTable(ResourceTable* table, const DebugPrintTableOptions& options) {
+    PrintVisitor visitor;
+
     for (auto& package : table->packages) {
         std::cout << "Package name=" << package->name;
         if (package->id) {
@@ -106,7 +127,7 @@ void Debug::printTable(ResourceTable* table) {
         std::cout << std::endl;
 
         for (const auto& type : package->types) {
-            std::cout << "  type " << type->type;
+            std::cout << "\n  type " << type->type;
             if (type->id) {
                 std::cout << " id=" << std::hex << (int) type->id.value() << std::dec;
             }
@@ -142,10 +163,12 @@ void Debug::printTable(ResourceTable* table) {
 
                 std::cout << std::endl;
 
-                PrintVisitor visitor;
                 for (const auto& value : entry->values) {
                     std::cout << "      (" << value->config << ") ";
                     value->value->accept(&visitor);
+                    if (options.showSources && !value->value->getSource().path.empty()) {
+                        std::cout << " src=" << value->value->getSource();
+                    }
                     std::cout << std::endl;
                 }
             }

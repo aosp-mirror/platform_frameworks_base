@@ -20,6 +20,7 @@
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "StringPool.h"
+#include "io/File.h"
 #include "util/Maybe.h"
 
 #include <array>
@@ -225,6 +226,11 @@ private:
 
 struct FileReference : public BaseItem<FileReference> {
     StringPool::Ref path;
+
+    /**
+     * A handle to the file object from which this file can be read.
+     */
+    io::IFile* file = nullptr;
 
     FileReference() = default;
     FileReference(const StringPool::Ref& path);

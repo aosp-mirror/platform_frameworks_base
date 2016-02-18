@@ -38,6 +38,7 @@
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 #include "proto/ProtoSerialize.h"
+#include "split/TableSplitter.h"
 #include "unflatten/BinaryResourceParser.h"
 #include "util/Files.h"
 #include "util/StringPiece.h"
@@ -63,15 +64,14 @@ struct LinkOptions {
     bool noAutoVersion = false;
     bool staticLib = false;
     bool generateNonFinalIds = false;
-    bool verbose = false;
     bool outputToDirectory = false;
     bool autoAddOverlay = false;
     bool doNotCompressAnything = false;
     std::vector<std::string> extensionsToNotCompress;
     Maybe<std::u16string> privateSymbols;
     ManifestFixerOptions manifestFixerOptions;
-    IConfigFilter* configFilter = nullptr;
     std::unordered_set<std::string> products;
+    TableSplitterOptions tableSplitterOptions;
 };
 
 struct LinkContext : public IAaptContext {
@@ -80,6 +80,7 @@ struct LinkContext : public IAaptContext {
     std::u16string mCompilationPackage;
     uint8_t mPackageId;
     std::unique_ptr<ISymbolTable> mSymbols;
+    bool mVerbose = false;
 
     IDiagnostics* getDiagnostics() override {
         return &mDiagnostics;
@@ -100,7 +101,375 @@ struct LinkContext : public IAaptContext {
     ISymbolTable* getExternalSymbols() override {
         return mSymbols.get();
     }
+
+    bool verbose() override {
+        return mVerbose;
+    }
 };
+
+static bool copyFileToArchive(io::IFile* file, const std::string& outPath,
+                              uint32_t compressionFlags,
+                              IArchiveWriter* writer, IAaptContext* context) {
+    std::unique_ptr<io::IData> data = file->openAsData();
+    if (!data) {
+        context->getDiagnostics()->error(DiagMessage(file->getSource())
+                                         << "failed to open file");
+        return false;
+    }
+
+    CompiledFileInputStream inputStream(data->data(), data->size());
+    if (!inputStream.CompiledFile()) {
+        context->getDiagnostics()->error(DiagMessage(file->getSource())
+                                         << "invalid compiled file header");
+        return false;
+    }
+
+    if (context->verbose()) {
+        context->getDiagnostics()->note(DiagMessage() << "writing " << outPath << " to archive");
+    }
+
+    if (writer->startEntry(outPath, compressionFlags)) {
+        if (writer->writeEntry(reinterpret_cast<const uint8_t*>(inputStream.data()),
+                               inputStream.size())) {
+            if (writer->finishEntry()) {
+                return true;
+            }
+        }
+    }
+
+    context->getDiagnostics()->error(DiagMessage() << "failed to write file " << outPath);
+    return false;
+}
+
+static bool flattenXml(xml::XmlResource* xmlRes, const StringPiece& path, Maybe<size_t> maxSdkLevel,
+                       bool keepRawValues, IArchiveWriter* writer, IAaptContext* context) {
+    BigBuffer buffer(1024);
+    XmlFlattenerOptions options = {};
+    options.keepRawValues = keepRawValues;
+    options.maxSdkLevel = maxSdkLevel;
+    XmlFlattener flattener(&buffer, options);
+    if (!flattener.consume(context, xmlRes)) {
+        return false;
+    }
+
+    if (context->verbose()) {
+        DiagMessage msg;
+        msg << "writing " << path << " to archive";
+        if (maxSdkLevel) {
+            msg << " maxSdkLevel=" << maxSdkLevel.value();
+        }
+        context->getDiagnostics()->note(msg);
+    }
+
+    if (writer->startEntry(path, ArchiveEntry::kCompress)) {
+        if (writer->writeEntry(buffer)) {
+            if (writer->finishEntry()) {
+                return true;
+            }
+        }
+    }
+    context->getDiagnostics()->error(DiagMessage() << "failed to write " << path << " to archive");
+    return false;
+}
+
+/*static std::unique_ptr<ResourceTable> loadTable(const Source& source, const void* data, size_t len,
+                                                IDiagnostics* diag) {
+    std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
+    BinaryResourceParser parser(diag, table.get(), source, data, len);
+    if (!parser.parse()) {
+        return {};
+    }
+    return table;
+}*/
+
+static std::unique_ptr<ResourceTable> loadTableFromPb(const Source& source,
+                                                      const void* data, size_t len,
+                                                      IDiagnostics* diag) {
+    pb::ResourceTable pbTable;
+    if (!pbTable.ParseFromArray(data, len)) {
+        diag->error(DiagMessage(source) << "invalid compiled table");
+        return {};
+    }
+
+    std::unique_ptr<ResourceTable> table = deserializeTableFromPb(pbTable, source, diag);
+    if (!table) {
+        return {};
+    }
+    return table;
+}
+
+/**
+ * Inflates an XML file from the source path.
+ */
+static std::unique_ptr<xml::XmlResource> loadXml(const std::string& path, IDiagnostics* diag) {
+    std::ifstream fin(path, std::ifstream::binary);
+    if (!fin) {
+        diag->error(DiagMessage(path) << strerror(errno));
+        return {};
+    }
+    return xml::inflate(&fin, diag, Source(path));
+}
+
+static std::unique_ptr<xml::XmlResource> loadBinaryXmlSkipFileExport(const Source& source,
+                                                                     const void* data, size_t len,
+                                                                     IDiagnostics* diag) {
+    CompiledFileInputStream inputStream(data, len);
+    if (!inputStream.CompiledFile()) {
+        diag->error(DiagMessage(source) << "invalid compiled file header");
+        return {};
+    }
+
+    const uint8_t* xmlData = reinterpret_cast<const uint8_t*>(inputStream.data());
+    const size_t xmlDataLen = inputStream.size();
+
+    std::unique_ptr<xml::XmlResource> xmlRes = xml::inflate(xmlData, xmlDataLen, diag, source);
+    if (!xmlRes) {
+        return {};
+    }
+    return xmlRes;
+}
+
+static std::unique_ptr<ResourceFile> loadFileExportHeader(const Source& source,
+                                                          const void* data, size_t len,
+                                                          IDiagnostics* diag) {
+    CompiledFileInputStream inputStream(data, len);
+    const pb::CompiledFile* pbFile = inputStream.CompiledFile();
+    if (!pbFile) {
+        diag->error(DiagMessage(source) << "invalid compiled file header");
+        return {};
+    }
+
+    std::unique_ptr<ResourceFile> resFile = deserializeCompiledFileFromPb(*pbFile, source, diag);
+    if (!resFile) {
+        return {};
+    }
+    return resFile;
+}
+
+struct ResourceFileFlattenerOptions {
+    bool noAutoVersion = false;
+    bool keepRawValues = false;
+    bool doNotCompressAnything = false;
+    std::vector<std::string> extensionsToNotCompress;
+};
+
+class ResourceFileFlattener {
+public:
+    ResourceFileFlattener(const ResourceFileFlattenerOptions& options,
+                          IAaptContext* context, proguard::KeepSet* keepSet) :
+            mOptions(options), mContext(context), mKeepSet(keepSet) {
+    }
+
+    bool flatten(ResourceTable* table, IArchiveWriter* archiveWriter);
+
+private:
+    struct FileOperation {
+        io::IFile* fileToCopy;
+        std::unique_ptr<xml::XmlResource> xmlToFlatten;
+        std::string dstPath;
+    };
+
+    uint32_t getCompressionFlags(const StringPiece& str);
+
+    std::unique_ptr<xml::XmlResource> linkAndVersionXmlFile(const ResourceEntry* entry,
+                                                            const ResourceFile& fileDesc,
+                                                            io::IFile* file,
+                                                            ResourceTable* table);
+
+    ResourceFileFlattenerOptions mOptions;
+    IAaptContext* mContext;
+    proguard::KeepSet* mKeepSet;
+};
+
+uint32_t ResourceFileFlattener::getCompressionFlags(const StringPiece& str) {
+    if (mOptions.doNotCompressAnything) {
+        return 0;
+    }
+
+    for (const std::string& extension : mOptions.extensionsToNotCompress) {
+        if (util::stringEndsWith<char>(str, extension)) {
+            return 0;
+        }
+    }
+    return ArchiveEntry::kCompress;
+}
+
+std::unique_ptr<xml::XmlResource> ResourceFileFlattener::linkAndVersionXmlFile(
+        const ResourceEntry* entry,
+        const ResourceFile& fileDesc,
+        io::IFile* file,
+        ResourceTable* table) {
+    const StringPiece srcPath = file->getSource().path;
+    if (mContext->verbose()) {
+        mContext->getDiagnostics()->note(DiagMessage() << "linking " << srcPath);
+    }
+
+    std::unique_ptr<io::IData> data = file->openAsData();
+    if (!data) {
+        mContext->getDiagnostics()->error(DiagMessage(file->getSource()) << "failed to open file");
+        return {};
+    }
+
+    std::unique_ptr<xml::XmlResource> xmlRes;
+    if (util::stringEndsWith<char>(srcPath, ".flat")) {
+        xmlRes = loadBinaryXmlSkipFileExport(file->getSource(), data->data(), data->size(),
+                                             mContext->getDiagnostics());
+    } else {
+        xmlRes = xml::inflate(data->data(), data->size(), mContext->getDiagnostics(),
+                              file->getSource());
+    }
+
+    if (!xmlRes) {
+        return {};
+    }
+
+    // Copy the the file description header.
+    xmlRes->file = fileDesc;
+
+    XmlReferenceLinker xmlLinker;
+    if (!xmlLinker.consume(mContext, xmlRes.get())) {
+        return {};
+    }
+
+    if (!proguard::collectProguardRules(xmlRes->file.source, xmlRes.get(), mKeepSet)) {
+        return {};
+    }
+
+    if (!mOptions.noAutoVersion) {
+        // Find the first SDK level used that is higher than this defined config and
+        // not superseded by a lower or equal SDK level resource.
+        for (int sdkLevel : xmlLinker.getSdkLevels()) {
+            if (sdkLevel > xmlRes->file.config.sdkVersion) {
+                if (!shouldGenerateVersionedResource(entry, xmlRes->file.config, sdkLevel)) {
+                    // If we shouldn't generate a versioned resource, stop checking.
+                    break;
+                }
+
+                ResourceFile versionedFileDesc = xmlRes->file;
+                versionedFileDesc.config.sdkVersion = sdkLevel;
+
+                if (mContext->verbose()) {
+                    mContext->getDiagnostics()->note(DiagMessage(versionedFileDesc.source)
+                                                     << "auto-versioning resource from config '"
+                                                     << xmlRes->file.config << "' -> '"
+                                                     << versionedFileDesc.config << "'");
+                }
+
+                std::u16string genPath = util::utf8ToUtf16(ResourceUtils::buildResourceFileName(
+                        versionedFileDesc, mContext->getNameMangler()));
+
+                bool added = table->addFileReferenceAllowMangled(versionedFileDesc.name,
+                                                                 versionedFileDesc.config,
+                                                                 versionedFileDesc.source,
+                                                                 genPath,
+                                                                 file,
+                                                                 mContext->getDiagnostics());
+                if (!added) {
+                    return {};
+                }
+                break;
+            }
+        }
+    }
+    return xmlRes;
+}
+
+/**
+ * Do not insert or remove any resources while executing in this function. It will
+ * corrupt the iteration order.
+ */
+bool ResourceFileFlattener::flatten(ResourceTable* table, IArchiveWriter* archiveWriter) {
+    bool error = false;
+    std::map<std::pair<ConfigDescription, StringPiece16>, FileOperation> configSortedFiles;
+
+    for (auto& pkg : table->packages) {
+        for (auto& type : pkg->types) {
+            // Sort by config and name, so that we get better locality in the zip file.
+            configSortedFiles.clear();
+            for (auto& entry : type->entries) {
+                // Iterate via indices because auto generated values can be inserted ahead of
+                // the value being processed.
+                for (size_t i = 0; i < entry->values.size(); i++) {
+                    ResourceConfigValue* configValue = entry->values[i].get();
+
+                    FileReference* fileRef = valueCast<FileReference>(configValue->value.get());
+                    if (!fileRef) {
+                        continue;
+                    }
+
+                    io::IFile* file = fileRef->file;
+                    if (!file) {
+                        mContext->getDiagnostics()->error(DiagMessage(fileRef->getSource())
+                                                          << "file not found");
+                        return false;
+                    }
+
+                    FileOperation fileOp;
+                    fileOp.dstPath = util::utf16ToUtf8(*fileRef->path);
+
+                    const StringPiece srcPath = file->getSource().path;
+                    if (type->type != ResourceType::kRaw &&
+                            (util::stringEndsWith<char>(srcPath, ".xml.flat") ||
+                            util::stringEndsWith<char>(srcPath, ".xml"))) {
+                        ResourceFile fileDesc;
+                        fileDesc.config = configValue->config;
+                        fileDesc.name = ResourceName(pkg->name, type->type, entry->name);
+                        fileDesc.source = fileRef->getSource();
+                        fileOp.xmlToFlatten = linkAndVersionXmlFile(entry.get(), fileDesc,
+                                                                    file, table);
+                        if (!fileOp.xmlToFlatten) {
+                            error = true;
+                            continue;
+                        }
+
+                    } else {
+                        fileOp.fileToCopy = file;
+                    }
+
+                    // NOTE(adamlesinski): Explicitly construct a StringPiece16 here, or else
+                    // we end up copying the string in the std::make_pair() method, then creating
+                    // a StringPiece16 from the copy, which would cause us to end up referencing
+                    // garbage in the map.
+                    const StringPiece16 entryName(entry->name);
+                    configSortedFiles[std::make_pair(configValue->config, entryName)] =
+                                      std::move(fileOp);
+                }
+            }
+
+            if (error) {
+                return false;
+            }
+
+            // Now flatten the sorted values.
+            for (auto& mapEntry : configSortedFiles) {
+                const ConfigDescription& config = mapEntry.first.first;
+                const FileOperation& fileOp = mapEntry.second;
+
+                if (fileOp.xmlToFlatten) {
+                    Maybe<size_t> maxSdkLevel;
+                    if (!mOptions.noAutoVersion) {
+                        maxSdkLevel = std::max<size_t>(config.sdkVersion, 1u);
+                    }
+
+                    bool result = flattenXml(fileOp.xmlToFlatten.get(), fileOp.dstPath, maxSdkLevel,
+                                             mOptions.keepRawValues,
+                                             archiveWriter, mContext);
+                    if (!result) {
+                        error = true;
+                    }
+                } else {
+                    bool result = copyFileToArchive(fileOp.fileToCopy, fileOp.dstPath,
+                                                    getCompressionFlags(fileOp.dstPath),
+                                                    archiveWriter, mContext);
+                    if (!result) {
+                        error = true;
+                    }
+                }
+            }
+        }
+    }
+    return !error;
+}
 
 class LinkCommand {
 public:
@@ -123,7 +492,7 @@ public:
     std::unique_ptr<ISymbolTable> createSymbolTableFromIncludePaths() {
         AssetManagerSymbolTableBuilder builder;
         for (const std::string& path : mOptions.includePaths) {
-            if (mOptions.verbose) {
+            if (mContext->verbose()) {
                 mContext->getDiagnostics()->note(DiagMessage(path) << "loading include path");
             }
 
@@ -138,125 +507,6 @@ public:
             builder.add(std::move(assetManager));
         }
         return builder.build();
-    }
-
-    std::unique_ptr<ResourceTable> loadTable(const Source& source, const void* data, size_t len) {
-        std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-        BinaryResourceParser parser(mContext, table.get(), source, data, len);
-        if (!parser.parse()) {
-            return {};
-        }
-        return table;
-    }
-
-    std::unique_ptr<ResourceTable> loadTableFromPb(const Source& source,
-                                                   const void* data, size_t len) {
-        pb::ResourceTable pbTable;
-        if (!pbTable.ParseFromArray(data, len)) {
-            mContext->getDiagnostics()->error(DiagMessage(source) << "invalid compiled table");
-            return {};
-        }
-
-        std::unique_ptr<ResourceTable> table = deserializeTableFromPb(pbTable, source,
-                                                                      mContext->getDiagnostics());
-        if (!table) {
-            return {};
-        }
-        return table;
-    }
-
-    /**
-     * Inflates an XML file from the source path.
-     */
-    static std::unique_ptr<xml::XmlResource> loadXml(const std::string& path, IDiagnostics* diag) {
-        std::ifstream fin(path, std::ifstream::binary);
-        if (!fin) {
-            diag->error(DiagMessage(path) << strerror(errno));
-            return {};
-        }
-
-        return xml::inflate(&fin, diag, Source(path));
-    }
-
-    static std::unique_ptr<xml::XmlResource> loadBinaryXmlSkipFileExport(
-            const Source& source,
-            const void* data, size_t len,
-            IDiagnostics* diag) {
-        CompiledFileInputStream inputStream(data, len);
-        if (!inputStream.CompiledFile()) {
-            diag->error(DiagMessage(source) << "invalid compiled file header");
-            return {};
-        }
-
-        const uint8_t* xmlData = reinterpret_cast<const uint8_t*>(inputStream.data());
-        const size_t xmlDataLen = inputStream.size();
-
-        std::unique_ptr<xml::XmlResource> xmlRes = xml::inflate(xmlData, xmlDataLen, diag, source);
-        if (!xmlRes) {
-            return {};
-        }
-        return xmlRes;
-    }
-
-    static std::unique_ptr<ResourceFile> loadFileExportHeader(const Source& source,
-                                                              const void* data, size_t len,
-                                                              IDiagnostics* diag) {
-        CompiledFileInputStream inputStream(data, len);
-        const pb::CompiledFile* pbFile = inputStream.CompiledFile();
-        if (!pbFile) {
-            diag->error(DiagMessage(source) << "invalid compiled file header");
-            return {};
-        }
-
-        std::unique_ptr<ResourceFile> resFile = deserializeCompiledFileFromPb(*pbFile, source,
-                                                                              diag);
-        if (!resFile) {
-            return {};
-        }
-        return resFile;
-    }
-
-    uint32_t getCompressionFlags(const StringPiece& str) {
-        if (mOptions.doNotCompressAnything) {
-            return 0;
-        }
-
-        for (const std::string& extension : mOptions.extensionsToNotCompress) {
-            if (util::stringEndsWith<char>(str, extension)) {
-                return 0;
-            }
-        }
-        return ArchiveEntry::kCompress;
-    }
-
-    bool copyFileToArchive(io::IFile* file, const std::string& outPath,
-                           IArchiveWriter* writer) {
-        std::unique_ptr<io::IData> data = file->openAsData();
-        if (!data) {
-            mContext->getDiagnostics()->error(DiagMessage(file->getSource())
-                                             << "failed to open file");
-            return false;
-        }
-
-        CompiledFileInputStream inputStream(data->data(), data->size());
-        if (!inputStream.CompiledFile()) {
-            mContext->getDiagnostics()->error(DiagMessage(file->getSource())
-                                              << "invalid compiled file header");
-            return false;
-        }
-
-        if (writer->startEntry(outPath, getCompressionFlags(outPath))) {
-            if (writer->writeEntry(reinterpret_cast<const uint8_t*>(inputStream.data()),
-                                   inputStream.size())) {
-                if (writer->finishEntry()) {
-                    return true;
-                }
-            }
-        }
-
-        mContext->getDiagnostics()->error(
-                DiagMessage(mOptions.outputPath) << "failed to write file " << outPath);
-        return false;
     }
 
     Maybe<AppInfo> extractAppInfoFromManifest(xml::XmlResource* xmlRes) {
@@ -349,28 +599,6 @@ public:
         return false;
     }
 
-    bool flattenXml(xml::XmlResource* xmlRes, const StringPiece& path, Maybe<size_t> maxSdkLevel,
-                    IArchiveWriter* writer) {
-        BigBuffer buffer(1024);
-        XmlFlattenerOptions options = {};
-        options.keepRawValues = mOptions.staticLib;
-        options.maxSdkLevel = maxSdkLevel;
-        XmlFlattener flattener(&buffer, options);
-        if (!flattener.consume(mContext, xmlRes)) {
-            return false;
-        }
-
-        if (writer->startEntry(path, ArchiveEntry::kCompress)) {
-            if (writer->writeEntry(buffer)) {
-                if (writer->finishEntry()) {
-                    return true;
-                }
-            }
-        }
-        mContext->getDiagnostics()->error(
-                DiagMessage() << "failed to write " << path << " to archive");
-        return false;
-    }
 
     bool writeJavaFile(ResourceTable* table, const StringPiece16& packageNameToGenerate,
                        const StringPiece16& outPackage, JavaClassGeneratorOptions javaOptions) {
@@ -456,7 +684,7 @@ public:
     }
 
     bool mergeResourceTable(io::IFile* file, bool override) {
-        if (mOptions.verbose) {
+        if (mContext->verbose()) {
             mContext->getDiagnostics()->note(DiagMessage() << "linking " << file->getSource());
         }
 
@@ -467,8 +695,9 @@ public:
             return false;
         }
 
-        std::unique_ptr<ResourceTable> table = loadTableFromPb(file->getSource(), data->data(),
-                                                               data->size());
+        std::unique_ptr<ResourceTable> table = loadTableFromPb(file->getSource(),
+                                                               data->data(), data->size(),
+                                                               mContext->getDiagnostics());
         if (!table) {
             return false;
         }
@@ -483,7 +712,7 @@ public:
     }
 
     bool mergeCompiledFile(io::IFile* file, std::unique_ptr<ResourceFile> fileDesc, bool overlay) {
-        if (mOptions.verbose) {
+        if (mContext->verbose()) {
             mContext->getDiagnostics()->note(DiagMessage() << "adding " << file->getSource());
         }
 
@@ -628,10 +857,9 @@ public:
 
         TableMergerOptions tableMergerOptions;
         tableMergerOptions.autoAddOverlay = mOptions.autoAddOverlay;
-        tableMergerOptions.filter = mOptions.configFilter;
         mTableMerger = util::make_unique<TableMerger>(mContext, &mFinalTable, tableMergerOptions);
 
-        if (mOptions.verbose) {
+        if (mContext->verbose()) {
             mContext->getDiagnostics()->note(
                     DiagMessage() << "linking package '" << mContext->mCompilationPackage << "' "
                                   << "with package ID " << std::hex << (int) mContext->mPackageId);
@@ -692,6 +920,15 @@ public:
                 mContext->getDiagnostics()->error(DiagMessage() << "failed stripping products");
                 return 1;
             }
+
+            // TODO(adamlesinski): Actually pass in split constraints and handle splits at the file
+            // level.
+            TableSplitter tableSplitter({}, mOptions.tableSplitterOptions);
+            if (!tableSplitter.verifySplitConstraints(mContext)) {
+                return 1;
+            }
+
+            tableSplitter.splitTable(&mFinalTable);
         }
 
         proguard::KeepSet proguardKeepSet;
@@ -728,8 +965,10 @@ public:
                     }
                 }
 
-                if (!flattenXml(manifestXml.get(), "AndroidManifest.xml", {},
-                                archiveWriter.get())) {
+                const bool keepRawValues = mOptions.staticLib;
+                bool result = flattenXml(manifestXml.get(), "AndroidManifest.xml", {},
+                                         keepRawValues, archiveWriter.get(), mContext);
+                if (!result) {
                     error = true;
                 }
             } else {
@@ -742,113 +981,14 @@ public:
             return 1;
         }
 
-        for (auto& mergeEntry : mTableMerger->getFilesToMerge()) {
-            const ResourceKeyRef& key = mergeEntry.first;
-            const FileToMerge& fileToMerge = mergeEntry.second;
+        ResourceFileFlattenerOptions fileFlattenerOptions;
+        fileFlattenerOptions.keepRawValues = mOptions.staticLib;
+        fileFlattenerOptions.doNotCompressAnything = mOptions.doNotCompressAnything;
+        fileFlattenerOptions.extensionsToNotCompress = mOptions.extensionsToNotCompress;
+        fileFlattenerOptions.noAutoVersion = mOptions.noAutoVersion;
+        ResourceFileFlattener fileFlattener(fileFlattenerOptions, mContext, &proguardKeepSet);
 
-            const StringPiece path = fileToMerge.file->getSource().path;
-
-            if (key.name.type != ResourceType::kRaw &&
-                    (util::stringEndsWith<char>(path, ".xml.flat") ||
-                    util::stringEndsWith<char>(path, ".xml"))) {
-                if (mOptions.verbose) {
-                    mContext->getDiagnostics()->note(DiagMessage() << "linking " << path);
-                }
-
-                io::IFile* file = fileToMerge.file;
-                std::unique_ptr<io::IData> data = file->openAsData();
-                if (!data) {
-                    mContext->getDiagnostics()->error(DiagMessage(file->getSource())
-                                                     << "failed to open file");
-                    return 1;
-                }
-
-                std::unique_ptr<xml::XmlResource> xmlRes;
-                if (util::stringEndsWith<char>(path, ".flat")) {
-                    xmlRes = loadBinaryXmlSkipFileExport(file->getSource(),
-                                                         data->data(), data->size(),
-                                                         mContext->getDiagnostics());
-                } else {
-                    xmlRes = xml::inflate(data->data(), data->size(), mContext->getDiagnostics(),
-                                          file->getSource());
-                }
-
-                if (!xmlRes) {
-                    return 1;
-                }
-
-                // Create the file description header.
-                xmlRes->file = ResourceFile{
-                        key.name.toResourceName(),
-                        key.config,
-                        fileToMerge.originalSource,
-                };
-
-                XmlReferenceLinker xmlLinker;
-                if (xmlLinker.consume(mContext, xmlRes.get())) {
-                    if (!proguard::collectProguardRules(xmlRes->file.source, xmlRes.get(),
-                                                        &proguardKeepSet)) {
-                        error = true;
-                    }
-
-                    Maybe<size_t> maxSdkLevel;
-                    if (!mOptions.noAutoVersion) {
-                        maxSdkLevel = std::max<size_t>(xmlRes->file.config.sdkVersion, 1u);
-                    }
-
-                    if (!flattenXml(xmlRes.get(), fileToMerge.dstPath, maxSdkLevel,
-                                    archiveWriter.get())) {
-                        error = true;
-                    }
-
-                    if (!mOptions.noAutoVersion) {
-                        Maybe<ResourceTable::SearchResult> result = mFinalTable.findResource(
-                                xmlRes->file.name);
-                        for (int sdkLevel : xmlLinker.getSdkLevels()) {
-                            if (sdkLevel > xmlRes->file.config.sdkVersion &&
-                                    shouldGenerateVersionedResource(result.value().entry,
-                                                                    xmlRes->file.config,
-                                                                    sdkLevel)) {
-                                xmlRes->file.config.sdkVersion = sdkLevel;
-
-                                std::string genResourcePath = ResourceUtils::buildResourceFileName(
-                                        xmlRes->file, mContext->getNameMangler());
-
-                                bool added = mFinalTable.addFileReference(
-                                        xmlRes->file.name,
-                                        xmlRes->file.config,
-                                        xmlRes->file.source,
-                                        util::utf8ToUtf16(genResourcePath),
-                                        mContext->getDiagnostics());
-                                if (!added) {
-                                    error = true;
-                                    continue;
-                                }
-
-                                if (!flattenXml(xmlRes.get(), genResourcePath, sdkLevel,
-                                                archiveWriter.get())) {
-                                    error = true;
-                                }
-                            }
-                        }
-                    }
-
-                } else {
-                    error = true;
-                }
-            } else {
-                if (mOptions.verbose) {
-                    mContext->getDiagnostics()->note(DiagMessage() << "copying " << path);
-                }
-
-                if (!copyFileToArchive(fileToMerge.file, fileToMerge.dstPath,
-                                       archiveWriter.get())) {
-                    error = true;
-                }
-            }
-        }
-
-        if (error) {
+        if (!fileFlattener.flatten(&mFinalTable, archiveWriter.get())) {
             mContext->getDiagnostics()->error(DiagMessage() << "failed linking file resources");
             return 1;
         }
@@ -912,8 +1052,10 @@ public:
             }
         }
 
-        if (mOptions.verbose) {
-            Debug::printTable(&mFinalTable);
+        if (mContext->verbose()) {
+            DebugPrintTableOptions debugPrintTableOptions;
+            debugPrintTableOptions.showSources = true;
+            Debug::printTable(&mFinalTable, debugPrintTableOptions);
         }
         return 0;
     }
@@ -934,6 +1076,7 @@ private:
 };
 
 int link(const std::vector<StringPiece>& args) {
+    LinkContext context;
     LinkOptions options;
     Maybe<std::string> privateSymbolsPackage;
     Maybe<std::string> minSdkVersion, targetSdkVersion;
@@ -942,6 +1085,7 @@ int link(const std::vector<StringPiece>& args) {
     Maybe<std::string> customJavaPackage;
     std::vector<std::string> extraJavaPackages;
     Maybe<std::string> configs;
+    Maybe<std::string> preferredDensity;
     Maybe<std::string> productList;
     bool legacyXFlag = false;
     bool requireLocalization = false;
@@ -966,6 +1110,9 @@ int link(const std::vector<StringPiece>& args) {
                             &requireLocalization)
             .optionalFlag("-c", "Comma separated list of configurations to include. The default\n"
                                 "is all configurations", &configs)
+            .optionalFlag("--preferred-density",
+                          "Selects the closest matching density and strips out all others.",
+                          &preferredDensity)
             .optionalFlag("--product", "Comma separated list of product names to keep",
                           &productList)
             .optionalSwitch("--output-to-dir", "Outputs the APK contents to a directory specified "
@@ -1001,13 +1148,11 @@ int link(const std::vector<StringPiece>& args) {
                           &renameInstrumentationTargetPackage)
             .optionalFlagList("-0", "File extensions not to compress",
                               &options.extensionsToNotCompress)
-            .optionalSwitch("-v", "Enables verbose logging", &options.verbose);
+            .optionalSwitch("-v", "Enables verbose logging", &context.mVerbose);
 
     if (!flags.parse("aapt2 link", args, &std::cerr)) {
         return 1;
     }
-
-    LinkContext context;
 
     if (privateSymbolsPackage) {
         options.privateSymbols = util::utf8ToUtf16(privateSymbolsPackage.value());
@@ -1082,7 +1227,29 @@ int link(const std::vector<StringPiece>& args) {
             }
         }
 
-        options.configFilter = &filter;
+        options.tableSplitterOptions.configFilter = &filter;
+    }
+
+    if (preferredDensity) {
+        ConfigDescription preferredDensityConfig;
+        if (!ConfigDescription::parse(preferredDensity.value(), &preferredDensityConfig)) {
+            context.getDiagnostics()->error(DiagMessage() << "invalid density '"
+                                            << preferredDensity.value()
+                                            << "' for --preferred-density option");
+            return 1;
+        }
+
+        // Clear the version that can be automatically added.
+        preferredDensityConfig.sdkVersion = 0;
+
+        if (preferredDensityConfig.diff(ConfigDescription::defaultConfig())
+                != ConfigDescription::CONFIG_DENSITY) {
+            context.getDiagnostics()->error(DiagMessage() << "invalid preferred density '"
+                                            << preferredDensity.value() << "'. "
+                                            << "Preferred density must only be a density value");
+            return 1;
+        }
+        options.tableSplitterOptions.preferredDensity = preferredDensityConfig.density;
     }
 
     LinkCommand cmd(&context, options);
