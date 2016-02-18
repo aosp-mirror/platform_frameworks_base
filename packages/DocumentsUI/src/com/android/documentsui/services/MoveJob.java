@@ -80,8 +80,8 @@ final class MoveJob extends CopyJob {
                 R.plurals.move_error_notification_title, R.drawable.ic_menu_copy);
     }
 
-    boolean processDocument(DocumentInfo src, DocumentInfo srcParent, DocumentInfo dest)
-            throws RemoteException {
+    void processDocument(DocumentInfo src, DocumentInfo srcParent, DocumentInfo dest)
+            throws ResourceException {
 
         // TODO: When optimized move kicks in, we're not making any progress updates. FIX IT!
 
@@ -89,13 +89,19 @@ final class MoveJob extends CopyJob {
         // If not supported, then fallback to byte-by-byte copy/move.
         if (src.authority.equals(dest.authority)) {
             if ((src.flags & Document.FLAG_SUPPORTS_MOVE) != 0) {
-                if (DocumentsContract.moveDocument(getClient(src), src.derivedUri,
-                        srcParent != null ? srcParent.derivedUri : mSrcParent.derivedUri,
-                        dest.derivedUri) == null) {
-                    onFileFailed(src);
-                    return false;
+                try {
+                    if (DocumentsContract.moveDocument(getClient(src), src.derivedUri,
+                            srcParent != null ? srcParent.derivedUri : mSrcParent.derivedUri,
+                            dest.derivedUri) == null) {
+                        throw new ResourceException("Provider side move failed for document %s.",
+                                src.derivedUri);
+                    }
+                } catch (RuntimeException | RemoteException e) {
+                    throw new ResourceException(
+                            "Provider side move failed for document %s due to an exception.",
+                            src.derivedUri, e);
                 }
-                return true;
+                return;
             }
         }
 
@@ -103,16 +109,12 @@ final class MoveJob extends CopyJob {
         // conversion, and the source file should not be deleted in such case (as it's a different
         // file).
         if (src.isVirtualDocument()) {
-            Log.w(TAG, "Cannot move virtual files byte by byte.");
-            onFileFailed(src);
-            return false;
+            throw new ResourceException("Cannot move virtual file %s byte by byte.",
+                    src.derivedUri);
         }
 
         // If we couldn't do an optimized copy...we fall back to vanilla byte copy.
-        boolean copied = byteCopyDocument(src, dest);
-
-        // TODO: Replace deleteDocument() with removeDocument() once implemented.
-        return copied && !isCanceled() && deleteDocument(src);
+        byteCopyDocument(src, dest);
     }
 
     @Override

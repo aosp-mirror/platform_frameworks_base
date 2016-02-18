@@ -129,10 +129,19 @@ class CopyJob extends Job {
     }
 
     Notification getProgressNotification(@StringRes int msgId) {
-        double completed = (double) this.mBytesCopied / mBatchSize;
-        mProgressBuilder.setProgress(100, (int) (completed * 100), false);
-        mProgressBuilder.setContentInfo(
-                NumberFormat.getPercentInstance().format(completed));
+        if (mBatchSize >= 0) {
+            double completed = (double) this.mBytesCopied / mBatchSize;
+            mProgressBuilder.setProgress(100, (int) (completed * 100), false);
+            mProgressBuilder.setContentInfo(
+                    NumberFormat.getPercentInstance().format(completed));
+        } else {
+            // If the total file size failed to compute on some files, then show
+            // an indeterminate spinner. CopyJob would most likely fail on those
+            // files while copying, but would continue with another files.
+            // Also, if the total size is 0 bytes, show an indeterminate spinner.
+            mProgressBuilder.setProgress(0, 0, true);
+        }
+
         if (mRemainingTime > 0) {
             mProgressBuilder.setContentText(service.getString(msgId,
                     DateUtils.formatDuration(mRemainingTime)));
@@ -208,11 +217,15 @@ class CopyJob extends Job {
     }
 
     @Override
-    void start() throws RemoteException {
+    void start() {
         mStartTime = elapsedRealtime();
 
-        // client
-        mBatchSize = calculateSize(mSrcs);
+        try {
+            mBatchSize = calculateSize(mSrcs);
+        } catch (ResourceException e) {
+            Log.w(TAG, "Failed to calculate total size. Copying without progress.");
+            mBatchSize = -1;
+        }
 
         DocumentInfo srcInfo;
         DocumentInfo dstInfo = stack.peek();
@@ -220,9 +233,13 @@ class CopyJob extends Job {
             srcInfo = mSrcs.get(i);
 
             // Guard unsupported recursive operation.
-            if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
-                onFileFailed(srcInfo,
-                        "Skipping recursive operation on directory " + dstInfo.derivedUri + ".");
+            try {
+                if (dstInfo.equals(srcInfo) || isDescendentOf(srcInfo, dstInfo)) {
+                    throw new ResourceException("Cannot copy to itself recursively.");
+                }
+            } catch (ResourceException e) {
+                Log.e(TAG, e.toString());
+                onFileFailed(srcInfo);
                 continue;
             }
 
@@ -230,7 +247,12 @@ class CopyJob extends Job {
                     "Copying " + srcInfo.displayName + " (" + srcInfo.derivedUri + ")"
                     + " to " + dstInfo.displayName + " (" + dstInfo.derivedUri + ")");
 
-            processDocument(srcInfo, null, dstInfo);
+            try {
+                processDocument(srcInfo, null, dstInfo);
+            } catch (ResourceException e) {
+                Log.e(TAG, e.toString());
+                onFileFailed(srcInfo);
+            }
         }
         Metrics.logFileOperation(service, operationType, mSrcs, dstInfo);
     }
@@ -259,13 +281,12 @@ class CopyJob extends Job {
      * @param src DocumentInfos for the documents to copy.
      * @param srcParent DocumentInfo for the parent of the document to process.
      * @param dstDirInfo The destination directory.
-     * @return True on success, false on failure.
-     * @throws RemoteException
+     * @throws ResourceException
      *
      * TODO: Stop passing srcParent, as it's not used for copy, but for move only.
      */
-    boolean processDocument(DocumentInfo src, DocumentInfo srcParent,
-            DocumentInfo dstDirInfo) throws RemoteException {
+    void processDocument(DocumentInfo src, DocumentInfo srcParent,
+            DocumentInfo dstDirInfo) throws ResourceException {
 
         // TODO: When optimized copy kicks in, we'll not making any progress updates.
         // For now. Local storage isn't using optimized copy.
@@ -274,22 +295,28 @@ class CopyJob extends Job {
         // If not supported, then fallback to byte-by-byte copy/move.
         if (src.authority.equals(dstDirInfo.authority)) {
             if ((src.flags & Document.FLAG_SUPPORTS_COPY) != 0) {
-                if (DocumentsContract.copyDocument(getClient(src), src.derivedUri,
-                        dstDirInfo.derivedUri) == null) {
-                    onFileFailed(src,
-                            "Provider side copy failed for documents: " + src.derivedUri + ".");
-                    return false;
+                try {
+                    if (DocumentsContract.copyDocument(getClient(src), src.derivedUri,
+                            dstDirInfo.derivedUri) == null) {
+                        throw new ResourceException("Provider side copy failed for document %s.",
+                                src.derivedUri);
+                    }
+                } catch (ResourceException e) {
+                    throw e;
+                } catch (RemoteException | RuntimeException e) {
+                    throw new ResourceException(
+                            "Provider side copy failed for document %s due to an exception.",
+                            src.derivedUri, e);
                 }
-                return true;
+                return;
             }
         }
 
         // If we couldn't do an optimized copy...we fall back to vanilla byte copy.
-        return byteCopyDocument(src, dstDirInfo);
+        byteCopyDocument(src, dstDirInfo);
     }
 
-    boolean byteCopyDocument(DocumentInfo src, DocumentInfo dest)
-            throws RemoteException {
+    void byteCopyDocument(DocumentInfo src, DocumentInfo dest) throws ResourceException {
         final String dstMimeType;
         final String dstDisplayName;
 
@@ -297,8 +324,14 @@ class CopyJob extends Job {
         // If the file is virtual, but can be converted to another format, then try to copy it
         // as such format. Also, append an extension for the target mime type (if known).
         if (src.isVirtualDocument()) {
-            final String[] streamTypes = getContentResolver().getStreamTypes(
-                    src.derivedUri, "*/*");
+            String[] streamTypes = null;
+            try {
+                streamTypes = getContentResolver().getStreamTypes(src.derivedUri, "*/*");
+            } catch (RuntimeException e) {
+                throw new ResourceException(
+                        "Failed to obtain streamable types for %s due to an exception.",
+                        src.derivedUri, e);
+            }
             if (streamTypes != null && streamTypes.length > 0) {
                 dstMimeType = streamTypes[0];
                 final String extension = MimeTypeMap.getSingleton().
@@ -306,8 +339,8 @@ class CopyJob extends Job {
                 dstDisplayName = src.displayName +
                         (extension != null ? "." + extension : src.displayName);
             } else {
-                onFileFailed(src, "Cannot copy virtual file. No streamable formats available.");
-                return false;
+                throw new ResourceException("Cannot copy virtual file %s. No streamable formats "
+                        + "available.", src.derivedUri);
             }
         } else {
             dstMimeType = src.mimeType;
@@ -316,33 +349,35 @@ class CopyJob extends Job {
 
         // Create the target document (either a file or a directory), then copy recursively the
         // contents (bytes or children).
-        final Uri dstUri = DocumentsContract.createDocument(
-                getClient(dest), dest.derivedUri, dstMimeType, dstDisplayName);
+        Uri dstUri = null;
+        try {
+            dstUri = DocumentsContract.createDocument(
+                    getClient(dest), dest.derivedUri, dstMimeType, dstDisplayName);
+        } catch (RemoteException | RuntimeException e) {
+            throw new ResourceException(
+                    "Couldn't create destination document " + dstDisplayName + " in directory %s "
+                    + "due to an exception.", dest.derivedUri, e);
+        }
         if (dstUri == null) {
             // If this is a directory, the entire subdir will not be copied over.
-            onFileFailed(src,
-                    "Couldn't create destination document " + dstDisplayName
-                    + " in directory " + dest.displayName + ".");
-            return false;
+            throw new ResourceException(
+                    "Couldn't create destination document " + dstDisplayName + " in directory %s.",
+                    dest.derivedUri);
         }
 
         DocumentInfo dstInfo = null;
         try {
             dstInfo = DocumentInfo.fromUri(getContentResolver(), dstUri);
-        } catch (FileNotFoundException e) {
-            onFileFailed(src,
-                    "Could not load DocumentInfo for newly created file: " + dstUri + ".");
-            return false;
+        } catch (FileNotFoundException | RuntimeException e) {
+            throw new ResourceException("Could not load DocumentInfo for newly created file %s.",
+                    dstUri);
         }
 
-        final boolean success;
         if (Document.MIME_TYPE_DIR.equals(src.mimeType)) {
-            success = copyDirectoryHelper(src, dstInfo);
+            copyDirectoryHelper(src, dstInfo);
         } else {
-            success = copyFileHelper(src, dstInfo, dstMimeType);
+            copyFileHelper(src, dstInfo, dstMimeType);
         }
-
-        return success;
     }
 
     /**
@@ -352,11 +387,10 @@ class CopyJob extends Job {
      * @param srcDir Info of the directory to copy from. The routine will copy the directory's
      *            contents, not the directory itself.
      * @param destDir Info of the directory to copy to. Must be created beforehand.
-     * @return True on success, false if some of the children failed to copy.
-     * @throws RemoteException
+     * @throws ResourceException
      */
-    private boolean copyDirectoryHelper(DocumentInfo srcDir, DocumentInfo destDir)
-            throws RemoteException {
+    private void copyDirectoryHelper(DocumentInfo srcDir, DocumentInfo destDir)
+            throws ResourceException {
         // Recurse into directories. Copy children into the new subdirectory.
         final String queryColumns[] = new String[] {
                 Document.COLUMN_DISPLAY_NAME,
@@ -367,19 +401,39 @@ class CopyJob extends Job {
         };
         Cursor cursor = null;
         boolean success = true;
+        // Iterate over srcs in the directory; copy to the destination directory.
+        final Uri queryUri = buildChildDocumentsUri(srcDir.authority, srcDir.documentId);
         try {
-            // Iterate over srcs in the directory; copy to the destination directory.
-            final Uri queryUri = buildChildDocumentsUri(srcDir.authority, srcDir.documentId);
-            cursor = getClient(srcDir).query(queryUri, queryColumns, null, null, null);
-            while (cursor.moveToNext() && !isCanceled()) {
-                DocumentInfo src = DocumentInfo.fromCursor(cursor, srcDir.authority);
-                success &= processDocument(src, srcDir, destDir);
+            try {
+                cursor = getClient(srcDir).query(queryUri, queryColumns, null, null, null);
+            } catch (RemoteException | RuntimeException e) {
+                throw new ResourceException("Failed to query children of %s due to an exception.",
+                        srcDir.derivedUri, e);
             }
+
+            DocumentInfo src;
+            while (cursor.moveToNext() && !isCanceled()) {
+                try {
+                    src = DocumentInfo.fromCursor(cursor, srcDir.authority);
+                    processDocument(src, srcDir, destDir);
+                } catch (RuntimeException e) {
+                    Log.e(TAG, "Failed to recursively process a file %s due to an exception."
+                            .format(srcDir.derivedUri.toString()), e);
+                    success = false;
+                }
+            }
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Failed to copy a file %s to %s. "
+                    .format(srcDir.derivedUri.toString(), destDir.derivedUri.toString()), e);
+            success = false;
         } finally {
             IoUtils.closeQuietly(cursor);
         }
 
-        return success;
+        if (!success) {
+            throw new RuntimeException("Some files failed to copy during a recursive "
+                    + "directory copy.");
+        }
     }
 
     /**
@@ -388,85 +442,101 @@ class CopyJob extends Job {
      * @param srcUriInfo Info of the file to copy from.
      * @param dstUriInfo Info of the *file* to copy to. Must be created beforehand.
      * @param mimeType Mime type for the target. Can be different than source for virtual files.
-     * @return True on success, false on error.
-     * @throws RemoteException
+     * @throws ResourceException
      */
-    private boolean copyFileHelper(DocumentInfo src, DocumentInfo dest, String mimeType)
-            throws RemoteException {
+    private void copyFileHelper(DocumentInfo src, DocumentInfo dest, String mimeType)
+            throws ResourceException {
         CancellationSignal canceller = new CancellationSignal();
+        AssetFileDescriptor srcFileAsAsset = null;
         ParcelFileDescriptor srcFile = null;
         ParcelFileDescriptor dstFile = null;
         InputStream in = null;
         OutputStream out = null;
+        boolean success = false;
 
-        boolean success = true;
         try {
             // If the file is virtual, but can be converted to another format, then try to copy it
             // as such format.
             if (src.isVirtualDocument()) {
-                final AssetFileDescriptor srcFileAsAsset =
-                        getClient(src).openTypedAssetFileDescriptor(
+                try {
+                    srcFileAsAsset = getClient(src).openTypedAssetFileDescriptor(
                                 src.derivedUri, mimeType, null, canceller);
+                } catch (FileNotFoundException | RemoteException | RuntimeException e) {
+                    throw new ResourceException("Failed to open a file as asset for %s due to an "
+                            + "exception.", src.derivedUri, e);
+                }
                 srcFile = srcFileAsAsset.getParcelFileDescriptor();
-                in = new AssetFileDescriptor.AutoCloseInputStream(srcFileAsAsset);
+                try {
+                    in = new AssetFileDescriptor.AutoCloseInputStream(srcFileAsAsset);
+                } catch (IOException e) {
+                    throw new ResourceException("Failed to open a file input stream for %s due "
+                            + "an exception.", src.derivedUri, e);
+                }
             } else {
-                srcFile = getClient(src).openFile(src.derivedUri, "r", canceller);
+                try {
+                    srcFile = getClient(src).openFile(src.derivedUri, "r", canceller);
+                } catch (FileNotFoundException | RemoteException | RuntimeException e) {
+                    throw new ResourceException(
+                            "Failed to open a file for %s due to an exception.", src.derivedUri, e);
+                }
                 in = new ParcelFileDescriptor.AutoCloseInputStream(srcFile);
             }
 
-            dstFile = getClient(dest).openFile(dest.derivedUri, "w", canceller);
+            try {
+                dstFile = getClient(dest).openFile(dest.derivedUri, "w", canceller);
+            } catch (FileNotFoundException | RemoteException | RuntimeException e) {
+                throw new ResourceException("Failed to open the destination file %s for writing "
+                        + "due to an exception.", dest.derivedUri, e);
+            }
             out = new ParcelFileDescriptor.AutoCloseOutputStream(dstFile);
 
             byte[] buffer = new byte[32 * 1024];
             int len;
-            while ((len = in.read(buffer)) != -1) {
-                if (isCanceled()) {
-                    if (DEBUG) Log.d(TAG, "Canceled copy mid-copy. Id:" + id);
-                    success = false;
-                    break;
+            try {
+                while ((len = in.read(buffer)) != -1) {
+                    if (isCanceled()) {
+                        throw new ResourceException("Canceled copy mid-copy of %s",
+                                src.derivedUri);
+                    }
+                    out.write(buffer, 0, len);
+                    makeCopyProgress(len);
                 }
-                out.write(buffer, 0, len);
-                makeCopyProgress(len);
+
+                srcFile.checkError();
+            } catch (IOException e) {
+                throw new ResourceException(
+                        "Failed to copy bytes from %s to %s due to an IO exception.",
+                        src.derivedUri, dest.derivedUri, e);
             }
 
-            srcFile.checkError();
-        } catch (IOException e) {
-            success = false;
-            onFileFailed(src, "Exception thrown while copying from "
-                    + src.derivedUri + " to " + dest.derivedUri + ".");
-
-            if (dstFile != null) {
-                try {
-                    dstFile.closeWithError(e.getMessage());
-                } catch (IOException closeError) {
-                    Log.e(TAG, "Error closing destination", closeError);
-                }
+            if (src.isVirtualDocument()) {
+               convertedFiles.add(src);
             }
+
+            success = true;
         } finally {
+            if (!success) {
+                if (dstFile != null) {
+                    try {
+                        dstFile.closeWithError("Error copying bytes.");
+                    } catch (IOException closeError) {
+                        Log.w(TAG, "Error closing destination.", closeError);
+                    }
+                }
+
+                if (DEBUG) Log.d(TAG, "Cleaning up failed operation leftovers.");
+                canceller.cancel();
+                try {
+                    DocumentsContract.deleteDocument(getClient(dest), dest.derivedUri);
+                } catch (RemoteException | RuntimeException e) {
+                    Log.w(TAG, "Failed to cleanup after copy error: " + src.derivedUri, e);
+                }
+            }
+
             // This also ensures the file descriptors are closed.
             IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(out);
         }
-
-        if (!success) {
-            if (DEBUG) Log.d(TAG, "Cleaning up failed operation leftovers.");
-            canceller.cancel();
-            try {
-                DocumentsContract.deleteDocument(getClient(dest), dest.derivedUri);
-            } catch (RemoteException e) {
-                // RemoteExceptions usually signal that the connection is dead, so there's no
-                // point attempting to continue. Propagate the exception up so the copy job is
-                // cancelled.
-                Log.w(TAG, "Failed to cleanup after copy error: " + src.derivedUri, e);
-                throw e;
-            }
-        }
-
-        if (src.isVirtualDocument() && success) {
-           convertedFiles.add(src);
-        }
-
-        return success;
     }
 
     /**
@@ -475,16 +545,20 @@ class CopyJob extends Job {
      *
      * @param srcs
      * @return Size in bytes.
-     * @throws RemoteException
+     * @throws ResourceException
      */
-    private long calculateSize(List<DocumentInfo> srcs)
-            throws RemoteException {
+    private long calculateSize(List<DocumentInfo> srcs) throws ResourceException {
         long result = 0;
 
         for (DocumentInfo src : srcs) {
             if (src.isDirectory()) {
                 // Directories need to be recursed into.
-                result += calculateFileSizesRecursively(getClient(src), src.derivedUri);
+                try {
+                    result += calculateFileSizesRecursively(getClient(src), src.derivedUri);
+                } catch (RemoteException e) {
+                    throw new ResourceException("Failed to obtain the client for %s.",
+                            src.derivedUri);
+                }
             } else {
                 result += src.size;
             }
@@ -495,10 +569,10 @@ class CopyJob extends Job {
     /**
      * Calculates (recursively) the cumulative size of all the files under the given directory.
      *
-     * @throws RemoteException
+     * @throws ResourceException
      */
     private static long calculateFileSizesRecursively(
-            ContentProviderClient client, Uri uri) throws RemoteException {
+            ContentProviderClient client, Uri uri) throws ResourceException {
         final String authority = uri.getAuthority();
         final Uri queryUri = buildChildDocumentsUri(authority, getDocumentId(uri));
         final String queryColumns[] = new String[] {
@@ -524,6 +598,9 @@ class CopyJob extends Job {
                     result += size > 0 ? size : 0;
                 }
             }
+        } catch (RemoteException | RuntimeException e) {
+            throw new ResourceException(
+                    "Failed to calculate size for %s due to an exception.", uri, e);
         } finally {
             IoUtils.closeQuietly(cursor);
         }
@@ -533,19 +610,20 @@ class CopyJob extends Job {
 
     /**
      * Returns true if {@code doc} is a descendant of {@code parentDoc}.
-     * @throws RemoteException
+     * @throws ResourceException
      */
     boolean isDescendentOf(DocumentInfo doc, DocumentInfo parent)
-            throws RemoteException {
+            throws ResourceException {
         if (parent.isDirectory() && doc.authority.equals(parent.authority)) {
-            return isChildDocument(getClient(doc), doc.derivedUri, parent.derivedUri);
+            try {
+                return isChildDocument(getClient(doc), doc.derivedUri, parent.derivedUri);
+            } catch (RemoteException | RuntimeException e) {
+                throw new ResourceException(
+                        "Failed to check if %s is a child of %s due to an exception.",
+                        doc.derivedUri, parent.derivedUri, e);
+            }
         }
         return false;
-    }
-
-    private void onFileFailed(DocumentInfo file, String msg) {
-        Log.w(TAG, msg);
-        onFileFailed(file);
     }
 
     @Override
