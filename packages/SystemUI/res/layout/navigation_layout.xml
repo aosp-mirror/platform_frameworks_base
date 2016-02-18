@@ -42,26 +42,6 @@
 
     </FrameLayout>
 
-    <FrameLayout
-        android:id="@+id/lights_out"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <LinearLayout
-            android:id="@+id/ends_group_lightsout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal" />
-
-        <LinearLayout
-            android:id="@+id/center_group_lightsout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="horizontal" />
-
-    </FrameLayout>
-
     <com.android.systemui.statusbar.policy.DeadZone
         android:id="@+id/deadzone"
         android:layout_height="match_parent"

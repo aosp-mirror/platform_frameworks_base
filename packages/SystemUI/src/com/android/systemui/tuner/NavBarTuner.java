@@ -117,13 +117,9 @@ public class NavBarTuner extends Fragment implements TunerService.Tunable {
         if (isRotated) {
             mPreview.findViewById(R.id.rot0).setVisibility(View.GONE);
             final View rot90 = mPreview.findViewById(R.id.rot90);
-            rot90.findViewById(R.id.ends_group_lightsout).setVisibility(View.GONE);
-            rot90.findViewById(R.id.center_group_lightsout).setVisibility(View.GONE);
         } else {
             mPreview.findViewById(R.id.rot90).setVisibility(View.GONE);
             final View rot0 = mPreview.findViewById(R.id.rot0);
-            rot0.findViewById(R.id.ends_group_lightsout).setVisibility(View.GONE);
-            rot0.findViewById(R.id.center_group_lightsout).setVisibility(View.GONE);
         }
     }
 
