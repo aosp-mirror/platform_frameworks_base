@@ -318,7 +318,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     StatusBarIconController mIconController;
 
     // expanded notifications
-    NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
+    protected NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
     View mExpandedContents;
     TextView mNotificationPanelDebugText;
 
