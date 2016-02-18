@@ -21584,7 +21584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mPointerIcon = pointerIcon;
-        if (mAttachInfo == null) {
+        if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
             return;
         }
         try {
@@ -22635,6 +22635,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * Set to true if high contrast mode enabled
          */
         boolean mHighContrastText;
+
+        /**
+         * Set to true if a pointer event is currently being handled.
+         */
+        boolean mHandlingPointerEvent;
 
         /**
          * Global to the view hierarchy used as a temporary for dealing with
