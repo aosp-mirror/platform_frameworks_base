@@ -246,6 +246,7 @@ public class NotificationManager
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         final Notification copy = notification.clone();
+        Builder.stripForDelivery(copy);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     copy, idOut, user.getIdentifier());
