@@ -610,6 +610,10 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         // Grant CAP_WAKE_ALARM and CAP_BLOCK_SUSPEND to the Bluetooth process.
         capabilities |= (1LL << CAP_WAKE_ALARM);
         capabilities |= (1LL << CAP_BLOCK_SUSPEND);
+        // Allow bluetooth to open packet sockets so it can start the DHCP client.
+        // TODO: consider making such functionality an RPC to netd.
+        capabilities |= (1LL << CAP_NET_RAW);
+        capabilities |= (1LL << CAP_NET_BIND_SERVICE);
 
         // Add the Bluetooth process to the system group.
         jsize length = env->GetArrayLength(reinterpret_cast<jarray>(gids));
