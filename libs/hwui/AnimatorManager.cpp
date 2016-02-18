@@ -42,23 +42,7 @@ AnimatorManager::~AnimatorManager() {
 }
 
 void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-    RenderNode* stagingTarget = animator->stagingTarget();
-    if (stagingTarget == &mParent) {
-        return;
-    }
     mNewAnimators.emplace_back(animator.get());
-    // If the animator is already attached to other RenderNode, remove it from that RenderNode's
-    // new animator list. This ensures one animator only ends up in one newAnimatorList during one
-    // frame, even when it's added multiple times to multiple targets.
-    if (stagingTarget) {
-        stagingTarget->removeAnimator(animator);
-    }
-    animator->attach(&mParent);
-}
-
-void AnimatorManager::removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-    mNewAnimators.erase(std::remove(mNewAnimators.begin(), mNewAnimators.end(), animator),
-            mNewAnimators.end());
 }
 
 void AnimatorManager::setAnimationHandle(AnimationHandle* handle) {
@@ -74,23 +58,27 @@ void AnimatorManager::pushStaging() {
         LOG_ALWAYS_FATAL_IF(!mAnimationHandle,
                 "Trying to start new animators on %p (%s) without an animation handle!",
                 &mParent, mParent.getName());
-
-        // Only add new animators that are not already in the mAnimators list
-        for (auto& anim : mNewAnimators) {
-            if (anim->target() != &mParent) {
-                mAnimators.push_back(std::move(anim));
+        // Only add animators that are not already in the on-going animator list.
+        for (auto& animator : mNewAnimators) {
+            RenderNode* targetRenderNode = animator->target();
+            if (targetRenderNode == &mParent) {
+                // Animator already in the animator list: skip adding again
+                continue;
             }
+
+            if (targetRenderNode){
+                // If the animator is already in another RenderNode's animator list, remove animator from
+                // that list and add animator to current RenderNode's list.
+                targetRenderNode->animators().removeActiveAnimator(animator);
+            }
+            animator->attach(&mParent);
+            mAnimators.push_back(std::move(animator));
         }
         mNewAnimators.clear();
     }
     for (auto& animator : mAnimators) {
         animator->pushStaging(mAnimationHandle->context());
     }
-}
-
-void AnimatorManager::onAnimatorTargetChanged(BaseRenderNodeAnimator* animator) {
-    LOG_ALWAYS_FATAL_IF(animator->target() == &mParent, "Target has not been changed");
-    mAnimators.erase(std::remove(mAnimators.begin(), mAnimators.end(), animator), mAnimators.end());
 }
 
 class AnimateFunctor {
@@ -164,6 +152,10 @@ void AnimatorManager::endAllStagingAnimators() {
     // which means we're already on the right thread to invoke listeners
     for_each(mNewAnimators.begin(), mNewAnimators.end(), endStagingAnimator);
     mNewAnimators.clear();
+}
+
+void AnimatorManager::removeActiveAnimator(const sp<BaseRenderNodeAnimator>& animator) {
+    std::remove(mAnimators.begin(), mAnimators.end(), animator);
 }
 
 class EndActiveAnimatorsFunctor {

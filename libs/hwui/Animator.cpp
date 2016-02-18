@@ -33,7 +33,6 @@ namespace uirenderer {
 
 BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
         : mTarget(nullptr)
-        , mStagingTarget(nullptr)
         , mFinalValue(finalValue)
         , mDeltaValue(0)
         , mFromValue(0)
@@ -83,7 +82,7 @@ void BaseRenderNodeAnimator::setStartDelay(nsecs_t startDelay) {
 }
 
 void BaseRenderNodeAnimator::attach(RenderNode* target) {
-    mStagingTarget = target;
+    mTarget = target;
     onAttached();
 }
 
@@ -146,15 +145,6 @@ void BaseRenderNodeAnimator::resolveStagingRequest(Request request) {
 }
 
 void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
-    if (mStagingTarget) {
-        RenderNode* oldTarget = mTarget;
-        mTarget = mStagingTarget;
-        mStagingTarget = nullptr;
-        if (oldTarget && oldTarget != mTarget) {
-            oldTarget->onAnimatorTargetChanged(this);
-        }
-    }
-
     if (!mHasStartValue) {
         doSetStartValue(getValue(mTarget));
     }
@@ -205,7 +195,6 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
             }
         }
     }
-    onPushStaging();
 }
 
 void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
@@ -320,36 +309,18 @@ RenderPropertyAnimator::RenderPropertyAnimator(RenderProperty property, float fi
 
 void RenderPropertyAnimator::onAttached() {
     if (!mHasStartValue
-            && mStagingTarget->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
-        setStartValue((mStagingTarget->stagingProperties().*mPropertyAccess->getter)());
+            && mTarget->isPropertyFieldDirty(mPropertyAccess->dirtyMask)) {
+        setStartValue((mTarget->stagingProperties().*mPropertyAccess->getter)());
     }
 }
 
 void RenderPropertyAnimator::onStagingPlayStateChanged() {
     if (mStagingPlayState == PlayState::Running) {
-        if (mStagingTarget) {
-            (mStagingTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
-        } else {
-            // In the case of start delay where stagingTarget has been sync'ed over and null'ed
-            // we delay the properties update to push staging.
-            mShouldUpdateStagingProperties = true;
-        }
+        (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
     } else if (mStagingPlayState == PlayState::Finished) {
         // We're being canceled, so make sure that whatever values the UI thread
         // is observing for us is pushed over
-        mShouldSyncPropertyFields = true;
-    }
-}
-
-void RenderPropertyAnimator::onPushStaging() {
-    if (mShouldUpdateStagingProperties) {
-        (mTarget->mutateStagingProperties().*mPropertyAccess->setter)(finalValue());
-        mShouldUpdateStagingProperties = false;
-    }
-
-    if (mShouldSyncPropertyFields) {
         mTarget->setPropertyFieldsDirty(dirtyMask());
-        mShouldSyncPropertyFields = false;
     }
 }
 
