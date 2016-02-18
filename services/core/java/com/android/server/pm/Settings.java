@@ -19,22 +19,16 @@ package com.android.server.pm;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
-import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
-import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
+
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 
 import android.annotation.NonNull;
@@ -88,7 +82,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.PackageManagerService.DumpState;
@@ -170,6 +163,7 @@ final class Settings {
 
     private static final boolean DEBUG_STOPPED = false;
     private static final boolean DEBUG_MU = false;
+    private static final boolean DEBUG_KERNEL = false;
 
     private static final String RUNTIME_PERMISSIONS_FILE_NAME = "runtime-permissions.xml";
 
@@ -246,9 +240,13 @@ final class Settings {
     private final File mPackageListFilename;
     private final File mStoppedPackagesFilename;
     private final File mBackupStoppedPackagesFilename;
+    private final File mKernelMappingFilename;
 
-    final ArrayMap<String, PackageSetting> mPackages =
-            new ArrayMap<String, PackageSetting>();
+    /** Map from package name to settings */
+    final ArrayMap<String, PackageSetting> mPackages = new ArrayMap<>();
+
+    /** Map from package name to appId */
+    private final ArrayMap<String, Integer> mKernelMapping = new ArrayMap<>();
 
     // List of replaced system applications
     private final ArrayMap<String, PackageSetting> mDisabledSysPackages =
@@ -407,6 +405,9 @@ final class Settings {
         mBackupSettingsFilename = new File(mSystemDir, "packages-backup.xml");
         mPackageListFilename = new File(mSystemDir, "packages.list");
         FileUtils.setPermissions(mPackageListFilename, 0640, SYSTEM_UID, PACKAGE_INFO_GID);
+
+        final File kernelDir = new File("/config/sdcardfs");
+        mKernelMappingFilename = kernelDir.exists() ? kernelDir : null;
 
         // Deprecated: Needed for migration
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
@@ -2342,6 +2343,7 @@ final class Settings {
                     |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
 
+            writeKernelMappingLPr();
             writePackageListLPr();
             writeAllUsersPackageRestrictionsLPr();
             writeAllRuntimePermissionsLPr();
@@ -2362,6 +2364,56 @@ final class Settings {
             }
         }
         //Debug.stopMethodTracing();
+    }
+
+    void writeKernelMappingLPr() {
+        if (mKernelMappingFilename == null) return;
+
+        final String[] known = mKernelMappingFilename.list();
+        final ArraySet<String> knownSet = new ArraySet<>(known.length);
+        for (String name : known) {
+            knownSet.add(name);
+        }
+
+        for (final PackageSetting ps : mPackages.values()) {
+            // Package is actively claimed
+            knownSet.remove(ps.name);
+            writeKernelMappingLPr(ps);
+        }
+
+        // Remove any unclaimed mappings
+        for (int i = 0; i < knownSet.size(); i++) {
+            final String name = knownSet.valueAt(i);
+            if (DEBUG_KERNEL) Slog.d(TAG, "Dropping mapping " + name);
+
+            mKernelMapping.remove(name);
+
+            final File dir = new File(mKernelMappingFilename, name);
+            FileUtils.deleteContents(dir);
+            dir.delete();
+        }
+    }
+
+    void writeKernelMappingLPr(PackageSetting ps) {
+        if (mKernelMappingFilename == null) return;
+
+        final Integer cur = mKernelMapping.get(ps.name);
+        if (cur != null && cur.intValue() == ps.appId) {
+            // Ignore when mapping already matches
+            return;
+        }
+
+        if (DEBUG_KERNEL) Slog.d(TAG, "Mapping " + ps.name + " to " + ps.appId);
+
+        final File dir = new File(mKernelMappingFilename, ps.name);
+        dir.mkdir();
+
+        final File file = new File(dir, "appid");
+        try {
+            FileUtils.stringToFile(file, Integer.toString(ps.appId));
+            mKernelMapping.put(ps.name, ps.appId);
+        } catch (IOException ignored) {
+        }
     }
 
     void writePackageListLPr() {
@@ -2395,7 +2447,9 @@ final class Settings {
             for (final PackageSetting pkg : mPackages.values()) {
                 if (pkg.pkg == null || pkg.pkg.applicationInfo == null
                         || pkg.pkg.applicationInfo.dataDir == null) {
-                    Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
+                    if (!"android".equals(pkg.name)) {
+                        Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
+                    }
                     continue;
                 }
 
@@ -2907,6 +2961,8 @@ final class Settings {
 
         mReadMessages.append("Read completed successfully: " + mPackages.size() + " packages, "
                 + mSharedUsers.size() + " shared uids\n");
+
+        writeKernelMappingLPr();
 
         return true;
     }
