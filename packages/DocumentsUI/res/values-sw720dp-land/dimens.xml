@@ -15,8 +15,6 @@
 -->
 
 <resources>
-    <bool name="always_show_summary">true</bool>
-
     <dimen name="list_item_height">64dp</dimen>
     <dimen name="list_item_padding">24dp</dimen>
 
