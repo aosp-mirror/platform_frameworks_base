@@ -17,37 +17,24 @@
 <resources>
     <dimen name="grid_container_padding">10dp</dimen>
     <dimen name="list_container_padding">0dp</dimen>
-
     <dimen name="icon_size">40dp</dimen>
     <dimen name="root_icon_size">24dp</dimen>
     <dimen name="root_icon_margin">0dp</dimen>
     <dimen name="check_icon_size">30dp</dimen>
-
     <dimen name="list_item_thumbnail_size">40dp</dimen>
     <dimen name="grid_item_icon_size">30dp</dimen>
-
     <dimen name="progress_bar_height">4dp</dimen>
-
     <dimen name="grid_width">152dp</dimen>
     <dimen name="grid_height">176dp</dimen>
-
     <dimen name="grid_item_width">152dp</dimen>
     <dimen name="grid_item_height">176dp</dimen>
     <dimen name="grid_item_margin">4dp</dimen>
-
     <dimen name="grid_padding_horiz">4dp</dimen>
     <dimen name="grid_padding_vert">4dp</dimen>
-
     <dimen name="list_item_height">72dp</dimen>
     <dimen name="list_item_padding">16dp</dimen>
-
     <dimen name="list_divider_inset">72dp</dimen>
-    <bool name="list_divider_inset_left">true</bool>
-
-    <bool name="always_show_summary">false</bool>
-
     <dimen name="dir_elevation">8dp</dimen>
-
     <dimen name="drag_shadow_size">120dp</dimen>
-
+    <dimen name="grid_item_elevation">2dp</dimen>
 </resources>

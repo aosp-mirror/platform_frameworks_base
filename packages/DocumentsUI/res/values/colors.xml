@@ -21,6 +21,11 @@
          else that needs to manually declare a background matching the "default"
          app background (e.g. the drawer overlay). -->
     <color name="window_background">#fff1f1f1</color>
+    <color name="drawer_background">#fff1f1f1</color>
+    <color name="directory_background">#fff7f7f7</color>
+    <color name="item_doc_background">#fffafafa</color>
+    <color name="item_doc_background_selected">#ffe0f2f1</color>
+    <color name="menu_search_background">#ff676f74</color>
 
     <color name="primary_dark">@*android:color/primary_dark_material_dark</color>
     <color name="primary">@*android:color/material_blue_grey_900</color>
@@ -29,10 +34,4 @@
 
     <color name="band_select_background">#88ffffff</color>
     <color name="band_select_border">#44000000</color>
-
-    <color name="item_doc_background">#fffafafa</color>
-    <color name="item_doc_background_selected">#ffe0f2f1</color>
-
-    <color name="menu_search_background">#ff676f74</color>
-
 </resources>
