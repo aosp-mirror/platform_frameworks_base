@@ -119,7 +119,7 @@
   </li>
   <li class="nav-section">
     <div class="nav-section-header empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/cardboard.html">
-          <span class="en">Build VR with <span style="white-space:nowrap">Google Cardboard</span></span>
+          <span class="en">Build VR with <span style="white-space:nowrap">Cardboard</span></span>
         </a>
     </div>
   </li>
