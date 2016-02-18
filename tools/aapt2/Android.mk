@@ -47,6 +47,7 @@ sources := \
 	proto/ProtoHelpers.cpp \
 	proto/TableProtoDeserializer.cpp \
 	proto/TableProtoSerializer.cpp \
+	split/TableSplitter.cpp \
 	unflatten/BinaryResourceParser.cpp \
 	unflatten/ResChunkPullParser.cpp \
 	util/BigBuffer.cpp \
@@ -90,6 +91,7 @@ testSources := \
 	link/XmlReferenceLinker_test.cpp \
 	process/SymbolTable_test.cpp \
 	proto/TableProtoSerializer_test.cpp \
+	split/TableSplitter_test.cpp \
 	util/BigBuffer_test.cpp \
 	util/Maybe_test.cpp \
 	util/StringPiece_test.cpp \
@@ -103,6 +105,7 @@ testSources := \
 	ResourceParser_test.cpp \
 	ResourceTable_test.cpp \
 	ResourceUtils_test.cpp \
+	SdkConstants_test.cpp \
 	StringPool_test.cpp \
 	ValueVisitor_test.cpp \
 	xml/XmlDom_test.cpp \
