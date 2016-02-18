@@ -49,6 +49,7 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -3988,8 +3989,12 @@ public class Activity extends ContextThemeWrapper
             a.recycle();
             if (colorPrimary != 0) {
                 ActivityManager.TaskDescription td = new ActivityManager.TaskDescription();
-                td.setPrimaryColor(colorPrimary);
-                td.setBackgroundColor(colorBg);
+                if (Color.alpha(colorPrimary) == 0xFF) {
+                    td.setPrimaryColor(colorPrimary);
+                }
+                if (Color.alpha(colorBg) == 0xFF) {
+                    td.setBackgroundColor(colorBg);
+                }
                 setTaskDescription(td);
             }
         }
