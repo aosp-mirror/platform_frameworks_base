@@ -44,11 +44,14 @@ import android.test.mock.MockContext;
 import android.view.IWindowManager;
 
 import org.junit.Assert;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -294,6 +297,50 @@ public class DpmMockContext extends MockContext {
 
         mUserInfos.add(uh);
         when(userManager.getUsers()).thenReturn(mUserInfos);
+        when(userManager.getUserInfo(anyInt())).thenAnswer(
+                new Answer<UserInfo>() {
+                    @Override
+                    public UserInfo answer(InvocationOnMock invocation) throws Throwable {
+                        final int userId = (int) invocation.getArguments()[0];
+                        for (UserInfo ui : mUserInfos) {
+                            if (ui.id == userId) {
+                                return ui;
+                            }
+                        }
+                        return null;
+                    }
+                }
+        );
+        when(userManager.getProfiles(anyInt())).thenAnswer(
+                new Answer<List<UserInfo>>() {
+                    @Override
+                    public List<UserInfo> answer(InvocationOnMock invocation) throws Throwable {
+                        final int userId = (int) invocation.getArguments()[0];
+                        final ArrayList<UserInfo> ret = new ArrayList<UserInfo>();
+                        UserInfo parent = null;
+                        for (UserInfo ui : mUserInfos) {
+                            if (ui.id == userId) {
+                                parent = ui;
+                                break;
+                            }
+                        }
+                        if (parent == null) {
+                            return ret;
+                        }
+                        ret.add(parent);
+                        for (UserInfo ui : mUserInfos) {
+                            if (ui.id == userId) {
+                                continue;
+                            }
+                            if (ui.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID
+                                    && ui.profileGroupId == parent.profileGroupId) {
+                                ret.add(ui);
+                            }
+                        }
+                        return ret;
+                    }
+                }
+        );
 
         // Create a data directory.
         final File dir = new File(dataDir, "user" + userId);

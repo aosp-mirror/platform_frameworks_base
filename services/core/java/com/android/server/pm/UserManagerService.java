@@ -840,7 +840,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * See {@link UserManagerInternal#setDevicePolicyUserRestrictions(int, Bundle, Bundle)}
      */
-    void setDevicePolicyUserRestrictions(int userId, @NonNull Bundle local,
+    void setDevicePolicyUserRestrictionsInner(int userId, @NonNull Bundle local,
             @Nullable Bundle global) {
         Preconditions.checkNotNull(local);
         boolean globalChanged = false;
@@ -2854,7 +2854,7 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public void setDevicePolicyUserRestrictions(int userId, @NonNull Bundle localRestrictions,
                 @Nullable Bundle globalRestrictions) {
-            UserManagerService.this.setDevicePolicyUserRestrictions(userId, localRestrictions,
+            UserManagerService.this.setDevicePolicyUserRestrictionsInner(userId, localRestrictions,
                     globalRestrictions);
         }
 

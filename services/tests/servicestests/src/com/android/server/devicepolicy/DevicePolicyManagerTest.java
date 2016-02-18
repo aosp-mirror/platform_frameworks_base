@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
@@ -60,6 +61,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -208,7 +210,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     /**
      * Test for:
      * {@link DevicePolicyManager#setActiveAdmin}
-     *   with replace=false and replace=true
+     * with replace=false and replace=true
      * {@link DevicePolicyManager#isAdminActive}
      * {@link DevicePolicyManager#isAdminActiveAsUser}
      * {@link DevicePolicyManager#getActiveAdmins}
@@ -336,7 +338,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     /**
      * Test for:
      * {@link DevicePolicyManager#setActiveAdmin}
-     *   with replace=false
+     * with replace=false
      */
     public void testSetActiveAdmin_twiceWithoutReplace() throws Exception {
         // 1. Make sure the caller has proper permissions.
@@ -999,7 +1001,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     /**
      * This essentially tests
-     * {@code DevicePolicyManagerService.findOwnerComponentIfNecessaryLocked()}. (which is private.)
+     * {@code DevicePolicyManagerService.findOwnerComponentIfNecessaryLocked()}. (which is
+     * private.)
      *
      * We didn't use to persist the DO component class name, but now we do, and the above method
      * finds the right component from a package name upon migration.
@@ -1196,7 +1199,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(UserHandle.USER_SYSTEM),
                 MockUtils.checkUserRestrictions(),
                 MockUtils.checkUserRestrictions(UserManager.DISALLOW_ADD_USER)
-                );
+        );
         reset(mContext.userManagerInternal);
 
         dpm.addUserRestriction(admin1, UserManager.DISALLOW_OUTGOING_CALLS);
@@ -1833,4 +1836,76 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.callerPermissions.removeAll(OWNER_SETUP_PERMISSIONS);
     }
+
+    public void testSetMaximumTimeToLock() {
+        mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
+
+        dpm.setActiveAdmin(admin1, /* replace =*/ false);
+        dpm.setActiveAdmin(admin2, /* replace =*/ false);
+
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin1, 0);
+        verifyScreenTimeoutCall(null, false);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin1, 1);
+        verifyScreenTimeoutCall(1, true);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin2, 10);
+        verifyScreenTimeoutCall(null, false);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin1, 5);
+        verifyScreenTimeoutCall(5, true);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin2, 4);
+        verifyScreenTimeoutCall(4, true);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin1, 0);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin2, Integer.MAX_VALUE);
+        verifyScreenTimeoutCall(Integer.MAX_VALUE, true);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin2, Integer.MAX_VALUE + 1);
+        verifyScreenTimeoutCall(Integer.MAX_VALUE, true);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        dpm.setMaximumTimeToLock(admin2, 10);
+        verifyScreenTimeoutCall(10, true);
+        reset(mMockContext.powerManagerInternal);
+        reset(mMockContext.settings);
+
+        // There's no restriction; shold be set to MAX.
+        dpm.setMaximumTimeToLock(admin2, 0);
+        verifyScreenTimeoutCall(Integer.MAX_VALUE, false);
+    }
+
+    private void verifyScreenTimeoutCall(Integer expectedTimeout,
+            boolean shouldStayOnWhilePluggedInBeCleared) {
+        if (expectedTimeout == null) {
+            verify(mMockContext.powerManagerInternal, times(0))
+                    .setMaximumScreenOffTimeoutFromDeviceAdmin(anyInt());
+        } else {
+            verify(mMockContext.powerManagerInternal, times(1))
+                    .setMaximumScreenOffTimeoutFromDeviceAdmin(eq(expectedTimeout));
+        }
+        // TODO Verify calls to settingsGlobalPutInt.  Tried but somehow mockito threw
+        // UnfinishedVerificationException.
+    }
 }
+
