@@ -49,6 +49,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
 
+@SuppressWarnings("deprecation")
 public final class BridgeResources extends Resources {
 
     private BridgeContext mContext;
@@ -70,6 +71,7 @@ public final class BridgeResources extends Resources {
 
         @Override
         public boolean markSupported() {
+            //noinspection SimplifiableIfStatement
             if (mFakeMarkSupport) {
                 // this is needed so that BitmapFactory doesn't wrap this in a BufferedInputStream.
                 return true;
@@ -595,7 +597,6 @@ public final class BridgeResources extends Resources {
         if (value != null) {
             ResourceValue resValue = value.getSecond();
 
-            assert resValue != null;
             if (resValue != null) {
                 String v = resValue.getValue();
                 if (v != null) {

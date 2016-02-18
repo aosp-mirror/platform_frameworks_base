@@ -69,10 +69,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private static final int[] ATTRS_TEXT_COLOR = new int[] {R.attr.textColor};
     private static final int[] ATTRS_DISABLED_ALPHA = new int[] {R.attr.disabledAlpha};
 
-    // LayoutLib relies on these constants. Change TimePickerClockDelegate_Delegate if
-    // modifying these.
-    static final int AM = 0;
-    static final int PM = 1;
+    private static final int AM = 0;
+    private static final int PM = 1;
 
     private static final int HOURS_IN_HALF_DAY = 12;
 
