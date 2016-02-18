@@ -212,6 +212,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public File getDataDir() {
+        return mBase.getDataDir();
+    }
+
+    @Override
     public File getFilesDir() {
         return mBase.getFilesDir();
     }

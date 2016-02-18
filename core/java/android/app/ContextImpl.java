@@ -460,7 +460,7 @@ class ContextImpl extends Context {
     private File getPreferencesDir() {
         synchronized (mSync) {
             if (mPreferencesDir == null) {
-                mPreferencesDir = new File(getDataDirFile(), "shared_prefs");
+                mPreferencesDir = new File(getDataDir(), "shared_prefs");
             }
             return ensurePrivateDirExists(mPreferencesDir);
         }
@@ -525,7 +525,7 @@ class ContextImpl extends Context {
     public File getFilesDir() {
         synchronized (mSync) {
             if (mFilesDir == null) {
-                mFilesDir = new File(getDataDirFile(), "files");
+                mFilesDir = new File(getDataDir(), "files");
             }
             return ensurePrivateDirExists(mFilesDir);
         }
@@ -535,7 +535,7 @@ class ContextImpl extends Context {
     public File getNoBackupFilesDir() {
         synchronized (mSync) {
             if (mNoBackupFilesDir == null) {
-                mNoBackupFilesDir = new File(getDataDirFile(), "no_backup");
+                mNoBackupFilesDir = new File(getDataDir(), "no_backup");
             }
             return ensurePrivateDirExists(mNoBackupFilesDir);
         }
@@ -587,7 +587,7 @@ class ContextImpl extends Context {
     public File getCacheDir() {
         synchronized (mSync) {
             if (mCacheDir == null) {
-                mCacheDir = new File(getDataDirFile(), "cache");
+                mCacheDir = new File(getDataDir(), "cache");
             }
             return ensurePrivateDirExists(mCacheDir);
         }
@@ -597,7 +597,7 @@ class ContextImpl extends Context {
     public File getCodeCacheDir() {
         synchronized (mSync) {
             if (mCodeCacheDir == null) {
-                mCodeCacheDir = new File(getDataDirFile(), "code_cache");
+                mCodeCacheDir = new File(getDataDir(), "code_cache");
             }
             return ensurePrivateDirExists(mCodeCacheDir);
         }
@@ -724,7 +724,7 @@ class ContextImpl extends Context {
                 if ("android".equals(getPackageName())) {
                     mDatabasesDir = new File("/data/system");
                 } else {
-                    mDatabasesDir = new File(getDataDirFile(), "databases");
+                    mDatabasesDir = new File(getDataDir(), "databases");
                 }
             }
             return ensurePrivateDirExists(mDatabasesDir);
@@ -1920,7 +1920,8 @@ class ContextImpl extends Context {
         return mDisplayAdjustments;
     }
 
-    private File getDataDirFile() {
+    @Override
+    public File getDataDir() {
         if (mPackageInfo != null) {
             File res = null;
             if (isCredentialEncryptedStorage()) {
@@ -1947,7 +1948,7 @@ class ContextImpl extends Context {
     public File getDir(String name, int mode) {
         checkMode(mode);
         name = "app_" + name;
-        File file = makeFilename(getDataDirFile(), name);
+        File file = makeFilename(getDataDir(), name);
         if (!file.exists()) {
             file.mkdir();
             setFilePermissionsFromMode(file.getPath(), mode,

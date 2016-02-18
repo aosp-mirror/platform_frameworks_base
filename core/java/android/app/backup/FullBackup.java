@@ -55,13 +55,22 @@ public class FullBackup {
 
     public static final String APK_TREE_TOKEN = "a";
     public static final String OBB_TREE_TOKEN = "obb";
+
     public static final String ROOT_TREE_TOKEN = "r";
-    public static final String DATA_TREE_TOKEN = "f";
+    public static final String FILES_TREE_TOKEN = "f";
     public static final String NO_BACKUP_TREE_TOKEN = "nb";
     public static final String DATABASE_TREE_TOKEN = "db";
     public static final String SHAREDPREFS_TREE_TOKEN = "sp";
-    public static final String MANAGED_EXTERNAL_TREE_TOKEN = "ef";
     public static final String CACHE_TREE_TOKEN = "c";
+
+    public static final String DEVICE_ROOT_TREE_TOKEN = "d_r";
+    public static final String DEVICE_FILES_TREE_TOKEN = "d_f";
+    public static final String DEVICE_NO_BACKUP_TREE_TOKEN = "d_nb";
+    public static final String DEVICE_DATABASE_TREE_TOKEN = "d_db";
+    public static final String DEVICE_SHAREDPREFS_TREE_TOKEN = "d_sp";
+    public static final String DEVICE_CACHE_TREE_TOKEN = "d_c";
+
+    public static final String MANAGED_EXTERNAL_TREE_TOKEN = "ef";
     public static final String SHARED_STORAGE_TOKEN = "shared";
 
     public static final String APPS_PREFIX = "apps/";
@@ -201,9 +210,17 @@ public class FullBackup {
         private final File DATABASE_DIR;
         private final File ROOT_DIR;
         private final File SHAREDPREF_DIR;
-        private final File EXTERNAL_DIR;
         private final File CACHE_DIR;
         private final File NOBACKUP_DIR;
+
+        private final File DEVICE_FILES_DIR;
+        private final File DEVICE_DATABASE_DIR;
+        private final File DEVICE_ROOT_DIR;
+        private final File DEVICE_SHAREDPREF_DIR;
+        private final File DEVICE_CACHE_DIR;
+        private final File DEVICE_NOBACKUP_DIR;
+
+        private final File EXTERNAL_DIR;
 
         final int mFullBackupContent;
         final PackageManager mPackageManager;
@@ -214,7 +231,7 @@ public class FullBackup {
          */
         String tokenToDirectoryPath(String domainToken) {
             try {
-                if (domainToken.equals(FullBackup.DATA_TREE_TOKEN)) {
+                if (domainToken.equals(FullBackup.FILES_TREE_TOKEN)) {
                     return FILES_DIR.getCanonicalPath();
                 } else if (domainToken.equals(FullBackup.DATABASE_TREE_TOKEN)) {
                     return DATABASE_DIR.getCanonicalPath();
@@ -224,14 +241,26 @@ public class FullBackup {
                     return SHAREDPREF_DIR.getCanonicalPath();
                 } else if (domainToken.equals(FullBackup.CACHE_TREE_TOKEN)) {
                     return CACHE_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.NO_BACKUP_TREE_TOKEN)) {
+                    return NOBACKUP_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.DEVICE_FILES_TREE_TOKEN)) {
+                    return DEVICE_FILES_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.DEVICE_DATABASE_TREE_TOKEN)) {
+                    return DEVICE_DATABASE_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.DEVICE_ROOT_TREE_TOKEN)) {
+                    return DEVICE_ROOT_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.DEVICE_SHAREDPREFS_TREE_TOKEN)) {
+                    return DEVICE_SHAREDPREF_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.DEVICE_CACHE_TREE_TOKEN)) {
+                    return DEVICE_CACHE_DIR.getCanonicalPath();
+                } else if (domainToken.equals(FullBackup.DEVICE_NO_BACKUP_TREE_TOKEN)) {
+                    return DEVICE_NOBACKUP_DIR.getCanonicalPath();
                 } else if (domainToken.equals(FullBackup.MANAGED_EXTERNAL_TREE_TOKEN)) {
                     if (EXTERNAL_DIR != null) {
                         return EXTERNAL_DIR.getCanonicalPath();
                     } else {
                         return null;
                     }
-                } else if (domainToken.equals(FullBackup.NO_BACKUP_TREE_TOKEN)) {
-                    return NOBACKUP_DIR.getCanonicalPath();
                 }
                 // Not a supported location
                 Log.i(TAG, "Unrecognized domain " + domainToken);
@@ -257,12 +286,25 @@ public class FullBackup {
             mFullBackupContent = context.getApplicationInfo().fullBackupContent;
             mPackageManager = context.getPackageManager();
             mPackageName = context.getPackageName();
-            FILES_DIR = context.getFilesDir();
-            DATABASE_DIR = context.getDatabasePath("foo").getParentFile();
-            ROOT_DIR = new File(context.getApplicationInfo().dataDir);
-            SHAREDPREF_DIR = context.getSharedPrefsFile("foo").getParentFile();
-            CACHE_DIR = context.getCacheDir();
-            NOBACKUP_DIR = context.getNoBackupFilesDir();
+
+            // System apps have control over where their default storage context
+            // is pointed, so we're always explicit when building paths.
+            final Context ceContext = context.createCredentialEncryptedStorageContext();
+            FILES_DIR = ceContext.getFilesDir();
+            DATABASE_DIR = ceContext.getDatabasePath("foo").getParentFile();
+            ROOT_DIR = ceContext.getDataDir();
+            SHAREDPREF_DIR = ceContext.getSharedPreferencesPath("foo").getParentFile();
+            CACHE_DIR = ceContext.getCacheDir();
+            NOBACKUP_DIR = ceContext.getNoBackupFilesDir();
+
+            final Context deContext = context.createDeviceEncryptedStorageContext();
+            DEVICE_FILES_DIR = deContext.getFilesDir();
+            DEVICE_DATABASE_DIR = deContext.getDatabasePath("foo").getParentFile();
+            DEVICE_ROOT_DIR = deContext.getDataDir();
+            DEVICE_SHAREDPREF_DIR = deContext.getSharedPreferencesPath("foo").getParentFile();
+            DEVICE_CACHE_DIR = deContext.getCacheDir();
+            DEVICE_NOBACKUP_DIR = deContext.getNoBackupFilesDir();
+
             if (android.os.Process.myUid() != Process.SYSTEM_UID) {
                 EXTERNAL_DIR = context.getExternalFilesDir(null);
             } else {
@@ -403,6 +445,13 @@ public class FullBackup {
                                 Log.v(TAG_XML_PARSER, "...automatically generated "
                                         + canonicalJournalPath + ". Ignore if nonexistent.");
                             }
+                            final String canonicalWalPath =
+                                    canonicalFile.getCanonicalPath() + "-wal";
+                            activeSet.add(canonicalWalPath);
+                            if (Log.isLoggable(TAG_XML_PARSER, Log.VERBOSE)) {
+                                Log.v(TAG_XML_PARSER, "...automatically generated "
+                                        + canonicalWalPath + ". Ignore if nonexistent.");
+                            }
                         }
 
                         // Special case for sharedpref files (not dirs) also add ".xml" suffix file.
@@ -485,11 +534,19 @@ public class FullBackup {
             if ("root".equals(xmlDomain)) {
                 return FullBackup.ROOT_TREE_TOKEN;
             } else if ("file".equals(xmlDomain)) {
-                return FullBackup.DATA_TREE_TOKEN;
+                return FullBackup.FILES_TREE_TOKEN;
             } else if ("database".equals(xmlDomain)) {
                 return FullBackup.DATABASE_TREE_TOKEN;
             } else if ("sharedpref".equals(xmlDomain)) {
                 return FullBackup.SHAREDPREFS_TREE_TOKEN;
+            } else if ("device_root".equals(xmlDomain)) {
+                return FullBackup.DEVICE_ROOT_TREE_TOKEN;
+            } else if ("device_file".equals(xmlDomain)) {
+                return FullBackup.DEVICE_FILES_TREE_TOKEN;
+            } else if ("device_database".equals(xmlDomain)) {
+                return FullBackup.DEVICE_DATABASE_TREE_TOKEN;
+            } else if ("device_sharedpref".equals(xmlDomain)) {
+                return FullBackup.DEVICE_SHAREDPREFS_TREE_TOKEN;
             } else if ("external".equals(xmlDomain)) {
                 return FullBackup.MANAGED_EXTERNAL_TREE_TOKEN;
             } else {
@@ -542,6 +599,14 @@ public class FullBackup {
                 return ROOT_DIR;
             } else if ("sharedpref".equals(domain)) {
                 return SHAREDPREF_DIR;
+            } else if ("device_file".equals(domain)) {
+                return DEVICE_FILES_DIR;
+            } else if ("device_database".equals(domain)) {
+                return DEVICE_DATABASE_DIR;
+            } else if ("device_root".equals(domain)) {
+                return DEVICE_ROOT_DIR;
+            } else if ("device_sharedpref".equals(domain)) {
+                return DEVICE_SHAREDPREF_DIR;
             } else if ("external".equals(domain)) {
                 return EXTERNAL_DIR;
             } else {
