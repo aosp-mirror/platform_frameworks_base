@@ -59,16 +59,16 @@ public class WifiNanManager {
      * have explicitly {@link WifiNanManager#disconnect()} need to call this
      * function to re-connect.
      *
-     * @param listener A listener extended from {@link WifiNanEventListener}.
-     * @param events The set of events to be delivered to the {@code listener}.
-     *            OR'd event flags from {@link WifiNanEventListener
-     *            NanEventListener.LISTEN*}.
+     * @param callback A callback extended from {@link WifiNanEventCallback}.
+     * @param events The set of events to be delivered to the {@code callback}.
+     *            OR'd event flags from {@link WifiNanEventCallback
+     *            WifiNanEventCallback.LISTEN*}.
      */
-    public void connect(WifiNanEventListener listener, int events) {
+    public void connect(WifiNanEventCallback callback, int events) {
         try {
             if (VDBG) Log.v(TAG, "connect()");
-            if (listener == null) {
-                throw new IllegalArgumentException("Invalid listener - must not be null");
+            if (callback == null) {
+                throw new IllegalArgumentException("Invalid callback - must not be null");
             }
             if (mClientId != -1) {
                 Log.w(TAG, "connect(): mClientId=" + mClientId
@@ -77,7 +77,7 @@ public class WifiNanManager {
             if (mBinder == null) {
                 mBinder = new Binder();
             }
-            mClientId = mService.connect(mBinder, listener.callback, events);
+            mClientId = mService.connect(mBinder, callback.callback, events);
         } catch (RemoteException e) {
             Log.w(TAG, "connect RemoteException (FYI - ignoring): " + e);
         }
@@ -90,7 +90,7 @@ public class WifiNanManager {
      * are cancelled.
      * <p>
      * An application may then re-connect using
-     * {@link WifiNanManager#connect(WifiNanEventListener, int)} .
+     * {@link WifiNanManager#connect(WifiNanEventCallback, int)} .
      */
     public void disconnect() {
         try {
@@ -110,8 +110,8 @@ public class WifiNanManager {
      * multiple applications and configure NAN differently from individual
      * requests.
      * <p>
-     * The {@link WifiNanEventListener#onConfigCompleted(ConfigRequest)} will be
-     * called when configuration is completed (if a listener is registered for
+     * The {@link WifiNanEventCallback#onConfigCompleted(ConfigRequest)} will be
+     * called when configuration is completed (if a callback is registered for
      * this specific event).
      *
      * @param configRequest The requested NAN configuration.
@@ -127,23 +127,23 @@ public class WifiNanManager {
 
     /**
      * Request a NAN publish session. The results of the publish session
-     * operation will result in callbacks to the indicated listener:
-     * {@link WifiNanSessionListener NanSessionListener.on*}.
+     * operation will result in callbacks to the indicated callback:
+     * {@link WifiNanSessionCallback NanSessionCallback.on*}.
      *
      * @param publishConfig The {@link PublishConfig} specifying the
      *            configuration of the publish session.
-     * @param listener The {@link WifiNanSessionListener} derived objects to be
+     * @param callback The {@link WifiNanSessionCallback} derived objects to be
      *            used for the event callbacks specified by {@code events}.
-     * @param events The list of events to be delivered to the {@code listener}
-     *            object. An OR'd value of {@link WifiNanSessionListener
-     *            NanSessionListener.LISTEN_*}.
+     * @param events The list of events to be delivered to the {@code callback}
+     *            object. An OR'd value of {@link WifiNanSessionCallback
+     *            WifiNanSessionCallback.LISTEN_*}.
      * @return The {@link WifiNanPublishSession} which can be used to further
      *         control the publish session.
      */
     public WifiNanPublishSession publish(PublishConfig publishConfig,
-            WifiNanSessionListener listener, int events) {
-        return publishRaw(publishConfig, listener,
-                events | WifiNanSessionListener.LISTEN_HIDDEN_FLAGS);
+            WifiNanSessionCallback callback, int events) {
+        return publishRaw(publishConfig, callback,
+                events | WifiNanSessionCallback.LISTEN_HIDDEN_FLAGS);
     }
 
     /**
@@ -152,7 +152,7 @@ public class WifiNanManager {
      * @hide
      */
     public WifiNanPublishSession publishRaw(PublishConfig publishConfig,
-            WifiNanSessionListener listener, int events) {
+            WifiNanSessionCallback callback, int events) {
         if (VDBG) Log.v(TAG, "publish(): config=" + publishConfig);
 
         if (publishConfig.mPublishType == PublishConfig.PUBLISH_TYPE_UNSOLICITED
@@ -165,14 +165,14 @@ public class WifiNanManager {
             throw new IllegalArgumentException("Invalid publish config: SOLICITED "
                     + "publishes (passive) can't have a Tx filter");
         }
-        if (listener == null) {
-            throw new IllegalArgumentException("Invalid listener - must not be null");
+        if (callback == null) {
+            throw new IllegalArgumentException("Invalid callback - must not be null");
         }
 
         int sessionId;
 
         try {
-            sessionId = mService.createSession(mClientId, listener.callback, events);
+            sessionId = mService.createSession(mClientId, callback.callback, events);
             if (DBG) Log.d(TAG, "publish: session created - sessionId=" + sessionId);
             mService.publish(mClientId, sessionId, publishConfig);
         } catch (RemoteException e) {
@@ -209,23 +209,23 @@ public class WifiNanManager {
 
     /**
      * Request a NAN subscribe session. The results of the subscribe session
-     * operation will result in callbacks to the indicated listener:
-     * {@link WifiNanSessionListener NanSessionListener.on*}.
+     * operation will result in callbacks to the indicated callback:
+     * {@link WifiNanSessionCallback WifiNanSessionCallback.on*}.
      *
      * @param subscribeConfig The {@link SubscribeConfig} specifying the
      *            configuration of the subscribe session.
-     * @param listener The {@link WifiNanSessionListener} derived objects to be
+     * @param callback The {@link WifiNanSessionCallback} derived objects to be
      *            used for the event callbacks specified by {@code events}.
-     * @param events The list of events to be delivered to the {@code listener}
-     *            object. An OR'd value of {@link WifiNanSessionListener
-     *            NanSessionListener.LISTEN_*}.
+     * @param events The list of events to be delivered to the {@code callback}
+     *            object. An OR'd value of {@link WifiNanSessionCallback
+     *            WifiNanSessionCallback.LISTEN_*}.
      * @return The {@link WifiNanSubscribeSession} which can be used to further
      *         control the subscribe session.
      */
     public WifiNanSubscribeSession subscribe(SubscribeConfig subscribeConfig,
-            WifiNanSessionListener listener, int events) {
-        return subscribeRaw(subscribeConfig, listener,
-                events | WifiNanSessionListener.LISTEN_HIDDEN_FLAGS);
+            WifiNanSessionCallback callback, int events) {
+        return subscribeRaw(subscribeConfig, callback,
+                events | WifiNanSessionCallback.LISTEN_HIDDEN_FLAGS);
     }
 
     /**
@@ -234,7 +234,7 @@ public class WifiNanManager {
      * @hide
      */
     public WifiNanSubscribeSession subscribeRaw(SubscribeConfig subscribeConfig,
-            WifiNanSessionListener listener, int events) {
+            WifiNanSessionCallback callback, int events) {
         if (VDBG) {
             Log.v(TAG, "subscribe(): config=" + subscribeConfig);
         }
@@ -253,7 +253,7 @@ public class WifiNanManager {
         int sessionId;
 
         try {
-            sessionId = mService.createSession(mClientId, listener.callback, events);
+            sessionId = mService.createSession(mClientId, callback.callback, events);
             if (DBG) Log.d(TAG, "subscribe: session created - sessionId=" + sessionId);
             mService.subscribe(mClientId, sessionId, subscribeConfig);
         } catch (RemoteException e) {
