@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -96,12 +97,26 @@ public abstract class DpmTestBase extends AndroidTestCase {
 
     protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid,
             Integer enabledSetting, Integer appTargetSdk) throws Exception {
+        setUpPackageManagerForFakeAdmin(admin, packageUid, enabledSetting, appTargetSdk,
+                admin);
+    }
+
+    /**
+     * Set up a component in the mock package manager to be an active admin.
+     *
+     * @param admin ComponentName that's visible to the test code, which doesn't have to exist.
+     * @param copyFromAdmin package information for {@code admin} will be built based on this
+     *    component's information.
+     */
+    protected void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
+            Integer enabledSetting, Integer appTargetSdk, ComponentName copyFromAdmin)
+            throws Exception {
 
         // Set up getApplicationInfo().
 
         final ApplicationInfo ai = DpmTestUtils.cloneParcelable(
                 mRealTestContext.getPackageManager().getApplicationInfo(
-                        admin.getPackageName(),
+                        copyFromAdmin.getPackageName(),
                         PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS));
 
         ai.enabledSetting = enabledSetting == null
@@ -111,6 +126,8 @@ public abstract class DpmTestBase extends AndroidTestCase {
             ai.targetSdkVersion = appTargetSdk;
         }
         ai.uid = packageUid;
+        ai.packageName = admin.getPackageName();
+        ai.name = admin.getClassName();
 
         doReturn(ai).when(mMockContext.ipackageManager).getApplicationInfo(
                 eq(admin.getPackageName()),
@@ -120,7 +137,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
         // Set up queryBroadcastReceivers().
 
         final Intent resolveIntent = new Intent();
-        resolveIntent.setComponent(admin);
+        resolveIntent.setComponent(copyFromAdmin);
         final List<ResolveInfo> realResolveInfo =
                 mRealTestContext.getPackageManager().queryBroadcastReceivers(
                         resolveIntent,
@@ -132,7 +149,10 @@ public abstract class DpmTestBase extends AndroidTestCase {
         realResolveInfo.set(0, DpmTestUtils.cloneParcelable(realResolveInfo.get(0)));
 
         // We need to rewrite the UID in the activity info.
-        realResolveInfo.get(0).activityInfo.applicationInfo = ai;
+        final ActivityInfo aci = realResolveInfo.get(0).activityInfo;
+        aci.applicationInfo = ai;
+        aci.packageName = admin.getPackageName();
+        aci.name = admin.getClassName();
 
         doReturn(realResolveInfo).when(mMockContext.packageManager).queryBroadcastReceiversAsUser(
                 MockUtils.checkIntentComponent(admin),
