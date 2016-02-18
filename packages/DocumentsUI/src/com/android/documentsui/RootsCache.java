@@ -66,7 +66,7 @@ public class RootsCache {
     private final ContentObserver mObserver;
     private OnCacheUpdateListener mCacheUpdateListener;
 
-    private final RootInfo mRecentsRoot = new RootInfo();
+    private final RootInfo mRecentsRoot;
 
     private final Object mLock = new Object();
     private final CountDownLatch mFirstLoad = new CountDownLatch(1);
@@ -82,6 +82,18 @@ public class RootsCache {
     public RootsCache(Context context) {
         mContext = context;
         mObserver = new RootsChangedObserver();
+
+        // Create a new anonymous "Recents" RootInfo. It's a faker.
+        mRecentsRoot = new RootInfo() {{
+            // Special root for recents
+            authority = null;
+            rootId = null;
+            derivedIcon = R.drawable.ic_root_recent;
+            derivedType = RootInfo.TYPE_RECENTS;
+            flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD;
+            title = mContext.getString(R.string.root_recent);
+            availableBytes = -1;
+        }};
     }
 
     private class RootsChangedObserver extends ContentObserver {
@@ -104,16 +116,6 @@ public class RootsCache {
      * Gather roots from all known storage providers.
      */
     public void updateAsync() {
-        // Special root for recents
-        mRecentsRoot.authority = null;
-        mRecentsRoot.rootId = null;
-        mRecentsRoot.derivedIcon = R.drawable.ic_root_recent;
-        mRecentsRoot.derivedType = RootInfo.TYPE_RECENTS;
-        mRecentsRoot.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE
-                | Root.FLAG_SUPPORTS_IS_CHILD;
-        mRecentsRoot.title = mContext.getString(R.string.root_recent);
-        mRecentsRoot.availableBytes = -1;
-
         new UpdateTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -360,7 +362,7 @@ public class RootsCache {
     }
 
     public boolean isRecentsRoot(RootInfo root) {
-        return mRecentsRoot == root;
+        return mRecentsRoot.equals(root);
     }
 
     public Collection<RootInfo> getRootsBlocking() {
@@ -400,27 +402,22 @@ public class RootsCache {
     static List<RootInfo> getMatchingRoots(Collection<RootInfo> roots, State state) {
         final List<RootInfo> matching = new ArrayList<>();
         for (RootInfo root : roots) {
-            final boolean supportsCreate = (root.flags & Root.FLAG_SUPPORTS_CREATE) != 0;
-            final boolean supportsIsChild = (root.flags & Root.FLAG_SUPPORTS_IS_CHILD) != 0;
-            final boolean advanced = (root.flags & Root.FLAG_ADVANCED) != 0;
-            final boolean localOnly = (root.flags & Root.FLAG_LOCAL_ONLY) != 0;
-            final boolean empty = (root.flags & Root.FLAG_EMPTY) != 0;
-
             // Exclude read-only devices when creating
-            if (state.action == State.ACTION_CREATE && !supportsCreate) continue;
-            if (state.action == State.ACTION_PICK_COPY_DESTINATION && !supportsCreate) continue;
+            if (state.action == State.ACTION_CREATE && !root.supportsCreate()) continue;
+            if (state.action == State.ACTION_PICK_COPY_DESTINATION
+                    && !root.supportsCreate()) continue;
             // Exclude roots that don't support directory picking
-            if (state.action == State.ACTION_OPEN_TREE && !supportsIsChild) continue;
+            if (state.action == State.ACTION_OPEN_TREE && !root.supportsChildren()) continue;
             // Exclude advanced devices when not requested
-            if (!state.showAdvanced && advanced) continue;
+            if (!state.showAdvanced && root.isAdvanced()) continue;
             // Exclude non-local devices when local only
-            if (state.localOnly && !localOnly) continue;
+            if (state.localOnly && !root.isLocalOnly()) continue;
             // Exclude downloads roots that don't support directory creation
             // TODO: Add flag to check the root supports directory creation or not.
-            if (state.directoryCopy && root.isDownloads()) continue;
+            if (state.directoryCopy && !root.supportsChildren()) continue;
 
             // Only show empty roots when creating, or in browse mode.
-            if (empty && (state.action == State.ACTION_OPEN
+            if (root.isEmpty() && (state.action == State.ACTION_OPEN
                     || state.action == State.ACTION_GET_CONTENT)) {
                 if (DEBUG) Log.i(TAG, "Skipping empty root: " + root);
                 continue;
@@ -436,10 +433,13 @@ public class RootsCache {
 
             // Exclude roots from the calling package.
             if (state.excludedAuthorities.contains(root.authority)) {
-                if (DEBUG) Log.d(TAG, "Excluding root " + root.authority + " from calling package.");
+                if (DEBUG) Log.d(
+                        TAG, "Excluding root " + root.authority + " from calling package.");
                 continue;
             }
 
+            if (DEBUG) Log.d(
+                    TAG, "Including root " + root + " in roots list.");
             matching.add(root);
         }
         return matching;
