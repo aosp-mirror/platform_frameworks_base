@@ -62,17 +62,13 @@ public:
 private:
     uint32_t animateCommon(TreeInfo& info);
 
-    // This would remove the animator from mAnimators list. It should only be called during
-    // push staging.
-    void removeActiveAnimator(const sp<BaseRenderNodeAnimator>& animator);
-
     RenderNode& mParent;
     AnimationHandle* mAnimationHandle;
 
     // To improve the efficiency of resizing & removing from the vector
     // use manual ref counting instead of sp<>.
-    std::vector< sp<BaseRenderNodeAnimator> > mNewAnimators;
-    std::vector< sp<BaseRenderNodeAnimator> > mAnimators;
+    std::vector<BaseRenderNodeAnimator*> mNewAnimators;
+    std::vector<BaseRenderNodeAnimator*> mAnimators;
 };
 
 } /* namespace uirenderer */

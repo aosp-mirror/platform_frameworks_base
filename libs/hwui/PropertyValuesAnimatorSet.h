@@ -50,6 +50,7 @@ public:
 
     void start(AnimationListener* listener);
     void reverse(AnimationListener* listener);
+    void reset();
 
     void addPropertyAnimator(PropertyValuesHolder* propertyValuesHolder,
             Interpolator* interpolators, int64_t startDelays,
