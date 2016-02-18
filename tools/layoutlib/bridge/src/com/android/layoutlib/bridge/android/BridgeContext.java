@@ -1382,6 +1382,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public File getDataDir() {
+        // pass
+        return null;
+    }
+
+    @Override
     public File getFilesDir() {
         // pass
         return null;
