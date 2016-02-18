@@ -16,8 +16,6 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_JAVA_LANGUAGE_VERSION := 1.8
-
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 
 LOCAL_JAR_MANIFEST := manifest.txt
