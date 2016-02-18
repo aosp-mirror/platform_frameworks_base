@@ -16,8 +16,9 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
+import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
+import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
@@ -40,7 +41,8 @@ public class PickFragment extends Fragment {
     public static final String TAG = "PickFragment";
 
     private int mAction;
-    private @OpType int mOperationType;
+    // Only legal values are OPERATION_COPY, OPERATION_MOVE, and unset (OPERATION_UNKNOWN).
+    private @OpType int mCopyOperationSubType = OPERATION_UNKNOWN;
     private DocumentInfo mPickTarget;
     private View mContainer;
     private Button mPick;
@@ -97,10 +99,11 @@ public class PickFragment extends Fragment {
     /**
      * @param action Which action defined in State is the picker shown for.
      */
-    public void setPickTarget(int action, @OpType int operationType, DocumentInfo pickTarget) {
-        checkArgument(operationType == OPERATION_COPY || operationType == OPERATION_MOVE);
+    public void setPickTarget(
+            int action, @OpType int copyOperationSubType, DocumentInfo pickTarget) {
+        checkArgument(copyOperationSubType != OPERATION_DELETE);
         mAction = action;
-        mOperationType = operationType;
+        mCopyOperationSubType = copyOperationSubType;
         mPickTarget = pickTarget;
         if (mContainer != null) {
             updateView();
@@ -117,7 +120,7 @@ public class PickFragment extends Fragment {
                 mCancel.setVisibility(View.GONE);
                 break;
             case State.ACTION_PICK_COPY_DESTINATION:
-                mPick.setText(mOperationType == OPERATION_MOVE
+                mPick.setText(mCopyOperationSubType == OPERATION_MOVE
                         ? R.string.button_move : R.string.button_copy);
                 mCancel.setVisibility(View.VISIBLE);
                 break;
