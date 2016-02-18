@@ -30,6 +30,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -86,7 +87,6 @@ public class RootsFragment extends Fragment {
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final Context context = inflater.getContext();
 
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(R.id.roots_list);
@@ -112,11 +112,13 @@ public class RootsFragment extends Fragment {
             @Override
             public void onLoadFinished(
                     Loader<Collection<RootInfo>> loader, Collection<RootInfo> result) {
-                if (!isAdded()) return;
+                if (!isAdded()) {
+                    return;
+                }
 
-                final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
+                Intent handlerAppIntent = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
 
-                mAdapter = new RootsAdapter(context, result, includeApps);
+                mAdapter = new RootsAdapter(context, result, handlerAppIntent);
                 mList.setAdapter(mAdapter);
 
                 onCurrentRootChanged();
@@ -151,7 +153,9 @@ public class RootsFragment extends Fragment {
     }
 
     public void onCurrentRootChanged() {
-        if (mAdapter == null) return;
+        if (mAdapter == null) {
+            return;
+        }
 
         final RootInfo root = ((BaseActivity) getActivity()).getCurrentRoot();
         for (int i = 0; i < mAdapter.getCount(); i++) {
@@ -300,7 +304,13 @@ public class RootsFragment extends Fragment {
     }
 
     private static class RootsAdapter extends ArrayAdapter<Item> {
-        public RootsAdapter(Context context, Collection<RootInfo> roots, Intent includeApps) {
+
+        /**
+         * @param handlerAppIntent When not null, apps capable of handling the original
+         *     intent will be included in list of roots (in special section at bottom).
+         */
+        public RootsAdapter(
+                Context context, Collection<RootInfo> roots, @Nullable Intent handlerAppIntent) {
             super(context, 0);
 
             final List<RootItem> libraries = new ArrayList<>();
@@ -322,27 +332,39 @@ public class RootsFragment extends Fragment {
             Collections.sort(others, comp);
 
             addAll(libraries);
-            add(new SpacerItem());
+            // Only add the spacer if it is actually separating something.
+            if (!libraries.isEmpty() && !others.isEmpty()) {
+                add(new SpacerItem());
+            }
             addAll(others);
 
-            if (includeApps != null) {
-                final PackageManager pm = context.getPackageManager();
-                final List<ResolveInfo> infos = pm.queryIntentActivities(
-                        includeApps, PackageManager.MATCH_DEFAULT_ONLY);
+            // Include apps that can handle this intent too.
+            if (handlerAppIntent != null) {
+                includeHandlerApps(context, handlerAppIntent);
+            }
+        }
 
-                final List<AppItem> apps = new ArrayList<>();
+        /**
+         * Adds apps capable of handling the original intent will be included
+         * in list of roots (in special section at bottom).
+         */
+        private void includeHandlerApps(Context context, Intent handlerAppIntent) {
+            final PackageManager pm = context.getPackageManager();
+            final List<ResolveInfo> infos = pm.queryIntentActivities(
+                    handlerAppIntent, PackageManager.MATCH_DEFAULT_ONLY);
 
-                // Omit ourselves from the list
-                for (ResolveInfo info : infos) {
-                    if (!context.getPackageName().equals(info.activityInfo.packageName)) {
-                        apps.add(new AppItem(info));
-                    }
+            final List<AppItem> apps = new ArrayList<>();
+
+            // Omit ourselves from the list
+            for (ResolveInfo info : infos) {
+                if (!context.getPackageName().equals(info.activityInfo.packageName)) {
+                    apps.add(new AppItem(info));
                 }
+            }
 
-                if (apps.size() > 0) {
-                    add(new SpacerItem());
-                    addAll(apps);
-                }
+            if (apps.size() > 0) {
+                add(new SpacerItem());
+                addAll(apps);
             }
         }
 

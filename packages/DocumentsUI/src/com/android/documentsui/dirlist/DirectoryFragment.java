@@ -985,7 +985,8 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
     }
 
     private void copyDocuments(final List<DocumentInfo> docs, final DocumentInfo destination) {
-        if (!canCopy(docs, destination)) {
+        BaseActivity activity = (BaseActivity) getActivity();
+        if (!canCopy(docs, activity.getCurrentRoot(), destination)) {
             Snackbars.makeSnackbar(
                     getActivity(),
                     R.string.clipboard_files_cannot_paste,
@@ -1065,13 +1066,13 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
      *
      * @return true if the list of files can be copied to destination.
      */
-    boolean canCopy(List<DocumentInfo> files, DocumentInfo dest) {
-        BaseActivity activity = (BaseActivity) getActivity();
+    private boolean canCopy(List<DocumentInfo> files, RootInfo root, DocumentInfo dest) {
+        if (dest == null || !dest.isDirectory() || !dest.isCreateSupported()) {
+            return false;
+        }
 
-        final RootInfo root = activity.getCurrentRoot();
-
-        // Can't copy folders to Downloads.
-        if (root.isDownloads()) {
+        // Can't copy folders to roots that don't support children.
+        if (!root.supportsChildren()) {
             for (DocumentInfo docs : files) {
                 if (docs.isDirectory()) {
                     return false;
@@ -1079,7 +1080,7 @@ public class DirectoryFragment extends Fragment implements DocumentsAdapter.Envi
             }
         }
 
-        return dest != null && dest.isDirectory() && dest.isCreateSupported();
+        return true;
     }
 
     public void selectAllFiles() {
