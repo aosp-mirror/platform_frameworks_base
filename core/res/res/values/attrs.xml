@@ -5030,7 +5030,7 @@ i
         <attr name="firstDayOfWeek" format="integer" />
         <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="minDate" />
-        <!-- The minimal date shown by this calendar view in mm/dd/yyyy format. -->
+        <!-- The maximal date shown by this calendar view in mm/dd/yyyy format. -->
         <attr name="maxDate" />
         <!-- The text appearance for the month and year in the calendar header. -->
         <attr name="monthTextAppearance" format="reference" />
