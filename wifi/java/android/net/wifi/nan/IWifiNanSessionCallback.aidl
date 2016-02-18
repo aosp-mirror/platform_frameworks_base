@@ -16,17 +16,23 @@
 
 package android.net.wifi.nan;
 
-import android.net.wifi.nan.ConfigRequest;
-
 /**
  * Callback interface that WifiNanManager implements
  *
  * {@hide}
  */
-oneway interface IWifiNanEventListener
+oneway interface IWifiNanSessionCallback
 {
-    void onConfigCompleted(in ConfigRequest completedConfig);
-    void onConfigFailed(in ConfigRequest failedConfig, int reason);
-    void onNanDown(int reason);
-    void onIdentityChanged();
+    void onPublishFail(int reason);
+    void onPublishTerminated(int reason);
+
+    void onSubscribeFail(int reason);
+    void onSubscribeTerminated(int reason);
+
+    void onMatch(int peerId, in byte[] serviceSpecificInfo,
+            int serviceSpecificInfoLength, in byte[] matchFilter, int matchFilterLength);
+
+    void onMessageSendSuccess(int messageId);
+    void onMessageSendFail(int messageId, int reason);
+    void onMessageReceived(int peerId, in byte[] message, int messageLength);
 }

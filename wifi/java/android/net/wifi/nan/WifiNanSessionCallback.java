@@ -26,29 +26,29 @@ import android.util.Log;
  * Base class for NAN session events callbacks. Should be extended by
  * applications wanting notifications. The callbacks are registered when a
  * publish or subscribe session is created using
- * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionListener, int)} or
- * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionListener, int)}
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionCallback, int)} or
+ * {@link WifiNanManager#subscribe(SubscribeConfig, WifiNanSessionCallback, int)}
  * . These are callbacks applying to a specific NAN session. Events
  * corresponding to the NAN link are delivered using
- * {@link WifiNanEventListener}.
+ * {@link WifiNanEventCallback}.
  * <p>
- * A single listener is registered at session creation - it cannot be replaced.
+ * A single callback is registered at session creation - it cannot be replaced.
  * <p>
  * During registration specify which specific events are desired using a set of
- * {@code NanSessionListener.LISTEN_*} flags OR'd together. Only those events
- * will be delivered to the registered listener. Override those callbacks
- * {@code NanSessionListener.on*} for the registered events.
+ * {@code WifiNanSessionCallback.LISTEN_*} flags OR'd together. Only those
+ * events will be delivered to the registered callback. Override those callbacks
+ * {@code WifiNanSessionCallback.on*} for the registered events.
  *
  * @hide PROPOSED_NAN_API
  */
-public class WifiNanSessionListener {
-    private static final String TAG = "WifiNanSessionListener";
+public class WifiNanSessionCallback {
+    private static final String TAG = "WifiNanSessionCallback";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /**
      * Publish fail callback event registration flag. Corresponding callback is
-     * {@link WifiNanSessionListener#onPublishFail(int)}.
+     * {@link WifiNanSessionCallback#onPublishFail(int)}.
      *
      * @hide
      */
@@ -56,13 +56,13 @@ public class WifiNanSessionListener {
 
     /**
      * Publish terminated callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionListener#onPublishTerminated(int)}.
+     * callback is {@link WifiNanSessionCallback#onPublishTerminated(int)}.
      */
     public static final int LISTEN_PUBLISH_TERMINATED = 0x1 << 1;
 
     /**
      * Subscribe fail callback event registration flag. Corresponding callback
-     * is {@link WifiNanSessionListener#onSubscribeFail(int)}.
+     * is {@link WifiNanSessionCallback#onSubscribeFail(int)}.
      *
      * @hide
      */
@@ -70,14 +70,14 @@ public class WifiNanSessionListener {
 
     /**
      * Subscribe terminated callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionListener#onSubscribeTerminated(int)}.
+     * callback is {@link WifiNanSessionCallback#onSubscribeTerminated(int)}.
      */
     public static final int LISTEN_SUBSCRIBE_TERMINATED = 0x1 << 3;
 
     /**
      * Match (discovery: publish or subscribe) callback event registration flag.
      * Corresponding callback is
-     * {@link WifiNanSessionListener#onMatch(int, byte[], int, byte[], int)}.
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}.
      *
      * @hide
      */
@@ -85,7 +85,7 @@ public class WifiNanSessionListener {
 
     /**
      * Message sent successfully callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionListener#onMessageSendSuccess()}.
+     * callback is {@link WifiNanSessionCallback#onMessageSendSuccess()}.
      *
      * @hide
      */
@@ -93,7 +93,7 @@ public class WifiNanSessionListener {
 
     /**
      * Message sending failure callback event registration flag. Corresponding
-     * callback is {@link WifiNanSessionListener#onMessageSendFail(int)}.
+     * callback is {@link WifiNanSessionCallback#onMessageSendFail(int)}.
      *
      * @hide
      */
@@ -101,7 +101,7 @@ public class WifiNanSessionListener {
 
     /**
      * Message received callback event registration flag. Corresponding callback
-     * is {@link WifiNanSessionListener#onMessageReceived(int, byte[], int)}.
+     * is {@link WifiNanSessionCallback#onMessageReceived(int, byte[], int)}.
      *
      * @hide
      */
@@ -118,37 +118,37 @@ public class WifiNanSessionListener {
             | LISTEN_MESSAGE_RECEIVED;
 
     /**
-     * Failure reason flag for {@link WifiNanEventListener} and
-     * {@link WifiNanSessionListener} callbacks. Indicates no resources to execute
-     * the requested operation.
+     * Failure reason flag for {@link WifiNanEventCallback} and
+     * {@link WifiNanSessionCallback} callbacks. Indicates no resources to
+     * execute the requested operation.
      */
     public static final int FAIL_REASON_NO_RESOURCES = 0;
 
     /**
-     * Failure reason flag for {@link WifiNanEventListener} and
-     * {@link WifiNanSessionListener} callbacks. Indicates invalid argument in the
-     * requested operation.
+     * Failure reason flag for {@link WifiNanEventCallback} and
+     * {@link WifiNanSessionCallback} callbacks. Indicates invalid argument in
+     * the requested operation.
      */
     public static final int FAIL_REASON_INVALID_ARGS = 1;
 
     /**
-     * Failure reason flag for {@link WifiNanEventListener} and
-     * {@link WifiNanSessionListener} callbacks. Indicates a message is transmitted
-     * without a match (i.e. a discovery) occurring first.
+     * Failure reason flag for {@link WifiNanEventCallback} and
+     * {@link WifiNanSessionCallback} callbacks. Indicates a message is
+     * transmitted without a match (i.e. a discovery) occurring first.
      */
     public static final int FAIL_REASON_NO_MATCH_SESSION = 2;
 
     /**
-     * Failure reason flag for {@link WifiNanEventListener} and
-     * {@link WifiNanSessionListener} callbacks. Indicates an unspecified error
+     * Failure reason flag for {@link WifiNanEventCallback} and
+     * {@link WifiNanSessionCallback} callbacks. Indicates an unspecified error
      * occurred during the operation.
      */
     public static final int FAIL_REASON_OTHER = 3;
 
     /**
      * Failure reason flag for
-     * {@link WifiNanSessionListener#onPublishTerminated(int)} and
-     * {@link WifiNanSessionListener#onSubscribeTerminated(int)} callbacks.
+     * {@link WifiNanSessionCallback#onPublishTerminated(int)} and
+     * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} callbacks.
      * Indicates that publish or subscribe session is done - i.e. all the
      * requested operations (per {@link PublishConfig} or
      * {@link SubscribeConfig}) have been executed.
@@ -157,8 +157,8 @@ public class WifiNanSessionListener {
 
     /**
      * Failure reason flag for
-     * {@link WifiNanSessionListener#onPublishTerminated(int)} and
-     * {@link WifiNanSessionListener#onSubscribeTerminated(int)} callbacks.
+     * {@link WifiNanSessionCallback#onPublishTerminated(int)} and
+     * {@link WifiNanSessionCallback#onSubscribeTerminated(int)} callbacks.
      * Indicates that publish or subscribe session is terminated due to a
      * failure.
      */
@@ -171,20 +171,21 @@ public class WifiNanSessionListener {
     private final Handler mHandler;
 
     /**
-     * Constructs a {@link WifiNanSessionListener} using the looper of the current
-     * thread. I.e. all callbacks will be delivered on the current thread.
+     * Constructs a {@link WifiNanSessionCallback} using the looper of the
+     * current thread. I.e. all callbacks will be delivered on the current
+     * thread.
      */
-    public WifiNanSessionListener() {
+    public WifiNanSessionCallback() {
         this(Looper.myLooper());
     }
 
     /**
-     * Constructs a {@link WifiNanSessionListener} using the specified looper. I.e.
-     * all callbacks will delivered on the thread of the specified looper.
+     * Constructs a {@link WifiNanSessionCallback} using the specified looper.
+     * I.e. all callbacks will delivered on the thread of the specified looper.
      *
      * @param looper The looper on which to execute the callbacks.
      */
-    public WifiNanSessionListener(Looper looper) {
+    public WifiNanSessionCallback(Looper looper) {
         if (VDBG) Log.v(TAG, "ctor: looper=" + looper);
         mHandler = new Handler(looper) {
             @Override
@@ -192,31 +193,31 @@ public class WifiNanSessionListener {
                 if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
                 switch (msg.what) {
                     case LISTEN_PUBLISH_FAIL:
-                        WifiNanSessionListener.this.onPublishFail(msg.arg1);
+                        WifiNanSessionCallback.this.onPublishFail(msg.arg1);
                         break;
                     case LISTEN_PUBLISH_TERMINATED:
-                        WifiNanSessionListener.this.onPublishTerminated(msg.arg1);
+                        WifiNanSessionCallback.this.onPublishTerminated(msg.arg1);
                         break;
                     case LISTEN_SUBSCRIBE_FAIL:
-                        WifiNanSessionListener.this.onSubscribeFail(msg.arg1);
+                        WifiNanSessionCallback.this.onSubscribeFail(msg.arg1);
                         break;
                     case LISTEN_SUBSCRIBE_TERMINATED:
-                        WifiNanSessionListener.this.onSubscribeTerminated(msg.arg1);
+                        WifiNanSessionCallback.this.onSubscribeTerminated(msg.arg1);
                         break;
                     case LISTEN_MATCH:
-                        WifiNanSessionListener.this.onMatch(
+                        WifiNanSessionCallback.this.onMatch(
                                 msg.getData().getInt(MESSAGE_BUNDLE_KEY_PEER_ID),
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE), msg.arg1,
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2), msg.arg2);
                         break;
                     case LISTEN_MESSAGE_SEND_SUCCESS:
-                        WifiNanSessionListener.this.onMessageSendSuccess(msg.arg1);
+                        WifiNanSessionCallback.this.onMessageSendSuccess(msg.arg1);
                         break;
                     case LISTEN_MESSAGE_SEND_FAIL:
-                        WifiNanSessionListener.this.onMessageSendFail(msg.arg1, msg.arg2);
+                        WifiNanSessionCallback.this.onMessageSendFail(msg.arg1, msg.arg2);
                         break;
                     case LISTEN_MESSAGE_RECEIVED:
-                        WifiNanSessionListener.this.onMessageReceived(msg.arg2,
+                        WifiNanSessionCallback.this.onMessageReceived(msg.arg2,
                                 msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE), msg.arg1);
                         break;
                 }
@@ -229,8 +230,8 @@ public class WifiNanSessionListener {
      * implementation printing out a log message). Override to implement your
      * custom response.
      *
-     * @param reason The failure reason using {@code NanSessionListener.FAIL_*}
-     *            codes.
+     * @param reason The failure reason using
+     *            {@code WifiNanSessionCallback.FAIL_*} codes.
      */
     public void onPublishFail(int reason) {
         if (VDBG) Log.v(TAG, "onPublishFail: called in stub - override if interested");
@@ -238,12 +239,13 @@ public class WifiNanSessionListener {
 
     /**
      * Called when a publish operation terminates. Event will only be delivered
-     * if registered using {@link WifiNanSessionListener#LISTEN_PUBLISH_TERMINATED}.
-     * A dummy (empty implementation printing out a warning). Make sure to
-     * override if registered.
+     * if registered using
+     * {@link WifiNanSessionCallback#LISTEN_PUBLISH_TERMINATED}. A dummy (empty
+     * implementation printing out a warning). Make sure to override if
+     * registered.
      *
      * @param reason The termination reason using
-     *            {@code NanSessionListener.TERMINATE_*} codes.
+     *            {@code WifiNanSessionCallback.TERMINATE_*} codes.
      */
     public void onPublishTerminated(int reason) {
         Log.w(TAG, "onPublishTerminated: called in stub - override if interested or disable");
@@ -254,8 +256,8 @@ public class WifiNanSessionListener {
      * implementation printing out a log message). Override to implement your
      * custom response.
      *
-     * @param reason The failure reason using {@code NanSessionListener.FAIL_*}
-     *            codes.
+     * @param reason The failure reason using
+     *            {@code WifiNanSessionCallback.FAIL_*} codes.
      */
     public void onSubscribeFail(int reason) {
         if (VDBG) Log.v(TAG, "onSubscribeFail: called in stub - override if interested");
@@ -264,12 +266,12 @@ public class WifiNanSessionListener {
     /**
      * Called when a subscribe operation terminates. Event will only be
      * delivered if registered using
-     * {@link WifiNanSessionListener#LISTEN_SUBSCRIBE_TERMINATED}. A dummy (empty
-     * implementation printing out a warning). Make sure to override if
+     * {@link WifiNanSessionCallback#LISTEN_SUBSCRIBE_TERMINATED}. A dummy
+     * (empty implementation printing out a warning). Make sure to override if
      * registered.
      *
      * @param reason The termination reason using
-     *            {@code NanSessionListener.TERMINATE_*} codes.
+     *            {@code WifiNanSessionCallback.TERMINATE_*} codes.
      */
     public void onSubscribeTerminated(int reason) {
         Log.w(TAG, "onSubscribeTerminated: called in stub - override if interested or disable");
@@ -303,7 +305,7 @@ public class WifiNanSessionListener {
      * message). Override to implement your custom response.
      * <p>
      * Note that either this callback or
-     * {@link WifiNanSessionListener#onMessageSendFail(int, int)} will be
+     * {@link WifiNanSessionCallback#onMessageSendFail(int, int)} will be
      * received - never both.
      */
     public void onMessageSendSuccess(int messageId) {
@@ -319,11 +321,11 @@ public class WifiNanSessionListener {
      * message). Override to implement your custom response.
      * <p>
      * Note that either this callback or
-     * {@link WifiNanSessionListener#onMessageSendSuccess(int)} will be received
+     * {@link WifiNanSessionCallback#onMessageSendSuccess(int)} will be received
      * - never both
      *
-     * @param reason The failure reason using {@code NanSessionListener.FAIL_*}
-     *            codes.
+     * @param reason The failure reason using
+     *            {@code WifiNanSessionCallback.FAIL_*} codes.
      */
     public void onMessageSendFail(int messageId, int reason) {
         if (VDBG) Log.v(TAG, "onMessageSendFail: called in stub - override if interested");
@@ -346,7 +348,7 @@ public class WifiNanSessionListener {
     /**
      * {@hide}
      */
-    public IWifiNanSessionListener callback = new IWifiNanSessionListener.Stub() {
+    public IWifiNanSessionCallback callback = new IWifiNanSessionCallback.Stub() {
         @Override
         public void onPublishFail(int reason) {
             if (VDBG) Log.v(TAG, "onPublishFail: reason=" + reason);

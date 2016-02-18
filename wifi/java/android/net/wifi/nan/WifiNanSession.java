@@ -94,11 +94,11 @@ public class WifiNanSession {
      * Sends a message to the specified destination. Message transmission is
      * part of the current discovery session - i.e. executed subsequent to a
      * publish/subscribe
-     * {@link WifiNanSessionListener#onMatch(int, byte[], int, byte[], int)}
+     * {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}
      * event.
      *
      * @param peerId The peer's ID for the message. Must be a result of an
-     *            {@link WifiNanSessionListener#onMatch(int, byte[], int, byte[], int)}
+     *            {@link WifiNanSessionCallback#onMatch(int, byte[], int, byte[], int)}
      *            event.
      * @param message The message to be transmitted.
      * @param messageLength The number of bytes from the {@code message} to be
