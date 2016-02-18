@@ -324,6 +324,11 @@ public class RttManager {
         public int requestType;
 
         /**
+         * Whether the secure RTT protocol needs to be used for ranging this peer device.
+         */
+        public boolean secure;
+
+        /**
          * mac address of the device being ranged
          * Default value: null
          */
@@ -478,6 +483,7 @@ public class RttManager {
                 for (RttParams params : mParams) {
                     dest.writeInt(params.deviceType);
                     dest.writeInt(params.requestType);
+                    dest.writeByte(params.secure ? (byte) 1 : 0);
                     dest.writeString(params.bssid);
                     dest.writeInt(params.channelWidth);
                     dest.writeInt(params.frequency);
@@ -515,6 +521,7 @@ public class RttManager {
                             params[i] = new RttParams();
                             params[i].deviceType = in.readInt();
                             params[i].requestType = in.readInt();
+                            params[i].secure = (in.readByte() != 0);
                             params[i].bssid = in.readString();
                             params[i].channelWidth = in.readInt();
                             params[i].frequency = in.readInt();
@@ -690,6 +697,11 @@ public class RttManager {
 
         /** LCR information Element, only available to double side RTT. */
         public WifiInformationElement LCR;
+
+        /**
+         * Whether the secure RTT protocol was used for ranging.
+         */
+        public boolean secure;
     }
 
 
@@ -742,6 +754,7 @@ public class RttManager {
                         dest.writeInt((byte) result.LCR.data.length);
                         dest.writeByte(result.LCR.id);
                     }
+                    dest.writeByte(result.secure ? (byte) 1 : 0);
                 }
             } else {
                 dest.writeInt(0);
@@ -796,6 +809,7 @@ public class RttManager {
                                 results[i].LCR.data = new byte[length];
                                 in.readByteArray(results[i].LCR.data);
                             }
+                            results[i].secure = (in.readByte() != 0);
                         }
 
                         ParcelableRttResults parcelableResults = new ParcelableRttResults(results);
