@@ -32,7 +32,6 @@
     >
 
     <LinearLayout
-        android:id="@+id/expanded_group"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:gravity="center"
@@ -80,12 +79,12 @@
 
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
-        <ImageView
+        <com.android.systemui.statusbar.phone.ExpandableIndicator
+            android:id="@+id/expand_indicator"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:padding="12dp"
-            android:src="@drawable/ic_expand_less"
-            android:tint="@android:color/white" />
+            android:padding="12dp" />
+
     </LinearLayout>
 
     <TextView
@@ -109,6 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="4dp"
         android:layout_marginStart="16dp"
         android:gravity="start"
         android:orientation="vertical">
@@ -116,7 +116,6 @@
             android:id="@+id/date_time_group"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
-            android:layout_marginTop="4dp"
             android:orientation="horizontal">
 
             <include layout="@layout/split_clock_view"
