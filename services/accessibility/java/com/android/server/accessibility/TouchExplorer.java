@@ -467,17 +467,18 @@ class TouchExplorer implements EventStreamTransformation, AccessibilityGestureDe
       if (mCurrentState == STATE_GESTURE_DETECTING) {
           endGestureDetection();
       } else if (mCurrentState == STATE_TOUCH_EXPLORING) {
-          final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
-          final int pointerIdBits = (1 << pointerId);
+          // If the finger is still moving, pass the event on.
+          if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+              final int pointerId = mReceivedPointerTracker.getPrimaryPointerId();
+              final int pointerIdBits = (1 << pointerId);
 
-          // Cache the event until we discern exploration from gesturing.
-          mSendHoverEnterAndMoveDelayed.addEvent(event);
-
-          // We have just decided that the user is touch,
-          // exploring so start sending events.
-          mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
-          mSendHoverExitDelayed.cancel();
-          sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits, policyFlags);
+              // We have just decided that the user is touch,
+              // exploring so start sending events.
+              mSendHoverEnterAndMoveDelayed.addEvent(event);
+              mSendHoverEnterAndMoveDelayed.forceSendAndRemove();
+              mSendHoverExitDelayed.cancel();
+              sendMotionEvent(event, MotionEvent.ACTION_HOVER_MOVE, pointerIdBits, policyFlags);
+          }
       }
     }
 
