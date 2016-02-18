@@ -1689,7 +1689,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             final ActiveAdmin deviceOwnerAdmin = getDeviceOwnerAdminLocked();
 
             migrateUserRestrictionsForUser(UserHandle.SYSTEM, deviceOwnerAdmin,
-                    /* exceptionList =*/ null);
+                    /* exceptionList =*/ null, /* isDeviceOwner =*/ true);
 
             // Push DO user restrictions to user manager.
             pushUserRestrictions(UserHandle.USER_SYSTEM);
@@ -1697,39 +1697,36 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mOwners.setDeviceOwnerUserRestrictionsMigrated();
         }
 
-        // Migrate for POs.  We have a few more exceptions.
-        final Set<String> normalExceptionList = Sets.newArraySet(
+        // Migrate for POs.
+
+        // The following restrictions can be set on secondary users by the device owner, so we
+        // assume they're not from the PO.
+        final Set<String> secondaryUserExceptionList = Sets.newArraySet(
                 UserManager.DISALLOW_OUTGOING_CALLS,
                 UserManager.DISALLOW_SMS);
-
-        final Set<String> managedExceptionList = new ArraySet<>(normalExceptionList.size() + 1);
-        managedExceptionList.addAll(normalExceptionList);
-        managedExceptionList.add(UserManager.DISALLOW_WALLPAPER);
 
         for (UserInfo ui : mUserManager.getUsers()) {
             final int userId = ui.id;
             if (mOwners.getProfileOwnerUserRestrictionsNeedsMigration(userId)) {
-                if (userId != UserHandle.USER_SYSTEM) {
-                    if (VERBOSE_LOG) {
-                        Log.v(LOG_TAG, "Migrating PO user restrictions for user " + userId);
-                    }
-                    migrated = true;
-
-                    final ActiveAdmin profileOwnerAdmin = getProfileOwnerAdminLocked(userId);
-
-                    final Set<String> exceptionList =
-                            ui.isManagedProfile() ? managedExceptionList : normalExceptionList;
-
-                    migrateUserRestrictionsForUser(ui.getUserHandle(), profileOwnerAdmin,
-                            exceptionList);
-
-                    // Note if a secondary user has no PO but has a DA that disables camera, we
-                    // don't get here and won't push the camera user restriction to UserManager
-                    // here.  That's okay because we'll push user restrictions anyway when a user
-                    // starts.  But we still do it because we want to let user manager persist
-                    // upon migration.
-                    pushUserRestrictions(userId);
+                if (VERBOSE_LOG) {
+                    Log.v(LOG_TAG, "Migrating PO user restrictions for user " + userId);
                 }
+                migrated = true;
+
+                final ActiveAdmin profileOwnerAdmin = getProfileOwnerAdminLocked(userId);
+
+                final Set<String> exceptionList =
+                        (userId == UserHandle.USER_SYSTEM) ? null : secondaryUserExceptionList;
+
+                migrateUserRestrictionsForUser(ui.getUserHandle(), profileOwnerAdmin,
+                        exceptionList, /* isDeviceOwner =*/ false);
+
+                // Note if a secondary user has no PO but has a DA that disables camera, we
+                // don't get here and won't push the camera user restriction to UserManager
+                // here.  That's okay because we'll push user restrictions anyway when a user
+                // starts.  But we still do it because we want to let user manager persist
+                // upon migration.
+                pushUserRestrictions(userId);
 
                 mOwners.setProfileOwnerUserRestrictionsMigrated(userId);
             }
@@ -1740,7 +1737,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void migrateUserRestrictionsForUser(UserHandle user, ActiveAdmin admin,
-            Set<String> exceptionList) {
+            Set<String> exceptionList, boolean isDeviceOwner) {
         final Bundle origRestrictions = mUserManagerInternal.getBaseUserRestrictions(
                 user.getIdentifier());
 
@@ -1751,7 +1748,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!origRestrictions.getBoolean(key)) {
                 continue;
             }
-            if (exceptionList!= null && exceptionList.contains(key)) {
+            final boolean canOwnerChange = isDeviceOwner
+                    ? UserRestrictionsUtils.canDeviceOwnerChange(key)
+                    : UserRestrictionsUtils.canProfileOwnerChange(key, user.getIdentifier());
+
+            if (!canOwnerChange || (exceptionList!= null && exceptionList.contains(key))) {
                 newBaseRestrictions.putBoolean(key, true);
             } else {
                 newOwnerRestrictions.putBoolean(key, true);
