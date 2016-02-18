@@ -448,7 +448,7 @@ public class ListView extends AbsListView {
      * through the specified intent.
      * @param intent the intent used to identify the RemoteViewsService for the adapter to connect to.
      */
-    @android.view.RemotableViewMethod
+    @android.view.RemotableViewMethod(asyncImpl="setRemoteViewsAdapterAsync")
     public void setRemoteViewsAdapter(Intent intent) {
         super.setRemoteViewsAdapter(intent);
     }

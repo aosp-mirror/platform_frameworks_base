@@ -455,7 +455,16 @@ public class ImageView extends View {
 
     /** @hide **/
     public Runnable setImageResourceAsync(@DrawableRes int resId) {
-        return new ImageDrawableCallback(getContext().getDrawable(resId), null, resId);
+        Drawable d = null;
+        if (resId != 0) {
+            try {
+                d = getContext().getDrawable(resId);
+            } catch (Exception e) {
+                Log.w(LOG_TAG, "Unable to find resource: " + resId, e);
+                resId = 0;
+            }
+        }
+        return new ImageDrawableCallback(d, null, resId);
     }
 
     /**
@@ -857,7 +866,7 @@ public class ImageView extends View {
             } catch (Exception e) {
                 Log.w(LOG_TAG, "Unable to find resource: " + mResource, e);
                 // Don't try again.
-                mUri = null;
+                mResource = 0;
             }
         } else if (mUri != null) {
             d = getDrawableFromUri(mUri);

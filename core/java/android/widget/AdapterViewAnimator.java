@@ -975,8 +975,19 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * @param intent the intent used to identify the RemoteViewsService for the adapter to
      *        connect to.
      */
-    @android.view.RemotableViewMethod
+    @android.view.RemotableViewMethod(asyncImpl="setRemoteViewsAdapterAsync")
     public void setRemoteViewsAdapter(Intent intent) {
+        setRemoteViewsAdapter(intent, false);
+    }
+
+    /** @hide **/
+    public Runnable setRemoteViewsAdapterAsync(final Intent intent) {
+        return new RemoteViewsAdapter.AsyncRemoteAdapterAction(this, intent);
+    }
+
+    /** @hide **/
+    @Override
+    public void setRemoteViewsAdapter(Intent intent, boolean isAsync) {
         // Ensure that we don't already have a RemoteViewsAdapter that is bound to an existing
         // service handling the specified intent.
         if (mRemoteViewsAdapter != null) {
@@ -989,7 +1000,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
         mDeferNotifyDataSetChanged = false;
         // Otherwise, create a new RemoteViewsAdapter for binding
-        mRemoteViewsAdapter = new RemoteViewsAdapter(getContext(), intent, this);
+        mRemoteViewsAdapter = new RemoteViewsAdapter(getContext(), intent, this, isAsync);
         if (mRemoteViewsAdapter.isDataReady()) {
             setAdapter(mRemoteViewsAdapter);
         }
