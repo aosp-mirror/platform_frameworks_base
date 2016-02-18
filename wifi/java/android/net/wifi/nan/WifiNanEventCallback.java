@@ -44,20 +44,20 @@ public class WifiNanEventCallback {
      * callback is {@link WifiNanEventCallback#onConfigCompleted(ConfigRequest)}
      * .
      */
-    public static final int LISTEN_CONFIG_COMPLETED = 0x1 << 0;
+    public static final int FLAG_LISTEN_CONFIG_COMPLETED = 0x1 << 0;
 
     /**
      * Configuration failed callback event registration flag. Corresponding
      * callback is
      * {@link WifiNanEventCallback#onConfigFailed(ConfigRequest, int)}.
      */
-    public static final int LISTEN_CONFIG_FAILED = 0x1 << 1;
+    public static final int FLAG_LISTEN_CONFIG_FAILED = 0x1 << 1;
 
     /**
      * NAN cluster is down callback event registration flag. Corresponding
      * callback is {@link WifiNanEventCallback#onNanDown(int)}.
      */
-    public static final int LISTEN_NAN_DOWN = 0x1 << 2;
+    public static final int FLAG_LISTEN_NAN_DOWN = 0x1 << 2;
 
     /**
      * NAN identity has changed event registration flag. This may be due to
@@ -66,7 +66,7 @@ public class WifiNanEventCallback {
      * recognize you and you need to re-establish your identity. Corresponding
      * callback is {@link WifiNanEventCallback#onIdentityChanged()}.
      */
-    public static final int LISTEN_IDENTITY_CHANGED = 0x1 << 3;
+    public static final int FLAG_LISTEN_IDENTITY_CHANGED = 0x1 << 3;
 
     private final Handler mHandler;
 
@@ -91,16 +91,16 @@ public class WifiNanEventCallback {
             public void handleMessage(Message msg) {
                 if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
                 switch (msg.what) {
-                    case LISTEN_CONFIG_COMPLETED:
+                    case FLAG_LISTEN_CONFIG_COMPLETED:
                         WifiNanEventCallback.this.onConfigCompleted((ConfigRequest) msg.obj);
                         break;
-                    case LISTEN_CONFIG_FAILED:
+                    case FLAG_LISTEN_CONFIG_FAILED:
                         WifiNanEventCallback.this.onConfigFailed((ConfigRequest) msg.obj, msg.arg1);
                         break;
-                    case LISTEN_NAN_DOWN:
+                    case FLAG_LISTEN_NAN_DOWN:
                         WifiNanEventCallback.this.onNanDown(msg.arg1);
                         break;
-                    case LISTEN_IDENTITY_CHANGED:
+                    case FLAG_LISTEN_IDENTITY_CHANGED:
                         WifiNanEventCallback.this.onIdentityChanged();
                         break;
                 }
@@ -110,7 +110,7 @@ public class WifiNanEventCallback {
 
     /**
      * Called when NAN configuration is completed. Event will only be delivered
-     * if registered using {@link WifiNanEventCallback#LISTEN_CONFIG_COMPLETED}.
+     * if registered using {@link WifiNanEventCallback#FLAG_LISTEN_CONFIG_COMPLETED}.
      * A dummy (empty implementation printing out a warning). Make sure to
      * override if registered.
      *
@@ -125,7 +125,7 @@ public class WifiNanEventCallback {
 
     /**
      * Called when NAN configuration failed. Event will only be delivered if
-     * registered using {@link WifiNanEventCallback#LISTEN_CONFIG_FAILED}. A
+     * registered using {@link WifiNanEventCallback#FLAG_LISTEN_CONFIG_FAILED}. A
      * dummy (empty implementation printing out a warning). Make sure to
      * override if registered.
      *
@@ -138,7 +138,7 @@ public class WifiNanEventCallback {
 
     /**
      * Called when NAN cluster is down. Event will only be delivered if
-     * registered using {@link WifiNanEventCallback#LISTEN_NAN_DOWN}. A dummy
+     * registered using {@link WifiNanEventCallback#FLAG_LISTEN_NAN_DOWN}. A dummy
      * (empty implementation printing out a warning). Make sure to override if
      * registered.
      *
@@ -155,7 +155,7 @@ public class WifiNanEventCallback {
      * implication is that peers you've been communicating with may no longer
      * recognize you and you need to re-establish your identity. Event will only
      * be delivered if registered using
-     * {@link WifiNanEventCallback#LISTEN_IDENTITY_CHANGED}. A dummy (empty
+     * {@link WifiNanEventCallback#FLAG_LISTEN_IDENTITY_CHANGED}. A dummy (empty
      * implementation printing out a warning). Make sure to override if
      * registered.
      */
@@ -171,7 +171,7 @@ public class WifiNanEventCallback {
         public void onConfigCompleted(ConfigRequest completedConfig) {
             if (VDBG) Log.v(TAG, "onConfigCompleted: configRequest=" + completedConfig);
 
-            Message msg = mHandler.obtainMessage(LISTEN_CONFIG_COMPLETED);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_CONFIG_COMPLETED);
             msg.obj = completedConfig;
             mHandler.sendMessage(msg);
         }
@@ -182,7 +182,7 @@ public class WifiNanEventCallback {
                 Log.v(TAG, "onConfigFailed: failedConfig=" + failedConfig + ", reason=" + reason);
             }
 
-            Message msg = mHandler.obtainMessage(LISTEN_CONFIG_FAILED);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_CONFIG_FAILED);
             msg.arg1 = reason;
             msg.obj = failedConfig;
             mHandler.sendMessage(msg);
@@ -192,7 +192,7 @@ public class WifiNanEventCallback {
         public void onNanDown(int reason) {
             if (VDBG) Log.v(TAG, "onNanDown: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(LISTEN_NAN_DOWN);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_NAN_DOWN);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
@@ -201,7 +201,7 @@ public class WifiNanEventCallback {
         public void onIdentityChanged() {
             if (VDBG) Log.v(TAG, "onIdentityChanged");
 
-            Message msg = mHandler.obtainMessage(LISTEN_IDENTITY_CHANGED);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_IDENTITY_CHANGED);
             mHandler.sendMessage(msg);
         }
     };
