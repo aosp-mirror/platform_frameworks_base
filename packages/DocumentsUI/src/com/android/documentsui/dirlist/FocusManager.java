@@ -158,7 +158,14 @@ class FocusManager implements View.OnFocusChangeListener {
         }
 
         if (searchDir != -1) {
+            // Focus search behaves badly if the parent RecyclerView is focused. However, focusable
+            // shouldn't be unset on RecyclerView, otherwise focus isn't properly restored after
+            // events that cause a UI rebuild (like rotating the device). Compromise: turn focusable
+            // off while performing the focus search.
+            // TODO: Revisit this when RV focus issues are resolved.
+            mView.setFocusable(false);
             View targetView = view.focusSearch(searchDir);
+            mView.setFocusable(true);
             // TargetView can be null, for example, if the user pressed <down> at the bottom
             // of the list.
             if (targetView != null) {
