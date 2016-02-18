@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.support.v4.util.SimpleArrayMap;
+import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -71,6 +72,7 @@ class CarNavigationBarController {
 
     private int mCurrentFacetIndex;
     private String mCurrentPackageName;
+    private SparseBooleanArray mFacetHasMultipleAppsCache = new SparseBooleanArray();
 
     public CarNavigationBarController(Context context,
                                       CarNavigationBarView navBar,
@@ -93,6 +95,21 @@ class CarNavigationBarController {
         String category = getPackageCategory(packageName);
         if (category != null) {
             setCurrentFacet(mFacetCategoryMap.get(category));
+        }
+    }
+
+    public void onPackageChange(String packageName) {
+        if (mFacetPackageMap.containsKey(packageName)) {
+            int index = mFacetPackageMap.get(packageName);
+            mFacetHasMultipleAppsCache.put(index, facetHasMultiplePackages(index));
+            // No need to check categories because we've already refreshed the cache.
+            return;
+        }
+
+        String category = getPackageCategory(packageName);
+        if (mFacetCategoryMap.containsKey(category)) {
+            int index = mFacetCategoryMap.get(packageName);
+            mFacetHasMultipleAppsCache.put(index, facetHasMultiplePackages(index));
         }
     }
 
@@ -138,6 +155,7 @@ class CarNavigationBarController {
                 initFacetFilterMaps(i,
                         facetPackageNames.getString(i).split(FACET_FILTER_DEMILITER),
                         facetCategories.getString(i).split(FACET_FILTER_DEMILITER));
+                        mFacetHasMultipleAppsCache.put(i, facetHasMultiplePackages(i));
             } catch (URISyntaxException e) {
                 throw new RuntimeException("Malformed intent uri", e);
             }
@@ -229,7 +247,7 @@ class CarNavigationBarController {
 
         if (mNavButtons.get(index) != null) {
             mNavButtons.get(index).setSelected(true /* selected */,
-                    facetHasMultiplePackages(index)  /* showMoreIcon */);
+                    mFacetHasMultipleAppsCache.get(index)  /* showMoreIcon */);
         }
         mCurrentFacetIndex = index;
     }
@@ -268,7 +286,7 @@ class CarNavigationBarController {
 
     private void startActivity(Intent intent) {
         if (mActivityStarter != null && intent != null) {
-            mActivityStarter.startActivity(intent, true);
+            mActivityStarter.startActivity(intent, false);
         }
     }
 

@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
 import android.app.ITaskStackListener;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,6 +55,7 @@ public class CarStatusBar extends PhoneStatusBar {
         mTaskStackListener = new TaskStackListenerImpl(mHandler);
         mSystemServicesProxy = new SystemServicesProxy(mContext);
         mSystemServicesProxy.registerTaskStackListener(mTaskStackListener);
+        registerPackageChangeReceivers();
     }
 
     @Override
@@ -81,6 +85,26 @@ public class CarStatusBar extends PhoneStatusBar {
         mController = new CarNavigationBarController(context, mCarNavigationBar,
                 this /* ActivityStarter*/);
         mNavigationBarView = mCarNavigationBar;
+
+    }
+
+    private BroadcastReceiver mPackageChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getData() == null || mController == null) {
+                return;
+            }
+            String packageName = intent.getData().getSchemeSpecificPart();
+            mController.onPackageChange(packageName);
+        }
+    };
+
+    private void registerPackageChangeReceivers() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiver(mPackageChangeReceiver, filter);
     }
 
     @Override
