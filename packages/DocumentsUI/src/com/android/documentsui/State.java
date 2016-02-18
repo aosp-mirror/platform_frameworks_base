@@ -30,6 +30,7 @@ import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
+import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.lang.annotation.Retention;
@@ -93,9 +94,10 @@ public class State implements android.os.Parcelable {
 
     /**
      * This is basically a sub-type for the copy operation. It can be either COPY or MOVE.
-     * The only legal values are: OPERATION_COPY, OPERATION_MOVE.
+     * The only legal values, if set, are: OPERATION_COPY, OPERATION_MOVE. Other pick
+     * operations don't use this. In those cases OPERATION_UNKNOWN is also legal.
      */
-    public @OpType int copyOperationSubType;
+    public @OpType int copyOperationSubType = FileOperationService.OPERATION_UNKNOWN;
 
     /** Current user navigation stack; empty implies recents. */
     public DocumentStack stack = new DocumentStack();
