@@ -73,7 +73,7 @@ public class FontFamily_Delegate {
     private static final Map<String, FontInfo> sCache =
             new LinkedHashMap<String, FontInfo>(CACHE_SIZE) {
         @Override
-        protected boolean removeEldestEntry(Entry<String, FontInfo> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<String, FontInfo> eldest) {
             return size() > CACHE_SIZE;
         }
 
