@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+h * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManagerGlobal;
@@ -265,11 +266,10 @@ public class WallpaperManager {
         private Bitmap mWallpaper;
         private Bitmap mDefaultWallpaper;
 
-        private static final int MSG_CLEAR_WALLPAPER = 1;
-
         Globals(Looper looper) {
             IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
             mService = IWallpaperManager.Stub.asInterface(b);
+            forgetLoadedWallpaper();
         }
 
         public void onWallpaperChanged() {
@@ -278,10 +278,7 @@ public class WallpaperManager {
              * to null so if the user requests the wallpaper again then we'll
              * fetch it.
              */
-            synchronized (this) {
-                mWallpaper = null;
-                mDefaultWallpaper = null;
-            }
+            forgetLoadedWallpaper();
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
@@ -334,7 +331,8 @@ public class WallpaperManager {
 
             try {
                 Bundle params = new Bundle();
-                ParcelFileDescriptor fd = mService.getWallpaper(this, params);
+                ParcelFileDescriptor fd = mService.getWallpaper(this, FLAG_SET_SYSTEM,
+                        params, context.getUserId());
                 if (fd != null) {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -633,7 +631,7 @@ public class WallpaperManager {
      * wallpaper or a null pointer if these is none.
      */
     public Drawable peekFastDrawable() {
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
+       Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -650,15 +648,49 @@ public class WallpaperManager {
     }
 
     /**
+     * Get an open, readable file descriptor to the given wallpaper image file.
+     * The callee is resopnsible for closing the fd when done ingesting the file.
+     *
+     * <p>If no lock-specific wallpaper has been configured for the given user, then
+     * this method will return {@code null} when requesting {@link #FLAG_SET_LOCK} rather than
+     * returning the system wallpaper's image file.
+     */
+    public ParcelFileDescriptor getWallpaperFile(int which) {
+        return getWallpaperFile(which, mContext.getUserId());
+    }
+
+    /**
+     * Version of {@link #getWallpaperFile(int)} that can access the wallpaper data
+     * for a given user.  The caller must hold the INTERACT_ACROSS_USERS_FULL
+     * permission to access another user's wallpaper data.
+     * @hide
+     */
+    public ParcelFileDescriptor getWallpaperFile(int which, int userId) {
+        if (which != FLAG_SET_SYSTEM && which != FLAG_SET_LOCK) {
+            throw new IllegalArgumentException("Must request exactly one kind of wallpaper");
+        }
+
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return null;
+        } else {
+            try {
+                Bundle outParams = new Bundle();
+                return sGlobals.mService.getWallpaper(null, which, outParams, userId);
+            } catch (RemoteException e) {
+                return null;
+            }
+        }
+    }
+
+    /**
      * Remove all internal references to the last loaded wallpaper.  Useful
      * for apps that want to reduce memory usage when they only temporarily
      * need to have the wallpaper.  After calling, the next request for the
      * wallpaper will require reloading it again from disk.
      */
     public void forgetLoadedWallpaper() {
-        if (isWallpaperSupported()) {
-            sGlobals.forgetLoadedWallpaper();
-        }
+        sGlobals.forgetLoadedWallpaper();
     }
 
     /**
@@ -1209,12 +1241,23 @@ public class WallpaperManager {
      */
     @SystemApi
     public void clearWallpaper() {
+        clearWallpaper(FLAG_SET_SYSTEM, mContext.getUserId());
+    }
+
+    /**
+     * Clear the wallpaper for a specific user.  The caller must hold the
+     * INTERACT_ACROSS_USERS_FULL permission to clear another user's
+     * wallpaper.
+     * @hide
+     */
+    @SystemApi
+    public void clearWallpaper(int which, int userId) {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             return;
         }
         try {
-            sGlobals.mService.clearWallpaper(mContext.getOpPackageName());
+            sGlobals.mService.clearWallpaper(mContext.getOpPackageName(), which, userId);
         } catch (RemoteException e) {
             // Ignore
         }
@@ -1363,7 +1406,7 @@ public class WallpaperManager {
     }
 
     /**
-     * Remove any currently set wallpaper, reverting to the system's built-in
+     * Remove any currently set system wallpaper, reverting to the system's built-in
      * wallpaper. On success, the intent {@link Intent#ACTION_WALLPAPER_CHANGED}
      * is broadcast.
      *
@@ -1422,6 +1465,26 @@ public class WallpaperManager {
         }
 
         return null;
+    }
+
+    /**
+     * Register a callback for lock wallpaper observation. Only the OS may use this.
+     *
+     * @return true on success; false on error.
+     * @hide
+     */
+    public boolean setLockWallpaperCallback(IWallpaperManagerCallback callback) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return false;
+        }
+
+        try {
+            return sGlobals.mService.setLockWallpaperCallback(callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to contact wallpaper service");
+        }
+        return false;
     }
 
     // Private completion callback for setWallpaper() synchronization
