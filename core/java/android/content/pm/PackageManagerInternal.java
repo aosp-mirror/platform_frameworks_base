@@ -59,12 +59,6 @@ public abstract class PackageManagerInternal {
     public abstract void setLocationPackagesProvider(PackagesProvider provider);
 
     /**
-     * Sets the input method packages provider.
-     * @param provider The packages provider.
-     */
-    public abstract void setImePackagesProvider(PackagesProvider provider);
-
-    /**
      * Sets the voice interaction packages provider.
      * @param provider The packages provider.
      */
