@@ -163,66 +163,27 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
         String[] start = sets[0].split(BUTTON_SEPARATOR);
         String[] center = sets[1].split(BUTTON_SEPARATOR);
         String[] end = sets[2].split(BUTTON_SEPARATOR);
-        inflateButtons(start, (ViewGroup) mRot0.findViewById(R.id.ends_group),
-                (ViewGroup) mRot0.findViewById(R.id.ends_group_lightsout), false);
-        inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.ends_group),
-                (ViewGroup) mRot90.findViewById(R.id.ends_group_lightsout), true);
+        inflateButtons(start, (ViewGroup) mRot0.findViewById(R.id.ends_group), false);
+        inflateButtons(start, (ViewGroup) mRot90.findViewById(R.id.ends_group), true);
 
-        inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group),
-                (ViewGroup) mRot0.findViewById(R.id.center_group_lightsout), false);
-        inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group),
-                (ViewGroup) mRot90.findViewById(R.id.center_group_lightsout), true);
+        inflateButtons(center, (ViewGroup) mRot0.findViewById(R.id.center_group), false);
+        inflateButtons(center, (ViewGroup) mRot90.findViewById(R.id.center_group), true);
 
         addGravitySpacer((LinearLayout) mRot0.findViewById(R.id.ends_group));
         addGravitySpacer((LinearLayout) mRot90.findViewById(R.id.ends_group));
 
-        inflateButtons(end, (ViewGroup) mRot0.findViewById(R.id.ends_group),
-                (ViewGroup) mRot0.findViewById(R.id.ends_group_lightsout), false);
-        inflateButtons(end, (ViewGroup) mRot90.findViewById(R.id.ends_group),
-                (ViewGroup) mRot90.findViewById(R.id.ends_group_lightsout), true);
+        inflateButtons(end, (ViewGroup) mRot0.findViewById(R.id.ends_group), false);
+        inflateButtons(end, (ViewGroup) mRot90.findViewById(R.id.ends_group), true);
     }
 
     private void addGravitySpacer(LinearLayout layout) {
         layout.addView(new Space(mContext), new LinearLayout.LayoutParams(0, 0, 1));
     }
 
-    private void inflateButtons(String[] buttons, ViewGroup parent, ViewGroup lightsOutParent,
-            boolean landscape) {
+    private void inflateButtons(String[] buttons, ViewGroup parent, boolean landscape) {
         for (int i = 0; i < buttons.length; i++) {
-            copyToLightsout(inflateButton(buttons[i], parent, landscape), lightsOutParent);
+            inflateButton(buttons[i], parent, landscape);
         }
-    }
-
-    private void copyToLightsout(View view, ViewGroup lightsOutParent) {
-        if (view == null) return;
-
-        if (view instanceof FrameLayout) {
-            // The only ViewGroup we support in here is a FrameLayout, so copy those manually.
-            FrameLayout original = (FrameLayout) view;
-            FrameLayout layout = new FrameLayout(view.getContext());
-            for (int i = 0; i < original.getChildCount(); i++) {
-                copyToLightsout(original.getChildAt(i), layout);
-            }
-            lightsOutParent.addView(layout, copy(view.getLayoutParams()));
-        } else if (view instanceof Space) {
-            lightsOutParent.addView(new Space(view.getContext()), copy(view.getLayoutParams()));
-        } else {
-            lightsOutParent.addView(generateLightsOutView(view), copy(view.getLayoutParams()));
-        }
-    }
-
-    private View generateLightsOutView(View view) {
-        ImageView imageView = new ImageView(view.getContext());
-        // Copy everything we can about the original view.
-        imageView.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(),
-                view.getPaddingBottom());
-        imageView.setContentDescription(view.getContentDescription());
-        imageView.setId(view.getId());
-        // Only home gets a big dot, everything else will be little.
-        imageView.setImageResource(view.getId() == R.id.home
-                ? R.drawable.ic_sysbar_lights_out_dot_large
-                : R.drawable.ic_sysbar_lights_out_dot_small);
-        return imageView;
     }
 
     private ViewGroup.LayoutParams copy(ViewGroup.LayoutParams layoutParams) {
@@ -348,9 +309,7 @@ public class NavigationBarInflaterView extends FrameLayout implements TunerServi
             }
         }
         clearAllChildren((ViewGroup) mRot0.findViewById(R.id.nav_buttons));
-        clearAllChildren((ViewGroup) mRot0.findViewById(R.id.lights_out));
         clearAllChildren((ViewGroup) mRot90.findViewById(R.id.nav_buttons));
-        clearAllChildren((ViewGroup) mRot90.findViewById(R.id.lights_out));
     }
 
     private void clearAllChildren(ViewGroup group) {
