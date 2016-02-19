@@ -58,7 +58,7 @@
     <item name="status_bar_icon_scale_factor" format="float" type="dimen">1.0</item>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">84dp</dimen>
+    <dimen name="notification_min_height">86dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>

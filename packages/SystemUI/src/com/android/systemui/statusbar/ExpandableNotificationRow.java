@@ -251,7 +251,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 != com.android.internal.R.id.status_bar_latest_event_content;
         int headsUpheight = headsUpCustom && beforeN ? mMaxHeadsUpHeightLegacy
                 : mMaxHeadsUpHeight;
-        mMaxViewHeight = mNotificationMaxHeight;
         mPrivateLayout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
         mPublicLayout.setHeights(minHeight, headsUpheight, mNotificationMaxHeight);
     }
@@ -573,16 +572,23 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     private void initDimens() {
-        mNotificationMinHeightLegacy =  getResources().getDimensionPixelSize(
-                R.dimen.notification_min_height_legacy);
-        mNotificationMinHeight =  getResources().getDimensionPixelSize(
-                R.dimen.notification_min_height);
-        mNotificationMaxHeight =  getResources().getDimensionPixelSize(
-                R.dimen.notification_max_height);
-        mMaxHeadsUpHeightLegacy =  getResources().getDimensionPixelSize(
+        mNotificationMinHeightLegacy = getFontScaledHeight(R.dimen.notification_min_height_legacy);
+        mNotificationMinHeight = getFontScaledHeight(R.dimen.notification_min_height);
+        mNotificationMaxHeight = getFontScaledHeight(R.dimen.notification_max_height);
+        mMaxHeadsUpHeightLegacy = getFontScaledHeight(
                 R.dimen.notification_max_heads_up_height_legacy);
-        mMaxHeadsUpHeight =  getResources().getDimensionPixelSize(
-                R.dimen.notification_max_heads_up_height);
+        mMaxHeadsUpHeight = getFontScaledHeight(R.dimen.notification_max_heads_up_height);
+    }
+
+    /**
+     * @param dimenId the dimen to look up
+     * @return the font scaled dimen as if it were in sp but doesn't shrink sizes below dp
+     */
+    private int getFontScaledHeight(int dimenId) {
+        int dimensionPixelSize = getResources().getDimensionPixelSize(dimenId);
+        float factor = Math.max(1.0f, getResources().getDisplayMetrics().scaledDensity /
+                getResources().getDisplayMetrics().density);
+        return (int) (dimensionPixelSize * factor);
     }
 
     /**
@@ -592,7 +598,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void reset() {
         super.reset();
         final boolean wasExpanded = isExpanded();
-        mMaxViewHeight = 0;
         mExpandable = false;
         mHasUserChangedExpansion = false;
         mUserLocked = false;
