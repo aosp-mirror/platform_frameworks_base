@@ -53,7 +53,7 @@ public class BatteryController extends StateController {
         synchronized (sCreationLock) {
             if (sController == null) {
                 sController = new BatteryController(taskManagerService,
-                        taskManagerService.getContext());
+                        taskManagerService.getContext(), taskManagerService.getLock());
             }
         }
         return sController;
@@ -67,11 +67,12 @@ public class BatteryController extends StateController {
     @VisibleForTesting
     public static BatteryController getForTesting(StateChangedListener stateChangedListener,
                                            Context context) {
-        return new BatteryController(stateChangedListener, context);
+        return new BatteryController(stateChangedListener, context, new Object());
     }
 
-    private BatteryController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private BatteryController(StateChangedListener stateChangedListener, Context context,
+            Object lock) {
+        super(stateChangedListener, context, lock);
         mChargeTracker = new ChargingTracker();
         mChargeTracker.startTracking();
     }
@@ -80,7 +81,7 @@ public class BatteryController extends StateController {
     public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
         final boolean isOnStablePower = mChargeTracker.isOnStablePower();
         if (taskStatus.hasChargingConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 mTrackedTasks.add(taskStatus);
                 taskStatus.chargingConstraintSatisfied.set(isOnStablePower);
             }
@@ -90,7 +91,7 @@ public class BatteryController extends StateController {
     @Override
     public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
         if (taskStatus.hasChargingConstraint()) {
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 mTrackedTasks.remove(taskStatus);
             }
         }
@@ -102,7 +103,7 @@ public class BatteryController extends StateController {
             Slog.d(TAG, "maybeReportNewChargingState: " + stablePower);
         }
         boolean reportChange = false;
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             for (JobStatus ts : mTrackedTasks) {
                 boolean previous = ts.chargingConstraintSatisfied.getAndSet(stablePower);
                 if (previous != stablePower) {
@@ -200,7 +201,7 @@ public class BatteryController extends StateController {
     public void dumpControllerState(PrintWriter pw) {
         pw.println("Batt.");
         pw.println("Stable power: " + mChargeTracker.isOnStablePower());
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             Iterator<JobStatus> it = mTrackedTasks.iterator();
             if (it.hasNext()) {
                 pw.print(String.valueOf(it.next().hashCode()));
