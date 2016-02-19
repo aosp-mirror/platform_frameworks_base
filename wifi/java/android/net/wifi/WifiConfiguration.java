@@ -403,6 +403,15 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * The number of beacon intervals between Delivery Traffic Indication Maps (DTIM)
+     * This value is populated from scan results that contain Beacon Frames, which are infrequent.
+     * The value is not guaranteed to be set or current (Although it SHOULDNT change once set)
+     * Valid values are from 1 - 255. Initialized here as 0, use this to check if set.
+     */
+    public int dtimInterval = 0;
+
+    /**
+     * @hide
      * Uid of app creating the configuration
      */
     @SystemApi
@@ -1298,6 +1307,7 @@ public class WifiConfiguration implements Parcelable {
         lastUpdateUid = -1;
         creatorUid = -1;
         shared = true;
+        dtimInterval = 0;
     }
 
     /**
