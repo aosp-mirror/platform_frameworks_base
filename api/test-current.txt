@@ -5136,6 +5136,11 @@ package android.app {
     ctor public Notification.DecoratedCustomViewStyle(android.app.Notification.Builder);
   }
 
+  public static class Notification.DecoratedMediaCustomViewStyle extends android.app.Notification.MediaStyle {
+    ctor public Notification.DecoratedMediaCustomViewStyle();
+    ctor public Notification.DecoratedMediaCustomViewStyle(android.app.Notification.Builder);
+  }
+
   public static abstract interface Notification.Extender {
     method public abstract android.app.Notification.Builder extend(android.app.Notification.Builder);
   }
