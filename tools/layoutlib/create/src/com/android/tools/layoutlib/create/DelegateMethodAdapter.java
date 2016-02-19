@@ -122,7 +122,8 @@ class DelegateMethodAdapter extends MethodVisitor {
             String className,
             String methodName,
             String desc,
-            boolean isStatic) {
+            boolean isStatic,
+            boolean isStaticClass) {
         super(Main.ASM_VERSION);
         mLog = log;
         mOrgWriter = mvOriginal;
