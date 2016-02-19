@@ -49,9 +49,7 @@ public class NotificationGuts extends LinearLayout {
     private int mClipTopAmount;
     private int mActualHeight;
     private boolean mExposed;
-    private RadioButton mApplyToTopic;
     private SeekBar mSeekBar;
-    private Notification.Topic mTopic;
     private INotificationManager mINotificationManager;
     private int mStartingImportance;
 
@@ -109,24 +107,9 @@ public class NotificationGuts extends LinearLayout {
         mStartingImportance = importance;
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-        mTopic = sbn.getNotification().getTopic() == null
-                ? new Notification.Topic(Notification.TOPIC_DEFAULT, mContext.getString(
-                com.android.internal.R.string.default_notification_topic_label))
-                : sbn.getNotification().getTopic();
-        boolean doesUserUseTopics = false;
-        try {
-            doesUserUseTopics =
-                    mINotificationManager.doesUserUseTopics(sbn.getPackageName(), sbn.getUid());
-        } catch (RemoteException e) {}
-        final boolean userUsesTopics = doesUserUseTopics;
 
-        mApplyToTopic = (RadioButton) row.findViewById(R.id.apply_to_topic);
-        if (userUsesTopics) {
-            mApplyToTopic.setChecked(true);
-        }
-        final View applyToApp = row.findViewById(R.id.apply_to_app);
-        final TextView topicSummary = ((TextView) row.findViewById(R.id.summary));
-        final TextView topicTitle = ((TextView) row.findViewById(R.id.title));
+        final TextView importanceSummary = ((TextView) row.findViewById(R.id.summary));
+        final TextView importanceTitle = ((TextView) row.findViewById(R.id.title));
         mSeekBar = (SeekBar) row.findViewById(R.id.seekbar);
         boolean systemApp = false;
         try {
@@ -156,12 +139,6 @@ public class NotificationGuts extends LinearLayout {
                 updateTitleAndSummary(progress);
                 if (fromUser) {
                     MetricsLogger.action(mContext, MetricsEvent.ACTION_MODIFY_IMPORTANCE_SLIDER);
-                    if (userUsesTopics) {
-                        mApplyToTopic.setVisibility(View.VISIBLE);
-                        mApplyToTopic.setText(
-                                mContext.getString(R.string.apply_to_topic, mTopic.getLabel()));
-                        applyToApp.setVisibility(View.VISIBLE);
-                    }
                 }
             }
 
@@ -178,29 +155,29 @@ public class NotificationGuts extends LinearLayout {
             private void updateTitleAndSummary(int progress) {
                 switch (progress) {
                     case NotificationListenerService.Ranking.IMPORTANCE_NONE:
-                        topicSummary.setText(mContext.getString(
+                        importanceSummary.setText(mContext.getString(
                                 R.string.notification_importance_blocked));
-                        topicTitle.setText(mContext.getString(R.string.blocked_importance));
+                        importanceTitle.setText(mContext.getString(R.string.blocked_importance));
                         break;
                     case NotificationListenerService.Ranking.IMPORTANCE_LOW:
-                        topicSummary.setText(mContext.getString(
+                        importanceSummary.setText(mContext.getString(
                                 R.string.notification_importance_low));
-                        topicTitle.setText(mContext.getString(R.string.low_importance));
+                        importanceTitle.setText(mContext.getString(R.string.low_importance));
                         break;
                     case NotificationListenerService.Ranking.IMPORTANCE_DEFAULT:
-                        topicSummary.setText(mContext.getString(
+                        importanceSummary.setText(mContext.getString(
                                 R.string.notification_importance_default));
-                        topicTitle.setText(mContext.getString(R.string.default_importance));
+                        importanceTitle.setText(mContext.getString(R.string.default_importance));
                         break;
                     case NotificationListenerService.Ranking.IMPORTANCE_HIGH:
-                        topicSummary.setText(mContext.getString(
+                        importanceSummary.setText(mContext.getString(
                                 R.string.notification_importance_high));
-                        topicTitle.setText(mContext.getString(R.string.high_importance));
+                        importanceTitle.setText(mContext.getString(R.string.high_importance));
                         break;
                     case NotificationListenerService.Ranking.IMPORTANCE_MAX:
-                        topicSummary.setText(mContext.getString(
+                        importanceSummary.setText(mContext.getString(
                                 R.string.notification_importance_max));
-                        topicTitle.setText(mContext.getString(R.string.max_importance));
+                        importanceTitle.setText(mContext.getString(R.string.max_importance));
                         break;
                 }
             }
@@ -213,8 +190,7 @@ public class NotificationGuts extends LinearLayout {
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 progress - mStartingImportance);
         try {
-            mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(),
-                    mApplyToTopic.isChecked() ? mTopic : null, progress);
+            mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(), progress);
         } catch (RemoteException e) {
             // :(
         }

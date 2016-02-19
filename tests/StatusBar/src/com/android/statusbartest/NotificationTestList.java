@@ -162,78 +162,6 @@ public class NotificationTestList extends TestActivity
             }
         },
 
-        new Test("with topic Hello") {
-            public void run() {
-                Notification.BigTextStyle bigText = new Notification.BigTextStyle();
-                bigText.bigText("FgBHreherhethethethe\ntwetwrterter\netetweterteryetry");
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon1)
-                        .setStyle(bigText)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle("hihi")
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent2())
-                        .setTopic(new Notification.Topic("hello", "Hello"))
-                        .build();
-
-                mNM.notify(70, n);
-            }
-        },
-
-        new Test("with topic GoodBye") {
-            public void run() {
-                Notification.BigPictureStyle picture = new Notification.BigPictureStyle();
-                picture.bigPicture(BitmapFactory.decodeResource(getResources(),
-                        R.id.large_icon_pineapple2));
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon1)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle("byebye")
-                        .setContentText("This is a notification!!!")
-                        .setContentIntent(makeIntent2())
-                        .setTopic(new Notification.Topic("bye", "Goodbye"))
-                        .setStyle(picture)
-                        .build();
-
-                mNM.notify(71, n);
-            }
-        },
-        new Test("with topic Bananas") {
-            public void run() {
-                Notification.BigTextStyle bigText = new Notification.BigTextStyle();
-                bigText.bigText("bananas are great\nso tasty\nyum\nyum\nyum\n");
-                Notification n = new Notification.Builder(NotificationTestList.this)
-                        .setSmallIcon(R.drawable.icon1)
-                        .setStyle(bigText)
-                        .setWhen(mActivityCreateTime)
-                        .setContentTitle("bananananana")
-                        .setContentText("This is a banana!!!")
-                        .setContentIntent(makeIntent2())
-                        .setTopic(new Notification.Topic("bananas", "Bananas"))
-                        .build();
-
-                mNM.notify(72, n);
-            }
-        },
-
-            new Test("with delete intent") {
-                public void run() {
-                    Notification.BigTextStyle bigText = new Notification.BigTextStyle();
-                    bigText.bigText("bananas are great\nso tasty\nyum\nyum\nyum\n");
-                    Notification n = new Notification.Builder(NotificationTestList.this)
-                            .setSmallIcon(R.drawable.icon1)
-                            .setStyle(bigText)
-                            .setWhen(mActivityCreateTime)
-                            .setContentTitle("bananananana")
-                            .setContentText("This is a banana!!!")
-                            .setTopic(new Notification.Topic("bananas", "Bananas"))
-                            .setDeleteIntent(makeIntent2())
-                            .build();
-
-                    mNM.notify(73, n);
-                }
-            },
-
             new Test("Is blocked?") {
                 public void run() {
                     Toast.makeText(NotificationTestList.this,
@@ -242,18 +170,10 @@ public class NotificationTestList extends TestActivity
                 }
             },
 
-            new Test("Topic banana importance?") {
+            new Test("importance?") {
                 public void run() {
                     Toast.makeText(NotificationTestList.this,
-                            "bananas importance? " + mNM.getImportance("bananas"),
-                            Toast.LENGTH_LONG).show();
-                }
-            },
-
-            new Test("Topic garbage importance?") {
-                public void run() {
-                    Toast.makeText(NotificationTestList.this,
-                            "garbage importance? " + mNM.getImportance("garbage"),
+                            "importance? " + mNM.getImportance(),
                             Toast.LENGTH_LONG).show();
                 }
             },

@@ -97,14 +97,11 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     /** Notification was canceled because it was an invisible member of a group. */
     public static final int REASON_GROUP_OPTIMIZATION = 13;
 
-    /** Notification was canceled by the user banning the topic. */
-    public static final int REASON_TOPIC_BANNED = 14;
-
     /** Notification was canceled by the device administrator suspending the package. */
-    public static final int REASON_PACKAGE_SUSPENDED = 15;
+    public static final int REASON_PACKAGE_SUSPENDED = 14;
 
     /** Notification was canceled by the owning managed profile being turned off. */
-    public static final int REASON_PROFILE_TURNED_OFF = 16;
+    public static final int REASON_PROFILE_TURNED_OFF = 15;
 
     public class Adjustment {
         int mImportance;
