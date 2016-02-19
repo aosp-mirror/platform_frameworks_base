@@ -486,7 +486,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         public final DocumentLoader mDocumentLoader;
 
         public DeviceToolkit(MtpManager manager, ContentResolver resolver, MtpDatabase database) {
-            mPipeManager = new PipeManager();
+            mPipeManager = new PipeManager(database);
             mDocumentLoader = new DocumentLoader(manager, resolver, database);
         }
     }

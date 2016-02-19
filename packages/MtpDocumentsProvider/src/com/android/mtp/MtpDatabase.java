@@ -581,6 +581,23 @@ class MtpDatabase {
         }
     }
 
+    void updateObject(String documentId, int deviceId, String parentId, MtpObjectInfo info) {
+        final ContentValues values = new ContentValues();
+        getObjectDocumentValues(values, deviceId, parentId, info);
+
+        mDatabase.beginTransaction();
+        try {
+            mDatabase.update(
+                    TABLE_DOCUMENTS,
+                    values,
+                    Document.COLUMN_DOCUMENT_ID + " = ?",
+                    strings(documentId));
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
     private static class OpenHelper extends SQLiteOpenHelper {
         public OpenHelper(Context context, int flags) {
             super(context,
