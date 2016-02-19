@@ -43,12 +43,13 @@ static JNIEnv* getEnv(JavaVM* vm) {
     return env;
 }
 
-static AnimationListener* createAnimationListener(JNIEnv* env, jobject finishListener) {
+static AnimationListener* createAnimationListener(JNIEnv* env, jobject finishListener, jint id) {
     class AnimationListenerBridge : public AnimationListener {
     public:
-        AnimationListenerBridge(JNIEnv* env, jobject finishListener) {
+        AnimationListenerBridge(JNIEnv* env, jobject finishListener, jint id) {
             mFinishListener = env->NewGlobalRef(finishListener);
             env->GetJavaVM(&mJvm);
+            mId = id;
         }
 
         virtual ~AnimationListenerBridge() {
@@ -63,7 +64,7 @@ static AnimationListener* createAnimationListener(JNIEnv* env, jobject finishLis
             env->CallStaticVoidMethod(
                     gVectorDrawableAnimatorClassInfo.clazz,
                     gVectorDrawableAnimatorClassInfo.callOnFinished,
-                    mFinishListener);
+                    mFinishListener, mId);
             releaseJavaObject();
         }
 
@@ -76,8 +77,9 @@ static AnimationListener* createAnimationListener(JNIEnv* env, jobject finishLis
 
         JavaVM* mJvm;
         jobject mFinishListener;
+        jint mId;
     };
-    return new AnimationListenerBridge(env, finishListener);
+    return new AnimationListenerBridge(env, finishListener, id);
 }
 
 static void addAnimator(JNIEnv*, jobject, jlong animatorSetPtr, jlong propertyHolderPtr,
@@ -142,15 +144,16 @@ static void setPropertyHolderData(JNIEnv* env, jobject, jlong propertyHolderPtr,
     holder->setPropertyDataSource(propertyData, length);
     env->ReleaseFloatArrayElements(srcData, propertyData, JNI_ABORT);
 }
-static void start(JNIEnv* env, jobject, jlong animatorSetPtr, jobject finishListener) {
+static void start(JNIEnv* env, jobject, jlong animatorSetPtr, jobject finishListener, jint id) {
     PropertyValuesAnimatorSet* set = reinterpret_cast<PropertyValuesAnimatorSet*>(animatorSetPtr);
-    // TODO: keep a ref count in finish listener
-    AnimationListener* listener = createAnimationListener(env, finishListener);
+    AnimationListener* listener = createAnimationListener(env, finishListener, id);
     set->start(listener);
 }
 
-static void reverse(JNIEnv* env, jobject, jlong animatorSetPtr, jobject finishListener) {
-    // TODO: implement reverse
+static void reverse(JNIEnv* env, jobject, jlong animatorSetPtr, jobject finishListener, jint id) {
+    PropertyValuesAnimatorSet* set = reinterpret_cast<PropertyValuesAnimatorSet*>(animatorSetPtr);
+    AnimationListener* listener = createAnimationListener(env, finishListener, id);
+    set->reverse(listener);
 }
 
 static void end(JNIEnv*, jobject, jlong animatorSetPtr) {
@@ -172,8 +175,8 @@ static const JNINativeMethod gMethods[] = {
     {"nCreatePathPropertyHolder", "!(JIFF)J", (void*)createPathPropertyHolder},
     {"nCreateRootAlphaPropertyHolder", "!(JFF)J", (void*)createRootAlphaPropertyHolder},
     {"nSetPropertyHolderData", "(J[FI)V", (void*)setPropertyHolderData},
-    {"nStart", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;)V", (void*)start},
-    {"nReverse", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;)V", (void*)reverse},
+    {"nStart", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;I)V", (void*)start},
+    {"nReverse", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;I)V", (void*)reverse},
     {"nEnd", "!(J)V", (void*)end},
     {"nReset", "!(J)V", (void*)reset},
 };
@@ -186,7 +189,7 @@ int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env) {
 
     gVectorDrawableAnimatorClassInfo.callOnFinished = GetStaticMethodIDOrDie(
             env, gVectorDrawableAnimatorClassInfo.clazz, "callOnFinished",
-            "(Landroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;)V");
+            "(Landroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;I)V");
     return RegisterMethodsOrDie(env, "android/graphics/drawable/AnimatedVectorDrawable",
             gMethods, NELEM(gMethods));
 }
