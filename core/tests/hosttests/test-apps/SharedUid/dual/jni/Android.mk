@@ -33,6 +33,8 @@ LOCAL_SRC_FILES:= \
 LOCAL_LDLIBS = -llog
 LOCAL_SHARED_LIBRARIES := liblog
 
+LOCAL_CFLAGS += -Wall -Wextra -Werror
+
 # Also need the JNI headers.
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE)
