@@ -519,6 +519,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mPrivateLayout.getNotificationHeader();
     }
 
+    private NotificationHeaderView getVisibleNotificationHeader() {
+        if (mNotificationHeader != null) {
+            return mNotificationHeader;
+        }
+        return getShowingLayout().getVisibleNotificationHeader();
+    }
+
     public void setOnExpandClickListener(OnExpandClickListener onExpandClickListener) {
         mOnExpandClickListener = onExpandClickListener;
     }
@@ -1293,7 +1300,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     protected boolean disallowSingleClick(MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-        NotificationHeaderView header = getNotificationHeader();
+        NotificationHeaderView header = getVisibleNotificationHeader();
         if (header != null) {
             return header.isInTouchRect(x, y);
         }
