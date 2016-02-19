@@ -289,13 +289,18 @@ public final class SoundTriggerDetector {
          * @hide
          */
         @Override
-        public void onDetected(SoundTrigger.RecognitionEvent event) {
-            Slog.d(TAG, "onDetected()" + event);
+        public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
+            Slog.d(TAG, "onGenericSoundTriggerDetected()" + event);
             Message.obtain(mHandler,
                     MSG_SOUND_TRIGGER_DETECTED,
                     new EventPayload(event.triggerInData, event.captureAvailable,
                             event.captureFormat, event.captureSession, event.data))
                     .sendToTarget();
+        }
+
+        @Override
+        public void onKeyphraseDetected(SoundTrigger.KeyphraseRecognitionEvent event) {
+            Slog.e(TAG, "Ignoring onKeyphraseDetected() called for " + event);
         }
 
         /**

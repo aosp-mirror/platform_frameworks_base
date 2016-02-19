@@ -20,7 +20,7 @@ parcelable SoundTrigger.ConfidenceLevel;
 parcelable SoundTrigger.Keyphrase;
 parcelable SoundTrigger.RecognitionEvent;
 parcelable SoundTrigger.KeyphraseRecognitionEvent;
-parcelable SoundTrigger.GenericSoundRecognitionEvent;
+parcelable SoundTrigger.GenericRecognitionEvent;
 parcelable SoundTrigger.KeyphraseRecognitionExtra;
 parcelable SoundTrigger.KeyphraseSoundModel;
 parcelable SoundTrigger.GenericSoundModel;
