@@ -248,9 +248,9 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"外部ストレージへのアプリの書き込みを許可"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"アクティビティをサイズ変更可能にする"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようになります。"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"マニフェストの値に関係なく、マルチウィンドウですべてのアクティビティのサイズを変更できるようにします。"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"フリーフォーム ウィンドウの有効化"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"テスト段階のフリーフォーム ウィンドウのサポートを有効にします。"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"外部のフリーフォーム ウィンドウのサポートを有効にします。"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"PCバックアップパスワード"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"デスクトップのフルバックアップは現在保護されていません"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"デスクトップのフルバックアップ用のパスワードを変更または削除する場合にタップします"</string>
@@ -277,6 +277,10 @@
     <string name="night_mode_no" msgid="9171772244775838901">"無効"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"常にON"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"自動"</string>
+    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
+    <skip />
+    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
+    <skip />
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView の実装の設定"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"選択した WebView の実装は無効になっていますが、使用するには有効にする必要があります。有効にしますか？"</string>
@@ -296,8 +300,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色補正"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"この機能は試験運用機能であり、パフォーマンスに影響することがあります。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g>によって上書き済み"</string>
-    <!-- no translation found for power_remaining_duration_only (4400068916452346544) -->
-    <skip />
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"あと約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - 残り約<xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - フル充電まで<xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -316,8 +319,6 @@
     <skip />
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"管理者によって無効にされています"</string>
     <string name="home" msgid="8263346537524314127">"ホーム"</string>
-    <!-- no translation found for charge_length_format (8978516217024434156) -->
-    <skip />
-    <!-- no translation found for remaining_length_format (7886337596669190587) -->
-    <skip />
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"あと <xliff:g id="ID_1">%1$s</xliff:g>"</string>
 </resources>
