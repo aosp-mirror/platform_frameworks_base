@@ -548,11 +548,12 @@ public abstract class ApplicationThreadNative extends Binder
             boolean dumpInfo = data.readInt() != 0;
             boolean dumpDalvik = data.readInt() != 0;
             boolean dumpSummaryOnly = data.readInt() != 0;
+            boolean dumpUnreachable = data.readInt() != 0;
             String[] args = data.readStringArray();
             if (fd != null) {
                 try {
                     dumpMemInfo(fd.getFileDescriptor(), mi, checkin, dumpInfo,
-                            dumpDalvik, dumpSummaryOnly, args);
+                            dumpDalvik, dumpSummaryOnly, dumpUnreachable, args);
                 } finally {
                     try {
                         fd.close();
@@ -1328,7 +1329,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin,
-            boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, String[] args) throws RemoteException {
+            boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
+            boolean dumpUnreachable, String[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1338,6 +1340,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(dumpInfo ? 1 : 0);
         data.writeInt(dumpDalvik ? 1 : 0);
         data.writeInt(dumpSummaryOnly ? 1 : 0);
+        data.writeInt(dumpUnreachable ? 1 : 0);
         data.writeStringArray(args);
         mRemote.transact(DUMP_MEM_INFO_TRANSACTION, data, reply, 0);
         reply.readException();
