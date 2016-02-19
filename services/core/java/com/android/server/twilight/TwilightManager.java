@@ -20,5 +20,6 @@ import android.os.Handler;
 
 public interface TwilightManager {
     void registerListener(TwilightListener listener, Handler handler);
+    void unregisterListener(TwilightListener listener);
     TwilightState getCurrentState();
 }

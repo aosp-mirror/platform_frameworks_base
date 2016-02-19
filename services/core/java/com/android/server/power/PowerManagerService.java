@@ -49,6 +49,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
 import android.util.Slog;
@@ -468,6 +469,9 @@ public final class PowerManagerService extends SystemService
     private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
             = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
 
+    // True if brightness should be affected by twilight.
+    private boolean mBrightnessUseTwilight;
+
     private native void nativeInit();
 
     private static native void nativeAcquireSuspendBlocker(String name);
@@ -620,6 +624,9 @@ public final class PowerManagerService extends SystemService
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.DOUBLE_TAP_TO_WAKE),
                     false, mSettingsObserver, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Secure.BRIGHTNESS_USE_TWILIGHT),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
             // Go.
             readConfigurationLocked();
             updateSettingsLocked();
@@ -725,6 +732,9 @@ public final class PowerManagerService extends SystemService
         mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
+
+        mBrightnessUseTwilight = Settings.Secure.getIntForUser(resolver,
+                Secure.BRIGHTNESS_USE_TWILIGHT, 0, UserHandle.USER_CURRENT) != 0;
 
         final boolean lowPowerModeEnabled = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
@@ -1998,6 +2008,7 @@ public final class PowerManagerService extends SystemService
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
             mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
             mDisplayPowerRequest.boostScreenBrightness = mScreenBrightnessBoostInProgress;
+            mDisplayPowerRequest.useTwilight = mBrightnessUseTwilight;
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;

@@ -53,9 +53,9 @@ public class TileQueryHelper {
     }
 
     private void addSystemTiles(QSTileHost host) {
-        boolean hasColorMod = host.getDisplayController().isEnabled();
+        boolean hasColorMod = host.getNightModeController().isEnabled();
         String possible = mContext.getString(R.string.quick_settings_tiles_default)
-                + ",hotspot,inversion,saver,work,cast" + (hasColorMod ? ",colors" : "");
+                + ",hotspot,inversion,saver,work,cast" + (hasColorMod ? ",night" : "");
         String[] possibleTiles = possible.split(",");
         final Handler qsHandler = new Handler(host.getLooper());
         final Handler mainHandler = new Handler(Looper.getMainLooper());
