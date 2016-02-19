@@ -6978,6 +6978,12 @@ public final class Settings {
          */
         public static final String WEBVIEW_PROVIDER = "webview_provider";
 
+        /**
+         * Developer setting to enable WebView multiprocess rendering.
+         * @hide
+         */
+        public static final String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
+
        /**
         * Whether Wifi display is enabled/disabled
         * 0=disabled. 1=enabled.
