@@ -56,6 +56,10 @@
          calculate the bounds of the stacks-->
     <dimen name="docked_stack_divider_insets">19dp</dimen>
 
+    <!-- To how much the docked stack gets reduced when we decide to minimize the docked stack, i.e.
+         when the user opens homescreen. -->
+    <dimen name="docked_stack_minimize_thickness">8dp</dimen>
+
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
 

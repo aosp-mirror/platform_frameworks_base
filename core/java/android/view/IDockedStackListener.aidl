@@ -33,4 +33,13 @@ oneway interface IDockedStackListener {
      * Called when the docked stack gets created or removed.
      */
     void onDockedStackExistsChanged(boolean exists);
+
+    /**
+     * Called when window manager decides to minimize the docked stack. The divider should make
+     * itself not interactable and shrink a bit in this state.
+     *
+     * @param minimized Whether the docked stack is currently minimized.
+     * @param animDuration The duration of the animation for changing the minimized state.
+     */
+    void onDockedStackMinimizedChanged(boolean minimized, long animDuration);
 }

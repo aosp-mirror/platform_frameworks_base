@@ -40,6 +40,7 @@ public class Divider extends SystemUI {
     private DividerView mView;
     private DockDividerVisibilityListener mDockDividerVisibilityListener;
     private boolean mVisible = false;
+    private boolean mMinimized = false;
 
     @Override
     public void start() {
@@ -81,6 +82,10 @@ public class Divider extends SystemUI {
     private void update(Configuration configuration) {
         removeDivider();
         addDivider(configuration);
+        if (mMinimized) {
+            mView.setMinimizedDockStack(true);
+            mWindowManager.setTouchable(false);
+        }
     }
 
     private void updateVisibility(final boolean visible) {
@@ -95,6 +100,23 @@ public class Divider extends SystemUI {
         });
     }
 
+    private void updateMinimizedDockedStack(final boolean minimized, final long animDuration) {
+        mView.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mMinimized != minimized) {
+                    mMinimized = minimized;
+                    mWindowManager.setTouchable(!minimized);
+                    if (animDuration > 0) {
+                        mView.setMinimizedDockStack(minimized, animDuration);
+                    } else {
+                        mView.setMinimizedDockStack(minimized);
+                    }
+                }
+            }
+        });
+    }
+
     class DockDividerVisibilityListener extends IDockedStackListener.Stub {
 
         @Override
@@ -104,6 +126,12 @@ public class Divider extends SystemUI {
 
         @Override
         public void onDockedStackExistsChanged(boolean exists) throws RemoteException {
+        }
+
+        @Override
+        public void onDockedStackMinimizedChanged(boolean minimized, long animDuration)
+                throws RemoteException {
+            updateMinimizedDockedStack(minimized, animDuration);
         }
     }
 }

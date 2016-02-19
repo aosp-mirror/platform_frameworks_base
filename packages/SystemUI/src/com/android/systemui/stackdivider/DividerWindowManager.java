@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
@@ -73,6 +74,20 @@ public class DividerWindowManager {
             changed = true;
         } else if (!slippery && (mLp.flags & FLAG_SLIPPERY) != 0) {
             mLp.flags &= ~FLAG_SLIPPERY;
+            changed = true;
+        }
+        if (changed) {
+            mWindowManager.updateViewLayout(mView, mLp);
+        }
+    }
+
+    public void setTouchable(boolean touchable) {
+        boolean changed = false;
+        if (!touchable && (mLp.flags & FLAG_NOT_TOUCHABLE) == 0) {
+            mLp.flags |= FLAG_NOT_TOUCHABLE;
+            changed = true;
+        } else if (touchable && (mLp.flags & FLAG_NOT_TOUCHABLE) != 0) {
+            mLp.flags &= ~FLAG_NOT_TOUCHABLE;
             changed = true;
         }
         if (changed) {

@@ -53,6 +53,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.AppTransitionAnimationSpec;
@@ -336,14 +337,17 @@ public class AppTransition implements Dump {
         return false;
     }
 
-    void goodToGo(AppWindowAnimator openingAppAnimator, AppWindowAnimator closingAppAnimator) {
+    void goodToGo(AppWindowAnimator topOpeningAppAnimator, AppWindowAnimator topClosingAppAnimator,
+            ArraySet<AppWindowToken> openingApps, ArraySet<AppWindowToken> closingApps) {
         mNextAppTransition = TRANSIT_UNSET;
         mAppTransitionState = APP_STATE_RUNNING;
         notifyAppTransitionStartingLocked(
-                openingAppAnimator != null ? openingAppAnimator.mAppToken.token : null,
-                closingAppAnimator != null ? closingAppAnimator.mAppToken.token : null,
-                openingAppAnimator != null ? openingAppAnimator.animation : null,
-                closingAppAnimator != null ? closingAppAnimator.animation : null);
+                topOpeningAppAnimator != null ? topOpeningAppAnimator.mAppToken.token : null,
+                topClosingAppAnimator != null ? topClosingAppAnimator.mAppToken.token : null,
+                topOpeningAppAnimator != null ? topOpeningAppAnimator.animation : null,
+                topClosingAppAnimator != null ? topClosingAppAnimator.animation : null);
+        mService.getDefaultDisplayContentLocked().getDockedDividerController()
+                .notifyAppTransitionStarting(openingApps, closingApps);
     }
 
     void clear() {

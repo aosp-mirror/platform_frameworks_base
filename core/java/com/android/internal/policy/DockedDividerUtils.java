@@ -17,9 +17,9 @@
 package com.android.internal.policy;
 
 import android.graphics.Rect;
-import android.view.WindowManager;
 
 import static android.view.WindowManager.DOCKED_BOTTOM;
+import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -35,46 +35,61 @@ public class DockedDividerUtils {
             int displayWidth, int displayHeight, int dividerSize) {
         outRect.set(0, 0, displayWidth, displayHeight);
         switch (dockSide) {
-            case WindowManager.DOCKED_LEFT:
+            case DOCKED_LEFT:
                 outRect.right = position;
                 break;
-            case WindowManager.DOCKED_TOP:
+            case DOCKED_TOP:
                 outRect.bottom = position;
                 break;
-            case WindowManager.DOCKED_RIGHT:
+            case DOCKED_RIGHT:
                 outRect.left = position + dividerSize;
                 break;
-            case WindowManager.DOCKED_BOTTOM:
+            case DOCKED_BOTTOM:
                 outRect.top = position + dividerSize;
                 break;
         }
-        sanitizeStackBounds(outRect);
+        sanitizeStackBounds(outRect, dockSide == DOCKED_LEFT || dockSide == DOCKED_TOP);
     }
 
-    public static void sanitizeStackBounds(Rect bounds) {
-        if (bounds.left >= bounds.right) {
-            bounds.left = bounds.right - 1;
-        }
-        if (bounds.top >= bounds.bottom) {
-            bounds.top = bounds.bottom - 1;
-        }
-        if (bounds.right <= bounds.left) {
-            bounds.right = bounds.left + 1;
-        }
-        if (bounds.bottom <= bounds.top) {
-            bounds.bottom = bounds.top + 1;
+    /**
+     * Makes sure that the bounds are always valid, i. e. they are at least one pixel high and wide.
+     *
+     * @param bounds The bounds to sanitize.
+     * @param topLeft Pass true if the bounds are at the top/left of the screen, false if they are
+     *                at the bottom/right. This is used to determine in which direction to extend
+     *                the bounds.
+     */
+    public static void sanitizeStackBounds(Rect bounds, boolean topLeft) {
+
+        // If the bounds are either on the top or left of the screen, rather move it further to the
+        // left/top to make it more offscreen. If they are on the bottom or right, push them off the
+        // screen by moving it even more to the bottom/right.
+        if (topLeft) {
+            if (bounds.left >= bounds.right) {
+                bounds.left = bounds.right - 1;
+            }
+            if (bounds.top >= bounds.bottom) {
+                bounds.top = bounds.bottom - 1;
+            }
+        } else {
+            if (bounds.right <= bounds.left) {
+                bounds.right = bounds.left + 1;
+            }
+            if (bounds.bottom <= bounds.top) {
+                bounds.bottom = bounds.top + 1;
+            }
         }
     }
 
     public static int calculatePositionForBounds(Rect bounds, int dockSide, int dividerSize) {
         switch (dockSide) {
-            case WindowManager.DOCKED_LEFT:
+            case DOCKED_LEFT:
                 return bounds.right;
-            case WindowManager.DOCKED_TOP:
+            case DOCKED_TOP:
                 return bounds.bottom;
-            case WindowManager.DOCKED_RIGHT:
+            case DOCKED_RIGHT:
                 return bounds.left - dividerSize;
-            case WindowManager.DOCKED_BOTTOM:
+            case DOCKED_BOTTOM:
                 return bounds.top - dividerSize;
             default:
                 return 0;
@@ -109,16 +124,16 @@ public class DockedDividerUtils {
 
     public static int invertDockSide(int dockSide) {
         switch (dockSide) {
-            case WindowManager.DOCKED_LEFT:
-                return WindowManager.DOCKED_RIGHT;
-            case WindowManager.DOCKED_TOP:
-                return WindowManager.DOCKED_BOTTOM;
-            case WindowManager.DOCKED_RIGHT:
-                return WindowManager.DOCKED_LEFT;
-            case WindowManager.DOCKED_BOTTOM:
-                return WindowManager.DOCKED_TOP;
+            case DOCKED_LEFT:
+                return DOCKED_RIGHT;
+            case DOCKED_TOP:
+                return DOCKED_BOTTOM;
+            case DOCKED_RIGHT:
+                return DOCKED_LEFT;
+            case DOCKED_BOTTOM:
+                return DOCKED_TOP;
             default:
-                return WindowManager.DOCKED_INVALID;
+                return DOCKED_INVALID;
         }
     }
 }
