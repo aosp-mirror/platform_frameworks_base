@@ -4968,6 +4968,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null");
+        // Allow setting this policy to true only if there is a split system user.
+        if (forceEphemeralUsers && !mInjector.userManagerIsSplitSystemUser()) {
+            throw new IllegalArgumentException(
+                    "Cannot force ephemeral users on systems without split system user.");
+        }
         boolean removeAllUsers = false;
         synchronized (this) {
             final ActiveAdmin deviceOwner =
@@ -6817,6 +6822,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Only allow the system user to use this method
         if (!mInjector.binderGetCallingUserHandle().isSystem()) {
             throw new SecurityException("createAndManageUser was called from non-system user");
+        }
+        if (!mInjector.userManagerIsSplitSystemUser()
+                && (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0) {
+            throw new IllegalArgumentException(
+                    "Ephemeral users are only supported on systems with a split system user.");
         }
         // Create user.
         UserHandle user = null;
