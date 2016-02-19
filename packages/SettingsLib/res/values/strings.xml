@@ -684,11 +684,16 @@
     <!-- Sound & display settings screen, theme setting value to automatically switch between a light- or dark-colored user interface [CHAR LIMIT=30] -->
     <string name="night_mode_auto">Automatic</string>
 
-    <!-- Developer settings: select WebView provider title -->
+    <!-- Developer settings: enable WebView multiprocess name [CHAR LIMIT=30] -->
+    <string name="enable_webview_multiprocess">Enable multiprocess WebView</string>
+    <!-- Developer settings: enable WebView multiprocess summary [CHAR LIMIT=60] -->
+    <string name="enable_webview_multiprocess_desc">Run WebView renderers in an isolated process.</string>
+
+    <!-- Developer settings: select WebView provider title [CHAR LIMIT=30] -->
     <string name="select_webview_provider_title">WebView implementation</string>
-    <!-- Developer settings: select WebView provider dialog title -->
+    <!-- Developer settings: select WebView provider dialog title [CHAR LIMIT=30] -->
     <string name="select_webview_provider_dialog_title">Set WebView implementation</string>
-    <!-- Developer settings: confirmation dialog text for the WebView provider selection dialog -->
+    <!-- Developer settings: confirmation dialog text for the WebView provider selection dialog [CHAR LIMIT=NONE] -->
     <string name="select_webview_provider_confirmation_text">The chosen WebView implementation is disabled, and must be enabled to be used, do you wish to enable it?</string>
 
     <!-- Developer settings screen, convert userdata to file encryption option name -->
