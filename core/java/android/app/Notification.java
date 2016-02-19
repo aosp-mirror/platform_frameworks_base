@@ -895,6 +895,11 @@ public class Notification implements Parcelable
      */
     public static final String EXTRA_BUILDER_APPLICATION_INFO = "android.appInfo";
 
+    /**
+     * @hide
+     */
+    public static final String EXTRA_CONTAINS_CUSTOM_VIEW = "android.contains.customView";
+
     private Icon mSmallIcon;
     private Icon mLargeIcon;
 
@@ -3425,6 +3430,10 @@ public class Notification implements Parcelable
                 mN.extras.putStringArray(EXTRA_PEOPLE,
                         mPersonList.toArray(new String[mPersonList.size()]));
             }
+            if (mN.bigContentView != null || mN.contentView != null
+                    || mN.headsUpContentView != null) {
+                mN.extras.putBoolean(EXTRA_CONTAINS_CUSTOM_VIEW, true);
+            }
             return mN;
         }
 
@@ -4137,6 +4146,7 @@ public class Notification implements Parcelable
             final float density = mBuilder.mContext.getResources().getDisplayMetrics().density;
             int topPadding = (int) (5 * density);
             int bottomPadding = (int) (13 * density);
+            boolean first = true;
             while (i < mTexts.size() && i < rowIds.length) {
                 CharSequence str = mTexts.get(i);
                 if (str != null && !str.equals("")) {
@@ -4148,23 +4158,26 @@ public class Notification implements Parcelable
                     }
                     contentView.setViewPadding(rowIds[i], 0, topPadding, 0,
                             i == rowIds.length - 1 || i == mTexts.size() - 1 ? bottomPadding : 0);
+                    handleInboxImageMargin(contentView, rowIds[i], first);
+                    first = false;
                 }
                 i++;
             }
 
-            handleInboxImageMargin(contentView, rowIds[0]);
 
             return contentView;
         }
 
-        private void handleInboxImageMargin(RemoteViews contentView, int id) {
-            final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
-            final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
-            boolean hasProgress = max != 0 || ind;
+        private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first) {
             int endMargin = 0;
-            if (mTexts.size() > 0 && mBuilder.mN.mLargeIcon != null && !hasProgress) {
-                endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_content_picture_margin);
+            if (first) {
+                final int max = mBuilder.mN.extras.getInt(EXTRA_PROGRESS_MAX, 0);
+                final boolean ind = mBuilder.mN.extras.getBoolean(EXTRA_PROGRESS_INDETERMINATE);
+                boolean hasProgress = max != 0 || ind;
+                if (mBuilder.mN.mLargeIcon != null && !hasProgress) {
+                    endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
+                            R.dimen.notification_content_picture_margin);
+                }
             }
             contentView.setViewLayoutMarginEnd(id, endMargin);
         }
@@ -4347,13 +4360,11 @@ public class Notification implements Parcelable
             }
             handleImage(view);
             // handle the content margin
-            int endMargin;
+            int endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_content_margin_end);;
             if (mBuilder.mN.mLargeIcon != null) {
-                endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_content_picture_margin_media);
-            } else {
-                endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
-                        R.dimen.notification_content_margin_end);
+                endMargin += mBuilder.mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_content_picture_margin);
             }
             view.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
             return view;
@@ -4463,9 +4474,6 @@ public class Notification implements Parcelable
             return makeDecoratedHeadsUpContentView();
         }
 
-        /**
-         * @hide
-         */
         private RemoteViews makeDecoratedHeadsUpContentView() {
             RemoteViews headsUpContentView = mBuilder.mN.headsUpContentView == null
                     ? mBuilder.mN.contentView
@@ -4475,25 +4483,17 @@ public class Notification implements Parcelable
             }
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
                         mBuilder.getBigBaseLayoutResource());
-            remoteViews.removeAllViews(R.id.notification_main_column);
-            remoteViews.addView(R.id.notification_main_column, headsUpContentView);
+            buildIntoRemoteViewContent(remoteViews, headsUpContentView);
             return remoteViews;
         }
 
-        /**
-         * @hide
-         */
         private RemoteViews makeStandardTemplateWithCustomContent(RemoteViews customContent) {
             RemoteViews remoteViews = mBuilder.applyStandardTemplate(
                     mBuilder.getBaseLayoutResource());
-            remoteViews.removeAllViews(R.id.notification_main_column);
-            remoteViews.addView(R.id.notification_main_column, customContent);
+            buildIntoRemoteViewContent(remoteViews, customContent);
             return remoteViews;
         }
 
-        /**
-         * @hide
-         */
         private RemoteViews makeDecoratedBigContentView() {
             RemoteViews bigContentView = mBuilder.mN.bigContentView == null
                     ? mBuilder.mN.contentView
@@ -4503,9 +4503,22 @@ public class Notification implements Parcelable
             }
             RemoteViews remoteViews = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getBigBaseLayoutResource());
-            remoteViews.removeAllViews(R.id.notification_main_column);
-            remoteViews.addView(R.id.notification_main_column, bigContentView);
+            buildIntoRemoteViewContent(remoteViews, bigContentView);
             return remoteViews;
+        }
+
+        private void buildIntoRemoteViewContent(RemoteViews remoteViews,
+                RemoteViews customContent) {
+            remoteViews.removeAllViews(R.id.notification_main_column);
+            remoteViews.addView(R.id.notification_main_column, customContent);
+            // also update the end margin if there is an image
+            int endMargin = mBuilder.mContext.getResources().getDimensionPixelSize(
+                    R.dimen.notification_content_margin_end);
+            if (mBuilder.mN.mLargeIcon != null) {
+                endMargin += mBuilder.mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_content_picture_margin);
+            }
+            remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
         }
     }
 
