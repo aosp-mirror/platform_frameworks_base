@@ -46,7 +46,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Debug;
@@ -64,8 +63,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ClipRectAnimation;
-import android.view.animation.ClipRectLRAnimation;
-import android.view.animation.ClipRectTBAnimation;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.view.animation.ScaleAnimation;
@@ -74,10 +71,11 @@ import android.view.animation.TranslateAnimation;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.server.AttributeCache;
 import com.android.server.wm.WindowManagerService.H;
+import com.android.server.wm.animation.ClipRectLRAnimation;
+import com.android.server.wm.animation.ClipRectTBAnimation;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -136,6 +134,16 @@ public class AppTransition implements Dump {
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.5f;
 
     static final int DEFAULT_APP_TRANSITION_DURATION = 336;
+
+    /** Interpolator to be used for animations that respond directly to a touch */
+    static final Interpolator TOUCH_RESPONSE_INTERPOLATOR =
+            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
+
+    /**
+     * Maximum duration for the clip reveal animation. This is used when there is a lot of movement
+     * involved, to make it more understandable.
+     */
+    private static final int MAX_CLIP_REVEAL_TRANSITION_DURATION = 420;
     private static final int THUMBNAIL_APP_TRANSITION_DURATION = 336;
     private static final int THUMBNAIL_APP_TRANSITION_ALPHA_DURATION = 336;
     private static final long APP_TRANSITION_TIMEOUT_MS = 5000;
@@ -200,13 +208,10 @@ public class AppTransition implements Dump {
     private final Interpolator mFastOutLinearInInterpolator;
     private final Interpolator mClipHorizontalInterpolator = new PathInterpolator(0, 0, 0.4f, 1f);
 
-    /** Interpolator to be used for animations that respond directly to a touch */
-    private final Interpolator mTouchResponseInterpolator =
-            new PathInterpolator(0.3f, 0f, 0.1f, 1f);
-
     private final int mClipRevealTranslationY;
 
     private int mCurrentUserId = 0;
+    private long mLastClipRevealTransitionDuration = DEFAULT_APP_TRANSITION_DURATION;
 
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
     private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
@@ -636,50 +641,101 @@ public class AppTransition implements Dump {
                 bitmap, new Rect(left, top, left + width, top + height));
     }
 
-    private Animation createClipRevealAnimationLocked(int transit, boolean enter, Rect appFrame) {
+    long getLastClipRevealTransitionDuration() {
+        return mLastClipRevealTransitionDuration;
+    }
+
+    /**
+     * Calculates the duration for the clip reveal animation. If the clip is "cut off", meaning that
+     * the start rect is outside of the target rect, and there is a lot of movement going on.
+     *
+     * @param cutOff whether the start rect was not fully contained by the end rect
+     * @param translationX the total translation the surface moves in x direction
+     * @param translationY the total translation the surfaces moves in y direction
+     * @param displayFrame our display frame
+     *
+     * @return the duration of the clip reveal animation, in milliseconds
+     */
+    private long calculateClipRevealTransitionDuration(boolean cutOff, float translationX,
+            float translationY, Rect displayFrame) {
+        if (!cutOff) {
+            return DEFAULT_APP_TRANSITION_DURATION;
+        }
+        final float fraction = Math.max(Math.abs(translationX) / displayFrame.width(),
+                Math.abs(translationY) / displayFrame.height());
+        return (long) (DEFAULT_APP_TRANSITION_DURATION + fraction *
+                (MAX_CLIP_REVEAL_TRANSITION_DURATION - DEFAULT_APP_TRANSITION_DURATION));
+    }
+
+    private Animation createClipRevealAnimationLocked(int transit, boolean enter, Rect appFrame,
+            Rect displayFrame) {
         final Animation anim;
         if (enter) {
-            // Reveal will expand and move faster in horizontal direction
-
             final int appWidth = appFrame.width();
             final int appHeight = appFrame.height();
+
             // mTmpRect will contain an area around the launcher icon that was pressed. We will
             // clip reveal from that area in the final area of the app.
             getDefaultNextAppTransitionStartRect(mTmpRect);
 
             float t = 0f;
             if (appHeight > 0) {
-                t = (float) mTmpRect.left / appHeight;
+                t = (float) mTmpRect.top / displayFrame.height();
             }
-            int translationY = mClipRevealTranslationY + (int)(appHeight / 7f * t);
-
+            int translationY = mClipRevealTranslationY + (int)(displayFrame.height() / 7f * t);
+            int translationX = 0;
+            int translationYCorrection = translationY;
             int centerX = mTmpRect.centerX();
             int centerY = mTmpRect.centerY();
             int halfWidth = mTmpRect.width() / 2;
             int halfHeight = mTmpRect.height() / 2;
+            int clipStartX = centerX - halfWidth - appFrame.left;
+            int clipStartY = centerY - halfHeight - appFrame.top;
+            boolean cutOff = false;
+
+            // If the starting rectangle is fully or partially outside of the target rectangle, we
+            // need to start the clipping at the edge and then achieve the rest with translation
+            // and extending the clip rect from that edge.
+            if (appFrame.top > centerY - halfHeight) {
+                translationY = (centerY - halfHeight) - appFrame.top;
+                translationYCorrection = 0;
+                clipStartY = 0;
+                cutOff = true;
+            }
+            if (appFrame.left > centerX - halfWidth) {
+                translationX = (centerX - halfWidth) - appFrame.left;
+                clipStartX = 0;
+                cutOff = true;
+            }
+            if (appFrame.right < centerX + halfWidth) {
+                translationX = (centerX + halfWidth) - appFrame.right;
+                clipStartX = appWidth - mTmpRect.width();
+                cutOff = true;
+            }
+            final long duration = calculateClipRevealTransitionDuration(cutOff, translationX,
+                    translationY, displayFrame);
 
             // Clip third of the from size of launch icon, expand to full width/height
             Animation clipAnimLR = new ClipRectLRAnimation(
-                    centerX - halfWidth, centerX + halfWidth, 0, appWidth);
+                    clipStartX, clipStartX + mTmpRect.width(), 0, appWidth);
             clipAnimLR.setInterpolator(mClipHorizontalInterpolator);
-            clipAnimLR.setDuration((long) (DEFAULT_APP_TRANSITION_DURATION / 2.5f));
+            clipAnimLR.setDuration((long) (duration / 2.5f));
 
-            Animation clipAnimTB = new ClipRectTBAnimation(centerY - halfHeight - translationY,
-                    centerY + halfHeight/ 2 - translationY, 0, appHeight);
-            clipAnimTB.setInterpolator(mTouchResponseInterpolator);
-            clipAnimTB.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+            TranslateAnimation translate = new TranslateAnimation(translationX, 0, translationY, 0);
+            translate.setInterpolator(cutOff ? TOUCH_RESPONSE_INTERPOLATOR
+                    : mLinearOutSlowInInterpolator);
+            translate.setDuration(duration);
 
-            // We might be animating entrance of a docked task, so we need the translate to account
-            // for the app frame in which the window will reside. Every other calculation here
-            // is performed as if the window started at 0,0.
-            translationY -= appFrame.top;
-            TranslateAnimation translate = new TranslateAnimation(-appFrame.left, 0, translationY,
-                    0);
-            translate.setInterpolator(mLinearOutSlowInInterpolator);
-            translate.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+            Animation clipAnimTB = new ClipRectTBAnimation(
+                    clipStartY, clipStartY + mTmpRect.height(),
+                    0, appHeight,
+                    translationYCorrection, 0,
+                    mLinearOutSlowInInterpolator);
+            clipAnimTB.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
+            clipAnimTB.setDuration(duration);
 
             // Quick fade-in from icon to app window
-            final int alphaDuration = DEFAULT_APP_TRANSITION_DURATION / 4;
+            final long alphaDuration = duration / 4;
             AlphaAnimation alpha = new AlphaAnimation(0.5f, 1);
             alpha.setDuration(alphaDuration);
             alpha.setInterpolator(mLinearOutSlowInInterpolator);
@@ -692,6 +748,7 @@ public class AppTransition implements Dump {
             set.setZAdjustment(Animation.ZORDER_TOP);
             set.initialize(appWidth, appHeight, appWidth, appHeight);
             anim = set;
+            mLastClipRevealTransitionDuration = duration;
         } else {
             final long duration;
             switch (transit) {
@@ -798,7 +855,7 @@ public class AppTransition implements Dump {
             // Animation up from the thumbnail to the full screen
             Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW,
                     mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
-            scale.setInterpolator(mTouchResponseInterpolator);
+            scale.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
             Animation alpha = new AlphaAnimation(1f, 0f);
             alpha.setInterpolator(mThumbnailFadeOutInterpolator);
@@ -806,7 +863,7 @@ public class AppTransition implements Dump {
             final float toX = appRect.left + appRect.width() / 2 -
                     (mTmpRect.left + thumbWidth / 2);
             Animation translate = new TranslateAnimation(0, toX, 0, toY);
-            translate.setInterpolator(mTouchResponseInterpolator);
+            translate.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
             // This AnimationSet uses the Interpolators assigned above.
@@ -819,7 +876,7 @@ public class AppTransition implements Dump {
             // Animation down from the full screen to the thumbnail
             Animation scale = new ScaleAnimation(scaleW, 1f, scaleW, 1f,
                     mTmpRect.left + (thumbWidth / 2f), mTmpRect.top + (thumbHeight / 2f));
-            scale.setInterpolator(mTouchResponseInterpolator);
+            scale.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
             Animation alpha = new AlphaAnimation(0f, 1f);
             alpha.setInterpolator(mThumbnailFadeInInterpolator);
@@ -827,7 +884,7 @@ public class AppTransition implements Dump {
             final float toX = appRect.left + appRect.width() / 2 -
                     (mTmpRect.left + thumbWidth / 2);
             Animation translate = new TranslateAnimation(toX, 0, toY, 0);
-            translate.setInterpolator(mTouchResponseInterpolator);
+            translate.setInterpolator(TOUCH_RESPONSE_INTERPOLATOR);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
             // This AnimationSet uses the Interpolators assigned above.
@@ -839,7 +896,7 @@ public class AppTransition implements Dump {
 
         }
         return prepareThumbnailAnimationWithDuration(a, appWidth, appRect.height(), 0,
-                mTouchResponseInterpolator);
+                TOUCH_RESPONSE_INTERPOLATOR);
     }
 
     /**
@@ -971,7 +1028,7 @@ public class AppTransition implements Dump {
         int duration = Math.max(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION,
                 THUMBNAIL_APP_TRANSITION_DURATION);
         return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, duration,
-                mTouchResponseInterpolator);
+                TOUCH_RESPONSE_INTERPOLATOR);
     }
 
     private Animation createAspectScaledThumbnailEnterFreeformAnimationLocked(Rect frame,
@@ -1223,8 +1280,9 @@ public class AppTransition implements Dump {
      *                      bigger.
      */
     Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            int orientation, Rect frame, Rect insets, @Nullable Rect surfaceInsets,
-            boolean isVoiceInteraction, boolean freeform, int taskId) {
+            int orientation, Rect frame, Rect displayFrame, Rect insets,
+            @Nullable Rect surfaceInsets, boolean isVoiceInteraction, boolean freeform,
+            int taskId) {
         Animation a;
         if (isVoiceInteraction && (transit == TRANSIT_ACTIVITY_OPEN
                 || transit == TRANSIT_TASK_OPEN
@@ -1269,7 +1327,7 @@ public class AppTransition implements Dump {
                     + " transit=" + appTransitionToString(transit)
                     + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
-            a = createClipRevealAnimationLocked(transit, enter, frame);
+            a = createClipRevealAnimationLocked(transit, enter, frame, displayFrame);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
                     "applyAnimation:"
                             + " anim=" + a + " nextAppTransition=ANIM_CLIP_REVEAL"

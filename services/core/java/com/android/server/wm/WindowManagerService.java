@@ -2970,6 +2970,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // Determine the visible rect to calculate the thumbnail clip
             final WindowState win = atoken.findMainWindow();
             final Rect frame = new Rect(0, 0, width, height);
+            final Rect displayFrame = new Rect(0, 0,
+                    displayInfo.logicalWidth, displayInfo.logicalHeight);
             final Rect insets = new Rect();
             Rect surfaceInsets = null;
             final boolean freeform = win != null && win.inFreeformWorkspace();
@@ -2997,8 +2999,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " transit=" + AppTransition.appTransitionToString(transit) + " enter=" + enter
                     + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter,
-                    mCurConfiguration.orientation, frame, insets, surfaceInsets, isVoiceInteraction,
-                    freeform, atoken.mTask.mTaskId);
+                    mCurConfiguration.orientation, frame, displayFrame, insets, surfaceInsets,
+                    isVoiceInteraction, freeform, atoken.mTask.mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();

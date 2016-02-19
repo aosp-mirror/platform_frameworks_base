@@ -28,6 +28,7 @@ import android.view.IDockedStackListener;
 import android.view.SurfaceControl;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
 
@@ -39,6 +40,8 @@ import static android.view.WindowManager.DOCKED_BOTTOM;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
+import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -48,8 +51,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 public class DockedStackDividerController implements DimLayerUser {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DockedStackDividerController" : TAG_WM;
-
-    private static final long MINIMIZED_DOCK_ANIMATION_DURATION = 400;
 
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
@@ -71,6 +72,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private long mAnimationStartTime;
     private float mAnimationStart;
     private float mAnimationTarget;
+    private long mAnimationDuration;
     private final Interpolator mMinimizedDockInterpolator;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
@@ -331,6 +333,10 @@ public class DockedStackDividerController implements DimLayerUser {
         notifyDockedStackMinimizedChanged(minimized, 0);
     }
 
+    private boolean isAnimationMaximizing() {
+        return mAnimationTarget == 0f;
+    }
+
     public boolean animate(long now) {
         if (!mAnimating) {
             return false;
@@ -339,12 +345,17 @@ public class DockedStackDividerController implements DimLayerUser {
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
+            final long transitionDuration = isAnimationMaximizing()
+                    ? mService.mAppTransition.getLastClipRevealTransitionDuration()
+                    : DEFAULT_APP_TRANSITION_DURATION;
+            mAnimationDuration = (long)
+                    (transitionDuration * mService.getTransitionAnimationScaleLocked());
             notifyDockedStackMinimizedChanged(mMinimizedDock,
-                    MINIMIZED_DOCK_ANIMATION_DURATION);
+                    mAnimationDuration);
         }
-        float t = Math.min(1f, (float) (now - mAnimationStartTime)
-                / MINIMIZED_DOCK_ANIMATION_DURATION);
-        t = mMinimizedDockInterpolator.getInterpolation(t);
+        float t = Math.min(1f, (float) (now - mAnimationStartTime) / mAnimationDuration);
+        t = (isAnimationMaximizing() ? TOUCH_RESPONSE_INTERPOLATOR : mMinimizedDockInterpolator)
+                .getInterpolation(t);
         final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         if (stack != null) {
             final float amount = t * mAnimationTarget + (1 - t) * mAnimationStart;
