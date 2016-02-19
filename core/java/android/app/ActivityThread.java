@@ -941,18 +941,19 @@ public final class ActivityThread {
 
         @Override
         public void dumpMemInfo(FileDescriptor fd, Debug.MemoryInfo mem, boolean checkin,
-                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly, String[] args) {
+                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
+                boolean dumpUnreachable, String[] args) {
             FileOutputStream fout = new FileOutputStream(fd);
             PrintWriter pw = new FastPrintWriter(fout);
             try {
-                dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly);
+                dumpMemInfo(pw, mem, checkin, dumpFullInfo, dumpDalvik, dumpSummaryOnly, dumpUnreachable);
             } finally {
                 pw.flush();
             }
         }
 
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
-                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly) {
+                boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
@@ -1065,6 +1066,16 @@ public final class ActivityThread {
                 pw.println(" ");
                 pw.println(" Asset Allocations");
                 pw.print(assetAlloc);
+            }
+
+            // Unreachable native memory
+            if (dumpUnreachable) {
+                boolean showContents = ((mBoundApplication != null)
+                    && ((mBoundApplication.appInfo.flags&ApplicationInfo.FLAG_DEBUGGABLE) != 0))
+                    || android.os.Build.IS_DEBUGGABLE;
+                pw.println(" ");
+                pw.println(" Unreachable memory");
+                pw.print(Debug.getUnreachableMemory(100, showContents));
             }
         }
 
