@@ -1203,7 +1203,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * }
      * </code></pre></p>
      *
-     * @param permissions The requested permissions.
+     * @param permissions The requested permissions. Must me non-null and not empty.
      * @param requestCode Application specific request code to match with a result
      *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
      *    Should be >= 0.

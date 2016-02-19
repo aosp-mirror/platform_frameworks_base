@@ -3167,7 +3167,7 @@ public abstract class PackageManager {
      */
     public Intent buildRequestPermissionsIntent(@NonNull String[] permissions) {
         if (ArrayUtils.isEmpty(permissions)) {
-           throw new NullPointerException("permission cannot be null or empty");
+           throw new IllegalArgumentException("permission cannot be null or empty");
         }
         Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
         intent.putExtra(EXTRA_REQUEST_PERMISSIONS_NAMES, permissions);
