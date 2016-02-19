@@ -80,7 +80,7 @@ public class SyncStorageEngine extends Handler {
     private static final String XML_TAG_LISTEN_FOR_TICKLES = "listenForTickles";
 
     /** Default time for a periodic sync. */
-    static final long DEFAULT_POLL_FREQUENCY_SECONDS = 60 * 60 * 24; // One day
+    private static final long DEFAULT_POLL_FREQUENCY_SECONDS = 60 * 60 * 24; // One day
 
     /** Percentage of period that is flex by default, if no flexMillis is set. */
     private static final double DEFAULT_FLEX_PERCENT_SYNC = 0.04;
@@ -855,16 +855,6 @@ public class SyncStorageEngine extends Handler {
         synchronized (mAuthorities) {
             return mAuthorities.get(authorityId);
         }
-    }
-
-    List<AuthorityInfo> getAllAuthorities() {
-        List<AuthorityInfo> authorities = new ArrayList<AuthorityInfo>();
-        synchronized (mAuthorities) {
-            for (int i = 0; i < mAuthorities.size(); i++) {
-                authorities.add(mAuthorities.valueAt(i));
-            }
-        }
-        return authorities;
     }
 
     /**
