@@ -164,6 +164,13 @@ public:
         mPendingAnimatingRenderNodes.clear();
     }
 
+    void destroy() {
+        for (auto& renderNode : mPendingAnimatingRenderNodes) {
+            renderNode->animators().endAllStagingAnimators();
+        }
+        mPendingAnimatingRenderNodes.clear();
+    }
+
 private:
     sp<Looper> mLooper;
     JavaVM* mVm;
@@ -476,7 +483,9 @@ static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject c
 }
 
 static void android_view_ThreadedRenderer_destroy(JNIEnv* env, jobject clazz,
-        jlong proxyPtr) {
+        jlong proxyPtr, jlong rootNodePtr) {
+    RootRenderNode* rootRenderNode = reinterpret_cast<RootRenderNode*>(rootNodePtr);
+    rootRenderNode->destroy();
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->destroy();
 }
@@ -698,7 +707,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
-    { "nDestroy", "(J)V", (void*) android_view_ThreadedRenderer_destroy },
+    { "nDestroy", "(JJ)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
     { "nCreateTextureLayer", "(J)J", (void*) android_view_ThreadedRenderer_createTextureLayer },
