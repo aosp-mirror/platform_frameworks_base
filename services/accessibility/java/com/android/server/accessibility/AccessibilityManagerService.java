@@ -94,6 +94,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.LocalServices;
 
+import com.android.server.statusbar.StatusBarManagerInternal;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
@@ -2754,6 +2755,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     case AccessibilityService.GLOBAL_ACTION_POWER_DIALOG: {
                         showGlobalActions();
                     } return true;
+                    case AccessibilityService.GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN: {
+                        toggleSplitScreen();
+                    } return true;
                 }
                 return false;
             } finally {
@@ -3225,6 +3229,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             mWindowManagerService.showGlobalActions();
         }
 
+        private void toggleSplitScreen() {
+            LocalServices.getService(StatusBarManagerInternal.class).toggleSplitScreen();
+        }
+
         private IAccessibilityInteractionConnection getConnectionLocked(int windowId) {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Trying to get interaction connection to windowId: " + windowId);
@@ -3441,9 +3449,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
-                case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY:
-                case WindowManager.LayoutParams.TYPE_DOCK_DIVIDER: {
+                case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
+                }
+
+                case WindowManager.LayoutParams.TYPE_DOCK_DIVIDER: {
+                    return AccessibilityWindowInfo.TYPE_SPLIT_SCREEN_DIVIDER;
                 }
 
                 case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY: {

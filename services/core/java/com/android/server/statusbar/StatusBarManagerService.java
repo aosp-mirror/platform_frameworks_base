@@ -204,6 +204,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             StatusBarManagerService.this.setSystemUiVisibility(vis, fullscreenStackVis,
                     dockedStackVis, mask, fullscreenBounds, dockedBounds, cause);
         }
+
+        @Override
+        public void toggleSplitScreen() {
+            enforceStatusBarService();
+            if (mBar != null) {
+                try {
+                    mBar.toggleSplitScreen();
+                } catch (RemoteException ex) {}
+            }
+        }
     };
 
     // ================================================================================

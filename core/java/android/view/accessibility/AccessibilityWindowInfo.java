@@ -64,6 +64,12 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public static final int TYPE_ACCESSIBILITY_OVERLAY = 4;
 
+    /**
+     * Window type: A system window used to divide the screen in split-screen mode.
+     * This type of window is present only in split-screen mode.
+     */
+    public static final int TYPE_SPLIT_SCREEN_DIVIDER = 5;
+
     private static final int UNDEFINED = -1;
 
     private static final int BOOLEAN_PROPERTY_ACTIVE = 1 << 0;
@@ -550,6 +556,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
             }
             case TYPE_ACCESSIBILITY_OVERLAY: {
                 return "TYPE_ACCESSIBILITY_OVERLAY";
+            }
+            case TYPE_SPLIT_SCREEN_DIVIDER: {
+                return "TYPE_SPLIT_SCREEN_DIVIDER";
             }
             default:
                 return "<UNKNOWN>";

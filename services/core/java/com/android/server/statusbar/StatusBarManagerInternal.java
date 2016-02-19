@@ -33,4 +33,5 @@ public interface StatusBarManagerInternal {
     void topAppWindowChanged(boolean menuVisible);
     void setSystemUiVisibility(int vis, int fullscreenStackVis, int dockedStackVis, int mask,
             Rect fullscreenBounds, Rect dockedBounds, String cause);
+    void toggleSplitScreen();
 }
