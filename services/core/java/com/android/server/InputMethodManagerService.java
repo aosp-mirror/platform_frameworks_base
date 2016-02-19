@@ -189,6 +189,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private InputMethodFileManager mFileManager;
     private final HardKeyboardListener mHardKeyboardListener;
     private final AppOpsManager mAppOpsManager;
+    private final UserManager mUserManager;
 
     final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1, -1);
 
@@ -780,6 +781,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mService.systemRunning(statusBarService);
             }
         }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            mService.onUnlockUser(userHandle);
+        }
+    }
+
+    public void onUnlockUser(int userId) {
+        synchronized(mMethodMap) {
+            final int currentUserId = mSettings.getCurrentUserId();
+            if (DEBUG) {
+                Slog.d(TAG, "onUnlockUser: userId=" + userId + " curUserId=" + currentUserId);
+            }
+            if (userId != currentUserId) {
+                return;
+            }
+            mSettings.switchCurrentUser(currentUserId, !mSystemReady);
+            // We need to rebuild IMEs.
+            buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+            updateInputMethodsFromSettingsLocked(true /* enabledChanged */);
+        }
     }
 
     public InputMethodManagerService(Context context) {
@@ -799,6 +821,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }, true /*asyncHandler*/);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
+        mUserManager = mContext.getSystemService(UserManager.class);
         mHardKeyboardListener = new HardKeyboardListener();
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
@@ -972,8 +995,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // ContentObserver should be registered again when the user is changed
         mSettingsObserver.registerContentObserverLocked(newUserId);
 
-        // If the system is not ready, then we use copy-on-write settings.
-        final boolean useCopyOnWriteSettings = !mSystemReady;
+        // If the system is not ready or the device is not yed unlocked by the user, then we use
+        // copy-on-write settings.
+        final boolean useCopyOnWriteSettings =
+                !mSystemReady || !mUserManager.isUserUnlocked(newUserId);
         mSettings.switchCurrentUser(newUserId, useCopyOnWriteSettings);
         updateCurrentProfileIds();
         // InputMethodFileManager should be reset when the user is changed
@@ -1002,8 +1027,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     void updateCurrentProfileIds() {
-        List<UserInfo> profiles = mContext.getSystemService(UserManager.class)
-                .getProfiles(mSettings.getCurrentUserId());
+        List<UserInfo> profiles = mUserManager.getProfiles(mSettings.getCurrentUserId());
         int[] currentProfileIds = new int[profiles.size()]; // profiles will not be null
         for (int i = 0; i < currentProfileIds.length; i++) {
             currentProfileIds[i] = profiles.get(i).id;
@@ -1034,7 +1058,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (!mSystemReady) {
                 mSystemReady = true;
                 final int currentUserId = mSettings.getCurrentUserId();
-                mSettings.switchCurrentUser(currentUserId, false /* copyOnWrite */);
+                mSettings.switchCurrentUser(currentUserId,
+                        !mUserManager.isUserUnlocked(currentUserId));
                 mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
                 mNotificationManager = mContext.getSystemService(NotificationManager.class);
                 mStatusBar = statusBar;
@@ -2918,6 +2943,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Use for queryIntentServicesAsUser
         final PackageManager pm = mContext.getPackageManager();
 
+        // Note: We do not specify PackageManager.MATCH_ENCRYPTION_* flags here because the default
+        // behavior of PackageManager is exactly what we want.  It by default picks up appropriate
+        // services depending on the unlock state for the specified user.
         final List<ResolveInfo> services = pm.queryIntentServicesAsUser(
                 new Intent(InputMethod.SERVICE_INTERFACE),
                 PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
