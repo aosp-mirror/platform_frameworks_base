@@ -13,25 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/volume_dialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="@dimen/volume_dialog_margin_bottom"
     android:background="@drawable/volume_dialog_background"
-    android:translationZ="4dp" >
-
-    <com.android.keyguard.AlphaOptimizedImageButton
-        android:id="@+id/volume_expand_button"
-        style="@style/VolumeButtons"
-        android:layout_width="@dimen/volume_button_size"
-        android:layout_height="@dimen/volume_button_size"
-        android:layout_alignParentLeft="true"
-        android:clickable="true"
-        android:soundEffectsEnabled="false"
-        android:src="@drawable/ic_volume_collapse_animation"
-        tools:ignore="RtlHardcoded" />
+    android:translationZ="4dp"
+    android:paddingTop="8dp">
 
     <LinearLayout
         android:id="@+id/volume_dialog_content"
@@ -39,14 +29,34 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingBottom="8dp"
-        android:paddingTop="8dp" >
+        android:paddingStart="8dp">
 
         <!-- volume rows added and removed here! :-) -->
+        <LinearLayout
+                android:id="@+id/volume_row_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/volume_button_size"
+                android:orientation="vertical"/>
 
         <include layout="@layout/volume_zen_footer" />
 
         <!-- Only shown from Tuner setting -->
         <include layout="@layout/tuner_zen_mode_panel" />
     </LinearLayout>
+
+    <com.android.keyguard.AlphaOptimizedImageButton
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/volume_expand_button"
+            style="@style/VolumeButtons"
+            android:layout_width="@dimen/volume_button_size"
+            android:layout_height="@dimen/volume_button_size"
+            android:clickable="true"
+            android:soundEffectsEnabled="false"
+            android:src="@drawable/ic_volume_collapse_animation"
+            tools:ignore="RtlHardcoded"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"/>
 
 </RelativeLayout>
