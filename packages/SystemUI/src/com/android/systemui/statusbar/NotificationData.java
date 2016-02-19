@@ -34,6 +34,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * The list of currently displaying notifications.
@@ -118,10 +119,16 @@ public class NotificationData {
                 final RemoteViews newPublicNotification
                         = updatedNotificationBuilder.makePublicContentView();
 
+                boolean sameCustomView = Objects.equals(
+                        notification.getNotification().extras.getBoolean(
+                                Notification.EXTRA_CONTAINS_CUSTOM_VIEW),
+                        updatedNotification.extras.getBoolean(
+                                Notification.EXTRA_CONTAINS_CUSTOM_VIEW));
                 applyInPlace = compareRemoteViews(cachedContentView, newContentView)
                         && compareRemoteViews(cachedBigContentView, newBigContentView)
                         && compareRemoteViews(cachedHeadsUpContentView, newHeadsUpContentView)
-                        && compareRemoteViews(cachedPublicContentView, newPublicNotification);
+                        && compareRemoteViews(cachedPublicContentView, newPublicNotification)
+                        && sameCustomView;
                 cachedPublicContentView = newPublicNotification;
                 cachedHeadsUpContentView = newHeadsUpContentView;
                 cachedBigContentView = newBigContentView;
