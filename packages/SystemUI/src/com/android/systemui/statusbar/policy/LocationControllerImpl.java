@@ -52,7 +52,6 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private AppOpsManager mAppOpsManager;
     private StatusBarManager mStatusBarManager;
-    private final int mCurrentUser;
 
     private boolean mAreActiveLocationRequests;
 
@@ -74,7 +73,6 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mStatusBarManager
                 = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
-        mCurrentUser = ActivityManager.getCurrentUser();
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
@@ -105,6 +103,10 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      * @return true if attempt to change setting was successful.
      */
     public boolean setLocationEnabled(boolean enabled) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
+        }
         final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
@@ -113,7 +115,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
         return Settings.Secure
-                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, mCurrentUser);
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
     /**
@@ -131,10 +133,10 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     /**
      * Returns true if the current user is restricted from using location.
      */
-    public boolean isUserLocationRestricted() {
+    private boolean isUserLocationRestricted(int userId) {
         final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         return um.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION,
-                UserHandle.of(mCurrentUser));
+                UserHandle.of(userId));
     }
 
     /**
