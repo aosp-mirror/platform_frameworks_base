@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
@@ -453,5 +454,10 @@ public class InputConnectionWrapper implements InputConnection {
             return false;
         }
         return result;
+    }
+
+    public Handler getHandler() {
+        // Nothing should happen when called from input method.
+        return null;
     }
 }

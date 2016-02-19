@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
@@ -786,4 +787,15 @@ public interface InputConnection {
      * {@link InputMethodManager#updateCursorAnchorInfo(android.view.View, CursorAnchorInfo)}.
      */
     public boolean requestCursorUpdates(int cursorUpdateMode);
+
+    /**
+     * Called by the {@link InputMethodManager} to enable application developers to specify a
+     * dedicated {@link Handler} on which incoming IPC method calls from input methods will be
+     * dispatched.
+     *
+     * <p>Note: This does nothing when called from input methods.</p>
+     *
+     * @return {@code null} to use the default {@link Handler}.
+     */
+    public Handler getHandler();
 }
