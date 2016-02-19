@@ -85,6 +85,7 @@ public:
 
     void forceEndNow(AnimationContext& context);
     RenderNode* target() { return mTarget; }
+    RenderNode* stagingTarget() { return mStagingTarget; }
 
 protected:
     // PlayState is used by mStagingPlayState and mPlayState to track the state initiated from UI
@@ -123,8 +124,10 @@ protected:
 
     virtual void onStagingPlayStateChanged() {}
     virtual void onPlayTimeChanged(nsecs_t playTime) {}
+    virtual void onPushStaging() {}
 
     RenderNode* mTarget;
+    RenderNode* mStagingTarget;
 
     float mFinalValue;
     float mDeltaValue;
@@ -188,6 +191,7 @@ protected:
     virtual void setValue(RenderNode* target, float value) override;
     virtual void onAttached() override;
     virtual void onStagingPlayStateChanged() override;
+    virtual void onPushStaging() override;
 
 private:
     typedef bool (RenderProperties::*SetFloatProperty)(float value);
@@ -197,6 +201,8 @@ private:
     const PropertyAccessors* mPropertyAccess;
 
     static const PropertyAccessors PROPERTY_ACCESSOR_LUT[];
+    bool mShouldSyncPropertyFields = false;
+    bool mShouldUpdateStagingProperties = false;
 };
 
 class CanvasPropertyPrimitiveAnimator : public BaseRenderNodeAnimator {
