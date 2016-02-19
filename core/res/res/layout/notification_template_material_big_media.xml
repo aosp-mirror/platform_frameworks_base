@@ -19,41 +19,45 @@
 <com.android.internal.widget.MediaNotificationView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
-    android:layout_height="126dp"
+    android:layout_height="wrap_content"
     android:background="#00000000"
     android:tag="bigMediaNarrow"
     >
     <include layout="@layout/notification_template_header"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_alignParentStart="true"/>
+        android:layout_gravity="start"/>
     <LinearLayout
-        android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/notification_content_margin_top"
-        android:layout_marginStart="@dimen/notification_content_margin_start"
-        android:layout_marginBottom="@dimen/notification_content_margin_bottom"
-        android:layout_marginEnd="@dimen/notification_content_margin_end"
-        android:layout_toStartOf="@id/right_icon"
-        android:minHeight="@dimen/notification_min_content_height"
         android:orientation="vertical"
         >
-        <include layout="@layout/notification_template_part_line1" />
-        <include layout="@layout/notification_template_text" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/media_actions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:paddingStart="8dp"
-        android:paddingBottom="8dp"
-        android:orientation="horizontal"
-        android:layoutDirection="ltr"
-        >
-        <!-- media buttons will be added here -->
+        <LinearLayout
+            android:id="@+id/notification_main_column"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/notification_content_margin_top"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginBottom="@dimen/notification_content_margin_bottom"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:minHeight="@dimen/notification_min_content_height"
+            android:orientation="vertical"
+            >
+            <include layout="@layout/notification_template_part_line1" />
+            <include layout="@layout/notification_template_text" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/media_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-15dp"
+            android:paddingStart="8dp"
+            android:paddingBottom="8dp"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr"
+            >
+            <!-- media buttons will be added here -->
+        </LinearLayout>
     </LinearLayout>
 
     <ImageView android:id="@+id/right_icon"
@@ -61,9 +65,8 @@
         android:layout_height="@dimen/media_notification_expanded_image_max_size"
         android:minWidth="40dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="bottom|end"
         android:scaleType="centerCrop"
         />
 </com.android.internal.widget.MediaNotificationView>
