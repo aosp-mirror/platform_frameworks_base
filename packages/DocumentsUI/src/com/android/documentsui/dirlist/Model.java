@@ -35,6 +35,7 @@ import android.util.Log;
 
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.RootCursorWrapper;
+import com.android.documentsui.Shared;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
 
@@ -170,7 +171,7 @@ public class Model {
                     final String displayName = getCursorString(
                             mCursor, Document.COLUMN_DISPLAY_NAME);
                     if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-                        stringValues[pos] = DocumentInfo.DIR_PREFIX + displayName;
+                        stringValues[pos] = Shared.DIR_PREFIX + displayName;
                     } else {
                         stringValues[pos] = displayName;
                     }
@@ -227,7 +228,7 @@ public class Model {
 
                 final String lhs = pivotValue;
                 final String rhs = sortKey[mid];
-                final int compare = DocumentInfo.compareToIgnoreCaseNullable(lhs, rhs);
+                final int compare = Shared.compareToIgnoreCaseNullable(lhs, rhs);
 
                 if (compare < 0) {
                     right = mid;

@@ -28,6 +28,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.documentsui.DirectoryResult;
 import com.android.documentsui.RootCursorWrapper;
+import com.android.documentsui.Shared;
 import com.android.documentsui.State;
 import com.android.documentsui.dirlist.MultiSelectManager.Selection;
 import com.android.documentsui.model.DocumentInfo;
@@ -190,7 +191,7 @@ public class ModelTest extends AndroidTestCase {
 
         assertEquals(ITEM_COUNT, seen.cardinality());
         for (int i = 0; i < names.size()-1; ++i) {
-            assertTrue(DocumentInfo.compareToIgnoreCaseNullable(names.get(i), names.get(i+1)) <= 0);
+            assertTrue(Shared.compareToIgnoreCaseNullable(names.get(i), names.get(i+1)) <= 0);
         }
     }
 

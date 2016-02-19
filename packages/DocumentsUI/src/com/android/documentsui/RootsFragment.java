@@ -45,7 +45,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
 
 import java.util.ArrayList;
@@ -403,17 +402,7 @@ public class RootsFragment extends Fragment {
     public static class RootComparator implements Comparator<RootItem> {
         @Override
         public int compare(RootItem lhs, RootItem rhs) {
-            // Sort by root type, then title, then summary.
-            int score = lhs.root.derivedType - rhs.root.derivedType;
-            if (score != 0) {
-                return score;
-            }
-            score = DocumentInfo.compareToIgnoreCaseNullable(lhs.root.title, rhs.root.title);
-            if (score != 0) {
-                return score;
-            }
-
-            return DocumentInfo.compareToIgnoreCaseNullable(lhs.root.summary, rhs.root.summary);
+            return lhs.root.compareTo(rhs.root);
         }
     }
 }

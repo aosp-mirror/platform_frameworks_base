@@ -16,10 +16,12 @@
 
 package com.android.documentsui.model;
 
+import static com.android.documentsui.Shared.compareToIgnoreCaseNullable;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -36,17 +38,31 @@ import com.android.documentsui.R;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.ProtocolException;
 import java.util.Objects;
 
 /**
  * Representation of a {@link Root}.
  */
-public class RootInfo implements Durable, Parcelable {
+public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_DROP_TYPE = 2;
 
     // The values of these constants determine the sort order of various roots in the RootsFragment.
+    @IntDef(flag = true, value = {
+            TYPE_IMAGES,
+            TYPE_VIDEO,
+            TYPE_AUDIO,
+            TYPE_RECENTS,
+            TYPE_DOWNLOADS,
+            TYPE_LOCAL,
+            TYPE_MTP,
+            TYPE_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RootType {}
     public static final int TYPE_IMAGES = 1;
     public static final int TYPE_VIDEO = 2;
     public static final int TYPE_AUDIO = 3;
@@ -69,7 +85,7 @@ public class RootInfo implements Durable, Parcelable {
     /** Derived fields that aren't persisted */
     public String[] derivedMimeTypes;
     public int derivedIcon;
-    public int derivedType;
+    public @RootType int derivedType;
 
     public RootInfo() {
         reset();
@@ -326,6 +342,22 @@ public class RootInfo implements Durable, Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(authority, rootId);
+    }
+
+    @Override
+    public int compareTo(RootInfo other) {
+        // Sort by root type, then title, then summary.
+        int score = derivedType - other.derivedType;
+        if (score != 0) {
+            return score;
+        }
+
+        score = compareToIgnoreCaseNullable(title, other.title);
+        if (score != 0) {
+            return score;
+        }
+
+        return compareToIgnoreCaseNullable(summary, other.summary);
     }
 
     @Override
