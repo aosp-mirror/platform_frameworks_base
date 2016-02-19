@@ -159,7 +159,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 reloadWidgetsMaskedStateForUser(userId);
             } else if (Intent.ACTION_MANAGED_PROFILE_AVAILABILITY_CHANGED.equals(action)) {
                 synchronized (mLock) {
-                    reloadWidgetQuietModeMaskedStateLocked(userId);
+                    reloadWidgetProfileUnavailableMaskedStateLocked(userId);
                 }
             } else if (Intent.ACTION_PACKAGES_SUSPENDED.equals(action)) {
                 String[] packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
@@ -432,7 +432,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     /**
      * Reload all widgets' masked state for the given user and its associated profiles, including
-     * due to quiet mode and package suspension.
+     * due to user not being available and package suspension.
      */
     private void reloadWidgetsMaskedStateForUser(int userId) {
         if (!mUserManager.isUserUnlocked(userId)) return;
@@ -442,7 +442,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (profiles != null) {
                 for (int i = 0; i < profiles.size(); i++) {
                     UserInfo user  = profiles.get(i);
-                    reloadWidgetQuietModeMaskedStateLocked(user.id);
+                    reloadWidgetProfileUnavailableMaskedStateLocked(user.id);
                     reloadWidgetPackageSuspensionMaskedStateLocked(user.id);
                 }
             }
@@ -450,17 +450,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     /**
-     * Mask/unmask widgets in the given profile, depending on the quiet state of the profile.
+     * Mask/unmask widgets in the given profile, depending on the quiet state
+     * or locked state of the profile.
      */
-    private void reloadWidgetQuietModeMaskedStateLocked(int profileId) {
-        if (!mUserManager.isUserUnlocked(profileId)) return;
+    private void reloadWidgetProfileUnavailableMaskedStateLocked(int profileId) {
         final long identity = Binder.clearCallingIdentity();
         try {
-            UserInfo user  = mUserManager.getUserInfo(profileId);
-            if (!user.isManagedProfile()) {
+            if (!isProfileWithUnlockedParent(profileId)) {
                 return;
             }
-            boolean shouldMask = user.isQuietModeEnabled();
+            UserInfo user  = mUserManager.getUserInfo(profileId);
+            boolean shouldMask = user.isQuietModeEnabled() ||
+                    !mUserManager.isUserUnlocked(user.getUserHandle());
             final int N = mProviders.size();
             for (int i = 0; i < N; i++) {
                 Provider provider = mProviders.get(i);
@@ -468,7 +469,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (providerUserId != profileId) {
                     continue;
                 }
-                if (provider.setMaskedByQuietProfileLocked(shouldMask)) {
+                if (provider.setMaskedByProfileUnavailabledLocked(shouldMask)) {
                     if (provider.isMaskedLocked()) {
                         maskWidgetsViewsLocked(provider);
                     } else {
@@ -537,8 +538,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private void maskWidgetsViewsLocked(Provider provider) {
-        Bitmap iconBitmap = null;
+    private Bitmap createMaskedWidgetBitmap(Provider provider) {
+        final long identity = Binder.clearCallingIdentity();
         try {
             // Load the unbadged application icon and pass it to the widget to appear on
             // the masked view.
@@ -548,11 +549,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             PackageManager pm = userContext.getPackageManager();
             Drawable icon = pm.getApplicationInfo(providerPackage, 0).loadUnbadgedIcon(pm);
             // Create a bitmap of the icon which is what the widget's remoteview requires.
-            iconBitmap = mIconUtilities.createIconBitmap(icon);
+            return mIconUtilities.createIconBitmap(icon);
         } catch (NameNotFoundException e) {
             Slog.e(TAG, "Fail to get application icon", e);
             // Provider package removed, no need to mask its views as its state will be
             // purged very soon.
+            return null;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void maskWidgetsViewsLocked(Provider provider) {
+        Bitmap iconBitmap = createMaskedWidgetBitmap(provider);
+        if (iconBitmap == null) {
             return;
         }
 
@@ -2320,7 +2330,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final PackageManager pm = mContext.getPackageManager();
                 final int userId = UserHandle.getUserId(providerId.uid);
                 final ApplicationInfo app = pm.getApplicationInfoAsUser(activityInfo.packageName,
-                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
+                        0, userId);
                 resources = pm.getResourcesForApplication(app);
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2423,8 +2433,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             int flags = PackageManager.GET_META_DATA;
 
             // We really need packages to be around and parsed to know if they
-            // provide widgets, and we only load widgets after user is unlocked.
+            // provide widgets.
             flags |= PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+
+            // Widget hosts that are non-crypto aware may be hosting widgets
+            // from a profile that is still locked, so let them see those
+            // widgets.
+            if (isProfileWithUnlockedParent(userId)) {
+                flags |= PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+            }
 
             // Widgets referencing shared libraries need to have their
             // dependencies loaded.
@@ -2443,6 +2460,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void onUserUnlocked(int userId) {
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
+            reloadWidgetsMaskedStateForUser(userId);
 
             final int N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -2580,6 +2598,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             mWidgetPackages.put(userId, packages = new ArraySet<String>());
         }
         packages.add(widget.provider.info.provider.getPackageName());
+
+        // If we are adding a widget it might be for a provider that
+        // is currently masked, if so mask the widget.
+        if (widget.provider.isMaskedLocked()) {
+            Bitmap bitmap = createMaskedWidgetBitmap(widget.provider);
+            if (bitmap != null) {
+                widget.replaceWithMaskedViewsLocked(mContext, bitmap);
+            }
+        } else {
+            widget.clearMaskedViewsLocked();
+        }
     }
 
     /**
@@ -3277,6 +3306,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    private boolean isProfileWithUnlockedParent(int userId) {
+        UserInfo userInfo = mUserManager.getUserInfo(userId);
+        if (userInfo != null && userInfo.isManagedProfile()) {
+            UserInfo parentInfo = mUserManager.getProfileParent(userId);
+            if (parentInfo != null
+                    && mUserManager.isUserUnlocked(parentInfo.getUserHandle())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private final class CallbackHandler extends Handler {
         public static final int MSG_NOTIFY_UPDATE_APP_WIDGET = 1;
         public static final int MSG_NOTIFY_PROVIDER_CHANGED = 2;
@@ -3554,7 +3595,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         PendingIntent broadcast;
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
-        boolean maskedByQuietProfile;
+        boolean maskedByProfileUnavailable;
         boolean maskedBySuspendedPackage;
 
         int tag = TAG_UNDEFINED; // for use while saving state (the index)
@@ -3587,9 +3628,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         // returns true if the provider's masked state is changed as a result
-        public boolean setMaskedByQuietProfileLocked(boolean masked) {
+        public boolean setMaskedByProfileUnavailabledLocked(boolean masked) {
             boolean oldMaskedState = isMaskedLocked();
-            maskedByQuietProfile = masked;
+            maskedByProfileUnavailable = masked;
             return isMaskedLocked() != oldMaskedState;
         }
 
@@ -3601,7 +3642,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         public boolean isMaskedLocked() {
-            return maskedByQuietProfile || maskedBySuspendedPackage;
+            return maskedByProfileUnavailable || maskedBySuspendedPackage;
         }
     }
 
