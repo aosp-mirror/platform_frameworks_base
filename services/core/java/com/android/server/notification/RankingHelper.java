@@ -20,13 +20,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.UserHandle;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
-
-import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -36,8 +33,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 public class RankingHelper implements RankingConfig {
     private static final String TAG = "RankingHelper";
@@ -47,7 +42,6 @@ public class RankingHelper implements RankingConfig {
     private static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
     private static final String ATT_VERSION = "version";
-    private static final String TAG_TOPIC = "topic";
 
     private static final String ATT_NAME = "name";
     private static final String ATT_UID = "uid";
@@ -141,8 +135,6 @@ public class RankingHelper implements RankingConfig {
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_PACKAGE.equals(tag)) {
                     int uid = safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
-                    int priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                    int vis = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
                     String name = parser.getAttributeValue(null, ATT_NAME);
 
                     if (!TextUtils.isEmpty(name)) {
@@ -165,57 +157,13 @@ public class RankingHelper implements RankingConfig {
                             r = getOrCreateRecord(name, uid);
                         }
                         r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                        r.priority = priority;
-                        r.visibility = vis;
-
-                        // Migrate package level settings to the default topic.
-                        // Might be overwritten by parseTopics.
-                        Topic defaultTopic = r.topics.get(Notification.TOPIC_DEFAULT);
-                        defaultTopic.priority = priority;
-                        defaultTopic.visibility = vis;
-
-                        parseTopics(r, parser);
+                        r.priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
+                        r.visibility = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
                     }
                 }
             }
         }
         throw new IllegalStateException("Failed to reach END_DOCUMENT");
-    }
-
-    public void parseTopics(Record r, XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        final int innerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (TAG_TOPIC.equals(tagName)) {
-                int priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                int vis = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
-                int importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                String id = parser.getAttributeValue(null, ATT_TOPIC_ID);
-                CharSequence label = parser.getAttributeValue(null, ATT_TOPIC_LABEL);
-
-                if (!TextUtils.isEmpty(id)) {
-                    Topic topic = new Topic(new Notification.Topic(id, label));
-
-                    if (priority != DEFAULT_PRIORITY) {
-                        topic.priority = priority;
-                    }
-                    if (vis != DEFAULT_VISIBILITY) {
-                        topic.visibility = vis;
-                    }
-                    if (importance != DEFAULT_IMPORTANCE) {
-                        topic.importance = importance;
-                    }
-                    r.topics.put(id, topic);
-                }
-            }
-        }
     }
 
     private static String recordKey(String pkg, int uid) {
@@ -229,7 +177,6 @@ public class RankingHelper implements RankingConfig {
             r = new Record();
             r.pkg = pkg;
             r.uid = uid;
-            r.topics.put(Notification.TOPIC_DEFAULT, new Topic(createDefaultTopic()));
             mRecords.put(key, r);
         }
         return r;
@@ -246,44 +193,29 @@ public class RankingHelper implements RankingConfig {
             if (forBackup && UserHandle.getUserId(r.uid) != UserHandle.USER_SYSTEM) {
                 continue;
             }
-            out.startTag(null, TAG_PACKAGE);
-            out.attribute(null, ATT_NAME, r.pkg);
-            if (r.importance != DEFAULT_IMPORTANCE) {
-                out.attribute(null, ATT_IMPORTANCE, Integer.toString(r.importance));
-            }
-            if (r.priority != DEFAULT_PRIORITY) {
-                out.attribute(null, ATT_PRIORITY, Integer.toString(r.priority));
-            }
-            if (r.visibility != DEFAULT_VISIBILITY) {
-                out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
-            }
+            final boolean hasNonDefaultSettings = r.importance != DEFAULT_IMPORTANCE
+                    || r.priority != DEFAULT_PRIORITY || r.visibility != DEFAULT_VISIBILITY;
+            if (hasNonDefaultSettings) {
+                out.startTag(null, TAG_PACKAGE);
+                out.attribute(null, ATT_NAME, r.pkg);
+                if (r.importance != DEFAULT_IMPORTANCE) {
+                    out.attribute(null, ATT_IMPORTANCE, Integer.toString(r.importance));
+                }
+                if (r.priority != DEFAULT_PRIORITY) {
+                    out.attribute(null, ATT_PRIORITY, Integer.toString(r.priority));
+                }
+                if (r.visibility != DEFAULT_VISIBILITY) {
+                    out.attribute(null, ATT_VISIBILITY, Integer.toString(r.visibility));
+                }
 
-            if (!forBackup) {
-                out.attribute(null, ATT_UID, Integer.toString(r.uid));
-            }
+                if (!forBackup) {
+                    out.attribute(null, ATT_UID, Integer.toString(r.uid));
+                }
 
-            writeTopicsXml(out, r);
-            out.endTag(null, TAG_PACKAGE);
+                out.endTag(null, TAG_PACKAGE);
+            }
         }
         out.endTag(null, TAG_RANKING);
-    }
-
-    public void writeTopicsXml(XmlSerializer out, Record r) throws IOException {
-        for (Topic t : r.topics.values()) {
-            out.startTag(null, TAG_TOPIC);
-            out.attribute(null, ATT_TOPIC_ID, t.topic.getId());
-            out.attribute(null, ATT_TOPIC_LABEL, t.topic.getLabel().toString());
-            if (t.priority != DEFAULT_PRIORITY) {
-                out.attribute(null, ATT_PRIORITY, Integer.toString(t.priority));
-            }
-            if (t.visibility != DEFAULT_VISIBILITY) {
-                out.attribute(null, ATT_VISIBILITY, Integer.toString(t.visibility));
-            }
-            if (t.importance != DEFAULT_IMPORTANCE) {
-                out.attribute(null, ATT_IMPORTANCE, Integer.toString(t.importance));
-            }
-            out.endTag(null, TAG_TOPIC);
-        }
     }
 
     private void updateConfig() {
@@ -370,187 +302,60 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
-    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return tryParseBool(val, defValue);
-    }
-
     private static boolean tryParseBool(String value, boolean defValue) {
         if (TextUtils.isEmpty(value)) return defValue;
         return Boolean.valueOf(value);
     }
 
+    /**
+     * Gets priority.
+     */
     @Override
-    public List<Notification.Topic> getTopics(String packageName, int uid) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        List<Notification.Topic> topics = new ArrayList<>();
-        for (Topic t : r.topics.values()) {
-            topics.add(t.topic);
-        }
-        return topics;
-    }
-
-    @Override
-    public boolean hasBannedTopics(String packageName, int uid) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        for (Topic t : r.topics.values()) {
-            if (t.importance == Ranking.IMPORTANCE_NONE) {
-                return true;
-            }
-        }
-        return false;
+    public int getPriority(String packageName, int uid) {
+        return getOrCreateRecord(packageName, uid).priority;
     }
 
     /**
-     * Gets priority. If a topic is given, returns the priority of that topic. Otherwise, the
-     * priority of the app.
+     * Sets priority.
      */
     @Override
-    public int getPriority(String packageName, int uid, Notification.Topic topic) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        if (topic == null) {
-            return r.priority;
-        }
-        return getOrCreateTopic(r, topic).priority;
-    }
-
-    /**
-     * Sets priority. If a topic is given, sets the priority of that topic. If not,
-     * sets the default priority for all new topics that appear in the future, and resets
-     * the priority of all current topics.
-     */
-    @Override
-    public void setPriority(String packageName, int uid, Notification.Topic topic,
-            int priority) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        if (topic == null) {
-            r.priority = priority;
-            for (Topic t : r.topics.values()) {
-                t.priority = priority;
-            }
-        } else {
-            getOrCreateTopic(r, topic).priority = priority;
-        }
+    public void setPriority(String packageName, int uid, int priority) {
+        getOrCreateRecord(packageName, uid).priority = priority;
         updateConfig();
     }
 
     /**
-     * Gets visual override. If a topic is given, returns the override of that topic. Otherwise, the
-     * override of the app.
+     * Gets visual override.
      */
     @Override
-    public int getVisibilityOverride(String packageName, int uid, Notification.Topic topic) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        if (topic == null) {
-            return r.visibility;
-        }
-        return getOrCreateTopic(r, topic).visibility;
+    public int getVisibilityOverride(String packageName, int uid) {
+        return getOrCreateRecord(packageName, uid).visibility;
     }
 
     /**
-     * Sets visibility override. If a topic is given, sets the override of that topic. If not,
-     * sets the default override for all new topics that appear in the future, and resets
-     * the override of all current topics.
+     * Sets visibility override.
      */
     @Override
-    public void setVisibilityOverride(String pkgName, int uid, Notification.Topic topic,
-        int visibility) {
-        final Record r = getOrCreateRecord(pkgName, uid);
-        if (topic == null) {
-            r.visibility = visibility;
-            for (Topic t : r.topics.values()) {
-                t.visibility = visibility;
-            }
-        } else {
-            getOrCreateTopic(r, topic).visibility = visibility;
-        }
+    public void setVisibilityOverride(String pkgName, int uid, int visibility) {
+        getOrCreateRecord(pkgName, uid).visibility = visibility;
         updateConfig();
     }
 
     /**
-     * Gets the importance of a topic. Unlike {@link #getImportance(String, int, String)}, does not
-     * create package or topic records if they don't exist.
+     * Gets importance.
      */
     @Override
-    public int getImportance(String packageName, int uid, String topicId) {
-        final String key = recordKey(packageName, uid);
-        Record r = mRecords.get(key);
-        if (r == null) {
-            return Ranking.IMPORTANCE_UNSPECIFIED;
-        }
-        Topic t = r.topics.get(topicId);
-        if (t == null) {
-            return Ranking.IMPORTANCE_UNSPECIFIED;
-        }
-        return t.importance;
+    public int getImportance(String packageName, int uid) {
+        return getOrCreateRecord(packageName, uid).importance;
     }
 
     /**
-     * Gets importance. If a topic is given, returns the importance of that topic. Otherwise, the
-     * importance of the app.
+     * Sets importance.
      */
     @Override
-    public int getImportance(String packageName, int uid, Notification.Topic topic) {
-        final Record r = getOrCreateRecord(packageName, uid);
-        if (topic == null) {
-            return r.importance;
-        }
-        return getOrCreateTopic(r, topic).importance;
-    }
-
-    /**
-     * Sets importance. If a topic is given, sets the importance of that topic. If not, sets the
-     * default importance for all new topics that appear in the future, and resets
-     * the importance of all current topics (unless the app is being blocked).
-     */
-    @Override
-    public void setImportance(String pkgName, int uid, Notification.Topic topic,
-            int importance) {
-        final Record r = getOrCreateRecord(pkgName, uid);
-        if (topic == null) {
-            r.importance = importance;
-            if (Ranking.IMPORTANCE_NONE != importance) {
-                for (Topic t : r.topics.values()) {
-                    t.importance = importance;
-                }
-            }
-        } else {
-            getOrCreateTopic(r, topic).importance = importance;
-        }
+    public void setImportance(String pkgName, int uid, int importance) {
+        getOrCreateRecord(pkgName, uid).importance = importance;
         updateConfig();
-    }
-
-    @Override
-    public boolean doesUserUseTopics(String pkgName, int uid) {
-        final Record r = getOrCreateRecord(pkgName, uid);
-        for (Topic topic : r.topics.values()) {
-            if (topic.importance != Ranking.IMPORTANCE_UNSPECIFIED
-                    && r.importance != topic.importance)
-                return true;
-        }
-        return false;
-    }
-
-    private Topic getOrCreateTopic(Record r, Notification.Topic topic) {
-        if (topic == null) {
-            topic = createDefaultTopic();
-        }
-        Topic t = r.topics.get(topic.getId());
-        if (t != null) {
-            return t;
-        } else {
-            t = new Topic(topic);
-            t.importance = r.importance;
-            t.priority = r.priority;
-            t.visibility = r.visibility;
-            r.topics.put(topic.getId(), t);
-            return t;
-        }
-    }
-
-    private Notification.Topic createDefaultTopic() {
-        return new Notification.Topic(Notification.TOPIC_DEFAULT,
-                mContext.getString(R.string.default_notification_topic_label));
     }
 
     public void dump(PrintWriter pw, String prefix, NotificationManagerService.DumpFilter filter) {
@@ -600,25 +405,6 @@ public class RankingHelper implements RankingConfig {
                     pw.print(Ranking.importanceToString(r.visibility));
                 }
                 pw.println();
-                for (Topic t : r.topics.values()) {
-                    pw.print(prefix);
-                    pw.print("  ");
-                    pw.print("  ");
-                    pw.print(t.topic.getId());
-                    if (t.priority != DEFAULT_PRIORITY) {
-                        pw.print(" priority=");
-                        pw.print(Notification.priorityToString(t.priority));
-                    }
-                    if (t.visibility != DEFAULT_VISIBILITY) {
-                        pw.print(" visibility=");
-                        pw.print(Notification.visibilityToString(t.visibility));
-                    }
-                    if (t.importance != DEFAULT_IMPORTANCE) {
-                        pw.print(" importance=");
-                        pw.print(Ranking.importanceToString(t.importance));
-                    }
-                    pw.println();
-                }
             }
         }
     }
@@ -657,17 +443,5 @@ public class RankingHelper implements RankingConfig {
         int importance = DEFAULT_IMPORTANCE;
         int priority = DEFAULT_PRIORITY;
         int visibility = DEFAULT_VISIBILITY;
-        Map<String, Topic> topics = new ArrayMap<>();
    }
-
-    private static class Topic {
-        Notification.Topic topic;
-        int priority = DEFAULT_PRIORITY;
-        int visibility = DEFAULT_VISIBILITY;
-        int importance = DEFAULT_IMPORTANCE;
-
-        public Topic(Notification.Topic topic) {
-            this.topic = topic;
-        }
-    }
 }

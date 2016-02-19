@@ -1,5 +1,5 @@
-/*
-* Copyright (C) 2014 The Android Open Source Project
+/**
+* Copyright (C) 2015 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import android.content.Context;
 import android.util.Slog;
 
 /**
- * Determines if the given notification can display sensitive content on the lockscreen.
+ * Determines the importance of the given notification.
  */
-public class TopicVisibilityExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "TopicVisibilityExtractor";
+public class ImportanceExtractor implements NotificationSignalExtractor {
+    private static final String TAG = "ImportantTopicExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
@@ -42,10 +42,8 @@ public class TopicVisibilityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int packageVisibility = mConfig.getVisibilityOverride(
-                record.sbn.getPackageName(), record.sbn.getUid(),
-                record.sbn.getNotification().getTopic());
-        record.setPackageVisibilityOverride(packageVisibility);
+        record.setUserImportance(
+                mConfig.getImportance(record.sbn.getPackageName(), record.sbn.getUid()));
 
         return null;
     }

@@ -19,10 +19,10 @@ import android.content.Context;
 import android.util.Slog;
 
 /**
- * Determines if the given notification can bypass Do Not Disturb.
+ * Determines if the given notification can display sensitive content on the lockscreen.
  */
-public class TopicPriorityExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "ImportantTopicExtractor";
+public class VisibilityExtractor implements NotificationSignalExtractor {
+    private static final String TAG = "VisibilityExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
@@ -42,9 +42,8 @@ public class TopicPriorityExtractor implements NotificationSignalExtractor {
             return null;
         }
 
-        final int packagePriority = mConfig.getPriority(record.sbn.getPackageName(),
-                record.sbn.getUid(), record.sbn.getNotification().getTopic());
-        record.setPackagePriority(packagePriority);
+        record.setPackageVisibilityOverride(
+                mConfig.getVisibilityOverride(record.sbn.getPackageName(), record.sbn.getUid()));
 
         return null;
     }
