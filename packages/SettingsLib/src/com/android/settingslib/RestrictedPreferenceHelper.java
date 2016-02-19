@@ -70,6 +70,12 @@ public class RestrictedPreferenceHelper {
                 }
             }
             mAttrUserRestriction = data == null ? null : data.toString();
+            // If the system has set the user restriction, then we shouldn't add the padlock.
+            if (RestrictedLockUtils.hasBaseUserRestriction(mContext, mAttrUserRestriction,
+                    UserHandle.myUserId())) {
+                mAttrUserRestriction = null;
+                return;
+            }
 
             final TypedValue useAdminDisabledSummary =
                     attributes.peekValue(R.styleable.RestrictedPreference_useAdminDisabledSummary);

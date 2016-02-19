@@ -113,6 +113,12 @@ public class RestrictedLockUtils {
         return admin;
     }
 
+    public static boolean hasBaseUserRestriction(Context context,
+            String userRestriction, int userId) {
+        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        return um.hasBaseUserRestriction(userRestriction, UserHandle.of(userId));
+    }
+
     /**
      * Checks if keyguard features are disabled by policy.
      *
