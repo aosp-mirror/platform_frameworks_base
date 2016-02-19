@@ -3875,7 +3875,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // challenge only and keep the screen on. However there is no easy way of doing that at the
         // moment so we set the screen off timeout regardless of whether it affects the parent user
         // or the profile challenge only.
-        long timeMs = Integer.MAX_VALUE;
+        long timeMs = Long.MAX_VALUE;
         List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
         for (UserInfo userInfo : profiles) {
             DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
@@ -3899,15 +3899,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
-            if (policy.mLastMaximumTimeToLock != Integer.MAX_VALUE) {
+            if (policy.mLastMaximumTimeToLock != Long.MAX_VALUE) {
                 // Make sure KEEP_SCREEN_ON is disabled, since that
                 // would allow bypassing of the maximum time to lock.
                 mInjector.settingsGlobalPutInt(Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
             }
 
-            // TODO It can overflow.  Cap it.
-            mInjector.getPowerManagerInternal()
-                    .setMaximumScreenOffTimeoutFromDeviceAdmin((int)policy.mLastMaximumTimeToLock);
+            mInjector.getPowerManagerInternal().setMaximumScreenOffTimeoutFromDeviceAdmin(
+                    (int) Math.min(policy.mLastMaximumTimeToLock, Integer.MAX_VALUE));
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
