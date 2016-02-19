@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.security.Credentials;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -116,10 +117,30 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String CA_CERT_ALIAS_DELIMITER = " ";
 
 
+    // Fields to copy verbatim from wpa_supplicant.
+    private static final String[] SUPPLICANT_CONFIG_KEYS = new String[] {
+            IDENTITY_KEY,
+            ANON_IDENTITY_KEY,
+            PASSWORD_KEY,
+            CLIENT_CERT_KEY,
+            CA_CERT_KEY,
+            SUBJECT_MATCH_KEY,
+            ENGINE_KEY,
+            ENGINE_ID_KEY,
+            PRIVATE_KEY_ID_KEY,
+            ALTSUBJECT_MATCH_KEY,
+            DOM_SUFFIX_MATCH_KEY,
+            CA_PATH_KEY
+    };
+
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate[] mCaCerts;
     private PrivateKey mClientPrivateKey;
     private X509Certificate mClientCertificate;
+    private int mEapMethod = Eap.NONE;
+    private int mPhase2Method = Phase2.NONE;
+
+    private static final String TAG = "WifiEnterpriseConfig";
 
     public WifiEnterpriseConfig() {
         // Do not set defaults so that the enterprise fields that are not changed
@@ -134,6 +155,8 @@ public class WifiEnterpriseConfig implements Parcelable {
         for (String key : source.mFields.keySet()) {
             mFields.put(key, source.mFields.get(key));
         }
+        mEapMethod = source.mEapMethod;
+        mPhase2Method = source.mPhase2Method;
     }
 
     @Override
@@ -149,6 +172,8 @@ public class WifiEnterpriseConfig implements Parcelable {
             dest.writeString(entry.getValue());
         }
 
+        dest.writeInt(mEapMethod);
+        dest.writeInt(mPhase2Method);
         writeCertificates(dest, mCaCerts);
 
         if (mClientPrivateKey != null) {
@@ -200,6 +225,8 @@ public class WifiEnterpriseConfig implements Parcelable {
                         enterpriseConfig.mFields.put(key, value);
                     }
 
+                    enterpriseConfig.mEapMethod = in.readInt();
+                    enterpriseConfig.mPhase2Method = in.readInt();
                     enterpriseConfig.mCaCerts = readCertificates(in);
 
                     PrivateKey userKey = null;
@@ -296,7 +323,8 @@ public class WifiEnterpriseConfig implements Parcelable {
         public static final int MSCHAPV2    = 3;
         /** Generic Token Card */
         public static final int GTC         = 4;
-        private static final String PREFIX = "auth=";
+        private static final String AUTH_PREFIX = "auth=";
+        private static final String AUTHEAP_PREFIX = "autheap=";
         /** @hide */
         public static final String[] strings = {EMPTY_VALUE, "PAP", "MSCHAP",
                 "MSCHAPV2", "GTC" };
@@ -305,11 +333,98 @@ public class WifiEnterpriseConfig implements Parcelable {
         private Phase2() {}
     }
 
-    /** Internal use only
+    // Loader and saver interfaces for exchanging data with wpa_supplicant.
+    // TODO: Decouple this object (which is just a placeholder of the configuration)
+    // from the implementation that knows what wpa_supplicant wants.
+    /**
+     * Interface used for retrieving supplicant configuration from WifiEnterpriseConfig
      * @hide
      */
-    public HashMap<String, String> getFields() {
-        return mFields;
+    public interface SupplicantSaver {
+        /**
+         * Set a value within wpa_supplicant configuration
+         * @param key index to set within wpa_supplciant
+         * @param value the value for the key
+         * @return true if successful; false otherwise
+         */
+        boolean saveValue(String key, String value);
+    }
+
+    /**
+     * Interface used for populating a WifiEnterpriseConfig from supplicant configuration
+     * @hide
+     */
+    public interface SupplicantLoader {
+        /**
+         * Returns a value within wpa_supplicant configuration
+         * @param key index to set within wpa_supplciant
+         * @return string value if successful; null otherwise
+         */
+        String loadValue(String key);
+    }
+
+    /**
+     * Internal use only; supply field values to wpa_supplicant config.  The configuration
+     * process aborts on the first failed call on {@code saver}.
+     * @param saver proxy for setting configuration in wpa_supplciant
+     * @return whether the save succeeded on all attempts
+     * @hide
+     */
+    public boolean saveToSupplicant(SupplicantSaver saver) {
+        if (!isEapMethodValid()) {
+            return false;
+        }
+
+        for (String key : mFields.keySet()) {
+            if (!saver.saveValue(key, mFields.get(key))) {
+                return false;
+            }
+        }
+
+        if (!saver.saveValue(EAP_KEY, Eap.strings[mEapMethod])) {
+            return false;
+        }
+
+        if (mEapMethod != Eap.TLS && mPhase2Method != Phase2.NONE) {
+            boolean is_autheap = mEapMethod == Eap.TTLS && mPhase2Method == Phase2.GTC;
+            String prefix = is_autheap ? Phase2.AUTHEAP_PREFIX : Phase2.AUTH_PREFIX;
+            String value = convertToQuotedString(prefix + Phase2.strings[mPhase2Method]);
+            return saver.saveValue(PHASE2_KEY, value);
+        } else if (mPhase2Method == Phase2.NONE) {
+            // By default, send a null phase 2 to clear old configuration values.
+            return saver.saveValue(PHASE2_KEY, null);
+        } else {
+            Log.e(TAG, "WiFi enterprise configuration is invalid as it supplies a "
+                    + "phase 2 method but the phase1 method does not support it.");
+            return false;
+        }
+    }
+
+    /**
+     * Internal use only; retrieve configuration from wpa_supplicant config.
+     * @param loader proxy for retrieving configuration keys from wpa_supplicant
+     * @hide
+     */
+    public void loadFromSupplicant(SupplicantLoader loader) {
+        for (String key : SUPPLICANT_CONFIG_KEYS) {
+            String value = loader.loadValue(key);
+            if (value == null) {
+                mFields.put(key, EMPTY_VALUE);
+            } else {
+                mFields.put(key, value);
+            }
+        }
+        String eapMethod  = loader.loadValue(EAP_KEY);
+        mEapMethod = getStringIndex(Eap.strings, eapMethod, Eap.NONE);
+
+        String phase2Method = removeDoubleQuotes(loader.loadValue(PHASE2_KEY));
+        // Remove "auth=" or "autheap=" prefix.
+        if (phase2Method.startsWith(Phase2.AUTH_PREFIX)) {
+            phase2Method = phase2Method.substring(Phase2.AUTH_PREFIX.length());
+        } else if (phase2Method.startsWith(Phase2.AUTHEAP_PREFIX)) {
+            phase2Method = phase2Method.substring(Phase2.AUTHEAP_PREFIX.length());
+        }
+        mPhase2Method = getStringIndex(Phase2.strings, phase2Method, Phase2.NONE);
     }
 
     /**
@@ -330,7 +445,7 @@ public class WifiEnterpriseConfig implements Parcelable {
             case Eap.SIM:
             case Eap.AKA:
             case Eap.AKA_PRIME:
-                mFields.put(EAP_KEY, Eap.strings[eapMethod]);
+                mEapMethod = eapMethod;
                 mFields.put(OPP_KEY_CACHING, "1");
                 break;
             default:
@@ -343,8 +458,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return eap method configured
      */
     public int getEapMethod() {
-        String eapMethod  = mFields.get(EAP_KEY);
-        return getStringIndex(Eap.strings, eapMethod, Eap.NONE);
+        return mEapMethod;
     }
 
     /**
@@ -359,15 +473,11 @@ public class WifiEnterpriseConfig implements Parcelable {
     public void setPhase2Method(int phase2Method) {
         switch (phase2Method) {
             case Phase2.NONE:
-                mFields.put(PHASE2_KEY, EMPTY_VALUE);
-                break;
-            /** Valid methods */
             case Phase2.PAP:
             case Phase2.MSCHAP:
             case Phase2.MSCHAPV2:
             case Phase2.GTC:
-                mFields.put(PHASE2_KEY, convertToQuotedString(
-                        Phase2.PREFIX + Phase2.strings[phase2Method]));
+                mPhase2Method = phase2Method;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Phase 2 method");
@@ -379,12 +489,7 @@ public class WifiEnterpriseConfig implements Parcelable {
      * @return a phase 2 method defined at {@link Phase2}
      * */
     public int getPhase2Method() {
-        String phase2Method = removeDoubleQuotes(mFields.get(PHASE2_KEY));
-        // Remove auth= prefix
-        if (phase2Method.startsWith(Phase2.PREFIX)) {
-            phase2Method = phase2Method.substring(Phase2.PREFIX.length());
-        }
-        return getStringIndex(Phase2.strings, phase2Method, Phase2.NONE);
+        return mPhase2Method;
     }
 
     /**
@@ -412,7 +517,8 @@ public class WifiEnterpriseConfig implements Parcelable {
         setFieldValue(ANON_IDENTITY_KEY, anonymousIdentity, "");
     }
 
-    /** Get the anonymous identity
+    /**
+     * Get the anonymous identity
      * @return anonymous identity
      */
     public String getAnonymousIdentity() {
@@ -839,18 +945,15 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /** See {@link WifiConfiguration#getKeyIdForCredentials} @hide */
-    String getKeyId(WifiEnterpriseConfig current) {
-        String eap = mFields.get(EAP_KEY);
-        String phase2 = mFields.get(PHASE2_KEY);
-
-        // If either eap or phase2 are not initialized, use current config details
-        if (TextUtils.isEmpty((eap))) {
-            eap = current.mFields.get(EAP_KEY);
+    public String getKeyId(WifiEnterpriseConfig current) {
+        // If EAP method is not initialized, use current config details
+        if (mEapMethod == Eap.NONE) {
+            return (current != null) ? current.getKeyId(null) : EMPTY_VALUE;
         }
-        if (TextUtils.isEmpty(phase2)) {
-            phase2 = current.mFields.get(PHASE2_KEY);
+        if (!isEapMethodValid()) {
+            return EMPTY_VALUE;
         }
-        return eap + "_" + phase2;
+        return Eap.strings[mEapMethod] + "_" + Phase2.strings[mPhase2Method];
     }
 
     private String removeDoubleQuotes(String string) {
@@ -867,7 +970,8 @@ public class WifiEnterpriseConfig implements Parcelable {
         return "\"" + string + "\"";
     }
 
-    /** Returns the index at which the toBeFound string is found in the array.
+    /**
+     * Returns the index at which the toBeFound string is found in the array.
      * @param arr array of strings
      * @param toBeFound string to be found
      * @param defaultIndex default index to be returned when string is not found
@@ -881,13 +985,16 @@ public class WifiEnterpriseConfig implements Parcelable {
         return defaultIndex;
     }
 
-    /** Returns the field value for the key.
+    /**
+     * Returns the field value for the key.
      * @param key into the hash
      * @param prefix is the prefix that the value may have
      * @return value
      * @hide
      */
     public String getFieldValue(String key, String prefix) {
+        // TODO: Should raise an exception if |key| is EAP_KEY or PHASE2_KEY since
+        // neither of these keys should be retrieved in this manner.
         String value = mFields.get(key);
         // Uninitialized or known to be empty after reading from supplicant
         if (TextUtils.isEmpty(value) || EMPTY_VALUE.equals(value)) return "";
@@ -900,13 +1007,16 @@ public class WifiEnterpriseConfig implements Parcelable {
         }
     }
 
-    /** Set a value with an optional prefix at key
+    /**
+     * Set a value with an optional prefix at key
      * @param key into the hash
      * @param value to be set
      * @param prefix an optional value to be prefixed to actual value
      * @hide
      */
     public void setFieldValue(String key, String value, String prefix) {
+        // TODO: Should raise an exception if |key| is EAP_KEY or PHASE2_KEY since
+        // neither of these keys should be set in this manner.
         if (TextUtils.isEmpty(value)) {
             mFields.put(key, EMPTY_VALUE);
         } else {
@@ -915,13 +1025,16 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
 
-    /** Set a value with an optional prefix at key
+    /**
+     * Set a value with an optional prefix at key
      * @param key into the hash
      * @param value to be set
      * @param prefix an optional value to be prefixed to actual value
      * @hide
      */
     public void setFieldValue(String key, String value) {
+        // TODO: Should raise an exception if |key| is EAP_KEY or PHASE2_KEY since
+        // neither of these keys should be set in this manner.
         if (TextUtils.isEmpty(value)) {
            mFields.put(key, EMPTY_VALUE);
         } else {
@@ -938,5 +1051,26 @@ public class WifiEnterpriseConfig implements Parcelable {
             sb.append(key).append(" ").append(value).append("\n");
         }
         return sb.toString();
+    }
+
+    /**
+     * Returns whether the EAP method data is valid, i.e., whether mEapMethod and mPhase2Method
+     * are valid indices into {@code Eap.strings[]} and {@code Phase2.strings[]} respectively.
+     */
+    private boolean isEapMethodValid() {
+        if (mEapMethod == Eap.NONE) {
+            Log.e(TAG, "WiFi enterprise configuration is invalid as it supplies no EAP method.");
+            return false;
+        }
+        if (mEapMethod < 0 || mEapMethod >= Eap.strings.length) {
+            Log.e(TAG, "mEapMethod is invald for WiFi enterprise configuration: " + mEapMethod);
+            return false;
+        }
+        if (mPhase2Method < 0 || mPhase2Method >= Phase2.strings.length) {
+            Log.e(TAG, "mPhase2Method is invald for WiFi enterprise configuration: "
+                    + mPhase2Method);
+            return false;
+        }
+        return true;
     }
 }
