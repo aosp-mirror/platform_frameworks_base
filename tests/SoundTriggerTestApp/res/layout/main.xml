@@ -66,6 +66,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="20dp"
+        android:checkedButton="@+id/model_one"
         android:orientation="vertical">
    <RadioButton android:id="@+id/model_one"
         android:layout_width="wrap_content"
@@ -84,15 +85,21 @@
         android:onClick="onRadioButtonClicked"/>
 </RadioGroup>
 
-    <TextView
-        android:id="@+id/console"
-        android:gravity="left"
+<ScrollView
+       android:id="@+id/scroller_id"
+       android:layout_width="fill_parent"
+       android:layout_height="wrap_content"
+       android:scrollbars="vertical"
+       android:fillViewport="true">
+
+      <TextView
+         android:id="@+id/console"
         android:paddingTop="20pt"
         android:layout_height="fill_parent"
-        android:layout_width="match_parent"
-        android:maxLines="40"
+        android:layout_width="fill_parent"
         android:textSize="14dp"
-        android:scrollbars = "vertical"
+        android:layout_weight="1.0"
         android:text="@string/none">
      </TextView>
+</ScrollView>
 </LinearLayout>
