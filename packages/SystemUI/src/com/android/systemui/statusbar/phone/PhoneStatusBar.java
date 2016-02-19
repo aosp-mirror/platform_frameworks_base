@@ -116,7 +116,7 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.qs.QSDetail;
+import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recents.ScreenPinningRequest;
 import com.android.systemui.recents.events.EventBus;
@@ -871,13 +871,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mCastController, mFlashlightController,
                     mUserSwitcherController, mUserInfoController, mKeyguardMonitor,
                     mSecurityController, mBatteryController, mIconController);
-            mQSPanel.setHost(qsh);
             mQSPanel.setTiles(qsh.getTiles());
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
             mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
-            mHeader.setQSPanel(mQSPanel);
-            QSDetail qsDetail = (QSDetail) mStatusBarWindow.findViewById(R.id.qs_detail);
-            qsDetail.setHost(qsh);
+            QSContainer qsContainer = (QSContainer) mStatusBarWindow.findViewById(
+                    R.id.quick_settings_container);
+            qsContainer.setHost(qsh);
             qsh.addCallback(new QSTileHost.Callback() {
                 @Override
                 public void onTilesChanged() {

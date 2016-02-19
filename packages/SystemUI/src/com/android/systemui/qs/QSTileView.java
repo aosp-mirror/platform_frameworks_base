@@ -57,6 +57,10 @@ public class QSTileView extends QSTileBaseView {
         setGravity(Gravity.CENTER);
     }
 
+    TextView getLabel() {
+        return mLabel;
+    }
+
     private void updateTopPadding() {
         Resources res = getResources();
         int padding = res.getDimensionPixelSize(R.dimen.qs_tile_padding_top);

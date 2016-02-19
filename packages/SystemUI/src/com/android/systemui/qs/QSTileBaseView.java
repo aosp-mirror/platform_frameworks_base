@@ -49,6 +49,8 @@ public class QSTileBaseView extends LinearLayout {
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
         setPadding(padding, padding, padding, padding);
+        setClipChildren(false);
+        setClipToPadding(false);
     }
 
     private Drawable newTileBackground() {
@@ -108,6 +110,10 @@ public class QSTileBaseView extends LinearLayout {
     protected void handleStateChanged(QSTile.State state) {
         mIcon.setIcon(state);
         setContentDescription(state.contentDescription);
+    }
+
+    View getIcon() {
+        return mIcon;
     }
 
     private class H extends Handler {

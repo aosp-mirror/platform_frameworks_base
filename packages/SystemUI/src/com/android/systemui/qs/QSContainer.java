@@ -27,6 +27,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.BaseStatusBarHeader;
+import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
@@ -49,6 +50,7 @@ public class QSContainer extends FrameLayout {
     private boolean mStackScrollerOverscrolling;
 
     private long mDelay;
+    private QSAnimator mQSAnimator;
 
     public QSContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,6 +63,15 @@ public class QSContainer extends FrameLayout {
         mQSDetail = (QSDetail) findViewById(R.id.qs_detail);
         mQSDetail.setQsPanel(mQSPanel);
         mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
+        mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
+                mQSPanel);
+    }
+
+    public void setHost(QSTileHost qsh) {
+        mQSPanel.setHost(qsh);
+        mHeader.setQSPanel(mQSPanel);
+        mQSDetail.setHost(qsh);
+        mQSAnimator.setHost(qsh);
     }
 
     @Override
@@ -163,6 +174,7 @@ public class QSContainer extends FrameLayout {
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
         mQSPanel.setTranslationY(translationScaleY * mQSPanel.getHeight());
         mQSDetail.setFullyExpanded(expansion == 1);
+        mQSAnimator.setPosition(expansion);
         updateBottom();
     }
 

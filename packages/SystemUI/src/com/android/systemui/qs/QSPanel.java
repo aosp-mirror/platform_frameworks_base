@@ -25,7 +25,6 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
@@ -45,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /** View that represents the quick settings tile panel. **/
-public class QSPanel extends FrameLayout implements Tunable {
+public class QSPanel extends LinearLayout implements Tunable {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
 
@@ -66,7 +65,6 @@ public class QSPanel extends FrameLayout implements Tunable {
     protected QSFooter mFooter;
     private boolean mGridContentVisible = true;
 
-    protected LinearLayout mQsContainer;
     protected QSTileLayout mTileLayout;
 
     private QSCustomizer mCustomizePanel;
@@ -80,20 +78,15 @@ public class QSPanel extends FrameLayout implements Tunable {
         super(context, attrs);
         mContext = context;
 
-
-        mQsContainer = new LinearLayout(mContext);
-        mQsContainer.setOrientation(LinearLayout.VERTICAL);
-        mQsContainer.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT));
-        addView(mQsContainer);
+        setOrientation(VERTICAL);
 
         mBrightnessView = LayoutInflater.from(context).inflate(
                 R.layout.quick_settings_brightness_dialog, this, false);
-        mQsContainer.addView(mBrightnessView);
+        addView(mBrightnessView);
 
         mTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
-                R.layout.qs_paged_tile_layout, mQsContainer, false);
-        mQsContainer.addView((View) mTileLayout);
+                R.layout.qs_paged_tile_layout, this, false);
+        addView((View) mTileLayout);
         findViewById(android.R.id.edit).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -107,7 +100,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         });
 
         mFooter = new QSFooter(this, context);
-        mQsContainer.addView(mFooter.getView());
+        addView(mFooter.getView());
 
         updateResources();
 
@@ -187,7 +180,7 @@ public class QSPanel extends FrameLayout implements Tunable {
         final Resources res = mContext.getResources();
         mPanelPaddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         mBrightnessPaddingTop = res.getDimensionPixelSize(R.dimen.qs_brightness_padding_top);
-        mQsContainer.setPadding(0, mBrightnessPaddingTop, 0, mPanelPaddingBottom);
+        setPadding(0, mBrightnessPaddingTop, 0, mPanelPaddingBottom);
         for (TileRecord r : mRecords) {
             r.tile.clearState();
         }
@@ -214,6 +207,9 @@ public class QSPanel extends FrameLayout implements Tunable {
     public void setExpanded(boolean expanded) {
         if (mExpanded == expanded) return;
         mExpanded = expanded;
+        if (!mExpanded && mTileLayout instanceof PagedTileLayout) {
+            ((PagedTileLayout) mTileLayout).setCurrentItem(0, false);
+        }
         MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, mExpanded);
         if (!mExpanded) {
             closeDetail();
@@ -376,7 +372,7 @@ public class QSPanel extends FrameLayout implements Tunable {
     }
 
     public int getGridHeight() {
-        return mQsContainer.getMeasuredHeight();
+        return getMeasuredHeight();
     }
 
     protected void handleShowDetail(Record r, boolean show) {
@@ -425,7 +421,7 @@ public class QSPanel extends FrameLayout implements Tunable {
 
     void setGridContentVisibility(boolean visible) {
         int newVis = visible ? VISIBLE : INVISIBLE;
-        mQsContainer.setVisibility(newVis);
+        setVisibility(newVis);
         if (mGridContentVisible != visible) {
             MetricsLogger.visibility(mContext, MetricsEvent.QS_PANEL, newVis);
         }
@@ -466,6 +462,19 @@ public class QSPanel extends FrameLayout implements Tunable {
                 break;
             }
         }
+    }
+
+    QSTileLayout getTileLayout() {
+        return mTileLayout;
+    }
+
+    QSTileBaseView getTileView(QSTile<?> tile) {
+        for (TileRecord r : mRecords) {
+            if (r.tile == tile) {
+                return r.tileView;
+            }
+        }
+        return null;
     }
 
     private class H extends Handler {

@@ -213,7 +213,7 @@ public class TouchAnimator {
         }
     }
 
-    public static class FloatKeyframeSet extends KeyframeSet {
+    private static class FloatKeyframeSet extends KeyframeSet {
         public FloatKeyframeSet(Keyframe[] keyframes) {
             super(keyframes);
         }
@@ -226,7 +226,7 @@ public class TouchAnimator {
         }
     }
 
-    public static class IntKeyframeSet extends KeyframeSet {
+    private static class IntKeyframeSet extends KeyframeSet {
         public IntKeyframeSet(Keyframe[] keyframes) {
             super(keyframes);
         }
