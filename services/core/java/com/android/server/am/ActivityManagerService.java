@@ -14719,6 +14719,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 case Process.THREAD_GROUP_DEFAULT:
                     schedGroup = 'F';
                     break;
+                case Process.THREAD_GROUP_TOP_APP:
+                    schedGroup = 'T';
+                    break;
                 default:
                     schedGroup = '?';
                     break;
