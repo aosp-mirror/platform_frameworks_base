@@ -24,6 +24,8 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.metrics.IpReachabilityMonitorMessageEvent;
+import android.net.metrics.IpReachabilityMonitorProbeEvent;
 import android.net.netlink.NetlinkConstants;
 import android.net.netlink.NetlinkErrorMessage;
 import android.net.netlink.NetlinkMessage;
@@ -162,7 +164,7 @@ public class IpReachabilityMonitor {
     private boolean mRunning;
 
     /**
-     * Make the kernel to perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
+     * Make the kernel perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
      * for the given IP address on the specified interface index.
      *
      * @return true, if the request was successfully passed to the kernel; false otherwise.
@@ -203,7 +205,8 @@ public class IpReachabilityMonitor {
         } catch (ErrnoException | InterruptedIOException | SocketException e) {
             Log.d(TAG, "Error " + msgSnippet, e);
         }
-
+        IpReachabilityMonitorProbeEvent.logEvent("ifindex-" + ifIndex, ip.getHostAddress(),
+                returnValue);
         return returnValue;
     }
 
@@ -400,8 +403,7 @@ public class IpReachabilityMonitor {
         return (numUnicastProbes * retransTimeMs) + gracePeriodMs;
     }
 
-
-    // TODO: simply the number of objects by making this extend Thread.
+    // TODO: simplify the number of objects by making this extend Thread.
     private final class NetlinkSocketObserver implements Runnable {
         private NetlinkSocket mSocket;
 
@@ -519,6 +521,8 @@ public class IpReachabilityMonitor {
 
             final short msgType = neighMsg.getHeader().nlmsg_type;
             final short nudState = ndMsg.ndm_state;
+            IpReachabilityMonitorMessageEvent.logEvent(maybeGetInterfaceName(mInterfaceIndex),
+                    destination.getHostAddress(), msgType, nudState);
             final String eventMsg = "NeighborEvent{"
                     + "elapsedMs=" + whenMs + ", "
                     + destination.getHostAddress() + ", "
@@ -548,5 +552,12 @@ public class IpReachabilityMonitor {
                 handleNeighborLost(eventMsg);
             }
         }
+    }
+
+    private String maybeGetInterfaceName(int index) {
+        if (index == mInterfaceIndex) {
+            return mInterfaceName;
+        }
+        return "ifindex-" + index;
     }
 }

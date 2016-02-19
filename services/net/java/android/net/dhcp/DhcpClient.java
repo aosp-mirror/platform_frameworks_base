@@ -30,6 +30,8 @@ import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
+import android.net.metrics.IpConnectivityEvent;
+import android.net.metrics.DhcpClientEvent;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
@@ -355,11 +357,15 @@ public class DhcpClient extends StateMachine {
                     if (!stopped) {
                         Log.e(TAG, "Read error", e);
                     }
+                    DhcpClientEvent.logEvent(IpConnectivityEvent.IPCE_DHCP_RECV_ERROR,
+                            mIfaceName, e.getMessage());
                 } catch (DhcpPacket.ParseException e) {
                     Log.e(TAG, "Can't parse packet: " + e.getMessage());
                     if (PACKET_DBG) {
                         Log.d(TAG, HexDump.dumpHexString(mPacket, 0, length));
                     }
+                    DhcpClientEvent.logEvent(IpConnectivityEvent.IPCE_DHCP_PARSE_ERROR, mIfaceName,
+                            e.getMessage());
                 }
             }
             if (DBG) Log.d(TAG, "Receive thread stopped");
@@ -456,7 +462,9 @@ public class DhcpClient extends StateMachine {
 
     abstract class LoggingState extends State {
         public void enter() {
-            if (STATE_DBG) Log.d(TAG, "Entering state " + getName());
+            String msg = "Entering state " + getName();
+            if (STATE_DBG) Log.d(TAG, msg);
+            DhcpClientEvent.logEvent(IpConnectivityEvent.IPCE_DHCP_STATE_CHANGE, mIfaceName, msg);
         }
 
         private String messageName(int what) {
