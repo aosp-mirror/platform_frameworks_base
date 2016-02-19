@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 
 /**
@@ -132,5 +133,9 @@ public class InputConnectionWrapper implements InputConnection {
 
     public boolean requestCursorUpdates(int cursorUpdateMode) {
         return mTarget.requestCursorUpdates(cursorUpdateMode);
+    }
+
+    public Handler getHandler() {
+        return mTarget.getHandler();
     }
 }

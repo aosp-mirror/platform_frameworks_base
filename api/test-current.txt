@@ -44373,6 +44373,7 @@ package android.view.inputmethod {
     method public int getCursorCapsMode(int);
     method public android.text.Editable getEditable();
     method public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
+    method public android.os.Handler getHandler();
     method public java.lang.CharSequence getSelectedText(int);
     method public java.lang.CharSequence getTextAfterCursor(int, int);
     method public java.lang.CharSequence getTextBeforeCursor(int, int);
@@ -44536,6 +44537,7 @@ package android.view.inputmethod {
     method public abstract boolean finishComposingText();
     method public abstract int getCursorCapsMode(int);
     method public abstract android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
+    method public abstract android.os.Handler getHandler();
     method public abstract java.lang.CharSequence getSelectedText(int);
     method public abstract java.lang.CharSequence getTextAfterCursor(int, int);
     method public abstract java.lang.CharSequence getTextBeforeCursor(int, int);
@@ -44567,6 +44569,7 @@ package android.view.inputmethod {
     method public boolean finishComposingText();
     method public int getCursorCapsMode(int);
     method public android.view.inputmethod.ExtractedText getExtractedText(android.view.inputmethod.ExtractedTextRequest, int);
+    method public android.os.Handler getHandler();
     method public java.lang.CharSequence getSelectedText(int);
     method public java.lang.CharSequence getTextAfterCursor(int, int);
     method public java.lang.CharSequence getTextBeforeCursor(int, int);
