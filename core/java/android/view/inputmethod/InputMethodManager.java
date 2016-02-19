@@ -1215,7 +1215,7 @@ public final class InputMethodManager {
             if (mCurrentTextBoxAttribute == null) {
                 controlFlags |= CONTROL_START_INITIAL;
             }
-            
+
             // Hook 'em up and let 'er rip.
             mCurrentTextBoxAttribute = tba;
             mServedConnecting = false;
@@ -1230,7 +1230,9 @@ public final class InputMethodManager {
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
                 mCursorAnchorInfo = null;
-                servedContext = new ControlledInputConnectionWrapper(vh.getLooper(), ic, this);
+                final Handler icHandler = ic.getHandler();
+                servedContext = new ControlledInputConnectionWrapper(
+                        icHandler != null ? icHandler.getLooper() : vh.getLooper(), ic, this);
             } else {
                 servedContext = null;
             }
@@ -1238,7 +1240,7 @@ public final class InputMethodManager {
                 mServedInputConnectionWrapper.deactivate();
             }
             mServedInputConnectionWrapper = servedContext;
-            
+
             try {
                 if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
                         + ic + " tba=" + tba + " controlFlags=#"
