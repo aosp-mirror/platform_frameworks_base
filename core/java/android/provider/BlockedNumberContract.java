@@ -311,7 +311,7 @@ public class BlockedNumberContract {
              */
             public final long untilTimestampMillis;
 
-            BlockSuppressalStatus(boolean isSuppressed, long untilTimestampMillis) {
+            public BlockSuppressalStatus(boolean isSuppressed, long untilTimestampMillis) {
                 this.isSuppressed = isSuppressed;
                 this.untilTimestampMillis = untilTimestampMillis;
             }
