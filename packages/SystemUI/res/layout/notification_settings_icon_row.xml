@@ -17,20 +17,21 @@
 <com.android.systemui.statusbar.NotificationSettingsIconRow
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     >
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/gear_icon"
-        android:layout_width="@dimen/notification_gear_size"
-        android:layout_height="@dimen/notification_gear_size"
-        android:layout_marginTop="@dimen/notification_gear_top_margin"
-        android:layout_marginStart="@dimen/notification_gear_side_margin"
-        android:layout_marginEnd="@dimen/notification_gear_side_margin"
+        android:layout_width="@dimen/notification_gear_width"
+        android:layout_height="@dimen/notification_gear_height"
+        android:paddingTop="@dimen/notification_gear_top_padding"
+        android:paddingStart="@dimen/notification_gear_padding"
+        android:paddingEnd="@dimen/notification_gear_padding"
+        android:paddingBottom="@dimen/notification_gear_padding"
         android:src="@drawable/ic_settings"
         android:tint="@color/notification_gear_color"
-        android:visibility="gone"
+        android:visibility="invisible"
         android:alpha="0"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         />
