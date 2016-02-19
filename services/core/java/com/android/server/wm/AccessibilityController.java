@@ -60,6 +60,7 @@ import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -1019,9 +1020,17 @@ final class AccessibilityController {
                 boolean focusedWindowAdded = false;
 
                 final int visibleWindowCount = visibleWindows.size();
+                int skipRemainingWindowsForTaskId = -1;
+                HashSet<Integer> skipRemainingWindowsForTasks = new HashSet<>();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
                     final WindowState windowState = visibleWindows.valueAt(i);
                     final int flags = windowState.mAttrs.flags;
+                    final Task task = windowState.getTask();
+
+                    // If the window is part of a task that we're finished with - ignore.
+                    if (task != null && skipRemainingWindowsForTasks.contains(task.mTaskId)) {
+                        continue;
+                    }
 
                     // If the window is not touchable - ignore.
                     if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
@@ -1062,10 +1071,19 @@ final class AccessibilityController {
                         break;
                     }
 
-                    // If a window is modal, no other below can be touched - done.
+                    // If a window is modal it prevents other windows from being touched
                     if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
-                        break;
+                        if (task != null) {
+                            // If the window is associated with a particular task, we can skip the
+                            // rest of the windows for that task.
+                            skipRemainingWindowsForTasks.add(task.mTaskId);
+                            continue;
+                        } else {
+                            // If the window is not associated with a particular task, then it is
+                            // globally modal. In this case we can skip all remaining windows.
+                            break;
+                        }
                     }
                 }
 
