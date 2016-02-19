@@ -20987,6 +20987,7 @@ package android.media {
     field public static final java.lang.String KEY_MAX_WIDTH = "max-width";
     field public static final java.lang.String KEY_MIME = "mime";
     field public static final java.lang.String KEY_OPERATING_RATE = "operating-rate";
+    field public static final java.lang.String KEY_PCM_ENCODING = "pcm-encoding";
     field public static final java.lang.String KEY_PRIORITY = "priority";
     field public static final java.lang.String KEY_PROFILE = "profile";
     field public static final java.lang.String KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown";
