@@ -182,7 +182,7 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
 
     @Override
     public void unhide(SparseArray<String> ids) {
-        if (DEBUG) Log.d(TAG, "Un-iding ids: " + ids);
+        if (DEBUG) Log.d(TAG, "Unhiding ids: " + ids);
 
         // An ArrayList can shrink at runtime...and in fact
         // it does when we clear it completely.

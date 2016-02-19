@@ -391,6 +391,10 @@ public class Model {
         mUpdateListeners.add(listener);
     }
 
+    void removeUpdateListener(UpdateListener listener) {
+        mUpdateListeners.remove(listener);
+    }
+
     static interface UpdateListener {
         /**
          * Called when a successful update has occurred.
