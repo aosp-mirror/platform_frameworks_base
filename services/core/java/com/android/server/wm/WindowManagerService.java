@@ -10445,6 +10445,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
     }
 
+    private void getNonDecorInsetsLocked(Rect outInsets) {
+        final DisplayInfo di = getDefaultDisplayInfoLocked();
+        mPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
+    }
+
     /**
      * Intersects the specified {@code inOutBounds} with the display frame that excludes the stable
      * inset areas.
@@ -10454,6 +10459,23 @@ public class WindowManagerService extends IWindowManager.Stub
     public void subtractStableInsets(Rect inOutBounds) {
         synchronized (mWindowMap) {
             getStableInsetsLocked(mTmpRect2);
+            final DisplayInfo di = getDefaultDisplayInfoLocked();
+            mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
+            mTmpRect.inset(mTmpRect2);
+            inOutBounds.intersect(mTmpRect);
+        }
+    }
+
+    /**
+     * Intersects the specified {@code inOutBounds} with the display frame that excludes
+     * areas that could never be removed in Honeycomb. See
+     * {@link WindowManagerPolicy#getNonDecorInsetsLw}.
+     *
+     * @param inOutBounds The inOutBounds to subtract the inset areas from.
+     */
+    public void subtractNonDecorInsets(Rect inOutBounds) {
+        synchronized (mWindowMap) {
+            getNonDecorInsetsLocked(mTmpRect2);
             final DisplayInfo di = getDefaultDisplayInfoLocked();
             mTmpRect.set(0, 0, di.logicalWidth, di.logicalHeight);
             mTmpRect.inset(mTmpRect2);
