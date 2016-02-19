@@ -20,10 +20,14 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
 import android.view.SurfaceControl;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
 
@@ -45,25 +49,41 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DockedStackDividerController" : TAG_WM;
 
+    private static final long MINIMIZED_DOCK_ANIMATION_DURATION = 400;
+
+    private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final int mDividerWindowWidth;
     private final int mDividerInsets;
     private boolean mResizing;
     private WindowState mWindow;
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpRect2 = new Rect();
     private final Rect mLastRect = new Rect();
     private boolean mLastVisibility = false;
     private final RemoteCallbackList<IDockedStackListener> mDockedStackListeners
             = new RemoteCallbackList<>();
     private final DimLayer mDimLayer;
 
-    DockedStackDividerController(Context context, DisplayContent displayContent) {
+    private boolean mMinimizedDock;
+    private boolean mAnimating;
+    private boolean mAnimationStarted;
+    private long mAnimationStartTime;
+    private float mAnimationStart;
+    private float mAnimationTarget;
+    private final Interpolator mMinimizedDockInterpolator;
+
+    DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
+        mService = service;
         mDisplayContent = displayContent;
+        final Context context = service.mContext;
         mDividerWindowWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         mDividerInsets = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_insets);
         mDimLayer = new DimLayer(displayContent.mService, this, displayContent.getDisplayId());
+        mMinimizedDockInterpolator = AnimationUtils.loadInterpolator(
+                context, android.R.interpolator.fast_out_slow_in);
     }
 
     boolean isResizing() {
@@ -180,6 +200,19 @@ public class DockedStackDividerController implements DimLayerUser {
         mDockedStackListeners.finishBroadcast();
     }
 
+    void notifyDockedStackMinimizedChanged(boolean minimizedDock, long animDuration) {
+        final int size = mDockedStackListeners.beginBroadcast();
+        for (int i = 0; i < size; ++i) {
+            final IDockedStackListener listener = mDockedStackListeners.getBroadcastItem(i);
+            try {
+                listener.onDockedStackMinimizedChanged(minimizedDock, animDuration);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering minimized dock changed event.", e);
+            }
+        }
+        mDockedStackListeners.finishBroadcast();
+    }
+
     void registerDockedStackListener(IDockedStackListener listener) {
         mDockedStackListeners.register(listener);
         notifyDockedDividerVisibilityChanged(wasVisible());
@@ -205,6 +238,126 @@ public class DockedStackDividerController implements DimLayerUser {
             mDimLayer.hide();
         }
         SurfaceControl.closeTransaction();
+    }
+
+    /**
+     * Notifies the docked stack divider controller of a visibility change that happens without
+     * an animation.
+     */
+    void notifyAppVisibilityChanged(AppWindowToken wtoken, boolean visible) {
+        final Task task = wtoken.mTask;
+        if (!task.isHomeTask() || !task.isVisibleForUser()) {
+            return;
+        }
+
+        // If the stack is completely offscreen, this might just be an intermediate state when
+        // docking a task/launching recents at the same time, but home doesn't actually get
+        // visible after the state settles in.
+        if (isWithinDisplay(task)
+                && mDisplayContent.getDockedStackVisibleForUserLocked() != null) {
+            setMinimizedDockedStack(visible, false /* animate */);
+        }
+    }
+
+    void notifyAppTransitionStarting(ArraySet<AppWindowToken> openingApps,
+            ArraySet<AppWindowToken> closingApps) {
+        if (containsHomeTaskWithinDisplay(openingApps)) {
+            setMinimizedDockedStack(true /* minimized */, true /* animate */);
+        } else if (containsHomeTaskWithinDisplay(closingApps)) {
+            setMinimizedDockedStack(false /* minimized */, true /* animate */);
+        }
+    }
+
+    private boolean containsHomeTaskWithinDisplay(ArraySet<AppWindowToken> apps) {
+        for (int i = apps.size() - 1; i >= 0; i--) {
+            final Task task = apps.valueAt(i).mTask;
+            if (task != null && task.isHomeTask()) {
+                return isWithinDisplay(task);
+            }
+        }
+        return false;
+    }
+
+    private boolean isWithinDisplay(Task task) {
+        task.mStack.getBounds(mTmpRect);
+        mDisplayContent.getLogicalDisplayRect(mTmpRect2);
+        return mTmpRect.intersect(mTmpRect2);
+    }
+
+    /**
+     * Sets whether the docked stack is currently in a minimized state, i.e. all the tasks in the
+     * docked stack are heavily clipped so you can only see a minimal peek state.
+     *
+     * @param minimizedDock Whether the docked stack is currently minimized.
+     * @param animate Whether to animate the change.
+     */
+    private void setMinimizedDockedStack(boolean minimizedDock, boolean animate) {
+        if (minimizedDock == mMinimizedDock
+                || mDisplayContent.getDockedStackVisibleForUserLocked() == null) {
+            return;
+        }
+
+        mMinimizedDock = minimizedDock;
+        if (minimizedDock) {
+            if (animate) {
+                startAdjustAnimation(0f, 1f);
+            } else {
+                setMinimizedDockedStack(true);
+            }
+        } else {
+            if (animate) {
+                startAdjustAnimation(1f, 0f);
+            } else {
+                setMinimizedDockedStack(false);
+            }
+        }
+    }
+
+    private void startAdjustAnimation(float from, float to) {
+        mAnimating = true;
+        mAnimationStarted = false;
+        mAnimationStart = from;
+        mAnimationTarget = to;
+    }
+
+    private void setMinimizedDockedStack(boolean minimized) {
+        final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
+        if (stack == null) {
+            return;
+        }
+        if (stack.setAdjustedForMinimizedDock(minimized ? 1f : 0f)) {
+            mService.mWindowPlacerLocked.performSurfacePlacement();
+        }
+        notifyDockedStackMinimizedChanged(minimized, 0);
+    }
+
+    public boolean animate(long now) {
+        if (!mAnimating) {
+            return false;
+        }
+
+        if (!mAnimationStarted) {
+            mAnimationStarted = true;
+            mAnimationStartTime = now;
+            notifyDockedStackMinimizedChanged(mMinimizedDock,
+                    MINIMIZED_DOCK_ANIMATION_DURATION);
+        }
+        float t = Math.min(1f, (float) (now - mAnimationStartTime)
+                / MINIMIZED_DOCK_ANIMATION_DURATION);
+        t = mMinimizedDockInterpolator.getInterpolation(t);
+        final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
+        if (stack != null) {
+            final float amount = t * mAnimationTarget + (1 - t) * mAnimationStart;
+            if (stack.setAdjustedForMinimizedDock(amount)) {
+                mService.mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
+        if (t >= 1.0f) {
+            mAnimating = false;
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override

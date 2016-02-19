@@ -140,4 +140,9 @@ public class DividerHandleView extends ImageButton {
         canvas.drawRoundRect(left, top, left + mCurrentWidth, top + mCurrentHeight,
                 radius, radius, mPaint);
     }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
 }

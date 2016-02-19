@@ -1434,10 +1434,12 @@ final class ActivityStack {
 
         if (mStackId == DOCKED_STACK_ID) {
             // Docked stack is always visible, except in the case where the top running activity
-            // task in the focus stack doesn't support any form of resizing.
+            // task in the focus stack doesn't support any form of resizing but we show it for the
+            // home task even though it's not resizable.
             final ActivityRecord r = focusedStack.topRunningActivityLocked();
             final TaskRecord task = r != null ? r.task : null;
-            return task == null || task.canGoInDockedStack() ? STACK_VISIBLE : STACK_INVISIBLE;
+            return task == null || task.canGoInDockedStack() || task.isHomeTask() ? STACK_VISIBLE
+                    : STACK_INVISIBLE;
         }
 
         // Find the first stack below focused stack that actually got something visible.
