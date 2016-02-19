@@ -1394,13 +1394,11 @@ public final class TvContract {
             }
 
             /**
-             * Check whether a given genre is canonical or not.
+             * Returns whether a given text is a canonical genre defined in {@link Genres}.
              *
              * @param genre The name of genre to be checked.
              * @return {@code true} if the genre is canonical, otherwise {@code false}.
-             * @hide
              */
-            @SystemApi
             public static boolean isCanonical(String genre) {
                 return CANONICAL_GENRES.contains(genre);
             }
