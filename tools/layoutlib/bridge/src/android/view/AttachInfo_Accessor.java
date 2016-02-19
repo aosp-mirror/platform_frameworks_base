@@ -45,4 +45,10 @@ public class AttachInfo_Accessor {
     public static void dispatchOnPreDraw(View view) {
         view.mAttachInfo.mTreeObserver.dispatchOnPreDraw();
     }
+
+    public static void detachFromWindow(View view) {
+        if (view != null) {
+            view.dispatchDetachedFromWindow();
+        }
+    }
 }
