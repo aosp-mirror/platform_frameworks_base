@@ -21,14 +21,12 @@ import android.graphics.Rect;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
 import android.view.DisplayInfo;
 import android.view.IDockedStackListener;
 import android.view.SurfaceControl;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
-import android.view.animation.PathInterpolator;
 
 import com.android.server.wm.DimLayer.DimLayerUser;
 
@@ -52,6 +50,30 @@ public class DockedStackDividerController implements DimLayerUser {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DockedStackDividerController" : TAG_WM;
 
+    /**
+     * The fraction during the maximize/clip reveal animation the divider meets the edge of the clip
+     * revealing surface at the earliest.
+     */
+    private static final float CLIP_REVEAL_MEET_EARLIEST = 0.6f;
+
+    /**
+     * The fraction during the maximize/clip reveal animation the divider meets the edge of the clip
+     * revealing surface at the latest.
+     */
+    private static final float CLIP_REVEAL_MEET_LAST = 1f;
+
+    /**
+     * If the app translates at least CLIP_REVEAL_MEET_FRACTION_MIN * minimize distance, we start
+     * meet somewhere between {@link #CLIP_REVEAL_MEET_LAST} and {@link #CLIP_REVEAL_MEET_EARLIEST}.
+     */
+    private static final float CLIP_REVEAL_MEET_FRACTION_MIN = 0.4f;
+
+    /**
+     * If the app translates equals or more than CLIP_REVEAL_MEET_FRACTION_MIN * minimize distance,
+     * we meet at {@link #CLIP_REVEAL_MEET_EARLIEST}.
+     */
+    private static final float CLIP_REVEAL_MEET_FRACTION_MAX = 0.8f;
+
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final int mDividerWindowWidth;
@@ -74,6 +96,7 @@ public class DockedStackDividerController implements DimLayerUser {
     private float mAnimationTarget;
     private long mAnimationDuration;
     private final Interpolator mMinimizedDockInterpolator;
+    private float mMaximizeMeetFraction;
 
     DockedStackDividerController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
@@ -342,6 +365,7 @@ public class DockedStackDividerController implements DimLayerUser {
             return false;
         }
 
+        final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         if (!mAnimationStarted) {
             mAnimationStarted = true;
             mAnimationStartTime = now;
@@ -350,16 +374,15 @@ public class DockedStackDividerController implements DimLayerUser {
                     : DEFAULT_APP_TRANSITION_DURATION;
             mAnimationDuration = (long)
                     (transitionDuration * mService.getTransitionAnimationScaleLocked());
+            mMaximizeMeetFraction = getClipRevealMeetFraction(stack);
             notifyDockedStackMinimizedChanged(mMinimizedDock,
-                    mAnimationDuration);
+                    (long) (mAnimationDuration * mMaximizeMeetFraction));
         }
         float t = Math.min(1f, (float) (now - mAnimationStartTime) / mAnimationDuration);
         t = (isAnimationMaximizing() ? TOUCH_RESPONSE_INTERPOLATOR : mMinimizedDockInterpolator)
                 .getInterpolation(t);
-        final TaskStack stack = mDisplayContent.getDockedStackVisibleForUserLocked();
         if (stack != null) {
-            final float amount = t * mAnimationTarget + (1 - t) * mAnimationStart;
-            if (stack.setAdjustedForMinimizedDock(amount)) {
+            if (stack.setAdjustedForMinimizedDock(getMinimizeAmount(stack, t))) {
                 mService.mWindowPlacerLocked.performSurfacePlacement();
             }
         }
@@ -369,6 +392,54 @@ public class DockedStackDividerController implements DimLayerUser {
         } else {
             return true;
         }
+    }
+
+    /**
+     * Gets the amount how much to minimize a stack depending on the interpolated fraction t.
+     */
+    private float getMinimizeAmount(TaskStack stack, float t) {
+        final float naturalAmount = t * mAnimationTarget + (1 - t) * mAnimationStart;
+        if (isAnimationMaximizing()) {
+            return adjustMaximizeAmount(stack, t, naturalAmount);
+        } else {
+            return naturalAmount;
+        }
+    }
+
+    /**
+     * When maximizing the stack during a clip reveal transition, this adjusts the minimize amount
+     * during the transition such that the edge of the clip reveal rect is met earlier in the
+     * transition so we don't create a visible "hole", but only if both the clip reveal and the
+     * docked stack divider start from about the same portion on the screen.
+     */
+    private float adjustMaximizeAmount(TaskStack stack, float t, float naturalAmount) {
+        if (mMaximizeMeetFraction == 1f) {
+            return naturalAmount;
+        }
+        final int minimizeDistance = stack.getMinimizeDistance();
+        float startPrime = mService.mAppTransition.getLastClipRevealMaxTranslation()
+                / (float) minimizeDistance;
+        final float amountPrime = t * mAnimationTarget + (1 - t) * startPrime;
+        final float t2 = Math.min(t / mMaximizeMeetFraction, 1);
+        return amountPrime * t2 + naturalAmount * (1 - t2);
+    }
+
+    /**
+     * Retrieves the animation fraction at which the docked stack has to meet the clip reveal
+     * edge. See {@link #adjustMaximizeAmount}.
+     */
+    private float getClipRevealMeetFraction(TaskStack stack) {
+        if (!isAnimationMaximizing() || stack == null ||
+                !mService.mAppTransition.hadClipRevealAnimation()) {
+            return 1f;
+        }
+        final int minimizeDistance = stack.getMinimizeDistance();
+        final float fraction = Math.abs(mService.mAppTransition.getLastClipRevealMaxTranslation())
+                / (float) minimizeDistance;
+        final float t = Math.max(0, Math.min(1, (fraction - CLIP_REVEAL_MEET_FRACTION_MIN)
+                / (CLIP_REVEAL_MEET_FRACTION_MAX - CLIP_REVEAL_MEET_FRACTION_MIN)));
+        return CLIP_REVEAL_MEET_EARLIEST
+                + (1 - t) * (CLIP_REVEAL_MEET_LAST - CLIP_REVEAL_MEET_EARLIEST);
     }
 
     @Override

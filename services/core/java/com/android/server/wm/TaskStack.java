@@ -877,6 +877,26 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     /**
+     * @return the distance in pixels how much the stack gets minimized from it's original size
+     */
+    int getMinimizeDistance() {
+        final int dockSide = getDockSide();
+        if (dockSide == DOCKED_INVALID) {
+            return 0;
+        }
+
+        if (dockSide == DOCKED_TOP) {
+            mService.getStableInsetsLocked(mTmpRect);
+            int topInset = mTmpRect.top;
+            return mBounds.bottom - topInset;
+        } else if (dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT) {
+            return mBounds.width() - mDockedStackMinimizeThickness;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
      * Updates the adjustment depending on it's current state.
      */
     void updateAdjustedBounds() {
