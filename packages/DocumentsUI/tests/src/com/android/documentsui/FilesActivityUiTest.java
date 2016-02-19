@@ -43,11 +43,11 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
     public void testRootsListed() throws Exception {
         initTestFiles();
 
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
 
         // Should also have Drive, but that requires pre-configuration of devices
         // We omit for now.
-        bot.assertHasRoots(
+        bots.roots.assertHasRoots(
                 "Images",
                 "Videos",
                 "Audio",
@@ -60,93 +60,106 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
     public void testFilesListed() throws Exception {
         initTestFiles();
 
-        bot.openRoot(ROOT_0_ID);
-        bot.assertHasDocuments("file0.log", "file1.png", "file2.csv");
+        bots.roots.openRoot(ROOT_0_ID);
+        bots.directory.assertDocumentsPresent("file0.log", "file1.png", "file2.csv");
     }
 
     public void testLoadsHomeDirectoryByDefault() throws Exception {
         initTestFiles();
 
         device.waitForIdle();
-        bot.assertWindowTitle("Documents");
+        bots.main.assertWindowTitle("Documents");
     }
 
     public void testRootClickSetsWindowTitle() throws Exception {
         initTestFiles();
 
-        bot.openRoot("Downloads");
-        bot.assertWindowTitle("Downloads");
+        bots.roots.openRoot("Downloads");
+        bots.main.assertWindowTitle("Downloads");
     }
 
     public void testFilesList_LiveUpdate() throws Exception {
         initTestFiles();
 
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         mDocsHelper.createDocument(rootDir0, "yummers/sandwich", "Ham & Cheese.sandwich");
 
-        bot.waitForDocument("Ham & Cheese.sandwich");
-        bot.assertHasDocuments("file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
+        bots.directory.waitForDocument("Ham & Cheese.sandwich");
+        bots.directory.assertDocumentsPresent(
+                "file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
+    }
+
+    public void testCreateDirectory() throws Exception {
+        initTestFiles();
+
+        bots.main.openOverflowMenu();
+        bots.main.menuNewFolder().click();
+        bots.main.setDialogText("Kung Fu Panda");
+
+        bots.keyboard.pressEnter();
+
+        bots.directory.assertDocumentsPresent("Kung Fu Panda");
     }
 
     public void testDeleteDocument() throws Exception {
         initTestFiles();
 
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
 
-        bot.clickDocument("file1.png");
+        bots.directory.clickDocument("file1.png");
         device.waitForIdle();
-        bot.menuDelete().click();
+        bots.main.menuDelete().click();
 
-        bot.waitForDeleteSnackbar();
-        assertFalse(bot.hasDocuments("file1.png"));
+        bots.directory.waitForDeleteSnackbar();
+        bots.directory.assertDocumentsAbsent("file1.png");
 
-        bot.waitForDeleteSnackbarGone();
-        assertFalse(bot.hasDocuments("file1.png"));
+        bots.directory.waitForDeleteSnackbarGone();
+        bots.directory.assertDocumentsAbsent("file1.png");
 
         // Now delete from another root.
-        bot.openRoot(ROOT_1_ID);
+        bots.roots.openRoot(ROOT_1_ID);
 
-        bot.clickDocument("poodles.text");
+        bots.directory.clickDocument("poodles.text");
         device.waitForIdle();
-        bot.menuDelete().click();
+        bots.main.menuDelete().click();
 
-        bot.waitForDeleteSnackbar();
-        assertFalse(bot.hasDocuments("poodles.text"));
+        bots.directory.waitForDeleteSnackbar();
+        bots.directory.assertDocumentsAbsent("poodles.text");
 
-        bot.waitForDeleteSnackbarGone();
-        assertFalse(bot.hasDocuments("poodles.text"));
+        bots.directory.waitForDeleteSnackbarGone();
+        bots.directory.assertDocumentsAbsent("poodles.text");
     }
 
     // Tests that pressing tab switches focus between the roots and directory listings.
     public void testKeyboard_tab() throws Exception {
-        bot.pressKey(KeyEvent.KEYCODE_TAB);
-        bot.assertHasFocus("com.android.documentsui:id/roots_list");
-        bot.pressKey(KeyEvent.KEYCODE_TAB);
-        bot.assertHasFocus("com.android.documentsui:id/dir_list");
+        bots.main.pressKey(KeyEvent.KEYCODE_TAB);
+        bots.roots.assertHasFocus();
+        bots.main.pressKey(KeyEvent.KEYCODE_TAB);
+        bots.directory.assertHasFocus();
     }
 
     // Tests that arrow keys do not switch focus away from the dir list.
     public void testKeyboard_arrowsDirList() throws Exception {
         for (int i = 0; i < 10; i++) {
-            bot.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
-            bot.assertHasFocus("com.android.documentsui:id/dir_list");
+            bots.main.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
+            bots.directory.assertHasFocus();
         }
         for (int i = 0; i < 10; i++) {
-            bot.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
-            bot.assertHasFocus("com.android.documentsui:id/dir_list");
+            bots.main.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+            bots.directory.assertHasFocus();
         }
     }
 
     // Tests that arrow keys do not switch focus away from the roots list.
     public void testKeyboard_arrowsRootsList() throws Exception {
-        bot.pressKey(KeyEvent.KEYCODE_TAB);
+        bots.main.pressKey(KeyEvent.KEYCODE_TAB);
         for (int i = 0; i < 10; i++) {
-            bot.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
-            bot.assertHasFocus("com.android.documentsui:id/roots_list");
+            bots.main.pressKey(KeyEvent.KEYCODE_DPAD_RIGHT);
+            bots.roots.assertHasFocus();
         }
         for (int i = 0; i < 10; i++) {
-            bot.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
-            bot.assertHasFocus("com.android.documentsui:id/roots_list");
+            bots.main.pressKey(KeyEvent.KEYCODE_DPAD_LEFT);
+            bots.roots.assertHasFocus();
         }
     }
 }

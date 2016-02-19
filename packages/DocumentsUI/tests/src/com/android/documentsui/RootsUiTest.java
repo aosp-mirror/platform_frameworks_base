@@ -18,19 +18,14 @@ package com.android.documentsui;
 
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 
-import android.support.test.uiautomator.Configurator;
-import android.support.test.uiautomator.UiObject;
-import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.view.MotionEvent;
 
 @LargeTest
-public class RootUiTest extends ActivityTest<FilesActivity> {
+public class RootsUiTest extends ActivityTest<FilesActivity> {
 
     private static final String TAG = "RootUiTest";
 
-    public RootUiTest() {
+    public RootsUiTest() {
         super(FilesActivity.class);
     }
 
@@ -38,14 +33,14 @@ public class RootUiTest extends ActivityTest<FilesActivity> {
     public void setUp() throws Exception {
         super.setUp();
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
     }
 
     public void testRootTapped_GoToRootFromChildDir() throws Exception {
-        bot.openDocument(dirName1);
-        bot.assertWindowTitle(dirName1);
-        bot.openRoot(ROOT_0_ID);
-        bot.assertWindowTitle(ROOT_0_ID);
+        bots.directory.openDocument(dirName1);
+        bots.main.assertWindowTitle(dirName1);
+        bots.roots.openRoot(ROOT_0_ID);
+        bots.main.assertWindowTitle(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
     }
 }

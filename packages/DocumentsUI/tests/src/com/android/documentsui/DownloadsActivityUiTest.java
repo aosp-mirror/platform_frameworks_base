@@ -52,13 +52,13 @@ public class DownloadsActivityUiTest extends ActivityTest<DownloadsActivity> {
     public void testWindowTitle() throws Exception {
         initTestFiles();
 
-        bot.assertWindowTitle(ROOT_0_ID);
+        bots.main.assertWindowTitle(ROOT_0_ID);
     }
 
     public void testFilesListed() throws Exception {
         initTestFiles();
 
-        bot.assertHasDocuments("file0.log", "file1.png", "file2.csv");
+        bots.directory.assertDocumentsPresent("file0.log", "file1.png", "file2.csv");
     }
 
     public void testFilesList_LiveUpdate() throws Exception {
@@ -66,30 +66,31 @@ public class DownloadsActivityUiTest extends ActivityTest<DownloadsActivity> {
 
         mDocsHelper.createDocument(rootDir0, "yummers/sandwich", "Ham & Cheese.sandwich");
 
-        bot.waitForDocument("Ham & Cheese.sandwich");
-        bot.assertHasDocuments("file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
+        bots.directory.waitForDocument("Ham & Cheese.sandwich");
+        bots.directory.assertDocumentsPresent(
+                "file0.log", "file1.png", "file2.csv", "Ham & Cheese.sandwich");
     }
 
     public void testDeleteDocument() throws Exception {
         initTestFiles();
 
-        bot.clickDocument("file1.png");
+        bots.directory.clickDocument("file1.png");
         device.waitForIdle();
-        bot.menuDelete().click();
+        bots.main.menuDelete().click();
 
-        bot.waitForDeleteSnackbar();
-        assertFalse(bot.hasDocuments("file1.png"));
+        bots.directory.waitForDeleteSnackbar();
+        bots.directory.assertDocumentsAbsent("file1.png");
 
-        bot.waitForDeleteSnackbarGone();
-        assertFalse(bot.hasDocuments("file1.png"));
+        bots.directory.waitForDeleteSnackbarGone();
+        bots.directory.assertDocumentsAbsent("file1.png");
     }
 
     public void testSupportsShare() throws Exception {
         initTestFiles();
 
-        bot.clickDocument("file1.png");
+        bots.directory.clickDocument("file1.png");
         device.waitForIdle();
-        assertNotNull(bot.menuShare());
+        assertNotNull(bots.main.menuShare());
     }
 
     public void testClosesOnBack() throws Exception {
