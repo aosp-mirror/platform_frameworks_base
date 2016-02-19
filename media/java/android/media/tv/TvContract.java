@@ -1314,6 +1314,8 @@ public final class TvContract {
             private static final char COMMA = ',';
             private static final String DELIMITER = ",";
 
+            private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
             private Genres() {}
 
             /**
@@ -1359,6 +1361,12 @@ public final class TvContract {
              * @return genre strings.
              */
             public static String[] decode(String genres) {
+                if (genres.isEmpty()) {
+                    return EMPTY_STRING_ARRAY;
+                }
+                if (genres.indexOf(COMMA) == -1 && genres.indexOf(DOUBLE_QUOTE) == -1) {
+                    return new String[] {genres.trim()};
+                }
                 StringBuilder sb = new StringBuilder();
                 List<String> results = new ArrayList<>();
                 int length = genres.length();
