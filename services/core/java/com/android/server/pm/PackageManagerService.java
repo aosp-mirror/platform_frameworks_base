@@ -14126,25 +14126,48 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
-        for (int currentUserId : users) {
-            if (getBlockUninstallForUser(packageName, currentUserId)) {
-                try {
-                    observer.onPackageDeleted(packageName,
-                            PackageManager.DELETE_FAILED_OWNER_BLOCKED, null);
-                } catch (RemoteException re) {
-                }
-                return;
+        if (!deleteAllUsers && getBlockUninstallForUser(packageName, userId)) {
+            try {
+                observer.onPackageDeleted(packageName,
+                        PackageManager.DELETE_FAILED_OWNER_BLOCKED, null);
+            } catch (RemoteException re) {
             }
+            return;
         }
 
         if (DEBUG_REMOVE) {
-            Slog.d(TAG, "deletePackageAsUser: pkg=" + packageName + " user=" + userId);
+            Slog.d(TAG, "deletePackageAsUser: pkg=" + packageName + " user=" + userId
+                    + " deleteAllUsers: " + deleteAllUsers );
         }
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
                 mHandler.removeCallbacks(this);
-                final int returnCode = deletePackageX(packageName, userId, flags);
+                int returnCode;
+                if (!deleteAllUsers) {
+                    returnCode = deletePackageX(packageName, userId, flags);
+                } else {
+                    int[] blockUninstallUserIds = getBlockUninstallForUsers(packageName, users);
+                    // If nobody is blocking uninstall, proceed with delete for all users
+                    if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
+                        returnCode = deletePackageX(packageName, userId, flags);
+                    } else {
+                        // Otherwise uninstall individually for users with blockUninstalls=false
+                        final int userFlags = flags & ~PackageManager.DELETE_ALL_USERS;
+                        for (int userId : users) {
+                            if (!ArrayUtils.contains(blockUninstallUserIds, userId)) {
+                                returnCode = deletePackageX(packageName, userId, userFlags);
+                                if (returnCode != PackageManager.DELETE_SUCCEEDED) {
+                                    Slog.w(TAG, "Package delete failed for user " + userId
+                                            + ", returnCode " + returnCode);
+                                }
+                            }
+                        }
+                        // The app has only been marked uninstalled for certain users.
+                        // We still need to report that delete was blocked
+                        returnCode = PackageManager.DELETE_FAILED_OWNER_BLOCKED;
+                    }
+                }
                 try {
                     observer.onPackageDeleted(packageName, returnCode, null);
                 } catch (RemoteException e) {
@@ -14152,6 +14175,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } //end catch
             } //end run
         });
+    }
+
+    private int[] getBlockUninstallForUsers(String packageName, int[] userIds) {
+        int[] result = EMPTY_INT_ARRAY;
+        for (int userId : userIds) {
+            if (getBlockUninstallForUser(packageName, userId)) {
+                result = ArrayUtils.appendInt(result, userId);
+            }
+        }
+        return result;
     }
 
     @Override
