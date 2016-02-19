@@ -84,6 +84,13 @@ public:
         return new (allocImpl(sizeof(T))) T(std::forward<Params>(params)...);
     }
 
+    template<class T>
+    T* create_trivial_array(int count) {
+        static_assert(std::is_trivially_destructible<T>::value,
+                "Error, called create_trivial_array on a non-trivial type");
+        return reinterpret_cast<T*>(allocImpl(sizeof(T) * count));
+    }
+
     /**
      * Attempt to deallocate the given buffer, with the LinearAllocator attempting to rewind its
      * state if possible.

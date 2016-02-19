@@ -290,7 +290,7 @@ void RecordingCanvas::drawRect(float left, float top, float right, float bottom,
 void RecordingCanvas::drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint) {
     if (rects == nullptr) return;
 
-    Vertex* rectData = (Vertex*) mDisplayList->allocator.alloc<Vertex>(vertexCount * sizeof(Vertex));
+    Vertex* rectData = (Vertex*) mDisplayList->allocator.create_trivial_array<Vertex>(vertexCount);
     Vertex* vertex = rectData;
 
     float left = FLT_MAX;

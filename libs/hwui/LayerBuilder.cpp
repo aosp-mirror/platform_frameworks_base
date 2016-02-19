@@ -239,7 +239,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
         // put the verts in the frame allocator, since
         //     1) SimpleRectsOps needs verts, not rects
         //     2) even if mClearRects stored verts, std::vectors will move their contents
-        Vertex* const verts = (Vertex*) allocator.alloc<Vertex>(vertCount * sizeof(Vertex));
+        Vertex* const verts = (Vertex*) allocator.create_trivial_array<Vertex>(vertCount);
 
         Vertex* currentVert = verts;
         Rect bounds = mClearRects[0];
