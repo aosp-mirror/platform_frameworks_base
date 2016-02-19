@@ -248,9 +248,9 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"အပြင်မှာ အတင်း ခွင့်ပြုရန်"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ပြနေတဲ့ တန်ဖိုး ဘယ်လိုပဲရှိနေနေ၊ ဘယ် appကို မဆို အပြင် သိုလှောင်ခန်းသို့ ရေးသားခွင့် ပေးတယ်"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"လုပ်ဆောင်ချက်များ ဆိုက်ညှိရနိုင်ရန် လုပ်ခိုင်းပါ"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"မန်နီးဖက်စ် တန်ဖိုးမရွေး၊ လုပ်ဆောင်ချက် အားလုံး ဆိုက်ညှိရနိုင်အောင် လုပ်ပေးပါ။"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"မန်နီးဖက်စ်တန်ဖိုးများ မည်မျှပင်ရှိစေကာမူ၊ ဝင်းဒိုးများအတွက် လှုပ်ရှားမှုများအားလုံးကို အရွယ်အစားချိန်ခြင်း ပြုလုပ်ပါ။"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"အခမဲ့ပုံစံ ဝင်းဒိုးကို ဖွင့်ပါ"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"စမ်းသပ်မှု အခမဲ့ပုံစံ ဝင်းဒိုးများအတွက် ပံ့ပိုးမှုကို ဖွင့်ပါ။"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ပုံစံမျိုးစုံဝင်းဒိုးများစမ်းသပ်မှုအတွက် အထောက်အပံ့ကိုဖွင့်ပါ"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Desktop အရန်စကားဝှက်"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"အလုပ်ခုံတွင် အရန်သိမ်းဆည်းခြင်းများကို လောလောဆယ် မကာကွယ်နိုင်ပါ။"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"စားပွဲတင်ကွန်ပျူတာကို အပြည့်အဝအရံကူးထားရန်အတွက် စကားဝှက်ကို ပြောင်းရန် သို့မဟုတ် ဖယ်ရှားရန် တို့ပါ။"</string>
@@ -277,6 +277,10 @@
     <string name="night_mode_no" msgid="9171772244775838901">"ပိတ်ထား"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"အမြဲတမ်း ဖွင့်ထားရန်"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"အလိုအလျောက်"</string>
+    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
+    <skip />
+    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
+    <skip />
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ရွေးချယ်ထားသည့် WebView လုပ်ဆောင်ခြင်းကို ပိတ်ထားသည်ပြီး အသုံးပြုရန်အတွက် ဖွင့်ရမည်၊ ဖွင့်လိုပါသလား။"</string>
@@ -296,8 +300,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"အရောင်ပြင်ဆင်မှု"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဒီအင်္ဂါရပ်မှာ စမ်းသပ်မှု ဖြစ်၍ လုပ်ကိုင်မှုကို အကျိုးသက်ရောက်နိုင်သည်။"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
-    <!-- no translation found for power_remaining_duration_only (4400068916452346544) -->
-    <skip />
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"ခန့်မှန်းခြေ <xliff:g id="TIME">%1$s</xliff:g> ကျန်ပါသည်"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - ခန့်မှန်းခြေ။ <xliff:g id="TIME">%2$s</xliff:g> ကျန်ရှိနေ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> အပြည့်အထိ"</string>
@@ -314,8 +317,6 @@
     <string name="battery_info_status_full" msgid="2824614753861462808">"အပြည့်"</string>
     <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"စီမံခန့်ခွဲသူမှ ပိတ်ထားသည်"</string>
     <string name="home" msgid="8263346537524314127">"ပင်မ"</string>
-    <!-- no translation found for charge_length_format (8978516217024434156) -->
-    <skip />
-    <!-- no translation found for remaining_length_format (7886337596669190587) -->
-    <skip />
+    <string name="charge_length_format" msgid="8978516217024434156">"ပြီးခဲ့သည့် <xliff:g id="ID_1">%1$s</xliff:g> က"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်ပါသည်"</string>
 </resources>
