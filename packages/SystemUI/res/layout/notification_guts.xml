@@ -126,27 +126,6 @@
                     android:tint="@color/notification_guts_icon_tint" />
 
         </FrameLayout>
-
-        <RadioGroup
-                    android:id="@+id/apply_to"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-            <RadioButton android:id="@+id/apply_to_topic"
-                         android:layout_width="wrap_content"
-                         android:layout_height="48dp"
-                         style="@style/TextAppearance.NotificationGuts.Primary"
-                         android:visibility="gone"
-                         android:buttonTint="#858383"
-            />
-            <RadioButton android:id="@+id/apply_to_app"
-                         android:layout_width="wrap_content"
-                         android:layout_height="48dp"
-                         android:text="@string/apply_to_app"
-                         style="@style/TextAppearance.NotificationGuts.Primary"
-                         android:visibility="gone"
-                         android:buttonTint="#858383"
-            />
-        </RadioGroup>
     </LinearLayout>
     <!-- buttons -->
     <LinearLayout

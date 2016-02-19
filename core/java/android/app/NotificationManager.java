@@ -507,11 +507,10 @@ public class NotificationManager
         return false;
     }
 
-    public int getImportance(String topicId) {
-        Preconditions.checkNotNull(topicId);
+    public int getImportance() {
         INotificationManager service = getService();
         try {
-            return service.getTopicImportance(mContext.getPackageName(), topicId);
+            return service.getPackageImportance(mContext.getPackageName());
         } catch (RemoteException e) {
         }
         return NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
