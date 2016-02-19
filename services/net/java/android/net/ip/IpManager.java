@@ -16,6 +16,8 @@
 
 package android.net.ip;
 
+import com.android.internal.util.MessageUtils;
+
 import android.content.Context;
 import android.net.DhcpResults;
 import android.net.InterfaceConfiguration;
@@ -30,6 +32,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -60,6 +63,11 @@ import java.util.Objects;
 public class IpManager extends StateMachine {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
+
+    // For message logging.
+    private static final Class[] sMessageClasses = { IpManager.class, DhcpClient.class };
+    private static final SparseArray<String> sWhatToString =
+            MessageUtils.findMessageNames(sMessageClasses);
 
     /**
      * Callbacks for handling IpManager events.
@@ -306,26 +314,7 @@ public class IpManager extends StateMachine {
 
     @Override
     protected String getWhatToString(int what) {
-        // TODO: Investigate switching to reflection.
-        switch (what) {
-            case CMD_STOP:
-                return "CMD_STOP";
-            case CMD_START:
-                return "CMD_START";
-            case CMD_CONFIRM:
-                return "CMD_CONFIRM";
-            case EVENT_PRE_DHCP_ACTION_COMPLETE:
-                return "EVENT_PRE_DHCP_ACTION_COMPLETE";
-            case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
-                return "EVENT_NETLINK_LINKPROPERTIES_CHANGED";
-            case DhcpClient.CMD_PRE_DHCP_ACTION:
-                return "DhcpClient.CMD_PRE_DHCP_ACTION";
-            case DhcpClient.CMD_POST_DHCP_ACTION:
-                return "DhcpClient.CMD_POST_DHCP_ACTION";
-            case DhcpClient.CMD_ON_QUIT:
-                return "DhcpClient.CMD_ON_QUIT";
-        }
-        return "UNKNOWN:" + Integer.toString(what);
+        return sWhatToString.get(what, "UNKNOWN: " + Integer.toString(what));
     }
 
     @Override
