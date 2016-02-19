@@ -36,6 +36,7 @@
         android:tag="media"
         >
         <LinearLayout
+            android:id="@+id/notification_content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_vertical"
@@ -45,7 +46,6 @@
             android:orientation="vertical"
             >
             <include layout="@layout/notification_template_part_line1"/>
-            <include layout="@layout/notification_template_progress"/>
             <include layout="@layout/notification_template_text"/>
         </LinearLayout>
         <LinearLayout
