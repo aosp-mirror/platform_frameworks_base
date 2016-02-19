@@ -1048,6 +1048,9 @@ public class DevicePolicyManager {
      * by the application that owns the administration component; if you
      * try to remove someone else's component, a security exception will be
      * thrown.
+     *
+     * <p>Note that the operation is not synchronous and the admin might still be active (as
+     * indicated by {@link #getActiveAdmins()}) by the time this method returns.
      */
     public void removeActiveAdmin(@NonNull ComponentName admin) {
         if (mService != null) {
