@@ -42,6 +42,6 @@ public class FastXmlSerializerTest extends TestCase {
         out.endDocument();
 
         assertEquals("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
-                + "<string name=\"meow\"></string>", stream.toString());
+                + "<string name=\"meow\"></string>\n", stream.toString());
     }
 }
