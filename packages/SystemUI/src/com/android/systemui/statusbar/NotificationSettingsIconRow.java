@@ -22,7 +22,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.Interpolators;
@@ -69,12 +68,9 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         super.onFinishInflate();
         mGearIcon = (AlphaOptimizedImageView) findViewById(R.id.gear_icon);
         mGearIcon.setOnClickListener(this);
-
-        final float iconMargin =
-                ((ViewGroup.MarginLayoutParams) mGearIcon.getLayoutParams()).getMarginStart();
-        final float iconWidth =
-                getResources().getDimensionPixelOffset(R.dimen.notification_gear_size);
-        mHorizSpaceForGear = (iconWidth + iconMargin * 2);
+        setOnClickListener(this);
+        mHorizSpaceForGear =
+                getResources().getDimensionPixelOffset(R.dimen.notification_gear_width);
         resetState();
     }
 
@@ -140,7 +136,6 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         final float absTrans = Math.abs(transX);
         float desiredAlpha = 0;
 
-        // if ((fromLeft && transX <= fadeThreshold) || (!fromLeft && absTrans <= fadeThreshold)) {
         if (absTrans <= fadeThreshold) {
             desiredAlpha = 1;
         } else {
@@ -191,17 +186,24 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         mFadeAnimator.start();
     }
 
-    @Override
-    public void onClick(View v) {
-        mListener.onGearTouched(mParent);
-    }
-
     private void setIconLocation(boolean onLeft) {
         if (onLeft == mOnLeft) {
             // Same side? Do nothing.
             return;
         }
-        mGearIcon.setTranslationX(onLeft ? 0 : (getWidth() - mHorizSpaceForGear));
+
+        setTranslationX(onLeft ? 0 : (mParent.getWidth() - mHorizSpaceForGear));
         mOnLeft = onLeft;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.gear_icon) {
+            if (mListener != null) {
+                mListener.onGearTouched(mParent);
+            }
+        } else {
+            // Do nothing when the background is touched.
+        }
     }
 }

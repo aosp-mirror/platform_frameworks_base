@@ -1657,6 +1657,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 return;
             }
 
+            // Check if the notification is displaying the gear, if so slide notification back
+            if (row.getSettingsRow() != null && row.getSettingsRow().isVisible()) {
+                row.animateTranslateNotification(0);
+                return;
+            }
+
             Notification notification = sbn.getNotification();
             final PendingIntent intent = notification.contentIntent != null
                     ? notification.contentIntent
