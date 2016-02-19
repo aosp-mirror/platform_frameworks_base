@@ -68,8 +68,7 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
-        state.disabledByPolicy = mController.isTetheringAllowed();
-        checkIfRestrictionEnforced(state, UserManager.DISALLOW_CONFIG_TETHERING);
+        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
         if (arg instanceof Boolean) {
             state.value = (boolean) arg;
         } else {
