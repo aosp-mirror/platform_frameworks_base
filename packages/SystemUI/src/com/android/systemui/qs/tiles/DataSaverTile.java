@@ -14,6 +14,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Intent;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile;
@@ -41,6 +42,11 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
         } else {
             mDataSaverController.remListener(this);
         }
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return CellularTile.CELLULAR_SETTINGS;
     }
 
     @Override

@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Intent;
+import android.provider.Settings;
 import android.provider.Settings.Secure;
 
 import com.android.internal.logging.MetricsLogger;
@@ -67,6 +69,11 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     protected void handleUserSwitch(int newUserId) {
         mSetting.setUserId(newUserId);
         handleRefreshState(mSetting.getValue());
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
     }
 
     @Override

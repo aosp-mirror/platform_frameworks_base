@@ -36,7 +36,10 @@ public class TunerActivity extends SettingsDrawerActivity implements
         super.onCreate(savedInstanceState);
 
         if (getFragmentManager().findFragmentByTag(TAG_TUNER) == null) {
-            getFragmentManager().beginTransaction().replace(R.id.content_frame, new TunerFragment(),
+            boolean showNightMode = getIntent().getBooleanExtra(
+                    NightModeFragment.EXTRA_SHOW_NIGHT_MODE, false);
+            getFragmentManager().beginTransaction().replace(R.id.content_frame,
+                    showNightMode ? new NightModeFragment() : new TunerFragment(),
                     TAG_TUNER).commit();
         }
     }

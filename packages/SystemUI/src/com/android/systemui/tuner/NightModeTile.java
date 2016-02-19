@@ -16,6 +16,7 @@
 package com.android.systemui.tuner;
 
 import android.app.ActivityManager;
+import android.content.Intent;
 import android.provider.Settings;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -57,6 +58,12 @@ public class NightModeTile extends QSTile<QSTile.State> implements NightModeCont
     @Override
     public State newTileState() {
         return new State();
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(mContext, TunerActivity.class)
+                .putExtra(NightModeFragment.EXTRA_SHOW_NIGHT_MODE, true);
     }
 
     @Override

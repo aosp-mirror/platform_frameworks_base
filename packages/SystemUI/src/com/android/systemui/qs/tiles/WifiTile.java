@@ -93,6 +93,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     }
 
     @Override
+    public Intent getLongClickIntent() {
+        return WIFI_SETTINGS;
+    }
+
+    @Override
     protected void handleSecondaryClick() {
         // Secondary clicks are header clicks, just toggle.
         mState.copyTo(mStateBeforeClick);

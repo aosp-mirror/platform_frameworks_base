@@ -16,12 +16,15 @@
 package com.android.systemui.qs.external;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.service.quicksettings.IQSTileService;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
@@ -156,8 +159,9 @@ public class CustomTile extends QSTile<QSTile.State> {
     }
 
     @Override
-    protected void handleUserSwitch(int newUserId) {
-        super.handleUserSwitch(newUserId);
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(
+                Uri.fromParts("package", mComponent.getPackageName(), null));
     }
 
     @Override
@@ -181,10 +185,6 @@ public class CustomTile extends QSTile<QSTile.State> {
             // Called through wrapper, won't happen here.
         }
         MetricsLogger.action(mContext, getMetricsCategory(), mComponent.getPackageName());
-    }
-
-    @Override
-    protected void handleLongClick() {
     }
 
     @Override

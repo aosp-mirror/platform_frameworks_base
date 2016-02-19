@@ -101,6 +101,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public Intent getLongClickIntent() {
+        return ZEN_SETTINGS;
+    }
+
+    @Override
     public void handleClick() {
         if (mController.isVolumeRestricted()) {
             // Collapse the panels, so the user can see the toast.

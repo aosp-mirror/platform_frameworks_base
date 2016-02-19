@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
@@ -88,6 +89,11 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         if (!listening) {
             mBatteryDetail.mCurrentView = null;
         }
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
     }
 
     @Override

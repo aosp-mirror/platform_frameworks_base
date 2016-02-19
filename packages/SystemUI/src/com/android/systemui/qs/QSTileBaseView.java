@@ -77,6 +77,7 @@ public class QSTileBaseView extends LinearLayout {
     public void init(OnClickListener click, OnLongClickListener longClick) {
         setClickable(true);
         setOnClickListener(click);
+        setOnLongClickListener(longClick);
     }
 
     @Override
