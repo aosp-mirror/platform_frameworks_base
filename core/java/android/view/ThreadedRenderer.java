@@ -380,7 +380,7 @@ public final class ThreadedRenderer {
     void destroy() {
         mInitialized = false;
         updateEnabledState(null);
-        nDestroy(mNativeProxy);
+        nDestroy(mNativeProxy, mRootNode.mNativeRenderNode);
     }
 
     /**
@@ -994,7 +994,7 @@ public final class ThreadedRenderer {
             float lightX, float lightY, float lightZ);
     private static native void nSetOpaque(long nativeProxy, boolean opaque);
     private static native int nSyncAndDrawFrame(long nativeProxy, long[] frameInfo, int size);
-    private static native void nDestroy(long nativeProxy);
+    private static native void nDestroy(long nativeProxy, long rootRenderNode);
     private static native void nRegisterAnimatingRenderNode(long rootRenderNode, long animatingNode);
 
     private static native void nInvokeFunctor(long functor, boolean waitForCompletion);
