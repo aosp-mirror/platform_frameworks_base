@@ -18,6 +18,7 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.TAG;
+import static com.android.internal.util.Preconditions.checkState;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -40,6 +41,7 @@ import android.util.Log;
 
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -85,15 +87,13 @@ public class RootsCache {
 
         // Create a new anonymous "Recents" RootInfo. It's a faker.
         mRecentsRoot = new RootInfo() {{
-            // Special root for recents
-            authority = null;
-            rootId = null;
-            derivedIcon = R.drawable.ic_root_recent;
-            derivedType = RootInfo.TYPE_RECENTS;
-            flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD;
-            title = mContext.getString(R.string.root_recent);
-            availableBytes = -1;
-        }};
+                // Special root for recents
+                derivedIcon = R.drawable.ic_root_recent;
+                derivedType = RootInfo.TYPE_RECENTS;
+                flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD;
+                title = mContext.getString(R.string.root_recent);
+                availableBytes = -1;
+            }};
     }
 
     private class RootsChangedObserver extends ContentObserver {
@@ -116,6 +116,16 @@ public class RootsCache {
      * Gather roots from all known storage providers.
      */
     public void updateAsync() {
+        // Verifying an assumption about the recents root being immutable.
+        if (DEBUG) {
+            checkState(mRecentsRoot.authority == null);
+            checkState(mRecentsRoot.rootId == null);
+            checkState(mRecentsRoot.derivedIcon == R.drawable.ic_root_recent);
+            checkState(mRecentsRoot.derivedType == RootInfo.TYPE_RECENTS);
+            checkState(mRecentsRoot.flags == (Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD));
+            checkState(mRecentsRoot.title == mContext.getString(R.string.root_recent));
+            checkState(mRecentsRoot.availableBytes == -1);
+        }
         new UpdateTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -412,9 +422,10 @@ public class RootsCache {
             if (!state.showAdvanced && root.isAdvanced()) continue;
             // Exclude non-local devices when local only
             if (state.localOnly && !root.isLocalOnly()) continue;
-            // Exclude downloads roots that don't support directory creation
-            // TODO: Add flag to check the root supports directory creation or not.
-            if (state.directoryCopy && !root.supportsChildren()) continue;
+            // Exclude downloads roots as it doesn't support directory creation (actually
+            // we just don't show them).
+            // TODO: Add flag to check the root supports directory creation.
+            if (state.directoryCopy && !root.isDownloads()) continue;
 
             // Only show empty roots when creating, or in browse mode.
             if (root.isEmpty() && (state.action == State.ACTION_OPEN
