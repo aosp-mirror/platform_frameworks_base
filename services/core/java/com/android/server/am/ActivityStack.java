@@ -1149,7 +1149,7 @@ final class ActivityStack {
                         || mService.isSleepingOrShuttingDown()) {
                     // If we were visible then resumeTopActivities will release resources before
                     // stopping.
-                    addToStopping(prev);
+                    addToStopping(prev, true /* immediate */);
                 }
             } else {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "App died during pause, not stopping: " + prev);
@@ -1210,15 +1210,21 @@ final class ActivityStack {
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
     }
 
-    private void addToStopping(ActivityRecord r) {
-        mStackSupervisor.mStoppingActivities.add(r);
-        if (mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE ||
-                r.frontOfTask && mTaskHistory.size() <= 1) {
-            // If we already have a few activities waiting to stop,
-            // then give up on things going idle and start clearing
-            // them out. Or if r is the last of activity of the last task the stack
-            // will be empty and must be cleared immediately.
-            if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "To many pending stops, forcing idle");
+    private void addToStopping(ActivityRecord r, boolean immediate) {
+        if (!mStackSupervisor.mStoppingActivities.contains(r)) {
+            mStackSupervisor.mStoppingActivities.add(r);
+        }
+
+        // If we already have a few activities waiting to stop, then give up
+        // on things going idle and start clearing them out. Or if r is the
+        // last of activity of the last task the stack will be empty and must
+        // be cleared immediately.
+        boolean forceIdle = mStackSupervisor.mStoppingActivities.size() > MAX_STOPPING_TO_FORCE
+                || (r.frontOfTask && mTaskHistory.size() <= 1);
+
+        if (immediate || forceIdle) {
+            if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Scheduling idle now: forceIdle="
+                    + forceIdle + "immediate=" + immediate);
             mStackSupervisor.scheduleIdleLocked();
         } else {
             mStackSupervisor.checkReadyForSleepLocked();
@@ -1697,10 +1703,7 @@ final class ActivityStack {
                     if (visibleBehind == r) {
                         releaseBackgroundResources(r);
                     } else {
-                        if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                            mStackSupervisor.mStoppingActivities.add(r);
-                        }
-                        mStackSupervisor.scheduleIdleLocked();
+                        addToStopping(r, true /* immediate */);
                     }
                     break;
 
@@ -3261,7 +3264,7 @@ final class ActivityStack {
         // finishing until the resumed one becomes visible.
         if (mode == FINISH_AFTER_VISIBLE && r.nowVisible) {
             if (!mStackSupervisor.mStoppingActivities.contains(r)) {
-                addToStopping(r);
+                addToStopping(r, false /* immediate */);
             }
             if (DEBUG_STATES) Slog.v(TAG_STATES,
                     "Moving to STOPPING: "+ r + " (finish requested)");
