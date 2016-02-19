@@ -103,6 +103,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.GearDisplayedListener;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.ArrayList;
@@ -115,7 +116,7 @@ import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks, ActivatableNotificationView.OnActivatedListener,
         ExpandableNotificationRow.ExpansionLogger, NotificationData.Environment,
-        ExpandableNotificationRow.OnExpandClickListener {
+        ExpandableNotificationRow.OnExpandClickListener, GearDisplayedListener {
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean MULTIUSER_DEBUG = false;
@@ -220,6 +221,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
+    private ExpandableNotificationRow mNotificationGearDisplayed;
 
     private KeyboardShortcuts mKeyboardShortcuts;
 
@@ -1008,6 +1010,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         guts.bindImportance(sbn, row, mNotificationData.getImportance(sbn.getKey()));
     }
 
+    protected GearDisplayedListener getGearDisplayedListener() {
+        return this;
+    }
+
     protected SwipeHelper.LongPressListener getNotificationLongClicker() {
         return new SwipeHelper.LongPressListener() {
             @Override
@@ -1020,7 +1026,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                     return false;
                 }
 
-                ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
                 bindGuts(row);
 
                 // Assume we are a status_bar_notification_row
@@ -1052,6 +1058,14 @@ public abstract class BaseStatusBar extends SystemUI implements
                                 = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
                         a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                         a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+                        a.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                // Move the notification view back over the gear
+                                row.resetTranslation();
+                            }
+                        });
                         a.start();
                         guts.setExposed(true);
                         mStackScroller.onHeightChanged(null, true /* needsAnimation */);
@@ -1061,6 +1075,11 @@ public abstract class BaseStatusBar extends SystemUI implements
                 return true;
             }
         };
+    }
+
+    @Override
+    public void onGearDisplayed(ExpandableNotificationRow row) {
+        mNotificationGearDisplayed = row;
     }
 
     public void dismissPopups() {
@@ -1094,6 +1113,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             a.start();
             v.setExposed(false);
             mStackScroller.onHeightChanged(null, true /* needsAnimation */);
+        }
+
+        if (mNotificationGearDisplayed != null) {
+            mNotificationGearDisplayed.resetTranslation();
+            mNotificationGearDisplayed = null;
         }
     }
 
