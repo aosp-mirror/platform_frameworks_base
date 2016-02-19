@@ -254,7 +254,7 @@ class AppWindowToken extends WindowToken {
                 // In cases where there are multiple windows, we prefer the non-exiting window. This
                 // happens for example when replacing windows during an activity relaunch. When
                 // constructing the animation, we want the new window, not the exiting one.
-                if (win.mExiting) {
+                if (win.mAnimatingExit) {
                     candidate = win;
                 } else {
                     return win;
@@ -307,11 +307,11 @@ class AppWindowToken extends WindowToken {
             // If the app already requested to remove its window, we don't modify
             // its exiting state. Otherwise the stale window won't get removed on
             // exit and could cause focus to be given to the wrong window.
-            if (!(win.mRemoveOnExit && win.mExiting)) {
-                win.mExiting = exiting;
+            if (!(win.mRemoveOnExit && win.mAnimatingExit)) {
+                win.mAnimatingExit = exiting;
             }
             // If we're no longer exiting, remove the window from destroying list
-            if (!win.mExiting && win.mDestroying) {
+            if (!win.mAnimatingExit && win.mDestroying) {
                 win.mDestroying = false;
                 service.mDestroySurface.remove(win);
             }
@@ -330,13 +330,13 @@ class AppWindowToken extends WindowToken {
                 continue;
             }
 
-            if (!mAppStopped && !win.mClientRemoveRequested) {
+            if (!(mAppStopped || win.mWindowRemovalAllowed)) {
                 continue;
             }
 
             win.destroyOrSaveSurface();
             if (win.mRemoveOnExit) {
-                win.mExiting = false;
+                win.mAnimatingExit = false;
                 service.removeWindowInnerLocked(win);
             }
             final DisplayContent displayContent = win.getDisplayContent();

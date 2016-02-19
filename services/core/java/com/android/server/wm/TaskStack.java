@@ -420,7 +420,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 final ArrayList<WindowState> windows = activities.get(activityNdx).allAppWindows;
                 for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                     final WindowStateAnimator winAnimator = windows.get(winNdx).mWinAnimator;
-                    if (winAnimator.isAnimating() || winAnimator.mWin.mExiting) {
+                    if (winAnimator.isAnimating() || winAnimator.mWin.mAnimatingExit) {
                         return true;
                     }
                 }
