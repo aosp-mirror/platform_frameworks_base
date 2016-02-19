@@ -16,7 +16,9 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.provider.Settings;
 import android.util.Pair;
 
 import com.android.internal.logging.MetricsProto.MetricsEvent;
@@ -39,6 +41,11 @@ public class UserTile extends QSTile<QSTile.State> implements UserInfoController
     @Override
     public State newTileState() {
         return new QSTile.State();
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_USER_SETTINGS);
     }
 
     @Override

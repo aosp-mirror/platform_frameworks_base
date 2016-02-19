@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 
 import com.android.internal.logging.MetricsLogger;
@@ -65,6 +66,11 @@ public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
         final ConnectivityManager mgr =
                 (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mgr.setAirplaneMode(enabled);
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
     }
 
     @Override
