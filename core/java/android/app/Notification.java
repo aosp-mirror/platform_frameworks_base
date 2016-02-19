@@ -3460,7 +3460,7 @@ public class Notification implements Parcelable
         private static Class<? extends Style> getNotificationStyleClass(String templateClass) {
             Class<? extends Style>[] classes = new Class[] {
                     BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
-                    DecoratedCustomViewStyle.class };
+                    DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class };
             for (Class<? extends Style> innerClass : classes) {
                 if (templateClass.equals(innerClass.getName())) {
                     return innerClass;
@@ -4519,6 +4519,103 @@ public class Notification implements Parcelable
                         R.dimen.notification_content_picture_margin);
             }
             remoteViews.setViewLayoutMarginEnd(R.id.notification_main_column, endMargin);
+        }
+    }
+
+    /**
+     * Notification style for media custom views that are decorated by the system
+     *
+     * <p>Instead of providing a media notification that is completely custom, a developer can set
+     * this style and still obtain system decorations like the notification header with the expand
+     * affordance and actions.
+     *
+     * <p>Use {@link android.app.Notification.Builder#setCustomContentView(RemoteViews)},
+     * {@link android.app.Notification.Builder#setCustomBigContentView(RemoteViews)} and
+     * {@link android.app.Notification.Builder#setCustomHeadsUpContentView(RemoteViews)} to set the
+     * corresponding custom views to display.
+     *
+     * To use this style with your Notification, feed it to
+     * {@link Notification.Builder#setStyle(android.app.Notification.Style)} like so:
+     * <pre class="prettyprint">
+     * Notification noti = new Notification.Builder()
+     *     .setSmallIcon(R.drawable.ic_stat_player)
+     *     .setLargeIcon(albumArtBitmap))
+     *     .setCustomContentView(contentView);
+     *     .setStyle(<b>new Notification.DecoratedMediaCustomViewStyle()</b>
+     *          .setMediaSession(mySession))
+     *     .build();
+     * </pre>
+     *
+     * @see android.app.Notification.DecoratedCustomViewStyle
+     * @see android.app.Notification.MediaStyle
+     */
+    public static class DecoratedMediaCustomViewStyle extends MediaStyle {
+
+        public DecoratedMediaCustomViewStyle() {
+        }
+
+        public DecoratedMediaCustomViewStyle(Builder builder) {
+            setBuilder(builder);
+        }
+
+        /**
+         * @hide
+         */
+        public boolean displayCustomViewInline() {
+            return true;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView() {
+            RemoteViews remoteViews = super.makeContentView();
+            return buildIntoRemoteView(remoteViews, R.id.notification_content_container,
+                    mBuilder.mN.contentView);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeBigContentView() {
+            RemoteViews customRemoteView = mBuilder.mN.bigContentView != null
+                    ? mBuilder.mN.bigContentView
+                    : mBuilder.mN.contentView;
+            return makeBigContentViewWithCustomContent(customRemoteView);
+        }
+
+        private RemoteViews makeBigContentViewWithCustomContent(RemoteViews customRemoteView) {
+            RemoteViews remoteViews = super.makeBigContentView();
+            if (remoteViews != null) {
+                return buildIntoRemoteView(remoteViews, R.id.notification_main_column,
+                        customRemoteView);
+            } else if (customRemoteView != mBuilder.mN.contentView){
+                remoteViews = super.makeContentView();
+                return buildIntoRemoteView(remoteViews, R.id.notification_content_container,
+                        customRemoteView);
+            } else {
+                return null;
+            }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView() {
+            RemoteViews customRemoteView = mBuilder.mN.headsUpContentView != null
+                    ? mBuilder.mN.headsUpContentView
+                    : mBuilder.mN.contentView;
+            return makeBigContentViewWithCustomContent(customRemoteView);
+        }
+
+        private RemoteViews buildIntoRemoteView(RemoteViews remoteViews, int id,
+                RemoteViews customContent) {
+            remoteViews.removeAllViews(id);
+            remoteViews.addView(id, customContent);
+            return remoteViews;
         }
     }
 
