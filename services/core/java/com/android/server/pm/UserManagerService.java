@@ -1833,6 +1833,11 @@ public class UserManagerService extends IUserManager.Stub {
                         return null;
                     }
                 }
+                if (!UserManager.isSplitSystemUser() && (flags & UserInfo.FLAG_EPHEMERAL) != 0) {
+                    Log.e(LOG_TAG,
+                            "Ephemeral users are supported on split-system-user systems only.");
+                    return null;
+                }
                 // In split system user mode, we assign the first human user the primary flag.
                 // And if there is no device owner, we also assign the admin flag to primary user.
                 if (UserManager.isSplitSystemUser()
