@@ -291,6 +291,7 @@ public class Main {
     @Test
     public void testActivity() throws ClassNotFoundException {
         renderAndVerify("activity.xml", "activity.png");
+
     }
 
     /** Test allwidgets.xml */
@@ -430,8 +431,6 @@ public class Main {
             ImageUtils.requireSimilar(goldenImagePath, session.getImage());
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
-        } finally {
-            session.dispose();
         }
     }
 
