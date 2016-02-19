@@ -30,14 +30,14 @@
 namespace aapt {
 
 class ResourceTable;
-struct ISymbolTable;
+class SymbolTable;
 
 struct IAaptContext {
     virtual ~IAaptContext() = default;
 
-    virtual ISymbolTable* getExternalSymbols() = 0;
+    virtual SymbolTable* getExternalSymbols() = 0;
     virtual IDiagnostics* getDiagnostics() = 0;
-    virtual StringPiece16 getCompilationPackage() = 0;
+    virtual const std::u16string& getCompilationPackage() = 0;
     virtual uint8_t getPackageId() = 0;
     virtual NameMangler* getNameMangler() = 0;
     virtual bool verbose() = 0;

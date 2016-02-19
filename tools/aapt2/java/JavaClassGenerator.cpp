@@ -223,8 +223,10 @@ bool JavaClassGenerator::writeEntriesForClass(ClassDefinitionWriter* outClassDef
             continue;
         }
 
-        ResourceId id(package->id.value(), type->id.value(), entry->id.value());
-        assert(id.isValid());
+        ResourceId id;
+        if (package->id && type->id && entry->id) {
+            id = ResourceId(package->id.value(), type->id.value(), entry->id.value());
+        }
 
         std::u16string unmangledPackage;
         std::u16string unmangledName = entry->name;

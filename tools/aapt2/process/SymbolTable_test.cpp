@@ -15,14 +15,11 @@
  */
 
 #include "process/SymbolTable.h"
-#include "test/Builders.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
-TEST(SymbolTableWrapperTest, FindSymbolsWithIds) {
+TEST(ResourceTableSymbolSourceTest, FindSymbols) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .addSimple(u"@android:id/foo", ResourceId(0x01020000))
             .addSimple(u"@android:id/bar")
@@ -30,27 +27,27 @@ TEST(SymbolTableWrapperTest, FindSymbolsWithIds) {
                       test::AttributeBuilder().build())
             .build();
 
-    SymbolTableWrapper symbolTable(table.get());
-    EXPECT_NE(symbolTable.findByName(test::parseNameOrDie(u"@android:id/foo")), nullptr);
-    EXPECT_EQ(symbolTable.findByName(test::parseNameOrDie(u"@android:id/bar")), nullptr);
+    ResourceTableSymbolSource symbolSource(table.get());
+    EXPECT_NE(nullptr, symbolSource.findByName(test::parseNameOrDie(u"@android:id/foo")));
+    EXPECT_NE(nullptr, symbolSource.findByName(test::parseNameOrDie(u"@android:id/bar")));
 
-    const ISymbolTable::Symbol* s = symbolTable.findByName(
+    std::unique_ptr<SymbolTable::Symbol> s = symbolSource.findByName(
             test::parseNameOrDie(u"@android:attr/foo"));
-    ASSERT_NE(s, nullptr);
-    EXPECT_NE(s->attribute, nullptr);
+    ASSERT_NE(nullptr, s);
+    EXPECT_NE(nullptr, s->attribute);
 }
 
-TEST(SymbolTableWrapperTest, FindPrivateAttrSymbol) {
+TEST(ResourceTableSymbolSourceTest, FindPrivateAttrSymbol) {
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
             .addValue(u"@android:^attr-private/foo", ResourceId(0x01010000),
                       test::AttributeBuilder().build())
             .build();
 
-    SymbolTableWrapper symbolTable(table.get());
-    const ISymbolTable::Symbol* s = symbolTable.findByName(
+    ResourceTableSymbolSource symbolSource(table.get());
+    std::unique_ptr<SymbolTable::Symbol> s = symbolSource.findByName(
                 test::parseNameOrDie(u"@android:attr/foo"));
-    ASSERT_NE(s, nullptr);
-    EXPECT_NE(s->attribute, nullptr);
+    ASSERT_NE(nullptr, s);
+    EXPECT_NE(nullptr, s->attribute);
 }
 
 } // namespace aapt

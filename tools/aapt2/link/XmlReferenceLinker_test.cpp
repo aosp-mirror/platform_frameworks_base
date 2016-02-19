@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
+#include <test/Context.h>
 #include "link/Linkers.h"
-
-#include "test/Builders.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+#include "test/Test.h"
 
 namespace aapt {
 
@@ -30,7 +27,7 @@ public:
                 .setCompilationPackage(u"com.app.test")
                 .setNameManglerPolicy(
                         NameManglerPolicy{ u"com.app.test", { u"com.android.support" } })
-                .setSymbolTable(test::StaticSymbolTableBuilder()
+                .addSymbolSource(test::StaticSymbolSourceBuilder()
                         .addPublicSymbol(u"@android:attr/layout_width", ResourceId(0x01010000),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_ENUM |
@@ -92,14 +89,16 @@ TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
                                                     u"layout_width");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x01010000));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x01010000));
     ASSERT_NE(xmlAttr->compiledValue, nullptr);
     ASSERT_NE(valueCast<BinaryPrimitive>(xmlAttr->compiledValue.get()), nullptr);
 
     xmlAttr = viewEl->findAttribute(u"http://schemas.android.com/apk/res/android", u"background");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x01010001));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x01010001));
     ASSERT_NE(xmlAttr->compiledValue, nullptr);
     Reference* ref = valueCast<Reference>(xmlAttr->compiledValue.get());
     ASSERT_NE(ref, nullptr);
@@ -163,7 +162,8 @@ TEST_F(XmlReferenceLinkerTest, LinkMangledAttributes) {
             u"http://schemas.android.com/apk/res/com.android.support", u"colorAccent");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x7f010001));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x7f010001));
     ASSERT_NE(valueCast<BinaryPrimitive>(xmlAttr->compiledValue.get()), nullptr);
 }
 
@@ -182,7 +182,8 @@ TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
                                                     u"colorAccent");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x7f010000));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x7f010000));
     Reference* ref = valueCast<Reference>(xmlAttr->compiledValue.get());
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->name);
@@ -209,7 +210,8 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
                                                     u"attr");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x01010002));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x01010002));
     Reference* ref = valueCast<Reference>(xmlAttr->compiledValue.get());
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->id);
@@ -223,7 +225,8 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {
     xmlAttr = viewEl->findAttribute(u"http://schemas.android.com/apk/res/com.app.test", u"attr");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x7f010002));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x7f010002));
     ref = valueCast<Reference>(xmlAttr->compiledValue.get());
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->id);
@@ -246,7 +249,8 @@ TEST_F(XmlReferenceLinkerTest, LinkViewWithLocalPackageAndAliasOfTheSameName) {
             u"http://schemas.android.com/apk/res/com.app.test", u"attr");
     ASSERT_NE(xmlAttr, nullptr);
     AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute);
-    EXPECT_EQ(xmlAttr->compiledAttribute.value().id, ResourceId(0x7f010002));
+    AAPT_ASSERT_TRUE(xmlAttr->compiledAttribute.value().id);
+    EXPECT_EQ(xmlAttr->compiledAttribute.value().id.value(), ResourceId(0x7f010002));
     Reference* ref = valueCast<Reference>(xmlAttr->compiledValue.get());
     ASSERT_NE(ref, nullptr);
     AAPT_ASSERT_TRUE(ref->id);

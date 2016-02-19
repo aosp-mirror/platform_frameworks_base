@@ -15,12 +15,9 @@
  */
 
 #include "link/ReferenceLinker.h"
-#include "process/SymbolTable.h"
+#include "test/Test.h"
 
-#include "test/Builders.h"
-#include "test/Context.h"
-
-#include <gtest/gtest.h>
+using android::ResTable_map;
 
 namespace aapt {
 
@@ -41,12 +38,10 @@ TEST(ReferenceLinkerTest, LinkSimpleReferences) {
             .setCompilationPackage(u"com.app.test")
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test" })
-            .setSymbolTable(JoinedSymbolTableBuilder()
-                            .addSymbolTable(util::make_unique<SymbolTableWrapper>(table.get()))
-                            .addSymbolTable(test::StaticSymbolTableBuilder()
-                                    .addPublicSymbol(u"@android:string/ok", ResourceId(0x01040034))
-                                    .build())
-                            .build())
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .addSymbolSource(test::StaticSymbolSourceBuilder()
+                                     .addPublicSymbol(u"@android:string/ok", ResourceId(0x01040034))
+                                     .build())
             .build();
 
     ReferenceLinker linker;
@@ -91,19 +86,20 @@ TEST(ReferenceLinkerTest, LinkStyleAttributes) {
             .setCompilationPackage(u"com.app.test")
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test" })
-            .setSymbolTable(test::StaticSymbolTableBuilder()
-                    .addPublicSymbol(u"@android:style/Theme.Material", ResourceId(0x01060000))
-                    .addPublicSymbol(u"@android:attr/foo", ResourceId(0x01010001),
-                               test::AttributeBuilder()
-                                    .setTypeMask(android::ResTable_map::TYPE_COLOR)
-                                    .build())
-                    .addPublicSymbol(u"@android:attr/bar", ResourceId(0x01010002),
-                               test::AttributeBuilder()
-                                    .setTypeMask(android::ResTable_map::TYPE_FLAGS)
-                                    .addItem(u"one", 0x01)
-                                    .addItem(u"two", 0x02)
-                                    .build())
-                    .build())
+            .addSymbolSource(test::StaticSymbolSourceBuilder()
+                                     .addPublicSymbol(u"@android:style/Theme.Material",
+                                                      ResourceId(0x01060000))
+                                     .addPublicSymbol(u"@android:attr/foo", ResourceId(0x01010001),
+                                                      test::AttributeBuilder()
+                                                              .setTypeMask(ResTable_map::TYPE_COLOR)
+                                                              .build())
+                                     .addPublicSymbol(u"@android:attr/bar", ResourceId(0x01010002),
+                                                      test::AttributeBuilder()
+                                                              .setTypeMask(ResTable_map::TYPE_FLAGS)
+                                                              .addItem(u"one", 0x01)
+                                                              .addItem(u"two", 0x02)
+                                                              .build())
+                                     .build())
             .build();
 
     ReferenceLinker linker;
@@ -131,11 +127,13 @@ TEST(ReferenceLinkerTest, LinkMangledReferencesAndAttributes) {
             .setCompilationPackage(u"com.app.test")
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test", { u"com.android.support" } })
-            .setSymbolTable(test::StaticSymbolTableBuilder()
-                    .addPublicSymbol(u"@com.app.test:attr/com.android.support$foo",
-                               ResourceId(0x7f010000), test::AttributeBuilder()
-                                        .setTypeMask(android::ResTable_map::TYPE_COLOR).build())
-                    .build())
+            .addSymbolSource(test::StaticSymbolSourceBuilder()
+                                     .addPublicSymbol(u"@com.app.test:attr/com.android.support$foo",
+                                                      ResourceId(0x7f010000),
+                                                      test::AttributeBuilder()
+                                                              .setTypeMask(ResTable_map::TYPE_COLOR)
+                                                              .build())
+                                     .build())
             .build();
 
     std::unique_ptr<ResourceTable> table = test::ResourceTableBuilder()
@@ -167,12 +165,10 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateSymbols) {
             .setCompilationPackage(u"com.app.test")
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test" })
-            .setSymbolTable(JoinedSymbolTableBuilder()
-                            .addSymbolTable(util::make_unique<SymbolTableWrapper>(table.get()))
-                            .addSymbolTable(test::StaticSymbolTableBuilder()
-                                    .addSymbol(u"@android:string/hidden", ResourceId(0x01040034))
-                                    .build())
-                            .build())
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .addSymbolSource(test::StaticSymbolSourceBuilder()
+                                     .addSymbol(u"@android:string/hidden", ResourceId(0x01040034))
+                                     .build())
             .build();
 
     ReferenceLinker linker;
@@ -190,13 +186,12 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateMangledSymbols) {
             .setCompilationPackage(u"com.app.test")
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test", { u"com.app.lib" } })
-            .setSymbolTable(JoinedSymbolTableBuilder()
-                            .addSymbolTable(util::make_unique<SymbolTableWrapper>(table.get()))
-                            .addSymbolTable(test::StaticSymbolTableBuilder()
-                                    .addSymbol(u"@com.app.test:string/com.app.lib$hidden",
-                                               ResourceId(0x7f040034))
-                                    .build())
-                            .build())
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .addSymbolSource(test::StaticSymbolSourceBuilder()
+                                     .addSymbol(u"@com.app.test:string/com.app.lib$hidden",
+                                                ResourceId(0x7f040034))
+                                     .build())
+
             .build();
 
     ReferenceLinker linker;
@@ -215,15 +210,14 @@ TEST(ReferenceLinkerTest, FailToLinkPrivateStyleAttributes) {
             .setCompilationPackage(u"com.app.test")
             .setPackageId(0x7f)
             .setNameManglerPolicy(NameManglerPolicy{ u"com.app.test" })
-            .setSymbolTable(JoinedSymbolTableBuilder()
-                            .addSymbolTable(util::make_unique<SymbolTableWrapper>(table.get()))
-                            .addSymbolTable(test::StaticSymbolTableBuilder()
-                                    .addSymbol(u"@android:attr/hidden", ResourceId(0x01010001),
-                                               test::AttributeBuilder()
-                                                    .setTypeMask(android::ResTable_map::TYPE_COLOR)
-                                                    .build())
-                                    .build())
-                            .build())
+            .addSymbolSource(util::make_unique<ResourceTableSymbolSource>(table.get()))
+            .addSymbolSource(test::StaticSymbolSourceBuilder()
+                                     .addSymbol(u"@android:attr/hidden", ResourceId(0x01010001),
+                                                test::AttributeBuilder()
+                                                        .setTypeMask(
+                                                                android::ResTable_map::TYPE_COLOR)
+                                                        .build())
+                                     .build())
             .build();
 
     ReferenceLinker linker;

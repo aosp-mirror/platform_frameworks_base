@@ -92,9 +92,8 @@ std::unique_ptr<ZipFileCollection> ZipFileCollection::create(const StringPiece& 
         return {};
     }
 
-    ZipString suffix(".flat");
     void* cookie = nullptr;
-    result = StartIteration(collection->mHandle, &cookie, nullptr, &suffix);
+    result = StartIteration(collection->mHandle, &cookie, nullptr, nullptr);
     if (result != 0) {
         if (outError) *outError = ErrorCodeString(result);
         return {};

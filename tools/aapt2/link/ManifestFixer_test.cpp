@@ -30,7 +30,7 @@ struct ManifestFixerTest : public ::testing::Test {
                 .setCompilationPackage(u"android")
                 .setPackageId(0x01)
                 .setNameManglerPolicy(NameManglerPolicy{ u"android" })
-                .setSymbolTable(test::StaticSymbolTableBuilder()
+                .addSymbolSource(test::StaticSymbolSourceBuilder()
                         .addSymbol(u"@android:attr/package", ResourceId(0x01010000),
                                    test::AttributeBuilder()
                                         .setTypeMask(android::ResTable_map::TYPE_STRING)

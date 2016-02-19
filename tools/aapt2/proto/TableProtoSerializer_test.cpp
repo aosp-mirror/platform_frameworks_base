@@ -62,6 +62,17 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
                                        test::buildPrimitive(android::Res_value::TYPE_INT_DEC, 321u),
                                        context->getDiagnostics()));
 
+    // Make a reference with both resource name and resource ID.
+    // The reference should point to a resource outside of this table to test that both
+    // name and id get serialized.
+    Reference expectedRef;
+    expectedRef.name = test::parseNameOrDie(u"@android:layout/main");
+    expectedRef.id = ResourceId(0x01020000);
+    ASSERT_TRUE(table->addResource(test::parseNameOrDie(u"@com.app.a:layout/abc"),
+                                   ConfigDescription::defaultConfig(), std::string(),
+                                   util::make_unique<Reference>(expectedRef),
+                                   context->getDiagnostics()));
+
     std::unique_ptr<pb::ResourceTable> pbTable = serializeTableToPb(table.get());
     ASSERT_NE(nullptr, pbTable);
 
@@ -90,6 +101,13 @@ TEST(TableProtoSerializer, SerializeSinglePackage) {
             newTable.get(), u"@com.app.a:integer/one", test::parseConfigOrDie("land"), "tablet");
     ASSERT_NE(nullptr, prim);
     EXPECT_EQ(321u, prim->value.data);
+
+    Reference* actualRef = test::getValue<Reference>(newTable.get(), u"@com.app.a:layout/abc");
+    ASSERT_NE(nullptr, actualRef);
+    AAPT_ASSERT_TRUE(actualRef->name);
+    AAPT_ASSERT_TRUE(actualRef->id);
+    EXPECT_EQ(expectedRef.name.value(), actualRef->name.value());
+    EXPECT_EQ(expectedRef.id.value(), actualRef->id.value());
 }
 
 TEST(TableProtoSerializer, SerializeFileHeader) {
@@ -128,6 +146,29 @@ TEST(TableProtoSerializer, SerializeFileHeader) {
 
     ASSERT_EQ(1u, file->exportedSymbols.size());
     EXPECT_EQ(test::parseNameOrDie(u"@+id/unchecked"), file->exportedSymbols[0].name);
+}
+
+TEST(TableProtoSerializer, DeserializeCorruptHeaderSafely) {
+    ResourceFile f;
+    std::unique_ptr<pb::CompiledFile> pbFile = serializeCompiledFileToPb(f);
+
+    const std::string expectedData = "1234";
+
+    std::string outputStr;
+    {
+        google::protobuf::io::StringOutputStream outStream(&outputStr);
+        CompiledFileOutputStream outFileStream(&outStream, pbFile.get());
+
+        ASSERT_TRUE(outFileStream.Write(expectedData.data(), expectedData.size()));
+        ASSERT_TRUE(outFileStream.Finish());
+    }
+
+    outputStr[0] = 0xff;
+
+    CompiledFileInputStream inFileStream(outputStr.data(), outputStr.size());
+    EXPECT_EQ(nullptr, inFileStream.CompiledFile());
+    EXPECT_EQ(nullptr, inFileStream.data());
+    EXPECT_EQ(0u, inFileStream.size());
 }
 
 } // namespace aapt

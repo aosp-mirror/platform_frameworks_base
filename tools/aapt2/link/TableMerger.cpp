@@ -34,10 +34,21 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* outTable,
     assert(mMasterPackage && "package name or ID already taken");
 }
 
+bool TableMerger::merge(const Source& src, ResourceTable* table,
+                        io::IFileCollection* collection) {
+    return mergeImpl(src, table, collection, false /* overlay */, true /* allow new */);
+}
+
+bool TableMerger::mergeOverlay(const Source& src, ResourceTable* table,
+                               io::IFileCollection* collection) {
+    return mergeImpl(src, table, collection, true /* overlay */, mOptions.autoAddOverlay);
+}
+
 /**
  * This will merge packages with the same package name (or no package name).
  */
 bool TableMerger::mergeImpl(const Source& src, ResourceTable* table,
+                            io::IFileCollection* collection,
                             bool overlay, bool allowNew) {
     const uint8_t desiredPackageId = mContext->getPackageId();
 
@@ -51,24 +62,34 @@ bool TableMerger::mergeImpl(const Source& src, ResourceTable* table,
         }
 
         if (package->name.empty() || mContext->getCompilationPackage() == package->name) {
+            FileMergeCallback callback;
+            if (collection) {
+                callback = [&](const ResourceNameRef& name, const ConfigDescription& config,
+                               FileReference* newFile, FileReference* oldFile) -> bool {
+                    // The old file's path points inside the APK, so we can use it as is.
+                    io::IFile* f = collection->findFile(util::utf16ToUtf8(*oldFile->path));
+                    if (!f) {
+                        mContext->getDiagnostics()->error(DiagMessage(src) << "file '"
+                                                          << *oldFile->path
+                                                          << "' not found");
+                        return false;
+                    }
+
+                    newFile->file = f;
+                    return true;
+                };
+            }
+
             // Merge here. Once the entries are merged and mangled, any references to
             // them are still valid. This is because un-mangled references are
             // mangled, then looked up at resolution time.
             // Also, when linking, we convert references with no package name to use
             // the compilation package name.
             error |= !doMerge(src, table, package.get(),
-                              false /* mangle */, overlay, allowNew, {});
+                              false /* mangle */, overlay, allowNew, callback);
         }
     }
     return !error;
-}
-
-bool TableMerger::merge(const Source& src, ResourceTable* table) {
-    return mergeImpl(src, table, false /* overlay */, true /* allow new */);
-}
-
-bool TableMerger::mergeOverlay(const Source& src, ResourceTable* table) {
-    return mergeImpl(src, table, true /* overlay */, mOptions.autoAddOverlay);
 }
 
 /**

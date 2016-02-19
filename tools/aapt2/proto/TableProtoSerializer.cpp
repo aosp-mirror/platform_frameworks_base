@@ -178,10 +178,13 @@ private:
     void serializeReferenceToPb(const Reference& ref, pb::Reference* pbRef) {
         if (ref.id) {
             pbRef->set_id(ref.id.value().id);
-        } else if (ref.name) {
+        }
+
+        if (ref.name) {
             StringPool::Ref symbolRef = mSymbolPool->makeRef(ref.name.value().toString());
             pbRef->set_symbol_idx(static_cast<uint32_t>(symbolRef.getIndex()));
         }
+
         pbRef->set_private_(ref.privateReference);
         pbRef->set_type(serializeReferenceTypeToPb(ref.referenceType));
     }
