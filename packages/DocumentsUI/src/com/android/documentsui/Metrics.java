@@ -64,23 +64,23 @@ public final class Metrics {
 
     // Indices for bucketing roots in the roots histogram. "Other" is the catch-all index for any
     // root that is not explicitly recognized by the Metrics code (see {@link
-    // #getSanitizedRootIndex}). Apps are also bucketed in this histogram using negative indices
-    // (see below).
+    // #getSanitizedRootIndex}). Apps are also bucketed in this histogram.
     // Do not change or rearrange these values, that will break historical data. Only add to the end
     // of the list.
-    private static final int ROOT_NONE = 0;
-    private static final int ROOT_OTHER = 1;
-    private static final int ROOT_AUDIO = 2;
-    private static final int ROOT_DEVICE_STORAGE = 3;
-    private static final int ROOT_DOWNLOADS = 4;
-    private static final int ROOT_HOME = 5;
-    private static final int ROOT_IMAGES = 6;
-    private static final int ROOT_RECENTS = 7;
-    private static final int ROOT_VIDEOS = 8;
-    private static final int ROOT_MTP = 9;
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int ROOT_NONE = 1;
+    private static final int ROOT_OTHER = 2;
+    private static final int ROOT_AUDIO = 3;
+    private static final int ROOT_DEVICE_STORAGE = 4;
+    private static final int ROOT_DOWNLOADS = 5;
+    private static final int ROOT_HOME = 6;
+    private static final int ROOT_IMAGES = 7;
+    private static final int ROOT_RECENTS = 8;
+    private static final int ROOT_VIDEOS = 9;
+    private static final int ROOT_MTP = 10;
     // Apps aren't really "roots", but they are treated as such in the roots fragment UI and so they
-    // are logged analogously to roots. Use negative numbers to identify apps.
-    private static final int ROOT_THIRD_PARTY_APP = -1;
+    // are logged analogously to roots.
+    private static final int ROOT_THIRD_PARTY_APP = 100;
 
     @IntDef(flag = true, value = {
             ROOT_NONE,
@@ -99,19 +99,21 @@ public final class Metrics {
     public @interface Root {}
 
     // Indices for bucketing mime types.
-    private static final int MIME_OTHER = -2; // anything not enumerated below
-    private static final int MIME_NONE = -1; // null mime
-    private static final int MIME_ANY = 0; // */*
-    private static final int MIME_APPLICATION = 1; // application/*
-    private static final int MIME_AUDIO = 2; // audio/*
-    private static final int MIME_IMAGE = 3; // image/*
-    private static final int MIME_MESSAGE = 4; // message/*
-    private static final int MIME_MULTIPART = 5; // multipart/*
-    private static final int MIME_TEXT = 6; // text/*
-    private static final int MIME_VIDEO = 7; // video/*
+    // Do not change or rearrange these values, that will break historical data. Only add to the end
+    // of the list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int MIME_NONE = 1; // null mime
+    private static final int MIME_ANY = 2; // */*
+    private static final int MIME_APPLICATION = 3; // application/*
+    private static final int MIME_AUDIO = 4; // audio/*
+    private static final int MIME_IMAGE = 5; // image/*
+    private static final int MIME_MESSAGE = 6; // message/*
+    private static final int MIME_MULTIPART = 7; // multipart/*
+    private static final int MIME_TEXT = 8; // text/*
+    private static final int MIME_VIDEO = 9; // video/*
+    private static final int MIME_OTHER = 10; // anything not enumerated below
 
     @IntDef(flag = true, value = {
-            MIME_OTHER,
             MIME_NONE,
             MIME_ANY,
             MIME_APPLICATION,
@@ -120,25 +122,29 @@ public final class Metrics {
             MIME_MESSAGE,
             MIME_MULTIPART,
             MIME_TEXT,
-            MIME_VIDEO
+            MIME_VIDEO,
+            MIME_OTHER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Mime {}
 
     // Codes representing different kinds of file operations. These are used for bucketing
     // operations in the COUNT_FILEOP_{SYSTEM|EXTERNAL} histograms.
-    private static final int FILEOP_OTHER = 0; // any file operation not listed below
-    private static final int FILEOP_COPY_INTRA_PROVIDER = 1; // Copy within a provider
-    private static final int FILEOP_COPY_SYSTEM_PROVIDER = 2; // Copy to a system provider.
-    private static final int FILEOP_COPY_EXTERNAL_PROVIDER = 3; // Copy to a 3rd-party provider.
-    private static final int FILEOP_MOVE_INTRA_PROVIDER = 4; // Move within a provider.
-    private static final int FILEOP_MOVE_SYSTEM_PROVIDER = 5; // Move to a system provider.
-    private static final int FILEOP_MOVE_EXTERNAL_PROVIDER = 6; // Move to a 3rd-party provider.
-    private static final int FILEOP_DELETE = 7;
-    private static final int FILEOP_OTHER_ERROR = -1;
-    private static final int FILEOP_COPY_ERROR = -2;
-    private static final int FILEOP_MOVE_ERROR = -3;
-    private static final int FILEOP_DELETE_ERROR = -4;
+    // Do not change or rearrange these values, that will break historical data. Only add to the
+    // list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int FILEOP_OTHER = 1; // any file operation not listed below
+    private static final int FILEOP_COPY_INTRA_PROVIDER = 2; // Copy within a provider
+    private static final int FILEOP_COPY_SYSTEM_PROVIDER = 3; // Copy to a system provider.
+    private static final int FILEOP_COPY_EXTERNAL_PROVIDER = 4; // Copy to a 3rd-party provider.
+    private static final int FILEOP_MOVE_INTRA_PROVIDER = 5; // Move within a provider.
+    private static final int FILEOP_MOVE_SYSTEM_PROVIDER = 6; // Move to a system provider.
+    private static final int FILEOP_MOVE_EXTERNAL_PROVIDER = 7; // Move to a 3rd-party provider.
+    private static final int FILEOP_DELETE = 8;
+    private static final int FILEOP_OTHER_ERROR = 100;
+    private static final int FILEOP_DELETE_ERROR = 101;
+    private static final int FILEOP_MOVE_ERROR = 102;
+    private static final int FILEOP_COPY_ERROR = 103;
 
     @IntDef(flag = true, value = {
             FILEOP_OTHER,
@@ -156,6 +162,52 @@ public final class Metrics {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FileOp {}
+
+    // Codes representing different kinds of file operations. These are used for bucketing
+    // operations in the COUNT_FILEOP_CANCELED histogram.
+    // Do not change or rearrange these values, that will break historical data. Only add to the
+    // list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int OPERATION_UNKNOWN = 1;
+    private static final int OPERATION_COPY = 2;
+    private static final int OPERATION_MOVE = 3;
+    private static final int OPERATION_DELETE= 4;
+
+    @IntDef(flag = true, value = {
+            OPERATION_UNKNOWN,
+            OPERATION_COPY,
+            OPERATION_MOVE,
+            OPERATION_DELETE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MetricsOpType {}
+
+    // Codes representing different launch actions. These are used for bucketing stats in the
+    // COUNT_LAUNCH_ACTION histogram.
+    // Do not change or rearrange these values, that will break historical data. Only add to the
+    // list.
+    // Do not use negative numbers or zero; clearcut only handles positive integers.
+    private static final int ACTION_OTHER = 1;
+    private static final int ACTION_OPEN = 2;
+    private static final int ACTION_CREATE = 3;
+    private static final int ACTION_GET_CONTENT = 4;
+    private static final int ACTION_OPEN_TREE = 5;
+    private static final int ACTION_MANAGE = 6;
+    private static final int ACTION_BROWSE = 7;
+    private static final int ACTION_PICK_COPY_DESTINATION = 8;
+
+    @IntDef(flag = true, value = {
+            ACTION_OTHER,
+            ACTION_OPEN,
+            ACTION_CREATE,
+            ACTION_GET_CONTENT,
+            ACTION_OPEN_TREE,
+            ACTION_MANAGE,
+            ACTION_BROWSE,
+            ACTION_PICK_COPY_DESTINATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MetricsAction {}
 
     // Codes representing different provider types.  Used for sorting file operations when logging.
     private static final int PROVIDER_INTRA = 0;
@@ -179,7 +231,7 @@ public final class Metrics {
      */
     public static void logActivityLaunch(Context context, State state, Intent intent) {
         // Log the launch action.
-        logHistogram(context, COUNT_LAUNCH_ACTION, state.action);
+        logHistogram(context, COUNT_LAUNCH_ACTION, toMetricsAction(state.action));
         // Then log auxiliary data (roots/mime types) associated with some actions.
         Uri uri = intent.getData();
         switch (state.action) {
@@ -300,7 +352,7 @@ public final class Metrics {
      * @param operationType
      */
     public static void logFileOperationCancelled(Context context, @OpType int operationType) {
-        logHistogram(context, COUNT_FILEOP_CANCELED, operationType);
+        logHistogram(context, COUNT_FILEOP_CANCELED, toMetricsOpType(operationType));
     }
 
     private static void logInterProviderFileOps(
@@ -479,6 +531,44 @@ public final class Metrics {
             default:
                 Log.w(TAG, "Unrecognized operation type when logging a file operation");
                 return FILEOP_OTHER;
+        }
+    }
+
+    /**
+     * Maps FileOperationService OpType values, to MetricsOpType values.
+     */
+    private static @MetricsOpType int toMetricsOpType(@OpType int operation) {
+        switch (operation) {
+            case FileOperationService.OPERATION_COPY:
+                return OPERATION_COPY;
+            case FileOperationService.OPERATION_MOVE:
+                return OPERATION_MOVE;
+            case FileOperationService.OPERATION_DELETE:
+                return OPERATION_DELETE;
+            case FileOperationService.OPERATION_UNKNOWN:
+            default:
+                return OPERATION_UNKNOWN;
+        }
+    }
+
+    private static @MetricsAction int toMetricsAction(int action) {
+        switch(action) {
+            case State.ACTION_OPEN:
+                return ACTION_OPEN;
+            case State.ACTION_CREATE:
+                return ACTION_CREATE;
+            case State.ACTION_GET_CONTENT:
+                return ACTION_GET_CONTENT;
+            case State.ACTION_OPEN_TREE:
+                return ACTION_OPEN_TREE;
+            case State.ACTION_MANAGE:
+                return ACTION_MANAGE;
+            case State.ACTION_BROWSE:
+                return ACTION_BROWSE;
+            case State.ACTION_PICK_COPY_DESTINATION:
+                return ACTION_PICK_COPY_DESTINATION;
+            default:
+                return ACTION_OTHER;
         }
     }
 
