@@ -1105,7 +1105,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     outParams.putInt("width", wallpaper.width);
                     outParams.putInt("height", wallpaper.height);
                 }
-                wallpaper.callbacks.register(cb);
+                if (cb != null) {
+                    wallpaper.callbacks.register(cb);
+                }
                 if (!wallpaper.cropFile.exists()) {
                     return null;
                 }
