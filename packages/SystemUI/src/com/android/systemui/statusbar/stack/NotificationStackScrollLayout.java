@@ -18,10 +18,12 @@ package com.android.systemui.statusbar.stack;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -32,6 +34,7 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -56,6 +59,8 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationOverflowContainer;
+import com.android.systemui.statusbar.NotificationSettingsIconRow;
+import com.android.systemui.statusbar.NotificationSettingsIconRow.SettingsIconRowListener;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -72,7 +77,8 @@ import java.util.HashSet;
  */
 public class NotificationStackScrollLayout extends ViewGroup
         implements SwipeHelper.Callback, ExpandHelper.Callback, ScrollAdapter,
-        ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener {
+        ExpandableView.OnHeightChangedListener, NotificationGroupManager.OnGroupChangeListener,
+        SettingsIconRowListener {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -207,6 +213,11 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     private int mMaxScrollAfterExpand;
     private SwipeHelper.LongPressListener mLongPressListener;
+    private GearDisplayedListener mGearDisplayedListener;
+
+    private NotificationSettingsIconRow mCurrIconRow;
+    private View mTranslatingParentView;
+    private View mGearExposedView;
 
     /**
      * Should in this touch motion only be scrolling allowed? It's true when the scroller was
@@ -304,8 +315,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollAdapter(this);
-
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, getContext());
+        mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, this, getContext());
         mSwipeHelper.setLongPressListener(mLongPressListener);
         mStackScrollAlgorithm = new StackScrollAlgorithm(context);
         initView(context);
@@ -318,6 +328,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mFalsingManager = FalsingManager.getInstance(context);
         mBackgroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+    }
+
+    @Override
+    public void onGearTouched(ExpandableNotificationRow row) {
+        if (mLongPressListener != null) {
+            mLongPressListener.onLongPress(row, 0, 0);
+        }
     }
 
     @Override
@@ -630,6 +647,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         mLongPressListener = listener;
     }
 
+    public void setGearDisplayedListener(GearDisplayedListener listener) {
+        mGearDisplayedListener = listener;
+    }
+
     public void setQsContainer(ViewGroup qsContainer) {
         mQsContainer = qsContainer;
     }
@@ -666,7 +687,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    public void onChildSnappedBack(View animView) {
+    public void onChildSnappedBack(View animView, float targetLeft) {
         mAmbientState.onDragFinished(animView);
         if (!mDragAnimPendingChildren.contains(animView)) {
             if (mAnimationsEnabled) {
@@ -678,6 +699,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             // We start the swipe and snap back in the same frame, we don't want any animation
             mDragAnimPendingChildren.remove(animView);
         }
+
+        if (targetLeft == 0 && mCurrIconRow != null) {
+            mCurrIconRow.resetState();
+            if (mGearExposedView != null && mGearExposedView == mTranslatingParentView) {
+                mGearExposedView = null;
+            }
+        }
     }
 
     @Override
@@ -686,7 +714,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mScrimController.setTopHeadsUpDragAmount(animView,
                     Math.min(Math.abs(swipeProgress - 1.0f), 1.0f));
         }
-        return false;
+        return true; // Don't fade out the notification
     }
 
     public void onBeginDrag(View v) {
@@ -726,8 +754,21 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mPhoneStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
     }
 
+    @Override
     public View getChildAtPosition(MotionEvent ev) {
-        return getChildAtPosition(ev.getX(), ev.getY());
+        View child = getChildAtPosition(ev.getX(), ev.getY());
+        if (child instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+            ExpandableNotificationRow parent = row.getNotificationParent();
+            if (mGearExposedView != null && parent != null
+                    && parent.areChildrenExpanded() && mGearExposedView == parent) {
+                // In this case the group is expanded and showing the gear for the
+                // group, further interaction should apply to the group, not any
+                // child notifications so we use the parent of the child.
+                child = row.getNotificationParent();
+            }
+        }
+        return child;
     }
 
     public ExpandableView getClosestChildAtRawPosition(float touchX, float touchY) {
@@ -839,10 +880,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private boolean isScrollingEnabled() {
         return mScrollingEnabled;
-    }
-
-    public View getChildContentView(View v) {
-        return v;
     }
 
     public boolean canChildBeDismissed(View v) {
@@ -3008,6 +3045,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             disableClipOptimization();
         }
         handleDismissAllClipping();
+        if (mCurrIconRow != null & mCurrIconRow.isVisible()) {
+            mCurrIconRow.getNotificationParent().animateTranslateNotification(0 /* left target */);
+        }
     }
 
     private void handleDismissAllClipping() {
@@ -3266,6 +3306,247 @@ public class NotificationStackScrollLayout extends ViewGroup
          * @param open Should the fling open or close the overscroll view.
          */
         public void flingTopOverscroll(float velocity, boolean open);
+    }
+
+    /**
+     * A listener that is notified when the gear is shown behind a notification.
+     */
+    public interface GearDisplayedListener {
+        void onGearDisplayed(ExpandableNotificationRow row);
+    }
+
+    private class NotificationSwipeHelper extends SwipeHelper {
+        private static final int MOVE_STATE_LEFT = -1;
+        private static final int MOVE_STATE_UNDEFINED = 0;
+        private static final int MOVE_STATE_RIGHT = 1;
+
+        private static final long GEAR_SHOW_DELAY = 60;
+
+        private ArrayList<View> mTranslatingViews = new ArrayList<>();
+        private CheckForDrag mCheckForDrag;
+        private Handler mHandler;
+        private int mMoveState = MOVE_STATE_UNDEFINED;
+
+        public NotificationSwipeHelper(int swipeDirection, Callback callback, Context context) {
+            super(swipeDirection, callback, context);
+            mHandler = new Handler();
+        }
+
+        @Override
+        public void onDownUpdate(View currView) {
+            // Set the active view
+            mTranslatingParentView = currView;
+
+            // Reset check for drag gesture
+            mCheckForDrag = null;
+
+            // Slide back any notifications that might be showing a gear
+            resetExposedGearView();
+
+            if (currView instanceof ExpandableNotificationRow) {
+                // Set the listener for the current row's gear
+                mCurrIconRow = ((ExpandableNotificationRow) currView).getSettingsRow();
+                mCurrIconRow.setGearListener(NotificationStackScrollLayout.this);
+
+                // And the translating children
+                mTranslatingViews = ((ExpandableNotificationRow) currView).getContentViews();
+            }
+            mMoveState = MOVE_STATE_UNDEFINED;
+        }
+
+        @Override
+        public void onMoveUpdate(View view, float translation, float delta) {
+            final int newMoveState = (delta < 0) ? MOVE_STATE_RIGHT : MOVE_STATE_LEFT;
+            if (mMoveState != MOVE_STATE_UNDEFINED && mMoveState != newMoveState) {
+                // Changed directions, make sure we check for drag again.
+                mCheckForDrag = null;
+            }
+            mMoveState = newMoveState;
+
+            if (view instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) view).setTranslationForOutline(translation);
+                if (!isPinnedHeadsUp(view)) {
+                    // Only show the gear if we're not a heads up view.
+                    checkForDrag();
+                    if (mCurrIconRow != null) {
+                        mCurrIconRow.updateSettingsIcons(translation, getSize(view));
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void dismissChild(final View view, float velocity) {
+            cancelCheckForDrag();
+            super.dismissChild(view, velocity);
+        }
+
+        @Override
+        public void snapChild(final View animView, final float targetLeft, float velocity) {
+            final float snapBackThreshold = getSpaceForGear(animView);
+            final float translation = getTranslation(animView);
+            final boolean fromLeft = translation > 0;
+            final float absTrans = Math.abs(translation);
+            final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
+
+            boolean pastGear = (fromLeft && translation >= snapBackThreshold * 0.4f
+                    && translation <= notiThreshold) ||
+                    (!fromLeft && absTrans >= snapBackThreshold * 0.4f
+                            && absTrans <= notiThreshold);
+
+            if (pastGear && !isPinnedHeadsUp(animView)) {
+                // bouncity
+                final float target = fromLeft ? snapBackThreshold : -snapBackThreshold;
+                mGearExposedView = mTranslatingParentView;
+                if (mGearDisplayedListener != null
+                        && (animView instanceof ExpandableNotificationRow)) {
+                    mGearDisplayedListener.onGearDisplayed((ExpandableNotificationRow) animView);
+                }
+                super.snapChild(animView, target, velocity);
+            } else {
+                super.snapChild(animView, 0, velocity);
+            }
+        }
+
+        @Override
+        public void onTranslationUpdate(View animView, float value, boolean canBeDismissed) {
+            if (mDismissAllInProgress) {
+                // When dismissing all, we translate the entire view instead.
+                super.onTranslationUpdate(animView, value, canBeDismissed);
+                return;
+            }
+            if (animView instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) animView).setTranslationForOutline(value);
+            }
+            if (mCurrIconRow != null) {
+                mCurrIconRow.updateSettingsIcons(value, getSize(animView));
+            }
+        }
+
+        @Override
+        public Animator getViewTranslationAnimator(View v, float target,
+                AnimatorUpdateListener listener) {
+            if (mDismissAllInProgress) {
+                // When dismissing all, we translate the entire view instead.
+                return super.getViewTranslationAnimator(v, target, listener);
+            }
+            ArrayList<Animator> animators = new ArrayList<Animator>();
+            for (int i = 0; i < mTranslatingViews.size(); i++) {
+                ObjectAnimator anim = createTranslationAnimation(mTranslatingViews.get(i), target);
+                animators.add(anim);
+                if (i == 0 && listener != null) {
+                    anim.addUpdateListener(listener);
+                }
+            }
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(animators);
+            return set;
+        }
+
+        @Override
+        public void setTranslation(View v, float translate) {
+            if (mDismissAllInProgress) {
+                // When dismissing all, we translate the entire view instead.
+                super.setTranslation(v, translate);
+                return;
+            }
+            // Translate the group of views
+            for (int i = 0; i < mTranslatingViews.size(); i++) {
+                if (mTranslatingViews.get(i) != null) {
+                    super.setTranslation(mTranslatingViews.get(i), translate);
+                }
+            }
+        }
+
+        @Override
+        public float getTranslation(View v) {
+            if (mDismissAllInProgress) {
+                // When dismissing all, we translate the entire view instead.
+                return super.getTranslation(v);
+            }
+            // All of the views in the list should have same translation, just use first one.
+            if (mTranslatingViews.size() > 0) {
+                return super.getTranslation(mTranslatingViews.get(0));
+            }
+            return 0;
+        }
+
+
+        /**
+         * Returns the horizontal space in pixels required to display the gear behind a
+         * notification.
+         */
+        private float getSpaceForGear(View view) {
+            if (view instanceof ExpandableNotificationRow) {
+                return ((ExpandableNotificationRow) view).getSpaceForGear();
+            }
+            return 0;
+        }
+
+        private void checkForDrag() {
+            if (mCheckForDrag == null) {
+                mCheckForDrag = new CheckForDrag();
+                mHandler.postDelayed(mCheckForDrag, GEAR_SHOW_DELAY);
+            }
+        }
+
+        private void cancelCheckForDrag() {
+            if (mCurrIconRow != null) {
+                mCurrIconRow.cancelFadeAnimator();
+            }
+            mHandler.removeCallbacks(mCheckForDrag);
+            mCheckForDrag = null;
+        }
+
+        private final class CheckForDrag implements Runnable {
+            @Override
+            public void run() {
+                final float translation = getTranslation(mTranslatingParentView);
+                final float absTransX = Math.abs(translation);
+                final float bounceBackToGearWidth = getSpaceForGear(mTranslatingParentView);
+                final float notiThreshold = getSize(mTranslatingParentView) * 0.4f;
+                if (mCurrIconRow != null && absTransX >= bounceBackToGearWidth * 0.4
+                        && absTransX < notiThreshold) {
+                    // Show icon
+                    mCurrIconRow.fadeInSettings(translation > 0 /* fromLeft */, translation,
+                            notiThreshold);
+                } else {
+                    // Allow more to be posted if this wasn't a drag.
+                    mCheckForDrag = null;
+                }
+            }
+        }
+
+        private void resetExposedGearView() {
+            if (mGearExposedView == null || mGearExposedView == mTranslatingParentView) {
+                // If no gear is showing or it's showing for this view we do nothing.
+                return;
+            }
+
+            final View prevGearExposedView = mGearExposedView;
+            mGearExposedView = null;
+
+            AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
+                public void onAnimationEnd(Animator animator) {
+                    if (prevGearExposedView instanceof ExpandableNotificationRow) {
+                        ((ExpandableNotificationRow) prevGearExposedView).getSettingsRow()
+                                .resetState();
+                    }
+                }
+            };
+            AnimatorUpdateListener updateListener = new AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    if (prevGearExposedView instanceof ExpandableNotificationRow) {
+                        ((ExpandableNotificationRow) prevGearExposedView)
+                                .setTranslationForOutline((float) animation.getAnimatedValue());
+                    }
+                }
+            };
+            Animator set = getViewTranslationAnimator(prevGearExposedView, 0, updateListener);
+            set.addListener(listener);
+            set.start();
+        }
     }
 
     static class AnimationEvent {

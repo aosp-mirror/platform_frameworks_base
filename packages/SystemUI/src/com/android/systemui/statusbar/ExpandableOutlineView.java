@@ -81,8 +81,13 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     }
 
     protected void setOutlineRect(float left, float top, float right, float bottom) {
+        setOutlineRect(true, left, top, right, bottom);
+    }
+
+    protected void setOutlineRect(boolean clipToOutline, float left, float top, float right,
+            float bottom) {
         mCustomOutline = true;
-        setClipToOutline(true);
+        setClipToOutline(clipToOutline);
 
         mOutlineRect.set((int) left, (int) top, (int) right, (int) bottom);
 
