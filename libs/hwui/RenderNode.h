@@ -187,6 +187,12 @@ public:
 
     // UI thread only!
     ANDROID_API void addAnimator(const sp<BaseRenderNodeAnimator>& animator);
+    void removeAnimator(const sp<BaseRenderNodeAnimator>& animator);
+
+    // This can only happen during pushStaging()
+    void onAnimatorTargetChanged(BaseRenderNodeAnimator* animator) {
+        mAnimatorManager.onAnimatorTargetChanged(animator);
+    }
 
     AnimatorManager& animators() { return mAnimatorManager; }
 

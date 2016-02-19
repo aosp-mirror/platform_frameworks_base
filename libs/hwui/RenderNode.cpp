@@ -218,6 +218,10 @@ void RenderNode::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
     mAnimatorManager.addAnimator(animator);
 }
 
+void RenderNode::removeAnimator(const sp<BaseRenderNodeAnimator>& animator) {
+    mAnimatorManager.removeAnimator(animator);
+}
+
 void RenderNode::damageSelf(TreeInfo& info) {
     if (isRenderable()) {
         if (properties().getClipDamageToBounds()) {
