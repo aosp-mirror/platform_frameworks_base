@@ -22866,6 +22866,7 @@ package android.media.tv {
   public static final class TvContract.Programs.Genres {
     method public static java.lang.String[] decode(java.lang.String);
     method public static java.lang.String encode(java.lang.String...);
+    method public static boolean isCanonical(java.lang.String);
     field public static final java.lang.String ANIMAL_WILDLIFE = "ANIMAL_WILDLIFE";
     field public static final java.lang.String ARTS = "ARTS";
     field public static final java.lang.String COMEDY = "COMEDY";
