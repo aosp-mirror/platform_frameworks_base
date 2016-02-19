@@ -475,6 +475,19 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
+    private NotificationViewWrapper getCurrentVisibleWrapper() {
+        switch (mVisibleType) {
+            case VISIBLE_TYPE_EXPANDED:
+                return mExpandedWrapper;
+            case VISIBLE_TYPE_HEADSUP:
+                return mHeadsUpWrapper;
+            case VISIBLE_TYPE_CONTRACTED:
+                return mContractedWrapper;
+            default:
+                return null;
+        }
+    }
+
     /**
      * @return one of the static enum types in this view, calculated form the current state
      */
@@ -682,6 +695,11 @@ public class NotificationContentView extends FrameLayout {
             header = mHeadsUpWrapper.getNotificationHeader();
         }
         return header;
+    }
+
+    public NotificationHeaderView getVisibleNotificationHeader() {
+        NotificationViewWrapper wrapper = getCurrentVisibleWrapper();
+        return wrapper == null ? null : wrapper.getNotificationHeader();
     }
 
     public void setContainingNotification(ExpandableNotificationRow containingNotification) {
