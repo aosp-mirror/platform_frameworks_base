@@ -117,8 +117,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.DEVICE_ADMIN_DISABLED";
 
     /**
-     * Action sent to a device administrator when the user has changed the
-     * password of their device.  You can at this point check the characteristics
+     * Action sent to a device administrator when the user has changed the password of their device
+     * or profile challenge.  You can at this point check the characteristics
      * of the new password with {@link DevicePolicyManager#isActivePasswordSufficient()
      * DevicePolicyManager.isActivePasswordSufficient()}.
      * You will generally
@@ -133,8 +133,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.ACTION_PASSWORD_CHANGED";
 
     /**
-     * Action sent to a device administrator when the user has failed at
-     * attempted to enter the password.  You can at this point check the
+     * Action sent to a device administrator when the user has entered an incorrect device
+     * or profile challenge password.  You can at this point check the
      * number of failed password attempts there have been with
      * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts
      * DevicePolicyManager.getCurrentFailedPasswordAttempts()}.  You will generally
@@ -149,8 +149,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.ACTION_PASSWORD_FAILED";
 
     /**
-     * Action sent to a device administrator when the user has successfully
-     * entered their password, after failing one or more times.
+     * Action sent to a device administrator when the user has successfully entered their device
+     * or profile challenge password, after failing one or more times.  You will generally
+     * handle this in {@link DeviceAdminReceiver#onPasswordSucceeded}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WATCH_LOGIN} to receive
@@ -161,8 +162,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             = "android.app.action.ACTION_PASSWORD_SUCCEEDED";
 
     /**
-     * Action periodically sent to a device administrator when the device password
-     * is expiring.
+     * Action periodically sent to a device administrator when the device or profile challenge
+     * password is expiring.  You will generally
+     * handle this in {@link DeviceAdminReceiver#onPasswordExpiring}.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_EXPIRE_PASSWORD} to receive
@@ -417,7 +419,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called after the user has changed their password, as a result of
+     * Called after the user has changed their device or profile challenge password, as a result of
      * receiving {@link #ACTION_PASSWORD_CHANGED}.  At this point you
      * can use {@link DevicePolicyManager#getPasswordQuality(android.content.ComponentName)}
      * to retrieve the active password characteristics.
@@ -428,10 +430,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called after the user has failed at entering their current password, as a result of
-     * receiving {@link #ACTION_PASSWORD_FAILED}.  At this point you
-     * can use {@link DevicePolicyManager} to retrieve the number of failed
-     * password attempts.
+     * Called after the user has failed at entering their device or profile challenge password,
+     * as a result of receiving {@link #ACTION_PASSWORD_FAILED}.  At this point you can use
+     * {@link DevicePolicyManager#getCurrentFailedPasswordAttempts()} to retrieve the number of
+     * failed password attempts.
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
@@ -439,7 +441,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called after the user has succeeded at entering their current password,
+     * Called after the user has succeeded at entering their device or profile challenge password,
      * as a result of receiving {@link #ACTION_PASSWORD_SUCCEEDED}.  This will
      * only be received the first time they succeed after having previously
      * failed.
@@ -450,9 +452,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called periodically when the password is about to expire or has expired.  It will typically
-     * be called at these times: on device boot, once per day before the password expires,
-     * and at the time when the password expires.
+     * Called periodically when the device or profile challenge password is about to expire
+     * or has expired.  It will typically be called at these times: on device boot, once per day
+     * before the password expires, and at the time when the password expires.
      *
      * <p>If the password is not updated by the user, this method will continue to be called
      * once per day until the password is changed or the device admin disables password expiration.
