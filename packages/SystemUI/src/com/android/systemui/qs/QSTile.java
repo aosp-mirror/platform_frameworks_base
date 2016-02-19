@@ -212,8 +212,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected void handleLongClick() {
-        // optional
+        mHost.startActivityDismissingKeyguard(getLongClickIntent());
     }
+
+    public abstract Intent getLongClickIntent();
 
     protected void handleClearState() {
         mTmpState = newTileState();

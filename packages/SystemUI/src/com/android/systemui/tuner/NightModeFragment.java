@@ -42,6 +42,9 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
         Listener, OnPreferenceChangeListener {
 
     private static final String TAG = "NightModeFragment";
+
+    public static final String EXTRA_SHOW_NIGHT_MODE = "show_night_mode";
+
     private static final CharSequence KEY_AUTO = "auto";
     private static final CharSequence KEY_DARK_THEME = "dark_theme";
     private static final CharSequence KEY_ADJUST_TINT = "adjust_tint";

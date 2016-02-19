@@ -92,6 +92,11 @@ public class IntentTile extends QSTile<QSTile.State> {
     }
 
     @Override
+    public Intent getLongClickIntent() {
+        return null;
+    }
+
+    @Override
     protected void handleLongClick() {
         sendIntent("long-click", mOnLongClick, mOnLongClickUri);
     }

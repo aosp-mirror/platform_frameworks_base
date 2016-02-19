@@ -86,6 +86,11 @@ public class CastTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_CAST_SETTINGS);
+    }
+
+    @Override
     protected void handleClick() {
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
             mHost.startRunnableDismissingKeyguard(new Runnable() {

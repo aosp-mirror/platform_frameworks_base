@@ -688,7 +688,7 @@ public class UserSwitcherController {
     }
 
     public final QSTile.DetailAdapter userDetailAdapter = new QSTile.DetailAdapter() {
-        private final Intent USER_SETTINGS_INTENT = new Intent("android.settings.USER_SETTINGS");
+        private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
 
         @Override
         public CharSequence getTitle() {

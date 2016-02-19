@@ -16,8 +16,10 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Intent;
 import android.os.UserManager;
 
+import android.provider.Settings;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -55,6 +57,11 @@ public class HotspotTile extends QSTile<QSTile.BooleanState> {
         } else {
             mController.removeCallback(mCallback);
         }
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_WIRELESS_SETTINGS);
     }
 
     @Override

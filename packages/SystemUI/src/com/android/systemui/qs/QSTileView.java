@@ -84,11 +84,6 @@ public class QSTileView extends QSTileBaseView {
         addView(view);
     }
 
-    public void init(OnClickListener clickPrimary, OnLongClickListener longClick) {
-        setOnClickListener(clickPrimary);
-        setOnLongClickListener(longClick);
-    }
-
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
         mLabel.setText(state.label);
