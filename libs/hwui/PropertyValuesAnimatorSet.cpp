@@ -17,6 +17,8 @@
 #include "PropertyValuesAnimatorSet.h"
 #include "RenderNode.h"
 
+#include <algorithm>
+
 namespace android {
 namespace uirenderer {
 
@@ -53,14 +55,24 @@ void PropertyValuesAnimatorSet::setValue(RenderNode* target, float value) {
 }
 
 void PropertyValuesAnimatorSet::onPlayTimeChanged(nsecs_t playTime) {
-    for (size_t i = 0; i < mAnimators.size(); i++) {
-        mAnimators[i]->setCurrentPlayTime(playTime);
+    if (playTime == 0 && mDuration > 0) {
+        // Reset all the animators
+        for (auto it = mAnimators.rbegin(); it != mAnimators.rend(); it++) {
+            // Note that this set may containing animators modifying the same property, so when we
+            // reset the animators, we need to make sure the animators that end the first will
+            // have the final say on what the property value should be.
+            (*it)->setFraction(0);
+        }
+    } else if (playTime >= mDuration) {
+        // Skip all the animators to end
+        for (auto& anim : mAnimators) {
+            anim->setFraction(1);
+        }
+    } else {
+        for (auto& anim : mAnimators) {
+            anim->setCurrentPlayTime(playTime);
+        }
     }
-}
-
-void PropertyValuesAnimatorSet::reset() {
-    // TODO: implement reset through adding a play state because we need to support reset() even
-    // during an animation run.
 }
 
 void PropertyValuesAnimatorSet::start(AnimationListener* listener) {
@@ -70,20 +82,23 @@ void PropertyValuesAnimatorSet::start(AnimationListener* listener) {
 }
 
 void PropertyValuesAnimatorSet::reverse(AnimationListener* listener) {
-// TODO: implement reverse
+    init();
+    mOneShotListener = listener;
+    BaseRenderNodeAnimator::reverse();
 }
 
 void PropertyValuesAnimatorSet::init() {
     if (mInitialized) {
         return;
     }
-    nsecs_t maxDuration = 0;
-    for (size_t i = 0; i < mAnimators.size(); i++) {
-        if (maxDuration < mAnimators[i]->getTotalDuration()) {
-            maxDuration = mAnimators[i]->getTotalDuration();
-        }
-    }
-    mDuration = maxDuration;
+
+    // Sort the animators by their total duration. Note that all the animators in the set start at
+    // the same time, so the ones with longer total duration (which includes start delay) will
+    // be the ones that end later.
+    std::sort(mAnimators.begin(), mAnimators.end(), [](auto& a, auto&b) {
+        return a->getTotalDuration() < b->getTotalDuration();
+    });
+    mDuration = mAnimators[mAnimators.size() - 1]->getTotalDuration();
     mInitialized = true;
 }
 
@@ -106,18 +121,19 @@ PropertyAnimator::PropertyAnimator(PropertyValuesHolder* holder, Interpolator* i
 void PropertyAnimator::setCurrentPlayTime(nsecs_t playTime) {
     if (playTime >= mStartDelay && playTime < mTotalDuration) {
          nsecs_t currentIterationPlayTime = (playTime - mStartDelay) % mDuration;
-         mLatestFraction = currentIterationPlayTime / (float) mDuration;
+         float fraction = currentIterationPlayTime / (float) mDuration;
+         setFraction(fraction);
     } else if (mLatestFraction < 1.0f && playTime >= mTotalDuration) {
-        mLatestFraction = 1.0f;
-    } else {
-        return;
+        // This makes sure we only set the fraction = 1 once. It is needed because there might
+        // be another animator modifying the same property after this animator finishes, we need
+        // to make sure we don't set conflicting values on the same property within one frame.
+        setFraction(1.0f);
     }
-
-    setFraction(mLatestFraction);
 }
 
 void PropertyAnimator::setFraction(float fraction) {
-    float interpolatedFraction = mInterpolator->interpolate(mLatestFraction);
+    mLatestFraction = fraction;
+    float interpolatedFraction = mInterpolator->interpolate(fraction);
     mPropertyValuesHolder->setFraction(interpolatedFraction);
 }
 

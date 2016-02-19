@@ -184,7 +184,7 @@ static void start(JNIEnv* env, jobject clazz, jlong animatorPtr) {
 
 static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
-    animator->end();
+    animator->cancel();
 }
 
 // ----------------------------------------------------------------------------
