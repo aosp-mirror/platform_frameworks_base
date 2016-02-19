@@ -75,9 +75,23 @@ public abstract class DocumentHolder
      */
     public abstract void bind(Cursor cursor, String modelId, State state);
 
+    /**
+     * Makes the associated item view appear selected. Note that this merely affects the appearance
+     * of the view, it doesn't actually select the item.
+     *
+     * @param selected
+     */
     public void setSelected(boolean selected) {
         itemView.setActivated(selected);
         itemView.setBackgroundColor(selected ? mSelectedItemColor : mDefaultItemColor);
+    }
+
+    /**
+     * Highlights the associated item view.
+     * @param highlighted
+     */
+    public void setHighlighted(boolean highlighted) {
+        itemView.setBackgroundColor(highlighted ? mSelectedItemColor : mDefaultItemColor);
     }
 
     @Override
