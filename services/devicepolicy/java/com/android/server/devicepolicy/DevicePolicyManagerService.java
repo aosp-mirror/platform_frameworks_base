@@ -7734,9 +7734,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mUserSetupComplete.equals(uri)) {
                 updateUserSetupComplete();
             } else if (mDeviceProvisioned.equals(uri)) {
-                // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
-                // is delayed until device is marked as provisioned.
-                setDeviceOwnerSystemPropertyLocked();
+                synchronized (DevicePolicyManagerService.this) {
+                    // Set PROPERTY_DEVICE_OWNER_PRESENT, for the SUW case where setting the property
+                    // is delayed until device is marked as provisioned.
+                    setDeviceOwnerSystemPropertyLocked();
+                }
             }
         }
     }
@@ -8433,7 +8435,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    private void disableDeviceLoggingIfNotCompliant() {
+    private synchronized void disableDeviceLoggingIfNotCompliant() {
         if (!isDeviceOwnerManagedSingleUserDevice()) {
             mInjector.securityLogSetLoggingEnabledProperty(false);
             Slog.w(LOG_TAG, "Device logging turned off as it's no longer a single user device.");
@@ -8446,6 +8448,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         ensureDeviceOwnerManagingSingleUser(admin);
 
         synchronized (this) {
+            if (enabled == mInjector.securityLogGetLoggingEnabledProperty()) {
+                return;
+            }
             mInjector.securityLogSetLoggingEnabledProperty(enabled);
             if (enabled) {
                 mSecurityLogMonitor.start();

@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.os.Process;
 
@@ -41,6 +43,8 @@ import android.os.Process;
  */
 class SecurityLogMonitor implements Runnable {
     private final DevicePolicyManagerService mService;
+
+    private final Lock mLock = new ReentrantLock();
 
     SecurityLogMonitor(DevicePolicyManagerService service) {
         mService = service;
@@ -68,36 +72,50 @@ class SecurityLogMonitor implements Runnable {
      */
     private static final long POLLING_INTERVAL_MILLISECONDS = TimeUnit.MINUTES.toMillis(1);
 
-    @GuardedBy("this")
+    @GuardedBy("mLock")
     private Thread mMonitorThread = null;
-    @GuardedBy("this")
+    @GuardedBy("mLock")
     private ArrayList<SecurityEvent> mPendingLogs = new ArrayList<SecurityEvent>();
-    @GuardedBy("this")
+    @GuardedBy("mLock")
     private boolean mAllowedToRetrieve = false;
     // When DO will be allowed to retrieves the log, in milliseconds.
-    @GuardedBy("this")
+    @GuardedBy("mLock")
     private long mNextAllowedRetrivalTimeMillis = -1;
 
-    synchronized void start() {
-        if (mMonitorThread == null) {
-            mPendingLogs = new ArrayList<SecurityEvent>();
-            mAllowedToRetrieve = false;
-            mNextAllowedRetrivalTimeMillis = -1;
+    void start() {
+        mLock.lock();
+        try {
+            if (mMonitorThread == null) {
+                mPendingLogs = new ArrayList<SecurityEvent>();
+                mAllowedToRetrieve = false;
+                mNextAllowedRetrivalTimeMillis = -1;
 
-            mMonitorThread = new Thread(this);
-            mMonitorThread.start();
+                mMonitorThread = new Thread(this);
+                mMonitorThread.start();
+            }
+        } finally {
+            mLock.unlock();
         }
     }
 
-    synchronized void stop() {
-        if (mMonitorThread != null) {
-            mMonitorThread.interrupt();
-            try {
-                mMonitorThread.join(TimeUnit.SECONDS.toMillis(5));
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Interrupted while waiting for thread to stop", e);
+    void stop() {
+        mLock.lock();
+        try {
+            if (mMonitorThread != null) {
+                mMonitorThread.interrupt();
+                try {
+                    mMonitorThread.join(TimeUnit.SECONDS.toMillis(5));
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Interrupted while waiting for thread to stop", e);
+                }
+                // Reset state and clear buffer
+                mPendingLogs = new ArrayList<SecurityEvent>();
+                mAllowedToRetrieve = false;
+                mNextAllowedRetrivalTimeMillis = -1;
+                mMonitorThread = null;
             }
-            mMonitorThread = null;
+        } finally {
+            mLock.unlock();
         }
     }
 
@@ -105,16 +123,21 @@ class SecurityLogMonitor implements Runnable {
      * Returns the new batch of logs since the last call to this method. Returns null if
      * rate limit is exceeded.
      */
-    synchronized List<SecurityEvent> retrieveLogs() {
-        if (mAllowedToRetrieve) {
-            mAllowedToRetrieve = false;
-            mNextAllowedRetrivalTimeMillis = System.currentTimeMillis()
-                    + RATE_LIMIT_INTERVAL_MILLISECONDS;
-            List<SecurityEvent> result = mPendingLogs;
-            mPendingLogs = new ArrayList<SecurityEvent>();
-            return result;
-        } else {
-            return null;
+    List<SecurityEvent> retrieveLogs() {
+        mLock.lock();
+        try {
+            if (mAllowedToRetrieve) {
+                mAllowedToRetrieve = false;
+                mNextAllowedRetrivalTimeMillis = System.currentTimeMillis()
+                        + RATE_LIMIT_INTERVAL_MILLISECONDS;
+                List<SecurityEvent> result = mPendingLogs;
+                mPendingLogs = new ArrayList<SecurityEvent>();
+                return result;
+            } else {
+                return null;
+            }
+        } finally {
+            mLock.unlock();
         }
     }
 
@@ -141,7 +164,8 @@ class SecurityLogMonitor implements Runnable {
                 }
                 if (!logs.isEmpty()) {
                     if (DEBUG) Slog.d(TAG, "processing new logs");
-                    synchronized (this) {
+                    mLock.lockInterruptibly();
+                    try {
                         mPendingLogs.addAll(logs);
                         if (mPendingLogs.size() > BUFFER_ENTRIES_MAXIMUM_LEVEL) {
                             // Truncate buffer down to half of BUFFER_ENTRIES_MAXIMUM_LEVEL
@@ -149,6 +173,8 @@ class SecurityLogMonitor implements Runnable {
                                     mPendingLogs.size() - (BUFFER_ENTRIES_MAXIMUM_LEVEL / 2),
                                     mPendingLogs.size()));
                         }
+                    } finally {
+                        mLock.unlock();
                     }
                     lastLogTimestampNanos = logs.get(logs.size() - 1).getTimeNanos();
                     logs.clear();
@@ -163,18 +189,13 @@ class SecurityLogMonitor implements Runnable {
             }
         }
         if (DEBUG) Slog.d(TAG, "MonitorThread exit.");
-        synchronized (this) {
-            // Reset state and clear buffer
-            mPendingLogs = new ArrayList<SecurityEvent>();
-            mAllowedToRetrieve = false;
-            mNextAllowedRetrivalTimeMillis = -1;
-        }
     }
 
-    private void notifyDeviceOwnerIfNeeded() {
+    private void notifyDeviceOwnerIfNeeded() throws InterruptedException {
         boolean shouldNotifyDO = false;
         boolean allowToRetrieveNow = false;
-        synchronized (this) {
+        mLock.lockInterruptibly();
+        try {
             int logSize = mPendingLogs.size();
             if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL) {
                 // Allow DO to retrieve logs if too many pending logs
@@ -188,6 +209,8 @@ class SecurityLogMonitor implements Runnable {
             }
             shouldNotifyDO = (!mAllowedToRetrieve) && allowToRetrieveNow;
             mAllowedToRetrieve = allowToRetrieveNow;
+        } finally {
+            mLock.unlock();
         }
         if (shouldNotifyDO) {
             if (DEBUG) Slog.d(TAG, "notify DO");
