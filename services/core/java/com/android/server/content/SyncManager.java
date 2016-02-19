@@ -2271,6 +2271,7 @@ public class SyncManager {
         void checkIfDeviceReady() {
             if (mProvisioned && mBootCompleted) {
                 synchronized(this) {
+                    mSyncStorageEngine.restoreAllPeriodicSyncs();
                     // Dispatch any stashed messages.
                     obtainMessage(MESSAGE_RELEASE_MESSAGES_FROM_QUEUE).sendToTarget();
                 }
@@ -2622,7 +2623,6 @@ public class SyncManager {
             }
             if (mBootCompleted) {
                 doDatabaseCleanup();
-                mSyncStorageEngine.restoreAllPeriodicSyncs();
             }
 
             AccountAndUser[] accounts = mRunningAccounts;
