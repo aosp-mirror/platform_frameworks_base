@@ -54,11 +54,11 @@ void clearBuffer(Buffer* buf, uint32_t pixel) {
 void drawTwoPixels(Buffer* buf, uint32_t pixel, ssize_t x, ssize_t y, size_t w) {
     if (y>0 && y<ssize_t(buf->h)) {
         uint32_t* bits = buf->pixels + y * buf->s;
-        if (x>=0 && x<buf->w) {
+        if (x>=0 && x<ssize_t(buf->w)) {
             bits[x] = pixel;
         }
         ssize_t W(w);
-        if ((x+W)>=0 && (x+W)<buf->w) {
+        if ((x+W)>=0 && (x+W)<ssize_t(buf->w)) {
             bits[x+W] = pixel;
         }
     }
@@ -251,13 +251,13 @@ int main(int argc, char** argv) {
     Queue queue;
 
 
-    int x=0, y=0, down=0;
+    int x=0, y=0;
     int lag_x=0, lag_y=0;
 
     clearBuffer(&framebuffer, 0);
     while (true) {
         uint32_t crt = 0;
-        int err = ioctl(fd, FBIO_WAITFORVSYNC, &crt);
+        ioctl(fd, FBIO_WAITFORVSYNC, &crt);
 
         // draw beam marker
         drawRect(&framebuffer, 0x400000, framebuffer.w-2, 0, 2, framebuffer.h);

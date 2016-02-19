@@ -22,7 +22,7 @@
 #include "jni.h"
 
 static jint
-add(JNIEnv *env, jobject thiz, jint a, jint b) {
+add(JNIEnv */* env */, jobject /* thiz */, jint a, jint b) {
 int result = a + b;
     ALOGI("%d + %d = %d", a, b, result);
     return result;
@@ -82,7 +82,7 @@ typedef union {
     void* venv;
 } UnionJNIEnvToVoid;
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
+jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
     UnionJNIEnvToVoid uenv;
     uenv.venv = NULL;
