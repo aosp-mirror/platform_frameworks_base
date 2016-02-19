@@ -241,10 +241,13 @@ void RecordingCanvas::drawColor(int color, SkXfermode::Mode mode) {
 }
 
 void RecordingCanvas::drawPaint(const SkPaint& paint) {
+    const ClipBase* clip = getRecordedClip();
+    // if there's no current clip, draw a big rect and hope we cover the eventual clip bounds
+    Rect bounds = clip ? clip->rect : Rect(-10000, -10000, 10000, 10000);
     addOp(alloc().create_trivial<RectOp>(
-            mState.getRenderTargetClipBounds(), // OK, since we've not passed transform
+            bounds,
             Matrix4::identity(),
-            getRecordedClip(),
+            clip,
             refPaint(&paint)));
 }
 
