@@ -158,7 +158,8 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
         String path = classLoader.findLibrary(libname);
 
         if (path == null) {
-            throw new IllegalArgumentException("Unable to find native library: " + libname);
+            throw new IllegalArgumentException("Unable to find native library " + libname +
+                                               " using classloader: " + classLoader.toString());
         }
         
         byte[] nativeSavedState = savedInstanceState != null
