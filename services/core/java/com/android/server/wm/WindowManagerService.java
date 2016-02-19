@@ -116,7 +116,7 @@ import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 import android.widget.Toast;
-import com.android.internal.R;
+
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.FastPrintWriter;
@@ -4153,11 +4153,15 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (visibilityChanged && visible && !delayed) {
-            // The token was made immediately visible, there will be no entrance animation. We need
-            // to inform the client the enter animation was finished.
-            wtoken.mEnteringAnimation = true;
-            mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(wtoken.token);
+        if (visibilityChanged && !delayed) {
+            if (visible) {
+                // The token was made immediately visible, there will be no entrance animation.
+                // We need to inform the client the enter animation was finished.
+                wtoken.mEnteringAnimation = true;
+                mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(wtoken.token);
+            }
+            getDefaultDisplayContentLocked().getDockedDividerController()
+                    .notifyAppVisibilityChanged(wtoken, visible);
         }
 
         return delayed;
@@ -8124,14 +8128,14 @@ public class WindowManagerService extends IWindowManager.Stub
                             for (int i = stacks.size() - 1; i >= 0; --i) {
                                 final TaskStack stack = stacks.get(i);
                                 if (stack.isVisibleLocked()) {
-                                    stack.adjustForIME(imeWin);
+                                    stack.setAdjustedForIme(imeWin);
                                 }
                             }
                         } else {
                             final ArrayList<TaskStack> stacks = displayContent.getStacks();
                             for (int i = stacks.size() - 1; i >= 0; --i) {
                                 final TaskStack stack = stacks.get(i);
-                                stack.adjustForIME(null);
+                                stack.resetAdjustedForIme();
                             }
                         }
                     }
@@ -10333,7 +10337,8 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public int getDockedStackSide() {
         synchronized (mWindowMap) {
-            TaskStack dockedStack = getDefaultDisplayContentLocked().getDockedStackLocked();
+            final TaskStack dockedStack = getDefaultDisplayContentLocked()
+                    .getDockedStackVisibleForUserLocked();
             return dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide();
         }
     }
@@ -10417,7 +10422,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void getStableInsetsLocked(Rect outInsets) {
+    void getStableInsetsLocked(Rect outInsets) {
         final DisplayInfo di = getDefaultDisplayInfoLocked();
         mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight, outInsets);
     }

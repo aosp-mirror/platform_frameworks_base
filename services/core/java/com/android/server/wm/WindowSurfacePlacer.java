@@ -676,8 +676,10 @@ class WindowSurfacePlacer {
                     // currently animating... let's do something.
                     final int left = w.mFrame.left;
                     final int top = w.mFrame.top;
+                    final boolean adjustedForMinimizedDockedStack = w.getTask() != null &&
+                            w.getTask().mStack.isAdjustedForMinimizedDockedStack();
                     if ((w.mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
-                            && !w.isDragResizing()) {
+                            && !w.isDragResizing() && !adjustedForMinimizedDockedStack) {
                         winAnimator.setMoveAnimation(left, top);
                     }
 
@@ -1099,6 +1101,7 @@ class WindowSurfacePlacer {
 
         processApplicationsAnimatingInPlace(transit);
 
+        mTmpLayerAndToken.token = null;
         handleClosingApps(transit, animLp, voiceInteraction, mTmpLayerAndToken);
         final AppWindowToken topClosingApp = mTmpLayerAndToken.token;
         final int topClosingLayer = mTmpLayerAndToken.layer;
@@ -1111,7 +1114,8 @@ class WindowSurfacePlacer {
         final AppWindowAnimator closingAppAnimator = (topClosingApp == null) ? null :
                 topClosingApp.mAppAnimator;
 
-        mService.mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator);
+        mService.mAppTransition.goodToGo(openingAppAnimator, closingAppAnimator,
+                mService.mOpeningApps, mService.mClosingApps);
         mService.mAppTransition.postAnimationCallback();
         mService.mAppTransition.clear();
 

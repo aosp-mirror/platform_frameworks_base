@@ -75,9 +75,6 @@ public class TaskStack implements DimLayer.DimLayerUser,
     /** Content limits relative to the DisplayContent this sits in. */
     private Rect mBounds = new Rect();
 
-    /** Screen content area excluding IM windows, etc. */
-    private final Rect mContentBounds = new Rect();
-
     /** Stack bounds adjusted to screen content area (taking into account IM windows, etc.) */
     private final Rect mAdjustedBounds = new Rect();
 
@@ -103,9 +100,18 @@ public class TaskStack implements DimLayer.DimLayerUser,
     // Whether the stack and all its tasks is currently being drag-resized
     private boolean mDragResizing;
 
+    private final Rect mLastContentBounds = new Rect();
+    private final Rect mTmpAdjustedBounds = new Rect();
+    private boolean mAdjustedForIme;
+    private WindowState mImeWin;
+    private float mMinimizeAmount;
+    private final int mDockedStackMinimizeThickness;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
+        mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.docked_stack_minimize_thickness);
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId);
     }
 
@@ -174,7 +180,27 @@ public class TaskStack implements DimLayer.DimLayerUser,
         return mTmpRect.equals(bounds);
     }
 
-    void alignTasksToAdjustedBounds(final Rect adjustedBounds) {
+    /**
+     * Overrides the adjusted bounds, i.e. sets temporary layout bounds which are different from
+     * the normal task bounds.
+     *
+     * @param bounds The adjusted bounds.
+     * @param keepInsets Whether to keep the insets from the original bounds or to calculate new
+     *                   ones depending on the adjusted bounds.
+     */
+    private void setAdjustedBounds(Rect bounds, boolean keepInsets) {
+        if (mAdjustedBounds.equals(bounds)) {
+            return;
+        }
+
+        mAdjustedBounds.set(bounds);
+        final boolean adjusted = !mAdjustedBounds.isEmpty();
+        alignTasksToAdjustedBounds(adjusted ? mAdjustedBounds : mBounds,
+                adjusted && keepInsets ? mBounds : null);
+        mDisplayContent.layoutNeeded = true;
+    }
+
+    private void alignTasksToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds) {
         if (mFullscreen) {
             return;
         }
@@ -187,69 +213,12 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 task.resizeLocked(null, null, false /* forced */);
                 task.getBounds(mTmpRect2);
                 task.scrollLocked(mTmpRect2);
-            } else if (task.isResizeable()) {
+            } else if (task.isResizeable() && task.mOverrideConfig != Configuration.EMPTY) {
                 task.getBounds(mTmpRect2);
                 mTmpRect2.offsetTo(adjustedBounds.left, adjustedBounds.top);
+                task.setTempInsetBounds(tempInsetBounds);
                 task.resizeLocked(mTmpRect2, task.mOverrideConfig, false /* forced */);
             }
-        }
-    }
-
-    void adjustForIME(final WindowState imeWin) {
-        final int dockedSide = getDockSide();
-        final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
-        final Rect adjustedBounds = mAdjustedBounds;
-        if (imeWin == null || !dockedTopOrBottom) {
-            // If mContentBounds is already empty, it means we're not applying
-            // any adjustments, so nothing to do; otherwise clear any adjustments.
-            if (!mContentBounds.isEmpty()) {
-                mContentBounds.setEmpty();
-                adjustedBounds.set(mBounds);
-                alignTasksToAdjustedBounds(adjustedBounds);
-            }
-            return;
-        }
-
-        final Rect displayContentRect = mTmpRect;
-        final Rect contentBounds = mTmpRect2;
-
-        // Calculate the content bounds excluding the area occupied by IME
-        mDisplayContent.getContentRect(displayContentRect);
-        contentBounds.set(displayContentRect);
-        int imeTop = Math.max(imeWin.getDisplayFrameLw().top, contentBounds.top);
-        imeTop += imeWin.getGivenContentInsetsLw().top;
-        if (contentBounds.bottom > imeTop) {
-            contentBounds.bottom = imeTop;
-        }
-
-        // If content bounds not changing, nothing to do.
-        if (mContentBounds.equals(contentBounds)) {
-            return;
-        }
-
-        // Content bounds changed, need to apply adjustments depending on dock sides.
-        mContentBounds.set(contentBounds);
-        adjustedBounds.set(mBounds);
-        final int yOffset = displayContentRect.bottom - contentBounds.bottom;
-
-        if (dockedSide == DOCKED_TOP) {
-            // If this stack is docked on top, we make it smaller so the bottom stack is not
-            // occluded by IME. We shift its bottom up by the height of the IME (capped by
-            // the display content rect). Note that we don't change the task bounds.
-            adjustedBounds.bottom = Math.max(
-                    adjustedBounds.bottom - yOffset, displayContentRect.top);
-        } else {
-            // If this stack is docked on bottom, we shift it up so that it's not occluded by
-            // IME. We try to move it up by the height of the IME window (although the best
-            // we could do is to make the top stack fully collapsed).
-            final int dividerWidth = mDisplayContent.mDividerControllerLocked.getContentWidth();
-            adjustedBounds.top = Math.max(
-                    adjustedBounds.top - yOffset, displayContentRect.top + dividerWidth);
-            adjustedBounds.bottom = adjustedBounds.top + mBounds.height();
-
-            // We also move the member tasks together, taking care not to resize them.
-            // Resizing might cause relaunch, and IME window may not come back after that.
-            alignTasksToAdjustedBounds(adjustedBounds);
         }
     }
 
@@ -281,14 +250,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         mBounds.set(bounds);
         mRotation = rotation;
 
-        // Clear the adjusted content bounds as they're no longer valid.
-        // If IME is still visible, these will be re-applied.
-        // Note that we don't clear mContentBounds here, so that we know the last IME
-        // adjust we applied.
-        // If user starts dragging the dock divider while IME is visible, the new bounds
-        // we received are based on the actual screen location of the divider. It already
-        // accounted for the IME window, so we don't want to adjust again.
-        mAdjustedBounds.set(mBounds);
+        updateAdjustedBounds();
 
         return true;
     }
@@ -314,10 +276,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     public void getBounds(Rect out) {
         if (useCurrentBounds()) {
-            // If we're currently adjusting for IME, we use the adjusted bounds; otherwise,
-            // no need to adjust the output bounds if fullscreen or the docked stack is visible
-            // since it is already what we want to represent to the rest of the system.
-            if (!mContentBounds.isEmpty()) {
+            // If we're currently adjusting for IME or minimized docked stack, we use the adjusted
+            // bounds; otherwise, no need to adjust the output bounds if fullscreen or the docked
+            // stack is visible since it is already what we want to represent to the rest of the
+            // system.
+            if (!mAdjustedBounds.isEmpty()) {
                 out.set(mAdjustedBounds);
             } else {
                 out.set(mBounds);
@@ -691,7 +654,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
                 outBounds.top = dockedBounds.bottom + dockDividerWidth;
             }
         }
-        DockedDividerUtils.sanitizeStackBounds(outBounds);
+        DockedDividerUtils.sanitizeStackBounds(outBounds, !dockOnTopOrLeft);
     }
 
     /** Resizes all non-docked stacks in the system to either fullscreen or the appropriate size
@@ -802,6 +765,138 @@ public class TaskStack implements DimLayer.DimLayerUser,
         mDisplayContent = null;
     }
 
+    /**
+     * Adjusts the stack bounds if the IME is visible.
+     *
+     * @param imeWin The IME window.
+     */
+    void setAdjustedForIme(WindowState imeWin) {
+        mAdjustedForIme = true;
+        mImeWin = imeWin;
+        updateAdjustedBounds();
+    }
+
+    /**
+     * Resets the adjustment after it got adjusted for the IME.
+     */
+    void resetAdjustedForIme() {
+        mAdjustedForIme = false;
+        mImeWin = null;
+        updateAdjustedBounds();
+    }
+
+    /**
+     * Sets the amount how much we currently minimize our stack.
+     *
+     * @param minimizeAmount The amount, between 0 and 1.
+     * @return Whether the amount has changed and a layout is needed.
+     */
+    boolean setAdjustedForMinimizedDock(float minimizeAmount) {
+        if (minimizeAmount != mMinimizeAmount) {
+            mMinimizeAmount = minimizeAmount;
+            updateAdjustedBounds();
+            return isVisibleForUserLocked();
+        } else {
+            return false;
+        }
+    }
+
+    private boolean adjustForIME(final WindowState imeWin) {
+        final int dockedSide = getDockSide();
+        final boolean dockedTopOrBottom = dockedSide == DOCKED_TOP || dockedSide == DOCKED_BOTTOM;
+        final Rect adjustedBounds = mTmpAdjustedBounds;
+        if (imeWin == null || !dockedTopOrBottom) {
+            return false;
+        }
+
+        final Rect displayContentRect = mTmpRect;
+        final Rect contentBounds = mTmpRect2;
+
+        // Calculate the content bounds excluding the area occupied by IME
+        getDisplayContent().getContentRect(displayContentRect);
+        contentBounds.set(displayContentRect);
+        int imeTop = Math.max(imeWin.getDisplayFrameLw().top, contentBounds.top);
+        imeTop += imeWin.getGivenContentInsetsLw().top;
+        if (contentBounds.bottom > imeTop) {
+            contentBounds.bottom = imeTop;
+        }
+
+        // If content bounds not changing, nothing to do.
+        if (mLastContentBounds.equals(contentBounds)) {
+            return true;
+        }
+
+        // Content bounds changed, need to apply adjustments depending on dock sides.
+        mLastContentBounds.set(contentBounds);
+        adjustedBounds.set(mBounds);
+        final int yOffset = displayContentRect.bottom - contentBounds.bottom;
+
+        if (dockedSide == DOCKED_TOP) {
+            // If this stack is docked on top, we make it smaller so the bottom stack is not
+            // occluded by IME. We shift its bottom up by the height of the IME (capped by
+            // the display content rect). Note that we don't change the task bounds.
+            adjustedBounds.bottom = Math.max(
+                    adjustedBounds.bottom - yOffset, displayContentRect.top);
+        } else {
+            // If this stack is docked on bottom, we shift it up so that it's not occluded by
+            // IME. We try to move it up by the height of the IME window (although the best
+            // we could do is to make the top stack fully collapsed).
+            final int dividerWidth = getDisplayContent().mDividerControllerLocked
+                    .getContentWidth();
+            adjustedBounds.top = Math.max(
+                    adjustedBounds.top - yOffset, displayContentRect.top + dividerWidth);
+            adjustedBounds.bottom = adjustedBounds.top + mBounds.height();
+        }
+        return true;
+    }
+
+    private boolean adjustForMinimizedDockedStack(float minimizeAmount) {
+        final int dockSide = getDockSide();
+        if (dockSide == DOCKED_INVALID && !mTmpAdjustedBounds.isEmpty()) {
+            return false;
+        }
+
+        if (dockSide == DOCKED_TOP) {
+            mService.getStableInsetsLocked(mTmpRect);
+            int topInset = mTmpRect.top;
+            mTmpAdjustedBounds.set(mBounds);
+            mTmpAdjustedBounds.bottom =
+                    (int) (minimizeAmount * topInset + (1 - minimizeAmount) * mBounds.bottom);
+        } else if (dockSide == DOCKED_LEFT) {
+            mTmpAdjustedBounds.set(mBounds);
+            mTmpAdjustedBounds.right =
+                    (int) (minimizeAmount * mDockedStackMinimizeThickness
+                            + (1 - minimizeAmount) * mBounds.right);
+        } else if (dockSide == DOCKED_RIGHT) {
+            mTmpAdjustedBounds.set(mBounds);
+            mTmpAdjustedBounds.left =
+                    (int) (minimizeAmount * (mBounds.right - mDockedStackMinimizeThickness)
+                            + (1 - minimizeAmount) * mBounds.left);
+        }
+        return true;
+    }
+
+    /**
+     * Updates the adjustment depending on it's current state.
+     */
+    void updateAdjustedBounds() {
+        boolean adjust = false;
+        if (mMinimizeAmount != 0f) {
+            adjust = adjustForMinimizedDockedStack(mMinimizeAmount);
+        } else if (mAdjustedForIme) {
+            adjust = adjustForIME(mImeWin);
+        }
+        if (!adjust) {
+            mTmpAdjustedBounds.setEmpty();
+            mLastContentBounds.setEmpty();
+        }
+        setAdjustedBounds(mTmpAdjustedBounds, isAdjustedForMinimizedDockedStack());
+    }
+
+    boolean isAdjustedForMinimizedDockedStack() {
+        return mMinimizeAmount != 0f;
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "mStackId=" + mStackId);
         pw.println(prefix + "mDeferDetach=" + mDeferDetach);
@@ -906,11 +1001,26 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         for (int i = mTasks.size() - 1; i >= 0; i--) {
-            Task task = mTasks.get(i);
+            final Task task = mTasks.get(i);
             for (int j = task.mAppTokens.size() - 1; j >= 0; j--) {
                 if (!task.mAppTokens.get(j).hidden) {
                     return true;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return true if a the stack is visible for the current in user, ignoring any other visibility
+     *         aspects, and false otherwise
+     */
+    boolean isVisibleForUserLocked() {
+        for (int i = mTasks.size() - 1; i >= 0; i--) {
+            final Task task = mTasks.get(i);
+            if (task.isVisibleForUser()) {
+                return true;
             }
         }
         return false;

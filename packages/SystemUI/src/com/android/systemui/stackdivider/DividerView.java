@@ -86,6 +86,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
      */
     private static final float BOTTOM_RIGHT_SWITCH_BIGGER_FRACTION = 0.2f;
 
+    /**
+     * How much the background gets scaled when we are in the minimized dock state.
+     */
+    private static final float MINIMIZE_DOCK_SCALE = 0.375f;
+
     private static final PathInterpolator SLOWDOWN_INTERPOLATOR =
             new PathInterpolator(0.5f, 1f, 0.5f, 1f);
     private static final PathInterpolator DIM_INTERPOLATOR =
@@ -431,6 +436,47 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .translationZ(0)
                 .start();
         mBackgroundLifted = false;
+    }
+
+
+    public void setMinimizedDockStack(boolean minimized) {
+        updateDockSide();
+        mHandle.setAlpha(minimized ? 0f : 1f);
+        if (mDockSide == WindowManager.DOCKED_TOP) {
+            mBackground.setPivotY(0);
+            mBackground.setScaleY(minimized ? MINIMIZE_DOCK_SCALE : 1f);
+        } else if (mDockSide == WindowManager.DOCKED_LEFT
+                || mDockSide == WindowManager.DOCKED_RIGHT) {
+            mBackground.setPivotX(mDockSide == WindowManager.DOCKED_LEFT
+                    ? 0
+                    : mBackground.getWidth());
+            mBackground.setScaleX(minimized ? MINIMIZE_DOCK_SCALE : 1f);
+        }
+    }
+
+    public void setMinimizedDockStack(boolean minimized, long animDuration) {
+        updateDockSide();
+        mHandle.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(animDuration)
+                .alpha(minimized ? 0f : 1f)
+                .start();
+        if (mDockSide == WindowManager.DOCKED_TOP) {
+            mBackground.setPivotY(0);
+            mBackground.animate()
+                    .scaleY(minimized ? MINIMIZE_DOCK_SCALE : 1f);
+        } else if (mDockSide == WindowManager.DOCKED_LEFT
+                || mDockSide == WindowManager.DOCKED_RIGHT) {
+            mBackground.setPivotX(mDockSide == WindowManager.DOCKED_LEFT
+                    ? 0
+                    : mBackground.getWidth());
+            mBackground.animate()
+                    .scaleX(minimized ? MINIMIZE_DOCK_SCALE : 1f);
+        }
+        mBackground.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(animDuration)
+                .start();
     }
 
     @Override
