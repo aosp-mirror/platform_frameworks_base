@@ -243,7 +243,8 @@ final class TaskRecord {
 
     // Bounds of the Task. null for fullscreen tasks.
     Rect mBounds = null;
-    private final Rect mTmpRect = new Rect();
+    private final Rect mTmpStableBounds = new Rect();
+    private final Rect mTmpNonDecorBounds = new Rect();
     private final Rect mTmpRect2 = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
@@ -1353,12 +1354,7 @@ final class TaskRecord {
             if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-
-            // Stable insets need to be subtracted because we also subtract it in the fullscreen
-            // configuration.
-            mTmpRect.set(bounds);
-            subtractStableInsets(mTmpRect, insetBounds != null ? insetBounds : mTmpRect);
-            mOverrideConfig = calculateOverrideConfig(mTmpRect);
+            mOverrideConfig = calculateOverrideConfig(bounds, insetBounds);
         }
 
         if (mFullscreen != oldFullscreen) {
@@ -1366,6 +1362,16 @@ final class TaskRecord {
         }
 
         return !mOverrideConfig.equals(oldConfig) ? mOverrideConfig : null;
+    }
+
+    private void subtractNonDecorInsets(Rect inOutBounds, Rect inInsetBounds) {
+        mTmpRect2.set(inInsetBounds);
+        mService.mWindowManager.subtractNonDecorInsets(mTmpRect2);
+        int leftInset = mTmpRect2.left - inInsetBounds.left;
+        int topInset = mTmpRect2.top - inInsetBounds.top;
+        int rightInset = inInsetBounds.right - mTmpRect2.right;
+        int bottomInset = inInsetBounds.bottom - mTmpRect2.bottom;
+        inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
     }
 
     private void subtractStableInsets(Rect inOutBounds, Rect inInsetBounds) {
@@ -1378,23 +1384,39 @@ final class TaskRecord {
         inOutBounds.inset(leftInset, topInset, rightInset, bottomInset);
     }
 
-    Configuration calculateOverrideConfig(Rect bounds) {
+    private Configuration calculateOverrideConfig(Rect bounds, Rect insetBounds) {
+        mTmpNonDecorBounds.set(bounds);
+        mTmpStableBounds.set(bounds);
+        subtractNonDecorInsets(
+                mTmpNonDecorBounds, insetBounds != null ? insetBounds : bounds);
+        subtractStableInsets(
+                mTmpStableBounds, insetBounds != null ? insetBounds : bounds);
+
+        // For calculating screenWidthDp, screenWidthDp, we use the stable inset screen area,
+        // i.e. the screen area without the system bars.
         final Configuration serviceConfig = mService.mConfiguration;
         final Configuration config = new Configuration(Configuration.EMPTY);
         // TODO(multidisplay): Update Dp to that of display stack is on.
         final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         config.screenWidthDp =
-                Math.min((int)(bounds.width() / density), serviceConfig.screenWidthDp);
+                Math.min((int)(mTmpStableBounds.width() / density), serviceConfig.screenWidthDp);
         config.screenHeightDp =
-                Math.min((int)(bounds.height() / density), serviceConfig.screenHeightDp);
-        config.smallestScreenWidthDp =
-                Math.min(config.screenWidthDp, config.screenHeightDp);
+                Math.min((int)(mTmpStableBounds.height() / density), serviceConfig.screenHeightDp);
+        config.smallestScreenWidthDp = Math.min(config.screenWidthDp, config.screenHeightDp);
+
+        // TODO: Orientation?
         config.orientation = (config.screenWidthDp <= config.screenHeightDp)
                 ? Configuration.ORIENTATION_PORTRAIT
                 : Configuration.ORIENTATION_LANDSCAPE;
+
+        // For calculating screen layout, we need to use the non-decor inset screen area for the
+        // calculation for compatibility reasons, i.e. screen area without system bars that could
+        // never go away in Honeycomb.
+        final int compatScreenWidthDp = (int)(mTmpNonDecorBounds.width() / density);
+        final int compatScreenHeightDp = (int)(mTmpNonDecorBounds.height() / density);
         final int sl = Configuration.resetScreenLayout(serviceConfig.screenLayout);
-        int longSize = Math.max(config.screenWidthDp, config.screenHeightDp);
-        int shortSize = Math.min(config.screenWidthDp, config.screenHeightDp);
+        final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
+        final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
         config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
         return config;
     }
