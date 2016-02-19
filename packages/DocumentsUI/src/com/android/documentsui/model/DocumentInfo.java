@@ -26,7 +26,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsProvider;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.RootCursorWrapper;
@@ -38,7 +37,6 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ProtocolException;
-import java.text.Collator;
 import java.util.Objects;
 
 /**
@@ -47,13 +45,6 @@ import java.util.Objects;
 public class DocumentInfo implements Durable, Parcelable {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_SPLIT_URI = 2;
-
-    private static final Collator sCollator;
-
-    static {
-        sCollator = Collator.getInstance();
-        sCollator.setStrength(Collator.SECONDARY);
-    }
 
     public String authority;
     public String documentId;
@@ -319,32 +310,5 @@ public class DocumentInfo implements Durable, Parcelable {
         final FileNotFoundException fnfe = new FileNotFoundException(t.getMessage());
         fnfe.initCause(t);
         throw fnfe;
-    }
-
-    /**
-     * String prefix used to indicate the document is a directory.
-     */
-    public static final char DIR_PREFIX = '\001';
-
-    /**
-     * Compare two strings against each other using system default collator in a
-     * case-insensitive mode. Clusters strings prefixed with {@link #DIR_PREFIX}
-     * before other items.
-     */
-    public static int compareToIgnoreCaseNullable(String lhs, String rhs) {
-        final boolean leftEmpty = TextUtils.isEmpty(lhs);
-        final boolean rightEmpty = TextUtils.isEmpty(rhs);
-
-        if (leftEmpty && rightEmpty) return 0;
-        if (leftEmpty) return -1;
-        if (rightEmpty) return 1;
-
-        final boolean leftDir = (lhs.charAt(0) == DIR_PREFIX);
-        final boolean rightDir = (rhs.charAt(0) == DIR_PREFIX);
-
-        if (leftDir && !rightDir) return -1;
-        if (rightDir && !leftDir) return 1;
-
-        return sCollator.compare(lhs, rhs);
     }
 }
