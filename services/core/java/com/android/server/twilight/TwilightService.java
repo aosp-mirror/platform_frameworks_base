@@ -19,12 +19,15 @@ package com.android.server.twilight;
 import com.android.server.SystemService;
 import com.android.server.TwilightCalculator;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -33,6 +36,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Slog;
@@ -54,6 +60,26 @@ public final class TwilightService extends SystemService {
     static final String ACTION_UPDATE_TWILIGHT_STATE =
             "com.android.server.action.UPDATE_TWILIGHT_STATE";
 
+    // The amount of time after or before sunrise over which to start adjusting
+    // twilight affected things.  We want the change to happen gradually so that
+    // it is below the threshold of perceptibility and so that the adjustment has
+    // maximum effect well after dusk.
+    private static final long TWILIGHT_ADJUSTMENT_TIME = DateUtils.HOUR_IN_MILLIS * 2;
+
+    // Broadcast when twilight changes.
+    public static final String ACTION_TWILIGHT_CHANGED = "android.intent.action.TWILIGHT_CHANGED";
+
+    public static final String EXTRA_IS_NIGHT = "isNight";
+    public static final String EXTRA_AMOUNT = "amount";
+
+    // Amount of time the TwilightService will stay locked in an override state before switching
+    // back to auto.
+    private static final long RESET_TIME = DateUtils.HOUR_IN_MILLIS * 2;
+    private static final String EXTRA_RESET_USER = "user";
+
+    private static final String ACTION_RESET_TWILIGHT_AUTO =
+            "com.android.server.action.RESET_TWILIGHT_AUTO";
+
     final Object mLock = new Object();
 
     AlarmManager mAlarmManager;
@@ -65,6 +91,10 @@ public final class TwilightService extends SystemService {
 
     TwilightState mTwilightState;
 
+    private int mCurrentUser;
+    private boolean mLocked;
+    private boolean mBootCompleted;
+
     public TwilightService(Context context) {
         super(context);
     }
@@ -75,14 +105,93 @@ public final class TwilightService extends SystemService {
         mLocationManager = (LocationManager) getContext().getSystemService(
                 Context.LOCATION_SERVICE);
         mLocationHandler = new LocationHandler();
+        mCurrentUser = ActivityManager.getCurrentUser();
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(ACTION_UPDATE_TWILIGHT_STATE);
-        getContext().registerReceiver(mUpdateLocationReceiver, filter);
+        getContext().registerReceiver(mReceiver, filter);
 
         publishLocalService(TwilightManager.class, mService);
+        getContext().getContentResolver().registerContentObserver(
+                Secure.getUriFor(Secure.TWILIGHT_MODE), false, mContentObserver, mCurrentUser);
+        mContentObserver.onChange(true);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            mBootCompleted = true;
+            sendBroadcast();
+        }
+    }
+
+    private void reregisterSettingObserver() {
+        final ContentResolver contentResolver = getContext().getContentResolver();
+        contentResolver.unregisterContentObserver(mContentObserver);
+        contentResolver.registerContentObserver(Secure.getUriFor(Secure.TWILIGHT_MODE), false,
+                mContentObserver, mCurrentUser);
+        mContentObserver.onChange(true);
+    }
+
+    private void setLockedState(TwilightState state) {
+        synchronized (mLock) {
+            // Make sure we aren't locked so we can set the state.
+            mLocked = false;
+            setTwilightState(state);
+            // Make sure we leave the state locked, so it cant be changed.
+            mLocked = true;
+            // TODO: Don't bother updating state when locked.
+        }
+    }
+
+    private void setTwilightState(TwilightState state) {
+        synchronized (mLock) {
+            if (mLocked) {
+                // State has been locked by secure setting, shouldn't be changed.
+                return;
+            }
+            if (!Objects.equal(mTwilightState, state)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Twilight state changed: " + state);
+                }
+
+                mTwilightState = state;
+
+                final int listenerLen = mListeners.size();
+                for (int i = 0; i < listenerLen; i++) {
+                    mListeners.get(i).postUpdate();
+                }
+            }
+        }
+        sendBroadcast();
+    }
+
+    private void sendBroadcast() {
+        synchronized (mLock) {
+            if (mTwilightState == null) {
+                return;
+            }
+            if (mBootCompleted) {
+                Intent intent = new Intent(ACTION_TWILIGHT_CHANGED);
+                intent.putExtra(EXTRA_IS_NIGHT, mTwilightState.isNight());
+                intent.putExtra(EXTRA_AMOUNT, mTwilightState.getAmount());
+                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                getContext().sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            }
+        }
+    }
+
+    private void scheduleReset() {
+        long resetTime = System.currentTimeMillis() + RESET_TIME;
+        Intent resetIntent = new Intent(ACTION_RESET_TWILIGHT_AUTO);
+        resetIntent.putExtra(EXTRA_RESET_USER, mCurrentUser);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                getContext(), 0, resetIntent, 0);
+        mAlarmManager.cancel(pendingIntent);
+        mAlarmManager.setExact(AlarmManager.RTC, resetTime, pendingIntent);
     }
 
     private static class TwilightListenerRecord implements Runnable {
@@ -133,24 +242,22 @@ public final class TwilightService extends SystemService {
                 }
             }
         }
-    };
 
-    private void setTwilightState(TwilightState state) {
-        synchronized (mLock) {
-            if (!Objects.equal(mTwilightState, state)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Twilight state changed: " + state);
+        @Override
+        public void unregisterListener(TwilightListener listener) {
+            synchronized (mLock) {
+                for (int i = 0; i < mListeners.size(); i++) {
+                    if (mListeners.get(i).mListener == listener) {
+                        mListeners.remove(i);
+                    }
                 }
 
-                mTwilightState = state;
-
-                final int listenerLen = mListeners.size();
-                for (int i = 0; i < listenerLen; i++) {
-                    mListeners.get(i).postUpdate();
+                if (mListeners.size() == 0) {
+                    mLocationHandler.disableLocationUpdates();
                 }
             }
         }
-    }
+    };
 
     // The user has moved if the accuracy circles of the two locations don't overlap.
     private static boolean hasMoved(Location from, Location to) {
@@ -183,6 +290,7 @@ public final class TwilightService extends SystemService {
         private static final int MSG_GET_NEW_LOCATION_UPDATE = 2;
         private static final int MSG_PROCESS_NEW_LOCATION = 3;
         private static final int MSG_DO_TWILIGHT_UPDATE = 4;
+        private static final int MSG_DISABLE_LOCATION_UPDATES = 5;
 
         private static final long LOCATION_UPDATE_MS = 24 * DateUtils.HOUR_IN_MILLIS;
         private static final long MIN_LOCATION_UPDATE_MS = 30 * DateUtils.MINUTE_IN_MILLIS;
@@ -208,6 +316,10 @@ public final class TwilightService extends SystemService {
 
         public void enableLocationUpdates() {
             sendEmptyMessage(MSG_ENABLE_LOCATION_UPDATES);
+        }
+
+        public void disableLocationUpdates() {
+            sendEmptyMessage(MSG_DISABLE_LOCATION_UPDATES);
         }
 
         public void requestLocationUpdate() {
@@ -311,6 +423,11 @@ public final class TwilightService extends SystemService {
                     }
                     break;
 
+                case MSG_DISABLE_LOCATION_UPDATES:
+                    mLocationManager.removeUpdates(mLocationListener);
+                    removeMessages(MSG_ENABLE_LOCATION_UPDATES);
+                    break;
+
                 case MSG_DO_TWILIGHT_UPDATE:
                     updateTwilightState();
                     break;
@@ -368,11 +485,6 @@ public final class TwilightService extends SystemService {
 
             final long now = System.currentTimeMillis();
 
-            // calculate yesterday's twilight
-            mTwilightCalculator.calculateTwilight(now - DateUtils.DAY_IN_MILLIS,
-                    mLocation.getLatitude(), mLocation.getLongitude());
-            final long yesterdaySunset = mTwilightCalculator.mSunset;
-
             // calculate today's twilight
             mTwilightCalculator.calculateTwilight(now,
                     mLocation.getLatitude(), mLocation.getLongitude());
@@ -385,9 +497,19 @@ public final class TwilightService extends SystemService {
                     mLocation.getLatitude(), mLocation.getLongitude());
             final long tomorrowSunrise = mTwilightCalculator.mSunrise;
 
+            float amount = 0;
+            if (isNight) {
+                if (todaySunrise == -1 || todaySunset == -1) {
+                    amount = 1;
+                } else if (now > todaySunset) {
+                    amount = Math.min(1, (now - todaySunset) / (float) TWILIGHT_ADJUSTMENT_TIME);
+                } else {
+                    amount = Math.max(0, 1
+                            - (todaySunrise - now) / (float) TWILIGHT_ADJUSTMENT_TIME);
+                }
+            }
             // set twilight state
-            TwilightState state = new TwilightState(isNight, yesterdaySunset,
-                    todaySunrise, todaySunset, tomorrowSunrise);
+            TwilightState state = new TwilightState(isNight, amount);
             if (DEBUG) {
                 Slog.d(TAG, "Updating twilight state: " + state);
             }
@@ -402,12 +524,18 @@ public final class TwilightService extends SystemService {
                 // add some extra time to be on the safe side.
                 nextUpdate += DateUtils.MINUTE_IN_MILLIS;
 
-                if (now > todaySunset) {
-                    nextUpdate += tomorrowSunrise;
-                } else if (now > todaySunrise) {
-                    nextUpdate += todaySunset;
+                if (amount == 1 || amount == 0) {
+                    if (now > todaySunset) {
+                        nextUpdate += tomorrowSunrise;
+                    } else if (now > todaySunrise) {
+                        nextUpdate += todaySunset;
+                    } else {
+                        nextUpdate += todaySunrise;
+                    }
                 } else {
-                    nextUpdate += todaySunrise;
+                    // This is the update rate while transitioning.
+                    // Leave at 10 min for now (one from above).
+                    nextUpdate += 9 * DateUtils.MINUTE_IN_MILLIS;
                 }
             }
 
@@ -423,9 +551,37 @@ public final class TwilightService extends SystemService {
         }
     }
 
-    private final BroadcastReceiver mUpdateLocationReceiver = new BroadcastReceiver() {
+    private final ContentObserver mContentObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            int value = Secure.getIntForUser(getContext().getContentResolver(),
+                    Secure.TWILIGHT_MODE, Secure.TWILIGHT_MODE_LOCKED_OFF, mCurrentUser);
+            if (value == Secure.TWILIGHT_MODE_LOCKED_OFF) {
+                setLockedState(new TwilightState(false, 0));
+            } else if (value == Secure.TWILIGHT_MODE_LOCKED_ON) {
+                setLockedState(new TwilightState(true, 1));
+            } else if (value == Secure.TWILIGHT_MODE_AUTO_OVERRIDE_OFF) {
+                setLockedState(new TwilightState(false, 0));
+                scheduleReset();
+            } else if (value == Secure.TWILIGHT_MODE_AUTO_OVERRIDE_ON) {
+                setLockedState(new TwilightState(true, 1));
+                scheduleReset();
+            } else {
+                mLocked = false;
+                mLocationHandler.requestTwilightUpdate();
+            }
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                mCurrentUser = ActivityManager.getCurrentUser();
+                reregisterSettingObserver();
+                return;
+            }
             if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(intent.getAction())
                     && !intent.getBooleanExtra("state", false)) {
                 // Airplane mode is now off!
@@ -433,6 +589,12 @@ public final class TwilightService extends SystemService {
                 return;
             }
 
+            if (ACTION_RESET_TWILIGHT_AUTO.equals(intent.getAction())) {
+                int user = intent.getIntExtra(EXTRA_RESET_USER, 0);
+                Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                        Secure.TWILIGHT_MODE, Secure.TWILIGHT_MODE_AUTO, user);
+                return;
+            }
             // Time zone has changed or alarm expired.
             mLocationHandler.requestTwilightUpdate();
         }

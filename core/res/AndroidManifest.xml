@@ -452,6 +452,8 @@
     <protected-broadcast android:name="android.bluetooth.input.profile.action.HANDSHAKE" />
     <protected-broadcast android:name="android.bluetooth.input.profile.action.REPORT" />
 
+    <protected-broadcast android:name="android.intent.action.TWILIGHT_CHANGED" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->

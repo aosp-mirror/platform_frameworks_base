@@ -94,11 +94,4 @@
             android:layout_weight="1" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/apply"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:text="@string/color_apply" />
-
 </LinearLayout>
