@@ -329,7 +329,8 @@ public class QSPanel extends FrameLayout implements Tunable {
         final View.OnLongClickListener longClick = new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                return false;
+                r.tile.longClick();
+                return true;
             }
         };
         r.tileView.init(click, longClick);

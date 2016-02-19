@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.content.Intent;
+import android.provider.Settings;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -49,6 +51,11 @@ public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
         } else {
             mProfileController.removeCallback(this);
         }
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_SYNC_SETTINGS);
     }
 
     @Override

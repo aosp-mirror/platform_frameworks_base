@@ -18,6 +18,8 @@ package com.android.systemui.qs.tiles;
 
 import android.app.ActivityManager;
 
+import android.content.Intent;
+import android.provider.MediaStore;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -57,6 +59,11 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleUserSwitch(int newUserId) {
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
     }
 
     @Override

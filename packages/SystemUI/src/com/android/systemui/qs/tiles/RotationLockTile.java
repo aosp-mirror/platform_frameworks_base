@@ -17,8 +17,10 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 
+import android.provider.Settings;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -57,6 +59,11 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
         } else {
             mController.removeRotationLockControllerCallback(mCallback);
         }
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return new Intent(Settings.ACTION_DISPLAY_SETTINGS);
     }
 
     @Override

@@ -16,6 +16,8 @@
 package android.service.quicksettings;
 
 import android.Manifest;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Dialog;
 import android.app.Service;
@@ -72,6 +74,14 @@ import android.view.WindowManager;
  * @see Tile Tile for details about the UI of a Quick Settings Tile.
  */
 public class TileService extends Service {
+
+    /**
+     * An activity that provides a user interface for adjusting TileService preferences.
+     * Optional but recommended for apps that implement a TileService.
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String ACTION_QS_TILE_PREFERENCES
+            = "android.service.quicksettings.action.QS_TILE_PREFERENCES";
 
     /**
      * Action that identifies a Service as being a TileService.

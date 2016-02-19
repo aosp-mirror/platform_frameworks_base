@@ -37,7 +37,7 @@ import com.android.systemui.statusbar.policy.SignalCallbackAdapter;
 
 /** Quick settings tile: Cellular **/
 public class CellularTile extends QSTile<QSTile.SignalState> {
-    private static final Intent CELLULAR_SETTINGS = new Intent().setComponent(new ComponentName(
+    static final Intent CELLULAR_SETTINGS = new Intent().setComponent(new ComponentName(
             "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity"));
 
     private final NetworkController mController;
@@ -75,6 +75,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     @Override
     public QSIconView createTileView(Context context) {
         return new SignalTileView(context);
+    }
+
+    @Override
+    public Intent getLongClickIntent() {
+        return CELLULAR_SETTINGS;
     }
 
     @Override
