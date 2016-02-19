@@ -2112,6 +2112,14 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     public static native void dumpNativeBacktraceToFile(int pid, String file);
 
     /**
+     * Get description of unreachable native memory.
+     * @param limit the number of leaks to provide info on, 0 to only get a summary.
+     * @param contents true to include a hex dump of the contents of unreachable memory.
+     * @return the String containing a description of unreachable memory.
+     * @hide */
+    public static native String getUnreachableMemory(int limit, boolean contents);
+
+    /**
      * Return a String describing the calling method and location at a particular stack depth.
      * @param callStack the Thread stack
      * @param depth the depth of stack to return information for.
