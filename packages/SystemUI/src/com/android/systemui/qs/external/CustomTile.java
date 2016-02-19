@@ -15,9 +15,11 @@
  */
 package com.android.systemui.qs.external;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -160,8 +162,21 @@ public class CustomTile extends QSTile<QSTile.State> {
 
     @Override
     public Intent getLongClickIntent() {
+        Intent i = new Intent(TileService.ACTION_QS_TILE_PREFERENCES);
+        i.setPackage(mComponent.getPackageName());
+        i = resolveIntent(i);
+        if (i != null) {
+            return i;
+        }
         return new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(
                 Uri.fromParts("package", mComponent.getPackageName(), null));
+    }
+
+    private Intent resolveIntent(Intent i) {
+        ResolveInfo result = mContext.getPackageManager().resolveActivityAsUser(i, 0,
+                ActivityManager.getCurrentUser());
+        return result != null ? new Intent(TileService.ACTION_QS_TILE_PREFERENCES)
+                .setClassName(result.activityInfo.packageName, result.activityInfo.name) : null;
     }
 
     @Override

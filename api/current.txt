@@ -34579,6 +34579,7 @@ package android.service.quicksettings {
     method public final void startActivityAndCollapse(android.content.Intent);
     method public final void unlockAndRun(java.lang.Runnable);
     field public static final java.lang.String ACTION_QS_TILE = "android.service.quicksettings.action.QS_TILE";
+    field public static final java.lang.String ACTION_QS_TILE_PREFERENCES = "android.service.quicksettings.action.QS_TILE_PREFERENCES";
     field public static final int TILE_MODE_ACTIVE = 2; // 0x2
     field public static final int TILE_MODE_PASSIVE = 1; // 0x1
   }
