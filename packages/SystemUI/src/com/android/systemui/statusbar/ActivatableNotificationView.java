@@ -208,6 +208,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         return false;
     }
 
+    protected boolean handleSlideBack() {
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         boolean result;
@@ -260,6 +264,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 break;
             case MotionEvent.ACTION_UP:
                 if (isWithinTouchSlop(event)) {
+                    if (handleSlideBack()) {
+                        return true;
+                    }
                     if (!mActivated) {
                         makeActive();
                         postDelayed(mTapTimeoutRunnable, DOUBLETAP_TIMEOUT_MS);
