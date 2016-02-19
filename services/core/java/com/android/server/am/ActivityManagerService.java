@@ -16963,7 +16963,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             case Process.ROOT_UID:
             case Process.SYSTEM_UID:
             case Process.PHONE_UID:
-            case Process.SHELL_UID:
             case Process.BLUETOOTH_UID:
             case Process.NFC_UID:
                 isCallerSystem = true;
