@@ -2827,7 +2827,7 @@ public abstract class BatteryStats implements Parcelable {
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
         dumpLine(pw, 0 /* uid */, category, GLOBAL_WIFI_DATA, wifiOnTime / 1000,
-                wifiRunningTime / 1000, /* legacy fields follow, keep at 0 */ 0, 0, 0, 0);
+                wifiRunningTime / 1000, /* legacy fields follow, keep at 0 */ 0, 0, 0);
 
         dumpControllerActivityLine(pw, 0 /* uid */, category, GLOBAL_WIFI_CONTROLLER_DATA,
                 getWifiControllerActivity(), which);
