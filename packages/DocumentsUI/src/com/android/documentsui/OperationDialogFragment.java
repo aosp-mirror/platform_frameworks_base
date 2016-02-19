@@ -16,9 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.services.FileOperationService.OpType;
-import static com.android.internal.util.Preconditions.checkArgument;
-
 import android.annotation.IntDef;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -32,13 +29,11 @@ import android.text.Html;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.services.FileOperationService;
-import com.android.documentsui.services.FileOperations;
-import com.android.documentsui.services.Job;
+import com.android.documentsui.services.FileOperationService.OpType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Alert dialog for operation dialogs.
@@ -114,7 +109,7 @@ public class OperationDialogFragment extends DialogFragment {
 
         final StringBuilder list = new StringBuilder("<p>");
         for (DocumentInfo documentInfo : srcList) {
-            list.append(String.format("&#8226; %s<br>", documentInfo.displayName));
+            list.append(String.format("&#8226; %s<br>", Html.escapeHtml(documentInfo.displayName)));
         }
         list.append("</p>");
         builder.setMessage(Html.fromHtml(String.format(messageFormat, list.toString())));
