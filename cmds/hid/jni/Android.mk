@@ -18,6 +18,6 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_MODULE := libhidcommand_jni
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_CFLAGS += -Wall
+LOCAL_CFLAGS += -Wall -Wextra -Werror
 
 include $(BUILD_SHARED_LIBRARY)
