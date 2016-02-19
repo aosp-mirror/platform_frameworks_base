@@ -1396,21 +1396,4 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     public RenderSession getSession() {
         return mScene;
     }
-
-    public void dispose() {
-        AttachInfo_Accessor.detachFromWindow(mViewRoot);
-        if (mCanvas != null) {
-            mCanvas.release();
-            mCanvas = null;
-        }
-        if (mViewInfoList != null) {
-            mViewInfoList.clear();
-        }
-        if (mSystemViewInfoList != null) {
-            mSystemViewInfoList.clear();
-        }
-        mImage = null;
-        mViewRoot = null;
-        mContentRoot = null;
-    }
 }
