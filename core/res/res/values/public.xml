@@ -2702,6 +2702,7 @@
     <public type="attr" name="hotSpotY" />
     <public type="attr" name="version" />
     <public type="attr" name="backupInForeground" />
+    <public type="attr" name="countDown" />
 
     <public type="style" name="Theme.Material.Light.DialogWhenLarge.DarkActionBar" />
     <public type="style" name="Widget.Material.SeekBar.Discrete" />
