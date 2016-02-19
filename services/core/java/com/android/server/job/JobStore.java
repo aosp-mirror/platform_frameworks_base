@@ -29,6 +29,7 @@ import android.util.AtomicFile;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -68,8 +69,8 @@ public class JobStore {
 
     /** Threshold to adjust how often we want to write to the db. */
     private static final int MAX_OPS_BEFORE_WRITE = 1;
-    final ArraySet<JobStatus> mJobSet;
     final Object mLock;
+    final JobSet mJobSet; // per-caller-uid tracking
     final Context mContext;
 
     private int mDirtyOperations;
@@ -114,7 +115,7 @@ public class JobStore {
         jobDir.mkdirs();
         mJobsFile = new AtomicFile(new File(jobDir, "jobs.xml"));
 
-        mJobSet = new ArraySet<JobStatus>();
+        mJobSet = new JobSet();
 
         readJobMapFromDisk(mJobSet);
     }
@@ -137,25 +138,16 @@ public class JobStore {
         return replaced;
     }
 
-    /**
-     * Whether this jobStatus object already exists in the JobStore.
-     */
-    public boolean containsJobIdForUid(int jobId, int uId) {
-        for (int i=mJobSet.size()-1; i>=0; i--) {
-            JobStatus ts = mJobSet.valueAt(i);
-            if (ts.getUid() == uId && ts.getJobId() == jobId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     boolean containsJob(JobStatus jobStatus) {
         return mJobSet.contains(jobStatus);
     }
 
     public int size() {
         return mJobSet.size();
+    }
+
+    public int countJobsForUid(int uid) {
+        return mJobSet.countJobsForUid(uid);
     }
 
     /**
@@ -188,14 +180,7 @@ public class JobStore {
      * @return A list of all the jobs scheduled by the provided user. Never null.
      */
     public List<JobStatus> getJobsByUser(int userHandle) {
-        List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
-        for (int i=mJobSet.size()-1; i>=0; i--) {
-            JobStatus ts = mJobSet.valueAt(i);
-            if (UserHandle.getUserId(ts.getUid()) == userHandle) {
-                matchingJobs.add(ts);
-            }
-        }
-        return matchingJobs;
+        return mJobSet.getJobsByUser(userHandle);
     }
 
     /**
@@ -203,14 +188,7 @@ public class JobStore {
      * @return All JobStatus objects for a given uid from the master list. Never null.
      */
     public List<JobStatus> getJobsByUid(int uid) {
-        List<JobStatus> matchingJobs = new ArrayList<JobStatus>();
-        for (int i=mJobSet.size()-1; i>=0; i--) {
-            JobStatus ts = mJobSet.valueAt(i);
-            if (ts.getUid() == uid) {
-                matchingJobs.add(ts);
-            }
-        }
-        return matchingJobs;
+        return mJobSet.getJobsByUid(uid);
     }
 
     /**
@@ -219,20 +197,21 @@ public class JobStore {
      * @return the JobStatus that matches the provided uId and jobId, or null if none found.
      */
     public JobStatus getJobByUidAndJobId(int uid, int jobId) {
-        for (int i=mJobSet.size()-1; i>=0; i--) {
-            JobStatus ts = mJobSet.valueAt(i);
-            if (ts.getUid() == uid && ts.getJobId() == jobId) {
-                return ts;
-            }
-        }
-        return null;
+        return mJobSet.get(uid, jobId);
     }
 
     /**
-     * @return The live array of JobStatus objects.
+     * Iterate over the set of all jobs, invoking the supplied functor on each.  This is for
+     * customers who need to examine each job; we'd much rather not have to generate
+     * transient unified collections for them to iterate over and then discard, or creating
+     * iterators every time a client needs to perform a sweep.
      */
-    public ArraySet<JobStatus> getJobs() {
-        return mJobSet;
+    public void forEachJob(JobStatusFunctor functor) {
+        mJobSet.forEachJob(functor);
+    }
+
+    public interface JobStatusFunctor {
+        public void process(JobStatus jobStatus);
     }
 
     /** Version of the db schema. */
@@ -261,7 +240,7 @@ public class JobStore {
     }
 
     @VisibleForTesting
-    public void readJobMapFromDisk(ArraySet<JobStatus> jobSet) {
+    public void readJobMapFromDisk(JobSet jobSet) {
         new ReadJobMapFromDiskRunnable(jobSet).run();
     }
 
@@ -273,21 +252,19 @@ public class JobStore {
         @Override
         public void run() {
             final long startElapsed = SystemClock.elapsedRealtime();
-            List<JobStatus> mStoreCopy = new ArrayList<JobStatus>();
+            final List<JobStatus> storeCopy = new ArrayList<JobStatus>();
             synchronized (mLock) {
-                // Copy over the jobs so we can release the lock before writing.
-                for (int i=0; i<mJobSet.size(); i++) {
-                    JobStatus jobStatus = mJobSet.valueAt(i);
-
-                    if (!jobStatus.isPersisted()){
-                        continue;
+                // Clone the jobs so we can release the lock before writing.
+                mJobSet.forEachJob(new JobStatusFunctor() {
+                    @Override
+                    public void process(JobStatus job) {
+                        if (job.isPersisted()) {
+                            storeCopy.add(new JobStatus(job));
+                        }
                     }
-
-                    JobStatus copy = new JobStatus(jobStatus);
-                    mStoreCopy.add(copy);
-                }
+                });
             }
-            writeJobsMapImpl(mStoreCopy);
+            writeJobsMapImpl(storeCopy);
             if (JobSchedulerService.DEBUG) {
                 Slog.v(TAG, "Finished writing, took " + (SystemClock.elapsedRealtime()
                         - startElapsed) + "ms");
@@ -440,13 +417,13 @@ public class JobStore {
      * need to go through {@link JobStore#add(com.android.server.job.controllers.JobStatus)}.
      */
     private class ReadJobMapFromDiskRunnable implements Runnable {
-        private final ArraySet<JobStatus> jobSet;
+        private final JobSet jobSet;
 
         /**
          * @param jobSet Reference to the (empty) set of JobStatus objects that back the JobStore,
          *               so that after disk read we can populate it directly.
          */
-        ReadJobMapFromDiskRunnable(ArraySet<JobStatus> jobSet) {
+        ReadJobMapFromDiskRunnable(JobSet jobSet) {
             this.jobSet = jobSet;
         }
 
@@ -757,6 +734,124 @@ public class JobStore {
 
             }
             return Pair.create(earliestRunTimeElapsed, latestRunTimeElapsed);
+        }
+    }
+
+    static class JobSet {
+        // Key is the getUid() originator of the jobs in each sheaf
+        private SparseArray<ArraySet<JobStatus>> mJobs;
+
+        public JobSet() {
+            mJobs = new SparseArray<ArraySet<JobStatus>>();
+        }
+
+        public List<JobStatus> getJobsByUid(int uid) {
+            ArrayList<JobStatus> matchingJobs = new ArrayList<JobStatus>();
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            if (jobs != null) {
+                matchingJobs.addAll(jobs);
+            }
+            return matchingJobs;
+        }
+
+        // By user, not by uid, so we need to traverse by key and check
+        public List<JobStatus> getJobsByUser(int userId) {
+            ArrayList<JobStatus> result = new ArrayList<JobStatus>();
+            for (int i = mJobs.size() - 1; i >= 0; i--) {
+                if (UserHandle.getUserId(mJobs.keyAt(i)) == userId) {
+                    ArraySet<JobStatus> jobs = mJobs.get(i);
+                    if (jobs != null) {
+                        result.addAll(jobs);
+                    }
+                }
+            }
+            return result;
+        }
+
+        public boolean add(JobStatus job) {
+            final int uid = job.getUid();
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            if (jobs == null) {
+                jobs = new ArraySet<JobStatus>();
+                mJobs.put(uid, jobs);
+            }
+            return jobs.add(job);
+        }
+
+        public boolean remove(JobStatus job) {
+            final int uid = job.getUid();
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            boolean didRemove = (jobs != null) ? jobs.remove(job) : false;
+            if (didRemove && jobs.size() == 0) {
+                // no more jobs for this uid; let the now-empty set object be GC'd.
+                mJobs.remove(uid);
+            }
+            return didRemove;
+        }
+
+        public boolean contains(JobStatus job) {
+            final int uid = job.getUid();
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            return jobs != null && jobs.contains(job);
+        }
+
+        public JobStatus get(int uid, int jobId) {
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            if (jobs != null) {
+                for (int i = jobs.size() - 1; i >= 0; i--) {
+                    JobStatus job = jobs.valueAt(i);
+                    if (job.getJobId() == jobId) {
+                        return job;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Inefficient; use only for testing
+        public List<JobStatus> getAllJobs() {
+            ArrayList<JobStatus> allJobs = new ArrayList<JobStatus>(size());
+            for (int i = mJobs.size(); i >= 0; i--) {
+                allJobs.addAll(mJobs.valueAt(i));
+            }
+            return allJobs;
+        }
+
+        public void clear() {
+            mJobs.clear();
+        }
+
+        public int size() {
+            int total = 0;
+            for (int i = mJobs.size() - 1; i >= 0; i--) {
+                total += mJobs.valueAt(i).size();
+            }
+            return total;
+        }
+
+        // We only want to count the jobs that this uid has scheduled on its own
+        // behalf, not those that the app has scheduled on someone else's behalf.
+        public int countJobsForUid(int uid) {
+            int total = 0;
+            ArraySet<JobStatus> jobs = mJobs.get(uid);
+            if (jobs != null) {
+                for (int i = jobs.size() - 1; i >= 0; i--) {
+                    JobStatus job = jobs.valueAt(i);
+                    if (job.getUid() == job.getSourceUid()) {
+                        total++;
+                    }
+                }
+            }
+            return total;
+        }
+
+        public void forEachJob(JobStatusFunctor functor) {
+            for (int uidIndex = mJobs.size() - 1; uidIndex >= 0; uidIndex--) {
+                ArraySet<JobStatus> jobs = mJobs.valueAt(uidIndex);
+                for (int i = jobs.size() - 1; i >= 0; i--) {
+                    functor.process(jobs.valueAt(i));
+                }
+            }
         }
     }
 }
