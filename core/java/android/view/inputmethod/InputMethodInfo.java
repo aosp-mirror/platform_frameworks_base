@@ -428,18 +428,6 @@ public final class InputMethodInfo implements Parcelable {
         }
     }
 
-    /**
-     * @return {@code true} if the {@link android.inputmethodservice.InputMethodService} is marked
-     * to be Encryption-Aware.
-     * @hide
-     */
-    public boolean isEncryptionAware() {
-        if (mService == null || mService.serviceInfo == null) {
-            return false;
-        }
-        return mService.serviceInfo.encryptionAware;
-    }
-
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "mId=" + mId
                 + " mSettingsActivityName=" + mSettingsActivityName
