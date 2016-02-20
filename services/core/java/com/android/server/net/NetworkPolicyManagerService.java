@@ -1742,13 +1742,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public void setNetworkPolicies(NetworkPolicy[] policies) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
-        maybeRefreshTrustedTime();
-        synchronized (mRulesLock) {
-            normalizePoliciesLocked(policies);
-            updateNetworkEnabledLocked();
-            updateNetworkRulesLocked();
-            updateNotificationsLocked();
-            writePolicyLocked();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            maybeRefreshTrustedTime();
+            synchronized (mRulesLock) {
+                normalizePoliciesLocked(policies);
+                updateNetworkEnabledLocked();
+                updateNetworkRulesLocked();
+                updateNotificationsLocked();
+                writePolicyLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -1851,13 +1856,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @Override
     public void setRestrictBackground(boolean restrictBackground) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            maybeRefreshTrustedTime();
+            synchronized (mRulesLock) {
+                mRestrictBackground = restrictBackground;
+                updateRulesForGlobalChangeLocked(true);
+                updateNotificationsLocked();
+                writePolicyLocked();
+            }
 
-        maybeRefreshTrustedTime();
-        synchronized (mRulesLock) {
-            mRestrictBackground = restrictBackground;
-            updateRulesForGlobalChangeLocked(true);
-            updateNotificationsLocked();
-            writePolicyLocked();
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
 
         mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_CHANGED, restrictBackground ? 1 : 0, 0)
