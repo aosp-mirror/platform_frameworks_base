@@ -198,6 +198,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     return STATUS_ERROR;
                 }
                 modelData.setHandle(handle[0]);
+                modelData.setLoaded();
             }
             modelData.setCallback(callback);
             modelData.setRecognitionConfig(recognitionConfig);
@@ -346,7 +347,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 return STATUS_ERROR;
             }
 
-            if (currentCallback == null || !modelData.modelStarted()) {
+            if (currentCallback == null || !modelData.isModelStarted()) {
                 // startRecognition hasn't been called or it failed.
                 Slog.w(TAG, "Attempting stopRecognition without a successful startRecognition");
                 return STATUS_ERROR;
@@ -451,7 +452,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             // Stop all generic recognition models.
             for (ModelData model : mGenericModelDataMap.values()) {
-                if (model.modelStarted()) {
+                if (model.isModelStarted()) {
                     int status = stopGenericRecognitionLocked(model,
                             false /* do not notify for synchronous calls */);
                     if (status != STATUS_OK) {
@@ -970,7 +971,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
             for (UUID modelId : mGenericModelDataMap.keySet()) {
                 ModelData modelData = mGenericModelDataMap.get(modelId);
-                if (modelData.modelStarted()) {
+                if (modelData.isModelStarted()) {
                     mRecognitionRunning = true;
                     return mRecognitionRunning;
                 }
@@ -1001,7 +1002,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         // to SoundModel.TYPE_UNKNOWN;
         private int mModelType = SoundModel.TYPE_UNKNOWN;
         private IRecognitionStatusCallback mCallback = null;
-        private SoundModel mSoundModel = null;
         private RecognitionConfig mRecognitionConfig = null;
 
 
@@ -1026,8 +1026,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         synchronized boolean isModelLoaded() {
-            return (mModelState == MODEL_LOADED || mModelState == MODEL_STARTED) &&
-                    mSoundModel != null;
+            return (mModelState == MODEL_LOADED || mModelState == MODEL_STARTED);
         }
 
         synchronized void setStarted() {
@@ -1038,13 +1037,16 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mModelState = MODEL_LOADED;
         }
 
-        synchronized boolean modelStarted() {
+        synchronized void setLoaded() {
+            mModelState = MODEL_LOADED;
+        }
+
+        synchronized boolean isModelStarted() {
             return mModelState == MODEL_STARTED;
         }
 
         synchronized void clearState() {
             mModelState = MODEL_NOTLOADED;
-            mSoundModel = null;
             mModelHandle = INVALID_VALUE;
         }
 

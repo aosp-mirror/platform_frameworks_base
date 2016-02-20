@@ -32,6 +32,7 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.RadioButton;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +53,7 @@ public class TestSoundTriggerActivity extends Activity {
 
     private TextView mDebugView = null;
     private int mSelectedModelId = 1;
+    private ScrollView mScrollView = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +61,7 @@ public class TestSoundTriggerActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mDebugView = (TextView) findViewById(R.id.console);
+        mScrollView = (ScrollView) findViewById(R.id.scroller_id);
         mDebugView.setText(mDebugView.getText(), TextView.BufferType.EDITABLE);
         mDebugView.setMovementMethod(new ScrollingMovementMethod());
         mSoundTriggerUtil = new SoundTriggerUtil(this);
@@ -68,6 +71,18 @@ public class TestSoundTriggerActivity extends Activity {
     private void postMessage(String msg) {
         Log.i(TAG, "Posted: " + msg);
         ((Editable) mDebugView.getText()).append(msg + "\n");
+        if ((mDebugView.getMeasuredHeight() - mScrollView.getScrollY()) <=
+                (mScrollView.getHeight() + mDebugView.getLineHeight())) {
+            scrollToBottom();
+        }
+    }
+
+    private void scrollToBottom() {
+        mScrollView.post(new Runnable() {
+            public void run() {
+                mScrollView.smoothScrollTo(0, mDebugView.getBottom());
+            }
+        });
     }
 
     private UUID getSelectedUuid() {
