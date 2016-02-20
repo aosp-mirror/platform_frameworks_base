@@ -282,6 +282,10 @@ public class WallpaperManager {
         }
 
         public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault) {
+            return peekWallpaperBitmap(context, returnDefault, context.getUserId());
+        }
+
+        public Bitmap peekWallpaperBitmap(Context context, boolean returnDefault, int userId) {
             synchronized (this) {
                 if (mService != null) {
                     try {
@@ -300,7 +304,7 @@ public class WallpaperManager {
                 }
                 mWallpaper = null;
                 try {
-                    mWallpaper = getCurrentWallpaperLocked(context);
+                    mWallpaper = getCurrentWallpaperLocked(userId);
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "No memory load current wallpaper", e);
                 }
@@ -323,7 +327,7 @@ public class WallpaperManager {
             }
         }
 
-        private Bitmap getCurrentWallpaperLocked(Context context) {
+        private Bitmap getCurrentWallpaperLocked(int userId) {
             if (mService == null) {
                 Log.w(TAG, "WallpaperService not running");
                 return null;
@@ -332,7 +336,7 @@ public class WallpaperManager {
             try {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor fd = mService.getWallpaper(this, FLAG_SET_SYSTEM,
-                        params, context.getUserId());
+                        params, userId);
                 if (fd != null) {
                     try {
                         BitmapFactory.Options options = new BitmapFactory.Options();
@@ -644,7 +648,16 @@ public class WallpaperManager {
      * @hide
      */
     public Bitmap getBitmap() {
-        return sGlobals.peekWallpaperBitmap(mContext, true);
+        return getBitmapAsUser(mContext.getUserId());
+    }
+
+    /**
+     * Like {@link #getDrawable()} but returns a Bitmap for the provided user.
+     *
+     * @hide
+     */
+    public Bitmap getBitmapAsUser(int userId) {
+        return sGlobals.peekWallpaperBitmap(mContext, true, userId);
     }
 
     /**
