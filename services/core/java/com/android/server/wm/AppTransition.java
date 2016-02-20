@@ -216,6 +216,9 @@ public class AppTransition implements Dump {
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
     private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
 
+    private int mLastClipRevealMaxTranslation;
+    private boolean mLastHadClipReveal;
+
     AppTransition(Context context, WindowManagerService service) {
         mContext = context;
         mService = service;
@@ -337,6 +340,9 @@ public class AppTransition implements Dump {
         if (!isRunning()) {
             mAppTransitionState = APP_STATE_IDLE;
             notifyAppTransitionPendingLocked();
+            mLastHadClipReveal = false;
+            mLastClipRevealMaxTranslation = 0;
+            mLastClipRevealTransitionDuration = DEFAULT_APP_TRANSITION_DURATION;
             return true;
         }
         return false;
@@ -641,8 +647,25 @@ public class AppTransition implements Dump {
                 bitmap, new Rect(left, top, left + width, top + height));
     }
 
+    /**
+     * @return the duration of the last clip reveal animation
+     */
     long getLastClipRevealTransitionDuration() {
         return mLastClipRevealTransitionDuration;
+    }
+
+    /**
+     * @return the maximum distance the app surface is traveling of the last clip reveal animation
+     */
+    int getLastClipRevealMaxTranslation() {
+        return mLastClipRevealMaxTranslation;
+    }
+
+    /**
+     * @return true if in the last app transition had a clip reveal animation, false otherwise
+     */
+    boolean hadClipRevealAnimation() {
+        return mLastHadClipReveal;
     }
 
     /**
@@ -748,7 +771,13 @@ public class AppTransition implements Dump {
             set.setZAdjustment(Animation.ZORDER_TOP);
             set.initialize(appWidth, appHeight, appWidth, appHeight);
             anim = set;
+            mLastHadClipReveal = true;
             mLastClipRevealTransitionDuration = duration;
+
+            // If the start rect was full inside the target rect (cutOff == false), we don't need
+            // to store the translation, because it's only used if cutOff == true.
+            mLastClipRevealMaxTranslation = cutOff
+                    ? Math.max(Math.abs(translationY), Math.abs(translationX)) : 0;
         } else {
             final long duration;
             switch (transit) {
