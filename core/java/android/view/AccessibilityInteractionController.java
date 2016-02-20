@@ -1053,6 +1053,7 @@ final class AccessibilityInteractionController {
         private void prefetchPredecessorsOfVirtualNode(AccessibilityNodeInfo root,
                 View providerHost, AccessibilityNodeProvider provider,
                 List<AccessibilityNodeInfo> outInfos) {
+            final int initialResultSize = outInfos.size();
             long parentNodeId = root.getParentNodeId();
             int accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(parentNodeId);
             while (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
@@ -1071,6 +1072,12 @@ final class AccessibilityInteractionController {
                                 AccessibilityNodeProvider.HOST_VIEW_ID);
                     }
                     if (parent == null) {
+                        // Going up the parent relation we found a null predecessor,
+                        // so remove these disconnected nodes form the result.
+                        final int currentResultSize = outInfos.size();
+                        for (int i = currentResultSize - 1; i >= initialResultSize; i--) {
+                            outInfos.remove(i);
+                        }
                         // Couldn't obtain the parent, which means we have a
                         // disconnected sub-tree. Abort prefetch immediately.
                         return;
