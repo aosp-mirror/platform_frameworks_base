@@ -1087,19 +1087,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         synchronized (mLock) {
-            WallpaperData wallpaper = null;
-            if (which == FLAG_SET_LOCK) {
-                wallpaper = mLockWallpaperMap.get(wallpaperUserId);
+            final SparseArray<WallpaperData> whichSet =
+                    (which == FLAG_SET_LOCK) ? mLockWallpaperMap : mWallpaperMap;
+            WallpaperData wallpaper = whichSet.get(wallpaperUserId);
+            if (wallpaper == null) {
+                // common case, this is the first lookup post-boot of the system or
+                // unified lock, so we bring up the saved state lazily now and recheck.
+                loadSettingsLocked(wallpaperUserId);
+                wallpaper = whichSet.get(wallpaperUserId);
                 if (wallpaper == null) {
-                    // If you ask for the lock wallpaper specifically and there isn't one,
-                    // we say so rather than returning the system wallpaper as fallback.
                     return null;
                 }
-            } else {
-                wallpaper = mWallpaperMap.get(wallpaperUserId);
-            }
-            if (wallpaper == null) {
-                return null;
             }
             try {
                 if (outParams != null) {
