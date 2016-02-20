@@ -1500,6 +1500,9 @@ public class SyncStorageEngine extends Handler {
                                     if (authority.ident > highestAuthorityId) {
                                         highestAuthorityId = authority.ident;
                                     }
+                                } else {
+                                    EventLog.writeEvent(0x534e4554, "26513719", -1,
+                                            "Malformed authority");
                                 }
                             } else if (XML_TAG_LISTEN_FOR_TICKLES.equals(tagName)) {
                                 parseListenForTickles(parser);
