@@ -41,6 +41,7 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -187,6 +188,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final File mUsersDir;
     private final File mUserListFile;
+
+    private static final IBinder mUserRestriconToken = new Binder();
 
     /**
      * User-related information that is used for persisting to flash. Only UserInfo is
@@ -1016,7 +1019,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (mAppOpsService != null) { // We skip it until system-ready.
             final long token = Binder.clearCallingIdentity();
             try {
-                mAppOpsService.setUserRestrictions(effective, userId);
+                mAppOpsService.setUserRestrictions(effective, mUserRestriconToken, userId);
             } catch (RemoteException e) {
                 Log.w(LOG_TAG, "Unable to notify AppOpsService of UserRestrictions");
             } finally {
