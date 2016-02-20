@@ -48,14 +48,16 @@ public class AppIdleController extends StateController {
     public static AppIdleController get(JobSchedulerService service) {
         synchronized (sCreationLock) {
             if (sController == null) {
-                sController = new AppIdleController(service, service.getContext());
+                sController = new AppIdleController(service, service.getContext(),
+                        service.getLock());
             }
             return sController;
         }
     }
 
-    private AppIdleController(StateChangedListener stateChangedListener, Context context) {
-        super(stateChangedListener, context);
+    private AppIdleController(StateChangedListener stateChangedListener, Context context,
+            Object lock) {
+        super(stateChangedListener, context, lock);
         mUsageStatsInternal = LocalServices.getService(UsageStatsManagerInternal.class);
         mAppIdleParoleOn = mUsageStatsInternal.isAppIdleParoleOn();
         mUsageStatsInternal.addAppIdleStateChangeListener(new AppIdleStateChangeListener());
@@ -63,7 +65,7 @@ public class AppIdleController extends StateController {
 
     @Override
     public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             mTrackedTasks.add(jobStatus);
             String packageName = jobStatus.getSourcePackageName();
             final boolean appIdle = !mAppIdleParoleOn && mUsageStatsInternal.isAppIdle(packageName,
@@ -78,7 +80,7 @@ public class AppIdleController extends StateController {
 
     @Override
     public void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate) {
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             mTrackedTasks.remove(jobStatus);
         }
     }
@@ -87,7 +89,7 @@ public class AppIdleController extends StateController {
     public void dumpControllerState(PrintWriter pw) {
         pw.println("AppIdle");
         pw.println("Parole On: " + mAppIdleParoleOn);
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             for (JobStatus task : mTrackedTasks) {
                 pw.print(task.getSourcePackageName());
                 pw.print(":idle=" + !task.appNotIdleConstraintSatisfied.get());
@@ -100,7 +102,7 @@ public class AppIdleController extends StateController {
     void setAppIdleParoleOn(boolean isAppIdleParoleOn) {
         // Flag if any app's idle state has changed
         boolean changed = false;
-        synchronized (mTrackedTasks) {
+        synchronized (mLock) {
             if (mAppIdleParoleOn == isAppIdleParoleOn) {
                 return;
             }
@@ -128,7 +130,7 @@ public class AppIdleController extends StateController {
         @Override
         public void onAppIdleStateChanged(String packageName, int userId, boolean idle) {
             boolean changed = false;
-            synchronized (mTrackedTasks) {
+            synchronized (mLock) {
                 if (mAppIdleParoleOn) {
                     return;
                 }

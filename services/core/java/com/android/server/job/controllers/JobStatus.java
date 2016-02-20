@@ -46,6 +46,11 @@ public class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
+    /**
+     * Service global lock.  NOTE: this should be removed, having this class just rely on
+     * its callers doing the appropriate locking.
+     */
+    final Object lock;
     final JobInfo job;
     /** Uid of the package requesting this job. */
     final int callingUid;
@@ -94,8 +99,9 @@ public class JobStatus {
         return callingUid;
     }
 
-    private JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
-                      int numFailures) {
+    private JobStatus(Object lock, JobInfo job, int callingUid, String sourcePackageName,
+            int sourceUserId, int numFailures) {
+        this.lock = lock;
         this.job = job;
         this.callingUid = callingUid;
         this.name = job.getService().flattenToShortString();
@@ -124,8 +130,9 @@ public class JobStatus {
 
     /** Copy constructor. */
     public JobStatus(JobStatus jobStatus) {
-        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.getSourcePackageName(),
-                jobStatus.getSourceUserId(), jobStatus.getNumFailures());
+        this(jobStatus.lock, jobStatus.getJob(), jobStatus.getUid(),
+                jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
+                jobStatus.getNumFailures());
         this.earliestRunTimeElapsedMillis = jobStatus.getEarliestRunTime();
         this.latestRunTimeElapsedMillis = jobStatus.getLatestRunTimeElapsed();
     }
@@ -138,8 +145,9 @@ public class JobStatus {
      * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
      *                     calling userId.
      */
-    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId) {
-        this(job, callingUid, sourcePackageName, sourceUserId, 0);
+    public JobStatus(Object lock, JobInfo job, int callingUid, String sourcePackageName,
+            int sourceUserId) {
+        this(lock, job, callingUid, sourcePackageName, sourceUserId, 0);
 
         final long elapsedNow = SystemClock.elapsedRealtime();
 
@@ -161,9 +169,9 @@ public class JobStatus {
      * wallclock runtime rather than resetting it on every boot.
      * We consider a freshly loaded job to no longer be in back-off.
      */
-    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
-                     long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
-        this(job, callingUid, sourcePackageName, sourceUserId, 0);
+    public JobStatus(Object lock, JobInfo job, int callingUid, String sourcePackageName,
+            int sourceUserId, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
+        this(lock, job, callingUid, sourcePackageName, sourceUserId, 0);
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
@@ -172,7 +180,8 @@ public class JobStatus {
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
-        this(rescheduling.job, rescheduling.getUid(), rescheduling.getSourcePackageName(),
+        this(rescheduling.lock, rescheduling.job, rescheduling.getUid(),
+                rescheduling.getSourcePackageName(),
                 rescheduling.getSourceUserId(), backoffAttempt);
 
         earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
@@ -275,27 +284,31 @@ public class JobStatus {
      * @return Whether or not this job is ready to run, based on its requirements. This is true if
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
      */
-    public synchronized boolean isReady() {
-        // Deadline constraint trumps other constraints (except for periodic jobs where deadline
-        // (is an implementation detail. A periodic job should only run if it's constraints are
-        // satisfied).
-        // AppNotIdle implicit constraint trumps all!
-        return (isConstraintsSatisfied()
+    public boolean isReady() {
+        synchronized (lock) {
+            // Deadline constraint trumps other constraints (except for periodic jobs where deadline
+            // (is an implementation detail. A periodic job should only run if it's constraints are
+            // satisfied).
+            // AppNotIdle implicit constraint trumps all!
+            return (isConstraintsSatisfied()
                     || (!job.isPeriodic()
-                            && hasDeadlineConstraint() && deadlineConstraintSatisfied.get()))
-                && appNotIdleConstraintSatisfied.get();
+                    && hasDeadlineConstraint() && deadlineConstraintSatisfied.get()))
+                    && appNotIdleConstraintSatisfied.get();
+        }
     }
 
     /**
      * @return Whether the constraints set on this job are satisfied.
      */
-    public synchronized boolean isConstraintsSatisfied() {
-        return (!hasChargingConstraint() || chargingConstraintSatisfied.get())
-                && (!hasTimingDelayConstraint() || timeDelayConstraintSatisfied.get())
-                && (!hasConnectivityConstraint() || connectivityConstraintSatisfied.get())
-                && (!hasUnmeteredConstraint() || unmeteredConstraintSatisfied.get())
-                && (!hasIdleConstraint() || idleConstraintSatisfied.get())
-                && (!hasContentTriggerConstraint() || contentTriggerConstraintSatisfied.get());
+    public boolean isConstraintsSatisfied() {
+        synchronized (lock) {
+            return (!hasChargingConstraint() || chargingConstraintSatisfied.get())
+                    && (!hasTimingDelayConstraint() || timeDelayConstraintSatisfied.get())
+                    && (!hasConnectivityConstraint() || connectivityConstraintSatisfied.get())
+                    && (!hasUnmeteredConstraint() || unmeteredConstraintSatisfied.get())
+                    && (!hasIdleConstraint() || idleConstraintSatisfied.get())
+                    && (!hasContentTriggerConstraint() || contentTriggerConstraintSatisfied.get());
+        }
     }
 
     public boolean matches(int uid, int jobId) {
