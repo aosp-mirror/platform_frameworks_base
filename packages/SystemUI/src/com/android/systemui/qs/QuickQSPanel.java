@@ -43,10 +43,10 @@ public class QuickQSPanel extends QSPanel {
             for (int i = 0; i < mRecords.size(); i++) {
                 mTileLayout.removeTile(mRecords.get(i));
             }
-            mQsContainer.removeView((View) mTileLayout);
+            removeView((View) mTileLayout);
         }
         mTileLayout = new HeaderTileLayout(context);
-        mQsContainer.addView((View) mTileLayout, 1 /* Between brightness and footer */);
+        addView((View) mTileLayout, 1 /* Between brightness and footer */);
     }
 
     @Override
