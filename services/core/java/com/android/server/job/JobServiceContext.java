@@ -103,6 +103,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private final JobCompletedListener mCompletedListener;
     /** Used for service binding, etc. */
     private final Context mContext;
+    private final Object mLock;
     private final IBatteryStats mBatteryStats;
     private PowerManager.WakeLock mWakeLock;
 
@@ -124,7 +125,6 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private int mPreferredUid;
     IJobService service;
 
-    private final Object mLock = new Object();
     /**
      * Whether this context is free. This is set to false at the start of execution, and reset to
      * true when execution is complete.
@@ -137,13 +137,14 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
     private long mTimeoutElapsed;
 
     JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats, Looper looper) {
-        this(service.getContext(), batteryStats, service, looper);
+        this(service.getContext(), service.getLock(), batteryStats, service, looper);
     }
 
     @VisibleForTesting
-    JobServiceContext(Context context, IBatteryStats batteryStats,
+    JobServiceContext(Context context, Object lock, IBatteryStats batteryStats,
                       JobCompletedListener completedListener, Looper looper) {
         mContext = context;
+        mLock = lock;
         mBatteryStats = batteryStats;
         mCallbackHandler = new JobServiceHandler(looper);
         mCompletedListener = completedListener;
