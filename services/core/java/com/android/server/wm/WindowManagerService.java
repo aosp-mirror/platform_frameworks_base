@@ -192,6 +192,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static android.view.WindowManagerPolicy.TRANSIT_EXIT;
+import static android.view.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
 import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
@@ -1356,7 +1358,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + " policyVis=" + w.mPolicyVisibility
                             + " policyVisAfterAnim=" + w.mPolicyVisibilityAfterAnim
                             + " attachHid=" + w.mAttachedHidden
-                            + " exiting=" + w.mExiting + " destroying=" + w.mDestroying);
+                            + " exiting=" + w.mAnimatingExit + " destroying=" + w.mDestroying);
                     if (w.mAppToken != null) {
                         Slog.i(TAG_WM, "  mAppToken.hiddenRequested=" + w.mAppToken.hiddenRequested);
                     }
@@ -2059,7 +2061,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowState replacedWindow = null;
         for (int i = atoken.windows.size() - 1; i >= 0 && replacedWindow == null; i--) {
             WindowState candidate = atoken.windows.get(i);
-            if (candidate.mExiting && candidate.mWillReplaceWindow
+            if (candidate.mAnimatingExit && candidate.mWillReplaceWindow
                     && candidate.mAnimateReplacingWindow) {
                 replacedWindow = candidate;
             }
@@ -2133,19 +2135,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win == null) {
                 return;
             }
-            // We set this here instead of removeWindowLocked because we only want it to be
-            // true when the client has requested we remove the window. In other remove
-            // cases, we have to wait for activity stop to safely remove the window (as the
-            // client may still be using the surface). In this case though, the client has
-            // just dismissed a window (for example a Dialog) and activity stop isn't
-            // necessarily imminent, so we need to know not to wait for it after our
-            // hanimation (if applicable) finishes.
-            win.mClientRemoveRequested = true;
             removeWindowLocked(win);
         }
     }
 
     void removeWindowLocked(WindowState win) {
+        win.mWindowRemovalAllowed = true;
         final boolean startingWindow = win.mAttrs.type == TYPE_APPLICATION_STARTING;
         if (startingWindow) {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG_WM, "Starting window removed " + win);
@@ -2161,23 +2156,25 @@ public class WindowManagerService extends IWindowManager.Stub
 
         win.disposeInputChannel();
 
-        if (DEBUG_APP_TRANSITIONS) Slog.v(
-                TAG_WM, "Remove " + win + ": mSurfaceController=" + win.mWinAnimator.mSurfaceController
-                + " mExiting=" + win.mExiting
+        if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM,
+                "Remove " + win + ": mSurfaceController=" + win.mWinAnimator.mSurfaceController
+                + " mAnimatingExit=" + win.mAnimatingExit
+                + " mRemoveOnExit=" + win.mRemoveOnExit
+                + " mHasSurface=" + win.mHasSurface
+                + " surfaceShowing=" + win.mWinAnimator.getShown()
                 + " isAnimating=" + win.mWinAnimator.isAnimating()
                 + " app-animation="
                 + (win.mAppToken != null ? win.mAppToken.mAppAnimator.animation : null)
-                + " mWillReplaceWindow="
-                + win.mWillReplaceWindow
+                + " mWillReplaceWindow=" + win.mWillReplaceWindow
                 + " inPendingTransaction="
                 + (win.mAppToken != null ? win.mAppToken.inPendingTransaction : false)
-                + " mDisplayFrozen=" + mDisplayFrozen);
+                + " mDisplayFrozen=" + mDisplayFrozen
+                + " callers=" + Debug.getCallers(6));
         // Visibility of the removed window. Will be used later to update orientation later on.
         boolean wasVisible = false;
-        // First, see if we need to run an animation.  If we do, we have
-        // to hold off on removing the window until the animation is done.
-        // If the display is frozen, just remove immediately, since the
-        // animation wouldn't be seen.
+        // First, see if we need to run an animation. If we do, we have to hold off on removing the
+        // window until the animation is done. If the display is frozen, just remove immediately,
+        // since the animation wouldn't be seen.
         if (win.mHasSurface && okToDisplay()) {
             final AppWindowToken appToken = win.mAppToken;
             if (win.mWillReplaceWindow) {
@@ -2185,13 +2182,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 // gets added, then we will get rid of this one.
                 if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "Preserving " + win + " until the new one is "
                         + "added");
-                win.mExiting = true;
+                // TODO: We are overloading mAnimatingExit flag to prevent the window state from
+                // been removed. We probably need another falg to indicate that window removal
+                // should be deffered vs. overloading the flag that says we are playing an exit
+                // animation.
+                win.mAnimatingExit = true;
                 win.mReplacingRemoveRequested = true;
                 Binder.restoreCallingIdentity(origId);
                 return;
             }
-            // If we are not currently running the exit animation, we
-            // need to see about starting one.
+            // If we are not currently running the exit animation, we need to see about starting one
             wasVisible = win.isWinVisibleLw();
 
             if (win.shouldKeepVisibleDeadAppWindow()) {
@@ -2211,14 +2211,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
+            final WindowStateAnimator winAnimator = win.mWinAnimator;
             if (wasVisible) {
-                final int transit = (!startingWindow)
-                        ? WindowManagerPolicy.TRANSIT_EXIT
-                        : WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
+                final int transit = (!startingWindow) ? TRANSIT_EXIT : TRANSIT_PREVIEW_DONE;
 
                 // Try starting an animation.
-                if (win.mWinAnimator.applyAnimationLocked(transit, false)) {
-                    win.mExiting = true;
+                if (winAnimator.applyAnimationLocked(transit, false)) {
+                    win.mAnimatingExit = true;
                 }
                 //TODO (multidisplay): Magnification is supported only for the default display.
                 if (mAccessibilityController != null
@@ -2226,15 +2225,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAccessibilityController.onWindowTransitionLocked(win, transit);
                 }
             }
-            final boolean isAnimating = win.mWinAnimator.isAnimating()
-                    && !win.mWinAnimator.isDummyAnimation();
-            // The starting window is the last window in this app token and it isn't animating.
-            // Allow it to be removed now as there is no additional window or animation that will
-            // trigger its removal.
-            final boolean lastWinStartingNotAnimating = startingWindow && appToken!= null
-                    && appToken.allAppWindows.size() == 1 && !isAnimating;
-            if (!lastWinStartingNotAnimating && win.mExiting) {
-                // The exit animation is running... wait for it!
+            final boolean isAnimating =
+                    winAnimator.isAnimating() && !winAnimator.isDummyAnimation();
+            final boolean lastWindowIsStartingWindow = startingWindow && appToken != null
+                    && appToken.allAppWindows.size() == 1;
+            // We delay the removal of a window if it has a showing surface that can be used to run
+            // exit animation and it is marked as exiting.
+            // Also, If isn't the an animating starting window that is the last window in the app.
+            // We allow the removal of the non-animating starting window now as there is no
+            // additional window or animation that will trigger its removal.
+            if (winAnimator.getShown() && win.mAnimatingExit
+                    && (!lastWindowIsStartingWindow || isAnimating)) {
+                // The exit animation is running or should run... wait for it!
+                if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                        "Not removing " + win + " due to exit animation ");
                 win.mRemoveOnExit = true;
                 win.setDisplayLayoutNeeded();
                 final boolean focusChanged = updateFocusedWindowLocked(
@@ -2264,13 +2268,14 @@ public class WindowManagerService extends IWindowManager.Stub
     void removeWindowInnerLocked(WindowState win) {
         if (win.mRemoved) {
             // Nothing to do.
+            if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM,
+                    "removeWindowInnerLocked: " + win + " Already removed...");
             return;
         }
 
-        for (int i=win.mChildWindows.size()-1; i>=0; i--) {
+        for (int i = win.mChildWindows.size() - 1; i >= 0; i--) {
             WindowState cwin = win.mChildWindows.get(i);
-            Slog.w(TAG_WM, "Force-removing child win " + cwin + " from container "
-                    + win);
+            Slog.w(TAG_WM, "Force-removing child win " + cwin + " from container " + win);
             removeWindowInnerLocked(cwin);
         }
 
@@ -2683,16 +2688,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 final boolean usingSavedSurfaceBeforeVisible =
                         oldVisibility != View.VISIBLE && win.isAnimatingWithSavedSurface();
                 if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                    if (winAnimator.hasSurface() && !win.mExiting
+                    if (winAnimator.hasSurface() && !win.mAnimatingExit
                             && usingSavedSurfaceBeforeVisible) {
                         Slog.d(TAG, "Ignoring layout to invisible when using saved surface " + win);
                     }
                 }
 
-                if (winAnimator.hasSurface() && !win.mExiting
+                if (winAnimator.hasSurface() && !win.mAnimatingExit
                         && !usingSavedSurfaceBeforeVisible) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG_WM, "Relayout invis " + win
-                            + ": mExiting=" + win.mExiting);
+                            + ": mAnimatingExit=" + win.mAnimatingExit);
                     // If we are not currently running the exit animation, we
                     // need to see about starting one.
                     // We don't want to animate visibility of windows which are pending
@@ -2799,16 +2804,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
-            win.mExiting = true;
+            win.mAnimatingExit = true;
         } else if (win.mWinAnimator.isAnimating()) {
             // Currently in a hide animation... turn this into
             // an exit.
-            win.mExiting = true;
+            win.mAnimatingExit = true;
         } else if (mWallpaperControllerLocked.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
-            win.mExiting = true;
+            win.mAnimatingExit = true;
             win.mWinAnimator.mAnimating = true;
         } else {
             if (mInputMethodWindow == win) {
@@ -2844,12 +2849,12 @@ public class WindowManagerService extends IWindowManager.Stub
     private int relayoutVisibleWindow(Configuration outConfig, int result, WindowState win,
             WindowStateAnimator winAnimator, int attrChanges, int oldVisibility) {
         result |= !win.isVisibleLw() ? WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME : 0;
-        if (win.mExiting) {
-            Slog.d(TAG, "relayoutVisibleWindow: " + win + " mExiting=true, mRemoveOnExit="
+        if (win.mAnimatingExit) {
+            Slog.d(TAG, "relayoutVisibleWindow: " + win + " mAnimatingExit=true, mRemoveOnExit="
                     + win.mRemoveOnExit + ", mDestroying=" + win.mDestroying);
 
             winAnimator.cancelExitAnimationForNextAnimationLocked();
-            win.mExiting = false;
+            win.mAnimatingExit = false;
         }
         if (win.mDestroying) {
             win.mDestroying = false;

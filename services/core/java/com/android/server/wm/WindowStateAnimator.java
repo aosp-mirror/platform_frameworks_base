@@ -29,7 +29,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SURFACE_TRACE
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_CROP;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -375,7 +374,7 @@ class WindowStateAnimator {
 
         // Done animating, clean up.
         if (DEBUG_ANIM) Slog.v(
-            TAG, "Animation done in " + this + ": exiting=" + mWin.mExiting
+            TAG, "Animation done in " + this + ": exiting=" + mWin.mAnimatingExit
             + ", reportedVisible="
             + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
@@ -430,7 +429,7 @@ class WindowStateAnimator {
     void finishExit() {
         if (DEBUG_ANIM) Slog.v(
                 TAG, "finishExit in " + this
-                + ": exiting=" + mWin.mExiting
+                + ": exiting=" + mWin.mAnimatingExit
                 + " remove=" + mWin.mRemoveOnExit
                 + " windowAnimating=" + isWindowAnimating());
 
@@ -460,7 +459,7 @@ class WindowStateAnimator {
             }
         }
 
-        if (!mWin.mExiting) {
+        if (!mWin.mAnimatingExit) {
             return;
         }
 
@@ -475,27 +474,27 @@ class WindowStateAnimator {
 
         mWin.mDestroying = true;
 
+        final boolean hasSurface = hasSurface();
+        if (hasSurface) {
+            hide("finishExit");
+        }
+
         // If we have an app token, we ask it to destroy the surface for us,
         // so that it can take care to ensure the activity has actually stopped
         // and the surface is not still in use. Otherwise we add the service to
         // mDestroySurface and allow it to be processed in our next transaction.
         if (mWin.mAppToken != null) {
-            if (hasSurface()) {
-                hide("finishExit");
-            }
             mWin.mAppToken.destroySurfaces();
         } else {
-            if (hasSurface()) {
+            if (hasSurface) {
                 mService.mDestroySurface.add(mWin);
-                hide("finishExit");
             }
-            mWin.mExiting = false;
             if (mWin.mRemoveOnExit) {
                 mService.mPendingRemove.add(mWin);
                 mWin.mRemoveOnExit = false;
             }
         }
-
+        mWin.mAnimatingExit = false;
         mWallpaperControllerLocked.hideWallpapers(mWin);
     }
 

@@ -358,7 +358,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mLayoutNeeded;
 
     /** Currently running an exit animation? */
-    boolean mExiting;
+    boolean mAnimatingExit;
 
     /** Currently on the mDestroySurface list? */
     boolean mDestroying;
@@ -387,11 +387,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mRemoved;
 
     /**
-     * Has the client requested we remove the window? In this case we know
-     * that we can dispose of it when we wish without further synchronization
-     * with the client
+     * It is save to remove the window and destroy the surface because the client requested removal
+     * or some other higher level component said so (e.g. activity manager).
+     * TODO: We should either have different booleans for the removal reason or use a bit-field.
      */
-    boolean mClientRemoveRequested;
+    boolean mWindowRemovalAllowed;
 
     /**
      * Temp for keeping track of windows that have been removed when
@@ -614,7 +614,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf, Rect dcf, Rect sf,
             Rect osf) {
-        if (mWillReplaceWindow && (mExiting || !mReplacingRemoveRequested)) {
+        if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
             // want to apply any more changes to it, so it remains in this state until new window
@@ -1075,7 +1075,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     private boolean isVisibleUnchecked() {
         return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && !mExiting && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
+                && !mAnimatingExit && !mDestroying && (!mIsWallpaper || mWallpaperVisible);
     }
 
     /**
@@ -1100,7 +1100,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         final AppWindowToken atoken = mAppToken;
         final boolean animating = atoken != null && atoken.mAppAnimator.animation != null;
-        return mHasSurface && !mDestroying && !mExiting
+        return mHasSurface && !mDestroying && !mAnimatingExit
                 && (atoken == null ? mPolicyVisibility : !atoken.hiddenRequested)
                 && ((!mAttachedHidden && mViewVisibility == View.VISIBLE && !mRootToken.hidden)
                         || mWinAnimator.mAnimation != null || animating);
@@ -1143,7 +1143,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return (mHasSurface || (!mRelayoutCalled && mViewVisibility == View.VISIBLE))
                 && mPolicyVisibility && !mAttachedHidden
                 && (atoken == null || !atoken.hiddenRequested)
-                && !mExiting && !mDestroying;
+                && !mAnimatingExit && !mDestroying;
     }
 
     /**
@@ -1237,7 +1237,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 || (atoken == null && mRootToken.hidden)
                 || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
                 || mAttachedHidden
-                || (mExiting && !isAnimatingLw())
+                || (mAnimatingExit && !isAnimatingLw())
                 || mDestroying;
     }
 
@@ -1283,7 +1283,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
-                && !mExiting && !mWinAnimator.mLastHidden && mService.okToDisplay()
+                && !mAnimatingExit && !mWinAnimator.mLastHidden && mService.okToDisplay()
                 && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
                 && (mAttachedWindow == null || !mAttachedWindow.hasMoved());
     }
@@ -1438,11 +1438,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             return;
         }
 
-        if (!mExiting && mAppDied) {
+        if (!mAnimatingExit && mAppDied) {
             // If app died visible, apply a dim over the window to indicate that it's inactive
             mDisplayContent.mDimLayerController.applyDimAbove(getDimLayerUser(), mWinAnimator);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
-                && mDisplayContent != null && !mExiting && isDisplayedLw()) {
+                && mDisplayContent != null && !mAnimatingExit && isDisplayedLw()) {
             mDisplayContent.mDimLayerController.applyDimBehind(getDimLayerUser(), mWinAnimator);
         }
     }
@@ -1467,7 +1467,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 win.mAnimateReplacingWindow = false;
                 win.mReplacingRemoveRequested = false;
                 win.mReplacingWindow = null;
-                if (win.mExiting) {
+                if (win.mAnimatingExit) {
                     mService.removeWindowInnerLocked(win);
                 }
             }
@@ -1810,7 +1810,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isClosing() {
-        return mExiting || (mService.mClosingApps.contains(mAppToken));
+        return mAnimatingExit || (mService.mClosingApps.contains(mAppToken));
     }
 
     boolean isAnimatingWithSavedSurface() {
@@ -2341,8 +2341,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         pw.print(prefix); pw.print(mWinAnimator); pw.println(":");
         mWinAnimator.dump(pw, prefix + "  ", dumpAll);
-        if (mExiting || mRemoveOnExit || mDestroying || mRemoved) {
-            pw.print(prefix); pw.print("mExiting="); pw.print(mExiting);
+        if (mAnimatingExit || mRemoveOnExit || mDestroying || mRemoved) {
+            pw.print(prefix); pw.print("mAnimatingExit="); pw.print(mAnimatingExit);
                     pw.print(" mRemoveOnExit="); pw.print(mRemoveOnExit);
                     pw.print(" mDestroying="); pw.print(mDestroying);
                     pw.print(" mRemoved="); pw.println(mRemoved);
@@ -2403,12 +2403,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     @Override
     public String toString() {
         final CharSequence title = getWindowTag();
-        if (mStringNameCache == null || mLastTitle != title || mWasExiting != mExiting) {
+        if (mStringNameCache == null || mLastTitle != title || mWasExiting != mAnimatingExit) {
             mLastTitle = title;
-            mWasExiting = mExiting;
+            mWasExiting = mAnimatingExit;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
                     + " u" + UserHandle.getUserId(mSession.mUid)
-                    + " " + mLastTitle + (mExiting ? " EXITING}" : "}");
+                    + " " + mLastTitle + (mAnimatingExit ? " EXITING}" : "}");
         }
         return mStringNameCache;
     }

@@ -7,7 +7,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMA
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
@@ -753,7 +752,7 @@ class WindowSurfacePlacer {
                     }
                     if ((w.isOnScreenIgnoringKeyguard()
                             || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
-                            && !w.mExiting && !w.mDestroying) {
+                            && !w.mAnimatingExit && !w.mDestroying) {
                         if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
                             Slog.v(TAG, "Eval win " + w + ": isDrawn="
                                     + w.isDrawnLw()
@@ -1185,17 +1184,17 @@ class WindowSurfacePlacer {
                 int layer = -1;
                 for (int j = 0; j < wtoken.windows.size(); j++) {
                     final WindowState win = wtoken.windows.get(j);
-                    // Clearing the mExiting flag before entering animation. It will be set to true
+                    // Clearing the mAnimatingExit flag before entering animation. It will be set to true
                     // if app window is removed, or window relayout to invisible. We don't want to
                     // clear it out for windows that get replaced, because the animation depends on
                     // the flag to remove the replaced window.
                     //
-                    // We also don't clear the mExiting flag for windows which have the
+                    // We also don't clear the mAnimatingExit flag for windows which have the
                     // mRemoveOnExit flag. This indicates an explicit remove request has been issued
                     // by the client. We should let animation proceed and not clear this flag or
                     // they won't eventually be removed by WindowStateAnimator#finishExit.
                     if (!win.mWillReplaceWindow && !win.mRemoveOnExit) {
-                        win.mExiting = false;
+                        win.mAnimatingExit = false;
                     }
                     if (win.mWinAnimator.mAnimLayer > layer) {
                         layer = win.mWinAnimator.mAnimLayer;
@@ -1234,7 +1233,7 @@ class WindowSurfacePlacer {
             wtoken.deferClearAllDrawn = false;
             // Ensure that apps that are mid-starting are also scheduled to have their
             // starting windows removed after the animation is complete
-            if (wtoken.startingWindow != null && !wtoken.startingWindow.mExiting) {
+            if (wtoken.startingWindow != null && !wtoken.startingWindow.mAnimatingExit) {
                 mService.scheduleRemoveStartingWindowLocked(wtoken);
             }
             mService.mAnimator.mAppWindowAnimating |= appAnimator.isAnimating();
