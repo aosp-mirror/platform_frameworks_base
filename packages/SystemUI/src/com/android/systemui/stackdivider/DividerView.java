@@ -40,7 +40,6 @@ import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -131,6 +130,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mAnimateAfterRecentsDrawn;
     private boolean mGrowAfterRecentsDrawn;
     private boolean mGrowRecents;
+    private Animator mCurrentAnimator;
 
     public DividerView(Context context) {
         super(context);
@@ -210,6 +210,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public boolean startDragging(boolean animate, boolean touching) {
+        cancelFlingAnimation();
         if (touching) {
             mHandle.setTouching(true, animate);
         }
@@ -369,9 +370,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 commitSnapFlags(snapTarget);
                 mWindowManagerProxy.setResizing(false);
                 mDockSide = WindowManager.DOCKED_INVALID;
+                mCurrentAnimator = null;
             }
         });
+        mCurrentAnimator = anim;
         return anim;
+    }
+
+    private void cancelFlingAnimation() {
+        if (mCurrentAnimator != null) {
+            mCurrentAnimator.cancel();
+        }
     }
 
     private void commitSnapFlags(SnapTarget target) {
