@@ -26,7 +26,9 @@
             android:layout_marginTop="@dimen/status_bar_header_height"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:clipChildren="false" />
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 

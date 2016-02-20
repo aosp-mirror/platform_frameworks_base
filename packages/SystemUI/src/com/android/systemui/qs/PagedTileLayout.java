@@ -27,6 +27,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private int mNumPages;
     private View mDecorGroup;
+    private PageListener mPageListener;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -36,10 +37,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             public void onPageSelected(int position) {
                 if (mPageIndicator == null) return;
                 mPageIndicator.setLocation(position);
+                if (mPageListener != null) {
+                    mPageListener.onPageChanged(position);
+                }
             }
 
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            public void onPageScrolled(int position, float positionOffset,
+                    int positionOffsetPixels) {
                 if (mPageIndicator == null) return;
                 mPageIndicator.setLocation(position + positionOffset);
             }
@@ -78,6 +83,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (mTiles.remove(tile)) {
             postDistributeTiles();
         }
+    }
+
+    public void setPageListener(PageListener listener) {
+        mPageListener = listener;
     }
 
     private void postDistributeTiles() {
@@ -198,4 +207,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             return view == object;
         }
     };
+
+    public interface PageListener {
+        void onPageChanged(int page);
+    }
 }
