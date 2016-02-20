@@ -64,6 +64,14 @@ public class QSContainer extends FrameLayout {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // Since we control our own bottom, be whatever size we want.
+        // Otherwise the QSPanel ends up with 0 height when the window is only the
+        // size of the status bar.
+        super.onMeasure(widthMeasureSpec, MeasureSpec.UNSPECIFIED);
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateBottom();
