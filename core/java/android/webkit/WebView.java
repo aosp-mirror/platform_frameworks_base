@@ -39,6 +39,7 @@ import android.print.PrintDocumentAdapter;
 import android.security.KeyChain;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -2525,6 +2526,11 @@ public class WebView extends AbsoluteLayout
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         return mProvider.getViewDelegate().onCreateInputConnection(outAttrs);
+    }
+
+    @Override
+    public boolean onDragEvent(DragEvent event) {
+        return mProvider.getViewDelegate().onDragEvent(event);
     }
 
     @Override
