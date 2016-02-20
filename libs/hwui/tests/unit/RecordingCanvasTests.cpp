@@ -57,6 +57,22 @@ TEST(RecordingCanvas, clipRect) {
             << "Clip should be serialized once";
 }
 
+TEST(RecordingCanvas, drawArc) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.drawArc(0, 0, 200, 200, 0, 180, true, SkPaint());
+        canvas.drawArc(0, 0, 100, 100, 0, 360, true, SkPaint());
+    });
+
+    auto&& ops = dl->getOps();
+    ASSERT_EQ(2u, ops.size()) << "Must be exactly two ops";
+    EXPECT_EQ(RecordedOpId::ArcOp, ops[0]->opId);
+    EXPECT_EQ(Rect(200, 200), ops[0]->unmappedBounds);
+
+    EXPECT_EQ(RecordedOpId::OvalOp, ops[1]->opId)
+            << "Circular arcs should be converted to ovals";
+    EXPECT_EQ(Rect(100, 100), ops[1]->unmappedBounds);
+}
+
 TEST(RecordingCanvas, drawLines) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(100, 200, [](RecordingCanvas& canvas) {
         SkPaint paint;
