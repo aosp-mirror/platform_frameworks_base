@@ -1072,6 +1072,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    @Override
     public ParcelFileDescriptor getWallpaper(IWallpaperManagerCallback cb, final int which,
             Bundle outParams, int wallpaperUserId) {
         if (wallpaperUserId != UserHandle.getCallingUserId()) {
