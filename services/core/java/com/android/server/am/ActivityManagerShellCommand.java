@@ -62,6 +62,8 @@ class ActivityManagerShellCommand extends ShellCommand {
                     return runUntrackAssociations(pw);
                 case "is-user-stopped":
                     return runIsUserStopped(pw);
+                case "lenient-background-check":
+                    return runLenientBackgroundCheck(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -152,6 +154,22 @@ class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    int runLenientBackgroundCheck(PrintWriter pw) throws RemoteException {
+        String arg = getNextArg();
+        if (arg != null) {
+            boolean state = Boolean.valueOf(arg) || "1".equals(arg);
+            mInterface.setLenientBackgroundCheck(state);
+        }
+        synchronized (mInternal) {
+            if (mInternal.mLenientBackgroundCheck) {
+                pw.println("Lenient background check enabled");
+            } else {
+                pw.println("Lenient background check disabled");
+            }
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -203,6 +221,8 @@ class ActivityManagerShellCommand extends ShellCommand {
             pw.println("    Disable and clear association tracking.");
             pw.println("  is-user-stopped <USER_ID>");
             pw.println("    returns whether <USER_ID> has been stopped or not");
+            pw.println("  lenient-background-check [<true|false>]");
+            pw.println("    optionally controls lenient background check mode, returns current mode.");
         }
     }
 }

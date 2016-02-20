@@ -1532,6 +1532,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case SET_LENIENT_BACKGROUND_CHECK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            boolean enabled = data.readInt() != 0;
+            setLenientBackgroundCheck(enabled);
+            reply.writeNoException();
+            return true;
+        }
+
         case ENTER_SAFE_MODE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             enterSafeMode();
@@ -4851,6 +4859,17 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(watcher != null ? watcher.asBinder() : null);
         mRemote.transact(SET_ACTIVITY_CONTROLLER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+    public void setLenientBackgroundCheck(boolean enabled) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(enabled ? 1 : 0);
+        mRemote.transact(SET_LENIENT_BACKGROUND_CHECK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
