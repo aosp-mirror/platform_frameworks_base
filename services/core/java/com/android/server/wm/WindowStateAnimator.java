@@ -1191,6 +1191,11 @@ class WindowStateAnimator {
 
         w.transformFromScreenToSurfaceSpace(clipRect);
 
+        // See {@link WindowState#notifyMovedInStack} for why this is necessary.
+        if (w.hasJustMovedInStack() && mLastClipRect.isEmpty() && !clipRect.isEmpty()) {
+            clipRect.setEmpty();
+        }
+
         if (!clipRect.equals(mLastClipRect)) {
             mLastClipRect.set(clipRect);
             mSurfaceController.setCropInTransaction(clipRect, recoveringMemory);

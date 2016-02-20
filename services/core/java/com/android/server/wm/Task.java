@@ -248,6 +248,14 @@ class Task implements DimLayer.DimLayerUser {
         }
         stack.positionTask(this, position, showForAllUsers());
         resizeLocked(bounds, config, false /* force */);
+
+        for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState win = windows.get(winNdx);
+                win.notifyMovedInStack();
+            }
+        }
     }
 
     boolean removeAppToken(AppWindowToken wtoken) {
