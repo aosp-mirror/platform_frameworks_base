@@ -154,7 +154,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static final boolean DBG_ANIMATION_VECTOR_DRAWABLE = false;
 
     /** Local, mutable animator set. */
-    private final VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimator();
+    private final VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimator(this);
 
     /**
      * The resources against which this drawable was created. Used to attempt
@@ -613,14 +613,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      */
     public void reset() {
         mAnimatorSet.reset();
-        invalidateSelf();
     }
 
     @Override
     public void start() {
         ensureAnimatorSet();
         mAnimatorSet.start();
-        invalidateSelf();
     }
 
     @NonNull
@@ -639,7 +637,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     @Override
     public void stop() {
         mAnimatorSet.end();
-        invalidateSelf();
     }
 
     /**
@@ -659,7 +656,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         mAnimatorSet.reverse();
-        invalidateSelf();
     }
 
     /**
@@ -781,8 +777,10 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private WeakReference<RenderNode> mLastSeenTarget = null;
         private int mLastListenerId = 0;
         private int mPendingAnimationAction = NONE;
+        private final Drawable mDrawable;
 
-        VectorDrawableAnimator() {
+        VectorDrawableAnimator(AnimatedVectorDrawable drawable) {
+            mDrawable = drawable;
             mSetPtr = nCreateAnimatorSet();
             // Increment ref count on native AnimatorSet, so it doesn't get released before Java
             // side is done using it.
@@ -1058,12 +1056,17 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             return false;
         }
 
+        private void invalidateOwningView() {
+            mDrawable.invalidateSelf();
+        }
+
         public void start() {
             if (!mInitialized) {
                 return;
             }
 
             if (!useLastSeenTarget()) {
+                invalidateOwningView();
                 mPendingAnimationAction = START_ANIMATION;
                 return;
             }
@@ -1074,6 +1077,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
             mStarted = true;
             nStart(mSetPtr, this, ++mLastListenerId);
+            invalidateOwningView();
             if (mListener != null) {
                 mListener.onAnimationStart(null);
             }
@@ -1083,6 +1087,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             if (mInitialized && useLastSeenTarget()) {
                 // If no target has ever been set, no-op
                 nEnd(mSetPtr);
+                invalidateOwningView();
             }
         }
 
@@ -1090,6 +1095,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             if (mInitialized && useLastSeenTarget()) {
                 // If no target has ever been set, no-op
                 nReset(mSetPtr);
+                invalidateOwningView();
             }
         }
 
@@ -1100,6 +1106,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
                 return;
             }
             if (!useLastSeenTarget()) {
+                invalidateOwningView();
                 mPendingAnimationAction = REVERSE_ANIMATION;
                 return;
             }
@@ -1108,6 +1115,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             }
             mStarted = true;
             nReverse(mSetPtr, this, ++mLastListenerId);
+            invalidateOwningView();
             if (mListener != null) {
                 mListener.onAnimationStart(null);
             }
