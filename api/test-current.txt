@@ -19172,9 +19172,9 @@ package android.location {
     method public double getDriftInNsPerSec();
     method public double getDriftUncertaintyInNsPerSec();
     method public long getFullBiasInNs();
+    method public int getHardwareClockDiscontinuityCount();
     method public short getLeapSecond();
     method public long getTimeInNs();
-    method public long getTimeOfLastHwClockDiscontinuityInNs();
     method public double getTimeUncertaintyInNs();
     method public byte getType();
     method public boolean hasBiasInNs();
@@ -19198,9 +19198,9 @@ package android.location {
     method public void setDriftInNsPerSec(double);
     method public void setDriftUncertaintyInNsPerSec(double);
     method public void setFullBiasInNs(long);
+    method public void setHardwareClockDiscontinuityCount(int);
     method public void setLeapSecond(short);
     method public void setTimeInNs(long);
-    method public void setTimeOfLastHwClockDiscontinuityInNs(long);
     method public void setTimeUncertaintyInNs(double);
     method public void setType(byte);
     method public void writeToParcel(android.os.Parcel, int);
@@ -19228,6 +19228,7 @@ package android.location {
     method public double getCn0InDbHz();
     method public double getCodePhaseInChips();
     method public double getCodePhaseUncertaintyInChips();
+    method public byte getConstellationType();
     method public double getDopplerShiftInHz();
     method public double getDopplerShiftUncertaintyInHz();
     method public double getElevationInDeg();
@@ -19235,13 +19236,11 @@ package android.location {
     method public byte getLossOfLock();
     method public byte getMultipathIndicator();
     method public double getPseudorangeInMeters();
-    method public double getPseudorangeRateCarrierInMetersPerSec();
-    method public double getPseudorangeRateCarrierUncertaintyInMetersPerSec();
     method public double getPseudorangeRateInMetersPerSec();
     method public double getPseudorangeRateUncertaintyInMetersPerSec();
     method public double getPseudorangeUncertaintyInMeters();
-    method public long getReceivedGpsTowInNs();
-    method public long getReceivedGpsTowUncertaintyInNs();
+    method public long getReceivedSvTimeInNs();
+    method public long getReceivedSvTimeUncertaintyInNs();
     method public double getSnrInDb();
     method public short getState();
     method public short getSvid();
@@ -19298,6 +19297,7 @@ package android.location {
     method public void setCn0InDbHz(double);
     method public void setCodePhaseInChips(double);
     method public void setCodePhaseUncertaintyInChips(double);
+    method public void setConstellationType(byte);
     method public void setDopplerShiftInHz(double);
     method public void setDopplerShiftUncertaintyInHz(double);
     method public void setElevationInDeg(double);
@@ -19305,13 +19305,11 @@ package android.location {
     method public void setLossOfLock(byte);
     method public void setMultipathIndicator(byte);
     method public void setPseudorangeInMeters(double);
-    method public void setPseudorangeRateCarrierInMetersPerSec(double);
-    method public void setPseudorangeRateCarrierUncertaintyInMetersPerSec(double);
     method public void setPseudorangeRateInMetersPerSec(double);
     method public void setPseudorangeRateUncertaintyInMetersPerSec(double);
     method public void setPseudorangeUncertaintyInMeters(double);
-    method public void setReceivedGpsTowInNs(long);
-    method public void setReceivedGpsTowUncertaintyInNs(long);
+    method public void setReceivedSvTimeInNs(long);
+    method public void setReceivedSvTimeUncertaintyInNs(long);
     method public void setSnrInDb(double);
     method public void setState(short);
     method public void setSvid(short);
@@ -19372,7 +19370,7 @@ package android.location {
     method public short getStatus();
     method public short getSubmessageId();
     method public short getSvid();
-    method public byte getType();
+    method public short getType();
     method public void reset();
     method public void set(android.location.GnssNavigationMessage);
     method public void setData(byte[]);
@@ -19380,14 +19378,19 @@ package android.location {
     method public void setStatus(short);
     method public void setSubmessageId(short);
     method public void setSvid(short);
-    method public void setType(byte);
+    method public void setType(short);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessage> CREATOR;
-    field public static final byte MESSAGE_TYPE_CNAV2 = 4; // 0x4
-    field public static final byte MESSAGE_TYPE_L1CA = 1; // 0x1
-    field public static final byte MESSAGE_TYPE_L2CNAV = 2; // 0x2
-    field public static final byte MESSAGE_TYPE_L5CNAV = 3; // 0x3
-    field public static final byte MESSAGE_TYPE_UNKNOWN = 0; // 0x0
+    field public static final short MESSAGE_TYPE_BDS_D1 = 1281; // 0x501
+    field public static final short MESSAGE_TYPE_BDS_D2 = 1282; // 0x502
+    field public static final short MESSAGE_TYPE_GAL_F = 1538; // 0x602
+    field public static final short MESSAGE_TYPE_GAL_I = 1537; // 0x601
+    field public static final short MESSAGE_TYPE_GLO_L1CA = 769; // 0x301
+    field public static final short MESSAGE_TYPE_GPS_CNAV2 = 260; // 0x104
+    field public static final short MESSAGE_TYPE_GPS_L1CA = 257; // 0x101
+    field public static final short MESSAGE_TYPE_GPS_L2CNAV = 258; // 0x102
+    field public static final short MESSAGE_TYPE_GPS_L5CNAV = 259; // 0x103
+    field public static final short MESSAGE_TYPE_UNKNOWN = 0; // 0x0
     field public static final short STATUS_PARITY_PASSED = 1; // 0x1
     field public static final short STATUS_PARITY_REBUILT = 2; // 0x2
     field public static final short STATUS_UNKNOWN = 0; // 0x0
@@ -19422,7 +19425,7 @@ package android.location {
 
   public final class GnssStatus {
     method public float getAzimuth(int);
-    method public int getConstellationType(int);
+    method public byte getConstellationType(int);
     method public float getElevation(int);
     method public int getNumSatellites();
     method public float getSnr(int);
@@ -19430,13 +19433,16 @@ package android.location {
     method public boolean hasAlmanac(int);
     method public boolean hasEphemeris(int);
     method public boolean usedInFix(int);
-    field public static final int CONSTELLATION_BEIDOU = 5; // 0x5
-    field public static final int CONSTELLATION_GALILEO = 6; // 0x6
-    field public static final int CONSTELLATION_GLONASS = 3; // 0x3
-    field public static final int CONSTELLATION_GPS = 1; // 0x1
-    field public static final int CONSTELLATION_QZSS = 4; // 0x4
-    field public static final int CONSTELLATION_SBAS = 2; // 0x2
-    field public static final int CONSTELLATION_UNKNOWN = 0; // 0x0
+    field public static final byte CONSTELLATION_BEIDOU = 5; // 0x5
+    field public static final byte CONSTELLATION_GALILEO = 6; // 0x6
+    field public static final byte CONSTELLATION_GLONASS = 3; // 0x3
+    field public static final byte CONSTELLATION_GPS = 1; // 0x1
+    field public static final byte CONSTELLATION_QZSS = 4; // 0x4
+    field public static final byte CONSTELLATION_SBAS = 2; // 0x2
+    field public static final byte CONSTELLATION_UNKNOWN = 0; // 0x0
+  }
+
+  public static abstract class GnssStatus.ConstellationType implements java.lang.annotation.Annotation {
   }
 
   public abstract class GnssStatusCallback {
@@ -19542,8 +19548,8 @@ package android.location {
     method public void clearTestProviderStatus(java.lang.String);
     method public java.util.List<java.lang.String> getAllProviders();
     method public java.lang.String getBestProvider(android.location.Criteria, boolean);
+    method public int getGnssYearOfHardware();
     method public deprecated android.location.GpsStatus getGpsStatus(android.location.GpsStatus);
-    method public int getGpsYearOfHardware();
     method public android.location.Location getLastKnownLocation(java.lang.String);
     method public android.location.LocationProvider getProvider(java.lang.String);
     method public java.util.List<java.lang.String> getProviders(boolean);
