@@ -21,7 +21,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
-/**
+import com.android.internal.annotations.VisibleForTesting;
+
+ /**
  * An AlarmListener that sends the specified message to a Handler and keeps the system awake until
  * the message is processed.
  *
@@ -36,9 +38,13 @@ import android.os.Message;
  */
 public class WakeupMessage implements AlarmManager.OnAlarmListener {
     private final AlarmManager mAlarmManager;
-    private final Handler mHandler;
-    private final String mCmdName;
-    private final int mCmd, mArg1, mArg2;
+
+    @VisibleForTesting
+    protected final Handler mHandler;
+    @VisibleForTesting
+    protected final String mCmdName;
+    @VisibleForTesting
+    protected final int mCmd, mArg1, mArg2;
     private boolean mScheduled;
 
     public WakeupMessage(Context context, Handler handler,
