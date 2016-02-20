@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.print.PrintDocumentAdapter;
+import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -333,6 +334,8 @@ public interface WebViewProvider {
         public void onConfigurationChanged(Configuration newConfig);
 
         public InputConnection onCreateInputConnection(EditorInfo outAttrs);
+
+        public boolean onDragEvent(DragEvent event);
 
         public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event);
 
