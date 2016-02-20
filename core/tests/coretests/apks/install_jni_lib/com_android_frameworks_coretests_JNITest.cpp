@@ -37,7 +37,7 @@ int register_com_android_frameworks_coretests_JNITests(JNIEnv* env) {
 /*
  * JNI Initialization
  */
-jint JNI_OnLoad(JavaVM *jvm, void *reserved) {
+jint JNI_OnLoad(JavaVM *jvm, void */* reserved */) {
     JNIEnv *e;
     int status;
 

@@ -32,6 +32,8 @@ LOCAL_SRC_FILES:= \
 # All of the shard libraries we link against.
 LOCAL_SHARED_LIBRARIES := liblog
 
+LOCAL_CFLAGS += -Wall -Wextra -Werror
+
 # Also need the JNI headers.
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE)

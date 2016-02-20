@@ -9,6 +9,8 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_MODULE:= test-touchlag
 
+LOCAL_CFLAGS += -Wall -Wextra -Werror
+
 LOCAL_MODULE_TAGS := tests
 
 include $(BUILD_EXECUTABLE)
