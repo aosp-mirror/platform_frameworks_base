@@ -509,8 +509,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         return !(mLastShowing && !mLastOccluded) || mLastBouncerShowing || mLastRemoteInputActive;
     }
 
-    public boolean onMenuPressed() {
-        return mBouncer.onMenuPressed();
+    public boolean shouldDismissOnMenuPressed() {
+        return mBouncer.shouldDismissOnMenuPressed();
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
