@@ -34,36 +34,33 @@ public final class GnssNavigationMessage implements Parcelable {
 
     /** The type of the GPS Clock. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MESSAGE_TYPE_UNKNOWN, MESSAGE_TYPE_L1CA, MESSAGE_TYPE_L2CNAV, MESSAGE_TYPE_L5CNAV,
-            MESSAGE_TYPE_CNAV2})
+    @IntDef({MESSAGE_TYPE_UNKNOWN, MESSAGE_TYPE_GPS_L1CA, MESSAGE_TYPE_GPS_L2CNAV,
+        MESSAGE_TYPE_GPS_L5CNAV, MESSAGE_TYPE_GPS_CNAV2, MESSAGE_TYPE_GLO_L1CA, MESSAGE_TYPE_BDS_D1,
+        MESSAGE_TYPE_BDS_D2, MESSAGE_TYPE_GAL_I, MESSAGE_TYPE_GAL_F})
     public @interface GnssNavigationMessageType {}
 
     // The following enumerations must be in sync with the values declared in gps.h
 
-    /**
-     * The type of the navigation message is not available or unknown.
-     */
-    public static final byte MESSAGE_TYPE_UNKNOWN = 0;
-
-    /**
-     * The Navigation Message is of type L1 C/A.
-     */
-    public static final byte MESSAGE_TYPE_L1CA = 1;
-
-    /**
-     * The Navigation Message is of type L1-CNAV.
-     */
-    public static final byte MESSAGE_TYPE_L2CNAV = 2;
-
-    /**
-     * The Navigation Message is of type L5-CNAV.
-     */
-    public static final byte MESSAGE_TYPE_L5CNAV = 3;
-
-    /**
-     * The Navigation Message is of type CNAV-2.
-     */
-    public static final byte MESSAGE_TYPE_CNAV2 = 4;
+    /** Message type unknown */
+    public static final short MESSAGE_TYPE_UNKNOWN = 0;
+    /** GPS L1 C/A message contained in the structure.  */
+    public static final short MESSAGE_TYPE_GPS_L1CA = 0x0101;
+    /** GPS L2-CNAV message contained in the structure. */
+    public static final short MESSAGE_TYPE_GPS_L2CNAV = 0x0102;
+    /** GPS L5-CNAV message contained in the structure. */
+    public static final short MESSAGE_TYPE_GPS_L5CNAV = 0x0103;
+    /** GPS CNAV-2 message contained in the structure. */
+    public static final short MESSAGE_TYPE_GPS_CNAV2 = 0x0104;
+    /** Glonass L1 CA message contained in the structure. */
+    public static final short MESSAGE_TYPE_GLO_L1CA = 0x0301;
+    /** Beidou D1 message contained in the structure. */
+    public static final short MESSAGE_TYPE_BDS_D1 = 0x0501;
+    /** Beidou D2 message contained in the structure. */
+    public static final short MESSAGE_TYPE_BDS_D2 = 0x0502;
+    /** Galileo I/NAV message contained in the structure. */
+    public static final short MESSAGE_TYPE_GAL_I = 0x0601;
+    /** Galileo F/NAV message contained in the structure. */
+    public static final short MESSAGE_TYPE_GAL_F = 0x0602;
 
     /**
      * The Navigation Message Status is 'unknown'.
@@ -83,7 +80,7 @@ public final class GnssNavigationMessage implements Parcelable {
 
     // End enumerations in sync with gps.h
 
-    private byte mType;
+    private short mType;
     private short mSvid;
     private short mMessageId;
     private short mSubmessageId;
@@ -117,14 +114,14 @@ public final class GnssNavigationMessage implements Parcelable {
      * Gets the type of the navigation message contained in the object.
      */
     @GnssNavigationMessageType
-    public byte getType() {
+    public short getType() {
         return mType;
     }
 
     /**
      * Sets the type of the navigation message.
      */
-    public void setType(@GnssNavigationMessageType byte value) {
+    public void setType(@GnssNavigationMessageType short value) {
         mType = value;
     }
 
@@ -136,14 +133,24 @@ public final class GnssNavigationMessage implements Parcelable {
         switch (mType) {
             case MESSAGE_TYPE_UNKNOWN:
                 return "Unknown";
-            case MESSAGE_TYPE_L1CA:
-                return "L1 C/A";
-            case MESSAGE_TYPE_L2CNAV:
-                return "L2-CNAV";
-            case MESSAGE_TYPE_L5CNAV:
-                return "L5-CNAV";
-            case MESSAGE_TYPE_CNAV2:
-                return "CNAV-2";
+            case MESSAGE_TYPE_GPS_L1CA:
+                return "GPS L1 C/A";
+            case MESSAGE_TYPE_GPS_L2CNAV:
+                return "GPS L2-CNAV";
+            case MESSAGE_TYPE_GPS_L5CNAV:
+                return "GPS L5-CNAV";
+            case MESSAGE_TYPE_GPS_CNAV2:
+                return "GPS CNAV2";
+            case MESSAGE_TYPE_GLO_L1CA:
+                return "Glonass L1 C/A";
+            case MESSAGE_TYPE_BDS_D1:
+                return "Beidou D1";
+            case MESSAGE_TYPE_BDS_D2:
+                return "Beidou D2";
+            case MESSAGE_TYPE_GAL_I:
+                return "Galileo I";
+            case MESSAGE_TYPE_GAL_F:
+                return "Galileo F";
             default:
                 return "<Invalid:" + mType + ">";
         }
@@ -255,7 +262,7 @@ public final class GnssNavigationMessage implements Parcelable {
         public GnssNavigationMessage createFromParcel(Parcel parcel) {
             GnssNavigationMessage navigationMessage = new GnssNavigationMessage();
 
-            navigationMessage.setType(parcel.readByte());
+            navigationMessage.setType((short) parcel.readInt());
             navigationMessage.setSvid((short) parcel.readInt());
             navigationMessage.setMessageId((short) parcel.readInt());
             navigationMessage.setSubmessageId((short) parcel.readInt());
@@ -283,7 +290,7 @@ public final class GnssNavigationMessage implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeByte(mType);
+        parcel.writeInt(mType);
         parcel.writeInt(mSvid);
         parcel.writeInt(mMessageId);
         parcel.writeInt(mSubmessageId);

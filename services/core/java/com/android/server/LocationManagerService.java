@@ -214,7 +214,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
     private int[] mCurrentUserProfiles = new int[] { UserHandle.USER_SYSTEM };
 
-    private GnssLocationProvider.GpsSystemInfoProvider mGpsSystemInfoProvider;
+    private GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
 
     public LocationManagerService(Context context) {
         super();
@@ -462,7 +462,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             // Create a gps location provider
             GnssLocationProvider gnssProvider = new GnssLocationProvider(mContext, this,
                     mLocationHandler.getLooper());
-            mGpsSystemInfoProvider = gnssProvider.getGpsSystemInfoProvider();
+            mGnssSystemInfoProvider = gnssProvider.getGnssSystemInfoProvider();
             mGnssStatusProvider = gnssProvider.getGnssStatusProvider();
             mNetInitiatedListener = gnssProvider.getNetInitiatedListener();
             addProviderLocked(gnssProvider);
@@ -990,12 +990,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     /**
-     * Returns the system information of the GPS hardware.
+     * Returns the system information of the GNSS hardware.
      */
     @Override
-    public int getGpsYearOfHardware() {
+    public int getGnssYearOfHardware() {
         if (mGnssNavigationMessageProvider != null) {
-            return mGpsSystemInfoProvider.getGpsYearOfHardware();
+            return mGnssSystemInfoProvider.getGnssYearOfHardware();
         } else {
             return 0;
         }

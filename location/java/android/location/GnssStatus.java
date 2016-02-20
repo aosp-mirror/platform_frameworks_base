@@ -16,25 +16,36 @@
 
 package android.location;
 
+import android.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * This class represents the current state of the GNSS engine.
  * This class is used in conjunction with the {@link GnssStatusCallback}.
  */
 public final class GnssStatus {
     /** Unknown constellation type. */
-    public static final int CONSTELLATION_UNKNOWN = 0;
+    public static final byte CONSTELLATION_UNKNOWN = 0;
     /** Constellation type constant for GPS. */
-    public static final int CONSTELLATION_GPS = 1;
+    public static final byte CONSTELLATION_GPS = 1;
     /** Constellation type constant for SBAS. */
-    public static final int CONSTELLATION_SBAS = 2;
+    public static final byte CONSTELLATION_SBAS = 2;
     /** Constellation type constant for Glonass. */
-    public static final int CONSTELLATION_GLONASS = 3;
+    public static final byte CONSTELLATION_GLONASS = 3;
     /** Constellation type constant for QZSS. */
-    public static final int CONSTELLATION_QZSS = 4;
+    public static final byte CONSTELLATION_QZSS = 4;
     /** Constellation type constant for Beidou. */
-    public static final int CONSTELLATION_BEIDOU = 5;
+    public static final byte CONSTELLATION_BEIDOU = 5;
     /** Constellation type constant for Galileo. */
-    public static final int CONSTELLATION_GALILEO = 6;
+    public static final byte CONSTELLATION_GALILEO = 6;
+
+    /** Constellation type. */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CONSTELLATION_UNKNOWN, CONSTELLATION_GPS, CONSTELLATION_SBAS, CONSTELLATION_GLONASS,
+            CONSTELLATION_QZSS, CONSTELLATION_BEIDOU, CONSTELLATION_GALILEO})
+    public @interface ConstellationType {}
 
     // these must match the definitions in gps.h
     /** @hide */
@@ -80,9 +91,10 @@ public final class GnssStatus {
      * Retrieves the constellation type of the satellite at the specified position.
      * @param satIndex the index of the satellite in the list.
      */
-    public int getConstellationType(int satIndex) {
-        return (mSvidWithFlags[satIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
-                & CONSTELLATION_TYPE_MASK;
+    @ConstellationType
+    public byte getConstellationType(int satIndex) {
+        return (byte) ((mSvidWithFlags[satIndex] >> CONSTELLATION_TYPE_SHIFT_WIDTH)
+                & CONSTELLATION_TYPE_MASK);
     }
 
     /**

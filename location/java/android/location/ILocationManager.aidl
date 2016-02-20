@@ -69,7 +69,7 @@ interface ILocationManager
             in String packageName);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
-    int getGpsYearOfHardware();
+    int getGnssYearOfHardware();
 
     // --- deprecated ---
     List<String> getAllProviders();
