@@ -400,7 +400,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     // The default minimal size that will be used if the activity doesn't specify its minimal size.
     // It will be calculated when the default display gets added.
-    private int mDefaultMinimalSizeOfResizeableTask = -1;
+    int mDefaultMinimalSizeOfResizeableTask = -1;
 
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
@@ -2039,8 +2039,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return true;
         }
 
-        adjustForMinimalTaskDimensions(task, bounds);
-
         // If this is a forced resize, let it go through even if the bounds is not changing,
         // as we might need a relayout due to surface size change (to/from fullscreen).
         final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
@@ -2074,7 +2072,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // to be relaunched due to configuration change.
         boolean kept = true;
         if (overrideConfig != null) {
-            ActivityRecord r = task.topRunningActivityLocked();
+            final ActivityRecord r = task.topRunningActivityLocked();
             if (r != null) {
                 final ActivityStack stack = task.stack;
                 kept = stack.ensureActivityConfigurationLocked(r, 0, preserveWindow);
@@ -2085,42 +2083,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
-        mWindowManager.resizeTask(task.taskId, bounds, task.mOverrideConfig, kept, forced);
+        mWindowManager.resizeTask(task.taskId, task.mBounds, task.mOverrideConfig, kept, forced);
 
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
         return kept;
-    }
-
-    private void adjustForMinimalTaskDimensions(TaskRecord task, Rect bounds) {
-        if (bounds == null) {
-            return;
-        }
-        int minimalSize = task.mMinimalSize == -1 ? mDefaultMinimalSizeOfResizeableTask
-                : task.mMinimalSize;
-        final boolean adjustWidth = minimalSize > bounds.width();
-        final boolean adjustHeight = minimalSize > bounds.height();
-        if (!(adjustWidth || adjustHeight)) {
-            return;
-        }
-        Rect taskBounds = task.mBounds;
-        if (adjustWidth) {
-            if (taskBounds != null && bounds.right == taskBounds.right) {
-                bounds.left = bounds.right - minimalSize;
-            } else {
-                // Either left bounds match, or neither match, or the previous bounds were
-                // fullscreen and we default to keeping left.
-                bounds.right = bounds.left + minimalSize;
-            }
-        }
-        if (adjustHeight) {
-            if (taskBounds != null && bounds.bottom == taskBounds.bottom) {
-                bounds.top = bounds.bottom - minimalSize;
-            } else {
-                // Either top bounds match, or neither match, or the previous bounds were
-                // fullscreen and we default to keeping top.
-                bounds.bottom = bounds.top + minimalSize;
-            }
-        }
     }
 
     ActivityStack createStackOnDisplay(int stackId, int displayId, boolean onTop) {
