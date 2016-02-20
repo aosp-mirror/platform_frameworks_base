@@ -338,6 +338,7 @@ package android {
     field public static final int calendarViewStyle = 16843613; // 0x101035d
     field public static final int canControlMagnification = 16844040; // 0x1010508
     field public static final int canPerformGestures = 16844046; // 0x101050e
+    field public static final int canRecord = 16844061; // 0x101051d
     field public static final int canRequestEnhancedWebAccessibility = 16843736; // 0x10103d8
     field public static final int canRequestFilterKeyEvents = 16843737; // 0x10103d9
     field public static final int canRequestTouchExplorationMode = 16843735; // 0x10103d7
@@ -1359,6 +1360,7 @@ package android {
     field public static final int trimPathEnd = 16843785; // 0x1010409
     field public static final int trimPathOffset = 16843786; // 0x101040a
     field public static final int trimPathStart = 16843784; // 0x1010408
+    field public static final int tunerCount = 16844062; // 0x101051e
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
     field public static final int uiOptions = 16843672; // 0x1010398
