@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import libcore.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
@@ -90,7 +91,9 @@ public class QSTileView extends QSTileBaseView {
 
     protected void handleStateChanged(QSTile.State state) {
         super.handleStateChanged(state);
-        mLabel.setText(state.label);
+        if (!Objects.equal(mLabel.getText(), state.label)) {
+            mLabel.setText(state.label);
+        }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);
     }
