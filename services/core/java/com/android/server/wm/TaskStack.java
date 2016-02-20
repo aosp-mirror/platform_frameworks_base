@@ -336,6 +336,7 @@ public class TaskStack implements DimLayer.DimLayerUser,
         final int newRotation = getDisplayInfo().rotation;
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (mStackId == DOCKED_STACK_ID) {
+            repositionDockedStackAfterRotation(mTmpRect2);
             snapDockedStackAfterRotation(mTmpRect2);
         }
 
@@ -344,6 +345,43 @@ public class TaskStack implements DimLayer.DimLayerUser,
         // lock and activity manager lock been held.
         mService.mH.sendMessage(mService.mH.obtainMessage(
                 RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mTmpRect2));
+    }
+
+    /**
+     * Some dock sides are not allowed by the policy. This method queries the policy and moves
+     * the docked stack around if needed.
+     *
+     * @param inOutBounds the bounds of the docked stack to adjust
+     */
+    private void repositionDockedStackAfterRotation(Rect inOutBounds) {
+        int dockSide = getDockSide(inOutBounds);
+        if (mService.mPolicy.isDockSideAllowed(dockSide)) {
+            return;
+        }
+        mDisplayContent.getLogicalDisplayRect(mTmpRect);
+        dockSide = DockedDividerUtils.invertDockSide(dockSide);
+        switch (dockSide) {
+            case DOCKED_LEFT:
+                int movement = inOutBounds.left;
+                inOutBounds.left -= movement;
+                inOutBounds.right -= movement;
+                break;
+            case DOCKED_RIGHT:
+                movement = mTmpRect.right - inOutBounds.right;
+                inOutBounds.left += movement;
+                inOutBounds.right += movement;
+                break;
+            case DOCKED_TOP:
+                movement = inOutBounds.top;
+                inOutBounds.top -= movement;
+                inOutBounds.bottom -= movement;
+                break;
+            case DOCKED_BOTTOM:
+                movement = mTmpRect.bottom - inOutBounds.bottom;
+                inOutBounds.top += movement;
+                inOutBounds.bottom += movement;
+                break;
+        }
     }
 
     /**
