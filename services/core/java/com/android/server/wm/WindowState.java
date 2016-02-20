@@ -448,6 +448,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     final private Rect mTmpRect = new Rect();
 
+    /**
+     * Whether the window was resized by us while it was gone for layout.
+     */
+    boolean mResizedWhileGone = false;
+
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
            int viewVisibility, final DisplayContent displayContent) {
@@ -1235,7 +1240,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
                 || (atoken == null && mRootToken.hidden)
-                || (atoken != null && (atoken.hiddenRequested || atoken.hidden))
+                || (atoken != null && atoken.hiddenRequested)
                 || mAttachedHidden
                 || (mAnimatingExit && !isAnimatingLw())
                 || mDestroying;
@@ -1833,6 +1838,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final AppWindowToken taskTop = task.getTopVisibleAppToken();
         if (taskTop != null && taskTop != mAppToken) {
             // Don't save if the window is not the topmost window.
+            return false;
+        }
+
+        if (mResizedWhileGone) {
+            // Somebody resized our window while we were gone for layout, which means that the
+            // client got an old size, so we have an outdated surface here.
             return false;
         }
 

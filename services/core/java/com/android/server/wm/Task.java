@@ -247,7 +247,7 @@ class Task implements DimLayer.DimLayerUser {
             mStack.removeTask(this);
         }
         stack.positionTask(this, position, showForAllUsers());
-        setBounds(bounds, config);
+        resizeLocked(bounds, config, false /* force */);
     }
 
     boolean removeAppToken(AppWindowToken wtoken) {
@@ -272,7 +272,7 @@ class Task implements DimLayer.DimLayerUser {
     }
 
     /** Set the task bounds. Passing in null sets the bounds to fullscreen. */
-    int setBounds(Rect bounds, Configuration config) {
+    private int setBounds(Rect bounds, Configuration config) {
         if (config == null) {
             config = Configuration.EMPTY;
         }
@@ -598,12 +598,20 @@ class Task implements DimLayer.DimLayerUser {
     void resizeWindows() {
         final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
         for (int activityNdx = mAppTokens.size() - 1; activityNdx >= 0; --activityNdx) {
-            final ArrayList<WindowState> windows = mAppTokens.get(activityNdx).allAppWindows;
+            final AppWindowToken atoken = mAppTokens.get(activityNdx);
+
+            // Some windows won't go through the resizing process, if they don't have a surface, so
+            // destroy all saved surfaces here.
+            atoken.destroySavedSurfaces();
+            final ArrayList<WindowState> windows = atoken.allAppWindows;
             for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
                 final WindowState win = windows.get(winNdx);
                 if (win.mHasSurface && !resizingWindows.contains(win)) {
                     if (DEBUG_RESIZE) Slog.d(TAG, "resizeWindows: Resizing " + win);
                     resizingWindows.add(win);
+                }
+                if (win.isGoneForLayoutLw()) {
+                    win.mResizedWhileGone = true;
                 }
             }
         }
