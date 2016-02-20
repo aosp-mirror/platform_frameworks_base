@@ -2162,8 +2162,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 mIntent = new Intent().setComponent(mComponentName);
                 mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                         com.android.internal.R.string.accessibility_binding_label);
-                mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
-                        mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
+                final long idendtity = Binder.clearCallingIdentity();
+                try {
+                    mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
+                            mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
+                } finally {
+                    Binder.restoreCallingIdentity(idendtity);
+                }
             }
             setDynamicallyConfigurableProperties(accessibilityServiceInfo);
         }
