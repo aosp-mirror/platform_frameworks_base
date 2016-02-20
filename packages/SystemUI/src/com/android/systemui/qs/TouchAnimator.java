@@ -15,8 +15,10 @@
 package com.android.systemui.qs;
 
 import android.animation.Keyframe;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Property;
+import android.view.View;
 import android.view.animation.Interpolator;
 
 import java.util.ArrayList;
@@ -129,9 +131,34 @@ public class TouchAnimator {
 
         private void add(Object target, String property, KeyframeSet keyframeSet) {
             mTargets.add(target);
-            // TODO: Optimize the properties here, to use those in View when possible.
-            mProperties.add(Property.of(target.getClass(), float.class, property));
+            mProperties.add(getProperty(target, property));
             mValues.add(keyframeSet);
+        }
+
+        private static Property getProperty(Object target, String property) {
+            if (target instanceof View) {
+                switch (property) {
+                    case "translationX":
+                        return View.TRANSLATION_X;
+                    case "translationY":
+                        return View.TRANSLATION_Y;
+                    case "translationZ":
+                        return View.TRANSLATION_Z;
+                    case "alpha":
+                        return View.ALPHA;
+                    case "rotation":
+                        return View.ROTATION;
+                    case "x":
+                        return View.X;
+                    case "y":
+                        return View.Y;
+                    case "scaleX":
+                        return View.SCALE_X;
+                    case "scaleY":
+                        return View.SCALE_Y;
+                }
+            }
+            return Property.of(target.getClass(), float.class, property);
         }
 
         public Builder setStartDelay(float startDelay) {
@@ -164,77 +191,61 @@ public class TouchAnimator {
 
     private static abstract class KeyframeSet {
 
-        private final Keyframe[] mKeyframes;
+        private final float mFrameWidth;
+        private final int mSize;
 
-        public KeyframeSet(Keyframe[] keyframes) {
-            mKeyframes = keyframes;
+        public KeyframeSet(int size) {
+            mSize = size;
+            mFrameWidth = 1 / (float) (size - 1);
         }
 
         Object getValue(float fraction) {
             int i;
-            for (i = 1; i < mKeyframes.length && fraction > mKeyframes[i].getFraction(); i++) ;
-            Keyframe first = mKeyframes[i - 1];
-            Keyframe second = mKeyframes[i];
-            float amount = (fraction - first.getFraction())
-                    / (second.getFraction() - first.getFraction());
-            return interpolate(first, second, amount);
+            for (i = 1; i < mSize - 1 && fraction > mFrameWidth; i++);
+            float amount = fraction / mFrameWidth;
+            return interpolate(i, amount);
         }
 
-        protected abstract Object interpolate(Keyframe first, Keyframe second, float amount);
+        protected abstract Object interpolate(int index, float amount);
 
         public static KeyframeSet ofInt(int... values) {
-            int numKeyframes = values.length;
-            Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes, 2)];
-            if (numKeyframes == 1) {
-                keyframes[0] = Keyframe.ofInt(0f);
-                keyframes[1] = Keyframe.ofInt(1f, values[0]);
-            } else {
-                keyframes[0] = Keyframe.ofInt(0f, values[0]);
-                for (int i = 1; i < numKeyframes; ++i) {
-                    keyframes[i] = Keyframe.ofInt((float) i / (numKeyframes - 1), values[i]);
-                }
-            }
-            return new IntKeyframeSet(keyframes);
+            return new IntKeyframeSet(values);
         }
 
         public static KeyframeSet ofFloat(float... values) {
-            int numKeyframes = values.length;
-            Keyframe keyframes[] = new Keyframe[Math.max(numKeyframes, 2)];
-            if (numKeyframes == 1) {
-                keyframes[0] = Keyframe.ofFloat(0f);
-                keyframes[1] = Keyframe.ofFloat(1f, values[0]);
-            } else {
-                keyframes[0] = Keyframe.ofFloat(0f, values[0]);
-                for (int i = 1; i < numKeyframes; ++i) {
-                    keyframes[i] = Keyframe.ofFloat((float) i / (numKeyframes - 1), values[i]);
-                }
-            }
-            return new FloatKeyframeSet(keyframes);
+            return new FloatKeyframeSet(values);
         }
     }
 
     private static class FloatKeyframeSet extends KeyframeSet {
-        public FloatKeyframeSet(Keyframe[] keyframes) {
-            super(keyframes);
+        private final float[] mValues;
+
+        public FloatKeyframeSet(float[] values) {
+            super(values.length);
+            mValues = values;
         }
 
         @Override
-        protected Object interpolate(Keyframe first, Keyframe second, float amount) {
-            float firstFloat = (float) first.getValue();
-            float secondFloat = (float) second.getValue();
+        protected Object interpolate(int index, float amount) {
+            float firstFloat = mValues[index - 1];
+            float secondFloat = mValues[index];
             return firstFloat + (secondFloat - firstFloat) * amount;
         }
     }
 
     private static class IntKeyframeSet extends KeyframeSet {
-        public IntKeyframeSet(Keyframe[] keyframes) {
-            super(keyframes);
+
+        private final int[] mValues;
+
+        public IntKeyframeSet(int[] values) {
+            super(values.length);
+            mValues = values;
         }
 
         @Override
-        protected Object interpolate(Keyframe first, Keyframe second, float amount) {
-            int firstFloat = (int) first.getValue();
-            int secondFloat = (int) second.getValue();
+        protected Object interpolate(int index, float amount) {
+            int firstFloat = mValues[index - 1];
+            int secondFloat = mValues[index];
             return (int) (firstFloat + (secondFloat - firstFloat) * amount);
         }
     }
