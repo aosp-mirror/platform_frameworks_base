@@ -44,7 +44,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -680,7 +679,7 @@ public class JobStore {
             parser.nextTag(); // Consume </extras>
 
             JobStatus js = new JobStatus(
-                    mLock, jobBuilder.build(), uid, sourcePackageName, sourceUserId,
+                    jobBuilder.build(), uid, sourcePackageName, sourceUserId,
                     elapsedRuntimes.first, elapsedRuntimes.second);
             return js;
         }

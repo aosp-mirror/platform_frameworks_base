@@ -75,87 +75,81 @@ public class ContentObserverController extends StateController {
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
+    public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasContentTriggerConstraint()) {
-            synchronized (mLock) {
-                if (taskStatus.contentObserverJobInstance == null) {
-                    taskStatus.contentObserverJobInstance = new JobInstance(taskStatus);
-                }
-                mTrackedTasks.add(taskStatus);
-                boolean havePendingUris = false;
-                // If there is a previous job associated with the new job, propagate over
-                // any pending content URI trigger reports.
-                if (lastJob != null && lastJob.contentObserverJobInstance != null
-                        && lastJob.contentObserverJobInstance
-                        != taskStatus.contentObserverJobInstance
-                        && lastJob.contentObserverJobInstance.mChangedAuthorities != null) {
-                    havePendingUris = true;
+            if (taskStatus.contentObserverJobInstance == null) {
+                taskStatus.contentObserverJobInstance = new JobInstance(taskStatus);
+            }
+            mTrackedTasks.add(taskStatus);
+            boolean havePendingUris = false;
+            // If there is a previous job associated with the new job, propagate over
+            // any pending content URI trigger reports.
+            if (lastJob != null && lastJob.contentObserverJobInstance != null
+                    && lastJob.contentObserverJobInstance
+                    != taskStatus.contentObserverJobInstance
+                    && lastJob.contentObserverJobInstance.mChangedAuthorities != null) {
+                havePendingUris = true;
+                taskStatus.contentObserverJobInstance.mChangedAuthorities
+                        = lastJob.contentObserverJobInstance.mChangedAuthorities;
+                taskStatus.contentObserverJobInstance.mChangedUris
+                        = lastJob.contentObserverJobInstance.mChangedUris;
+                lastJob.contentObserverJobInstance.mChangedAuthorities = null;
+                lastJob.contentObserverJobInstance.mChangedUris = null;
+            }
+            // If we have previously reported changed authorities/uris, then we failed
+            // to complete the job with them so will re-record them to report again.
+            if (taskStatus.changedAuthorities != null) {
+                havePendingUris = true;
+                if (taskStatus.contentObserverJobInstance.mChangedAuthorities == null) {
                     taskStatus.contentObserverJobInstance.mChangedAuthorities
-                            = lastJob.contentObserverJobInstance.mChangedAuthorities;
-                    taskStatus.contentObserverJobInstance.mChangedUris
-                            = lastJob.contentObserverJobInstance.mChangedUris;
-                    lastJob.contentObserverJobInstance.mChangedAuthorities = null;
-                    lastJob.contentObserverJobInstance.mChangedUris = null;
+                            = new ArraySet<>();
                 }
-                // If we have previously reported changed authorities/uris, then we failed
-                // to complete the job with them so will re-record them to report again.
-                if (taskStatus.changedAuthorities != null) {
-                    havePendingUris = true;
-                    if (taskStatus.contentObserverJobInstance.mChangedAuthorities == null) {
-                        taskStatus.contentObserverJobInstance.mChangedAuthorities
-                                = new ArraySet<>();
+                for (String auth : taskStatus.changedAuthorities) {
+                    taskStatus.contentObserverJobInstance.mChangedAuthorities.add(auth);
+                }
+                if (taskStatus.changedUris != null) {
+                    if (taskStatus.contentObserverJobInstance.mChangedUris == null) {
+                        taskStatus.contentObserverJobInstance.mChangedUris = new ArraySet<>();
                     }
-                    for (String auth : taskStatus.changedAuthorities) {
-                        taskStatus.contentObserverJobInstance.mChangedAuthorities.add(auth);
+                    for (Uri uri : taskStatus.changedUris) {
+                        taskStatus.contentObserverJobInstance.mChangedUris.add(uri);
                     }
-                    if (taskStatus.changedUris != null) {
-                        if (taskStatus.contentObserverJobInstance.mChangedUris == null) {
-                            taskStatus.contentObserverJobInstance.mChangedUris = new ArraySet<>();
-                        }
-                        for (Uri uri : taskStatus.changedUris) {
-                            taskStatus.contentObserverJobInstance.mChangedUris.add(uri);
-                        }
-                    }
-                    taskStatus.changedAuthorities = null;
-                    taskStatus.changedUris = null;
                 }
                 taskStatus.changedAuthorities = null;
                 taskStatus.changedUris = null;
-                taskStatus.contentTriggerConstraintSatisfied.set(havePendingUris);
+            }
+            taskStatus.changedAuthorities = null;
+            taskStatus.changedUris = null;
+            taskStatus.setContentTriggerConstraintSatisfied(havePendingUris);
+        }
+    }
+
+    @Override
+    public void prepareForExecutionLocked(JobStatus taskStatus) {
+        if (taskStatus.hasContentTriggerConstraint()) {
+            if (taskStatus.contentObserverJobInstance != null) {
+                taskStatus.changedUris = taskStatus.contentObserverJobInstance.mChangedUris;
+                taskStatus.changedAuthorities
+                        = taskStatus.contentObserverJobInstance.mChangedAuthorities;
+                taskStatus.contentObserverJobInstance.mChangedUris = null;
+                taskStatus.contentObserverJobInstance.mChangedAuthorities = null;
             }
         }
     }
 
     @Override
-    public void prepareForExecution(JobStatus taskStatus) {
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, boolean forUpdate) {
         if (taskStatus.hasContentTriggerConstraint()) {
-            synchronized (mLock) {
+            if (!forUpdate) {
+                // We won't do this reset if being called for an update, because
+                // we know it will be immediately followed by maybeStartTrackingJobLocked...
+                // and we don't want to lose any content changes in-between.
                 if (taskStatus.contentObserverJobInstance != null) {
-                    taskStatus.changedUris = taskStatus.contentObserverJobInstance.mChangedUris;
-                    taskStatus.changedAuthorities
-                            = taskStatus.contentObserverJobInstance.mChangedAuthorities;
-                    taskStatus.contentObserverJobInstance.mChangedUris = null;
-                    taskStatus.contentObserverJobInstance.mChangedAuthorities = null;
+                    taskStatus.contentObserverJobInstance.detach();
+                    taskStatus.contentObserverJobInstance = null;
                 }
             }
-        }
-    }
-
-    @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
-        if (taskStatus.hasContentTriggerConstraint()) {
-            synchronized (mLock) {
-                if (!forUpdate) {
-                    // We won't do this reset if being called for an update, because
-                    // we know it will be immediately followed by maybeStartTrackingJob...
-                    // and we don't want to lose any content changes in-between.
-                    if (taskStatus.contentObserverJobInstance != null) {
-                        taskStatus.contentObserverJobInstance.detach();
-                        taskStatus.contentObserverJobInstance = null;
-                    }
-                }
-                mTrackedTasks.remove(taskStatus);
-            }
+            mTrackedTasks.remove(taskStatus);
         }
     }
 
@@ -199,9 +193,7 @@ public class ContentObserverController extends StateController {
                         inst.mChangedAuthorities = new ArraySet<>();
                     }
                     inst.mChangedAuthorities.add(uri.getAuthority());
-                    boolean previous
-                            = inst.mJobStatus.contentTriggerConstraintSatisfied.getAndSet(true);
-                    if (!previous) {
+                    if (inst.mJobStatus.setContentTriggerConstraintSatisfied(true)) {
                         reportChange = true;
                     }
                 }
@@ -255,50 +247,48 @@ public class ContentObserverController extends StateController {
     }
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw) {
         pw.println("Content.");
-        synchronized (mLock) {
-            Iterator<JobStatus> it = mTrackedTasks.iterator();
-            if (it.hasNext()) {
-                pw.print(String.valueOf(it.next().hashCode()));
-            }
-            while (it.hasNext()) {
-                pw.print("," + String.valueOf(it.next().hashCode()));
-            }
-            pw.println();
-            int N = mObservers.size();
-            if (N > 0) {
-                pw.println("URIs:");
-                for (int i = 0; i < N; i++) {
-                    ObserverInstance obs = mObservers.valueAt(i);
-                    pw.print("  ");
-                    pw.print(mObservers.keyAt(i));
-                    pw.println(":");
-                    pw.print("    ");
-                    pw.println(obs);
-                    pw.println("    Jobs:");
-                    int M = obs.mJobs.size();
-                    for (int j=0; j<M; j++) {
-                        JobInstance inst = obs.mJobs.get(j);
-                        pw.print("      ");
-                        pw.print(inst.hashCode());
-                        if (inst.mChangedAuthorities != null) {
-                            pw.println(":");
-                            pw.println("        Changed Authorities:");
-                            for (int k=0; k<inst.mChangedAuthorities.size(); k++) {
-                                pw.print("          ");
-                                pw.println(inst.mChangedAuthorities.valueAt(k));
-                            }
-                            if (inst.mChangedUris != null) {
-                                pw.println("        Changed URIs:");
-                                for (int k = 0; k<inst.mChangedUris.size(); k++) {
-                                    pw.print("          ");
-                                    pw.println(inst.mChangedUris.valueAt(k));
-                                }
-                            }
-                        } else {
-                            pw.println();
+        Iterator<JobStatus> it = mTrackedTasks.iterator();
+        if (it.hasNext()) {
+            pw.print(String.valueOf(it.next().hashCode()));
+        }
+        while (it.hasNext()) {
+            pw.print("," + String.valueOf(it.next().hashCode()));
+        }
+        pw.println();
+        int N = mObservers.size();
+        if (N > 0) {
+            pw.println("URIs:");
+            for (int i = 0; i < N; i++) {
+                ObserverInstance obs = mObservers.valueAt(i);
+                pw.print("  ");
+                pw.print(mObservers.keyAt(i));
+                pw.println(":");
+                pw.print("    ");
+                pw.println(obs);
+                pw.println("    Jobs:");
+                int M = obs.mJobs.size();
+                for (int j=0; j<M; j++) {
+                    JobInstance inst = obs.mJobs.get(j);
+                    pw.print("      ");
+                    pw.print(inst.hashCode());
+                    if (inst.mChangedAuthorities != null) {
+                        pw.println(":");
+                        pw.println("        Changed Authorities:");
+                        for (int k=0; k<inst.mChangedAuthorities.size(); k++) {
+                            pw.print("          ");
+                            pw.println(inst.mChangedAuthorities.valueAt(k));
                         }
+                        if (inst.mChangedUris != null) {
+                            pw.println("        Changed URIs:");
+                            for (int k = 0; k<inst.mChangedUris.size(); k++) {
+                                pw.print("          ");
+                                pw.println(inst.mChangedUris.valueAt(k));
+                            }
+                        }
+                    } else {
+                        pw.println();
                     }
                 }
             }
