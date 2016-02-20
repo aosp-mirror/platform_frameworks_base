@@ -1684,25 +1684,25 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * Called from native code to inform us the hardware information.
      */
-    private void setGpsYearOfHardware(int yearOfHardware) {
-        if (DEBUG) Log.d(TAG, "setGpsYearOfHardware called with " + yearOfHardware);
+    private void setGnssYearOfHardware(int yearOfHardware) {
+        if (DEBUG) Log.d(TAG, "setGnssYearOfHardware called with " + yearOfHardware);
         mYearOfHardware = yearOfHardware;
     }
 
-    public interface GpsSystemInfoProvider {
+    public interface GnssSystemInfoProvider {
         /**
          * Returns the year of GPS hardware.
          */
-        int getGpsYearOfHardware();
+        int getGnssYearOfHardware();
     }
 
     /**
      * @hide
      */
-    public GpsSystemInfoProvider getGpsSystemInfoProvider() {
-        return new GpsSystemInfoProvider() {
+    public GnssSystemInfoProvider getGnssSystemInfoProvider() {
+        return new GnssSystemInfoProvider() {
             @Override
-            public int getGpsYearOfHardware() {
+            public int getGnssYearOfHardware() {
                 return mYearOfHardware;
             }
         };

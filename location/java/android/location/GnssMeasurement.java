@@ -24,15 +24,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * A class representing a GPS satellite measurement, containing raw and computed information.
+ * A class representing a GNSS satellite measurement, containing raw and computed information.
  */
 public final class GnssMeasurement implements Parcelable {
     private int mFlags;
     private short mSvid;
+    private byte mConstellationType;
     private double mTimeOffsetInNs;
     private short mState;
-    private long mReceivedGpsTowInNs;
-    private long mReceivedGpsTowUncertaintyInNs;
+    private long mReceivedSvTimeInNs;
+    private long mReceivedSvTimeUncertaintyInNs;
     private double mCn0InDbHz;
     private double mPseudorangeRateInMetersPerSec;
     private double mPseudorangeRateUncertaintyInMetersPerSec;
@@ -59,8 +60,6 @@ public final class GnssMeasurement implements Parcelable {
     private double mAzimuthInDeg;
     private double mAzimuthUncertaintyInDeg;
     private boolean mUsedInFix;
-    private double mPseudorangeRateCarrierInMetersPerSec;
-    private double mPseudorangeRateCarrierUncertaintyInMetersPerSec;
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -82,8 +81,8 @@ public final class GnssMeasurement implements Parcelable {
     private static final int HAS_TIME_FROM_LAST_BIT = (1<<14);
     private static final int HAS_DOPPLER_SHIFT = (1<<15);
     private static final int HAS_DOPPLER_SHIFT_UNCERTAINTY = (1<<16);
-    private static final int HAS_USED_IN_FIX = (1<<17);
-    private static final int GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
+    // private static final int HAS_USED_IN_FIX = (1<<17);
+    private static final int HAS_UNCORRECTED_PSEUDORANGE_RATE = (1<<18);
 
     /** The status of 'loss of lock'. */
     @Retention(RetentionPolicy.SOURCE)
@@ -127,37 +126,37 @@ public final class GnssMeasurement implements Parcelable {
     public static final byte MULTIPATH_INDICATOR_NOT_USED = 2;
 
     /**
-     * The state of GPS receiver the measurement is invalid or unknown.
+     * The state of GNSS receiver the measurement is invalid or unknown.
      */
     public static final short STATE_UNKNOWN = 0;
 
     /**
-     * The state of the GPS receiver is ranging code lock.
+     * The state of the GNSS receiver is ranging code lock.
      */
     public static final short STATE_CODE_LOCK = (1<<0);
 
     /**
-     * The state of the GPS receiver is in bit sync.
+     * The state of the GNSS receiver is in bit sync.
      */
     public static final short STATE_BIT_SYNC = (1<<1);
 
     /**
-     *The state of the GPS receiver is in sub-frame sync.
+     *The state of the GNSS receiver is in sub-frame sync.
      */
     public static final short STATE_SUBFRAME_SYNC = (1<<2);
 
     /**
-     * The state of the GPS receiver has TOW decoded.
+     * The state of the GNSS receiver has TOW decoded.
      */
     public static final short STATE_TOW_DECODED = (1<<3);
 
     /**
-     * The state of the GPS receiver contains millisecond ambiguity.
+     * The state of the GNSS receiver contains millisecond ambiguity.
      */
     public static final short STATE_MSEC_AMBIGUOUS = (1<<4);
 
     /**
-     * All the GPS receiver state flags.
+     * All the GNSS receiver state flags.
      */
     private static final short STATE_ALL = STATE_CODE_LOCK | STATE_BIT_SYNC | STATE_SUBFRAME_SYNC
             | STATE_TOW_DECODED | STATE_MSEC_AMBIGUOUS;
@@ -199,10 +198,11 @@ public final class GnssMeasurement implements Parcelable {
     public void set(GnssMeasurement measurement) {
         mFlags = measurement.mFlags;
         mSvid = measurement.mSvid;
+        mConstellationType = measurement.mConstellationType;
         mTimeOffsetInNs = measurement.mTimeOffsetInNs;
         mState = measurement.mState;
-        mReceivedGpsTowInNs = measurement.mReceivedGpsTowInNs;
-        mReceivedGpsTowUncertaintyInNs = measurement.mReceivedGpsTowUncertaintyInNs;
+        mReceivedSvTimeInNs = measurement.mReceivedSvTimeInNs;
+        mReceivedSvTimeUncertaintyInNs = measurement.mReceivedSvTimeUncertaintyInNs;
         mCn0InDbHz = measurement.mCn0InDbHz;
         mPseudorangeRateInMetersPerSec = measurement.mPseudorangeRateInMetersPerSec;
         mPseudorangeRateUncertaintyInMetersPerSec =
@@ -231,10 +231,6 @@ public final class GnssMeasurement implements Parcelable {
         mAzimuthInDeg = measurement.mAzimuthInDeg;
         mAzimuthUncertaintyInDeg = measurement.mAzimuthUncertaintyInDeg;
         mUsedInFix = measurement.mUsedInFix;
-        mPseudorangeRateCarrierInMetersPerSec =
-                measurement.mPseudorangeRateCarrierInMetersPerSec;
-        mPseudorangeRateCarrierUncertaintyInMetersPerSec =
-                measurement.mPseudorangeRateCarrierUncertaintyInMetersPerSec;
     }
 
     /**
@@ -257,6 +253,21 @@ public final class GnssMeasurement implements Parcelable {
      */
     public void setSvid(short value) {
         mSvid = value;
+    }
+
+    /**
+     * Getst the constellation type.
+     */
+    @GnssStatus.ConstellationType
+    public byte getConstellationType() {
+        return mConstellationType;
+    }
+
+    /**
+     * Sets the constellation type.
+     */
+    public void setConstellationType(@GnssStatus.ConstellationType byte value) {
+        mConstellationType = value;
     }
 
     /**
@@ -285,7 +296,7 @@ public final class GnssMeasurement implements Parcelable {
      * Gets per-satellite sync state.
      * It represents the current sync state for the associated satellite.
      *
-     * This value helps interpret {@link #getReceivedGpsTowInNs()}.
+     * This value helps interpret {@link #getReceivedSvTimeInNs()}.
      */
     public short getState() {
         return mState;
@@ -333,39 +344,92 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets the received GPS Time-of-Week at the measurement time, in nanoseconds.
-     * The value is relative to the beginning of the current GPS week.
+     * Gets the received GNSS satellite time, at the measurement time, in nanoseconds.
      *
-     * Given {@link #getState()} of the GPS receiver, the range of this field can be:
-     *      Searching           : [ 0           ]   : {@link #STATE_UNKNOWN} is set
-     *      Ranging code lock   : [ 0    1 ms   ]   : {@link #STATE_CODE_LOCK} is set
-     *      Bit sync            : [ 0   20 ms   ]   : {@link #STATE_BIT_SYNC} is set
-     *      Subframe sync       : [ 0    6 ms   ]   : {@link #STATE_SUBFRAME_SYNC} is set
-     *      TOW decoded         : [ 0    1 week ]   : {@link #STATE_TOW_DECODED} is set
+     * For GPS &amp; QZSS, this is:
+     *   Received GPS Time-of-Week at the measurement time, in nanoseconds.
+     *   The value is relative to the beginning of the current GPS week.
+     *
+     *   Given the highest sync state that can be achieved, per each satellite, valid range
+     *   for this field can be:
+     *     Searching       : [ 0       ]   : STATE_UNKNOWN
+     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
+     *     Bit sync        : [ 0  20ms ]   : STATE_BIT_SYNC is set
+     *     Subframe sync   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
+     *     TOW decoded     : [ 0 1week ]   : STATE_TOW_DECODED is set
+     *
+     *   Note well: if there is any ambiguity in integer millisecond,
+     *   STATE_MSEC_AMBIGUOUS should be set accordingly, in the 'state' field.
+     *
+     *   This value must be populated if 'state' != STATE_UNKNOWN.
+     *
+     * For Glonass, this is:
+     *   Received Glonass time of day, at the measurement time in nanoseconds.
+     *
+     *   Given the highest sync state that can be achieved, per each satellite, valid range for
+     *   this field can be:
+     *     Searching       : [ 0       ]   : STATE_UNKNOWN
+     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
+     *    Symbol sync    : [ 0  10ms ]   : STATE_SYMBOL_SYNC is set
+     *    Bit sync       : [ 0  20ms ]   : STATE_BIT_SYNC is set
+     *     String sync     : [ 0    2s ]   :  STATE_GLO_STRING_SYNC is set
+     *    Time of day      : [ 0  1day ]   : STATE_GLO_TOD_DECODED is set
+     *
+     * For Beidou, this is:
+     *   Received Beidou time of week, at the measurement time in nanoseconds.
+     *
+     *   Given the highest sync state that can be achieved, per each satellite, valid range for
+     *   this field can be:
+     *     Searching       : [ 0       ]   : STATE_UNKNOWN
+     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
+     *     Bit sync (D2)   : [ 0   2ms ]   : STATE_BDS_D2_BIT_SYNC is set
+     *     Bit sync (D1)   : [ 0  20ms ]   : STATE_BIT_SYNC is set
+     *     Subframe (D2)   : [ 0  0.6s ]   : STATE_BDS_D2_SUBFRAME_SYNC is set
+     *     Subframe (D1)   : [ 0    6s ]   : STATE_SUBFRAME_SYNC is set
+     *     Time of week    : [ 0 1week ]   : STATE_TOW_DECODED is set
+     *
+     * For Galileo, this is:
+     *   Received Galileo time of week, at the measurement time in nanoseconds.
+     *
+     *     E1BC code lock  : [ 0   4ms ]   : STATE_GAL_E1BC_CODE_LOCK is set
+     *     E1C 2nd code lock : [ 0   100ms ]   : STATE_GAL_E1C_2ND_CODE_LOCK is set
+     *
+     *     E1B page        : [ 0    2s ]   : STATE_GAL_E1B_PAGE_SYNC is set
+     *     Time of week    : [ 0 1week ]   : STATE_GAL_TOW_DECODED is set
+     *
+     *   For SBAS, this is:
+     *     Received SBAS time, at the measurement time in nanoseconds.
+     *
+     *   Given the highest sync state that can be achieved, per each satellite, valid range for
+     *   this field can be:
+     *     Searching       : [ 0       ]   : STATE_UNKNOWN
+     *     C/A code lock   : [ 0   1ms ]   : STATE_CODE_LOCK is set
+     *     Symbol sync     : [ 0   2ms ]   : STATE_SYMBOL_SYNC is set
+     *     Message         : [ 0    1s ]   : STATE_SBAS_SYNC is set
      */
-    public long getReceivedGpsTowInNs() {
-        return mReceivedGpsTowInNs;
+    public long getReceivedSvTimeInNs() {
+        return mReceivedSvTimeInNs;
     }
 
     /**
-     * Sets the received GPS time-of-week in nanoseconds.
+     * Sets the received GNSS time in nanoseconds.
      */
-    public void setReceivedGpsTowInNs(long value) {
-        mReceivedGpsTowInNs = value;
+    public void setReceivedSvTimeInNs(long value) {
+        mReceivedSvTimeInNs = value;
     }
 
     /**
-     * Gets the received GPS time-of-week's uncertainty (1-Sigma) in nanoseconds.
+     * Gets the received GNSS time uncertainty (1-Sigma) in nanoseconds.
      */
-    public long getReceivedGpsTowUncertaintyInNs() {
-        return mReceivedGpsTowUncertaintyInNs;
+    public long getReceivedSvTimeUncertaintyInNs() {
+        return mReceivedSvTimeUncertaintyInNs;
     }
 
     /**
-     * Sets the received GPS time-of-week's uncertainty (1-Sigma) in nanoseconds.
+     * Sets the received GNSS time uncertainty (1-Sigma) in nanoseconds.
      */
-    public void setReceivedGpsTowUncertaintyInNs(long value) {
-        mReceivedGpsTowUncertaintyInNs = value;
+    public void setReceivedSvTimeUncertaintyInNs(long value) {
+        mReceivedSvTimeUncertaintyInNs = value;
     }
 
     /**
@@ -416,7 +480,7 @@ public final class GnssMeasurement implements Parcelable {
      *         value, {@code false} if it contains an uncorrected value.
      */
     public boolean isPseudorangeRateCorrected() {
-        return !isFlagSet(GPS_MEASUREMENT_HAS_UNCORRECTED_PSEUDORANGE_RATE);
+        return !isFlagSet(HAS_UNCORRECTED_PSEUDORANGE_RATE);
     }
 
     /**
@@ -1160,7 +1224,7 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Gets a flag indicating whether the GPS represented by the measurement was used for computing
+     * Gets a flag indicating whether the GNSS represented by the measurement was used for computing
      * the most recent fix.
      *
      * @return A non-null value if the data is available, null otherwise.
@@ -1176,34 +1240,6 @@ public final class GnssMeasurement implements Parcelable {
         mUsedInFix = value;
     }
 
-    /**
-     * Gets pseudorange rate (based on carrier phase changes) at the timestamp in m/s.
-     */
-    public double getPseudorangeRateCarrierInMetersPerSec() {
-        return mPseudorangeRateCarrierInMetersPerSec;
-    }
-
-    /**
-     * Sets pseudorange rate (based on carrier phase changes) at the timestamp in m/s.
-     */
-    public void setPseudorangeRateCarrierInMetersPerSec(double value) {
-        mPseudorangeRateCarrierInMetersPerSec = value;
-    }
-
-    /**
-     * Gets 1-Sigma uncertainty of the pseudorange rate carrier.
-     */
-    public double getPseudorangeRateCarrierUncertaintyInMetersPerSec() {
-        return mPseudorangeRateCarrierUncertaintyInMetersPerSec;
-    }
-
-    /**
-     * Sets 1-Sigma uncertainty of the pseudorange rate carrier.
-     */
-    public void setPseudorangeRateCarrierUncertaintyInMetersPerSec(double value) {
-        mPseudorangeRateCarrierUncertaintyInMetersPerSec = value;
-    }
-
     public static final Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
         public GnssMeasurement createFromParcel(Parcel parcel) {
@@ -1211,10 +1247,11 @@ public final class GnssMeasurement implements Parcelable {
 
             gnssMeasurement.mFlags = parcel.readInt();
             gnssMeasurement.mSvid = (short) parcel.readInt();
+            gnssMeasurement.mConstellationType = parcel.readByte();
             gnssMeasurement.mTimeOffsetInNs = parcel.readDouble();
             gnssMeasurement.mState = (short) parcel.readInt();
-            gnssMeasurement.mReceivedGpsTowInNs = parcel.readLong();
-            gnssMeasurement.mReceivedGpsTowUncertaintyInNs = parcel.readLong();
+            gnssMeasurement.mReceivedSvTimeInNs = parcel.readLong();
+            gnssMeasurement.mReceivedSvTimeUncertaintyInNs = parcel.readLong();
             gnssMeasurement.mCn0InDbHz = parcel.readDouble();
             gnssMeasurement.mPseudorangeRateInMetersPerSec = parcel.readDouble();
             gnssMeasurement.mPseudorangeRateUncertaintyInMetersPerSec = parcel.readDouble();
@@ -1241,8 +1278,6 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mAzimuthInDeg = parcel.readDouble();
             gnssMeasurement.mAzimuthUncertaintyInDeg = parcel.readDouble();
             gnssMeasurement.mUsedInFix = parcel.readInt() != 0;
-            gnssMeasurement.mPseudorangeRateCarrierInMetersPerSec = parcel.readDouble();
-            gnssMeasurement.mPseudorangeRateCarrierUncertaintyInMetersPerSec = parcel.readDouble();
 
             return gnssMeasurement;
         }
@@ -1257,10 +1292,11 @@ public final class GnssMeasurement implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mFlags);
         parcel.writeInt(mSvid);
+        parcel.writeByte(mConstellationType);
         parcel.writeDouble(mTimeOffsetInNs);
         parcel.writeInt(mState);
-        parcel.writeLong(mReceivedGpsTowInNs);
-        parcel.writeLong(mReceivedGpsTowUncertaintyInNs);
+        parcel.writeLong(mReceivedSvTimeInNs);
+        parcel.writeLong(mReceivedSvTimeUncertaintyInNs);
         parcel.writeDouble(mCn0InDbHz);
         parcel.writeDouble(mPseudorangeRateInMetersPerSec);
         parcel.writeDouble(mPseudorangeRateUncertaintyInMetersPerSec);
@@ -1287,8 +1323,6 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mAzimuthInDeg);
         parcel.writeDouble(mAzimuthUncertaintyInDeg);
         parcel.writeInt(mUsedInFix ? 1 : 0);
-        parcel.writeDouble(mPseudorangeRateCarrierInMetersPerSec);
-        parcel.writeDouble(mPseudorangeRateCarrierUncertaintyInMetersPerSec);
     }
 
     @Override
@@ -1303,17 +1337,17 @@ public final class GnssMeasurement implements Parcelable {
         StringBuilder builder = new StringBuilder("GnssMeasurement:\n");
 
         builder.append(String.format(format, "Svid", mSvid));
-
+        builder.append(String.format(format, "ConstellationType", mConstellationType));
         builder.append(String.format(format, "TimeOffsetInNs", mTimeOffsetInNs));
 
         builder.append(String.format(format, "State", getStateString()));
 
         builder.append(String.format(
                 formatWithUncertainty,
-                "ReceivedGpsTowInNs",
-                mReceivedGpsTowInNs,
-                "ReceivedGpsTowUncertaintyInNs",
-                mReceivedGpsTowUncertaintyInNs));
+                "ReceivedSvTimeInNs",
+                mReceivedSvTimeInNs,
+                "ReceivedSvTimeUncertaintyInNs",
+                mReceivedSvTimeUncertaintyInNs));
 
         builder.append(String.format(format, "Cn0InDbHz", mCn0InDbHz));
 
@@ -1413,11 +1447,6 @@ public final class GnssMeasurement implements Parcelable {
 
         builder.append(String.format(format, "UsedInFix", mUsedInFix));
 
-        builder.append(String.format(format, "PseudorangeRateCarrierInMetersPerSec",
-                    mPseudorangeRateCarrierInMetersPerSec));
-        builder.append(String.format(format, "PseudorangeRateCarrierUncertaintyInMetersPerSec",
-                    mPseudorangeRateCarrierUncertaintyInMetersPerSec));
-
         return builder.toString();
     }
 
@@ -1426,8 +1455,8 @@ public final class GnssMeasurement implements Parcelable {
         setSvid((short) 0);
         setTimeOffsetInNs(Long.MIN_VALUE);
         setState(STATE_UNKNOWN);
-        setReceivedGpsTowInNs(Long.MIN_VALUE);
-        setReceivedGpsTowUncertaintyInNs(Long.MAX_VALUE);
+        setReceivedSvTimeInNs(Long.MIN_VALUE);
+        setReceivedSvTimeUncertaintyInNs(Long.MAX_VALUE);
         setCn0InDbHz(Double.MIN_VALUE);
         setPseudorangeRateInMetersPerSec(Double.MIN_VALUE);
         setPseudorangeRateUncertaintyInMetersPerSec(Double.MIN_VALUE);
@@ -1454,8 +1483,6 @@ public final class GnssMeasurement implements Parcelable {
         resetAzimuthInDeg();
         resetAzimuthUncertaintyInDeg();
         setUsedInFix(false);
-        setPseudorangeRateCarrierInMetersPerSec(Double.MIN_VALUE);
-        setPseudorangeRateCarrierUncertaintyInMetersPerSec(Double.MIN_VALUE);
     }
 
     private void setFlag(int flag) {
