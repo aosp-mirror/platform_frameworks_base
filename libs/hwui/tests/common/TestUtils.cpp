@@ -162,6 +162,7 @@ void TestUtils::TestTask::run() {
 
     renderState.onGLContextCreated();
     rtCallback(renderthread::RenderThread::getInstance());
+    renderState.flush(Caches::FlushMode::Full);
     renderState.onGLContextDestroyed();
 
     // Restore the previous signal handler
