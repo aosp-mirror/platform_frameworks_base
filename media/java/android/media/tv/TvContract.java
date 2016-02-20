@@ -53,6 +53,12 @@ public final class TvContract {
     /** The authority for the TV provider. */
     public static final String AUTHORITY = "android.media.tv";
 
+    /**
+     * Permission to read TV listings. This is required to read all the TV channel and program
+     * information available on the system.
+     */
+    public static final String PERMISSION_READ_TV_LISTINGS = "android.permission.READ_TV_LISTINGS";
+
     private static final String PATH_CHANNEL = "channel";
     private static final String PATH_PROGRAM = "program";
     private static final String PATH_RECORDED_PROGRAM = "recorded_program";
