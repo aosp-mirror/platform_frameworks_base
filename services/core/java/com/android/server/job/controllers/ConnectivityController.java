@@ -83,22 +83,18 @@ public class ConnectivityController extends StateController implements
     }
 
     @Override
-    public void maybeStartTrackingJob(JobStatus jobStatus, JobStatus lastJob) {
+    public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
-            synchronized (mLock) {
-                jobStatus.connectivityConstraintSatisfied.set(mNetworkConnected);
-                jobStatus.unmeteredConstraintSatisfied.set(mNetworkUnmetered);
-                mTrackedJobs.add(jobStatus);
-            }
+            jobStatus.setConnectivityConstraintSatisfied(mNetworkConnected);
+            jobStatus.setUnmeteredConstraintSatisfied(mNetworkUnmetered);
+            mTrackedJobs.add(jobStatus);
         }
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus jobStatus, boolean forUpdate) {
+    public void maybeStopTrackingJobLocked(JobStatus jobStatus, boolean forUpdate) {
         if (jobStatus.hasConnectivityConstraint() || jobStatus.hasUnmeteredConstraint()) {
-            synchronized (mLock) {
-                mTrackedJobs.remove(jobStatus);
-            }
+            mTrackedJobs.remove(jobStatus);
         }
     }
 
@@ -112,12 +108,8 @@ public class ConnectivityController extends StateController implements
                 if (js.getUserId() != userId) {
                     continue;
                 }
-                boolean prevIsConnected =
-                        js.connectivityConstraintSatisfied.getAndSet(mNetworkConnected);
-                boolean prevIsMetered = js.unmeteredConstraintSatisfied.getAndSet(mNetworkUnmetered);
-                if (prevIsConnected != mNetworkConnected || prevIsMetered != mNetworkUnmetered) {
-                    changed = true;
-                }
+                changed |= js.setConnectivityConstraintSatisfied(mNetworkConnected);
+                changed |= js.setUnmeteredConstraintSatisfied(mNetworkUnmetered);
             }
             if (changed) {
                 mStateChangedListener.onControllerStateChanged();
@@ -189,7 +181,7 @@ public class ConnectivityController extends StateController implements
     };
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw) {
         pw.println("Conn.");
         pw.println("connected: " + mNetworkConnected + " unmetered: " + mNetworkUnmetered);
         for (JobStatus js: mTrackedJobs) {

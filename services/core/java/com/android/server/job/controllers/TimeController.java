@@ -72,28 +72,26 @@ public class TimeController extends StateController {
      * list.
      */
     @Override
-    public void maybeStartTrackingJob(JobStatus job, JobStatus lastJob) {
-        synchronized (mLock) {
-            if (job.hasTimingDelayConstraint() || job.hasDeadlineConstraint()) {
-                maybeStopTrackingJob(job, false);
-                boolean isInsert = false;
-                ListIterator<JobStatus> it = mTrackedJobs.listIterator(mTrackedJobs.size());
-                while (it.hasPrevious()) {
-                    JobStatus ts = it.previous();
-                    if (ts.getLatestRunTimeElapsed() < job.getLatestRunTimeElapsed()) {
-                        // Insert
-                        isInsert = true;
-                        break;
-                    }
+    public void maybeStartTrackingJobLocked(JobStatus job, JobStatus lastJob) {
+        if (job.hasTimingDelayConstraint() || job.hasDeadlineConstraint()) {
+            maybeStopTrackingJobLocked(job, false);
+            boolean isInsert = false;
+            ListIterator<JobStatus> it = mTrackedJobs.listIterator(mTrackedJobs.size());
+            while (it.hasPrevious()) {
+                JobStatus ts = it.previous();
+                if (ts.getLatestRunTimeElapsed() < job.getLatestRunTimeElapsed()) {
+                    // Insert
+                    isInsert = true;
+                    break;
                 }
-                if (isInsert) {
-                    it.next();
-                }
-                it.add(job);
-                maybeUpdateAlarms(
-                        job.hasTimingDelayConstraint() ? job.getEarliestRunTime() : Long.MAX_VALUE,
-                        job.hasDeadlineConstraint() ? job.getLatestRunTimeElapsed() : Long.MAX_VALUE);
             }
+            if (isInsert) {
+                it.next();
+            }
+            it.add(job);
+            maybeUpdateAlarmsLocked(
+                    job.hasTimingDelayConstraint() ? job.getEarliestRunTime() : Long.MAX_VALUE,
+                    job.hasDeadlineConstraint() ? job.getLatestRunTimeElapsed() : Long.MAX_VALUE);
         }
     }
 
@@ -103,12 +101,10 @@ public class TimeController extends StateController {
      * Really an == comparison should be enough, but why play with fate? We'll do <=.
      */
     @Override
-    public void maybeStopTrackingJob(JobStatus job, boolean forUpdate) {
-        synchronized (mLock) {
-            if (mTrackedJobs.remove(job)) {
-                checkExpiredDelaysAndResetAlarm();
-                checkExpiredDeadlinesAndResetAlarm();
-            }
+    public void maybeStopTrackingJobLocked(JobStatus job, boolean forUpdate) {
+        if (mTrackedJobs.remove(job)) {
+            checkExpiredDelaysAndResetAlarm();
+            checkExpiredDeadlinesAndResetAlarm();
         }
     }
 
@@ -118,14 +114,14 @@ public class TimeController extends StateController {
      * the job's deadline is fulfilled - unlike other controllers a time constraint can't toggle
      * back and forth.
      */
-    private boolean canStopTrackingJob(JobStatus job) {
+    private boolean canStopTrackingJobLocked(JobStatus job) {
         return (!job.hasTimingDelayConstraint() ||
-                job.timeDelayConstraintSatisfied.get()) &&
+                (job.satisfiedConstraints&JobStatus.CONSTRAINT_TIMING_DELAY) != 0) &&
                 (!job.hasDeadlineConstraint() ||
-                        job.deadlineConstraintSatisfied.get());
+                        (job.satisfiedConstraints&JobStatus.CONSTRAINT_DEADLINE) != 0);
     }
 
-    private void ensureAlarmService() {
+    private void ensureAlarmServiceLocked() {
         if (mAlarmService == null) {
             mAlarmService = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         }
@@ -149,7 +145,7 @@ public class TimeController extends StateController {
                 final long jobDeadline = job.getLatestRunTimeElapsed();
 
                 if (jobDeadline <= nowElapsedMillis) {
-                    job.deadlineConstraintSatisfied.set(true);
+                    job.setDeadlineConstraintSatisfied(true);
                     mStateChangedListener.onRunJobNow(job);
                     it.remove();
                 } else {  // Sorted by expiry time, so take the next one and stop.
@@ -157,7 +153,7 @@ public class TimeController extends StateController {
                     break;
                 }
             }
-            setDeadlineExpiredAlarm(nextExpiryTime);
+            setDeadlineExpiredAlarmLocked(nextExpiryTime);
         }
     }
 
@@ -178,8 +174,8 @@ public class TimeController extends StateController {
                 }
                 final long jobDelayTime = job.getEarliestRunTime();
                 if (jobDelayTime <= nowElapsedMillis) {
-                    job.timeDelayConstraintSatisfied.set(true);
-                    if (canStopTrackingJob(job)) {
+                    job.setTimingDelayConstraintSatisfied(true);
+                    if (canStopTrackingJobLocked(job)) {
                         it.remove();
                     }
                     if (job.isReady()) {
@@ -194,16 +190,16 @@ public class TimeController extends StateController {
             if (ready) {
                 mStateChangedListener.onControllerStateChanged();
             }
-            setDelayExpiredAlarm(nextDelayTime);
+            setDelayExpiredAlarmLocked(nextDelayTime);
         }
     }
 
-    private void maybeUpdateAlarms(long delayExpiredElapsed, long deadlineExpiredElapsed) {
+    private void maybeUpdateAlarmsLocked(long delayExpiredElapsed, long deadlineExpiredElapsed) {
         if (delayExpiredElapsed < mNextDelayExpiredElapsedMillis) {
-            setDelayExpiredAlarm(delayExpiredElapsed);
+            setDelayExpiredAlarmLocked(delayExpiredElapsed);
         }
         if (deadlineExpiredElapsed < mNextJobExpiredElapsedMillis) {
-            setDeadlineExpiredAlarm(deadlineExpiredElapsed);
+            setDeadlineExpiredAlarmLocked(deadlineExpiredElapsed);
         }
     }
 
@@ -212,10 +208,11 @@ public class TimeController extends StateController {
      * delay will expire.
      * This alarm <b>will</b> wake up the phone.
      */
-    private void setDelayExpiredAlarm(long alarmTimeElapsedMillis) {
+    private void setDelayExpiredAlarmLocked(long alarmTimeElapsedMillis) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
         mNextDelayExpiredElapsedMillis = alarmTimeElapsedMillis;
-        updateAlarmWithListener(DELAY_TAG, mNextDelayExpiredListener, mNextDelayExpiredElapsedMillis);
+        updateAlarmWithListenerLocked(DELAY_TAG, mNextDelayExpiredListener,
+                mNextDelayExpiredElapsedMillis);
     }
 
     /**
@@ -223,10 +220,11 @@ public class TimeController extends StateController {
      * deadline will expire.
      * This alarm <b>will</b> wake up the phone.
      */
-    private void setDeadlineExpiredAlarm(long alarmTimeElapsedMillis) {
+    private void setDeadlineExpiredAlarmLocked(long alarmTimeElapsedMillis) {
         alarmTimeElapsedMillis = maybeAdjustAlarmTime(alarmTimeElapsedMillis);
         mNextJobExpiredElapsedMillis = alarmTimeElapsedMillis;
-        updateAlarmWithListener(DEADLINE_TAG, mDeadlineExpiredListener, mNextJobExpiredElapsedMillis);
+        updateAlarmWithListenerLocked(DEADLINE_TAG, mDeadlineExpiredListener,
+                mNextJobExpiredElapsedMillis);
     }
 
     private long maybeAdjustAlarmTime(long proposedAlarmTimeElapsedMillis) {
@@ -237,9 +235,9 @@ public class TimeController extends StateController {
         return proposedAlarmTimeElapsedMillis;
     }
 
-    private void updateAlarmWithListener(String tag, OnAlarmListener listener,
+    private void updateAlarmWithListenerLocked(String tag, OnAlarmListener listener,
             long alarmTimeElapsed) {
-        ensureAlarmService();
+        ensureAlarmServiceLocked();
         if (alarmTimeElapsed == Long.MAX_VALUE) {
             mAlarmService.cancel(listener);
         } else {
@@ -274,7 +272,7 @@ public class TimeController extends StateController {
     };
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
+    public void dumpControllerStateLocked(PrintWriter pw) {
         final long nowElapsed = SystemClock.elapsedRealtime();
         pw.println("Alarms (" + SystemClock.elapsedRealtime() + ")");
         pw.println(

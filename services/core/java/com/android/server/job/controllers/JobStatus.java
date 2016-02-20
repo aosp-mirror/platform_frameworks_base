@@ -42,15 +42,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * but we don't enforce that so this is safer.
  * @hide
  */
-public class JobStatus {
+public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    /**
-     * Service global lock.  NOTE: this should be removed, having this class just rely on
-     * its callers doing the appropriate locking.
-     */
-    final Object lock;
+    static final int CONSTRAINT_CHARGING = 1<<0;
+    static final int CONSTRAINT_TIMING_DELAY = 1<<1;
+    static final int CONSTRAINT_DEADLINE = 1<<2;
+    static final int CONSTRAINT_IDLE = 1<<3;
+    static final int CONSTRAINT_UNMETERED = 1<<4;
+    static final int CONSTRAINT_CONNECTIVITY = 1<<5;
+    static final int CONSTRAINT_APP_NOT_IDLE = 1<<6;
+    static final int CONSTRAINT_CONTENT_TRIGGER = 1<<7;
+
     final JobInfo job;
     /** Uid of the package requesting this job. */
     final int callingUid;
@@ -61,15 +65,23 @@ public class JobStatus {
     final int sourceUserId;
     final int sourceUid;
 
+    /**
+     * Earliest point in the future at which this job will be eligible to run. A value of 0
+     * indicates there is no delay constraint. See {@link #hasTimingDelayConstraint()}.
+     */
+    private final long earliestRunTimeElapsedMillis;
+    /**
+     * Latest point in the future at which this job must be run. A value of {@link Long#MAX_VALUE}
+     * indicates there is no deadline constraint. See {@link #hasDeadlineConstraint()}.
+     */
+    private final long latestRunTimeElapsedMillis;
+
+    /** How many times this job has failed, used to compute back-off. */
+    private final int numFailures;
+
     // Constraints.
-    final AtomicBoolean chargingConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean timeDelayConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean deadlineConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean idleConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean unmeteredConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean connectivityConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean appNotIdleConstraintSatisfied = new AtomicBoolean();
-    final AtomicBoolean contentTriggerConstraintSatisfied = new AtomicBoolean();
+    final int requiredConstraints;
+    int satisfiedConstraints = 0;
 
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
@@ -81,32 +93,18 @@ public class JobStatus {
      */
     ContentObserverController.JobInstance contentObserverJobInstance;
 
-    /**
-     * Earliest point in the future at which this job will be eligible to run. A value of 0
-     * indicates there is no delay constraint. See {@link #hasTimingDelayConstraint()}.
-     */
-    private long earliestRunTimeElapsedMillis;
-    /**
-     * Latest point in the future at which this job must be run. A value of {@link Long#MAX_VALUE}
-     * indicates there is no deadline constraint. See {@link #hasDeadlineConstraint()}.
-     */
-    private long latestRunTimeElapsedMillis;
-    /** How many times this job has failed, used to compute back-off. */
-    private final int numFailures;
-
     /** Provide a handle to the service that this job will be run on. */
     public int getServiceToken() {
         return callingUid;
     }
 
-    private JobStatus(Object lock, JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, int numFailures) {
-        this.lock = lock;
+    private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
+            int sourceUserId, int numFailures, long earliestRunTimeElapsedMillis,
+            long latestRunTimeElapsedMillis) {
         this.job = job;
         this.callingUid = callingUid;
         this.name = job.getService().flattenToShortString();
         this.tag = "*job*/" + this.name;
-        this.numFailures = numFailures;
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -126,40 +124,42 @@ public class JobStatus {
             this.sourceUserId = sourceUserId;
             this.sourcePackageName = sourcePackageName;
         }
+
+        this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
+        this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
+        this.numFailures = numFailures;
+
+        int requiredConstraints = 0;
+        if (job.getNetworkType() == JobInfo.NETWORK_TYPE_ANY) {
+            requiredConstraints |= CONSTRAINT_CONNECTIVITY;
+        }
+        if (job.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED) {
+            requiredConstraints |= CONSTRAINT_UNMETERED;
+        }
+        if (job.isRequireCharging()) {
+            requiredConstraints |= CONSTRAINT_CHARGING;
+        }
+        if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
+            requiredConstraints |= CONSTRAINT_TIMING_DELAY;
+        }
+        if (latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
+            requiredConstraints |= CONSTRAINT_DEADLINE;
+        }
+        if (job.isRequireDeviceIdle()) {
+            requiredConstraints |= CONSTRAINT_IDLE;
+        }
+        if (job.getTriggerContentUris() != null) {
+            requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
+        }
+        this.requiredConstraints = requiredConstraints;
     }
 
     /** Copy constructor. */
     public JobStatus(JobStatus jobStatus) {
-        this(jobStatus.lock, jobStatus.getJob(), jobStatus.getUid(),
+        this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
-                jobStatus.getNumFailures());
-        this.earliestRunTimeElapsedMillis = jobStatus.getEarliestRunTime();
-        this.latestRunTimeElapsedMillis = jobStatus.getLatestRunTimeElapsed();
-    }
-
-    /**
-     * Create a newly scheduled job.
-     * @param callingUid Uid of the package that scheduled this job.
-     * @param sourcePackageName Package name on whose behalf this job is scheduled. Null indicates
-     *                          the calling package is the source.
-     * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
-     *                     calling userId.
-     */
-    public JobStatus(Object lock, JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId) {
-        this(lock, job, callingUid, sourcePackageName, sourceUserId, 0);
-
-        final long elapsedNow = SystemClock.elapsedRealtime();
-
-        if (job.isPeriodic()) {
-            latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
-            earliestRunTimeElapsedMillis = latestRunTimeElapsedMillis - job.getFlexMillis();
-        } else {
-            earliestRunTimeElapsedMillis = job.hasEarlyConstraint() ?
-                    elapsedNow + job.getMinLatencyMillis() : NO_EARLIEST_RUNTIME;
-            latestRunTimeElapsedMillis = job.hasLateConstraint() ?
-                    elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
-        }
+                jobStatus.getNumFailures(), jobStatus.getEarliestRunTime(),
+                jobStatus.getLatestRunTimeElapsed());
     }
 
     /**
@@ -169,23 +169,43 @@ public class JobStatus {
      * wallclock runtime rather than resetting it on every boot.
      * We consider a freshly loaded job to no longer be in back-off.
      */
-    public JobStatus(Object lock, JobInfo job, int callingUid, String sourcePackageName,
+    public JobStatus(JobInfo job, int callingUid, String sourcePackageName,
             int sourceUserId, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
-        this(lock, job, callingUid, sourcePackageName, sourceUserId, 0);
-
-        this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
-        this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
+        this(job, callingUid, sourcePackageName, sourceUserId, 0, earliestRunTimeElapsedMillis,
+                latestRunTimeElapsedMillis);
     }
 
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
-        this(rescheduling.lock, rescheduling.job, rescheduling.getUid(),
+        this(rescheduling.job, rescheduling.getUid(),
                 rescheduling.getSourcePackageName(),
-                rescheduling.getSourceUserId(), backoffAttempt);
+                rescheduling.getSourceUserId(), backoffAttempt, newEarliestRuntimeElapsedMillis,
+                newLatestRuntimeElapsedMillis);
+    }
 
-        earliestRunTimeElapsedMillis = newEarliestRuntimeElapsedMillis;
-        latestRunTimeElapsedMillis = newLatestRuntimeElapsedMillis;
+    /**
+     * Create a newly scheduled job.
+     * @param callingUid Uid of the package that scheduled this job.
+     * @param sourcePackageName Package name on whose behalf this job is scheduled. Null indicates
+     *                          the calling package is the source.
+     * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
+     */
+    public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePackageName,
+            int sourceUserId) {
+        final long elapsedNow = SystemClock.elapsedRealtime();
+        final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
+        if (job.isPeriodic()) {
+            latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
+            earliestRunTimeElapsedMillis = latestRunTimeElapsedMillis - job.getFlexMillis();
+        } else {
+            earliestRunTimeElapsedMillis = job.hasEarlyConstraint() ?
+                    elapsedNow + job.getMinLatencyMillis() : NO_EARLIEST_RUNTIME;
+            latestRunTimeElapsedMillis = job.hasLateConstraint() ?
+                    elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
+        }
+        return new JobStatus(job, callingUid, sourcePackageName, sourceUserId, 0,
+                earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
     }
 
     public JobInfo getJob() {
@@ -241,31 +261,31 @@ public class JobStatus {
     }
 
     public boolean hasConnectivityConstraint() {
-        return job.getNetworkType() == JobInfo.NETWORK_TYPE_ANY;
+        return (requiredConstraints&CONSTRAINT_CONNECTIVITY) != 0;
     }
 
     public boolean hasUnmeteredConstraint() {
-        return job.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED;
+        return (requiredConstraints&CONSTRAINT_UNMETERED) != 0;
     }
 
     public boolean hasChargingConstraint() {
-        return job.isRequireCharging();
+        return (requiredConstraints&CONSTRAINT_CHARGING) != 0;
     }
 
     public boolean hasTimingDelayConstraint() {
-        return earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME;
+        return (requiredConstraints&CONSTRAINT_TIMING_DELAY) != 0;
     }
 
     public boolean hasDeadlineConstraint() {
-        return latestRunTimeElapsedMillis != NO_LATEST_RUNTIME;
+        return (requiredConstraints&CONSTRAINT_DEADLINE) != 0;
     }
 
     public boolean hasIdleConstraint() {
-        return job.isRequireDeviceIdle();
+        return (requiredConstraints&CONSTRAINT_IDLE) != 0;
     }
 
     public boolean hasContentTriggerConstraint() {
-        return job.getTriggerContentUris() != null;
+        return (requiredConstraints&CONSTRAINT_CONTENT_TRIGGER) != 0;
     }
 
     public boolean isPersisted() {
@@ -280,35 +300,74 @@ public class JobStatus {
         return latestRunTimeElapsedMillis;
     }
 
+    boolean setChargingConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CHARGING, state);
+    }
+
+    boolean setTimingDelayConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_TIMING_DELAY, state);
+    }
+
+    boolean setDeadlineConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_DEADLINE, state);
+    }
+
+    boolean setIdleConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_IDLE, state);
+    }
+
+    boolean setUnmeteredConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_UNMETERED, state);
+    }
+
+    boolean setConnectivityConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
+    }
+
+    boolean setAppNotIdleConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_APP_NOT_IDLE, state);
+    }
+
+    boolean setContentTriggerConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, state);
+    }
+
+    boolean setConstraintSatisfied(int constraint, boolean state) {
+        boolean old = (satisfiedConstraints&constraint) != 0;
+        if (old == state) {
+            return false;
+        }
+        satisfiedConstraints = (satisfiedConstraints&~constraint) | (state ? constraint : 0);
+        return true;
+    }
+
     /**
      * @return Whether or not this job is ready to run, based on its requirements. This is true if
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
      */
     public boolean isReady() {
-        synchronized (lock) {
-            // Deadline constraint trumps other constraints (except for periodic jobs where deadline
-            // (is an implementation detail. A periodic job should only run if it's constraints are
-            // satisfied).
-            // AppNotIdle implicit constraint trumps all!
-            return (isConstraintsSatisfied()
-                    || (!job.isPeriodic()
-                    && hasDeadlineConstraint() && deadlineConstraintSatisfied.get()))
-                    && appNotIdleConstraintSatisfied.get();
-        }
+        // Deadline constraint trumps other constraints (except for periodic jobs where deadline
+        // (is an implementation detail. A periodic job should only run if it's constraints are
+        // satisfied).
+        // AppNotIdle implicit constraint trumps all!
+        return (isConstraintsSatisfied()
+                || (!job.isPeriodic()
+                && hasDeadlineConstraint() && (satisfiedConstraints&CONSTRAINT_DEADLINE) != 0))
+                && (satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) != 0;
     }
+
+    static final int CONSTRAINTS_OF_INTEREST =
+            CONSTRAINT_CHARGING | CONSTRAINT_TIMING_DELAY |
+            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED |
+            CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     /**
      * @return Whether the constraints set on this job are satisfied.
      */
     public boolean isConstraintsSatisfied() {
-        synchronized (lock) {
-            return (!hasChargingConstraint() || chargingConstraintSatisfied.get())
-                    && (!hasTimingDelayConstraint() || timeDelayConstraintSatisfied.get())
-                    && (!hasConnectivityConstraint() || connectivityConstraintSatisfied.get())
-                    && (!hasUnmeteredConstraint() || unmeteredConstraintSatisfied.get())
-                    && (!hasIdleConstraint() || idleConstraintSatisfied.get())
-                    && (!hasContentTriggerConstraint() || contentTriggerConstraintSatisfied.get());
-        }
+        final int req = requiredConstraints & CONSTRAINTS_OF_INTEREST;
+        final int sat = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
+        return (sat & req) == req;
     }
 
     public boolean matches(int uid, int jobId) {
@@ -327,7 +386,7 @@ public class JobStatus {
                 + ",I=" + job.isRequireDeviceIdle()
                 + ",U=" + (job.getTriggerContentUris() != null)
                 + ",F=" + numFailures + ",P=" + job.isPersisted()
-                + ",ANI=" + appNotIdleConstraintSatisfied.get()
+                + ",ANI=" + ((satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) != 0)
                 + (isReady() ? "(READY)" : "")
                 + "]";
     }
@@ -360,6 +419,33 @@ public class JobStatus {
         sb.append(' ');
         sb.append(job.getService().flattenToShortString());
         return sb.toString();
+    }
+
+    void dumpConstraints(PrintWriter pw, int constraints) {
+        if ((constraints&CONSTRAINT_CHARGING) != 0) {
+            pw.print(" CHARGING");
+        }
+        if ((constraints&CONSTRAINT_TIMING_DELAY) != 0) {
+            pw.print(" TIMING_DELAY");
+        }
+        if ((constraints&CONSTRAINT_DEADLINE) != 0) {
+            pw.print(" DEADLINE");
+        }
+        if ((constraints&CONSTRAINT_IDLE) != 0) {
+            pw.print(" IDLE");
+        }
+        if ((constraints&CONSTRAINT_UNMETERED) != 0) {
+            pw.print(" UNMETERED");
+        }
+        if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
+            pw.print(" CONNECTIVITY");
+        }
+        if ((constraints&CONSTRAINT_APP_NOT_IDLE) != 0) {
+            pw.print(" APP_NOT_IDLE");
+        }
+        if ((constraints&CONSTRAINT_CONTENT_TRIGGER) != 0) {
+            pw.print(" CONTENT_TRIGGER");
+        }
     }
 
     // Dumpsys infrastructure
@@ -426,39 +512,12 @@ public class JobStatus {
         if (job.hasLateConstraint()) {
             pw.print(prefix); pw.println("  Has late constraint");
         }
-        pw.print(prefix); pw.println("Constraints:");
-        if (hasChargingConstraint()) {
-            pw.print(prefix); pw.print("  Charging: ");
-            pw.println(chargingConstraintSatisfied.get());
-        }
-        if (hasTimingDelayConstraint()) {
-            pw.print(prefix); pw.print("  Time delay: ");
-            pw.println(timeDelayConstraintSatisfied.get());
-        }
-        if (hasDeadlineConstraint()) {
-            pw.print(prefix); pw.print("  Deadline: ");
-            pw.println(deadlineConstraintSatisfied.get());
-        }
-        if (hasIdleConstraint()) {
-            pw.print(prefix); pw.print("  System idle: ");
-            pw.println(idleConstraintSatisfied.get());
-        }
-        if (hasUnmeteredConstraint()) {
-            pw.print(prefix); pw.print("  Unmetered: ");
-            pw.println(unmeteredConstraintSatisfied.get());
-        }
-        if (hasConnectivityConstraint()) {
-            pw.print(prefix); pw.print("  Connectivity: ");
-            pw.println(connectivityConstraintSatisfied.get());
-        }
-        if (hasIdleConstraint()) {
-            pw.print(prefix); pw.print("  App not idle: ");
-            pw.println(appNotIdleConstraintSatisfied.get());
-        }
-        if (hasContentTriggerConstraint()) {
-            pw.print(prefix); pw.print("  Content trigger: ");
-            pw.println(contentTriggerConstraintSatisfied.get());
-        }
+        pw.print(prefix); pw.print("Required constraints:");
+        dumpConstraints(pw, requiredConstraints);
+        pw.println();
+        pw.print(prefix); pw.print("Satisfied constraints:");
+        dumpConstraints(pw, satisfiedConstraints);
+        pw.println();
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
             for (int i=0; i<changedAuthorities.size(); i++) {
