@@ -406,12 +406,16 @@ void RecordingCanvas::drawOval(float left, float top, float right, float bottom,
 
 void RecordingCanvas::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) {
-    addOp(alloc().create_trivial<ArcOp>(
-            Rect(left, top, right, bottom),
-            *(mState.currentSnapshot()->transform),
-            getRecordedClip(),
-            refPaint(&paint),
-            startAngle, sweepAngle, useCenter));
+    if (fabs(sweepAngle) >= 360.0f) {
+        drawOval(left, top, right, bottom, paint);
+    } else {
+        addOp(alloc().create_trivial<ArcOp>(
+                Rect(left, top, right, bottom),
+                *(mState.currentSnapshot()->transform),
+                getRecordedClip(),
+                refPaint(&paint),
+                startAngle, sweepAngle, useCenter));
+    }
 }
 
 void RecordingCanvas::drawPath(const SkPath& path, const SkPaint& paint) {
