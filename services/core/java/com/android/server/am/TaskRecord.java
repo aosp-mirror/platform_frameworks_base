@@ -245,6 +245,7 @@ final class TaskRecord {
     Rect mBounds = null;
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
+    private final Rect mTmpRect = new Rect();
     private final Rect mTmpRect2 = new Rect();
 
     // Last non-fullscreen bounds the task was launched in or resized to.
@@ -1314,6 +1315,38 @@ final class TaskRecord {
         return task;
     }
 
+    private void adjustForMinimalTaskDimensions(Rect bounds) {
+        if (bounds == null) {
+            return;
+        }
+        final int minimalSize = mMinimalSize == -1
+                ? mService.mStackSupervisor.mDefaultMinimalSizeOfResizeableTask : mMinimalSize;
+        final boolean adjustWidth = minimalSize > bounds.width();
+        final boolean adjustHeight = minimalSize > bounds.height();
+        if (!(adjustWidth || adjustHeight)) {
+            return;
+        }
+
+        if (adjustWidth) {
+            if (mBounds != null && bounds.right == mBounds.right) {
+                bounds.left = bounds.right - minimalSize;
+            } else {
+                // Either left bounds match, or neither match, or the previous bounds were
+                // fullscreen and we default to keeping left.
+                bounds.right = bounds.left + minimalSize;
+            }
+        }
+        if (adjustHeight) {
+            if (mBounds != null && bounds.bottom == mBounds.bottom) {
+                bounds.top = bounds.bottom - minimalSize;
+            } else {
+                // Either top bounds match, or neither match, or the previous bounds were
+                // fullscreen and we default to keeping top.
+                bounds.bottom = bounds.top + minimalSize;
+            }
+        }
+    }
+
     /**
      * Update task's override configuration based on the bounds.
      * @param bounds The bounds of the task.
@@ -1346,15 +1379,17 @@ final class TaskRecord {
             mBounds = null;
             mOverrideConfig = Configuration.EMPTY;
         } else {
+            mTmpRect.set(bounds);
+            adjustForMinimalTaskDimensions(mTmpRect);
             if (mBounds == null) {
-                mBounds = new Rect(bounds);
+                mBounds = new Rect(mTmpRect);
             } else {
-                mBounds.set(bounds);
+                mBounds.set(mTmpRect);
             }
             if (stack == null || StackId.persistTaskBounds(stack.mStackId)) {
                 mLastNonFullscreenBounds = mBounds;
             }
-            mOverrideConfig = calculateOverrideConfig(bounds, insetBounds);
+            mOverrideConfig = calculateOverrideConfig(mTmpRect, insetBounds);
         }
 
         if (mFullscreen != oldFullscreen) {
