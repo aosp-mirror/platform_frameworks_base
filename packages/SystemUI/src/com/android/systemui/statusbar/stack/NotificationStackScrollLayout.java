@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.NotificationSettingsIconRow;
 import com.android.systemui.statusbar.NotificationSettingsIconRow.SettingsIconRowListener;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -70,6 +71,8 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 
 /**
@@ -93,7 +96,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private static final int INVALID_POINTER = -1;
 
     private ExpandHelper mExpandHelper;
-    private SwipeHelper mSwipeHelper;
+    private NotificationSwipeHelper mSwipeHelper;
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
@@ -277,6 +280,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mBgColor;
     private float mDimAmount;
     private ValueAnimator mDimAnimator;
+    private ArrayList<ExpandableView> mTmpSortedChildren = new ArrayList<>();
     private Animator.AnimatorListener mDimEndListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -292,6 +296,31 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
     private ViewGroup mQsContainer;
+    private boolean mContinuousShadowUpdate;
+    private ViewTreeObserver.OnPreDrawListener mShadowUpdater
+            = new ViewTreeObserver.OnPreDrawListener() {
+
+        @Override
+        public boolean onPreDraw() {
+            updateViewShadows();
+            return true;
+        }
+    };
+    private Comparator<ExpandableView> mViewPositionComparator = new Comparator<ExpandableView>() {
+        @Override
+        public int compare(ExpandableView view, ExpandableView otherView) {
+            float endY = view.getTranslationY() + view.getActualHeight();
+            float otherEndY = otherView.getTranslationY() + otherView.getActualHeight();
+            if (endY < otherEndY) {
+                return -1;
+            } else if (endY > otherEndY) {
+                return 1;
+            } else {
+                // The two notifications end at the same location
+                return 0;
+            }
+        }
+    };
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -667,6 +696,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         mSwipedOutViews.add(v);
         mAmbientState.onDragFinished(v);
+        updateContinuousShadowDrawing();
         if (v instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) v;
             if (row.isHeadsUp()) {
@@ -689,6 +719,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void onChildSnappedBack(View animView, float targetLeft) {
         mAmbientState.onDragFinished(animView);
+        updateContinuousShadowDrawing();
         if (!mDragAnimPendingChildren.contains(animView)) {
             if (mAnimationsEnabled) {
                 mSnappedBackChildren.add(animView);
@@ -721,6 +752,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mFalsingManager.onNotificatonStartDismissing();
         setSwipingInProgress(true);
         mAmbientState.onBeginDrag(v);
+        updateContinuousShadowDrawing();
         if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
             mDragAnimPendingChildren.add(v);
             mNeedsAnimation = true;
@@ -2242,6 +2274,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             setAnimationRunning(true);
             mAnimationEvents.clear();
             updateBackground();
+            updateViewShadows();
         } else {
             applyCurrentState();
         }
@@ -2824,6 +2857,43 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         runAnimationFinishedRunnables();
         updateBackground();
+        updateViewShadows();
+    }
+
+    private void updateViewShadows() {
+        // we need to work around an issue where the shadow would not cast between siblings when
+        // their z difference is between 0 and 0.1
+
+        // Lefts first sort by Z difference
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child.getVisibility() != GONE) {
+                mTmpSortedChildren.add(child);
+            }
+        }
+        Collections.sort(mTmpSortedChildren, mViewPositionComparator);
+
+        // Now lets update the shadow for the views
+        ExpandableView previous = null;
+        for (int i = 0; i < mTmpSortedChildren.size(); i++) {
+            ExpandableView expandableView = mTmpSortedChildren.get(i);
+            float translationZ = expandableView.getTranslationZ();
+            float otherZ = previous == null ? translationZ : previous.getTranslationZ();
+            float diff = otherZ - translationZ;
+            if (diff <= 0.0f || diff >= FakeShadowView.SHADOW_SIBLING_TRESHOLD) {
+                // There is no fake shadow to be drawn
+                expandableView.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
+            } else {
+                float yLocation = previous.getTranslationY() + previous.getActualHeight() -
+                        expandableView.getTranslationY();
+                expandableView.setFakeShadowIntensity(diff / FakeShadowView.SHADOW_SIBLING_TRESHOLD,
+                        previous.getOutlineAlpha(), (int) yLocation,
+                        previous.getOutlineTranslation());
+            }
+            previous = expandableView;
+        }
+
+        mTmpSortedChildren.clear();
     }
 
     public void goToFullShade(long delay) {
@@ -3262,6 +3332,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 getViewTreeObserver().removeOnPreDrawListener(mBackgroundUpdater);
             }
             mAnimationRunning = animationRunning;
+            updateContinuousShadowDrawing();
         }
     }
 
@@ -3546,6 +3617,18 @@ public class NotificationStackScrollLayout extends ViewGroup
             Animator set = getViewTranslationAnimator(prevGearExposedView, 0, updateListener);
             set.addListener(listener);
             set.start();
+        }
+    }
+
+    private void updateContinuousShadowDrawing() {
+        boolean continuousShadowUpdate = mAnimationRunning
+                || !mAmbientState.getDraggedViews().isEmpty();
+        if (continuousShadowUpdate != mContinuousShadowUpdate) {
+            if (continuousShadowUpdate) {
+                getViewTreeObserver().addOnPreDrawListener(mShadowUpdater);
+            } else {
+                getViewTreeObserver().removeOnPreDrawListener(mShadowUpdater);
+            }
         }
     }
 

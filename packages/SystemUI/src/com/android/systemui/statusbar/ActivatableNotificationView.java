@@ -35,6 +35,7 @@ import android.view.animation.PathInterpolator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 /**
@@ -155,6 +156,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     };
     private float mShadowAlpha = 1.0f;
+    private FakeShadowView mFakeShadow;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -180,6 +182,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void onFinishInflate() {
         super.onFinishInflate();
         mBackgroundNormal = (NotificationBackgroundView) findViewById(R.id.backgroundNormal);
+        mFakeShadow = (FakeShadowView) findViewById(R.id.fake_shadow);
         mBackgroundDimmed = (NotificationBackgroundView) findViewById(R.id.backgroundDimmed);
         mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
         mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
@@ -850,6 +853,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             mShadowAlpha = shadowAlpha;
             updateOutlineAlpha();
         }
+    }
+
+    @Override
+    public void setFakeShadowIntensity(float shadowIntensity, float outlineAlpha, int shadowYEnd,
+            int outlineTranslation) {
+        mFakeShadow.setFakeShadowTranslationZ(shadowIntensity * (getTranslationZ()
+                + FakeShadowView.SHADOW_SIBLING_TRESHOLD), outlineAlpha, shadowYEnd,
+                outlineTranslation);
     }
 
     public interface OnActivatedListener {
