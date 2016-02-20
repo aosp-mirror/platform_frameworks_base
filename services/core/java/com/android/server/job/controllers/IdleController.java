@@ -67,20 +67,16 @@ public class IdleController extends StateController {
      * StateController interface
      */
     @Override
-    public void maybeStartTrackingJob(JobStatus taskStatus, JobStatus lastJob) {
+    public void maybeStartTrackingJobLocked(JobStatus taskStatus, JobStatus lastJob) {
         if (taskStatus.hasIdleConstraint()) {
-            synchronized (mLock) {
-                mTrackedTasks.add(taskStatus);
-                taskStatus.idleConstraintSatisfied.set(mIdleTracker.isIdle());
-            }
+            mTrackedTasks.add(taskStatus);
+            taskStatus.setIdleConstraintSatisfied(mIdleTracker.isIdle());
         }
     }
 
     @Override
-    public void maybeStopTrackingJob(JobStatus taskStatus, boolean forUpdate) {
-        synchronized (mLock) {
-            mTrackedTasks.remove(taskStatus);
-        }
+    public void maybeStopTrackingJobLocked(JobStatus taskStatus, boolean forUpdate) {
+        mTrackedTasks.remove(taskStatus);
     }
 
     /**
@@ -89,7 +85,7 @@ public class IdleController extends StateController {
     void reportNewIdleState(boolean isIdle) {
         synchronized (mLock) {
             for (JobStatus task : mTrackedTasks) {
-                task.idleConstraintSatisfied.set(isIdle);
+                task.setIdleConstraintSatisfied(isIdle);
             }
         }
         mStateChangedListener.onControllerStateChanged();
@@ -194,17 +190,15 @@ public class IdleController extends StateController {
     }
 
     @Override
-    public void dumpControllerState(PrintWriter pw) {
-        synchronized (mLock) {
-            pw.print("Idle: ");
-            pw.println(mIdleTracker.isIdle() ? "true" : "false");
-            pw.println(mTrackedTasks.size());
-            for (int i = 0; i < mTrackedTasks.size(); i++) {
-                final JobStatus js = mTrackedTasks.get(i);
-                pw.print("  ");
-                pw.print(String.valueOf(js.hashCode()).substring(0, 3));
-                pw.println("..");
-            }
+    public void dumpControllerStateLocked(PrintWriter pw) {
+        pw.print("Idle: ");
+        pw.println(mIdleTracker.isIdle() ? "true" : "false");
+        pw.println(mTrackedTasks.size());
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.get(i);
+            pw.print("  ");
+            pw.print(String.valueOf(js.hashCode()).substring(0, 3));
+            pw.println("..");
         }
     }
 }
