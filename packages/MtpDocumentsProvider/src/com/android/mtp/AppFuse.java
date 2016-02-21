@@ -133,6 +133,8 @@ public class AppFuse {
             return mCallback.readObjectBytes(inode, offset, size, mBuffer);
         } catch (IOException e) {
             return -OsConstants.EIO;
+        } catch (UnsupportedOperationException e) {
+            return -OsConstants.ENOTSUP;
         }
     }
 

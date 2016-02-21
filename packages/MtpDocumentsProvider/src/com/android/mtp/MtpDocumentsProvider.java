@@ -201,6 +201,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         final Identifier identifier = mDatabase.createIdentifier(documentId);
         try {
             openDevice(identifier.mDeviceId);
+            final MtpDeviceRecord device = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
             switch (mode) {
                 case "r":
                     final long fileSize = getFileSize(documentId);
@@ -208,7 +209,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     // 4GB. Fallback to non-seekable file descriptor.
                     // TODO: Use getPartialObject64 for MTP devices that support Android vendor
                     // extension.
-                    if (fileSize <= 0xffffffffl) {
+                    if (MtpDeviceRecord.isPartialReadSupported(
+                            device.operationsSupported, fileSize)) {
                         return mAppFuse.openFile(Integer.parseInt(documentId));
                     } else {
                         return getPipeManager(identifier).readDocument(mMtpManager, identifier);
@@ -216,8 +218,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 case "w":
                     // TODO: Clear the parent document loader task (if exists) and call notify
                     // when writing is completed.
-                    return getPipeManager(identifier).writeDocument(
-                            getContext(), mMtpManager, identifier);
+                    if (MtpDeviceRecord.isWritingSupported(device.operationsSupported)) {
+                        return getPipeManager(identifier).writeDocument(
+                                getContext(), mMtpManager, identifier);
+                    } else {
+                        throw new UnsupportedOperationException(
+                                "The device does not support writing operation.");
+                    }
                 case "rw":
                     // TODO: Add support for "rw" mode.
                     throw new UnsupportedOperationException(
@@ -290,6 +297,10 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         try {
             final Identifier parentId = mDatabase.createIdentifier(parentDocumentId);
             openDevice(parentId.mDeviceId);
+            final MtpDeviceRecord record = getDeviceToolkit(parentId.mDeviceId).mDeviceRecord;
+            if (!MtpDeviceRecord.isWritingSupported(record.operationsSupported)) {
+                throw new UnsupportedOperationException();
+            }
             final ParcelFileDescriptor pipe[] = ParcelFileDescriptor.createReliablePipe();
             pipe[0].close();  // 0 bytes for a new document.
             final int formatCode = Document.MIME_TYPE_DIR.equals(mimeType) ?
@@ -323,9 +334,9 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             if (DEBUG) {
                 Log.d(TAG, "Open device " + deviceId);
             }
-            mMtpManager.openDevice(deviceId);
+            final MtpDeviceRecord device = mMtpManager.openDevice(deviceId);
             final DeviceToolkit toolkit =
-                    new DeviceToolkit(deviceId, mMtpManager, mResolver, mDatabase);
+                    new DeviceToolkit(deviceId, mMtpManager, mResolver, mDatabase, device);
             mDeviceToolkits.put(deviceId, toolkit);
             mIntentSender.sendUpdateNotificationIntent();
             try {
@@ -347,20 +358,15 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mIntentSender.sendUpdateNotificationIntent();
     }
 
-    int[] getOpenedDeviceIds() {
+    MtpDeviceRecord[] getOpenedDeviceRecordsCache() {
         synchronized (mDeviceListLock) {
-            return mMtpManager.getOpenedDeviceIds();
-        }
-    }
-
-    String getDeviceName(int deviceId) throws IOException {
-        synchronized (mDeviceListLock) {
-            for (final MtpDeviceRecord device : mMtpManager.getDevices()) {
-                if (device.deviceId == deviceId) {
-                    return device.name;
-                }
+            final MtpDeviceRecord[] records = new MtpDeviceRecord[mDeviceToolkits.size()];
+            int i = 0;
+            for (final DeviceToolkit toolkit : mDeviceToolkits.values()) {
+                records[i] = toolkit.mDeviceRecord;
+                i++;
             }
-            throw new IOException("Not found the device: " + Integer.toString(deviceId));
+            return records;
         }
     }
 
@@ -391,7 +397,10 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     public void shutdown() {
         synchronized (mDeviceListLock) {
             try {
-                for (final int id : mMtpManager.getOpenedDeviceIds()) {
+                // Copy the opened key set because it will be modified when closing devices.
+                final Integer[] keySet =
+                        mDeviceToolkits.keySet().toArray(new Integer[mDeviceToolkits.size()]);
+                for (final int id : keySet) {
                     closeDeviceInternal(id);
                 }
             } catch (InterruptedException|IOException e) {
@@ -432,7 +441,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         getDeviceToolkit(deviceId).mDocumentLoader.close();
         mDeviceToolkits.remove(deviceId);
         mMtpManager.closeDevice(deviceId);
-        if (getOpenedDeviceIds().length == 0) {
+        if (mDeviceToolkits.size() == 0) {
             mRootScanner.pause();
         }
     }
@@ -488,11 +497,14 @@ public class MtpDocumentsProvider extends DocumentsProvider {
     private static class DeviceToolkit {
         public final PipeManager mPipeManager;
         public final DocumentLoader mDocumentLoader;
+        public final MtpDeviceRecord mDeviceRecord;
 
         public DeviceToolkit(
-                int deviceId, MtpManager manager, ContentResolver resolver, MtpDatabase database) {
+                int deviceId, MtpManager manager, ContentResolver resolver, MtpDatabase database,
+                MtpDeviceRecord record) {
             mPipeManager = new PipeManager(database);
             mDocumentLoader = new DocumentLoader(deviceId, manager, resolver, database);
+            mDeviceRecord = record;
         }
     }
 
@@ -501,8 +513,13 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         public long readObjectBytes(
                 int inode, long offset, long size, byte[] buffer) throws IOException {
             final Identifier identifier = mDatabase.createIdentifier(Integer.toString(inode));
-            return mMtpManager.getPartialObject(
-                    identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
+            final MtpDeviceRecord record = getDeviceToolkit(identifier.mDeviceId).mDeviceRecord;
+            if (MtpDeviceRecord.isPartialReadSupported(record.operationsSupported, offset)) {
+                return mMtpManager.getPartialObject(
+                        identifier.mDeviceId, identifier.mObjectHandle, offset, size, buffer);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
 
         @Override

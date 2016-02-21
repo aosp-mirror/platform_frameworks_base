@@ -65,16 +65,14 @@ class MtpManager {
      */
     private static final int PROTOCOL_MTP = 0;
 
-
     private final UsbManager mManager;
-    // TODO: Save and restore the set of opened device.
     private final SparseArray<MtpDevice> mDevices = new SparseArray<>();
 
     MtpManager(Context context) {
         mManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
     }
 
-    synchronized void openDevice(int deviceId) throws IOException {
+    synchronized MtpDeviceRecord openDevice(int deviceId) throws IOException {
         UsbDevice rawDevice = null;
         for (final UsbDevice candidate : mManager.getDeviceList().values()) {
             if (candidate.getDeviceId() == deviceId) {
@@ -113,6 +111,8 @@ class MtpManager {
         }
 
         mDevices.put(deviceId, device);
+
+        return createDeviceRecord(rawDevice);
     }
 
     synchronized void closeDevice(int deviceId) throws IOException {
@@ -126,43 +126,9 @@ class MtpManager {
             if (!isMtpDevice(device)) {
                 continue;
             }
-            final MtpDevice mtpDevice = mDevices.get(device.getDeviceId());
-            final boolean opened = mtpDevice != null;
-            final String name = device.getProductName();
-            MtpRoot[] roots;
-            int[] operationsSupported = null;
-            int[] eventsSupported = null;
-            if (opened) {
-                try {
-                    roots = getRoots(device.getDeviceId());
-                } catch (IOException exp) {
-                    Log.e(MtpDocumentsProvider.TAG, "Failed to open device", exp);
-                    // If we failed to fetch roots for the device, we still returns device model
-                    // with an empty set of roots so that the device is shown DocumentsUI as long as
-                    // the device is physically connected.
-                    roots = new MtpRoot[0];
-                }
-                final MtpDeviceInfo info = mtpDevice.getDeviceInfo();
-                if (info != null) {
-                    operationsSupported = mtpDevice.getDeviceInfo().getOperationsSupported();
-                    eventsSupported = mtpDevice.getDeviceInfo().getEventsSupported();
-                }
-            } else {
-                roots = new MtpRoot[0];
-            }
-            devices.add(new MtpDeviceRecord(
-                    device.getDeviceId(), name, device.getSerialNumber(), opened, roots,
-                    operationsSupported, eventsSupported));
+            devices.add(createDeviceRecord(device));
         }
         return devices.toArray(new MtpDeviceRecord[devices.size()]);
-    }
-
-    synchronized int[] getOpenedDeviceIds() {
-        final int[] result = new int[mDevices.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = mDevices.keyAt(i);
-        }
-        return result;
     }
 
     MtpObjectInfo getObjectInfo(int deviceId, int objectHandle)
@@ -279,6 +245,36 @@ class MtpManager {
             }
             return results;
         }
+    }
+
+    private MtpDeviceRecord createDeviceRecord(UsbDevice device) {
+        final MtpDevice mtpDevice = mDevices.get(device.getDeviceId());
+        final boolean opened = mtpDevice != null;
+        final String name = device.getProductName();
+        MtpRoot[] roots;
+        int[] operationsSupported = null;
+        int[] eventsSupported = null;
+        if (opened) {
+            try {
+                roots = getRoots(device.getDeviceId());
+            } catch (IOException exp) {
+                Log.e(MtpDocumentsProvider.TAG, "Failed to open device", exp);
+                // If we failed to fetch roots for the device, we still returns device model
+                // with an empty set of roots so that the device is shown DocumentsUI as long as
+                // the device is physically connected.
+                roots = new MtpRoot[0];
+            }
+            final MtpDeviceInfo info = mtpDevice.getDeviceInfo();
+            if (info != null) {
+                operationsSupported = mtpDevice.getDeviceInfo().getOperationsSupported();
+                eventsSupported = mtpDevice.getDeviceInfo().getEventsSupported();
+            }
+        } else {
+            roots = new MtpRoot[0];
+        }
+        return new MtpDeviceRecord(
+                device.getDeviceId(), name, device.getSerialNumber(), opened, roots,
+                operationsSupported, eventsSupported);
     }
 
     static boolean isMtpDevice(UsbDevice device) {

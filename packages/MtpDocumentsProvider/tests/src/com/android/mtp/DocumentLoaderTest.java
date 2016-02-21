@@ -48,7 +48,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", new int[0], new MtpRoot[] {
                 new MtpRoot(0, 0, "Storage", 1000, 1000, "")
         });
         mDatabase.getMapper().stopAddingDocuments("1");

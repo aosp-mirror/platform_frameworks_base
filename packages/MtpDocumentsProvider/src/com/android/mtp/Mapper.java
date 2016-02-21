@@ -89,7 +89,8 @@ class Mapper {
      * @return If roots are added or removed from the database.
      * @throws FileNotFoundException
      */
-    synchronized boolean putStorageDocuments(String parentDocumentId, MtpRoot[] roots)
+    synchronized boolean putStorageDocuments(
+            String parentDocumentId, int[] operationsSupported, MtpRoot[] roots)
             throws FileNotFoundException {
         final SQLiteDatabase database = mDatabase.getSQLiteDatabase();
         database.beginTransaction();
@@ -100,7 +101,11 @@ class Mapper {
                 valuesList[i] = new ContentValues();
                 extraValuesList[i] = new ContentValues();
                 MtpDatabase.getStorageDocumentValues(
-                        valuesList[i], extraValuesList[i], parentDocumentId, roots[i]);
+                        valuesList[i],
+                        extraValuesList[i],
+                        parentDocumentId,
+                        operationsSupported,
+                        roots[i]);
             }
             final boolean changed = putDocuments(
                     parentDocumentId,
