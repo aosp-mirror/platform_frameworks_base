@@ -81,7 +81,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             record.tileView.measure(exactly(mCellWidth), exactly(mCellHeight));
             previousView = record.tileView.updateAccessibilityOrder(previousView);
         }
-        setMeasuredDimension(width, (mCellHeight + mCellMargin) * rows + mCellMargin);
+        setMeasuredDimension(width, (mCellHeight + mCellMargin) * rows);
     }
 
     private static int exactly(int size) {
