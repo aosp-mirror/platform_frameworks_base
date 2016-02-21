@@ -95,7 +95,11 @@ public class TaskStack implements DimLayer.DimLayerUser,
 
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
-    private boolean mUpdateBoundsAfterRotation = false;
+
+    // Display rotation as of the last time the display information was updated for this stack.
+    private int mLastUpdateDisplayInfoRotation = -1;
+    // Display rotation as of the last time the configuration was updated for this stack.
+    private int mLastConfigChangedRotation = -1;
 
     // Whether the stack and all its tasks is currently being drag-resized
     private boolean mDragResizing;
@@ -301,39 +305,51 @@ public class TaskStack implements DimLayer.DimLayerUser,
     }
 
     void updateDisplayInfo(Rect bounds) {
-        mUpdateBoundsAfterRotation = false;
-        if (mDisplayContent != null) {
-            for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
-            }
-            if (bounds != null) {
-                setBounds(bounds);
-            } else if (mFullscreen) {
-                setBounds(null);
-            } else {
-                mUpdateBoundsAfterRotation = true;
-                mTmpRect2.set(mBounds);
-                final int newRotation = mDisplayContent.getDisplayInfo().rotation;
-                if (mRotation == newRotation) {
-                    setBounds(mTmpRect2);
-                }
+        if (mDisplayContent == null) {
+            return;
+        }
 
-                // If the rotation changes, we'll handle it in updateBoundsAfterRotation
-            }
+        for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            mTasks.get(taskNdx).updateDisplayInfo(mDisplayContent);
+        }
+        if (bounds != null) {
+            setBounds(bounds);
+            return;
+        } else if (mFullscreen) {
+            setBounds(null);
+            return;
+        }
+
+        mTmpRect2.set(mBounds);
+        final int newRotation = mDisplayContent.getDisplayInfo().rotation;
+        if (mRotation == newRotation) {
+            setBounds(mTmpRect2);
+        } else {
+            mLastUpdateDisplayInfoRotation = newRotation;
+            updateBoundsAfterRotation();
         }
     }
 
-    /**
-     * Updates the bounds after rotating the screen. We can't handle it in
-     * {@link #updateDisplayInfo} because at that point the configuration might not be fully updated
-     * yet.
-     */
+    void onConfigurationChanged() {
+        mLastConfigChangedRotation = getDisplayInfo().rotation;
+        updateBoundsAfterRotation();
+    }
+
     void updateBoundsAfterRotation() {
-        if (!mUpdateBoundsAfterRotation) {
+        if (mLastConfigChangedRotation != mLastUpdateDisplayInfoRotation) {
+            // We wait for the rotation values after configuration change and display info. update
+            // to be equal before updating the bounds due to rotation change otherwise things might
+            // get out of alignment...
             return;
         }
-        mUpdateBoundsAfterRotation = false;
+
         final int newRotation = getDisplayInfo().rotation;
+
+        if (mRotation == newRotation) {
+            // Nothing to do here if the rotation didn't change
+            return;
+        }
+
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (mStackId == DOCKED_STACK_ID) {
             snapDockedStackAfterRotation(mTmpRect2);
@@ -342,8 +358,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
         // Post message to inform activity manager of the bounds change simulating
         // a one-way call. We do this to prevent a deadlock between window manager
         // lock and activity manager lock been held.
-        mService.mH.sendMessage(mService.mH.obtainMessage(
-                RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mTmpRect2));
+        mService.mH.obtainMessage(
+                RESIZE_STACK, mStackId, 0 /*allowResizeInDockedMode*/, mTmpRect2).sendToTarget();
     }
 
     /**

@@ -3549,23 +3549,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized(mWindowMap) {
-            final boolean orientationChanged = mCurConfiguration.orientation != config.orientation;
             mCurConfiguration = new Configuration(config);
             if (mWaitingForConfig) {
                 mWaitingForConfig = false;
                 mLastFinishedFreezeSource = "new-config";
             }
-            if (orientationChanged) {
-                updateTaskStackBoundsAfterRotation();
-            }
+            onConfigurationChanged();
             mWindowPlacerLocked.performSurfacePlacement();
         }
     }
 
-    private void updateTaskStackBoundsAfterRotation() {
+    private void onConfigurationChanged() {
         for (int stackNdx = mStackIdToStack.size() - 1; stackNdx >= 0; stackNdx--) {
             final TaskStack stack = mStackIdToStack.valueAt(stackNdx);
-            stack.updateBoundsAfterRotation();
+            stack.onConfigurationChanged();
         }
     }
 
