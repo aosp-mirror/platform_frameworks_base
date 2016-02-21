@@ -324,14 +324,18 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 Log.d(TAG, "Open device " + deviceId);
             }
             mMtpManager.openDevice(deviceId);
-            mDeviceToolkits.put(
-                    deviceId, new DeviceToolkit(mMtpManager, mResolver, mDatabase));
+            final DeviceToolkit toolkit =
+                    new DeviceToolkit(deviceId, mMtpManager, mResolver, mDatabase);
+            mDeviceToolkits.put(deviceId, toolkit);
             mIntentSender.sendUpdateNotificationIntent();
             try {
                 mRootScanner.resume().await();
             } catch (InterruptedException error) {
                 Log.e(TAG, "openDevice", error);
             }
+            // Resume document loader to remap disconnected document ID. Must be invoked after the
+            // root scanner resumes.
+            toolkit.mDocumentLoader.resume();
         }
     }
 
@@ -425,7 +429,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         if (DEBUG) {
             Log.d(TAG, "Close device " + deviceId);
         }
-        getDeviceToolkit(deviceId).mDocumentLoader.clearTasks();
+        getDeviceToolkit(deviceId).mDocumentLoader.close();
         mDeviceToolkits.remove(deviceId);
         mMtpManager.closeDevice(deviceId);
         if (getOpenedDeviceIds().length == 0) {
@@ -485,9 +489,10 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         public final PipeManager mPipeManager;
         public final DocumentLoader mDocumentLoader;
 
-        public DeviceToolkit(MtpManager manager, ContentResolver resolver, MtpDatabase database) {
+        public DeviceToolkit(
+                int deviceId, MtpManager manager, ContentResolver resolver, MtpDatabase database) {
             mPipeManager = new PipeManager(database);
-            mDocumentLoader = new DocumentLoader(manager, resolver, database);
+            mDocumentLoader = new DocumentLoader(deviceId, manager, resolver, database);
         }
     }
 

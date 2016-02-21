@@ -86,7 +86,7 @@ public class TestMtpManager extends MtpManager {
     @Override
     void openDevice(int deviceId) throws IOException {
         final MtpDeviceRecord device = mDevices.get(deviceId);
-        if (device == null || device.opened) {
+        if (device == null) {
             throw new IOException();
         }
         mDevices.put(
@@ -99,7 +99,7 @@ public class TestMtpManager extends MtpManager {
     @Override
     void closeDevice(int deviceId) throws IOException {
         final MtpDeviceRecord device = mDevices.get(deviceId);
-        if (device == null || !device.opened) {
+        if (device == null) {
             throw new IOException();
         }
         mDevices.put(
