@@ -1362,4 +1362,11 @@ public interface WindowManagerPolicy {
      */
     public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             Rect outInsets);
+
+    /**
+     * @return True if a specified {@param dockSide} is allowed on the current device, or false
+     *         otherwise. It is guaranteed that at least one dock side for a particular orientation
+     *         is allowed, so for example, if DOCKED_RIGHT is not allowed, DOCKED_LEFT is allowed.
+     */
+    public boolean isDockSideAllowed(int dockSide);
 }
