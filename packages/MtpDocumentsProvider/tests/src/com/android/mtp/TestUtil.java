@@ -21,11 +21,10 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.SystemClock;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
-
-import junit.framework.Assert;
 
 /**
  * Static utility methods for testing.
@@ -55,6 +54,22 @@ final class TestUtil {
                 continue;
             }
         }
+    }
+
+    static void addTestDevice(MtpDatabase database) throws FileNotFoundException {
+        database.getMapper().startAddingDocuments(null);
+        database.getMapper().putDeviceDocument(new MtpDeviceRecord(
+                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
+                null));
+        database.getMapper().stopAddingDocuments(null);
+    }
+
+    static void addTestStorage(MtpDatabase database, String parentId) throws FileNotFoundException {
+        database.getMapper().startAddingDocuments(parentId);
+        database.getMapper().putStorageDocuments(parentId, new MtpRoot[] {
+                new MtpRoot(0, 100, "Storage", 1024, 1024, ""),
+        });
+        database.getMapper().stopAddingDocuments(parentId);
     }
 
     private static UsbDevice findMtpDevice(

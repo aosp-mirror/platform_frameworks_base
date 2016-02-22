@@ -29,12 +29,14 @@ import java.util.concurrent.Executors;
 
 class PipeManager {
     final ExecutorService mExecutor;
+    final MtpDatabase mDatabase;
 
-    PipeManager() {
-        this(Executors.newSingleThreadExecutor());
+    PipeManager(MtpDatabase database) {
+        this(database, Executors.newSingleThreadExecutor());
     }
 
-    PipeManager(ExecutorService executor) {
+    PipeManager(MtpDatabase database, ExecutorService executor) {
+        this.mDatabase = database;
         this.mExecutor = executor;
     }
 
@@ -46,7 +48,7 @@ class PipeManager {
 
     ParcelFileDescriptor writeDocument(Context context, MtpManager model, Identifier identifier)
             throws IOException {
-        final Task task = new WriteDocumentTask(context, model, identifier);
+        final Task task = new WriteDocumentTask(context, model, identifier, mDatabase);
         mExecutor.execute(task);
         return task.getWritingFileDescriptor();
     }
@@ -100,11 +102,14 @@ class PipeManager {
 
     private static class WriteDocumentTask extends Task {
         private final Context mContext;
+        private final MtpDatabase mDatabase;
 
-        WriteDocumentTask(Context context, MtpManager model, Identifier identifier)
+        WriteDocumentTask(
+                Context context, MtpManager model, Identifier identifier, MtpDatabase database)
                 throws IOException {
             super(model, identifier);
             mContext = context;
+            mDatabase = database;
         }
 
         @Override
@@ -112,7 +117,7 @@ class PipeManager {
             File tempFile = null;
             try {
                 // Obtain a temporary file and copy the data to it.
-                tempFile = mContext.getCacheDir().createTempFile("mtp", "tmp");
+                tempFile = File.createTempFile("mtp", "tmp", mContext.getCacheDir());
                 try (
                     final FileOutputStream tempOutputStream =
                             new ParcelFileDescriptor.AutoCloseOutputStream(
@@ -140,12 +145,22 @@ class PipeManager {
                 // Create the target object info with a correct file size and upload the file.
                 final MtpObjectInfo targetObjectInfo =
                         new MtpObjectInfo.Builder(placeholderObjectInfo)
-                                .setCompressedSize((int) tempFile.length())
+                                .setCompressedSize(tempFile.length())
                                 .build();
                 final ParcelFileDescriptor tempInputDescriptor = ParcelFileDescriptor.open(
                         tempFile, ParcelFileDescriptor.MODE_READ_ONLY);
-                mManager.createDocument(mIdentifier.mDeviceId,
-                        targetObjectInfo, tempInputDescriptor);
+                final int newObjectHandle = mManager.createDocument(
+                        mIdentifier.mDeviceId, targetObjectInfo, tempInputDescriptor);
+
+                final MtpObjectInfo newObjectInfo = mManager.getObjectInfo(
+                        mIdentifier.mDeviceId, newObjectHandle);
+                final Identifier parentIdentifier =
+                        mDatabase.getParentIdentifier(mIdentifier.mDocumentId);
+                mDatabase.updateObject(
+                        mIdentifier.mDocumentId,
+                        mIdentifier.mDeviceId,
+                        parentIdentifier.mDocumentId,
+                        newObjectInfo);
             } catch (IOException error) {
                 Log.w(MtpDocumentsProvider.TAG,
                         "Failed to send a file because of: " + error.getMessage());

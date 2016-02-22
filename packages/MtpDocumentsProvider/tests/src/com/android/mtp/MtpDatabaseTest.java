@@ -983,18 +983,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
     }
 
     private void addTestDevice() throws FileNotFoundException {
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
-                null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        TestUtil.addTestDevice(mDatabase);
     }
 
     private void addTestStorage(String parentId) throws FileNotFoundException {
-        mDatabase.getMapper().startAddingDocuments(parentId);
-        mDatabase.getMapper().putStorageDocuments(parentId, new MtpRoot[] {
-                new MtpRoot(0, 100, "Storage", 1024, 1024, ""),
-        });
-        mDatabase.getMapper().stopAddingDocuments(parentId);
+        TestUtil.addTestStorage(mDatabase, parentId);
     }
 }
