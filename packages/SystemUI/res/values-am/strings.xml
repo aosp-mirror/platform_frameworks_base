@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ማያ ገጽ መሰካት"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ፈልግ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>ን መጀመር አልተቻለም።"</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> በጥንቃቄ ሁነታ ውስጥ ታግዷል።"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ታሪክ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ጥረግ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"አግድም ክፈል"</string>
@@ -334,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ሙሉ ለሙሉ\nጸጥታ"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ቅድሚያ ተሰጪ\nብቻ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ማንቂያዎች\nብቻ"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"ሁሉም"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"ሁሉም\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ሃይል በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> እስከሚሞላ ድረስ)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ኃይል በፍጥነት በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> እስከሚሞላ ድረስ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ኃይል በዝግታ በመሙላት ላይ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> እስከሚሞላ ድረስ)"</string>
@@ -448,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"የሰዓት ሰከንዶችን በሁኔታ አሞሌ ውስጥ አሳይ። በባትሪ ዕድሜ ላይ ተጽዕኖ ሊኖርው ይችል ይሆናል።"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ፈጣን ቅንብሮችን ዳግም ያደራጁ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"በፈጣን ቅንብሮች ውስጥ ብሩህነትን አሳይ"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"የተከፈለ ማያ ገጽ ወደላይ አንሸራትቶ ማፍጠንን ያንቁ"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"የተከፈለ ማያ ገጽ ወደ ላይ የማንሸራተት ጣት ምልክትን ያንቁ"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"ከአጠቃላይ እይታ አዝራሩ ወደ ላይ በማንሸራተት ወደ የተከፈለ ማያ ገጽ የሚገቡበትን የጣት ምልክት ያንቁ"</string>
     <string name="experimental" msgid="6198182315536726162">"የሙከራ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ብሉቱዝ ይብራ?"</string>
@@ -468,19 +465,34 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"ወደ ገጸ ማያው ይመልከቱና ድምፅ ይቅረጹ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ተጨማሪ ቅንብሮች"</string>
     <string name="notification_done" msgid="5279426047273930175">"ተከናውኗል"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"መደበኛ ቀለሞች"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"የለሊት ቀለሞች"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"ብጁ ቀለሞች"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"ራስ-ሰር"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"የማይታወቁ ቀለሞች"</string>
-    <string name="color_transform" msgid="6985460408079086090">"የቀለም ማሻሻያ"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"የፈጣን ቅንብሮች ሰቅን አሳይ"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"ብጁ ቅየራን አንቃ"</string>
+    <!-- no translation found for color_and_appearance (1254323855964993144) -->
+    <skip />
+    <!-- no translation found for night_mode (3540405868248625488) -->
+    <skip />
+    <!-- no translation found for calibrate_display (5974642573432039217) -->
+    <skip />
+    <!-- no translation found for night_mode_on (5597545513026541108) -->
+    <skip />
+    <!-- no translation found for night_mode_off (8035605276956057508) -->
+    <skip />
+    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
+    <skip />
+    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
+    <skip />
+    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
+    <skip />
+    <!-- no translation found for use_dark_theme (2900938704964299312) -->
+    <skip />
+    <!-- no translation found for adjust_tint (3398569573231409878) -->
+    <skip />
+    <!-- no translation found for adjust_brightness (980039329808178246) -->
+    <skip />
+    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
+    <skip />
     <string name="color_apply" msgid="9212602012641034283">"ተግብር"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ቅንብሮችን ያረጋግጡ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"አንዳንድ የቀለም ቅንብሮች ይህን መሣሪያ የማይጠቅም ሊያደርጉት ይችላሉ። እነዚህን የቀለም ቅንብሮች ለማረጋገጥ እሺ የሚለውን ጠቅ ያድርጉ፣ አለበለዚያ እነዚህ ቅንብሮች ከ10 ሰከንዶች በኋላ ዳግም ይጀምራሉ።"</string>
-    <!-- no translation found for battery_panel_title (7944156115535366613) -->
-    <skip />
+    <string name="battery_panel_title" msgid="7944156115535366613">"የባትሪ አጠቃቀም"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ኃይል በሚሞላበት ጊዜ ባትሪ ቆጣቢ አይገኝም"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ባትሪ ቆጣቢ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"አፈጻጸምን እና የጀርባ ውሂብን ይቀንሳል"</string>
@@ -488,21 +500,24 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"መነሻ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"የቅርብ ጊዜዎቹ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"ተመለስ"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"በድምጽ ውስጥ አትረብሽን አሳይ"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"በድምጽ ንግግር ውስጥ አትረብሽን ሙሉ ቁጥጥር ይፍቀዱ።"</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"ድምጽ እና አትረብሽ"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"ድምጽ ሲቀነስ አትረብሽ አስገባ"</string>
+    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
+    <skip />
+    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
+    <skip />
+    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
+    <skip />
     <string name="volume_up_silent" msgid="7141255269783588286">"ድምጽ ሲጨመር አትረብሽን ትተህ ውጣ"</string>
     <string name="battery" msgid="7498329822413202973">"ባትሪ"</string>
     <string name="clock" msgid="7416090374234785905">"ሰዓት"</string>
     <string name="headset" msgid="4534219457597457353">"ጆሮ ማዳመጫ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"የጆር ማዳመጫዎች ተገናኝተዋል"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"የጆሮ ማዳመጫ ተገናኝቷል"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"አዶዎች በሁኔታ አሞሌ ላይ እንዲታዩ ወይም እንዳይታዩ ያንቁ ወይም ያሰናክሉ።"</string>
     <string name="data_saver" msgid="5037565123367048522">"ውሂብ ቆጣቢ"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ውሂብ ቆጣቢ በርቷል"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ውሂብ ቆጣቢ ጠፍቷል"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"በርቷል"</string>
+    <!-- no translation found for switch_bar_off (8803270596930432874) -->
+    <skip />
     <string name="nav_bar" msgid="1993221402773877607">"የአሰሳ አሞሌ"</string>
     <string name="start" msgid="6873794757232879664">"ጀምር"</string>
     <string name="center" msgid="4327473927066010960">"መሃል"</string>
@@ -525,4 +540,12 @@
     <string name="preview" msgid="9077832302472282938">"ቅድመ-እይታ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ሰቆችን ለማከል ይጎትቱ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"አርትዕ"</string>
+    <!-- no translation found for tuner_time (6572217313285536011) -->
+    <skip />
+    <!-- no translation found for clock_options:0 (5965318737560463480) -->
+    <!-- no translation found for clock_options:1 (1427801730816895300) -->
+    <!-- no translation found for clock_options:2 (3830170141562534721) -->
+    <!-- no translation found for battery_options:0 (3160236755818672034) -->
+    <!-- no translation found for battery_options:1 (2139628951880142927) -->
+    <!-- no translation found for battery_options:2 (3327323682209964956) -->
 </resources>

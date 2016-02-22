@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pagpi-pin sa screen"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"maghanap"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Hindi masimulan <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Naka-disable ang <xliff:g id="APP">%s</xliff:g> sa safe-mode."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"History"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"I-clear"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
@@ -334,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Ganap na\nkatahimikan"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priyoridad\nlang"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Mga alarm\nlang"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Lahat"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"Lahat\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Nagtsa-charge (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hanggang mapuno)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Mabilis mag-charge (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hanggang sa mapuno)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Mabagal mag-charge (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> hanggang sa mapuno)"</string>
@@ -448,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ipakita ang mga segundo ng orasan sa status bar. Maaaring makaapekto sa tagal ng baterya."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Ayusing Muli ang Mga Mabilisang Setting"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Ipakita ang liwanag sa Mga Mabilisang Setting"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"I-enable ang split-screen na swipe-up accelerator"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"I-enable ang pag-swipe pataas na galaw para sa split-screen"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"I-enable ang gesture upang makapasok sa split-screen sa pamamagitan ng pagsa-swipe pataas mula sa button ng Pangkalahatang-ideya"</string>
     <string name="experimental" msgid="6198182315536726162">"Pang-eksperimento"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"I-on ang Bluetooth?"</string>
@@ -468,19 +465,34 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Ipasilip sa screen at mag-play ng tunog"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Higit pang mga setting"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tapos Na"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"Mga karaniwang kulay"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"Madidilim na kulay"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"Mga custom na kulay"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"Auto"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"Mga hindi kilalang kulay"</string>
-    <string name="color_transform" msgid="6985460408079086090">"Pagbago sa kulay"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Ipakita ang tile ng Mga Mabilisang Setting"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"I-enable ang custom na pagpalit"</string>
+    <!-- no translation found for color_and_appearance (1254323855964993144) -->
+    <skip />
+    <!-- no translation found for night_mode (3540405868248625488) -->
+    <skip />
+    <!-- no translation found for calibrate_display (5974642573432039217) -->
+    <skip />
+    <!-- no translation found for night_mode_on (5597545513026541108) -->
+    <skip />
+    <!-- no translation found for night_mode_off (8035605276956057508) -->
+    <skip />
+    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
+    <skip />
+    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
+    <skip />
+    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
+    <skip />
+    <!-- no translation found for use_dark_theme (2900938704964299312) -->
+    <skip />
+    <!-- no translation found for adjust_tint (3398569573231409878) -->
+    <skip />
+    <!-- no translation found for adjust_brightness (980039329808178246) -->
+    <skip />
+    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
+    <skip />
     <string name="color_apply" msgid="9212602012641034283">"Ilapat"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Kumpirmahin ang mga setting"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Maaaring hindi magamit ang device na ito dahil sa ilang setting ng kulay. I-click ang OK upang kumpirmahin ang mga setting ng kulay na ito, kung hindi ay mare-reset ang mga setting na ito pagkatapos ng 10 segundo."</string>
-    <!-- no translation found for battery_panel_title (7944156115535366613) -->
-    <skip />
+    <string name="battery_panel_title" msgid="7944156115535366613">"Paggamit ng baterya"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Hindi available ang Pangtipid sa Baterya kapag nagcha-charge"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Pangtipid sa Baterya"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Binabawasan ang pagganap at data sa background"</string>
@@ -488,21 +500,24 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Home"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Mga Kamakailang Ginamit"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Bumalik"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"Ipakita ang huwag istorbohin sa volume"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Payagang ganap na makontrol ang huwag istorbohin sa dialog ng volume."</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Volume at Huwag istorbohin"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"Gamitin ang huwag istorbohin nang mahina ang volume"</string>
+    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
+    <skip />
+    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
+    <skip />
+    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
+    <skip />
     <string name="volume_up_silent" msgid="7141255269783588286">"Umalis sa huwag istorbohin nang malakas ang volume"</string>
     <string name="battery" msgid="7498329822413202973">"Baterya"</string>
     <string name="clock" msgid="7416090374234785905">"Orasan"</string>
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Nakakonekta ang mga headphone"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Nakakonekta ang headset"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"I-enable o i-disable ang pagpapakita sa mga icon sa status bar."</string>
     <string name="data_saver" msgid="5037565123367048522">"Data Saver"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Naka-on ang Data Saver"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Naka-off ang Data Saver"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"I-on"</string>
+    <!-- no translation found for switch_bar_off (8803270596930432874) -->
+    <skip />
     <string name="nav_bar" msgid="1993221402773877607">"Navigation bar"</string>
     <string name="start" msgid="6873794757232879664">"Simula"</string>
     <string name="center" msgid="4327473927066010960">"Gitna"</string>
@@ -525,4 +540,12 @@
     <string name="preview" msgid="9077832302472282938">"I-preview"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Mag-drag upang magdagdag ng mga tile"</string>
     <string name="qs_edit" msgid="2232596095725105230">"I-edit"</string>
+    <!-- no translation found for tuner_time (6572217313285536011) -->
+    <skip />
+    <!-- no translation found for clock_options:0 (5965318737560463480) -->
+    <!-- no translation found for clock_options:1 (1427801730816895300) -->
+    <!-- no translation found for clock_options:2 (3830170141562534721) -->
+    <!-- no translation found for battery_options:0 (3160236755818672034) -->
+    <!-- no translation found for battery_options:1 (2139628951880142927) -->
+    <!-- no translation found for battery_options:2 (3327323682209964956) -->
 </resources>

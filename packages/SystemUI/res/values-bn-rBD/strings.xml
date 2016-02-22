@@ -333,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"একদম\nনিরব"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"শুধুমাত্র\nঅগ্রাধিকার"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"শুধুমাত্র\nঅ্যালার্মগুলি"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"সমস্ত"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"সমস্ত\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"চার্জ হচ্ছে (পূর্ণ হতে <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> সময় বাকি)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"দ্রুত চার্জ হচ্ছে (পূর্ণ হতে <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> সময় বাকি)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ধীরে ধীরে চার্জ হচ্ছে (পূর্ণ হতে <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> সময় বাকি)"</string>
@@ -447,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"স্থিতি দন্ডে ঘড়ির সেকেন্ড দেখায়৷ ব্যাটারি লাইফকে প্রভাবিত করতে পারে৷"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"দ্রুত সেটিংসে পুনরায় সাজান"</string>
     <string name="show_brightness" msgid="6613930842805942519">"দ্রুত সেটিংসে উজ্জ্বলতা দেখান"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"অ্যাকসেলেটর উপরের দিকে সোয়াইপ করে বিভক্ত-স্ক্রীন সক্ষম করুন"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"উপরের দিকে সোয়াইপ করে বিভক্ত-স্ক্রীনে প্রবেশ করার অঙ্গভঙ্গি সক্ষম করুন"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"\'এক নজরে\' বোতাম থেকে উপরের দিকে সোয়াইপ করে, বিভক্ত-স্ক্রীনে প্রবেশ করতে অঙ্গভঙ্গি সক্ষম করুন"</string>
     <string name="experimental" msgid="6198182315536726162">"পরীক্ষামূলক"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
@@ -467,14 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"স্ক্রীনের উপরে দেখানো হয় এবং শব্দ করে"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
     <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"স্বাভাবিক রঙ"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"রাতের রঙ"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"কাস্টম রঙ"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"স্বয়ংক্রিয়ভাবে"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"অজানা রঙ"</string>
-    <string name="color_transform" msgid="6985460408079086090">"রঙ সংশোধন"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"দ্রুত সেটিংস টাইল দেখান"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"কাস্টম রূপান্তর সক্ষম করুন"</string>
+    <string name="color_and_appearance" msgid="1254323855964993144">"রঙ এবং চেহারা"</string>
+    <string name="night_mode" msgid="3540405868248625488">"রাতের মোড"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"প্রদর্শন ক্যালিব্রেট করুন"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"চালু আছে"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"বন্ধ আছে"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"স্বয়ংক্রিয়ভাবে চালু করুন"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"অবস্থান এবং সময়ের হিসাবে উপযুক্ত রাতের মোডে পাল্টান"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"যখন রাতের মোড চালু থাকবে"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS এর জন্য গাঢ় থিম ব্যবহার করুন"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"টিন্ট সমন্বয় করুন"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"উজ্জ্বলতা সমন্বয় করুন"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Android OS এর মূল অংশগুলিতে গাঢ় থিম প্রয়োগ করা হয়েছে যেটা সাধারণত একটি হালকা থিমে প্রদর্শিত হয়, যেমন সেটিংস এবং বিজ্ঞপ্তিগুলি৷"</string>
     <string name="color_apply" msgid="9212602012641034283">"প্রয়োগ করুন"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"সেটিংস নিশ্চিত করুন"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"কিছু রঙের সেটিংস এই ডিভাইসকে ব্যবহারের অযোগ্য করে দিতে পারে৷ এই রঙের সেটিংস নিশ্চিত করতে ওকে এ ক্লিক করুন, অন্যথায় ১০ সেকেন্ড পরে এই সেটিংস পুনরায় সেট হবে৷"</string>
@@ -486,21 +488,20 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"হোম"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"সাম্প্রতিকগুলি"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"পিছনে"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"ভলিউমে \'বিরক্ত করবেন না\' দেখাবেন না"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"ভলিউম ডায়লগে \"বিরক্ত করবেন না\" এর পূর্ণ নিয়ন্ত্রণের মঞ্জুরি দিন৷"</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"ভলিউম এবং \'বিরক্ত করবেন না\'"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"ভলিউম কমানোর মাধ্যেমে \'বিরক্ত করবেন না\' চালু করুন"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"ভলিউম নিয়ন্ত্রণ সহ দেখান"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"বিরক্ত করবেন না"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"ভলিউম বোতামের শর্টকাট"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"ভলিউম বাড়ানোর মাধ্যেমে \'বিরক্ত করবেন না\' থেকে প্রস্থান করুন"</string>
     <string name="battery" msgid="7498329822413202973">"ব্যাটারি"</string>
     <string name="clock" msgid="7416090374234785905">"ঘড়ি"</string>
     <string name="headset" msgid="4534219457597457353">"হেডসেট"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"হেডফোনগুলি সংযুক্ত হয়েছে"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"হেডসেট সংযুক্ত হয়েছে"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"স্থিতি দন্ডে দেখানোর জন্য আইকনগুলিকে সক্ষম বা অক্ষম করুন৷"</string>
     <string name="data_saver" msgid="5037565123367048522">"ডেটা সেভার"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ডেটা সেভার চালু আছে"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ডেটা সেভার বন্ধ আছে"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"চালু আছে"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"বন্ধ আছে"</string>
     <string name="nav_bar" msgid="1993221402773877607">"নেভিগেশন দন্ড"</string>
     <string name="start" msgid="6873794757232879664">"শুরু করুন"</string>
     <string name="center" msgid="4327473927066010960">"কেন্দ্র"</string>
@@ -523,4 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"পূর্বরূপ দেখুন"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"টাইলগুলি যোগ করার জন্য টেনে আনুন"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা করুন"</string>
+    <string name="tuner_time" msgid="6572217313285536011">"সময়"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"ঘন্টা, মিনিট, এবং সেকেন্ড দেখান"</item>
+    <item msgid="1427801730816895300">"ঘন্টা এবং মিনিট দেখান (ডিফল্ট)"</item>
+    <item msgid="3830170141562534721">"এই আইকনটি দেখাবেন না"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"সর্বদা শতাংশ দেখান"</item>
+    <item msgid="2139628951880142927">"চার্জ করার সময় শতাংশ দেখান (ডিফল্ট)"</item>
+    <item msgid="3327323682209964956">"এই আইকনটি দেখাবেন না"</item>
+  </string-array>
 </resources>

@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"ບໍ່​ສາ​ມາດ​ເລີ່ມ <xliff:g id="APP">%s</xliff:g> ໄດ້."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ຖືກປິດໃຊ້ໃນໂໝດຄວາມມປອດໄພ."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ປະຫວັດ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ລຶບ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ການ​ແຍກ​ລວງ​ຂວາງ"</string>
@@ -334,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ຄວາມ​ງຽບ\nທັງ​ໝົດ"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ບຸ​ລິ​ມະ​ສິດ\nເທົ່າ​ນັ້ນ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ໂມງ​ປຸກ\nເທົ່າ​ນັ້ນ"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"ທັງໝົດ"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"ທັງໝົດ\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ກຳ​ລັງ​ສາກ​ໄຟ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ກວ່າ​ຈ​ະ​ເຕັມ)"</string>
@@ -448,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ສະ​ແດງວິ​ນາ​ທີ​ໂມງ​ຢູ່​ໃນ​ແຖບ​ສະ​ຖາ​ນະ. ອາດ​ຈະ​ມີ​ຜົນ​ກະ​ທົບ​ຕໍ່​ອາ​ຍຸ​ແບັດ​ເຕີ​ຣີ."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ຈັດ​ວາງ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ​ຄືນ​ໃໝ່"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ສະ​ແດງ​ຄວາມ​ແຈ້ງ​ຢູ່​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ດ່ວນ"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"ເປີດໃຊ້ຕົວເລັ່ງຄວາມໄວການປັດຂຶ້ນຂອງໜ້າຈໍແບບແຍກກັນ"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"ເປີດໃຊ້ທ່າທາງການປັດຂຶ້ນເພື່ອເຂົ້າສູ່ໜ້າຈໍແບບແຍກກັນ"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"ເປີດໃຊ້ທ່າທາງເພື່ອເຂົ້າສູ່ໜ້າຈໍແບບແຍກກັນ ໂດຍການປັດຂຶ້ນຈາກປຸ່ມພາບຮວມ"</string>
     <string name="experimental" msgid="6198182315536726162">"ຍັງຢູ່ໃນການທົດລອງ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ເປີດ​ໃຊ້ Bluetooth ບໍ່?"</string>
@@ -468,19 +465,22 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"ເດັ້ງຂຶ້ນເທິງຫນ້າຈໍ ແລະສົ່ງສຽງດັງ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"​ການ​ຕັ້ງ​ຄ່າ​ເພີ່ມ​ເຕີມ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ສຳເລັດແລ້ວ"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"ສີ​ປົກ​ກະ​ຕິ"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"ສີ​ຕອນ​ກາງ​ຄືນ"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"ສີແບບກຳນົດເອງ"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"ອັດຕະໂນມັດ"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"ສີທີ່ບໍ່ຮູ້ຈັກ"</string>
-    <string name="color_transform" msgid="6985460408079086090">"ການ​ດັດ​ແປງສີ"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"ສະແດງໄທລ໌ການຕັ້ງຄ່າດ່ວນ"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"ເປີດໃຊ້ການປ່ຽນສີແບບກຳນົດເອງ"</string>
+    <string name="color_and_appearance" msgid="1254323855964993144">"ສີ ແລະ ລັກສະນະ"</string>
+    <string name="night_mode" msgid="3540405868248625488">"ໂໝດກາງຄືນ"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"ປັບໜ້າຈໍ"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"ເປີດ"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"ປິດ"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"ເປີດ​ໃຊ້​ອັດ​ຕະ​ໂນ​ມັດ"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ສະລັບໄປໃຊ້ໂໝດກາງຄືນຕາມຄວາມເໝາະສົມກັບສະຖານທີ່ ແລະ ເວລາໃນແຕ່ລະມື້"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"ເມື່ອເປີດໂໝດກາງຄືນ"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"ໃຊ້ຮູບແບບສີສັນແບບມືດສຳລັບ Android OS"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"ປັບແຕ່ງໂທນສີ"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"ປັບແຕ່ງຄວາມສະຫວ່າງ"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"ຮູບແບບສີສັນແບບມືດແມ່ນຖືກນຳໃຊ້ກັບສ່ວນຫຼັກຂອງ Android OS ທີ່ປົກກະຕິຈະສະແດງໃນແບບສີສັນແບບແຈ້ງແລ້ວ ເຊັ່ນ: ການຕັ້ງຄ່າ ແລະ ການແຈ້ງເຕືອນ."</string>
     <string name="color_apply" msgid="9212602012641034283">"ນຳໃຊ້"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ຢືນ​ຢັນ​ການ​ຕັ້ງ​ຄ່າ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ບາງການຕັ້ງຄ່າສີສາມາດເຮັດໃຫ້ອຸປະກອນນີ້ບໍ່ສາມາດໃຊ້ໄດ້. ຄລິກ ຕົກລົງ ເພື່ອຢືນຢັນການຕັ້ງຄ່າສີເຫຼົ່ານີ້, ຖ້າບໍ່ດັ່ງນັ້ນ ການຕັ້ງຄ່າເຫຼົ່ານີ້ຈະຕັ້ງຄືນໃໝ່ ຫຼັງຈາກ 10 ວິນາທີ."</string>
-    <!-- no translation found for battery_panel_title (7944156115535366613) -->
-    <skip />
+    <string name="battery_panel_title" msgid="7944156115535366613">"ການໃຊ້ແບັດເຕີຣີ"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ຕົວປະຢັດແບັດເຕີຣີບໍ່ມີໃຫ້ນຳໃຊ້ໃນລະຫວ່າງການສາກ"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"ຕົວປະຢັດ​ແບັດເຕີຣີ"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"ຫຼຸດ​ປະ​ສິ​ທິ​ພາບ​ການໃຊ້ງານ ແລະ ​ຂໍ້​ມູນ​ພື້ນຫຼັງ"</string>
@@ -488,21 +488,20 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"​ໜ້າຫຼັກ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"ຫາ​ກໍ​ໃຊ້"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"ກັບຄືນ"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"ສະແດງ ຫ້າມລົບກວນ ໃນລະດັບສຽງ"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"ອະນຸຍາດການຄວບຄຸມເຕັມສ່ວນຂອງ ຫ້າມລົບກວນ ໃນກ່ອງປັບລະດັບສຽງ."</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"ລະດັບສຽງ ແລະ ຫ້າມລົບກວນ"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"ເປີດໃຊ້ໂໝດ ຫ້າມລົບກວນ ເມື່ອປັບສຽງໃຫ້ຄ່ອຍລົງ"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"ສະແດງສ່ວນຄວບຄຸມສຽງ"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"ຫ້າມ​ລົບ​ກວນ"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"ທາງລັດປຸ່ມສຽງ"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"ອອກຈາກໂໝດ ຫ້າມລົບກວນ ເມື່ອປັບສຽງໃຫ້ດັງຂຶ້ນ"</string>
     <string name="battery" msgid="7498329822413202973">"ແບັດເຕີຣີ"</string>
     <string name="clock" msgid="7416090374234785905">"ໂມງ"</string>
     <string name="headset" msgid="4534219457597457353">"​ຊຸດ​ຫູ​ຟັງ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ເຊື່ອມຕໍ່ຊຸດຫູຟັງແລ້ວ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ເຊື່ອມ​ຕໍ່ຊຸດ​ຫູ​ຟັງແລ້ວ"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"ເປີດ ຫຼື ປິດໄອຄອນຕ່າງໆຈາກການສະແດງໃນແຖບສະຖານະ."</string>
     <string name="data_saver" msgid="5037565123367048522">"ຕົວປະຢັດຂໍ້ມູນ"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ຕົວປະຢັດຂໍ້ມູນເປີດຢູ່"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ຕົວປະຢັດຂໍ້ມູນປິດຢູ່"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ເປີດ"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"ປິດ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ແຖບນຳທາງ"</string>
     <string name="start" msgid="6873794757232879664">"ເລີ່ມຕົ້ນ"</string>
     <string name="center" msgid="4327473927066010960">"ເຄິ່ງກາງ"</string>
@@ -525,4 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"ສະແດງຕົວຢ່າງ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ລາກເພື່ອເພີ່ມໄທລ໌"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ແກ້ໄຂ"</string>
+    <string name="tuner_time" msgid="6572217313285536011">"ເວລາ"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"ສະແດງຊົ່ວໂມງ, ນາທີ ແລະ ວິນາທີ"</item>
+    <item msgid="1427801730816895300">"ສະແດງຊົ່ວໂມງ ແລະ ນາທີ (ຄ່າເລີ່ມຕົ້ນ)"</item>
+    <item msgid="3830170141562534721">"ຢ່າສະແດງໄອຄອນນີ້"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"ສະແດງເປີເຊັນຕະຫຼອດເວລາ"</item>
+    <item msgid="2139628951880142927">"ສະແດງເປີເຊັນເມື່ອກຳລັງສາກໄຟ (ຄ່າເລີ່ມຕົ້ນ)"</item>
+    <item msgid="3327323682209964956">"ຢ່າສະແດງໄອຄອນນີ້"</item>
+  </string-array>
 </resources>
