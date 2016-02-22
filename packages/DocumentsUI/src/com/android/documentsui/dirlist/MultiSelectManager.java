@@ -657,15 +657,22 @@ public final class MultiSelectManager {
         // item A is tapped (and selected), then an in-progress band select covers A then uncovers
         // A, A should still be selected as it has been saved. To ensure this behavior, the saved
         // selection must be tracked separately.
-        private Set<String> mSelection = new HashSet<>();
-        private Set<String> mProvisionalSelection = new HashSet<>();
+        private final Set<String> mSelection;
+        private final Set<String> mProvisionalSelection;
         private String mDirectoryKey;
 
-        @VisibleForTesting
-        public Selection(String... ids) {
-            for (int i = 0; i < ids.length; i++) {
-                add(ids[i]);
-            }
+        public Selection() {
+            mSelection = new HashSet<String>();
+            mProvisionalSelection = new HashSet<String>();
+        }
+
+        /**
+         * Used by CREATOR.
+         */
+        private Selection(String directoryKey, List<String> selection) {
+            mDirectoryKey = directoryKey;
+            mSelection = new HashSet<String>(selection);
+            mProvisionalSelection = new HashSet<String>();
         }
 
         /**
@@ -810,8 +817,11 @@ public final class MultiSelectManager {
 
         @VisibleForTesting
         void copyFrom(Selection source) {
-            mSelection = new HashSet<>(source.mSelection);
-            mProvisionalSelection = new HashSet<>(source.mProvisionalSelection);
+            mSelection.clear();
+            mSelection.addAll(source.mSelection);
+
+            mProvisionalSelection.clear();
+            mProvisionalSelection.addAll(source.mProvisionalSelection);
         }
 
         @Override
@@ -878,6 +888,26 @@ public final class MultiSelectManager {
             // We don't include provisional selection since it is
             // typically coupled to some other runtime state (like a band).
         }
+
+        public static final ClassLoaderCreator<Selection> CREATOR =
+                new ClassLoaderCreator<Selection>() {
+            @Override
+            public Selection createFromParcel(Parcel in) {
+                return createFromParcel(in, null);
+            }
+
+            @Override
+            public Selection createFromParcel(Parcel in, ClassLoader loader) {
+                return new Selection(
+                        in.readString(),
+                        (ArrayList<String>) in.readArrayList(loader));
+            }
+
+            @Override
+            public Selection[] newArray(int size) {
+                return new Selection[size];
+            }
+        };
     }
 
     /**
