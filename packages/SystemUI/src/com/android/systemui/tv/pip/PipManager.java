@@ -106,7 +106,7 @@ public class PipManager {
                     stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
                     if (stackInfo == null) {
                         Log.w(TAG, "There is no pinned stack");
-                        closeInternal(false);
+                        closePipInternal(false);
                         return;
                     }
                 } catch (RemoteException e) {
@@ -120,7 +120,7 @@ public class PipManager {
                     }
                 }
                 // PIP task doesn't exist anymore in PINNED_STACK.
-                closeInternal(true);
+                closePipInternal(true);
             }
         }
     };
@@ -222,10 +222,10 @@ public class PipManager {
      * Closes PIP (PIPed activity and PIP system UI).
      */
     public void closePip() {
-        closeInternal(true);
+        closePipInternal(true);
     }
 
-    private void closeInternal(boolean removePipStack) {
+    private void closePipInternal(boolean removePipStack) {
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
         if (removePipStack) {
