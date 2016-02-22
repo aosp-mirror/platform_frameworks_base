@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "HardwarePropertiesManager-JNI"
+#define LOG_TAG "HardwarePropertiesManagerService-JNI"
 
 #include "JNIHelp.h"
 #include "jni.h"
@@ -137,7 +137,7 @@ static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
 
 // ----------------------------------------------------------------------------
 
-static const JNINativeMethod gHardwarePropertiesManagerMethods[] = {
+static const JNINativeMethod gHardwarePropertiesManagerServiceMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInit", "()V",
             (void*) nativeInit },
@@ -149,11 +149,11 @@ static const JNINativeMethod gHardwarePropertiesManagerMethods[] = {
             (void*) nativeGetCpuUsages }
 };
 
-int register_android_os_HardwarePropertiesManager(JNIEnv* env) {
+int register_android_server_HardwarePropertiesManagerService(JNIEnv* env) {
     gHardwarePropertiesModule = nullptr;
-    int res = jniRegisterNativeMethods(env, "android/os/HardwarePropertiesManager",
-                                       gHardwarePropertiesManagerMethods,
-                                       NELEM(gHardwarePropertiesManagerMethods));
+    int res = jniRegisterNativeMethods(env, "com/android/server/HardwarePropertiesManagerService",
+                                       gHardwarePropertiesManagerServiceMethods,
+                                       NELEM(gHardwarePropertiesManagerServiceMethods));
     jclass clazz = env->FindClass("android/os/CpuUsageInfo");
     gCpuUsageInfoClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
     gCpuUsageInfoClassInfo.initMethod = GetMethodIDOrDie(env, gCpuUsageInfoClassInfo.clazz,

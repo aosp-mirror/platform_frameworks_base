@@ -17,9 +17,11 @@ package android.os;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.Context;
+import android.util.Log;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
 
 /**
  * The HardwarePropertiesManager class provides a mechanism of accessing hardware state of a
@@ -29,11 +31,7 @@ public class HardwarePropertiesManager {
 
     private static final String TAG = HardwarePropertiesManager.class.getSimpleName();
 
-    private static native void nativeInit();
-
-    private static native float[] nativeGetFanSpeeds();
-    private static native float[] nativeGetDeviceTemperatures(int type);
-    private static native CpuUsageInfo[] nativeGetCpuUsages();
+    private final IHardwarePropertiesManager mService;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
@@ -54,9 +52,13 @@ public class HardwarePropertiesManager {
     /** Temperature of battery in Celsius. */
     public static final int DEVICE_TEMPERATURE_BATTERY = 2;
 
+    /** Calling app context. */
+    private final Context mContext;
+
     /** @hide */
-    public HardwarePropertiesManager() {
-        nativeInit();
+    public HardwarePropertiesManager(Context context, IHardwarePropertiesManager service) {
+        mContext = context;
+        mService = service;
     }
 
     /**
@@ -68,13 +70,19 @@ public class HardwarePropertiesManager {
      *         Empty if platform doesn't provide the queried temperature.
      *
      * @throws IllegalArgumentException if an incorrect temperature type is queried.
+     * @throws SecurityException if a non profile or device owner tries to call this method.
     */
     public @NonNull float[] getDeviceTemperatures(@DeviceTemperatureType int type) {
         switch (type) {
         case DEVICE_TEMPERATURE_CPU:
         case DEVICE_TEMPERATURE_GPU:
         case DEVICE_TEMPERATURE_BATTERY:
-            return nativeGetDeviceTemperatures(type);
+            try {
+                return mService.getDeviceTemperatures(mContext.getOpPackageName(), type);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Could not get device temperatures", e);
+                return new float[0];
+            }
         default:
             throw new IllegalArgumentException();
         }
@@ -85,18 +93,32 @@ public class HardwarePropertiesManager {
      *
      * @return an array of {@link android.os.CpuUsageInfo} for each core.
      *         Empty if CPU usage is not supported on this system.
+     *
+     * @throws SecurityException if a non profile or device owner tries to call this method.
      */
     public @NonNull CpuUsageInfo[] getCpuUsages() {
-        return nativeGetCpuUsages();
+        try {
+            return mService.getCpuUsages(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not get CPU usages", e);
+            return new CpuUsageInfo[0];
+        }
     }
 
     /**
      * Return an array of fan speeds in RPM.
      *
-     * @return an arrat of float fan speeds. Empty if there is no fans or fan speed
-     *         not supported on this system.
+     * @return an array of float fan speeds in RPM. Empty if there are no fans or fan speed is not
+     * supported on this system.
+     *
+     * @throws SecurityException if a non profile or device owner tries to call this method.
      */
     public @NonNull float[] getFanSpeeds() {
-        return nativeGetFanSpeeds();
+        try {
+            return mService.getFanSpeeds(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not get fan speeds", e);
+            return new float[0];
+        }
     }
 }

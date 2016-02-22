@@ -488,6 +488,7 @@ public final class SystemServer {
         MmsServiceBroker mmsService = null;
         EntropyMixer entropyMixer = null;
         VrManagerService vrManagerService = null;
+        HardwarePropertiesManagerService hardwarePropertiesService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableBluetooth = SystemProperties.getBoolean("config.disable_bluetooth", false);
@@ -960,6 +961,17 @@ public final class SystemServer {
                     ServiceManager.addService(Context.SERIAL_SERVICE, serial);
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting SerialService", e);
+                }
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+
+                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                        "StartHardwarePropertiesManagerService");
+                try {
+                    hardwarePropertiesService = new HardwarePropertiesManagerService(context);
+                    ServiceManager.addService(Context.HARDWARE_PROPERTIES_SERVICE,
+                            hardwarePropertiesService);
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting HardwarePropertiesManagerService", e);
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
