@@ -26860,6 +26860,7 @@ package android.opengl {
     method public static void glProgramBinary(int, int, java.nio.Buffer, int);
     method public static void glProgramParameteri(int, int, int);
     method public static void glReadBuffer(int);
+    method public static void glReadPixels(int, int, int, int, int, int, int);
     method public static void glRenderbufferStorageMultisample(int, int, int, int, int);
     method public static void glResumeTransformFeedback();
     method public static void glSamplerParameterf(int, int, float);

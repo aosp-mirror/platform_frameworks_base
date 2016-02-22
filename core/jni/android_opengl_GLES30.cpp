@@ -5155,6 +5155,21 @@ android_glGetInternalformativ__IIIILjava_nio_IntBuffer_2
     }
 }
 
+/* void glReadPixels ( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLint offset ) */
+static void
+android_glReadPixels__IIIIIII
+  (JNIEnv *_env, jobject _this, jint x, jint y, jint width, jint height, jint format, jint type, jint offset) {
+    glReadPixels(
+        (GLint)x,
+        (GLint)y,
+        (GLsizei)width,
+        (GLsizei)height,
+        (GLenum)format,
+        (GLenum)type,
+        reinterpret_cast<GLvoid *>(offset)
+    );
+}
+
 static const char *classPathName = "android/opengl/GLES30";
 
 static const JNINativeMethod methods[] = {
@@ -5320,6 +5335,7 @@ static const JNINativeMethod methods[] = {
 {"glTexStorage3D", "(IIIIII)V", (void *) android_glTexStorage3D__IIIIII },
 {"glGetInternalformativ", "(IIII[II)V", (void *) android_glGetInternalformativ__IIII_3II },
 {"glGetInternalformativ", "(IIIILjava/nio/IntBuffer;)V", (void *) android_glGetInternalformativ__IIIILjava_nio_IntBuffer_2 },
+{"glReadPixels", "(IIIIIII)V", (void *) android_glReadPixels__IIIIIII },
 };
 
 int register_android_opengl_jni_GLES30(JNIEnv *_env)
