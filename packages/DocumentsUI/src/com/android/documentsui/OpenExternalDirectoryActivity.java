@@ -22,6 +22,7 @@ import static android.os.storage.StorageVolume.EXTRA_STORAGE_VOLUME;
 import static com.android.documentsui.Shared.DEBUG;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -33,6 +34,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.UriPermission;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
@@ -61,6 +63,8 @@ public class OpenExternalDirectoryActivity extends Activity {
     private static final String EXTRA_FILE = "com.android.documentsui.FILE";
     private static final String EXTRA_APP_LABEL = "com.android.documentsui.APP_LABEL";
     private static final String EXTRA_VOLUME_LABEL = "com.android.documentsui.VOLUME_LABEL";
+
+    private ContentProviderClient mExternalStorageClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,12 +102,20 @@ public class OpenExternalDirectoryActivity extends Activity {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mExternalStorageClient != null) {
+            mExternalStorageClient.close();
+        }
+    }
+
     /**
      * Validates the given path (volume + directory) and display the appropriate dialog asking the
      * user to grant access to it.
      */
-    private static boolean showFragment(Activity activity, int userId, StorageVolume storageVolume,
-            String directoryName) {
+    private static boolean showFragment(OpenExternalDirectoryActivity activity, int userId,
+            StorageVolume storageVolume, String directoryName) {
         if (DEBUG)
             Log.d(TAG, "showFragment() for volume " + storageVolume.dump() + ", directory "
                     + directoryName + ", and user " + userId);
@@ -129,7 +141,7 @@ public class OpenExternalDirectoryActivity extends Activity {
             return false;
         }
 
-        // Gets volume label and converted path
+        // Gets volume label and converted path.
         String volumeLabel = null;
         final List<VolumeInfo> volumes = sm.getVolumes();
         if (DEBUG) Log.d(TAG, "Number of volumes: " + volumes.size());
@@ -143,6 +155,15 @@ public class OpenExternalDirectoryActivity extends Activity {
                 break;
             }
         }
+
+        // Checks if the user has granted the permission already.
+        final Intent intent = getIntentForExistingPermission(activity, file);
+        if (intent != null) {
+            activity.setResult(RESULT_OK, intent);
+            activity.finish();
+            return true;
+        }
+
         if (volumeLabel == null) {
             Log.e(TAG, "Could not get volume for " + file);
             return false;
@@ -196,8 +217,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         return volume.isVisibleForWrite(userId) && root.equals(path);
     }
 
-    private static Intent createGrantedUriPermissionsIntent(ContentProviderClient provider,
-            File file) {
+    private static Uri getGrantedUriPermission(ContentProviderClient provider, File file) {
         // Calls ExternalStorageProvider to get the doc id for the file
         final Bundle bundle;
         try {
@@ -218,8 +238,17 @@ public class OpenExternalDirectoryActivity extends Activity {
             Log.e(TAG, "Could not get URI for doc id " + docId);
             return null;
         }
-
         if (DEBUG) Log.d(TAG, "URI for " + file + ": " + uri);
+        return uri;
+    }
+
+    private static Intent createGrantedUriPermissionsIntent(ContentProviderClient provider,
+            File file) {
+        final Uri uri = getGrantedUriPermission(provider, file);
+        return createGrantedUriPermissionsIntent(uri);
+    }
+
+    private static Intent createGrantedUriPermissionsIntent(Uri uri) {
         final Intent intent = new Intent();
         intent.setData(uri);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -229,13 +258,31 @@ public class OpenExternalDirectoryActivity extends Activity {
         return intent;
     }
 
+    private static Intent getIntentForExistingPermission(OpenExternalDirectoryActivity activity,
+            File file) {
+        final String packageName = activity.getCallingPackage();
+        final Uri grantedUri = getGrantedUriPermission(activity.getExternalStorageClient(), file);
+        if (DEBUG)
+            Log.d(TAG, "checking if " + packageName + " already has permission for " + grantedUri);
+        final ActivityManager am =
+                (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+        for (UriPermission uriPermission : am.getGrantedUriPermissions(packageName).getList()) {
+            final Uri uri = uriPermission.getUri();
+            if (uri.equals(grantedUri)) {
+                if (DEBUG) Log.d(TAG, packageName + " already has permission: " + uriPermission);
+                return createGrantedUriPermissionsIntent(uri);
+            }
+        }
+        if (DEBUG) Log.d(TAG, packageName + " does not have permission for " + grantedUri);
+        return null;
+    }
+
     public static class OpenExternalDirectoryDialogFragment extends DialogFragment {
 
         private File mFile;
         private String mVolumeLabel;
         private String mAppLabel;
-        private ContentProviderClient mExternalStorageClient;
-        private ContentResolver mResolver;
+        private OpenExternalDirectoryActivity mActivity;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -245,16 +292,8 @@ public class OpenExternalDirectoryActivity extends Activity {
                 mFile = new File(args.getString(EXTRA_FILE));
                 mVolumeLabel = args.getString(EXTRA_VOLUME_LABEL);
                 mAppLabel = args.getString(EXTRA_APP_LABEL);
-                mResolver = getContext().getContentResolver();
             }
-        }
-
-        @Override
-        public void onDestroy() {
-            super.onDestroy();
-            if (mExternalStorageClient != null) {
-                mExternalStorageClient.close();
-            }
+            mActivity = (OpenExternalDirectoryActivity) getActivity();
         }
 
         @Override
@@ -267,8 +306,8 @@ public class OpenExternalDirectoryActivity extends Activity {
                 public void onClick(DialogInterface dialog, int which) {
                     Intent intent = null;
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        intent = createGrantedUriPermissionsIntent(getExternalStorageClient(),
-                                mFile);
+                        intent = createGrantedUriPermissionsIntent(
+                                mActivity.getExternalStorageClient(), mFile);
                     }
                     if (which == DialogInterface.BUTTON_NEGATIVE || intent == null) {
                         activity.setResult(RESULT_CANCELED);
@@ -297,13 +336,13 @@ public class OpenExternalDirectoryActivity extends Activity {
             activity.setResult(RESULT_CANCELED);
             activity.finish();
         }
+    }
 
-        private synchronized ContentProviderClient getExternalStorageClient() {
-            if (mExternalStorageClient == null) {
-                mExternalStorageClient =
-                        mResolver.acquireContentProviderClient(EXTERNAL_STORAGE_AUTH);
-            }
-            return mExternalStorageClient;
+    private synchronized ContentProviderClient getExternalStorageClient() {
+        if (mExternalStorageClient == null) {
+            mExternalStorageClient =
+                    getContentResolver().acquireContentProviderClient(EXTERNAL_STORAGE_AUTH);
         }
+        return mExternalStorageClient;
     }
 }
