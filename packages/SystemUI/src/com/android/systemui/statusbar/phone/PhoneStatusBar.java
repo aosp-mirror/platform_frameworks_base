@@ -111,6 +111,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.SystemUIFactory;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeHost;
@@ -771,8 +772,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ScrimView scrimBehind = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = (ScrimView) mStatusBarWindow.findViewById(R.id.scrim_in_front);
         View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
-        mScrimController = new ScrimController(scrimBehind, scrimInFront, headsUpScrim,
-                mScrimSrcModeEnabled);
+        mScrimController = SystemUIFactory.getInstance().createScrimController(
+                scrimBehind, scrimInFront, headsUpScrim, mScrimSrcModeEnabled);
         mHeadsUpManager.addListener(mScrimController);
         mStackScroller.setScrimController(mScrimController);
         mScrimController.setBackDropView(mBackdrop);
