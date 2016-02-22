@@ -1458,8 +1458,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return null;
     }
 
-    @Override
-    public InputBindResult startInput(
+    private InputBindResult startInput(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext, EditorInfo attribute,
             int controlFlags) {
@@ -2197,7 +2196,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public InputBindResult windowGainedFocus(
+    public InputBindResult startInputOrWindowGainedFocus(
+            /* @InputMethodClient.StartInputReason */ final int startInputReason,
+            IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
+            int windowFlags, EditorInfo attribute, IInputContext inputContext) {
+        if (windowToken != null) {
+            return windowGainedFocus(startInputReason, client, windowToken, controlFlags,
+                    softInputMode, windowFlags, attribute, inputContext);
+        } else {
+            return startInput(startInputReason, client, inputContext, attribute, controlFlags);
+        }
+    }
+
+    private InputBindResult windowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext) {
