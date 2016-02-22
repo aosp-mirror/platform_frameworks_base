@@ -369,6 +369,13 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     }
                     break;
                 case MSG_CANCEL:
+                    if (mVerb == VERB_FINISHED) {
+                        if (DEBUG) {
+                            Slog.d(TAG,
+                                   "Trying to process cancel for torn-down context, ignoring.");
+                        }
+                        return;
+                    }
                     mParams.setStopReason(message.arg1);
                     if (message.arg1 == JobParameters.REASON_PREEMPT) {
                         mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
@@ -478,12 +485,6 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
          *     _ENDING     -> No point in doing anything here, so we ignore.
          */
         private void handleCancelH() {
-            if (mRunningJob == null) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Trying to process cancel for torn-down context, ignoring.");
-                }
-                return;
-            }
             if (JobSchedulerService.DEBUG) {
                 Slog.d(TAG, "Handling cancel for: " + mRunningJob.getJobId() + " "
                         + VERB_STRINGS[mVerb]);
@@ -511,7 +512,6 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
 
         /** Process MSG_TIMEOUT here. */
         private void handleOpTimeoutH() {
-            mParams.setStopReason(JobParameters.REASON_TIMEOUT);
             switch (mVerb) {
                 case VERB_BINDING:
                     Slog.e(TAG, "Time-out while trying to bind " + mRunningJob.toShortString() +
@@ -536,6 +536,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                     // Not an error - client ran out of time.
                     Slog.i(TAG, "Client timed out while executing (no jobFinished received)." +
                             " sending onStop. "  + mRunningJob.toShortString());
+                    mParams.setStopReason(JobParameters.REASON_TIMEOUT);
                     sendStopMessageH();
                     break;
                 default:
