@@ -160,6 +160,10 @@ void BaseRenderNodeAnimator::pushStaging(AnimationContext& context) {
     }
 
     if (!mStagingRequests.empty()) {
+        // No interpolator was set, use the default
+        if (mPlayState == PlayState::NotStarted && !mInterpolator) {
+            mInterpolator.reset(Interpolator::createDefaultInterpolator());
+        }
         // Keep track of the play state and play time before they are changed when
         // staging requests are resolved.
         nsecs_t currentPlayTime = mPlayTime;
@@ -221,10 +225,6 @@ void BaseRenderNodeAnimator::transitionToRunning(AnimationContext& context) {
                 mStartTime, frameTimeMs, mStartDelay);
         // Set to 0 so that the animate() basically instantly finishes
         mStartTime = 0;
-    }
-    // No interpolator was set, use the default
-    if (!mInterpolator) {
-        mInterpolator.reset(Interpolator::createDefaultInterpolator());
     }
     if (mDuration < 0 || mDuration > 50000) {
         ALOGW("Your duration is strange and confusing: %" PRId64, mDuration);
