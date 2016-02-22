@@ -301,8 +301,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"én-appsmodus"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"Søk"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Kunne ikke starte <xliff:g id="APP">%s</xliff:g>."</string>
-    <!-- no translation found for recents_launch_disabled_message (1624523193008871793) -->
-    <skip />
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> er slått av i sikker modus."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Logg"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Tøm"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Del horisontalt"</string>
@@ -334,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nstillhet"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Bare\nPrioritet"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Bare\nalarmer"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Alle"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"Alle\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Lader (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Lader raskt (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Lader sakte (fulladet om <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -448,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Vis sekunder i statusfeltet på klokken. Det kan påvirke batteritiden."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Omorganiser hurtiginnstillingene"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Vis lysstyrke i hurtiginnstillingene"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Slå på delt skjerm ved å sveipe opp med akseleratoren"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Slå på delt skjerm ved å sveipe opp"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Slå på bevegelsen for å åpne delt skjerm ved å sveipe opp fra Oversikt-knappen"</string>
     <string name="experimental" msgid="6198182315536726162">"På forsøksstadiet"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå på Bluetooth?"</string>
@@ -468,19 +465,34 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Vis fort på skjermen med lyd"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere innstillinger"</string>
     <string name="notification_done" msgid="5279426047273930175">"Ferdig"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"Normale farger"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"Nattfarger"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"Spesialtilpassede farger"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"Automatisk"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"Ukjente farger"</string>
-    <string name="color_transform" msgid="6985460408079086090">"Fargemodifisering"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Vis ruten for hurtiginnstillinger"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"Slå på spesialtilpasset forvandling"</string>
+    <!-- no translation found for color_and_appearance (1254323855964993144) -->
+    <skip />
+    <!-- no translation found for night_mode (3540405868248625488) -->
+    <skip />
+    <!-- no translation found for calibrate_display (5974642573432039217) -->
+    <skip />
+    <!-- no translation found for night_mode_on (5597545513026541108) -->
+    <skip />
+    <!-- no translation found for night_mode_off (8035605276956057508) -->
+    <skip />
+    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
+    <skip />
+    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
+    <skip />
+    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
+    <skip />
+    <!-- no translation found for use_dark_theme (2900938704964299312) -->
+    <skip />
+    <!-- no translation found for adjust_tint (3398569573231409878) -->
+    <skip />
+    <!-- no translation found for adjust_brightness (980039329808178246) -->
+    <skip />
+    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
+    <skip />
     <string name="color_apply" msgid="9212602012641034283">"Bruk"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Bekreft innstillingene"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Noen fargeinnstillinger kan gjøre denne enheten ubrukelig. Klikk på OK for å bekrefte disse fargeinnstillingene, ellers blir de tilbakestilt etter ti sekunder."</string>
-    <!-- no translation found for battery_panel_title (7944156115535366613) -->
-    <skip />
+    <string name="battery_panel_title" msgid="7944156115535366613">"Batteribruk"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparing er ikke tilgjengelig under lading"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduserer ytelsen og begrenser bakgrunnsdataene"</string>
@@ -488,21 +500,24 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Startside"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nylige"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Tilbake"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"Vis «Ikke forstyrr» i volumkontrollene"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Tillat full kontroll over «Ikke forstyrr» i volumdialogen."</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Volum og «Ikke forstyrr»"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"Åpne «Ikke forstyrr» med volum ned-knappen"</string>
+    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
+    <skip />
+    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
+    <skip />
+    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
+    <skip />
     <string name="volume_up_silent" msgid="7141255269783588286">"Lukk «Ikke forstyrr» med volum opp-knappen"</string>
     <string name="battery" msgid="7498329822413202973">"Batteri"</string>
     <string name="clock" msgid="7416090374234785905">"Klokke"</string>
     <string name="headset" msgid="4534219457597457353">"Hodetelefoner"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Øretelefoner er tilkoblet"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Hodetelefoner er tilkoblet"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Vis eller skjul ikoner i statusfeltet."</string>
     <string name="data_saver" msgid="5037565123367048522">"Datasparing"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Datasparing er på"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Datasparing er av"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"På"</string>
+    <!-- no translation found for switch_bar_off (8803270596930432874) -->
+    <skip />
     <string name="nav_bar" msgid="1993221402773877607">"Navigasjonsrad"</string>
     <string name="start" msgid="6873794757232879664">"Start"</string>
     <string name="center" msgid="4327473927066010960">"Midtstilt"</string>
@@ -525,4 +540,12 @@
     <string name="preview" msgid="9077832302472282938">"Forhåndsvisning"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Dra for å legge til fliser"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Endre"</string>
+    <!-- no translation found for tuner_time (6572217313285536011) -->
+    <skip />
+    <!-- no translation found for clock_options:0 (5965318737560463480) -->
+    <!-- no translation found for clock_options:1 (1427801730816895300) -->
+    <!-- no translation found for clock_options:2 (3830170141562534721) -->
+    <!-- no translation found for battery_options:0 (3160236755818672034) -->
+    <!-- no translation found for battery_options:1 (2139628951880142927) -->
+    <!-- no translation found for battery_options:2 (3327323682209964956) -->
 </resources>
