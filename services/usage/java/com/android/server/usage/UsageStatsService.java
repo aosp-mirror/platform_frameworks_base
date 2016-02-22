@@ -123,6 +123,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_PAROLE_END_TIMEOUT = 7;
     static final int MSG_REPORT_CONTENT_PROVIDER_USAGE = 8;
     static final int MSG_PAROLE_STATE_CHANGED = 9;
+    static final int MSG_ONE_TIME_CHECK_IDLE_STATES = 10;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -145,7 +146,7 @@ public class UsageStatsService extends SystemService implements
     private long mLastAppIdleParoledTime;
 
     long mScreenOnTime;
-    long mScreenOnSystemTimeSnapshot;
+    long mLastScreenOnEventRealtime;
 
     @GuardedBy("mLock")
     private AppIdleHistory mAppIdleHistory = new AppIdleHistory();
@@ -188,6 +189,8 @@ public class UsageStatsService extends SystemService implements
 
         synchronized (mLock) {
             cleanUpRemovedUsersLocked();
+            mLastScreenOnEventRealtime = SystemClock.elapsedRealtime();
+            mScreenOnTime = readScreenOnTimeLocked();
         }
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
@@ -214,10 +217,6 @@ public class UsageStatsService extends SystemService implements
                     Context.DISPLAY_SERVICE);
             mPowerManager = getContext().getSystemService(PowerManager.class);
 
-            mScreenOnSystemTimeSnapshot = System.currentTimeMillis();
-            synchronized (this) {
-                mScreenOnTime = readScreenOnTimeLocked();
-            }
             mDisplayManager.registerDisplayListener(mDisplayListener, null);
             synchronized (this) {
                 updateDisplayLocked();
@@ -278,6 +277,11 @@ public class UsageStatsService extends SystemService implements
     @Override
     public void onStatsUpdated() {
         mHandler.sendEmptyMessageDelayed(MSG_FLUSH_TO_DISK, FLUSH_INTERVAL);
+    }
+
+    @Override
+    public void onStatsReloaded() {
+        postOneTimeCheckIdleStates();
     }
 
     @Override
@@ -359,6 +363,14 @@ public class UsageStatsService extends SystemService implements
         mHandler.sendMessage(mHandler.obtainMessage(MSG_CHECK_IDLE_STATES, userId, 0));
     }
 
+    /**
+     * We send a different message to check idle states once, otherwise we would end up
+     * scheduling a series of repeating checkIdleStates each time we fired off one.
+     */
+    void postOneTimeCheckIdleStates() {
+        mHandler.sendEmptyMessage(MSG_ONE_TIME_CHECK_IDLE_STATES);
+    }
+
     /** Check all running users' or specified user's apps to see if they enter an idle state. */
     void checkIdleStates(int checkUserId) {
         if (!mAppIdleEnabled) {
@@ -385,7 +397,7 @@ public class UsageStatsService extends SystemService implements
                             userId);
             synchronized (mLock) {
                 final long timeNow = checkAndGetTimeLocked();
-                final long screenOnTime = getScreenOnTimeLocked(timeNow);
+                final long screenOnTime = getScreenOnTimeLocked();
                 UserUsageStatsService service = getUserDataAndInitializeIfNeededLocked(userId,
                         timeNow);
                 final int packageCount = packages.size();
@@ -401,8 +413,6 @@ public class UsageStatsService extends SystemService implements
                 }
             }
         }
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CHECK_IDLE_STATES, checkUserId, 0),
-                mCheckIdleIntervalMillis);
     }
 
     /** Check if it's been a while since last parole and let idle apps do some work */
@@ -442,21 +452,21 @@ public class UsageStatsService extends SystemService implements
         if (screenOn == mScreenOn) return;
 
         mScreenOn = screenOn;
-        long now = System.currentTimeMillis();
+        long now = SystemClock.elapsedRealtime();
         if (mScreenOn) {
-            mScreenOnSystemTimeSnapshot = now;
+            mLastScreenOnEventRealtime = now;
         } else {
-            mScreenOnTime += now - mScreenOnSystemTimeSnapshot;
+            mScreenOnTime += now - mLastScreenOnEventRealtime;
             writeScreenOnTimeLocked(mScreenOnTime);
         }
     }
 
-    private long getScreenOnTimeLocked(long now) {
+    long getScreenOnTimeLocked() {
+        long screenOnTime = mScreenOnTime;
         if (mScreenOn) {
-            return now - mScreenOnSystemTimeSnapshot + mScreenOnTime;
-        } else {
-            return mScreenOnTime;
+            screenOnTime += SystemClock.elapsedRealtime() - mLastScreenOnEventRealtime;
         }
+        return screenOnTime;
     }
 
     private File getScreenOnTimeFile() {
@@ -526,7 +536,7 @@ public class UsageStatsService extends SystemService implements
         if (service == null) {
             service = new UserUsageStatsService(getContext(), userId,
                     new File(mUsageStatsDir, Integer.toString(userId)), this);
-            service.init(currentTimeMillis, getScreenOnTimeLocked(currentTimeMillis));
+            service.init(currentTimeMillis, getScreenOnTimeLocked());
             mUserState.put(userId, service);
         }
         return service;
@@ -539,25 +549,18 @@ public class UsageStatsService extends SystemService implements
         final long actualSystemTime = System.currentTimeMillis();
         final long actualRealtime = SystemClock.elapsedRealtime();
         final long expectedSystemTime = (actualRealtime - mRealTimeSnapshot) + mSystemTimeSnapshot;
-        boolean resetBeginIdleTime = false;
-        if (Math.abs(actualSystemTime - expectedSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
+        final long diffSystemTime = actualSystemTime - expectedSystemTime;
+        if (Math.abs(diffSystemTime) > TIME_CHANGE_THRESHOLD_MILLIS) {
             // The time has changed.
-
-            // Check if it's severe enough a change to reset screenOnTime
-            if (Math.abs(actualSystemTime - expectedSystemTime) > mAppIdleDurationMillis) {
-                mScreenOnSystemTimeSnapshot = actualSystemTime;
-                mScreenOnTime = 0;
-                resetBeginIdleTime = true;
-            }
+            Slog.i(TAG, "Time changed in UsageStats by " + (diffSystemTime / 1000) + " seconds");
             final int userCount = mUserState.size();
             for (int i = 0; i < userCount; i++) {
                 final UserUsageStatsService service = mUserState.valueAt(i);
-                service.onTimeChanged(expectedSystemTime, actualSystemTime, mScreenOnTime,
-                        resetBeginIdleTime);
+                service.onTimeChanged(expectedSystemTime, actualSystemTime, getScreenOnTimeLocked(),
+                        false);
             }
             mRealTimeSnapshot = actualRealtime;
             mSystemTimeSnapshot = actualSystemTime;
-            postCheckIdleStates(UserHandle.USER_ALL);
         }
         return actualSystemTime;
     }
@@ -586,7 +589,7 @@ public class UsageStatsService extends SystemService implements
     void reportEvent(UsageEvents.Event event, int userId) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
-            final long screenOnTime = getScreenOnTimeLocked(timeNow);
+            final long screenOnTime = getScreenOnTimeLocked();
             convertToSystemTimeLocked(event);
 
             final UserUsageStatsService service =
@@ -602,7 +605,6 @@ public class UsageStatsService extends SystemService implements
                     || event.mEventType == Event.SYSTEM_INTERACTION
                     || event.mEventType == Event.USER_INTERACTION)) {
                 if (previouslyIdle) {
-                    //Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
                             /* idle = */ 0, event.mPackage));
                     notifyBatteryStats(event.mPackage, userId, false);
@@ -643,7 +645,7 @@ public class UsageStatsService extends SystemService implements
     void forceIdleState(String packageName, int userId, boolean idle) {
         synchronized (mLock) {
             final long timeNow = checkAndGetTimeLocked();
-            final long screenOnTime = getScreenOnTimeLocked(timeNow);
+            final long screenOnTime = getScreenOnTimeLocked();
             final long deviceUsageTime = screenOnTime - (idle ? mAppIdleDurationMillis : 0) - 5000;
 
             final UserUsageStatsService service =
@@ -657,7 +659,6 @@ public class UsageStatsService extends SystemService implements
                     timeNow - (idle ? mAppIdleWallclockThresholdMillis : 0) - 5000);
             // Inform listeners if necessary
             if (previouslyIdle != idle) {
-                // Slog.d(TAG, "Informing listeners of out-of-idle " + packageName);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
                         /* idle = */ idle ? 1 : 0, packageName));
                 if (!idle) {
@@ -796,7 +797,7 @@ public class UsageStatsService extends SystemService implements
                 timeNow = checkAndGetTimeLocked();
             }
             userService = getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            screenOnTime = getScreenOnTimeLocked(timeNow);
+            screenOnTime = getScreenOnTimeLocked();
         }
         return isAppIdleFiltered(packageName, UserHandle.getAppId(uidForAppId), userId,
                 userService, timeNow, screenOnTime);
@@ -865,7 +866,7 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLock) {
             timeNow = checkAndGetTimeLocked();
             userService = getUserDataAndInitializeIfNeededLocked(userId, timeNow);
-            screenOnTime = getScreenOnTimeLocked(timeNow);
+            screenOnTime = getScreenOnTimeLocked();
         }
 
         List<ApplicationInfo> apps;
@@ -987,7 +988,7 @@ public class UsageStatsService extends SystemService implements
      */
     void dump(String[] args, PrintWriter pw) {
         synchronized (mLock) {
-            final long screenOnTime = getScreenOnTimeLocked(checkAndGetTimeLocked());
+            final long screenOnTime = getScreenOnTimeLocked();
             IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
             ArraySet<String> argSet = new ArraySet<>();
             argSet.addAll(Arrays.asList(args));
@@ -1008,7 +1009,11 @@ public class UsageStatsService extends SystemService implements
                 }
                 idpw.decreaseIndent();
             }
-            pw.println("Screen On Timebase:" + mScreenOnTime);
+            pw.print("Screen On Timebase: ");
+            pw.print(screenOnTime);
+            pw.print(" (");
+            TimeUtils.formatDuration(screenOnTime, pw);
+            pw.println(")");
 
             pw.println();
             pw.println("Settings:");
@@ -1042,8 +1047,8 @@ public class UsageStatsService extends SystemService implements
             pw.println();
             pw.print("mScreenOnTime="); TimeUtils.formatDuration(mScreenOnTime, pw);
             pw.println();
-            pw.print("mScreenOnSystemTimeSnapshot=");
-            TimeUtils.formatDuration(mScreenOnSystemTimeSnapshot, pw);
+            pw.print("mLastScreenOnEventRealtime=");
+            TimeUtils.formatDuration(mLastScreenOnEventRealtime, pw);
             pw.println();
         }
     }
@@ -1078,6 +1083,14 @@ public class UsageStatsService extends SystemService implements
 
                 case MSG_CHECK_IDLE_STATES:
                     checkIdleStates(msg.arg1);
+                    mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                            MSG_CHECK_IDLE_STATES, msg.arg1, 0),
+                            mCheckIdleIntervalMillis);
+                    break;
+
+                case MSG_ONE_TIME_CHECK_IDLE_STATES:
+                    mHandler.removeMessages(MSG_ONE_TIME_CHECK_IDLE_STATES);
+                    checkIdleStates(UserHandle.USER_ALL);
                     break;
 
                 case MSG_CHECK_PAROLE_TIMEOUT:
@@ -1138,7 +1151,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void onChange(boolean selfChange) {
             updateSettings();
-            postCheckIdleStates(UserHandle.USER_ALL);
+            postOneTimeCheckIdleStates();
         }
 
         void updateSettings() {
