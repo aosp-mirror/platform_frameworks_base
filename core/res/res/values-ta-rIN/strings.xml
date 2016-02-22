@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"பயன்பாட்டை மீட்டமைத்து மீண்டும் தொடங்கு"</string>
     <string name="aerr_report" msgid="5371800241488400617">"கருத்து தெரிவி"</string>
     <string name="aerr_close" msgid="2991640326563991340">"மூடு"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"முடக்கு"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"சாதனம் மீண்டும் தொடங்கும் வரை முடக்கு"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"காத்திரு"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"பயன்பாட்டை மூடு"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"கூடுதல் விருப்பங்களுக்காகத் தொடவும்."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைதிருத்தம் இணைக்கப்பட்டது"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB பிழைத்திருத்தத்தை முடக்க, தொடவும்."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"பிழை அறிக்கையைப் பகிரவா?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"பிழை அறிக்கையைப் பகிர்கிறது…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"இந்தச் சாதனத்தின் பிழைகாண்பதற்கு உதவ, உங்கள் ஐடி நிர்வாகி பிழை அறிக்கையைக் கோரியுள்ளார். பயன்பாடுகளும் தரவும் பகிரப்படலாம். தற்காலிகமாக சாதனத்தின் வேகம் குறையலாம்."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"இந்தச் சாதனத்தின் பிழைகாண்பதற்கு உதவ, உங்கள் ஐடி நிர்வாகி பிழை அறிக்கையைக் கோரியுள்ளார். பயன்பாடுகளும் தரவும் பகிரப்படலாம்."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"இது தற்காலிகமாக சாதனத்தின் வேகத்தைக் குறைக்கலாம்"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"சரி"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"வேண்டாம்"</string>
     <string name="select_input_method" msgid="8547250819326693584">"விசைப்பலகையை மாற்று"</string>
@@ -1543,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டன</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> தேர்ந்தெடுக்கப்பட்டது</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"இதர அமைப்பு"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"இந்த அறிவிப்புகளின் முக்கியத்துவத்தை அமைத்துள்ளீர்கள்."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (இந்தக் கணக்கில் ஏற்கனவே ஒரு பயனர் உள்ளார்) மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>

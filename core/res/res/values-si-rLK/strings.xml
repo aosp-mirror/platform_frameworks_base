@@ -919,7 +919,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"යෙදුම නැවත සකසා නැවත ආරම්භ කරන්න"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ප්‍රතිපෝෂණය යවන්න"</string>
     <string name="aerr_close" msgid="2991640326563991340">"වසන්න"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"නිහඬ කරන්න"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"උපාංගය නැවත ආරම්භ වන තෙක් නිහඬ කරන්න"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"රැඳී සිටින්න"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"යෙදුම වසන්න"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1055,16 +1055,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"වඩා වැඩි විකල්ප සඳහා ස්පර්ශ කරන්න."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB නිදොස්කරණය අබල කිරීමට ස්පර්ශ කරන්න."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"දෝෂ වාර්තාව බෙදා ගන්නද?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"දෝෂ වාර්තාවක් බෙදා ගනිමින්..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"මෙම උපාංගය දෝෂාවේක්ෂණය සඳහා උදවු කිරීමට ඔබේ IT පරිපාලක දෝෂ වාර්තාවක් ඉල්ලා ඇත. යෙදුම් සහ දත්ත බෙදා ගත හැකි අතර ඔබේ උපාංගය තාවකාලිකව මන්දගාමී විය හැකිය."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"මෙම උපාංගය දෝෂාවේක්ෂණය සඳහා උදවු කිරීමට ඔබේ IT පරිපාලක දෝෂ වාර්තාවක් ඉල්ලා ඇත. යෙදුම් සහ දත්ත බෙදා ගත හැකිය."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"මෙය ඔබේ උපාංගය තාවකාලිකව මන්දගාමී කළ හැකිය"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"පිළිගන්න"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="select_input_method" msgid="8547250819326693584">"යතුරු පුවරු වෙනස් කිරීම"</string>
@@ -1545,8 +1540,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ක් තෝරන ලදි</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"විවිධාකාර"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"ඔබ මෙම දැනුම්දීම්වල වැදගත්කම සකසා ඇත."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"ඔබ මෙම දැනුම්දීම්වල වැදගත්කම සකසා ඇත."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"සම්බන්ධ වූ පුද්ගලයන් නිසා මෙය වැදගත් වේ."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> හට <xliff:g id="ACCOUNT">%2$s</xliff:g> සමගින් නව පරිශීලකයෙකු සෑදීමට ඉඩ දෙන්නද (මෙම ගිණුම සහිත පරිශීලකයෙකු දැනටමත් සිටී) ?"</string>

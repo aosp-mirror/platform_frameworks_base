@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"App resetten en opnieuw starten"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Feedback verzenden"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Sluiten"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Negeren"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Verbergen tot apparaat opnieuw wordt opgestart"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Wachten"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"App sluiten"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Tik voor meer opties."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-foutopsporing verbonden"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tik om USB-foutopsporing uit te schakelen."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bugrapport delen?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Bugrapport delen…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Je IT-beheerder heeft een bugrapport aangevraagd om problemen met dit apparaat op te lossen. Apps en gegevens kunnen worden gedeeld en je apparaat kan hierdoor tijdelijk worden vertraagd."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Je IT-beheerder heeft een bugrapport aangevraagd om problemen met dit apparaat op te lossen. Apps en gegevens kunnen worden gedeeld."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Dit kan je apparaat tijdelijk vertragen"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPTEREN"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"WEIGEREN"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Toetsenbord wijzigen"</string>
@@ -1543,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> geselecteerd</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> geselecteerd</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Diversen"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Je stelt het belang van deze meldingen in."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"Je stelt het belang van deze meldingen in."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dit is belangrijk vanwege de betrokken mensen."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Toestaan dat <xliff:g id="APP">%1$s</xliff:g> een nieuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> maakt (er is al een gebruiker met dit account)?"</string>

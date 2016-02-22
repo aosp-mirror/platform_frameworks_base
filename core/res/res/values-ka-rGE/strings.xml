@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"გადაყენება და აპის გადატვირთვა"</string>
     <string name="aerr_report" msgid="5371800241488400617">"გამოხმაურება"</string>
     <string name="aerr_close" msgid="2991640326563991340">"დახურვა"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"დადუმება"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"დადუმება მოწყობილობის გადატვირთვამდე"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"მოცდა"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"აპის დახურვა"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"შეეხეთ დამატებითი პარამეტრებისთვის."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB გამართვა შეერთებულია"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"შეეხეთ, რათა შეწყვიტოთ USB-ის გამართვა."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"გსურთ ხარვეზის შესახებ ანგარიშის გაზიარება?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"მიმდინარეობს ხარვეზის შესახებ ანგარიშის გაზიარება…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ამ მოწყობილობის პრობლემების აღმოფხვრაში დასახმარებლად, თქვენი IT ადმინისტრატორი ხარვეზის შესახებ ანგარიშს ითხოვს, რა დროსაც შეიძლება გაზიარდეს აპები და მონაცემები, ხოლო თქვენი მოწყობილობა დროებით შენელდეს."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ამ მოწყობილობის პრობლემების აღმოფხვრაში დასახმარებლად, თქვენი IT ადმინისტრატორი ხარვეზის შესახებ ანგარიშს ითხოვს, რა დროსაც შეიძლება გაზიარდეს აპები და მონაცემები."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"ამან შეიძლება დროებით შეანელოს თქვენი მოწყობილობა"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"მიღება"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"უარყოფა"</string>
     <string name="select_input_method" msgid="8547250819326693584">"კლავიატურის შეცვლა"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> შერჩეული</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> შერჩეული</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"სხვადასხვა"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"ამ შეტყობინებების მნიშვნელობის დონე განისაზღვრა თქვენ მიერ."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"მნიშვნელოვანია ჩართული მომხმარებლების გამო."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"მიეცეს უფლება <xliff:g id="APP">%1$s</xliff:g>-ს, <xliff:g id="ACCOUNT">%2$s</xliff:g>-ის მეშვეობით ახალი მომხმარებელი შექმნას ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"მიეცეს უფლება <xliff:g id="APP">%1$s</xliff:g>-ს, <xliff:g id="ACCOUNT">%2$s</xliff:g>-ის მეშვეობით ახალი მომხმარებელი შექმნას (ამ ანგარიშის მქონე მომხმარებელი უკვე არსებობს) ?"</string>

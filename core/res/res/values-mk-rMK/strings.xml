@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Ресетирај ја и рестартирај ја апликацијата"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Испрати повратни информации"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Затвори"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Исклучи звук"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Исклучи го звукот додека уредот не се рестартира"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Почекај"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Затвори ја апликацијата"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Допри за повеќе опции."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку УСБ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели извештајот за грешки?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Се споделува извештај за грешки…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Администраторот за информатичка технологија побара извештај за грешки за да ви помогне во отстранувањето на грешките од уредот. Апликациите и податоците можеби ќе се споделат, а уредот можеби ќе биде привремено побавен при работата."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Вашиот администратор за информатичка технологија побара извештај за грешки за да помогне со отстранување на грешките на овој уред. Апликациите и податоците може да бидат споделени."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Ова може привремено да го забави уредот"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ПРИФАТИ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Измени тастатура"</string>
@@ -1545,8 +1540,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> е избрана</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> се избрани</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Разно"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Ја поставивте важноста на известувањава."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"Ја поставивте важноста на известувањава."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ова е важно заради луѓето кои се вклучени."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Дозволувате ли <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g> (веќе постои корисник со оваа сметка)?"</string>
