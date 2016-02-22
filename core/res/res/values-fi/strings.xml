@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Nollaa sovellus ja käynnistä uudelleen"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Lähetä palautetta"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Sulje"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Ohita"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Mykistä laitteen uudelleenkäynnistykseen asti"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Odota"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Sulje sovellus"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Lisää vaihtoehtoja koskettamalla"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-vianetsintä yhdistetty"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Sulje USB-vianetsintä koskettamalla."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Jaetaanko virheraportti?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Jaetaan virheraporttia…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Järjestelmänvalvoja pyysi virheraporttia voidakseen auttaa laitteen vianetsinnässä. Sovelluksia ja tietoja voidaan jakaa, ja laitteen toiminta voi hidastua väliaikaisesti."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Järjestelmänvalvoja pyysi virheraporttia voidakseen auttaa laitteen vianetsinnässä. Sovelluksia ja tietoja voidaan jakaa."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Tämä voi hidastaa laitteen toimintaa väliaikaisesti."</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"HYVÄKSY"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"HYLKÄÄ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Vaihda näppäimistö"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valittu</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> valittu</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Muut"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Voit valita näiden ilmoitusten tärkeyden."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Tämä on tärkeää siihen liittyvien ihmisten perusteella."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Myönnetäänkö sovellukselle <xliff:g id="APP">%1$s</xliff:g> oikeus luoda käyttäjä tilille <xliff:g id="ACCOUNT">%2$s</xliff:g> (tilillä on jo käyttäjä)?"</string>

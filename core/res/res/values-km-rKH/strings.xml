@@ -919,7 +919,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"កំណត់ និងចាប់ផ្តើមកម្មវិធីឡើងវិញ"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ផ្ញើមតិ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"បិទ"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"បិទ"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"បិទរហូតដល់ឧបករណ៍ចាប់ផ្តើមឡើងវិញ"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"រង់ចាំ"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"បិទកម្មវិធី"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1055,16 +1055,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ប៉ះដើម្បីបានជម្រើសថែមទៀត។"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"បាន​ភ្ជាប់​ការ​កែ​កំហុស​យូអេសប៊ី"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ប៉ះ ដើម្បី​បិទ​ការ​កែ​កំហុស​យូអេសប៊ី។"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ចែករំលែករបាយការណ៍កំហុសឬ?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"កំពុងចែករំលែករបាយកំហុស…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នកបានស្នើរបាយការណ៍កំហុសដើម្បីដោះស្រាយកំហុសឧបករណ៍នេះ។ កម្មវិធី និងទិន្នន័យអាចនឹងត្រូវបានចែករំលែក ហើយឧបករណ៍របស់អ្នកអាចនឹងយឺតជាបណ្តោះអាសន្ន។"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"អ្នកគ្រប់គ្រងផ្នែកព័ត៌មានវិទ្យារបស់អ្នកបានស្នើរបាយការណ៍កំហុសដើម្បីដោះស្រាយកំហុសឧបករណ៍នេះ។ កម្មវិធី និងទិន្នន័យអាចនឹងត្រូវបានចែករំលែក។"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"វាអាចនឹងធ្វើឲ្យឧបករណ៍របស់អ្នកយឺតជាបណ្តោះអាសន្ន។"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ព្រមទទួល"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"បដិសេធ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"ប្ដូរ​ក្ដារចុច"</string>
@@ -1545,8 +1540,7 @@
       <item quantity="other">បានជ្រើស <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">បានជ្រើស <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"ផ្សេងៗ"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"អ្នកបានកំណត់សារៈសំខាន់នៃការជូនដំណឹងទាំងនេះ"</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"អ្នកបានកំណត់សារៈសំខាន់នៃការជូនដំណឹងទាំងនេះ"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"វាមានសារៈសំខាន់ដោយសារតែមនុស្សដែលពាក់ព័ន្ធ"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"អនុញ្ញាតឲ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ឬទេ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"អនុញ្ញាតឲ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> (មានអ្នកប្រើសម្រាប់គណនីនេះរួចហើយ) ឬទេ?"</string>

@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Нулиране и рестартиране на приложението"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Изпращане на отзиви"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Затваряне"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Спиране"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Спиране, докато устройството се рестартира"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Изчакване"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Затваряне на приложението"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Докоснете за още опции."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отстраняване на грешки през USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Докоснете за деактивиране"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели ли сигналът за програмна грешка?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Сигналът за програмна грешка се споделя…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Системният ви администратор поиска сигнал за програмна грешка с цел отстраняване на неизправностите на устройството. Възможно е да бъдат споделени приложения и данни и работата на устройството ви временно да се забави."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Системният ви администратор поиска сигнал за програмна грешка с цел отстраняване на неизправностите на това устройство. Възможно е да бъдат споделени приложения и данни."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Това може временно да забави работата на устройството ви"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ПРИЕМАМ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ОТХВЪРЛЯМ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промяна на клавиатурата"</string>
@@ -1543,8 +1538,7 @@
       <item quantity="other">Избрахте <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Избрахте <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Други"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Зададохте важността на тези известия."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"Зададохте важността на тези известия."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Това е важно заради участващите хора."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g> (вече съществува потребител с този профил)?"</string>

@@ -918,7 +918,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"アプリをリセットして再起動"</string>
     <string name="aerr_report" msgid="5371800241488400617">"フィードバックを送信"</string>
     <string name="aerr_close" msgid="2991640326563991340">"閉じる"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"ミュート"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"端末が再起動するまでミュート"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"待機"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"アプリを閉じる"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1054,16 +1054,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"タップしてその他のオプションを表示"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"タップしてUSBデバッグを無効化"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"バグレポートを共有しますか？"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"バグレポートの共有中…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IT 管理者からこの端末のトラブルシューティングに役立てるためバグレポートを共有するようリクエストがありました。アプリやデータが共有され、端末の動作が一時的に遅くなる場合があります。"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IT 管理者からこの端末のトラブルシューティングに役立てるためバグレポートを共有するようリクエストがありました。アプリやデータが共有されることがあります。"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"共有によって端末の動作が一時的に遅くなる場合があります"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"同意する"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"同意しない"</string>
     <string name="select_input_method" msgid="8547250819326693584">"キーボードの変更"</string>
@@ -1544,8 +1539,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件選択済み</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件選択済み</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"その他"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"このような通知の重要度を設定します。"</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"関係するユーザーのため、この設定は重要です。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？（このアカウントのユーザーはすでに存在します）"</string>

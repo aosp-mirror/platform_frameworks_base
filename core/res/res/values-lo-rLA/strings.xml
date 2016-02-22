@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"ຣີເຊັດ ແລະ ເລີ່ມແອັບໃໝ່"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ສົ່ງຄຳຕິຊົມ"</string>
     <string name="aerr_close" msgid="2991640326563991340">"ປິດ"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"ປິດສຽງ"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"ປິດສຽງຈົນກວ່າວ່າອຸປະກອນເລີ່ມໃໝ່"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"ລໍຖ້າ"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"ປິດແອັບ"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"ສຳ​ພັດ​ສຳ​ລັບ​ທາງ​ເລືອກ​ເພີ່ມ​ເຕີມ."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"ເຊື່ອມຕໍ່ການດີບັ໊ກຜ່ານ USB ແລ້ວ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"ແຕະເພື່ອປິດການດີບັ໊ກຜ່ານ USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"ແບ່ງປັນລາຍງານບັນຫາບໍ?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"ກຳລັງແບ່ງປັນລາຍງານບັນຫາ…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານໄດ້ຮ້ອງຂໍລາຍງານຂໍ້ຜິດພາດເພື່ອຊ່ວຍແກ້ໄຂບັນຫາອຸປະກອນນີ້. ແອັບ ແລະ ຂໍ້ມູນອາດຖືກແບ່ງປັນ ແລະ ອຸປະກອນຂອງທ່ານອາດເຮັດວຽກຊ້າລົງຊົ່ວຄາວ."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານໄດ້ຮ້ອງຂໍເອົາລາຍງານບັນຫາ ເພື່ອຊ່ວຍແກ້ໄຂບັນຫາໃຫ້ອຸປະກອນນີ້. ອາດຈະມີການແບ່ງປັນແອັບ ແລະ ຂໍ້ມູນນຳ."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"ນີ້ອາດຈະເຮັດໃຫ້ອຸປະກອນຂອງທ່ານຊ້າລົງຊົ່ວຄາວ"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ຍອມຮັບ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ປະຕິເສດ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"​ປ່ຽນ​ແປ້ນ​ພິມ"</string>
@@ -1543,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ຖືກເລືອກ​ແລ້ວ</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ຖືກເລືອກ​ແລ້ວ</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"ອື່ນໆ"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"ທ່ານຕັ້ງຄວາມສຳຄັນຂອງການແຈ້ງເຕືອນເຫຼົ່ານີ້."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"ທ່ານຕັ້ງຄວາມສຳຄັນຂອງການແຈ້ງເຕືອນເຫຼົ່ານີ້."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ຂໍ້ຄວາມນີ້ສຳຄັນເນື່ອງຈາກບຸກຄົນທີ່ກ່ຽວຂ້ອງ."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ສຳລັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ບໍ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ສຳລັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> (ຜູ້ໃຊ້ສຳລັບບັນຊີນີ້ມີຢູ່ແລ້ວ) ບໍ?"</string>

@@ -929,7 +929,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Zresetuj aplikację i uruchom ją ponownie"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Prześlij opinię"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zamknij"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Ignoruj"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Ignoruj do momentu ponownego uruchomienia urządzenia"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Zaczekaj"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Zamknij aplikację"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1069,16 +1069,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Kliknij, by zobaczyć więcej opcji."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Podłączono moduł debugowania USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknij, aby wyłączyć debugowanie USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Udostępnić raport o błędzie?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Udostępniam raport o błędzie…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Administrator poprosił o raport o błędzie, by szybciej rozwiązać problemy na tym urządzeniu. Raport może zawierać informacje o aplikacjach i inne dane. Urządzenie może przez chwilę działać wolniej."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administrator poprosił o raport o błędzie, który pomoże w rozwiązaniu problemów na tym urządzeniu. Mogą zostać udostępnione aplikacje i dane."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Urządzenie może przez chwilę działać wolniej"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"AKCEPTUJ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ODRZUĆ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Zmień klawiaturę"</string>
@@ -1581,8 +1576,7 @@
       <item quantity="other">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Wybrano <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Inne"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Ustawiłeś ważność tych powiadomień."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"Ustawiłeś ważność tych powiadomień."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ta wiadomość jest ważna ze względu na osoby uczestniczące w wątku."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>)? Użytkownik z tym kontem już istnieje."</string>

@@ -923,7 +923,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"अनुप्रयोगलाई रिसेट गरी पुन: सुरु गर्नुहोस्"</string>
     <string name="aerr_report" msgid="5371800241488400617">"प्रतिक्रिया पठाउनुहोस्"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बन्द गर्नुहोस्"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"म्यूट गर्नुहोस्"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"यन्त्र पुनः सुरु नभएसम्म म्यूट गर्नुहोस्"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"पर्खनुहोस्"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"अनुप्रयोग बन्द गर्नुहोस्"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1059,16 +1059,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"थप विकल्पहरूका लागि छुनुहोस्।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्ट साझा गर्ने हो?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्ट साझेदारी गर्दै ..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"तपाईंको आईटी वेवस्थापकले यो यन्त्रको समस्या निवारण गर्नमा मदत गर्न बग रिपोर्टहरूका लागि अनुरोध गरेको छ । Apps र डेटा साझादारी गर्न सक्नुहुन्छ र तपाईंको यन्त्र अस्थायी रूपमा सुस्त हुन सक्छ।"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"तपाईंको आईटी वेवस्थापकले यो यन्त्रको समस्या निवारण गर्नमा मदत गर्न बग रिपोर्टहरूका लागि अनुरोध गरेको छ । Apps र डेटा साझा गर्न सक्नुहुन्छ ।"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"यसले अस्थायी रूपमा तपाईंको यन्त्र सुस्त हुन सक्छ"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार गर्नुहोस्"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार गर्नुहोस्"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
@@ -1549,8 +1544,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयन गरियो</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> चयन गरियो</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"विविध"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहुन्छ।"</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहोस् ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सँगै नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सँगै नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) ?"</string>
@@ -1570,7 +1564,7 @@
     <string name="user_encrypted_title" msgid="9054897468831672082">"केही कार्य सीमित हुनसक्छ"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"अनलक गर्न ट्याप गर्नुहोस्"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"प्रयोगकर्ताको डेटा लक गरियो"</string>
-    <string name="profile_encrypted_detail" msgid="3700965619978314974">"कार्य प्रोफाइल बन्द भयो"</string>
+    <string name="profile_encrypted_detail" msgid="3700965619978314974">"कार्य प्रोफाइल लक भयो"</string>
     <string name="profile_encrypted_message" msgid="6964994232310195874">"कार्य प्रोफाइल अनलक गर्न ट्याप गर्नुहोस्"</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> मा जडान गरिएको छ"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"फाइलहरू हेर्न ट्याप गर्नुहोस्"</string>
