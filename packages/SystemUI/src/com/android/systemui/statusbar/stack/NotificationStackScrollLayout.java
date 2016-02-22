@@ -3045,7 +3045,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             disableClipOptimization();
         }
         handleDismissAllClipping();
-        if (mCurrIconRow != null & mCurrIconRow.isVisible()) {
+        if (mCurrIconRow != null && mCurrIconRow.isVisible()) {
             mCurrIconRow.getNotificationParent().animateTranslateNotification(0 /* left target */);
         }
     }
