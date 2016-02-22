@@ -345,8 +345,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
                         mSpec.isUserAuthenticationRequired(),
                         mSpec.getUserAuthenticationValidityDurationSeconds(),
-                        mSpec.isUserAuthenticationValidWhileOnBody(),
-                        mSpec.isInvalidatedByBiometricEnrollment());
+                        mSpec.isUserAuthenticationValidWhileOnBody());
             } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -532,8 +531,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         KeymasterUtils.addUserAuthArgs(args,
                 mSpec.isUserAuthenticationRequired(),
                 mSpec.getUserAuthenticationValidityDurationSeconds(),
-                mSpec.isUserAuthenticationValidWhileOnBody(),
-                mSpec.isInvalidatedByBiometricEnrollment());
+                mSpec.isUserAuthenticationValidWhileOnBody());
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, mSpec.getKeyValidityStart());
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
                 mSpec.getKeyValidityForOriginationEnd());

@@ -499,8 +499,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 KeymasterUtils.addUserAuthArgs(importArgs,
                         spec.isUserAuthenticationRequired(),
                         spec.getUserAuthenticationValidityDurationSeconds(),
-                        spec.isUserAuthenticationValidWhileOnBody(),
-                        spec.isInvalidatedByBiometricEnrollment());
+                        spec.isUserAuthenticationValidWhileOnBody());
                 importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME,
                         spec.getKeyValidityStart());
                 importArgs.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
@@ -695,8 +694,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             KeymasterUtils.addUserAuthArgs(args,
                     params.isUserAuthenticationRequired(),
                     params.getUserAuthenticationValidityDurationSeconds(),
-                    params.isUserAuthenticationValidWhileOnBody(),
-                    params.isInvalidatedByBiometricEnrollment());
+                    params.isUserAuthenticationValidWhileOnBody());
             KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                     args,
                     keymasterAlgorithm,
