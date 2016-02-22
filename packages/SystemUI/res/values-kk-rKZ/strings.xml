@@ -334,8 +334,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Толық\nтыныштық"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Тек\nбасымдық"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Тек\nдабылдар"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"Барлығы"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"Барлығы\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Жылдам зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Баяу зарядталуда (толғанша <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -448,7 +446,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Күйін көрсету жолағында сағат секундтарын көрсету. Батареяның қызмет көрсету мерзіміне әсер етуі мүмкін."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Жылдам параметрлерді қайта реттеу"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Жылдам параметрлерде жарықтықты көрсету"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Бөлінген экранды жоғары қарай жанау жеделдеткішін қосу"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Бөлінген экранда жоғары қарай жанау қимылын қосу"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"\"Шолу\" түймесінен жоғары қарай жанау арқылы бөлінген экранға кіру қимылын қосу"</string>
     <string name="experimental" msgid="6198182315536726162">"Эксперименттік"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth функциясын қосу керек пе?"</string>
@@ -468,19 +466,22 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Экранға бекіту және дыбыс шығару"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"Қалыпты түстер"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"Түнгі түстер"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"Арнаулы түстер"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"Авто"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"Белгісіз түстер"</string>
-    <string name="color_transform" msgid="6985460408079086090">"Түсті өзгерту"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Жылдам параметрлер торын көрсету"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"Арнаулы түрлендіруді қосу"</string>
+    <string name="color_and_appearance" msgid="1254323855964993144">"Түс және сыртқы түрі"</string>
+    <string name="night_mode" msgid="3540405868248625488">"Түнгі режим"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"Дисплейді калибрлеу"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"Қосулы"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"Өшірулі"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"Автоматты түрде қосу"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Орынға және күн уақытына тиісті түнгі режимге ауысу"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"Түнгі режим қосулы кезде"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android ОЖ үшін күңгірт тақырыпты пайдалану"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"Реңкті реттеу"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"Жарықтықты реттеу"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Күңгірт тақырып Android операциялық жүйесінің әдетте ашық тақырыпта көрсетілетін негізгі аумақтарына қолданылады, мысалы, \"Параметрлер\" тармағына және хабарландыруларға."</string>
     <string name="color_apply" msgid="9212602012641034283">"Қолдану"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Параметрлерді растау"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Кейбір түс параметрлері бұл құрылғыны пайдалану мүмкін емес етуі мүмкін. Бұл түс параметрлерін растау үшін OK түймесін басыңыз, әйтпесе параметрлер 10 секундтан кейін ысырылады."</string>
-    <!-- no translation found for battery_panel_title (7944156115535366613) -->
-    <skip />
+    <string name="battery_panel_title" msgid="7944156115535366613">"Батареяны пайдалану"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Өнімділікті және фондық деректерді азайтады"</string>
@@ -488,21 +489,20 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Негізгі бет"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Жақындағылар"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Артқа"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"Дыбыс деңгейінде \"Мазаламау\" режимін көрсету"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Дыбыс деңгейі диалогтық терезесінде \"Мазаламау\" режимін толық басқаруға рұқсат ету."</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Дыбыс деңгейі және \"Мазаламау\""</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"Дыбыс деңгейін төмендеткенде \"Мазаламау\" режиміне кіру"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Дыбыс деңгейін басқару элементтерімен бірге көрсету"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Мазаламау"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Дыбыс деңгейі түймелерінің төте жолы"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Дыбыс деңгейін көтергенде \"Мазаламау\" режимінен шығу"</string>
     <string name="battery" msgid="7498329822413202973">"Батарея"</string>
     <string name="clock" msgid="7416090374234785905">"Сағат"</string>
     <string name="headset" msgid="4534219457597457353">"Құлақаспап жинағы"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Құлақаспап қосылды"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Құлақаспап жинағы қосылды"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Белгішелердің күй жолағында көрсетілуін қосу немесе өшіру"</string>
     <string name="data_saver" msgid="5037565123367048522">"Дерек сақтағыш"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дерек сақтағыш қосулы"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дерек сақтағышы өшірулі"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Қосулы"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Өшірулі"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Шарлау тақтасы"</string>
     <string name="start" msgid="6873794757232879664">"Бастау"</string>
     <string name="center" msgid="4327473927066010960">"Орталық"</string>
@@ -525,4 +525,15 @@
     <string name="preview" msgid="9077832302472282938">"Алдын ала қарау"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Торлар қосу үшін сүйреңіз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Өңдеу"</string>
+    <string name="tuner_time" msgid="6572217313285536011">"Уақыт"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"Сағаттарды, минуттарды және секундтарды көрсету"</item>
+    <item msgid="1427801730816895300">"Сағаттарды және минуттарды көрсету (әдепкі)"</item>
+    <item msgid="3830170141562534721">"Бұл белгішені көрсетпеу"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"Әрқашан пайызды көрсету"</item>
+    <item msgid="2139628951880142927">"Зарядтау кезінде пайызды көрсету (әдепкі)"</item>
+    <item msgid="3327323682209964956">"Бұл белгішені көрсетпеу"</item>
+  </string-array>
 </resources>
