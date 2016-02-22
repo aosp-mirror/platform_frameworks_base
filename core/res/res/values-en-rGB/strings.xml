@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Reset and restart app"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Sending feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Close"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Mute"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Mute until device restarts"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Wait"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Close app"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Touch for more options."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB debugging connected"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Touch to disable USB debugging."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Share bug report?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Sharing bug report…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared and your device may temporarily slow down."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Your IT admin requested a bug report to help troubleshoot this device. Apps and data may be shared."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"This may temporarily slow down your device"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPT"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"DECLINE"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Change keyboard"</string>
@@ -1543,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selected</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selected</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Miscellaneous"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"You set the importance of these notifications."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"You set the importance of these notifications."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"This is important because of the people involved."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> (a User with this account already exists) ?"</string>

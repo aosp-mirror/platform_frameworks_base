@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"ایپ کو دوبارہ ترتیب دیں اور دوبارہ شروع کریں"</string>
     <string name="aerr_report" msgid="5371800241488400617">"تاثرات بھیجیں"</string>
     <string name="aerr_close" msgid="2991640326563991340">"بند کریں"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"خاموش کریں"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"آلہ دوبارہ اسٹارٹ ہونے تک خاموش رکھیں"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"انتظار کریں"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"ایپ بند کریں"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"مزید اختیارات کیلئے ٹچ کریں۔"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏USB ڈیبگ کرنا مربوط ہو گیا"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏USB ڈیبگنگ کو غیر فعال کرنے کیلئے ٹچ کریں۔"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"بگ رپورٹ کا اشتراک کریں؟"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"بگ رپورٹ کا اشتراک ہو رہا ہے…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"‏آپ کے IT منتظم نے اس آلہ کا مسئلہ حل کرنے میں مدد کیلئے ایک بگ رپورٹ کی درخواست کی ہے۔ ایپس اور ڈیٹا کا اشتراک ہو سکتا ہے اور آپ کا آلہ عارضی طور پر سست ہو سکتا ہے۔"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"‏آپ کے IT منتظم نے اس آلہ کا مسئلہ حل کرنے میں مدد کیلئے ایک بگ رپورٹ کی درخواست کی ہے۔ ایپس اور ڈیٹا کا اشتراک ہو سکتا ہے۔"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"اس سے آپ کا آلہ عارضی طور پر سست ہو سکتا ہے"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"قبول کریں"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"مسترد کریں"</string>
     <string name="select_input_method" msgid="8547250819326693584">"کی بورڈ تبدیل کریں"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> منتخب کردہ</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> منتخب کردہ</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"متفرقات"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"ان اطلاعات کی اہمیت آپ مقرر کرتے ہیں۔"</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"اس میں موجود لوگوں کی وجہ سے یہ اہم ہے۔"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> کو <xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ ایک نیا صارف بنانے کی اجازت دیں؟"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> کو <xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ ایک نیا صارف بنانے کی اجازت دیں (اس اکاؤنٹ کے ساتھ ایک صارف پہلے سے موجود ہے) ؟"</string>

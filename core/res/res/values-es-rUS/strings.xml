@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Restablecer y reiniciar la app"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar comentarios"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Silenciar"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Esperar"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Cerrar app"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -971,8 +971,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumen de la llamada"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen de los medios"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumen de notificación"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Tono de llamada predeterminado"</string>
-    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono de llamada predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Tono predeterminado"</string>
+    <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ninguno"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonos de llamada"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Tono de llamada desconocido"</string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver más opciones."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración por USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para desactivar la depuración por USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"¿Compartir informe de errores?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartiendo informe de errores…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"El administrador de TI solicitó un informe de errores para ayudar a solucionar los problemas de este dispositivo. Es posible que se compartan apps y datos, y que el dispositivo se ralentice temporalmente."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"El administrador de TI solicitó un informe de errores para ayudar a solucionar los problemas de este dispositivo. Es posible que se compartan apps y datos."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Es posible que tu dispositivo se ralentice temporalmente"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEPTAR"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECHAZAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar el teclado"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementos seleccionados</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento seleccionado</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Varios"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Estableciste la importancia de estas notificaciones."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Es importante debido a las personas involucradas."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"¿Quieres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario nuevo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"¿Quieres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario nuevo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ya existe un usuario con esta cuenta)"</string>

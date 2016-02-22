@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"重設並重新啟動應用程式"</string>
     <string name="aerr_report" msgid="5371800241488400617">"傳送意見反映"</string>
     <string name="aerr_close" msgid="2991640326563991340">"關閉"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"忽略"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"忽略直至裝置重新啟動"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"等一下"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"關閉應用程式"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"輕觸以瀏覽更多選項。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已連接 USB 偵錯工具"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"輕觸即可停用 USB 偵錯。"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享錯誤報告嗎？"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享錯誤報告…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"您的 IT 管理員要求您提供錯誤報告，以協助解決此裝置的問題。報告可能會披露應用程式和相關資料，裝置的運作速度也可能暫時減慢。"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"您的 IT 管理員要求您提供錯誤報告，以協助解決此裝置的問題。報告可能會披露裝置中的應用程式和相關資料。"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"裝置的運作速度可能因而減慢"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"接受"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"拒絕"</string>
     <string name="select_input_method" msgid="8547250819326693584">"變更鍵盤"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"其他"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"您可以為這些通知設定重要性。"</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"列為重要的原因：涉及的人。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"要允許 <xliff:g id="APP">%1$s</xliff:g> 使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者 (此帳戶目前已有此使用者) 嗎？"</string>

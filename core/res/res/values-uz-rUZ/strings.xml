@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Ilovani qayta tiklash va qayta ishga tushirish"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"E’tiborsiz qoldirish"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chirib yoqilguncha e’tiborsiz qoldirish"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Kuting"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Ilovani yopish"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -998,7 +998,7 @@
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi Direct’ni ishga tushirish. Bu Wi-Fi mijoz/ulanish nuqtasini o‘chiradi."</string>
     <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Wi-Fi Direct ishga tushirilmadi."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct yoqilgan"</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct yoniq"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Sozlamalarga kirish uchun bosing"</string>
     <string name="accept" msgid="1645267259272829559">"Qabul qilish"</string>
     <string name="decline" msgid="2112225451706137894">"Rad qilish"</string>
@@ -1019,7 +1019,7 @@
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;ga xabar jo‘natishni xohlaydi."</string>
     <string name="sms_short_code_details" msgid="5873295990846059400">"Bunda, mobil hisobingizdan "<b>"to‘lov olinishi mumkin"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Bunda, mobil hisobingizdan to‘lov olinishi mumkin."</b></string>
-    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Jo‘natish"</string>
+    <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Yuborish"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Bekor qilish"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Tanlovim eslab qolinsin"</string>
     <string name="sms_short_code_remember_undo_instruction" msgid="4960944133052287484">"Siz buni keyinroq sozlamalar &gt; ilovalar menusidan o‘zgartirishingiz mumkin"</string>
@@ -1053,16 +1053,13 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Sozlash uchun bosing."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"O‘chirib qo‘yish uchun bosing."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
     <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
     <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi mumkin."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Bu vaqtincha qurilmangizni sekinlashtirishi mumkin"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"QABUL QILISH"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RAD ETISH"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
@@ -1121,7 +1118,7 @@
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidjet qo‘shilmadi."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"O‘tish"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Qidirish"</string>
-    <string name="ime_action_send" msgid="2316166556349314424">"Jo‘natish"</string>
+    <string name="ime_action_send" msgid="2316166556349314424">"Yuborish"</string>
     <string name="ime_action_next" msgid="3138843904009813834">"Keyingi"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Tayyor"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Old."</string>
@@ -1156,7 +1153,7 @@
     <string name="upload_file" msgid="2897957172366730416">"Faylni tanlash"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Hech qanday fayl tanlanmadi"</string>
     <string name="reset" msgid="2448168080964209908">"Tiklash"</string>
-    <string name="submit" msgid="1602335572089911941">"Jo‘natish"</string>
+    <string name="submit" msgid="1602335572089911941">"Yuborish"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mashina usuli yoqilgan"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Avtomashina rejimidan chiqish uchun bosing."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Modem rejimi yoniq"</string>
@@ -1543,8 +1540,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta tanlandi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Boshqa belgilar"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Siz ushbu bildirishnomalarning muhimligini belgilagansiz."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Bu odamlar siz uchun muhim."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>

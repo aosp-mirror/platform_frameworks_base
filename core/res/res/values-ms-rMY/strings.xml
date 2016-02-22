@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Tetapkan semula dan mulakan semula apl"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Hantar maklum balas"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Tutup"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Redam"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Redam sehingga peranti dimulakan semula"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Tunggu"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Tutup apl"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Sentuh untuk mendapatkan lagi pilihan."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Penyahpepijatan USB disambungkan"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Sentuh untuk melumpuhkan penyahpepijatan USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Kongsi laporan pepijat?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Berkongsi laporan pepijat…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Pentadbir IT anda meminta laporan pepijat untuk membantu menyelesaikan masalah peranti ini. Apl dan data mungkin dikongsi dan peranti anda mungkin menjadi perlahan untuk sementara waktu."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Pentadbir IT anda meminta laporan pepijat untuk membantu menyelesaikan masalah peranti ini. Apl dan data mungkin dikongsi."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Proses ini mungkin memperlahankan peranti anda untuk sementara waktu"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"TERIMA"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"TOLAK"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Tukar papan kekunci"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> dipilih</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> dipilih</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Pelbagai"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Anda menetapkan kepentingan pemberitahuan ini."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Mesej ini penting disebabkan orang yang terlibat."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Benarkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baharu dengan <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Benarkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baharu dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akaun ini sudah wujud)?"</string>
@@ -1561,7 +1556,7 @@
     <string name="suspended_package_message" msgid="6341091587106868601">"Dilumpuhkan oleh pentadbir %1$s. Hubungi mereka untuk mengetahui lebih lanjut."</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Anda mempunyai mesej baharu"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Buka apl SMS untuk melihat"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Beberapa fungsi mungkin terhad"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Sesetengah fungsi mungkin terhad"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Ketik untuk membuka kunci"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Data pengguna dikunci"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Profil kerja dikunci"</string>

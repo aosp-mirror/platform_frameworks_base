@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Redefinir e reiniciar app"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Enviar feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Fechar"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Ignorar"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Desativar até que dispositivo seja reiniciado"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Aguarde"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Fechar app"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toque para ver mais opções."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desativar a depuração do USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Compartilhar relatório do bug?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartilhando relatório do bug…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Seu administrador de TI solicitou um relatório de bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados, o que pode deixar seu dispositivo temporariamente mais lento."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Seu administrador de TI solicitou um relatório de bug para ajudar a resolver problemas deste dispositivo. É possível que apps e dados sejam compartilhados."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Isso pode deixar seu dispositivo temporariamente mais lento"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEITAR"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RECUSAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Diversos"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Você definiu a importância dessas notificações."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Isso é importante por causa das pessoas envolvidas."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Permitir que <xliff:g id="APP">%1$s</xliff:g> crie um novo usuário com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Permitir que <xliff:g id="APP">%1$s</xliff:g> crie um novo usuário com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um usuário com essa conta)?"</string>
@@ -1565,7 +1560,7 @@
     <string name="user_encrypted_message" msgid="4923292604515744267">"Toque para desbloquear"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Dados do usuário bloqueados"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Perfil de trabalho bloqueado"</string>
-    <string name="profile_encrypted_message" msgid="6964994232310195874">"Toque para desbloquear perfil de trabalho"</string>
+    <string name="profile_encrypted_message" msgid="6964994232310195874">"Toque p/ desbl. perfil de trab."</string>
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Conectado a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Toque para ver os arquivos"</string>
     <string name="pin_target" msgid="3052256031352291362">"Fixar guia"</string>

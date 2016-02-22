@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Alkalmazás alaphelyzetbe állítása és újraindítása"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Visszajelzés küldése"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Bezárás"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Némítás"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Némítás az eszköz újraindulásáig"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Várakozás"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Alkalmazás bezárása"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Érintse meg a további lehetőségekhez."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB hibakereső csatlakoztatva"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Érintse meg az USB hibakeresés kikapcsolásához."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Megosztja a hibajelentést?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Hibajelentés megosztása…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"A rendszergazda hibajelentést kért, hogy segíthessen az eszközzel kapcsolatos probléma megoldásában. Előfordulhat, hogy a rendszer megosztja az alkalmazásokat és adatokat, továbbá eszköze átmenetileg lelassulhat."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"A rendszergazda hibajelentést kért, hogy segíthessen az eszközzel kapcsolatos probléma megoldásában. Előfordulhat, hogy a rendszer megosztja az alkalmazásokat és adatokat."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Előfordulhat, hogy eszköze emiatt átmenetileg lelassul"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ELFOGADOM"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ELUTASÍTOM"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Billentyűzet megváltoztatása"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> kiválasztva</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kiválasztva</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Vegyes"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Ön állította be ezen értesítések fontossági szintjét."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Ez az üzenet a résztvevők miatt fontos."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>

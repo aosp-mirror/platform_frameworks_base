@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Ысырып, қолданбаны қайта іске қосу"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Пікір жіберу"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Жабу"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Үнсіз"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Құрылғы қайта іске қосылғанша дыбысын өшіру"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Күту"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Қолданбаны жабу"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Қосымша параметрлер үшін түртіңіз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB жөндеу қосылған"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB жөндеуді өшіру үшін түртіңіз."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Қате туралы есепті бөлісу керек пе?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Қате туралы есеп бөлісілуде…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар және деректер бөлісілуі мүмкін, әрі құрылғы уақытша баяулауы мүмкін."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар және деректер бөлісілуі мүмкін."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Бұл құрылғыны уақытша баяулатуы мүмкін"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ҚАБЫЛДАУ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
@@ -1543,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> таңдалды</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Әр түрлі"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Сіз осы хабарландырулардың маңыздылығын орнатасасыз."</string>
+    <string name="importance_from_user" msgid="7318955817386549931">"Сіз осы хабарландырулардың маңыздылығын орнатасыз."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Қатысты адамдарға байланысты бұл маңызды."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы жасауға рұқсат ету керек пе?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасында жаңа пайдаланушы жасауға рұқсат ету керек пе (осы есептік жазбасы бар пайдаланушы әлдеқашан бар) ?"</string>

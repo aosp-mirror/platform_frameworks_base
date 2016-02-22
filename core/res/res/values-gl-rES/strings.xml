@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Restablecer e reiniciar aplicación"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Dános a túa opinión"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Pechar"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Ignorar"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Ignorar fallos ata que o dispositivo se reinicie"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Esperar"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Pechar aplicación"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca para ver máis opcións."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca aquí para desactivala"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Queres compartir o informe de erros?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Compartindo informe de erros..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"O teu administrador de TI solicitou un informe de erros para axudar a solucionar os problemas deste dispositivo. É posible que se compartan aplicacións e datos e que se reduza a velocidade do teu dispositivo temporalmente."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"O teu administrador de TI solicitou un informe de erros para axudar a solucionar os problemas deste dispositivo. É posible que se compartan aplicacións e datos."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Esta acción pode reducir a velocidade do teu dispositivo temporalmente"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACEPTAR"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ANULAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other">Seleccionáronse <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Seleccionouse <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Varios"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Ti defines a importancia destas notificacións."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"É importante polas persoas involucradas."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Xa existe un usuario con esta conta)"</string>

@@ -929,7 +929,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Сбросить и перезапустить"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Отправить отзыв"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Закрыть"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Скрыть"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Отключить до перезагрузки устройства"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Подождать"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Закрыть приложение"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1069,16 +1069,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Нажмите, чтобы настроить."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отладка по USB разрешена"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Нажмите, чтобы отключить отладку по USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Разрешить доступ к информации об ошибке?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Отправка отчета об ошибке"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Администратор запросил отчет об ошибке, чтобы устранить неполадку. Он может получить доступ к приложениям и данным. Возможно временное снижение скорости работы вашего устройства."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Администратор запросил отчет об ошибке, чтобы устранить неполадку. Он может получить доступ к приложениям и данным."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Скорость работы устройства может быть временно снижена."</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ПРИНЯТЬ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ОТКЛОНИТЬ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Выбор раскладки"</string>
@@ -1581,8 +1576,8 @@
       <item quantity="many">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Выбрано: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Другое"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Вы определяете важность этих уведомлений."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Важное (люди)"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Разрешить приложению \"<xliff:g id="APP">%1$s</xliff:g>\" создать пользователя для аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Разрешить приложению \"<xliff:g id="APP">%1$s</xliff:g>\" создать нового пользователя для аккаунта <xliff:g id="ACCOUNT">%2$s</xliff:g> (пользователь c таким аккаунтом уже есть)?"</string>
