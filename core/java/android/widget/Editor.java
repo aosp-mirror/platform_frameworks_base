@@ -965,20 +965,21 @@ public class Editor {
     private int getNextCursorOffset(int offset, boolean findAfterGivenOffset) {
         final Layout layout = mTextView.getLayout();
         if (layout == null) return offset;
-        final CharSequence text = mTextView.getText();
-        final int nextOffset = layout.getPaint().getTextRunCursor(text, 0, text.length(),
-                layout.isRtlCharAt(offset) ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR,
-                offset, findAfterGivenOffset ? Paint.CURSOR_AFTER : Paint.CURSOR_BEFORE);
-        return nextOffset == -1 ? offset : nextOffset;
+        return findAfterGivenOffset == layout.isRtlCharAt(offset) ?
+                layout.getOffsetToLeftOf(offset) : layout.getOffsetToRightOf(offset);
     }
 
     private long getCharClusterRange(int offset) {
         final int textLength = mTextView.getText().length();
         if (offset < textLength) {
-            return TextUtils.packRangeInLong(offset, getNextCursorOffset(offset, true));
+            final int clusterEndOffset = getNextCursorOffset(offset, true);
+            return TextUtils.packRangeInLong(
+                    getNextCursorOffset(clusterEndOffset, false), clusterEndOffset);
         }
         if (offset - 1 >= 0) {
-            return TextUtils.packRangeInLong(getNextCursorOffset(offset, false), offset);
+            final int clusterStartOffset = getNextCursorOffset(offset, false);
+            return TextUtils.packRangeInLong(clusterStartOffset,
+                    getNextCursorOffset(clusterStartOffset, true));
         }
         return TextUtils.packRangeInLong(offset, offset);
     }
@@ -1089,7 +1090,7 @@ public class Editor {
         CharSequence selectedText = mTextView.getTransformedText(start, end);
         ClipData data = ClipData.newPlainText(null, selectedText);
         DragLocalState localState = new DragLocalState(mTextView, start, end);
-        mTextView.startDragAndDrop(data, getTextThumbnailBuilder(selectedText), localState,
+        mTextView.startDragAndDrop(data, getTextThumbnailBuilder(start, end), localState,
                 View.DRAG_FLAG_GLOBAL);
         stopTextActionMode();
         if (hasSelectionController()) {
@@ -2296,7 +2297,7 @@ public class Editor {
         }
     }
 
-    private DragShadowBuilder getTextThumbnailBuilder(CharSequence text) {
+    private DragShadowBuilder getTextThumbnailBuilder(int start, int end) {
         TextView shadowView = (TextView) View.inflate(mTextView.getContext(),
                 com.android.internal.R.layout.text_drag_thumbnail, null);
 
@@ -2304,9 +2305,11 @@ public class Editor {
             throw new IllegalArgumentException("Unable to inflate text drag thumbnail");
         }
 
-        if (text.length() > DRAG_SHADOW_MAX_TEXT_LENGTH) {
-            text = text.subSequence(0, DRAG_SHADOW_MAX_TEXT_LENGTH);
+        if (end - start > DRAG_SHADOW_MAX_TEXT_LENGTH) {
+            final long range = getCharClusterRange(start + DRAG_SHADOW_MAX_TEXT_LENGTH);
+            end = TextUtils.unpackRangeEndFromLong(range);
         }
+        final CharSequence text = mTextView.getTransformedText(start, end);
         shadowView.setText(text);
         shadowView.setTextColor(mTextView.getTextColors());
 
