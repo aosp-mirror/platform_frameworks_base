@@ -248,9 +248,9 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"Luba rakendused välises salvestusruumis"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Lubab rakendusi kirjutada välisesse salvestusruumi olenemata manifesti väärtustest"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Muuda tegevuste suurused muudetavaks"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Muudab kõigi tegevuste suurused mitme aknaga vaates olenemata manifesti väärtustest muudetavaks."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Muudetakse kõigi tegevuste suurused mitme aknaga vaates muudetavaks (manifesti väärtustest olenemata)."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Luba vabas vormis aknad"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Lubatakse katseliste vabas vormis akende tugi."</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Lubatakse katseliste vabavormis akende tugi."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Arvutivarunduse parool"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Täielikud arvutivarundused pole praegu kaitstud"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Puudutage täielike arvutivarunduste parooli muutmiseks või eemaldamiseks"</string>
@@ -277,6 +277,10 @@
     <string name="night_mode_no" msgid="9171772244775838901">"Keelatud"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"Alati sees"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"Automaatne"</string>
+    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
+    <skip />
+    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
+    <skip />
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView\' rakendamine"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView\' rakendamise seadistamine"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Valitud WebView\' rakendamisviis on keelatud ja see tuleb kasutamiseks lubada. Kas soovite selle lubada?"</string>
@@ -296,7 +300,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Värviparandus"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"See funktsioon on katseline ja võib mõjutada toimivust."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Alistas <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Umbes <xliff:g id="TIME">%2$s</xliff:g> on jäänud"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Umbes <xliff:g id="TIME">%1$s</xliff:g> on jäänud"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> – jäänud on umbes <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g>, kuni aku on täis"</string>
@@ -311,7 +315,8 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ei lae"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ei lae"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Täis"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Administraator on keelanud"</string>
+    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
+    <skip />
     <string name="home" msgid="8263346537524314127">"Avaekraan"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> tagasi"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> on jäänud"</string>
