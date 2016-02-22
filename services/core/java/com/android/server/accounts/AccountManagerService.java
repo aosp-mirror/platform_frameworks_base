@@ -1734,7 +1734,7 @@ public class AccountManagerService
 
     private boolean accountExistsCacheLocked(UserAccounts accounts, Account account) {
         if (accounts.accountCache.containsKey(account.type)) {
-            for (Account acc : getUserAccountsForCaller().accountCache.get(account.type)) {
+            for (Account acc : accounts.accountCache.get(account.type)) {
                 if (acc.name.equals(account.name)) {
                     return true;
                 }
