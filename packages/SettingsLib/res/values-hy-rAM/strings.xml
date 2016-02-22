@@ -248,9 +248,9 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"Միշտ թույլատրել ծրագրեր արտաքին պահեստում"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"Թույլ է տալիս պահել հավելվածը արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Ստիպել, որ ակտիվությունների չափերը լինեն փոփոխելի"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"Բոլոր ակտիվությունների չափերը բազմապատուհան ռեժիմի համար դարձնել փոփոխելի՝ մանիֆեստի արժեքներից անկախ:"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Բոլոր ակտիվությունների չափերը բազմապատուհան ռեժիմի համար դարձնել փոփոխելի՝ մանիֆեստի արժեքներից անկախ:"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Ակտիվացնել կամայական ձևի պատուհանները"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"Ակտիվացնում է կամայական ձևի փորձնական պատուհանների աջակցումը:"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Միացնել ազատ ձևի փորձնական պատուհանների աջակցումը:"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Աշխատասեղանի պահուստավորման գաղտնաբառ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Աշխատասեղանի ամբողջական պահուստավորումները այժմ պաշտպանված չեն"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Հպեք՝ աշխատասեղանի ամբողջական պահուստավորման գաղտնաբառը փոխելու կամ հեռացնելու համար"</string>
@@ -277,6 +277,10 @@
     <string name="night_mode_no" msgid="9171772244775838901">"Անջատված"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"Միշտ միացված"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"Ավտոմատ"</string>
+    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
+    <skip />
+    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
+    <skip />
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-ի իրականացում"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ընտրեք WebView-ի իրականացումը"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"WebView-ի իրականացման ընտրված եղանակն անջատված է և օգտագործելու համար պետք է նախ միացվի: Միացնե՞լ:"</string>
@@ -296,8 +300,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Գունային կարգաբերում"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Սա փորձնական գործառույթ է և կարող է ազդել աշխատանքի վրա:"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Գերազանցված է <xliff:g id="TITLE">%1$s</xliff:g>-ից"</string>
-    <!-- no translation found for power_remaining_duration_only (4400068916452346544) -->
-    <skip />
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"Մնացել է մոտ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - մնաց մոտավորապես <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> մինչև լրիվ լիցքավորումը"</string>
@@ -312,10 +315,9 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Չի լիցքավորվում"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Լիցքավորված"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Կասեցված է ադմինիստրատորի կողմից"</string>
+    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
+    <skip />
     <string name="home" msgid="8263346537524314127">"Գլխավոր էջ"</string>
-    <!-- no translation found for charge_length_format (8978516217024434156) -->
-    <skip />
-    <!-- no translation found for remaining_length_format (7886337596669190587) -->
-    <skip />
+    <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> առաջ"</string>
+    <string name="remaining_length_format" msgid="7886337596669190587">"Մնացել է <xliff:g id="ID_1">%1$s</xliff:g>"</string>
 </resources>

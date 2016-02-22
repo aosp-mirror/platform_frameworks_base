@@ -248,9 +248,9 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"ਐਪਸ ਨੂੰ ਬਾਹਰਲੇ ਤੇ ਜ਼ਬਰਦਸਤੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ਇੱਕ ਐਪ ਨੂੰ ਬਾਹਰਲੀ ਸਟੋਰੇਜ ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ, ਮੈਨੀਫੈਸਟ ਵੈਲਯੂਜ ਤੇ ਵਿਚਾਰ ਕੀਤੇ ਬਿਨਾਂ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>
-    <string name="force_resizable_activities_summary" msgid="4508217476997182216">"ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਮੁੜ-ਆਕਾਰ ਵਿੱਚ ਲਿਆਉਂਦੀ ਹੈ, ਚਾਹੇ ਮੈਨੀਫੈਸਟ ਵੈਲਯੂਜ਼ ਕੁਝ ਵੀ ਹੋਣ।"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"freeform windows ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
-    <string name="enable_freeform_support_summary" msgid="2252563497485436534">"ਪ੍ਰਯੋਗਾਤਮਕ freeform windows ਲਈ ਸਮਰਥਨ ਨੂੰ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ।"</string>
+    <string name="enable_freeform_support_summary" msgid="8247310463288834487">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਯੋਗ ਬਣਾਓ।"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ਡੈਸਕਟੌਪ ਬੈਕਅਪ ਪਾਸਵਰਡ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ਡੈਸਕਟੌਪ ਪੂਰੇ ਬੈਕਅਪਸ ਇਸ ਵੇਲੇ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹਨ"</string>
     <string name="local_backup_password_summary_change" msgid="5376206246809190364">"ਡੈਸਕਟਾਪ ਦੇ ਮੁਕੰਮਲ ਬੈਕਅੱਪਾਂ ਲਈ ਪਾਸਵਰਡ ਨੂੰ ਬਦਲਣ ਜਾਂ ਹਟਾਉਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
@@ -277,6 +277,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"ਅਸਮਰੱਥ ਬਣਾਇਆ"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"ਹਮੇਸ਼ਾ ਚਾਲੂ"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"ਆਟੋਮੈਟਿਕ"</string>
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"ਬਹੁ-ਮੰਤਵ WebView ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ਕਿਸੇ ਵੱਖ ਕੀਤੀ ਗਈ ਪ੍ਰਕਿਰਿਆ ਵਿੱਚ WebView ਰੈਂਡਰਰਾਂ ਨੂੰ ਚਲਾਓ।"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ਅਮਲ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ਅਮਲ ਸੈੱਟ ਕਰੋ"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ਚੁਣਿਆ ਗਿਆ WebView ਅਮਲ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ ਹੈ, ਅਤੇ ਵਰਤੋਂ ਕਰਨ ਲਈ ਇਸ ਨੂੰ ਯੋਗ ਬਣਾਇਆ ਜਾਣਾ ਜ਼ਰੂਰੀ ਹੈ, ਕੀ ਤੁਸੀਂ ਇਸ ਨੂੰ ਯੋਗ ਬਣਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
@@ -296,7 +298,7 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"ਰੰਗ ਸੰਸ਼ੋਧਨ"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਪ੍ਰਯੋਗਾਤਮਿਕ ਹੈ ਅਤੇ ਪ੍ਰਦਰਸ਼ਨ ਤੇ ਅਸਰ ਪਾ ਸਕਦੀ ਹੈ।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ਦੁਆਰਾ ਓਵਰਰਾਈਡ ਕੀਤਾ"</string>
-    <string name="power_remaining_duration_only" msgid="4400068916452346544">"ਲਗਭਗ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
+    <string name="power_remaining_duration_only" msgid="4400068916452346544">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਬਾਕੀ"</string>
     <string name="power_discharging_duration" msgid="1605929174734600590">"<xliff:g id="LEVEL">%1$s</xliff:g> - ਲਗਭਗ <xliff:g id="TIME">%2$s</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="2853265177761520490">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ"</string>
@@ -311,7 +313,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ਪੂਰੀ"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕੀਤੀ ਗਈ"</string>
     <string name="home" msgid="8263346537524314127">"ਮੁੱਖ ਸਕ੍ਰੀਨ"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> ਪਹਿਲਾਂ"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ਬਾਕੀ"</string>
