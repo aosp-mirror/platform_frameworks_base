@@ -253,6 +253,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final byte[] mAttestationChallenge;
     private final boolean mUniqueIdIncluded;
     private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mInvalidatedByBiometricEnrollment;
 
     /**
      * @hide should be built with Builder
@@ -279,7 +280,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             int userAuthenticationValidityDurationSeconds,
             byte[] attestationChallenge,
             boolean uniqueIdIncluded,
-            boolean userAuthenticationValidWhileOnBody) {
+            boolean userAuthenticationValidWhileOnBody,
+            boolean invalidatedByBiometricEnrollment) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -324,6 +326,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
         mUniqueIdIncluded = uniqueIdIncluded;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
     }
 
     /**
@@ -607,6 +610,19 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if the key is irreversibly invalidated when a new fingerprint is
+     * enrolled or all enrolled fingerprints are removed. This has effect only for keys that
+     * require fingerprint user authentication for every use.
+     *
+     * @see #isUserAuthenticationRequired()
+     * @see #getUserAuthenticationValidityDurationSeconds()
+     * @see Builder#setInvalidatedByBiometricEnrollment(boolean)
+     */
+    public boolean isInvalidatedByBiometricEnrollment() {
+        return mInvalidatedByBiometricEnrollment;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -633,6 +649,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private byte[] mAttestationChallenge = null;
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
+        private boolean mInvalidatedByBiometricEnrollment = true;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -966,8 +983,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
          * or when the secure lock screen is forcibly reset (e.g., by a Device Administrator).
          * Additionally, if the key requires that user authentication takes place for every use of
          * the key, it is also irreversibly invalidated once a new fingerprint is enrolled or once\
-         * no more fingerprints are enrolled. Attempts to initialize cryptographic operations using
-         * such keys will throw {@link KeyPermanentlyInvalidatedException}.</li>
+         * no more fingerprints are enrolled, unless {@link
+         * #setInvalidatedByBiometricEnrollment(boolean)} is used to allow validity after
+         * enrollment. Attempts to initialize cryptographic operations using such keys will throw
+         * {@link KeyPermanentlyInvalidatedException}.</li>
          * </ul>
          *
          * <p>This authorization applies only to secret key and private key operations. Public key
@@ -1110,6 +1129,30 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether this key should be invalidated on fingerprint enrollment.  This
+         * applies only to keys which require user authentication (see {@link
+         * #setUserAuthenticationRequired(boolean)}) and if no positive validity duration has been
+         * set (see {@link #setUserAuthenticationValidityDurationSeconds(int)}, meaning the key is
+         * valid for fingerprint authentication only.
+         *
+         * <p>By default, {@code invalidateKey} is {@code true}, so keys that are valid for
+         * fingerprint authentication only are <em>irreversibly invalidated</em> when a new
+         * fingerprint is enrolled, or when all existing fingerprints are deleted.  That may be
+         * changed by calling this method with {@code invalidateKey} set to {@code false}.
+         *
+         * <p>Invalidating keys on enrollment of a new finger or unenrollment of all fingers
+         * improves security by ensuring that an unauthorized person who obtains the password can't
+         * gain the use of fingerprint-authenticated keys by enrolling their own finger.  However,
+         * invalidating keys makes key-dependent operations impossible, requiring some fallback
+         * procedure to authenticate the user and set up a new key.
+         */
+        @NonNull
+        public Builder setInvalidatedByBiometricEnrollment(boolean invalidateKey) {
+            mInvalidatedByBiometricEnrollment = invalidateKey;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1136,7 +1179,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mUserAuthenticationValidityDurationSeconds,
                     mAttestationChallenge,
                     mUniqueIdIncluded,
-                    mUserAuthenticationValidWhileOnBody);
+                    mUserAuthenticationValidWhileOnBody,
+                    mInvalidatedByBiometricEnrollment);
         }
     }
 }
