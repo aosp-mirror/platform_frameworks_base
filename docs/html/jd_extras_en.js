@@ -3198,87 +3198,33 @@ METADATA['en'].carousel = {
     "title": "Android 5.0 Lollipop",
     "summary": "The Android 5.0 update adds a variety of new features for your apps, such as notifications on the lock screen, an all-new camera API, OpenGL ES 3.1, the new naterial design interface, and much more.",
   },
-  "https://www.youtube.com/watch?v=yJisuP94lHU": {
-    "url":"https://www.youtube.com/watch?v=yJisuP94lHU&index=1&list=PLWz5rJ2EKKc_QRBk7Zkl5uGjR1He7vG-w",
-    "image": "images/distribute/hero-playtime-opener.jpg",
-    "title": "Playtime 2015: Innovation happens everywhere",
-    "type":"video",
-    "summary": "Watch the opening video from Google Play's annual event series, Playtime, which celebrates inspirational developers who are changing the world around them.",
+  "http://www.youtube.com/watch?v=Pms0pcyPbAM": {
+    "url":"https://www.youtube.com/watch?v=Pms0pcyPbAM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c]",
+    "image": "images/distribute/hero-carousel-giftedmom.jpg",
+    "title": "Gifted Mom reaches more mothers across Africa with Android",
+    "type":"youtube",
+    "summary": "Gifted Mom is an app developed in Cameroon which provides users with critical information about pregnancy, breastfeeding and child vaccinations. Hear the creators explain how they built their business and launched on Google Play.",
   },
-  "http://www.youtube.com/watch?v=rcU7VEs1hiE": {
-    "url":"https://www.youtube.com/watch?v=rcU7VEs1hiE&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-rogervoice-story.jpg",
-    "title": "RogerVoice uses beta testing to launch on Android first",
+  "http://www.youtube.com/watch?v=9m6MoBM-sFI": {
+    "url":"https://www.youtube.com/watch?v=9m6MoBM-sFI&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c&index=3",
+    "image": "images/distribute/hero-carousel-sgn.jpg",
+    "title": "SGN increases installs with Store Listing Experiments",
     "type" : "youtube",
-    "summary": "RogerVoice helps people who are hearing impaired make phone calls through voice recognition and text captions. Hear how they used material design and beta testing to create a UI that's accessible and intuitive to navigate.",
+    "summary": "Watch mobile game developer SGN talk about how using Store Listing Experiments to test multiple variants across their portfolio of games helped improve their ROI, conversion rates and gamer retention.",
   },
-  "http://www.youtube.com/watch?v=JFlX9rW7Epc": {
-    "url":"https://www.youtube.com/watch?v=JFlX9rW7Epc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-domain-story.jpg",
-    "title": "Domain increases installs by 44% with Material Design",
+  "http://www.youtube.com/watch?v=e7t3svG9PTk": {
+    "url":"https://www.youtube.com/watch?v=e7t3svG9PTk&index=2&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+    "image": "images/distribute/hero-carousel-djit.jpg",
+    "title": "DJiT builds higher quality experiences on Android",
     "type" : "youtube",
-    "summary": "Learn how Domain, a premier real-estate portal in Australia, drastically improved their Google Play app reviews, ratings and downloads by investing in their Android app experience.",
+    "summary": "Learn how Music app developer DJiT create higher quality apps with improved latency on Android Marshmallow, as well as other Android and Google Play features.",
   },
-  "http://www.youtube.com/watch?v=4CqXCkcN_d4": {
-    "url":"https://www.youtube.com/watch?v=4CqXCkcN_d4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-dots-story.jpg",
-    "title": "Dots increases installs with Store Listing Experiments",
+  "http://www.youtube.com/watch?v=J3IvOfvH1ys": {
+    "url":"https://www.youtube.com/watch?v=J3IvOfvH1ys&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c&index=1",
+    "image": "images/distribute/hero-carousel-wego.jpg",
+    "title": "Wego increases user retention with material design",
     "type" : "youtube",
-    "summary": "Hear how US-founded game developer, Dots, used the Store Listing Experiments feature in the Google Play Developer Console to test what icon, graphics, and text worked the best at converting visitors to installs.",
-  },
-  "https://www.youtube.com/watch?v=JrR6o5tYMWQ": {
-    "url":"https://www.youtube.com/watch?v=JrR6o5tYMWQ",
-    "image": "images/distribute/hero-acquisition-devbyte.jpg",
-    "title": "User acquisition and tracking on Google Play",
-    "type" : "youtube",
-    "summary": "Learn how to get new users, using Universal app campaigns directly within the Google Play Developer Console to increase your installs from ads, and find out how your acquisition channels perform.",
-  },
-  "https://www.youtube.com/watch?v=Pd49vTkvu0U": {
-    "url":"https://www.youtube.com/watch?v=Pd49vTkvu0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-jelly-button.jpg",
-    "title": "How Jelly Button Games are growing globally through data",
-    "summary": "To really understand their users, Jelly Button Games analyzes over 3 billion events each month using Google Analytics and Google BigQuery.",
-  },
-  "https://www.youtube.com/watch?v=700gYRkhkLM": {
-    "url":"https://www.youtube.com/watch?v=700gYRkhkLM&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-outfit7.jpg",
-    "title": "Outfit7 — Building an entertainment company with Google",
-    "summary": "Outfit7, creators of My Talking Tom and My Talking Angela, offer a complete entertainment experience to users spanning mobile apps, user generated and original YouTube content, and a range of toys, clothing, and accessories....",
-  },
-  "https://www.youtube.com/watch?v=MPnH7h12h0U": {
-    "url":"https://www.youtube.com/watch?v=MPnH7h12h0U&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-haystack.jpg",
-    "summary": "Haystack TV built a scalable business with six employees and Android TV. Two weeks was all it took for them to bring their mobile app to the big screen.",
-  },
-  "https://www.youtube.com/watch?v=ekxABqJeRBc": {
-    "url":"https://www.youtube.com/watch?v=ekxABqJeRBc&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-ginlemon.jpg",
-    "title": "How GinLemon is breaking through with Google Play",
-    "summary": "Meet Vincenzo Colucci, developer and founder of GinLemon, which started as a summer holiday joke and has now become a successful global app business on Google Play based in Manfredonia, southern Italy.",
-  },
-  "https://www.youtube.com/watch?v=0r36OJaeMo4": {
-    "url":"https://www.youtube.com/watch?v=0r36OJaeMo4&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-shifty-jelly.jpg",
-    "title": "Shifty Jelly — building a number 1 podcast app",
-    "summary": "Shifty Jelly is an Adelaide based mobile development company that has seen great success building Pocket Casts, a premium podcast manager app.",
-  },
-  "https://www.youtube.com/watch?v=1Iw7Tg_afKk": {
-    "image": "images/distribute/hero-wooga.jpg",
-    "url":"https://www.youtube.com/watch?v=1Iw7Tg_afKk&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "title": "Wooga’s fast iterations on Google Play",
-    "summary": "The speed at which Wooga is able to iterate its live and under development games with the Android and Google Play tools has been key to delivering hits such as Diamond Dash, Jelly Splash, and Agent Alice.",
-  },
-  "https://www.youtube.com/watch?v=TieksFvD-7o": {
-    "url":"https://www.youtube.com/watch?v=TieksFvD-7o&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-trello.jpg",
-    "title": "Trello lifts engagement by double digits with material design",
-    "summary": "Trello recently redesigned their collaborative planning app using the material design guidelines, and their efforts paid off.",
-  },
-  "https://www.youtube.com/watch?v=MCoh4Pxs_ok": {
-    "url":"https://www.youtube.com/watch?v=MCoh4Pxs_ok&list=PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
-    "image": "images/distribute/hero-the-hunt.jpg",
-    "title": "The Hunt — growing engagement with material design and Google Play",
-    "summary": "Material design has helped The Hunt to enhance engagement in their style advice and product discovery app. ",
+    "summary": "Hear how online travel marketplace Wego, increased monthly user retention by 300% and reduced uninstall rates by up to 25% with material design.",
   },
   "https://www.youtube.com/watch?v=QDM52bblwlg": {
     "url":"distribute/googleplay/families/about.html",
@@ -3329,10 +3275,10 @@ METADATA['en'].collections = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=yJisuP94lHU",
-      "http://www.youtube.com/watch?v=rcU7VEs1hiE",
-      "http://www.youtube.com/watch?v=JFlX9rW7Epc",
-      "http://www.youtube.com/watch?v=4CqXCkcN_d4"
+      "http://www.youtube.com/watch?v=Pms0pcyPbAM",
+      "http://www.youtube.com/watch?v=9m6MoBM-sFI",
+      "http://www.youtube.com/watch?v=e7t3svG9PTk",
+      "http://www.youtube.com/watch?v=J3IvOfvH1ys"
     ]
   },
   "index/multiscreen": {

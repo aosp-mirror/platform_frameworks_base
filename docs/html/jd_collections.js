@@ -16,10 +16,10 @@ var RESOURCE_COLLECTIONS = {
   "index/secondary/carousel": {
     "title": "",
     "resources": [
-      "https://www.youtube.com/watch?v=yJisuP94lHU",
-      "http://www.youtube.com/watch?v=rcU7VEs1hiE",
-      "http://www.youtube.com/watch?v=JFlX9rW7Epc",
-      "http://www.youtube.com/watch?v=4CqXCkcN_d4"
+      "http://www.youtube.com/watch?v=Pms0pcyPbAM",
+      "http://www.youtube.com/watch?v=9m6MoBM-sFI",
+      "http://www.youtube.com/watch?v=e7t3svG9PTk",
+      "http://www.youtube.com/watch?v=J3IvOfvH1ys"
     ]
   },
   "index/multiscreen": {
