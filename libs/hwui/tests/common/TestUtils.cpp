@@ -19,6 +19,8 @@
 #include "DeferredLayerUpdater.h"
 #include "LayerRenderer.h"
 
+#include <utils/Unicode.h>
+
 #include <unistd.h>
 #include <signal.h>
 
@@ -66,7 +68,10 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
     SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
     SkAutoGlyphCacheNoGamma autoCache(paint, &surfaceProps, &SkMatrix::I());
     while (*text != '\0') {
-        SkUnichar unichar = SkUTF8_NextUnichar(&text);
+        size_t nextIndex = 0;
+        int32_t unichar = utf32_from_utf8_at(text, 4, 0, &nextIndex);
+        text += nextIndex;
+
         glyph_t glyph = autoCache.getCache()->unicharToGlyph(unichar);
         autoCache.getCache()->unicharToGlyph(unichar);
 
@@ -130,7 +135,10 @@ void TestUtils::drawTextToCanvas(TestCanvas* canvas, const char* text,
 
     std::vector<glyph_t> glyphs;
     while (*text != '\0') {
-        SkUnichar unichar = SkUTF8_NextUnichar(&text);
+        size_t nextIndex = 0;
+        int32_t unichar = utf32_from_utf8_at(text, 4, 0, &nextIndex);
+        text += nextIndex;
+
         glyphs.push_back(autoCache.getCache()->unicharToGlyph(unichar));
     }
     canvas->drawTextOnPath(glyphs.data(), glyphs.size(), path, 0, 0, paint);
