@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -91,7 +92,8 @@ public class KeyguardBouncer {
 
         final int activeUserId = ActivityManager.getCurrentUser();
         final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
-        final boolean allowDismissKeyguard = activeUserId != UserHandle.USER_SYSTEM
+        final boolean allowDismissKeyguard =
+                !(UserManager.isSplitSystemUser() && activeUserId == UserHandle.USER_SYSTEM)
                 && activeUserId == keyguardUserId;
         // If allowed, try to dismiss the Keyguard. If no security auth (password/pin/pattern) is
         // set, this will dismiss the whole Keyguard. Otherwise, show the bouncer.
