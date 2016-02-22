@@ -488,7 +488,6 @@
   <java-symbol type="string" name="Noon" />
   <java-symbol type="string" name="PinMmi" />
   <java-symbol type="string" name="PwdMmi" />
-  <java-symbol type="string" name="RestrictedChangedTitle" />
   <java-symbol type="string" name="RestrictedOnAllVoice" />
   <java-symbol type="string" name="RestrictedOnData" />
   <java-symbol type="string" name="RestrictedOnEmergency" />
