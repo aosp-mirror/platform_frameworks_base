@@ -28,6 +28,8 @@ import android.media.soundtrigger.SoundTriggerManager;
 import android.text.Editable;
 import android.text.method.ScrollingMovementMethod;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.os.UserManager;
 import android.util.Log;
 import android.view.View;
@@ -54,6 +56,8 @@ public class TestSoundTriggerActivity extends Activity {
     private TextView mDebugView = null;
     private int mSelectedModelId = 1;
     private ScrollView mScrollView = null;
+    private PowerManager.WakeLock mScreenWakelock;
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +70,7 @@ public class TestSoundTriggerActivity extends Activity {
         mDebugView.setMovementMethod(new ScrollingMovementMethod());
         mSoundTriggerUtil = new SoundTriggerUtil(this);
         mRandom = new Random();
+        mHandler = new Handler();
     }
 
     private void postMessage(String msg) {
@@ -85,22 +90,41 @@ public class TestSoundTriggerActivity extends Activity {
         });
     }
 
-    private UUID getSelectedUuid() {
+    private synchronized UUID getSelectedUuid() {
         if (mSelectedModelId == 2) return mModelUuid2;
         if (mSelectedModelId == 3) return mModelUuid3;
         return mModelUuid1;  // Default.
     }
 
-    private void setDetector(SoundTriggerDetector detector) {
-        if (mSelectedModelId == 2) mDetector2 = detector;
-        if (mSelectedModelId == 3) mDetector3 = detector;
+    private synchronized void setDetector(SoundTriggerDetector detector) {
+        if (mSelectedModelId == 2) {
+            mDetector2 = detector;
+            return;
+        }
+        if (mSelectedModelId == 3) {
+            mDetector3 = detector;
+            return;
+        }
         mDetector1 = detector;
     }
 
-    private SoundTriggerDetector getDetector() {
+    private synchronized SoundTriggerDetector getDetector() {
         if (mSelectedModelId == 2) return mDetector2;
         if (mSelectedModelId == 3) return mDetector3;
         return mDetector1;
+    }
+
+    private void screenWakeup() {
+        PowerManager pm = ((PowerManager)getSystemService(POWER_SERVICE));
+        if (mScreenWakelock == null) {
+            mScreenWakelock =  pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "TAG");
+        }
+        mScreenWakelock.acquire();
+    }
+
+    private void screenRelease() {
+        PowerManager pm = ((PowerManager)getSystemService(POWER_SERVICE));
+        mScreenWakelock.release();
     }
 
     /**
@@ -139,7 +163,7 @@ public class TestSoundTriggerActivity extends Activity {
             Toast.makeText(this, "Sound model not found!!!", Toast.LENGTH_SHORT).show();
             return;
         }
-        boolean status = mSoundTriggerUtil.deleteSoundModel(mModelUuid1);
+        boolean status = mSoundTriggerUtil.deleteSoundModel(modelUuid);
         if (status) {
             Toast.makeText(this, "Successfully deleted model UUID=" + soundModel.uuid,
                     Toast.LENGTH_SHORT)
@@ -204,22 +228,28 @@ public class TestSoundTriggerActivity extends Activity {
         }
     }
 
-    public void onRadioButtonClicked(View view) {
+    public synchronized void onRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
         // Check which radio button was clicked
         switch(view.getId()) {
             case R.id.model_one:
-                if (checked) mSelectedModelId = 1;
-                postMessage("Selected model one.");
+                if (checked) {
+                    mSelectedModelId = 1;
+                    postMessage("Selected model one.");
+                }
                 break;
             case R.id.model_two:
-                if (checked) mSelectedModelId = 2;
-                postMessage("Selected model two.");
+                if (checked) {
+                    mSelectedModelId = 2;
+                    postMessage("Selected model two.");
+                }
                 break;
             case R.id.model_three:
-                if (checked) mSelectedModelId = 3;
-                postMessage("Selected model three.");
+                if (checked) {
+                    mSelectedModelId = 3;
+                    postMessage("Selected model three.");
+                }
                 break;
         }
     }
@@ -232,6 +262,13 @@ public class TestSoundTriggerActivity extends Activity {
 
         public void onDetected(SoundTriggerDetector.EventPayload event) {
             postMessage("onDetected(): " + eventPayloadToString(event));
+            screenWakeup();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                   screenRelease();
+                }
+            }, 1000L);
         }
 
         public void onError() {
