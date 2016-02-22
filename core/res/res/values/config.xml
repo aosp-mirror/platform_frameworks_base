@@ -29,6 +29,7 @@
     <string-array name="config_statusBarIcons">
         <item><xliff:g id="id">@string/status_bar_rotate</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_headset</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_data_saver</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ime</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sync_failing</xliff:g></item>
@@ -56,6 +57,7 @@
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
     <string translatable="false" name="status_bar_headset">headset</string>
+    <string translatable="false" name="status_bar_data_saver">data_saver</string>
     <string translatable="false" name="status_bar_managed_profile">managed_profile</string>
     <string translatable="false" name="status_bar_ime">ime</string>
     <string translatable="false" name="status_bar_sync_failing">sync_failing</string>

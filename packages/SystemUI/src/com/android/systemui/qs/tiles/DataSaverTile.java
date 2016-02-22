@@ -61,8 +61,8 @@ public class DataSaverTile extends QSTile<QSTile.BooleanState> implements
         state.value = arg instanceof Boolean ? (Boolean) arg
                 : mDataSaverController.isDataSaverEnabled();
         state.label = mContext.getString(R.string.data_saver);
-        state.contentDescription = mContext.getString(state.value ?
-                R.string.accessibility_data_saver_on : R.string.accessibility_data_saver_off);
+        state.contentDescription = mContext.getString(state.value
+                ? R.string.accessibility_data_saver_on : R.string.accessibility_data_saver_off);
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_data_saver
                 : R.drawable.ic_data_saver_off);
     }
