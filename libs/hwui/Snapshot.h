@@ -44,7 +44,7 @@ namespace uirenderer {
  */
 class RoundRectClipState {
 public:
-    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size) = delete;
     static void* operator new(size_t size, LinearAllocator& allocator) {
         return allocator.alloc<RoundRectClipState>(size);
     }
@@ -65,7 +65,7 @@ public:
 
 class ProjectionPathMask {
 public:
-    /** static void* operator new(size_t size); PURPOSELY OMITTED, allocator only **/
+    static void* operator new(size_t size) = delete;
     static void* operator new(size_t size, LinearAllocator& allocator) {
         return allocator.alloc<ProjectionPathMask>(size);
     }
