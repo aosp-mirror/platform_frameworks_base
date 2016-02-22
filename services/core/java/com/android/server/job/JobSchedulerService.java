@@ -49,14 +49,13 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.Process;
-import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
+import com.android.server.job.JobStore.JobStatusFunctor;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BatteryController;
 import com.android.server.job.controllers.ConnectivityController;
@@ -80,11 +79,15 @@ import com.android.server.job.controllers.TimeController;
  */
 public final class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
+    static final String TAG = "JobSchedulerService";
     public static final boolean DEBUG = false;
+
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT
             = ActivityManager.isLowRamDeviceStatic() ? 3 : 6;
-    static final String TAG = "JobSchedulerService";
+    /** The maximum number of jobs that we allow an unprivileged app to schedule */
+    private static final int MAX_JOBS_PER_APP = 100;
+
     /** Global local for all job scheduler state. */
     final Object mLock = new Object();
     /** Master list of jobs. */
@@ -250,6 +253,15 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
         JobStatus toCancel;
         synchronized (mLock) {
+            // Jobs on behalf of others don't apply to the per-app job cap
+            if (packageName == null) {
+                if (mJobs.countJobsForUid(uId) > MAX_JOBS_PER_APP) {
+                    Slog.w(TAG, "Too many jobs for uid " + uId);
+                    throw new IllegalStateException("Apps may not schedule more than "
+                                + MAX_JOBS_PER_APP + " distinct jobs");
+                }
+            }
+
             toCancel = mJobs.getJobByUidAndJobId(uId, job.getId());
         }
         startTrackingJob(jobStatus, toCancel);
@@ -261,17 +273,15 @@ public final class JobSchedulerService extends com.android.server.SystemService
     }
 
     public List<JobInfo> getPendingJobs(int uid) {
-        ArrayList<JobInfo> outList = new ArrayList<JobInfo>();
         synchronized (mLock) {
-            ArraySet<JobStatus> jobs = mJobs.getJobs();
-            for (int i=0; i<jobs.size(); i++) {
-                JobStatus job = jobs.valueAt(i);
-                if (job.getUid() == uid) {
-                    outList.add(job.getJob());
-                }
+            List<JobStatus> jobs = mJobs.getJobsByUid(uid);
+            ArrayList<JobInfo> outList = new ArrayList<JobInfo>(jobs.size());
+            for (int i = jobs.size() - 1; i >= 0; i--) {
+                JobStatus job = jobs.get(i);
+                outList.add(job.getJob());
             }
+            return outList;
         }
-        return outList;
     }
 
     void cancelJobsForUser(int userHandle) {
@@ -471,14 +481,16 @@ public final class JobSchedulerService extends com.android.server.SystemService
                                     getContext().getMainLooper()));
                 }
                 // Attach jobs to their controllers.
-                ArraySet<JobStatus> jobs = mJobs.getJobs();
-                for (int i=0; i<jobs.size(); i++) {
-                    JobStatus job = jobs.valueAt(i);
-                    for (int controller=0; controller<mControllers.size(); controller++) {
-                        mControllers.get(controller).deviceIdleModeChanged(mDeviceIdleMode);
-                        mControllers.get(controller).maybeStartTrackingJobLocked(job, null);
+                mJobs.forEachJob(new JobStatusFunctor() {
+                    @Override
+                    public void process(JobStatus job) {
+                        for (int controller = 0; controller < mControllers.size(); controller++) {
+                            final StateController sc = mControllers.get(controller);
+                            sc.deviceIdleModeChanged(mDeviceIdleMode);
+                            sc.maybeStartTrackingJobLocked(job, null);
+                        }
                     }
-                }
+                });
                 // GO GO GO!
                 mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
             }
@@ -741,23 +753,13 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * as many as we can.
          */
         private void queueReadyJobsForExecutionLockedH() {
-            ArraySet<JobStatus> jobs = mJobs.getJobs();
-            mPendingJobs.clear();
             if (DEBUG) {
                 Slog.d(TAG, "queuing all ready jobs for execution:");
             }
-            for (int i=0; i<jobs.size(); i++) {
-                JobStatus job = jobs.valueAt(i);
-                if (isReadyToBeExecutedLocked(job)) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "    queued " + job.toShortString());
-                    }
-                    mPendingJobs.add(job);
-                } else if (areJobConstraintsNotSatisfiedLocked(job)) {
-                    stopJobOnServiceContextLocked(job,
-                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
-                }
-            }
+            mPendingJobs.clear();
+            mJobs.forEachJob(mReadyQueueFunctor);
+            mReadyQueueFunctor.postProcess();
+
             if (DEBUG) {
                 final int queuedJobs = mPendingJobs.size();
                 if (queuedJobs == 0) {
@@ -768,6 +770,34 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         }
 
+        class ReadyJobQueueFunctor implements JobStatusFunctor {
+            ArrayList<JobStatus> newReadyJobs;
+
+            @Override
+            public void process(JobStatus job) {
+                if (isReadyToBeExecutedLocked(job)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "    queued " + job.toShortString());
+                    }
+                    if (newReadyJobs == null) {
+                        newReadyJobs = new ArrayList<JobStatus>();
+                    }
+                    newReadyJobs.add(job);
+                } else if (areJobConstraintsNotSatisfiedLocked(job)) {
+                    stopJobOnServiceContextLocked(job,
+                            JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
+                }
+            }
+
+            public void postProcess() {
+                if (newReadyJobs != null) {
+                    mPendingJobs.addAll(newReadyJobs);
+                }
+                newReadyJobs = null;
+            }
+        }
+        private final ReadyJobQueueFunctor mReadyQueueFunctor = new ReadyJobQueueFunctor();
+
         /**
          * The state of at least one job has changed. Here is where we could enforce various
          * policies on when we want to execute jobs.
@@ -777,18 +807,21 @@ public final class JobSchedulerService extends com.android.server.SystemService
          * If more than 4 jobs total are ready we send them all off.
          * TODO: It would be nice to consolidate these sort of high-level policies somewhere.
          */
-        private void maybeQueueReadyJobsForExecutionLockedH() {
-            mPendingJobs.clear();
-            int chargingCount = 0;
-            int idleCount =  0;
-            int backoffCount = 0;
-            int connectivityCount = 0;
-            int contentCount = 0;
-            List<JobStatus> runnableJobs = null;
-            ArraySet<JobStatus> jobs = mJobs.getJobs();
-            if (DEBUG) Slog.d(TAG, "Maybe queuing ready jobs...");
-            for (int i=0; i<jobs.size(); i++) {
-                JobStatus job = jobs.valueAt(i);
+        class MaybeReadyJobQueueFunctor implements JobStatusFunctor {
+            int chargingCount;
+            int idleCount;
+            int backoffCount;
+            int connectivityCount;
+            int contentCount;
+            List<JobStatus> runnableJobs;
+
+            public MaybeReadyJobQueueFunctor() {
+                reset();
+            }
+
+            // Functor method invoked for each job via JobStore.forEachJob()
+            @Override
+            public void process(JobStatus job) {
                 if (isReadyToBeExecutedLocked(job)) {
                     try {
                         if (ActivityManagerNative.getDefault().getAppStartMode(job.getUid(),
@@ -797,7 +830,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                             Slog.w(TAG, "Aborting job " + job.getUid() + ":"
                                     + job.getJob().toString() + " -- package not allowed to start");
                             mHandler.obtainMessage(MSG_STOP_JOB, job).sendToTarget();
-                            continue;
+                            return;
                         }
                     } catch (RemoteException e) {
                     }
@@ -825,23 +858,45 @@ public final class JobSchedulerService extends com.android.server.SystemService
                             JobParameters.REASON_CONSTRAINTS_NOT_SATISFIED);
                 }
             }
-            if (backoffCount > 0 ||
-                    idleCount >= MIN_IDLE_COUNT ||
-                    connectivityCount >= MIN_CONNECTIVITY_COUNT ||
-                    chargingCount >= MIN_CHARGING_COUNT ||
-                    contentCount  >= MIN_CONTENT_COUNT ||
-                    (runnableJobs != null && runnableJobs.size() >= MIN_READY_JOBS_COUNT)) {
-                if (DEBUG) {
-                    Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
+
+            public void postProcess() {
+                if (backoffCount > 0 ||
+                        idleCount >= MIN_IDLE_COUNT ||
+                        connectivityCount >= MIN_CONNECTIVITY_COUNT ||
+                        chargingCount >= MIN_CHARGING_COUNT ||
+                        contentCount  >= MIN_CONTENT_COUNT ||
+                        (runnableJobs != null && runnableJobs.size() >= MIN_READY_JOBS_COUNT)) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Running jobs.");
+                    }
+                    mPendingJobs.addAll(runnableJobs);
+                } else {
+                    if (DEBUG) {
+                        Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Not running anything.");
+                    }
                 }
-                for (int i=0; i<runnableJobs.size(); i++) {
-                    mPendingJobs.add(runnableJobs.get(i));
-                }
-            } else {
-                if (DEBUG) {
-                    Slog.d(TAG, "maybeQueueReadyJobsForExecutionLockedH: Not running anything.");
-                }
+
+                // Be ready for next time
+                reset();
             }
+
+            private void reset() {
+                chargingCount = 0;
+                idleCount =  0;
+                backoffCount = 0;
+                connectivityCount = 0;
+                contentCount = 0;
+                runnableJobs = null;
+            }
+        }
+        private final MaybeReadyJobQueueFunctor mMaybeQueueFunctor = new MaybeReadyJobQueueFunctor();
+
+        private void maybeQueueReadyJobsForExecutionLockedH() {
+            if (DEBUG) Slog.d(TAG, "Maybe queuing ready jobs...");
+
+            mPendingJobs.clear();
+            mJobs.forEachJob(mMaybeQueueFunctor);
+            mMaybeQueueFunctor.postProcess();
         }
 
         /**
@@ -1090,17 +1145,27 @@ public final class JobSchedulerService extends com.android.server.SystemService
         @Override
         public int scheduleAsPackage(JobInfo job, String packageName, int userId)
                 throws RemoteException {
+            final int callerUid = Binder.getCallingUid();
             if (DEBUG) {
-                Slog.d(TAG, "Scheduling job: " + job.toString() + " on behalf of " + packageName);
+                Slog.d(TAG, "Caller uid " + callerUid + " scheduling job: " + job.toString()
+                        + " on behalf of " + packageName);
             }
-            final int uid = Binder.getCallingUid();
-            if (uid != Process.SYSTEM_UID) {
-                throw new IllegalArgumentException("Only system process is allowed"
-                        + "to set packageName");
+
+            if (packageName == null) {
+                throw new NullPointerException("Must specify a package for scheduleAsPackage()");
             }
+
+            int mayScheduleForOthers = getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.UPDATE_DEVICE_STATS);
+            if (mayScheduleForOthers != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Caller uid " + callerUid
+                        + " not permitted to schedule jobs for other apps");
+            }
+
             long ident = Binder.clearCallingIdentity();
             try {
-                return JobSchedulerService.this.scheduleAsPackage(job, uid, packageName, userId);
+                return JobSchedulerService.this.scheduleAsPackage(job, callerUid,
+                        packageName, userId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1183,7 +1248,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         return s.toString();
     }
 
-    void dumpInternal(PrintWriter pw) {
+    void dumpInternal(final PrintWriter pw) {
         final long now = SystemClock.elapsedRealtime();
         synchronized (mLock) {
             pw.print("Started users: ");
@@ -1193,24 +1258,27 @@ public final class JobSchedulerService extends com.android.server.SystemService
             pw.println();
             pw.println("Registered jobs:");
             if (mJobs.size() > 0) {
-                ArraySet<JobStatus> jobs = mJobs.getJobs();
-                for (int i=0; i<jobs.size(); i++) {
-                    JobStatus job = jobs.valueAt(i);
-                    pw.print("  Job #"); pw.print(i); pw.print(": ");
-                    pw.println(job.toShortString());
-                    job.dump(pw, "    ");
-                    pw.print("    Ready: ");
-                    pw.print(mHandler.isReadyToBeExecutedLocked(job));
-                    pw.print(" (job=");
-                    pw.print(job.isReady());
-                    pw.print(" pending=");
-                    pw.print(mPendingJobs.contains(job));
-                    pw.print(" active=");
-                    pw.print(isCurrentlyActiveLocked(job));
-                    pw.print(" user=");
-                    pw.print(mStartedUsers.contains(job.getUserId()));
-                    pw.println(")");
-                }
+                mJobs.forEachJob(new JobStatusFunctor() {
+                    private int index = 0;
+
+                    @Override
+                    public void process(JobStatus job) {
+                        pw.print("  Job #"); pw.print(index++); pw.print(": ");
+                        pw.println(job.toShortString());
+                        job.dump(pw, "    ");
+                        pw.print("    Ready: ");
+                        pw.print(mHandler.isReadyToBeExecutedLocked(job));
+                        pw.print(" (job=");
+                        pw.print(job.isReady());
+                        pw.print(" pending=");
+                        pw.print(mPendingJobs.contains(job));
+                        pw.print(" active=");
+                        pw.print(isCurrentlyActiveLocked(job));
+                        pw.print(" user=");
+                        pw.print(mStartedUsers.contains(job.getUserId()));
+                        pw.println(")");
+                    }
+                });
             } else {
                 pw.println("  None.");
             }
