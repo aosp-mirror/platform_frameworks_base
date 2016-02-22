@@ -2460,6 +2460,7 @@
 
   <java-symbol type="string" name="status_bar_rotate" />
   <java-symbol type="string" name="status_bar_headset" />
+  <java-symbol type="string" name="status_bar_data_saver" />
   <java-symbol type="string" name="status_bar_managed_profile" />
   <java-symbol type="string" name="status_bar_ime" />
   <java-symbol type="string" name="status_bar_sync_failing" />

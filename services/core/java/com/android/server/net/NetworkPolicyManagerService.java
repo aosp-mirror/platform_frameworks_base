@@ -240,8 +240,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_APP_ID = "appId";
     private static final String ATTR_POLICY = "policy";
 
-    private static final String TAG_ALLOW_BACKGROUND = TAG + ":allowBackground";
-
     private static final String ACTION_ALLOW_BACKGROUND =
             "com.android.server.net.action.ALLOW_BACKGROUND";
     private static final String ACTION_SNOOZE_WARNING =
@@ -844,11 +842,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        // ongoing notification when restricting background data
-        if (mRestrictBackground) {
-            enqueueRestrictedNotification(TAG_ALLOW_BACKGROUND);
-        }
-
         // cancel stale notifications that we didn't renew above
         for (int i = beforeNotifs.size()-1; i >= 0; i--) {
             final String tag = beforeNotifs.valueAt(i);
@@ -1020,42 +1013,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mNotifManager.enqueueNotificationWithTag(
                     packageName, packageName, tag, 0x0, builder.getNotification(), idReceived,
                     UserHandle.USER_ALL);
-            mActiveNotifs.add(tag);
-        } catch (RemoteException e) {
-            // ignored; service lives in system_server
-        }
-    }
-
-    /**
-     * Show ongoing notification to reflect that {@link #mRestrictBackground}
-     * has been enabled.
-     */
-    private void enqueueRestrictedNotification(String tag) {
-        final Resources res = mContext.getResources();
-        final Notification.Builder builder = new Notification.Builder(mContext);
-
-        final CharSequence title = res.getText(R.string.data_usage_restricted_title);
-        final CharSequence body = res.getString(R.string.data_usage_restricted_body);
-
-        builder.setOnlyAlertOnce(true);
-        builder.setOngoing(true);
-        builder.setSmallIcon(R.drawable.stat_notify_error);
-        builder.setTicker(title);
-        builder.setContentTitle(title);
-        builder.setContentText(body);
-        builder.setColor(mContext.getColor(
-                com.android.internal.R.color.system_notification_accent_color));
-
-        final Intent intent = buildAllowBackgroundDataIntent();
-        builder.setContentIntent(
-                PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
-
-        // TODO: move to NotificationManager once we can mock it
-        try {
-            final String packageName = mContext.getPackageName();
-            final int[] idReceived = new int[1];
-            mNotifManager.enqueueNotificationWithTag(packageName, packageName, tag,
-                    0x0, builder.getNotification(), idReceived, UserHandle.USER_ALL);
             mActiveNotifs.add(tag);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
