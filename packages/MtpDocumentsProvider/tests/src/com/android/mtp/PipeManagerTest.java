@@ -16,8 +16,10 @@
 
 package com.android.mtp;
 
+import android.database.Cursor;
 import android.mtp.MtpObjectInfo;
 import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract.Document;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 
@@ -33,12 +35,14 @@ public class PipeManagerTest extends AndroidTestCase {
     private TestMtpManager mtpManager;
     private ExecutorService mExecutor;
     private PipeManager mPipeManager;
+    private MtpDatabase mDatabase;
 
     @Override
     public void setUp() {
         mtpManager = new TestMtpManager(getContext());
         mExecutor = Executors.newSingleThreadExecutor();
-        mPipeManager = new PipeManager(mExecutor);
+        mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mPipeManager = new PipeManager(mDatabase, mExecutor);
     }
 
     public void testReadDocument_basic() throws Exception {
@@ -57,25 +61,32 @@ public class PipeManagerTest extends AndroidTestCase {
     }
 
     public void testWriteDocument_basic() throws Exception {
+        TestUtil.addTestDevice(mDatabase);
+        TestUtil.addTestStorage(mDatabase, "1");
+
+        final MtpObjectInfo info =
+                new MtpObjectInfo.Builder().setObjectHandle(1).setName("note.txt").build();
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] { info });
+        mDatabase.getMapper().stopAddingDocuments("2");
         // Create a placeholder file which should be replaced by a real file later.
-        mtpManager.setObjectInfo(0, new MtpObjectInfo.Builder()
-                .setObjectHandle(1)
-                .build());
+        mtpManager.setObjectInfo(0, info);
 
         // Upload testing bytes.
         final ParcelFileDescriptor descriptor = mPipeManager.writeDocument(
                 getContext(),
                 mtpManager,
-                new Identifier(0, 0, 1, null, MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT));
+                new Identifier(0, 0, 1, "2", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT));
         final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
                 new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
         outputStream.write(HELLO_BYTES, 0, HELLO_BYTES.length);
         outputStream.close();
-        mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        mExecutor.shutdown();
+        assertTrue(mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS));
 
         // Check if the placeholder file is removed.
         try {
-            final MtpObjectInfo placeholderDocument = mtpManager.getObjectInfo(0, 1);
+            mtpManager.getObjectInfo(0, 1);
             fail();  // The placeholder file has not been deleted.
         } catch (IOException e) {
             // Expected error, as the file is gone.
@@ -85,6 +96,14 @@ public class PipeManagerTest extends AndroidTestCase {
         final MtpObjectInfo targetDocument = mtpManager.getObjectInfo(
                 0, TestMtpManager.CREATED_DOCUMENT_HANDLE);
         assertTrue(targetDocument != null);
+
+        // Confirm the object handle is updated.
+        try (final Cursor cursor = mDatabase.queryDocument(
+                "2", new String[] { MtpDatabaseConstants.COLUMN_OBJECT_HANDLE })) {
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals(TestMtpManager.CREATED_DOCUMENT_HANDLE, cursor.getInt(0));
+        }
 
         // Verify uploaded bytes.
         final byte[] uploadedBytes = mtpManager.getImportFileBytes(
@@ -112,7 +131,8 @@ public class PipeManagerTest extends AndroidTestCase {
 
     private void assertDescriptor(ParcelFileDescriptor descriptor, byte[] expectedBytes)
             throws IOException, InterruptedException {
-        mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        mExecutor.shutdown();
+        assertTrue(mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS));
         try (final ParcelFileDescriptor.AutoCloseInputStream stream =
                 new ParcelFileDescriptor.AutoCloseInputStream(descriptor)) {
             byte[] results = new byte[100];
@@ -125,7 +145,8 @@ public class PipeManagerTest extends AndroidTestCase {
 
     private void assertDescriptorError(ParcelFileDescriptor descriptor)
             throws InterruptedException {
-        mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS);
+        mExecutor.shutdown();
+        assertTrue(mExecutor.awaitTermination(1000, TimeUnit.MILLISECONDS));
         try {
             descriptor.checkError();
             fail();

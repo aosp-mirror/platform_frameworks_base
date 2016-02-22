@@ -149,7 +149,9 @@ public class TestMtpManager extends MtpManager {
         if (mObjectInfos.containsKey(key)) {
             throw new IOException();
         }
-        mObjectInfos.put(key, objectInfo);
+        final MtpObjectInfo newInfo = new MtpObjectInfo.Builder(objectInfo).
+                setObjectHandle(CREATED_DOCUMENT_HANDLE).build();
+        mObjectInfos.put(key, newInfo);
         if (objectInfo.getFormat() != 0x3001) {
             try (final ParcelFileDescriptor.AutoCloseInputStream inputStream =
                     new ParcelFileDescriptor.AutoCloseInputStream(source)) {
