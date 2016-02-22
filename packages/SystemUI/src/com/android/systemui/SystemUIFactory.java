@@ -18,11 +18,14 @@ package com.android.systemui;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 
@@ -65,5 +68,10 @@ public class SystemUIFactory {
             LockPatternUtils lockPatternUtils, StatusBarWindowManager windowManager,
             ViewGroup container) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, windowManager, container);
+    }
+
+    public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+            View headsUpScrim, boolean scrimSrcEnabled) {
+        return new ScrimController(scrimBehind, scrimInFront, headsUpScrim, scrimSrcEnabled);
     }
 }
