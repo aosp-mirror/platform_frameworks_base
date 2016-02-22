@@ -184,15 +184,6 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
-    public InputBindResult startInput(
-            /* @InputMethodClient.StartInputReason */ int startInputReason,
-            IInputMethodClient client, IInputContext inputContext, EditorInfo attribute,
-            int controlFlags) throws RemoteException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public boolean switchToLastInputMethod(IBinder arg0) throws RemoteException {
         // TODO Auto-generated method stub
         return false;
@@ -228,7 +219,7 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
-    public InputBindResult windowGainedFocus(
+    public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext)
