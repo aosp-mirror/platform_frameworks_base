@@ -317,7 +317,8 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for battery_info_status_full (2824614753861462808) -->
     <skip />
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"管理者によって無効にされています"</string>
+    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
+    <skip />
     <string name="home" msgid="8263346537524314127">"ホーム"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"あと <xliff:g id="ID_1">%1$s</xliff:g>"</string>

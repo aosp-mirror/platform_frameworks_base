@@ -315,7 +315,8 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"சார்ஜ் ஏறவில்லை"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"முழுமை"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"நிர்வாகி முடக்கியுள்ளார்"</string>
+    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
+    <skip />
     <string name="home" msgid="8263346537524314127">"முகப்பு"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> முன்"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> உள்ளது"</string>

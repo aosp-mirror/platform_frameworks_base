@@ -277,10 +277,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"എല്ലായ്‌പ്പോഴും ഓണാണ്"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"ഓട്ടോമാറ്റിക്"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"മൾട്ടിപ്രോസസ്സ് WebView പ്രവർത്തനക്ഷമമാക്കൂ"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ഒറ്റപ്പെട്ടൊരു പ്രോസസ്സിൽ WebView റെൻഡററുകൾ റൺ ചെയ്യുക."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView നടപ്പാക്കൽ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView നടപ്പാക്കൽ സജ്ജമാക്കുക"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"തിരഞ്ഞെടുത്ത WebView നടപ്പാക്കൽ പ്രവർത്തനരഹിതമാക്കി, ഉപയോഗിക്കുന്നതിന് ഇത് പ്രവർത്തനക്ഷമമാക്കണം, പ്രവർത്തനക്ഷമമാക്കാൻ ആഗ്രഹിക്കുന്നുണ്ടോ?"</string>
@@ -315,7 +313,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"നിറഞ്ഞു"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"അഡ്‌മിനിസ്ട്രേറ്റർ പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"അഡ്‌മിൻ നിയന്ത്രിക്കുന്നത്"</string>
     <string name="home" msgid="8263346537524314127">"ഹോം"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> മുമ്പ്"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>

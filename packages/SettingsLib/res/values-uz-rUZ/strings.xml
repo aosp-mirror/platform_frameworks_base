@@ -78,7 +78,7 @@
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Quyidagi qurilma javob bermayapti: <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> biriktirish so‘rovini rad qildi."</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi o‘chiq."</string>
-    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi o‘chirilgan."</string>
+    <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi: bitta ustun"</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi: ikkita ustun"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi: uchta ustun"</string>
@@ -315,7 +315,8 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Quvvat olmayapti"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Quvvatlanmayapti"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"To‘la"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"Administrator tomonidan o‘chirib qo‘yilgan"</string>
+    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
+    <skip />
     <string name="home" msgid="8263346537524314127">"Bosh ekran"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> oldin"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> qoldi"</string>
