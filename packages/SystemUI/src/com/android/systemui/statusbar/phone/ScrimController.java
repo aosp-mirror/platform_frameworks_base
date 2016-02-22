@@ -56,16 +56,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
 
-    private final ScrimView mScrimBehind;
+    protected final ScrimView mScrimBehind;
     private final ScrimView mScrimInFront;
     private final UnlockMethodCache mUnlockMethodCache;
     private final View mHeadsUpScrim;
 
-    private boolean mKeyguardShowing;
+    protected boolean mKeyguardShowing;
     private float mFraction;
 
     private boolean mDarkenWhileDragging;
-    private boolean mBouncerShowing;
+    protected boolean mBouncerShowing;
     private boolean mWakeAndUnlocking;
     private boolean mAnimateChange;
     private boolean mUpdatePending;
@@ -203,7 +203,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mUpdatePending = true;
     }
 
-    private void updateScrims() {
+    protected void updateScrims() {
         if (mAnimateKeyguardFadingOut || mForceHideScrims) {
             setScrimInFrontColor(0f);
             setScrimBehindColor(0f);
