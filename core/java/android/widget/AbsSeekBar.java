@@ -694,7 +694,7 @@ public abstract class AbsSeekBar extends ProgressBar {
                 final int halfH = h >= 0 ? h / 2 : 1;
                 mTickMark.setBounds(-halfW, -halfH, halfW, halfH);
 
-                final int spacing = (getWidth() - mPaddingLeft - mPaddingRight) / count;
+                final float spacing = (getWidth() - mPaddingLeft - mPaddingRight) / (float) count;
                 final int saveCount = canvas.save();
                 canvas.translate(mPaddingLeft, getHeight() / 2);
                 for (int i = 0; i <= count; i++) {
