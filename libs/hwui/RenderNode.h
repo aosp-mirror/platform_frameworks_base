@@ -123,7 +123,11 @@ public:
     void defer(DeferStateStruct& deferStruct, const int level);
     void replay(ReplayStateStruct& replayStruct, const int level);
 
+#if HWUI_NEW_OPS
+    ANDROID_API void output(uint32_t level = 0, const char* label = "Root");
+#else
     ANDROID_API void output(uint32_t level = 1);
+#endif
     ANDROID_API int getDebugSize();
     void copyTo(proto::RenderNode* node);
 
