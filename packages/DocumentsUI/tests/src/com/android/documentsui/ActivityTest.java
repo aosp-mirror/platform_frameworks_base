@@ -21,21 +21,22 @@ import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.app.Activity;
-import android.app.Instrumentation;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
 import android.provider.DocumentsContract.Document;
-import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObjectNotFoundException;
-import android.support.test.uiautomator.Until;
 import android.test.ActivityInstrumentationTestCase2;
 import android.view.MotionEvent;
 
+import com.android.documentsui.bots.DirectoryListBot;
+import com.android.documentsui.bots.KeyboardBot;
+import com.android.documentsui.bots.RootsListBot;
+import com.android.documentsui.bots.UiBot;
 import com.android.documentsui.model.RootInfo;
 
 /**
@@ -56,7 +57,7 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
     public static final String fileName4 = "poodles.text";
     public static final String fileNameNoRename = "NO_RENAMEfile.txt";
 
-    public UiBot bot;
+    public Bots bots;
     public UiDevice device;
     public Context context;
 
@@ -76,10 +77,11 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         device = UiDevice.getInstance(getInstrumentation());
         // NOTE: Must be the "target" context, else security checks in content provider will fail.
         context = getInstrumentation().getTargetContext();
-        bot = new UiBot(device, context, TIMEOUT);
+
+        bots = new Bots(device, context, TIMEOUT);
 
         Configurator.getInstance().setToolType(MotionEvent.TOOL_TYPE_MOUSE);
-        bot.revealLauncher();
+        bots.main.revealLauncher();
 
         mResolver = context.getContentResolver();
         mClient = mResolver.acquireUnstableContentProviderClient(DEFAULT_AUTHORITY);
@@ -90,7 +92,7 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
 
         launchActivity();
 
-        bot.revealApp();
+        bots.main.revealApp();
         resetStorage();
     }
 
@@ -125,12 +127,31 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
     }
 
     void assertDefaultContentOfTestDir0() throws UiObjectNotFoundException {
-        bot.assertDocumentsCount(ROOT_0_ID, 4);
-        bot.assertHasDocuments(fileName1, fileName2, dirName1, fileNameNoRename);
+        bots.roots.openRoot(ROOT_0_ID);
+        bots.directory.assertDocumentsCount(4);
+        bots.directory.assertDocumentsPresent(fileName1, fileName2, dirName1, fileNameNoRename);
     }
 
     void assertDefaultContentOfTestDir1() throws UiObjectNotFoundException {
-        bot.assertDocumentsCount(ROOT_1_ID, 2);
-        bot.assertHasDocuments(fileName3, fileName4);
+        bots.roots.openRoot(ROOT_1_ID);
+        bots.directory.assertDocumentsCount(2);
+        bots.directory.assertDocumentsPresent(fileName3, fileName4);
+    }
+
+    /**
+     * Handy collection of bots for working with Files app.
+     */
+    public static final class Bots {
+        public final UiBot main;
+        public final RootsListBot roots;
+        public final DirectoryListBot directory;
+        public final KeyboardBot keyboard;
+
+        private Bots(UiDevice device, Context context, int timeout) {
+            this.main = new UiBot(device, context, TIMEOUT);
+            this.roots = new RootsListBot(device, context, TIMEOUT);
+            this.directory = new DirectoryListBot(device, context, TIMEOUT);
+            this.keyboard = new KeyboardBot(device, context, TIMEOUT);
+        }
     }
 }
