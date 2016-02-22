@@ -23,6 +23,8 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.support.v14.preference.SwitchPreference;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.TextView;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
@@ -36,6 +38,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     public RestrictedSwitchPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setWidgetLayoutResource(R.layout.restricted_switch_widget);
         mHelper = new RestrictedPreferenceHelper(context, this, attrs);
     }
 
@@ -56,6 +59,20 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         mHelper.onBindViewHolder(holder);
+        final View restrictedIcon = holder.findViewById(R.id.restricted_icon);
+        final View switchWidget = holder.findViewById(android.R.id.switch_widget);
+        if (restrictedIcon != null) {
+            restrictedIcon.setVisibility(isDisabledByAdmin() ? View.VISIBLE : View.GONE);
+        }
+        if (switchWidget != null) {
+            switchWidget.setVisibility(isDisabledByAdmin() ? View.GONE : View.VISIBLE);
+        }
+        final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
+        if (summaryView != null && isDisabledByAdmin()) {
+            summaryView.setText(
+                    isChecked() ? R.string.enabled_by_admin : R.string.disabled_by_admin);
+            summaryView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

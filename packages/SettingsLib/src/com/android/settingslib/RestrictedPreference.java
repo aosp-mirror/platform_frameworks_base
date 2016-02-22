@@ -23,6 +23,7 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.preference.PreferenceViewHolder;
 import android.util.AttributeSet;
+import android.view.View;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
@@ -36,6 +37,7 @@ public class RestrictedPreference extends Preference {
     public RestrictedPreference(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        setWidgetLayoutResource(R.layout.restricted_icon);
         mHelper = new RestrictedPreferenceHelper(context, this, attrs);
     }
 
@@ -56,6 +58,10 @@ public class RestrictedPreference extends Preference {
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         mHelper.onBindViewHolder(holder);
+        final View restrictedIcon = holder.findViewById(R.id.restricted_icon);
+        if (restrictedIcon != null) {
+            restrictedIcon.setVisibility(isDisabledByAdmin() ? View.VISIBLE : View.GONE);
+        }
     }
 
     @Override

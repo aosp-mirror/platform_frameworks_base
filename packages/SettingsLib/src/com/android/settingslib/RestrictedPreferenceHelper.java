@@ -91,12 +91,8 @@ public class RestrictedPreferenceHelper {
      * Modify PreferenceViewHolder to add padlock if restriction is disabled.
      */
     public void onBindViewHolder(PreferenceViewHolder holder) {
-        final TextView titleView = (TextView) holder.findViewById(android.R.id.title);
-        if (titleView != null) {
-            RestrictedLockUtils.setTextViewPadlock(mContext, titleView, mDisabledByAdmin);
-            if (mDisabledByAdmin) {
-                holder.itemView.setEnabled(true);
-            }
+        if (mDisabledByAdmin) {
+            holder.itemView.setEnabled(true);
         }
         if (mUseAdminDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
