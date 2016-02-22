@@ -127,7 +127,8 @@ final public class MediaMuxer {
      * @param path The path of the output media file.
      * @param format The format of the output media file.
      * @see android.media.MediaMuxer.OutputFormat
-     * @throws IOException if failed to open the file for write
+     * @throws IllegalArgumentException if path is invalid or format is not supported.
+     * @throws IOException if failed to open the file for write.
      */
     public MediaMuxer(@NonNull String path, @Format int format) throws IOException {
         if (path == null) {
@@ -165,6 +166,8 @@ final public class MediaMuxer {
      * By default, the rotation degree is 0.</p>
      * @param degrees the angle to be rotated clockwise in degrees.
      * The supported angles are 0, 90, 180, and 270 degrees.
+     * @throws IllegalArgumentException if degree is not supported.
+     * @throws IllegalStateException If this method is called after {@link #start}.
      */
     public void setOrientationHint(int degrees) {
         if (degrees != 0 && degrees != 90  && degrees != 180 && degrees != 270) {
@@ -217,6 +220,8 @@ final public class MediaMuxer {
      * Starts the muxer.
      * <p>Make sure this is called after {@link #addTrack} and before
      * {@link #writeSampleData}.</p>
+     * @throws IllegalStateException If this method is called after {@link #start}
+     * or Muxer is released
      */
     public void start() {
         if (mNativeObject == 0) {
@@ -233,6 +238,7 @@ final public class MediaMuxer {
     /**
      * Stops the muxer.
      * <p>Once the muxer stops, it can not be restarted.</p>
+     * @throws IllegalStateException if muxer is in the wrong state.
      */
     public void stop() {
         if (mState == MUXER_STATE_STARTED) {
@@ -264,6 +270,8 @@ final public class MediaMuxer {
      *               MediaFormat.
      * @return The track index for this newly added track, and it should be used
      * in the {@link #writeSampleData}.
+     * @throws IllegalArgumentException if format is invalid.
+     * @throws IllegalStateException if muxer is in the wrong state.
      */
     public int addTrack(@NonNull MediaFormat format) {
         if (format == null) {
@@ -314,6 +322,8 @@ final public class MediaMuxer {
      * @param byteBuf The encoded sample.
      * @param trackIndex The track index for this sample.
      * @param bufferInfo The buffer information related to this sample.
+     * @throws IllegalArgumentException if trackIndex, byteBuf or bufferInfo is  invalid.
+     * @throws IllegalStateException if muxer is in wrong state.
      * MediaMuxer uses the flags provided in {@link MediaCodec.BufferInfo},
      * to signal sync frames.
      */
