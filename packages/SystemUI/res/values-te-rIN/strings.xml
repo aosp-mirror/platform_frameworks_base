@@ -333,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"మొత్తం\nనిశ్శబ్దం"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ప్రాధాన్యమైనవి\nమాత్రమే"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"అలారాలు\nమాత్రమే"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"అన్నిటికీ"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"అన్నీ\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ఛార్జ్ అవుతోంది (పూర్తిగా నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"వేగంగా ఛార్జ్ అవుతోంది (నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"నెమ్మదిగా ఛార్జ్ అవుతోంది (నిండటానికి <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
@@ -447,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"స్థితి పట్టీలో గడియారం సెకన్లు చూపుతుంది. బ్యాటరీ శక్తి ప్రభావితం చేయవచ్చు."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"శీఘ్ర సెట్టింగ్‌ల ఏర్పాటు క్రమం మార్చు"</string>
     <string name="show_brightness" msgid="6613930842805942519">"శీఘ్ర సెట్టింగ్‌ల్లో ప్రకాశం చూపు"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"పైకి స్వైప్ చేయడం ద్వారా స్క్రీన్ విభజన యాక్సిలరేటర్‌ను ప్రారంభించు"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"పైకి స్వైప్ చేయడం ద్వారా స్క్రీన్ విభజన సంజ్ఞను ప్రారంభించు"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"స్థూలదృష్టి బటన్ నుండి పైకి స్వైప్ చేయడం ద్వారా స్క్రీన్ విభజనలోకి ప్రవేశించడానికి సంజ్ఞను ప్రారంభిస్తుంది"</string>
     <string name="experimental" msgid="6198182315536726162">"ప్రయోగాత్మకం"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"బ్లూటూత్ ఆన్ చేయాలా?"</string>
@@ -467,14 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"స్క్రీన్‌పై శీఘ్రంగా శబ్దంతో చూపుతుంది"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"మరిన్ని సెట్టింగ్‌లు"</string>
     <string name="notification_done" msgid="5279426047273930175">"పూర్తయింది"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"సాధారణ రంగులు"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"రాత్రి రంగులు"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"అనుకూల రంగులు"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"స్వయంచాలకం"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"తెలియని రంగులు"</string>
-    <string name="color_transform" msgid="6985460408079086090">"రంగు సవరణ"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"శీఘ్ర సెట్టింగ్‌ల టైల్‌ను చూపండి"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"అనుకూల పరివర్తనను ప్రారంభించండి"</string>
+    <string name="color_and_appearance" msgid="1254323855964993144">"రంగు మరియు కనిపించే తీరు"</string>
+    <string name="night_mode" msgid="3540405868248625488">"రాత్రి మోడ్"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"డిస్‌ప్లేని క్రమాంకనం చేయండి"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"ఆన్‌లో ఉంది"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"ఆఫ్‌లో ఉంది"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"స్వయంచాలకంగా ఆన్ చేయి"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"స్థానం మరియు రోజులో సమయానికి తగినట్లుగా రాత్రి మోడ్‌కి మారుస్తుంది"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"రాత్రి మోడ్ ఆన్‌లో ఉన్నప్పుడు"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS కోసం ముదురు రంగు థీమ్ ఉపయోగించండి"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"లేత రంగును సర్దుబాటు చేయండి"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"ప్రకాశాన్ని సర్దుబాటు చేయండి"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"సాధారణంగా లేత రంగు థీమ్‌లో ప్రదర్శించబడే సెట్టింగ్‌లు మరియు నోటిఫికేషన్‌ల వంటి Android OS ప్రధాన అంశాలకు ముదురు రంగు థీమ్ వర్తింపజేయబడుతుంది."</string>
     <string name="color_apply" msgid="9212602012641034283">"వర్తింపజేయి"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"సెట్టింగ్‌లను నిర్ధారించండి"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"కొన్ని రంగు సెట్టింగ్‌ల వలన ఈ పరికరం ఉపయోగించలేని విధంగా అయిపోవచ్చు. ఈ రంగు సెట్టింగ్‌లను నిర్ధారించడానికి సరే క్లిక్ చేయండి లేదంటే ఈ సెట్టింగ్‌లు 10 సెకన్ల తర్వాత రీసెట్ చేయబడతాయి."</string>
@@ -486,21 +488,20 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"హోమ్"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"ఇటీవలివి"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"వెనుకకు"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"వాల్యూమ్‌లో అంతరాయం కలిగించవద్దు ప్యానెల్‌ను చూపు"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"వాల్యూమ్‌ డైలాగ్‌లో అంతరాయం కలిగించవద్దు ప్యానెల్ పూర్తి నియంత్రణను అనుమతిస్తుంది."</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"వాల్యూమ్ మరియు అంతరాయం కలిగించవద్దు"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"వాల్యూమ్ తగ్గిస్తే అంతరాయం కలిగించవద్దులోకి ప్రవేశిస్తుంది"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"వాల్యూమ్ నియంత్రణలతో చూపు"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"అంతరాయం కలిగించవద్దు"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"వాల్యూమ్ బటన్‌ల సత్వరమార్గం"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"వాల్యూమ్ పెంచితే అంతరాయం కలిగించవద్దు నుండి నిష్క్రమిస్తుంది"</string>
     <string name="battery" msgid="7498329822413202973">"బ్యాటరీ"</string>
     <string name="clock" msgid="7416090374234785905">"గడియారం"</string>
     <string name="headset" msgid="4534219457597457353">"హెడ్‌సెట్"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"హెడ్‌ఫోన్‌లు కనెక్ట్ చేయబడ్డాయి"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"హెడ్‌సెట్ కనెక్ట్ చేయబడింది"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"స్థితి పట్టీలో చిహ్నాలు ప్రదర్శించడాన్ని ప్రారంభించండి లేదా నిలిపివేయండి."</string>
     <string name="data_saver" msgid="5037565123367048522">"డేటా సేవర్"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"డేటా సేవర్ ఆన్‌లో ఉంది"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"డేటా సేవర్ ఆఫ్‌లో ఉంది"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ఆన్"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"ఆఫ్ చేయి"</string>
     <string name="nav_bar" msgid="1993221402773877607">"నావిగేషన్ బార్"</string>
     <string name="start" msgid="6873794757232879664">"ప్రారంభం"</string>
     <string name="center" msgid="4327473927066010960">"మధ్య"</string>
@@ -523,4 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"పరిదృశ్యం"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"టైల్‌లను జోడించడానికి లాగండి"</string>
     <string name="qs_edit" msgid="2232596095725105230">"సవరించు"</string>
+    <string name="tuner_time" msgid="6572217313285536011">"సమయం"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"గంటలు, నిమిషాలు మరియు సెకన్లను చూపు"</item>
+    <item msgid="1427801730816895300">"గంటలు మరియు నిమిషాలను చూపు (డిఫాల్ట్)"</item>
+    <item msgid="3830170141562534721">"ఈ చిహ్నాన్ని చూపవద్దు"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"ఎల్లప్పుడూ శాతాన్ని చూపు"</item>
+    <item msgid="2139628951880142927">"ఛార్జ్ అవుతున్నప్పుడు శాతాన్ని చూపు (డిఫాల్ట్)"</item>
+    <item msgid="3327323682209964956">"ఈ చిహ్నాన్ని చూపవద్దు"</item>
+  </string-array>
 </resources>

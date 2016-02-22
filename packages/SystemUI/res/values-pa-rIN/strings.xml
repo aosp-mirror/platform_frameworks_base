@@ -333,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"ਕੁਲ \n ਚੁੱਪੀ"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"ਕੇਵਲ\nਤਰਜੀਹੀ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"ਕੇਵਲ\nਅਲਾਰਮ"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"ਸਭ"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"ਸਾਰੀਆਂ\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"ਚਾਰਜਿੰਗ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰਾ ਹੋਣ ਤੱਕ)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"ਤੇਜ਼ੀ ਨਾਲ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"ਹੌਲੀ-ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਹੀ ਹੈ (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> ਪੂਰੀ ਹੋਣ ਤੱਕ)"</string>
@@ -447,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"ਸਥਿਤੀ ਬਾਰ ਵਿੱਚ ਘੜੀ ਸਕਿੰਟ ਦਿਖਾਓ। ਬੈਟਰੀ ਸਮਰੱਥਾ ਤੇ ਅਸਰ ਪੈ ਸਕਦਾ ਹੈ।"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਨੂੰ ਦੁਬਾਰਾ ਕ੍ਰਮ ਦਿਓ"</string>
     <string name="show_brightness" msgid="6613930842805942519">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਮਕ ਦਿਖਾਓ"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਸਵਾਈਪ-ਅੱਪ ਐਕਸੇਲਰੇਟਰ ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਸਵਾਈਪ-ਅੱਪ ਸੰਕੇਤ ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"ਰੂਪ-ਰੇਖਾ ਬਟਨ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਨ ਦੁਆਰਾ ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਵਿੱਚ ਦਾਖਲ ਹੋਣ ਲਈ ਸੰਕੇਤ ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
     <string name="experimental" msgid="6198182315536726162">"ਪ੍ਰਯੋਗਾਤਮਿਕ"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ਚਾਲੂ ਕਰੋ?"</string>
@@ -467,14 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"ਸਕਰੀਨ \'ਤੇ ਝਾਤੀ ਮਾਰੋ ਅਤੇ ਆਵਾਜ਼ ਕਰੋ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ਹੋਰ ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ਹੋ ਗਿਆ"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"ਸਧਾਰਨ ਰੰਗ"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"ਰਾਤ ਦੇ ਰੰਗ"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"ਕਸਟਮ ਰੰਗ"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"ਸਵੈ"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"ਅਗਿਆਤ ਰੰਗ"</string>
-    <string name="color_transform" msgid="6985460408079086090">"ਰੰਗ ਸੋਧ"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"ਤਤਕਾਲ ਸੈਟਿੰਗਾਂ ਟਾਇਲ ਵਿਖਾਓ"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"ਕਸਟਮ ਤਬਦੀਲੀ ਯੋਗ ਬਣਾਓ"</string>
+    <string name="color_and_appearance" msgid="1254323855964993144">"ਰੰਗ ਅਤੇ ਵਿਖਾਲਾ"</string>
+    <string name="night_mode" msgid="3540405868248625488">"ਰਾਤ ਮੋਡ"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"ਡਿਸਪਲੇ ਨੂੰ ਕੈਲੀਬ੍ਰੇਟ ਕਰੋ"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"ਚਾਲੂ"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"ਬੰਦ"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"ਸਵੈਚਾਲਿਤ ਤੌਰ \'ਤੇ ਚਾਲੂ ਕਰੋ"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"ਟਿਕਾਣੇ ਅਤੇ ਦਿਨ ਦੇ ਸਮੇਂ ਲਈ ਢੁਕਵੇਂ ਰਾਤ ਮੋਡ \'ਤੇ ਸਵਿੱਚ ਕਰੋ"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"ਜਦੋਂ ਰਾਤ ਮੋਡ ਚਾਲੂ ਹੋਵੇ"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS ਲਈ ਗੂੜ੍ਹੇ ਥੀਮ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"ਟਿੰਟ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"ਚਮਕ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰੋ"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"ਗੂੜ੍ਹੇ ਥੀਮ ਨੂੰ Android OS ਦੇ ਉਹਨਾਂ ਮੁੱਖ ਖੇਤਰਾਂ \'ਤੇ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ  ਜੋ ਆਮ ਤੌਰ \'ਤੇ ਇੱਕ ਹਲਕੇ ਥੀਮ ਵਿੱਚ ਵਿਖਾਏ ਜਾਂਦੇ ਹਨ, ਜਿਵੇਂ ਕਿ ਸੈਟਿੰਗਾਂ ਅਤੇ ਸੂਚਨਾਵਾਂ।"</string>
     <string name="color_apply" msgid="9212602012641034283">"ਲਾਗੂ ਕਰੋ"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ਸੈਟਿੰਗਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ਕੁਝ ਰੰਗ ਸੈਟਿੰਗਾਂ ਇਸ ਡੀਵਾਈਸ ਨੂੰ ਬੇਕਾਰ ਕਰ ਸਕਦੀਆਂ ਹਨ। ਇਹਨਾਂ ਰੰਗ ਸੈਟਿੰਗਾਂ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ ਠੀਕ \'ਤੇ ਕਲਿੱਕ ਕਰੋ, ਨਹੀਂ ਤਾਂ ਇਹ ਸੈਟਿੰਗਾਂ 10 ਸਕਿੰਟ ਬਾਅਦ ਮੁੜ-ਸੈੱਟ ਹੋ ਜਾਣਗੀਆਂ।"</string>
@@ -486,21 +488,20 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"ਮੁੱਖ ਸਕ੍ਰੀਨ"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"ਹਾਲੀਆ"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"ਪਿੱਛੇ"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"ਵੌਲਯੂਮ ਵਿੱਚ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਵਿਖਾਓ"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"ਵੌਲਯੂਮ ਡਾਇਲੌਗ ਵਿੱਚ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਦੇ ਪੂਰੇ ਨਿਯੰਤ੍ਰਣ ਦੀ ਮਨਜ਼ੂਰੀ ਦਿਓ।"</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"ਵੌਲਯੂਮ ਅਤੇ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"ਵੌਲਯੂਮ ਘੱਟ ਹੋਣ \'ਤੇ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਵਿੱਚ ਦਾਖਲ ਹੋਵੋ"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"ਵੌਲਯੂਮ ਕੰਟਰੋਲਾਂ ਨਾਲ ਵਿਖਾਓ"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"ਵੌਲਯੂਮ ਬਟਨ ਸ਼ਾਰਟਕੱਟ"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"ਵੌਲਯੂਮ ਉੱਚੀ ਹੋਣ \'ਤੇ ਮੈਨੂੰ ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ ਤੋਂ ਬਾਹਰ ਜਾਓ"</string>
     <string name="battery" msgid="7498329822413202973">"ਬੈਟਰੀ"</string>
     <string name="clock" msgid="7416090374234785905">"ਘੜੀ"</string>
     <string name="headset" msgid="4534219457597457353">"ਹੈੱਡਸੈੱਟ"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ਹੈੱਡਫੋਨਾਂ ਨੂੰ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ਹੈੱਡਸੈੱਟ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"ਚਿੰਨ੍ਹਾਂ ਦੇ ਸਥਿਤੀ ਪੱਟੀ ਵਿੱਚ ਵਿਖਾਏ ਜਾਣ ਨੂੰ ਯੋਗ ਜਾਂ ਅਯੋਗ ਬਣਾਓ।"</string>
     <string name="data_saver" msgid="5037565123367048522">"ਡੈਟਾ ਸੇਵਰ"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"ਡੈਟਾ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"ਡੈਟਾ ਸੇਵਰ ਬੰਦ ਹੈ"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"ਚਾਲੂ"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"ਬੰਦ"</string>
     <string name="nav_bar" msgid="1993221402773877607">"ਆਵਾਗੌਣ ਪੱਟੀ"</string>
     <string name="start" msgid="6873794757232879664">"ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="center" msgid="4327473927066010960">"ਕੇਂਦਰ"</string>
@@ -523,4 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"ਝਲਕ"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"ਟਾਇਲਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਘਸੀਟੋ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ਸੰਪਾਦਨ ਕਰੋ"</string>
+    <string name="tuner_time" msgid="6572217313285536011">"ਸਮਾਂ"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"ਘੰਟੇ, ਮਿੰਟ, ਅਤੇ ਸਕਿੰਟ ਵਿਖਾਓ"</item>
+    <item msgid="1427801730816895300">"ਘੰਟੇ ਅਤੇ ਮਿੰਟ ਵਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="3830170141562534721">"ਇਸ ਚਿੰਨ੍ਹ ਨੂੰ ਨਾ ਵਿਖਾਓ"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"ਹਮੇਸ਼ਾਂ ਪ੍ਰਤੀਸ਼ਤਤਾ ਵਿਖਾਓ"</item>
+    <item msgid="2139628951880142927">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਪ੍ਰਤੀਸ਼ਤਤਾ ਵਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
+    <item msgid="3327323682209964956">"ਇਸ ਚਿੰਨ੍ਹ ਨੂੰ ਨਾ ਵਿਖਾਓ"</item>
+  </string-array>
 </resources>

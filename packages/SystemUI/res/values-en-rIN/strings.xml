@@ -333,8 +333,6 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Total\nsilence"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priority\nonly"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarms\nonly"</string>
-    <string name="interruption_level_all" msgid="1330581184930945764">"All"</string>
-    <string name="interruption_level_all_twoline" msgid="3719402899156124780">"All\n"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Charging (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Charging rapidly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Charging slowly (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> until full)"</string>
@@ -447,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Show clock seconds in the status bar. May impact battery life."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Rearrange Quick Settings"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Show brightness in Quick Settings"</string>
-    <string name="overview_nav_bar_gesture" msgid="1852503363271291341">"Enable split-screen swipe-up accelerator"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Enable split-screen swipe-up gesture"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Enable gesture to enter split-screen by swiping up from the Overview button"</string>
     <string name="experimental" msgid="6198182315536726162">"Experimental"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Turn on Bluetooth?"</string>
@@ -467,14 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Peek onto the screen and make sound"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"More settings"</string>
     <string name="notification_done" msgid="5279426047273930175">"Finished"</string>
-    <string name="color_matrix_none" msgid="2121957926040543148">"Normal colours"</string>
-    <string name="color_matrix_night" msgid="5943817622105307072">"Night colours"</string>
-    <string name="color_matrix_custom" msgid="3655576492322298713">"Customised colours"</string>
-    <string name="color_matrix_auto" msgid="4896624757412029265">"Auto"</string>
-    <string name="color_matrix_unknown" msgid="2709202104256265107">"Unknown colours"</string>
-    <string name="color_transform" msgid="6985460408079086090">"Colour modification"</string>
-    <string name="color_matrix_show_qs" msgid="1763244354399276679">"Show Quick Settings tile"</string>
-    <string name="color_enable_custom" msgid="6729001308217347501">"Enable customised transform"</string>
+    <string name="color_and_appearance" msgid="1254323855964993144">"Colour and appearance"</string>
+    <string name="night_mode" msgid="3540405868248625488">"Night mode"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"Calibrate display"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"On"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"Off"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"Turn on automatically"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Switch into Night Mode as appropriate for location and time of day"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"When Night Mode is on"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Use dark theme for Android OS"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"Adjust tint"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"Adjust brightness"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"The dark theme is applied to core areas of Android OS that are normally displayed in a light theme, such as Settings and notifications."</string>
     <string name="color_apply" msgid="9212602012641034283">"Apply"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirm Settings"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Some colour settings can make this device unusable. Click OK to confirm these colour settings, otherwise these settings will reset after 10 seconds."</string>
@@ -486,21 +488,20 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Home"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Recent"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Back"</string>
-    <string name="tuner_full_zen_title" msgid="5905081395132280054">"Show Do Not Disturb in volume"</string>
-    <string name="tuner_full_zen_summary" msgid="6883568374520596402">"Allow full control of Do Not Disturb in the volume dialogue."</string>
-    <string name="volume_and_do_not_disturb" msgid="3114580364524650941">"Volume and Do Not Disturb"</string>
-    <string name="volume_down_silent" msgid="66962568467719591">"Enter Do Not Disturb on volume down"</string>
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Show with volume controls"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Do not disturb"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Volume buttons shortcut"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Exit Do Not Disturb on volume up"</string>
     <string name="battery" msgid="7498329822413202973">"Battery"</string>
     <string name="clock" msgid="7416090374234785905">"Clock"</string>
     <string name="headset" msgid="4534219457597457353">"Headset"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Headphones connected"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Headset connected"</string>
-    <string name="tuner_status_bar_explanation" msgid="9032196769944137864">"Enable or disable icons from being shown in the status bar."</string>
     <string name="data_saver" msgid="5037565123367048522">"Data Saver"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Data Saver is on"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Data Saver is off"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"On"</string>
+    <string name="switch_bar_off" msgid="8803270596930432874">"Off"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigation bar"</string>
     <string name="start" msgid="6873794757232879664">"Start"</string>
     <string name="center" msgid="4327473927066010960">"Centre"</string>
@@ -523,4 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"Preview"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Drag to add tiles"</string>
     <string name="qs_edit" msgid="2232596095725105230">"(edit)"</string>
+    <string name="tuner_time" msgid="6572217313285536011">"Time"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"Show hours, minutes and seconds"</item>
+    <item msgid="1427801730816895300">"Show hours and minutes (default)"</item>
+    <item msgid="3830170141562534721">"Don\'t show this icon"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"Always show percentage"</item>
+    <item msgid="2139628951880142927">"Show percentage when charging (default)"</item>
+    <item msgid="3327323682209964956">"Don\'t show this icon"</item>
+  </string-array>
 </resources>
