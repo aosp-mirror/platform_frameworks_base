@@ -41,6 +41,8 @@ import java.util.zip.ZipOutputStream;
 import libcore.io.Streams;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.google.android.collect.Lists;
 
 import android.accounts.Account;
@@ -506,6 +508,7 @@ public class BugreportProgressService extends Service {
      * Cancels a bugreport upon user's request.
      */
     private void cancel(int id) {
+        MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL);
         Log.v(TAG, "cancel: ID=" + id);
         final BugreportInfo info = getInfo(id);
         if (info != null && !info.finished) {
@@ -582,6 +585,7 @@ public class BugreportProgressService extends Service {
      * change its values.
      */
     private void launchBugreportInfoDialog(int id) {
+        MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS);
         // Copy values so it doesn't lock mProcesses while UI is being updated
         final String name, title, description;
         final BugreportInfo info = getInfo(id);
@@ -610,6 +614,7 @@ public class BugreportProgressService extends Service {
      * upon receiving a {@link #INTENT_BUGREPORT_STARTED}.
      */
     private void takeScreenshot(int id, boolean delayed) {
+        MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT);
         if (getInfo(id) == null) {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
@@ -859,6 +864,7 @@ public class BugreportProgressService extends Service {
      * intent, but issuing a warning dialog the first time.
      */
     private void shareBugreport(int id, BugreportInfo sharedInfo) {
+        MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE);
         BugreportInfo info = getInfo(id);
         if (info == null) {
             // Service was terminated but notification persisted
@@ -1139,9 +1145,16 @@ public class BugreportProgressService extends Service {
         if (info == null) {
             return;
         }
+        if (title != null && !title.equals(info.title)) {
+            MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_TITLE_CHANGED);
+        }
         info.title = title;
+        if (description != null && !description.equals(info.description)) {
+            MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED);
+        }
         info.description = description;
         if (name != null && !name.equals(info.name)) {
+            MetricsLogger.action(this, MetricsEvent.ACTION_BUGREPORT_DETAILS_NAME_CHANGED);
             info.name = name;
             updateProgress(info);
         }
@@ -1229,7 +1242,7 @@ public class BugreportProgressService extends Service {
         /**
          * Sets its internal state and displays the dialog.
          */
-        private void initialize(Context context, BugreportInfo info) {
+        private void initialize(final Context context, BugreportInfo info) {
             // First initializes singleton.
             if (mDialog == null) {
                 @SuppressLint("InflateParams")
@@ -1263,6 +1276,8 @@ public class BugreportProgressService extends Service {
                                     @Override
                                     public void onClick(DialogInterface dialog, int id)
                                     {
+                                        MetricsLogger.action(context,
+                                                MetricsEvent.ACTION_BUGREPORT_DETAILS_CANCELED);
                                         if (!mTempName.equals(mSavedName)) {
                                             // Must restore dumpstate's name since it was changed
                                             // before user clicked OK.
@@ -1307,6 +1322,7 @@ public class BugreportProgressService extends Service {
 
                     @Override
                     public void onClick(View view) {
+                        MetricsLogger.action(context, MetricsEvent.ACTION_BUGREPORT_DETAILS_SAVED);
                         sanitizeName();
                         final String name = mInfoName.getText().toString();
                         final String title = mInfoTitle.getText().toString();
