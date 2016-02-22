@@ -1245,15 +1245,9 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
                         + ic + " tba=" + tba + " controlFlags=#"
                         + Integer.toHexString(controlFlags));
-                InputBindResult res;
-                if (windowGainingFocus != null) {
-                    res = mService.windowGainedFocus(startInputReason, mClient, windowGainingFocus,
-                            controlFlags, softInputMode, windowFlags,
-                            tba, servedContext);
-                } else {
-                    res = mService.startInput(startInputReason, mClient,
-                            servedContext, tba, controlFlags);
-                }
+                final InputBindResult res = mService.startInputOrWindowGainedFocus(
+                        startInputReason, mClient, windowGainingFocus, controlFlags, softInputMode,
+                        windowFlags, tba, servedContext);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res != null) {
                     if (res.id != null) {
@@ -1471,13 +1465,13 @@ public final class InputMethodManager {
                 return;
             }
         }
-        
+
         // For some reason we didn't do a startInput + windowFocusGain, so
         // we'll just do a window focus gain and call it a day.
         synchronized (mH) {
             try {
                 if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
-                mService.windowGainedFocus(
+                mService.startInputOrWindowGainedFocus(
                         InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
                         null);
