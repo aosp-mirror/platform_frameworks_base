@@ -28,6 +28,7 @@
 #include "gui/Surface.h"
 #include "renderthread/RenderProxy.h"
 
+#include <cutils/memory.h>
 
 namespace {
 
@@ -119,8 +120,8 @@ public:
             SkImageInfo::Make(mSize.width(), mSize.height(),
                               kRGBA_8888_SkColorType, kPremul_SkAlphaType);
         bmp->allocPixels(destinationConfig);
-        sk_memset32((uint32_t*) bmp->getPixels(), SK_ColorRED,
-                    mSize.width() * mSize.height());
+        android_memset32((uint32_t*) bmp->getPixels(), SK_ColorRED,
+                         mSize.width() * mSize.height() * 4);
 
         android::CpuConsumer::LockedBuffer nativeBuffer;
         android::status_t retval = mCpuConsumer->lockNextBuffer(&nativeBuffer);
