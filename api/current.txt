@@ -51008,7 +51008,7 @@ package java.nio.channels {
     ctor public ConnectionPendingException();
   }
 
-  public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.ScatteringByteChannel {
+  public abstract class DatagramChannel extends java.nio.channels.spi.AbstractSelectableChannel implements java.nio.channels.ByteChannel java.nio.channels.GatheringByteChannel java.nio.channels.NetworkChannel java.nio.channels.ScatteringByteChannel {
     ctor protected DatagramChannel(java.nio.channels.spi.SelectorProvider);
     method public abstract java.nio.channels.DatagramChannel bind(java.net.SocketAddress) throws java.io.IOException;
     method public abstract java.nio.channels.DatagramChannel connect(java.net.SocketAddress) throws java.io.IOException;
