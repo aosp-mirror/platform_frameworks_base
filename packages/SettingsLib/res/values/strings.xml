@@ -673,17 +673,6 @@
     <!-- Services settings screen, setting option summary for the user to go to the screen to view running services  -->
     <string name="runningservices_settings_summary">View and control currently running services</string>
 
-    <!-- Sound & display settings screen, setting option name to change the user interface theme [CHAR LIMIT=30] -->
-    <string name="night_mode_title">Night mode</string>
-    <!-- Sound & display settings screen, setting option summary to change the user interface theme [CHAR LIMIT=100] -->
-    <string name="night_mode_summary">%s</string>
-    <!-- Sound & display settings screen, theme setting value to prefer a light-colored user interface [CHAR LIMIT=30] -->
-    <string name="night_mode_no">Disabled</string>
-    <!-- Sound & display settings screen, theme setting value to prefer a dark-colored user interface [CHAR LIMIT=30] -->
-    <string name="night_mode_yes">Always on</string>
-    <!-- Sound & display settings screen, theme setting value to automatically switch between a light- or dark-colored user interface [CHAR LIMIT=30] -->
-    <string name="night_mode_auto">Automatic</string>
-
     <!-- Developer settings: enable WebView multiprocess name [CHAR LIMIT=30] -->
     <string name="enable_webview_multiprocess">Enable multiprocess WebView</string>
     <!-- Developer settings: enable WebView multiprocess summary [CHAR LIMIT=60] -->
