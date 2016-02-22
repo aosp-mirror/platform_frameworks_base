@@ -268,154 +268,155 @@ public final class LoadedApk {
                 return mClassLoader;
             }
 
-            if (mIncludeCode && !mPackageName.equals("android")) {
-                // Avoid the binder call when the package is the current application package.
-                // The activity manager will perform ensure that dexopt is performed before
-                // spinning up the process.
-                if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
-                    final String isa = VMRuntime.getRuntime().vmInstructionSet();
-                    try {
-                        ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
-                    } catch (RemoteException re) {
-                        // Ignored.
-                    }
-                }
-
-                final List<String> zipPaths = new ArrayList<>();
-                final List<String> apkPaths = new ArrayList<>();
-                final List<String> libPaths = new ArrayList<>();
-
-                if (mRegisterPackage) {
-                    try {
-                        ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
-                    } catch (RemoteException e) {
-                    }
-                }
-
-                zipPaths.add(mAppDir);
-                if (mSplitAppDirs != null) {
-                    Collections.addAll(zipPaths, mSplitAppDirs);
-                }
-
-                libPaths.add(mLibDir);
-
-                /*
-                 * The following is a bit of a hack to inject
-                 * instrumentation into the system: If the app
-                 * being started matches one of the instrumentation names,
-                 * then we combine both the "instrumentation" and
-                 * "instrumented" app into the path, along with the
-                 * concatenation of both apps' shared library lists.
-                 */
-
-                String instrumentationPackageName = mActivityThread.mInstrumentationPackageName;
-                String instrumentationAppDir = mActivityThread.mInstrumentationAppDir;
-                String[] instrumentationSplitAppDirs = mActivityThread.mInstrumentationSplitAppDirs;
-                String instrumentationLibDir = mActivityThread.mInstrumentationLibDir;
-
-                String instrumentedAppDir = mActivityThread.mInstrumentedAppDir;
-                String[] instrumentedSplitAppDirs = mActivityThread.mInstrumentedSplitAppDirs;
-                String instrumentedLibDir = mActivityThread.mInstrumentedLibDir;
-                String[] instrumentationLibs = null;
-
-                if (mAppDir.equals(instrumentationAppDir)
-                        || mAppDir.equals(instrumentedAppDir)) {
-                    zipPaths.clear();
-                    zipPaths.add(instrumentationAppDir);
-                    if (instrumentationSplitAppDirs != null) {
-                        Collections.addAll(zipPaths, instrumentationSplitAppDirs);
-                    }
-                    zipPaths.add(instrumentedAppDir);
-                    if (instrumentedSplitAppDirs != null) {
-                        Collections.addAll(zipPaths, instrumentedSplitAppDirs);
-                    }
-
-                    libPaths.clear();
-                    libPaths.add(instrumentationLibDir);
-                    libPaths.add(instrumentedLibDir);
-
-                    if (!instrumentedAppDir.equals(instrumentationAppDir)) {
-                        instrumentationLibs = getLibrariesFor(instrumentationPackageName);
-                    }
-                }
-
-                apkPaths.addAll(zipPaths);
-
-                if (mSharedLibraries != null) {
-                    for (String lib : mSharedLibraries) {
-                        if (!zipPaths.contains(lib)) {
-                            zipPaths.add(0, lib);
-                        }
-                    }
-                }
-
-                if (instrumentationLibs != null) {
-                    for (String lib : instrumentationLibs) {
-                        if (!zipPaths.contains(lib)) {
-                            zipPaths.add(0, lib);
-                        }
-                    }
-                }
-
-                final String zip = TextUtils.join(File.pathSeparator, zipPaths);
-
-                // Add path to libraries in apk for current abi
-                if (mApplicationInfo.primaryCpuAbi != null) {
-                    for (String apk : apkPaths) {
-                      libPaths.add(apk + "!/lib/" + mApplicationInfo.primaryCpuAbi);
-                    }
-                }
-
-                String libraryPermittedPath = mDataDir;
-                boolean isBundledApp = false;
-
-                if (mApplicationInfo.isSystemApp()) {
-                    isBundledApp = true;
-                    // Add path to system libraries to libPaths;
-                    // Access to system libs should be limited
-                    // to bundled applications; this is why updated
-                    // system apps are not included.
-                    libPaths.add(System.getProperty("java.library.path"));
-
-                    // This is necessary to grant bundled apps access to
-                    // libraries located in subdirectories of /system/lib
-                    libraryPermittedPath += File.pathSeparator +
-                                            System.getProperty("java.library.path");
-                }
-                // DO NOT SHIP: this is a workaround for apps loading native libraries
-                // provided by 3rd party apps using absolute path instead of corresponding
-                // classloader; see http://b/26954419 for example.
-                if (mApplicationInfo.targetSdkVersion <= 23) {
-                    libraryPermittedPath += File.pathSeparator + "/data/app";
-                }
-                // -----------------------------------------------------------------------------
-
-                final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
-
-                /*
-                 * With all the combination done (if necessary, actually
-                 * create the class loader.
-                 */
-
-                if (ActivityThread.localLOGV)
-                    Slog.v(ActivityThread.TAG, "Class path: " + zip +
-                            ", JNI path: " + librarySearchPath);
-
-                // Temporarily disable logging of disk reads on the Looper thread
-                // as this is early and necessary.
-                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
-
-                mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, isBundledApp,
-                        librarySearchPath, libraryPermittedPath, mBaseClassLoader);
-
-                StrictMode.setThreadPolicy(oldPolicy);
-            } else {
+            if (mPackageName.equals("android")) {
                 if (mBaseClassLoader == null) {
                     mClassLoader = ClassLoader.getSystemClassLoader();
                 } else {
                     mClassLoader = mBaseClassLoader;
                 }
+                return mClassLoader;
             }
+
+            // Avoid the binder call when the package is the current application package.
+            // The activity manager will perform ensure that dexopt is performed before
+            // spinning up the process.
+            if (!Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
+                final String isa = VMRuntime.getRuntime().vmInstructionSet();
+                try {
+                    ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
+                } catch (RemoteException re) {
+                    // Ignored.
+                }
+            }
+
+            final List<String> zipPaths = new ArrayList<>();
+            final List<String> apkPaths = new ArrayList<>();
+            final List<String> libPaths = new ArrayList<>();
+
+            if (mRegisterPackage) {
+                try {
+                    ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
+                } catch (RemoteException e) {
+                }
+            }
+
+            zipPaths.add(mAppDir);
+            if (mSplitAppDirs != null) {
+                Collections.addAll(zipPaths, mSplitAppDirs);
+            }
+
+            libPaths.add(mLibDir);
+
+            /*
+             * The following is a bit of a hack to inject
+             * instrumentation into the system: If the app
+             * being started matches one of the instrumentation names,
+             * then we combine both the "instrumentation" and
+             * "instrumented" app into the path, along with the
+             * concatenation of both apps' shared library lists.
+             */
+
+            String instrumentationPackageName = mActivityThread.mInstrumentationPackageName;
+            String instrumentationAppDir = mActivityThread.mInstrumentationAppDir;
+            String[] instrumentationSplitAppDirs = mActivityThread.mInstrumentationSplitAppDirs;
+            String instrumentationLibDir = mActivityThread.mInstrumentationLibDir;
+
+            String instrumentedAppDir = mActivityThread.mInstrumentedAppDir;
+            String[] instrumentedSplitAppDirs = mActivityThread.mInstrumentedSplitAppDirs;
+            String instrumentedLibDir = mActivityThread.mInstrumentedLibDir;
+            String[] instrumentationLibs = null;
+
+            if (mAppDir.equals(instrumentationAppDir)
+                    || mAppDir.equals(instrumentedAppDir)) {
+                zipPaths.clear();
+                zipPaths.add(instrumentationAppDir);
+                if (instrumentationSplitAppDirs != null) {
+                    Collections.addAll(zipPaths, instrumentationSplitAppDirs);
+                }
+                zipPaths.add(instrumentedAppDir);
+                if (instrumentedSplitAppDirs != null) {
+                    Collections.addAll(zipPaths, instrumentedSplitAppDirs);
+                }
+
+                libPaths.clear();
+                libPaths.add(instrumentationLibDir);
+                libPaths.add(instrumentedLibDir);
+
+                if (!instrumentedAppDir.equals(instrumentationAppDir)) {
+                    instrumentationLibs = getLibrariesFor(instrumentationPackageName);
+                }
+            }
+
+            apkPaths.addAll(zipPaths);
+
+            if (mSharedLibraries != null) {
+                for (String lib : mSharedLibraries) {
+                    if (!zipPaths.contains(lib)) {
+                        zipPaths.add(0, lib);
+                    }
+                }
+            }
+
+            if (instrumentationLibs != null) {
+                for (String lib : instrumentationLibs) {
+                    if (!zipPaths.contains(lib)) {
+                        zipPaths.add(0, lib);
+                    }
+                }
+            }
+
+            final String zip = mIncludeCode ? TextUtils.join(File.pathSeparator, zipPaths) : "";
+
+            // Add path to libraries in apk for current abi
+            if (mApplicationInfo.primaryCpuAbi != null) {
+                for (String apk : apkPaths) {
+                  libPaths.add(apk + "!/lib/" + mApplicationInfo.primaryCpuAbi);
+                }
+            }
+
+            String libraryPermittedPath = mDataDir;
+            boolean isBundledApp = false;
+
+            if (mApplicationInfo.isSystemApp()) {
+                isBundledApp = true;
+                // Add path to system libraries to libPaths;
+                // Access to system libs should be limited
+                // to bundled applications; this is why updated
+                // system apps are not included.
+                libPaths.add(System.getProperty("java.library.path"));
+
+                // This is necessary to grant bundled apps access to
+                // libraries located in subdirectories of /system/lib
+                libraryPermittedPath += File.pathSeparator +
+                                        System.getProperty("java.library.path");
+            }
+            // DO NOT SHIP: this is a workaround for apps loading native libraries
+            // provided by 3rd party apps using absolute path instead of corresponding
+            // classloader; see http://b/26954419 for example.
+            if (mApplicationInfo.targetSdkVersion <= 23) {
+                libraryPermittedPath += File.pathSeparator + "/data/app";
+            }
+            // -----------------------------------------------------------------------------
+
+            final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
+
+            /*
+             * With all the combination done (if necessary, actually
+             * create the class loader.
+             */
+
+            if (ActivityThread.localLOGV)
+                Slog.v(ActivityThread.TAG, "Class path: " + zip +
+                        ", JNI path: " + librarySearchPath);
+
+            // Temporarily disable logging of disk reads on the Looper thread
+            // as this is early and necessary.
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+
+            mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, isBundledApp,
+                    librarySearchPath, libraryPermittedPath, mBaseClassLoader);
+
+            StrictMode.setThreadPolicy(oldPolicy);
             return mClassLoader;
         }
     }
