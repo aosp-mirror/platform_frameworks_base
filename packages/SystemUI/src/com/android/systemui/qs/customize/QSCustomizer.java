@@ -17,6 +17,7 @@ package com.android.systemui.qs.customize;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -42,7 +43,7 @@ import java.util.List;
  * This adds itself to the status bar window, so it can appear on top of quick settings and
  * *someday* do fancy animations to get into/out of it.
  */
-public class QSCustomizer extends LinearLayout implements AnimatorListener, OnClickListener {
+public class QSCustomizer extends LinearLayout implements OnClickListener {
 
     private final QSDetailClipper mClipper;
 
@@ -94,7 +95,7 @@ public class QSCustomizer extends LinearLayout implements AnimatorListener, OnCl
             isShown = true;
             mPhoneStatusBar.getStatusBarWindow().addView(this);
             setTileSpecs();
-            mClipper.animateCircularClip(x, y, true, this);
+            mClipper.animateCircularClip(x, y, true, null);
             new TileQueryHelper(mContext, mHost).setListener(mTileAdapter);
         }
     }
@@ -102,7 +103,7 @@ public class QSCustomizer extends LinearLayout implements AnimatorListener, OnCl
     public void hide(int x, int y) {
         if (isShown) {
             isShown = false;
-            mClipper.animateCircularClip(x, y, false, this);
+            mClipper.animateCircularClip(x, y, false, mCollapseAnimationListener);
         }
     }
 
@@ -144,27 +145,19 @@ public class QSCustomizer extends LinearLayout implements AnimatorListener, OnCl
         }
     }
 
-    @Override
-    public void onAnimationEnd(Animator animation) {
-        if (!isShown) {
-            mPhoneStatusBar.getStatusBarWindow().removeView(this);
+    private final AnimatorListener mCollapseAnimationListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (!isShown) {
+                mPhoneStatusBar.getStatusBarWindow().removeView(QSCustomizer.this);
+            }
         }
-    }
 
-    @Override
-    public void onAnimationCancel(Animator animation) {
-        if (!isShown) {
-            mPhoneStatusBar.getStatusBarWindow().removeView(this);
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            if (!isShown) {
+                mPhoneStatusBar.getStatusBarWindow().removeView(QSCustomizer.this);
+            }
         }
-    }
-
-    @Override
-    public void onAnimationStart(Animator animation) {
-        // Don't care.
-    }
-
-    @Override
-    public void onAnimationRepeat(Animator animation) {
-        // Don't care.
-    }
+    };
 }
