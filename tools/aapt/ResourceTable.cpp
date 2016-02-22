@@ -308,29 +308,11 @@ struct PendingAttribute
         }
         added = true;
 
-        String16 attr16("attr");
-        
-        if (outTable->hasBagOrEntry(myPackage, attr16, ident)) {
-            sourcePos.error("Attribute \"%s\" has already been defined\n",
-                    String8(ident).string());
+        if (!outTable->makeAttribute(myPackage, ident, sourcePos, type, comment, appendComment)) {
             hasErrors = true;
             return UNKNOWN_ERROR;
         }
-        
-        char numberStr[16];
-        sprintf(numberStr, "%d", type);
-        status_t err = outTable->addBag(sourcePos, myPackage,
-                attr16, ident, String16(""),
-                String16("^type"),
-                String16(numberStr), NULL, NULL);
-        if (err != NO_ERROR) {
-            hasErrors = true;
-            return err;
-        }
-        outTable->appendComment(myPackage, attr16, ident, comment, appendComment);
-        //printf("Attribute %s comment: %s\n", String8(ident).string(),
-        //     String8(comment).string());
-        return err;
+        return NO_ERROR;
     }
 };
 
@@ -2113,6 +2095,61 @@ bool ResourceTable::appendTypeComment(const String16& package,
         }
     }
     return false;
+}
+
+bool ResourceTable::makeAttribute(const String16& package,
+                                  const String16& name,
+                                  const SourcePos& source,
+                                  int32_t format,
+                                  const String16& comment,
+                                  bool shouldAppendComment) {
+    const String16 attr16("attr");
+
+    // First look for this in the included resources...
+    uint32_t rid = mAssets->getIncludedResources()
+            .identifierForName(name.string(), name.size(),
+                               attr16.string(), attr16.size(),
+                               package.string(), package.size());
+    if (rid != 0) {
+        source.error("Attribute \"%s\" has already been defined", String8(name).string());
+        return false;
+    }
+
+    sp<ResourceTable::Entry> entry = getEntry(package, attr16, name, source, false);
+    if (entry == NULL) {
+        source.error("Failed to create entry attr/%s", String8(name).string());
+        return false;
+    }
+
+    if (entry->makeItABag(source) != NO_ERROR) {
+        return false;
+    }
+
+    const String16 formatKey16("^type");
+    const String16 formatValue16(String8::format("%d", format));
+
+    ssize_t idx = entry->getBag().indexOfKey(formatKey16);
+    if (idx >= 0) {
+        // We have already set a format for this attribute, check if they are different.
+        // We allow duplicate attribute definitions so long as they are identical.
+        // This is to ensure inter-operation with libraries that define the same generic attribute.
+        const Item& formatItem = entry->getBag().valueAt(idx);
+        if ((format & (ResTable_map::TYPE_ENUM | ResTable_map::TYPE_FLAGS)) ||
+                formatItem.value != formatValue16) {
+            source.error("Attribute \"%s\" already defined with incompatible format.\n"
+                         "%s:%d: Original attribute defined here.",
+                         String8(name).string(), formatItem.sourcePos.file.string(),
+                         formatItem.sourcePos.line);
+            return false;
+        }
+    } else {
+        entry->addToBag(source, formatKey16, formatValue16);
+        // Increment the number of resources we have. This is used to determine if we should
+        // even generate a resource table.
+        mNumLocal++;
+    }
+    appendComment(package, attr16, name, comment, shouldAppendComment);
+    return true;
 }
 
 void ResourceTable::canAddEntry(const SourcePos& pos,
