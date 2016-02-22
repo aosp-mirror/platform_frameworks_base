@@ -44,7 +44,7 @@ public class ResourceCertificateSource implements CertificateSource {
 
     public ResourceCertificateSource(int resourceId, Context context) {
         mResourceId = resourceId;
-        mContext = context.getApplicationContext();
+        mContext = context;
     }
 
     private void ensureInitialized() {
