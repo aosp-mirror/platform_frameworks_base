@@ -277,10 +277,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"מושבת"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"פועל תמיד"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"באופן אוטומטי"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"הפעל תצוגת אתר לריבוי עיבודים"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"הרץ מעבדי תצוגת אתר בהליך מבודד"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏יישום WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏הגדרת יישום WebView"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"‏יישום ה-WebView שנבחר מושבת, ויש להפעיל אותו כדי להשתמש בו. האם ברצונך להפעיל אותו?"</string>
@@ -315,7 +313,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"לא בטעינה"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"לא טוען"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"מלא"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"הושבת על ידי מנהל המערכת"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"נמצא בשליטת מנהל מערכת"</string>
     <string name="home" msgid="8263346537524314127">"דף הבית"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"לפני <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"נשארו <xliff:g id="ID_1">%1$s</xliff:g>"</string>

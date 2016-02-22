@@ -277,10 +277,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"నిలిపివేయబడింది"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"ఎల్లప్పుడూ ఆన్‌లో ఉంచు"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"స్వయంచాలకం"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"మల్టీప్రాసెస్ వెబ్ వీక్షణ ఆరం."</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ప్రత్యేకప్రాసెస్‌లో వెబ్ వీక్షణ రెండెరెర్‌లను అమలుచేస్తుంది."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"వెబ్ వీక్షణ అమలు"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"వెబ్ వీక్షణ అమలుని సెట్ చేయండి"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ఎంచుకున్న వెబ్ వీక్షణ అమలు నిలిపివేయబడింది, కానీ ఉపయోగించడానికి తప్పనిసరిగా ప్రారంభించాల్సి ఉంటుంది, మీరు దీన్ని ప్రారంభించాలనుకుంటున్నారా?"</string>
@@ -315,7 +313,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ఛార్జ్ కావడం లేదు"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ఛార్జ్ కావడం లేదు"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"నిండింది"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"నిర్వాహకుడు నిలిపివేసారు"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"నిర్వాహకుని ద్వారా నియంత్రించబడింది"</string>
     <string name="home" msgid="8263346537524314127">"హోమ్"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> క్రితం"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> మిగిలి ఉంది"</string>

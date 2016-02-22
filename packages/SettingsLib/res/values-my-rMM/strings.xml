@@ -277,10 +277,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"ပိတ်ထား"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"အမြဲတမ်း ဖွင့်ထားရန်"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"အလိုအလျောက်"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"လုပ်ငန်းဖြစ်စဉ်များစွာကြည့်နိုင်သည့် ဝဘ်မြင်ကွင်းကိုဖွင့်ပါ"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"လုပ်ငန်းဖြစ်စဉ်တစ်ခုတည်းအတွက် ဝဘ်မြင်ကွင်း အဖြစ်ပြုလုပ်ခြင်းကို ဖွင့်ပါ။"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ရွေးချယ်ထားသည့် WebView လုပ်ဆောင်ခြင်းကို ပိတ်ထားသည်ပြီး အသုံးပြုရန်အတွက် ဖွင့်ရမည်၊ ဖွင့်လိုပါသလား။"</string>
@@ -315,7 +313,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"အားသွင်းမနေပါ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"အပြည့်"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"စီမံခန့်ခွဲသူမှ ပိတ်ထားသည်"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"စီမံခန့်ခွဲသူမှ ထိန်းချုပ်ပါသည်"</string>
     <string name="home" msgid="8263346537524314127">"ပင်မ"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"ပြီးခဲ့သည့် <xliff:g id="ID_1">%1$s</xliff:g> က"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> ကျန်ပါသည်"</string>

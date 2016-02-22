@@ -277,10 +277,8 @@
     <string name="night_mode_no" msgid="9171772244775838901">"අබලයි"</string>
     <string name="night_mode_yes" msgid="2218157265997633432">"සැමවිට ක්‍රියාත්මක"</string>
     <string name="night_mode_auto" msgid="7508348175804304327">"ස්වයංක්‍රීය"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"බහු සැකසීම් WebView සබල කරන්න"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"හුදකලා වූ ක්‍රියාවලියක WebView විදහා දැක්වීම් ධාවනය කරන්න."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ක්‍රියාත්මක කිරීම"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView ක්‍රියාත්මක කිරීම සකසන්න"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"තෝරන ලද WebView ක්‍රියාත්මක කිරීම අබල අතර, භාවිත කිරීමට සබල කළ යුතුය, ඔබ එය සබල කිරීමට අදහස් කරන්නේද?"</string>
@@ -315,7 +313,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ආරෝපණය නොවෙමින්"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"පූර්ණ"</string>
-    <string name="disabled_by_admin_summary_text" msgid="7787027069207263048">"පරිපාලක විසින් අබල කරන ලදී"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
     <string name="home" msgid="8263346537524314127">"මුල් පිටුව"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>කට පෙර"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g>ක් ඉතිරිය"</string>
