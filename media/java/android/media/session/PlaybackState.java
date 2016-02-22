@@ -133,19 +133,32 @@ public final class PlaybackState implements Parcelable {
     public static final long ACTION_PLAY_FROM_URI = 1 << 13;
 
     /**
-     * Used as an optional boolean extra field in
-     * {@link MediaController.TransportControls#playFromMediaId},
-     * {@link MediaController.TransportControls#playFromSearch}, and
-     * {@link MediaController.TransportControls#playFromUri}. Value of {@code true} overrides
-     * the default behavior of starting the playback after preparing. Check
-     * {@link MediaSession#FLAG_HANDLES_PREPARE_ONLY} to see if the media session supports this.
+     * Indicates this session supports the prepare command.
      *
-     * @see MediaSession#FLAG_HANDLES_PREPARE_ONLY
-     * @see MediaController.TransportControls#playFromMediaId
-     * @see MediaController.TransportControls#playFromSearch
-     * @see MediaController.TransportControls#playFromUri
+     * @see Builder#setActions(long)
      */
-    public static final String EXTRA_PREPARE_ONLY = "android.media.session.extra.PREPARE_ONLY";
+    public static final long ACTION_PREPARE = 1 << 14;
+
+    /**
+     * Indicates this session supports the prepare from media id command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_PREPARE_FROM_MEDIA_ID = 1 << 15;
+
+    /**
+     * Indicates this session supports the prepare from search command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_PREPARE_FROM_SEARCH = 1 << 16;
+
+    /**
+     * Indicates this session supports the prepare from URI command.
+     *
+     * @see Builder#setActions(long)
+     */
+    public static final long ACTION_PREPARE_FROM_URI = 1 << 17;
 
     /**
      * This is the default playback state and indicates that no media has been
@@ -330,6 +343,10 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#STATE_REWINDING}</li>
      * <li> {@link PlaybackState#STATE_BUFFERING}</li>
      * <li> {@link PlaybackState#STATE_ERROR}</li>
+     * <li> {@link PlaybackState#STATE_CONNECTING}</li>
+     * <li> {@link PlaybackState#STATE_SKIPPING_TO_PREVIOUS}</li>
+     * <li> {@link PlaybackState#STATE_SKIPPING_TO_NEXT}</li>
+     * <li> {@link PlaybackState#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
      * </ul>
      */
     public int getState() {
@@ -380,6 +397,10 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#ACTION_PLAY_FROM_SEARCH}</li>
      * <li> {@link PlaybackState#ACTION_SKIP_TO_QUEUE_ITEM}</li>
      * <li> {@link PlaybackState#ACTION_PLAY_FROM_URI}</li>
+     * <li> {@link PlaybackState#ACTION_PREPARE}</li>
+     * <li> {@link PlaybackState#ACTION_PREPARE_FROM_MEDIA_ID}</li>
+     * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
+     * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
      * </ul>
      */
     public long getActions() {
@@ -831,6 +852,10 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#STATE_REWINDING}</li>
          * <li> {@link PlaybackState#STATE_BUFFERING}</li>
          * <li> {@link PlaybackState#STATE_ERROR}</li>
+         * <li> {@link PlaybackState#STATE_CONNECTING}</li>
+         * <li> {@link PlaybackState#STATE_SKIPPING_TO_PREVIOUS}</li>
+         * <li> {@link PlaybackState#STATE_SKIPPING_TO_NEXT}</li>
+         * <li> {@link PlaybackState#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
          * </ul>
          *
          * @param state The current state of playback.
@@ -870,6 +895,10 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#STATE_REWINDING}</li>
          * <li> {@link PlaybackState#STATE_BUFFERING}</li>
          * <li> {@link PlaybackState#STATE_ERROR}</li>
+         * <li> {@link PlaybackState#STATE_CONNECTING}</li>
+         * <li> {@link PlaybackState#STATE_SKIPPING_TO_PREVIOUS}</li>
+         * <li> {@link PlaybackState#STATE_SKIPPING_TO_NEXT}</li>
+         * <li> {@link PlaybackState#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
          * </ul>
          *
          * @param state The current state of playback.
@@ -900,6 +929,10 @@ public final class PlaybackState implements Parcelable {
          * <li> {@link PlaybackState#ACTION_PLAY_FROM_SEARCH}</li>
          * <li> {@link PlaybackState#ACTION_SKIP_TO_QUEUE_ITEM}</li>
          * <li> {@link PlaybackState#ACTION_PLAY_FROM_URI}</li>
+         * <li> {@link PlaybackState#ACTION_PREPARE}</li>
+         * <li> {@link PlaybackState#ACTION_PREPARE_FROM_MEDIA_ID}</li>
+         * <li> {@link PlaybackState#ACTION_PREPARE_FROM_SEARCH}</li>
+         * <li> {@link PlaybackState#ACTION_PREPARE_FROM_URI}</li>
          * </ul>
          *
          * @param actions The set of actions allowed.
