@@ -1644,7 +1644,7 @@ public class GridView extends AbsListView {
         boolean handled = false;
         int action = event.getAction();
         if (KeyEvent.isConfirmKey(keyCode)
-                && event.hasNoModifiers() && action == KeyEvent.ACTION_UP) {
+                && event.hasNoModifiers() && action != KeyEvent.ACTION_UP) {
             handled = resurrectSelectionIfNeeded();
             if (!handled && event.getRepeatCount() == 0 && getChildCount() > 0) {
                 keyPressed();
