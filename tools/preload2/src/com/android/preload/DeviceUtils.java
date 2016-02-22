@@ -285,7 +285,7 @@ public class DeviceUtils {
 
               if (device == null) {
                   try {
-                      wait(timeout);
+                      wfdl.wait(timeout);
                   } catch (InterruptedException e) {
                       // Ignore spurious wakeups.
                   }
@@ -304,7 +304,7 @@ public class DeviceUtils {
 
               if (!device.hasClients()) {
                   try {
-                      wait(timeout);
+                      wfcl.wait(timeout);
                   } catch (InterruptedException e) {
                       // Ignore spurious wakeups.
                   }
