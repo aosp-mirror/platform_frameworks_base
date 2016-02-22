@@ -4785,6 +4785,12 @@ public final class ActivityThread {
         }
     }
 
+    // Keep in sync with installd (frameworks/native/cmds/installd/commands.cpp).
+    private static File getPrimaryProfileFile(String packageName) {
+         return new File("/data/misc/profiles/cur/" + UserHandle.myUserId() +
+              "/" + packageName + "/primary.prof");
+    }
+
     private static void setupJitProfileSupport(LoadedApk loadedApk, File cacheDir) {
         if (!SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false)) {
             return;
@@ -4804,10 +4810,7 @@ public final class ActivityThread {
             return;
         }
 
-        // Add an extension to the file name to better reveal its intended use.
-        // Keep in sync with BackgroundDexOptService.
-        final String profileExtension = ".prof";
-        final File profileFile = new File(cacheDir, loadedApk.mPackageName + profileExtension);
+        final File profileFile = getPrimaryProfileFile(loadedApk.mPackageName);
         if (!profileFile.exists()) {
             FileDescriptor fd = null;
             try {
@@ -4816,7 +4819,7 @@ public final class ActivityThread {
                 Os.fchmod(fd, permissions);
                 Os.fchown(fd, appInfo.uid, appInfo.uid);
             } catch (ErrnoException e) {
-                Log.w(TAG, "Unable to create jit profile file " + profileFile, e);
+                Log.v(TAG, "Unable to create jit profile file " + profileFile, e);
                 try {
                     Os.unlink(profileFile.getAbsolutePath());
                 } catch (ErrnoException unlinkErr) {
