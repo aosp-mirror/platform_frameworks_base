@@ -17,10 +17,12 @@
 package android.security.keystore;
 
 import android.security.Credentials;
+import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
 
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.ProviderException;
 import java.security.spec.InvalidKeySpecException;
@@ -170,6 +172,16 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         boolean userAuthenticationValidWhileOnBody =
                 keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
 
+        boolean invalidatedByBiometricEnrollment = false;
+        if (keyCharacteristics.getEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE)
+                == KeymasterDefs.HW_AUTH_FINGERPRINT) {
+            // Fingerprint-only key; will be invalidated if the root SID isn't in the list.
+            BigInteger rootSid = BigInteger.valueOf(GateKeeper.getSecureUserId());
+            List<BigInteger> sids = keyCharacteristics.getUnsignedLongs(
+                    KeymasterDefs.KM_TAG_USER_SECURE_ID);
+            invalidatedByBiometricEnrollment = !sids.isEmpty() && !sids.contains(rootSid);
+        }
+
         return new KeyInfo(entryAlias,
                 insideSecureHardware,
                 origin,
@@ -185,7 +197,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 userAuthenticationRequired,
                 (int) userAuthenticationValidityDurationSeconds,
                 userAuthenticationRequirementEnforcedBySecureHardware,
-                userAuthenticationValidWhileOnBody);
+                userAuthenticationValidWhileOnBody,
+                invalidatedByBiometricEnrollment);
     }
 
     @Override

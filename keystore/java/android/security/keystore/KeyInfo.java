@@ -80,6 +80,7 @@ public class KeyInfo implements KeySpec {
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
     private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mInvalidatedByBiometricEnrollment;
 
     /**
      * @hide
@@ -99,7 +100,8 @@ public class KeyInfo implements KeySpec {
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationRequirementEnforcedBySecureHardware,
-            boolean userAuthenticationValidWhileOnBody) {
+            boolean userAuthenticationValidWhileOnBody,
+            boolean invalidatedByBiometricEnrollment) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
@@ -119,6 +121,7 @@ public class KeyInfo implements KeySpec {
         mUserAuthenticationRequirementEnforcedBySecureHardware =
                 userAuthenticationRequirementEnforcedBySecureHardware;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
     }
 
     /**
@@ -289,5 +292,13 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isUserAuthenticationValidWhileOnBody() {
         return mUserAuthenticationValidWhileOnBody;
+    }
+
+    /**
+     * Returns {@code true} if the key will be invalidated by enrollment of a new fingerprint or
+     * removal of all fingerprints.
+     */
+    public boolean isInvalidatedByBiometricEnrollment() {
+        return mInvalidatedByBiometricEnrollment;
     }
 }
