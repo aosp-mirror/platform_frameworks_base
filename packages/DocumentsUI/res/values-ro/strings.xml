@@ -117,5 +117,5 @@
     <string name="rename_error" msgid="4203041674883412606">"Documentul nu a putut fi redenumit"</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Unele fișiere au fost convertite"</string>
     <string name="allow" msgid="7225948811296386551">"Permiteți"</string>
-    <string name="deny" msgid="2081879885755434506">"Refuzaţi"</string>
+    <string name="deny" msgid="2081879885755434506">"Refuzați"</string>
 </resources>
