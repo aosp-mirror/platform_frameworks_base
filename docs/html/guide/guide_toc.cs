@@ -631,6 +631,16 @@
     </ul>
   </li>
 
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>guide/topics/security/index.html">
+        <span class="en">Security</span>
+    </a></div>
+    <ul>
+        <li><a href="<?cs var:toroot ?>guide/topics/security/security-config.html">
+        <span class="en">Network Security Config</span>
+        </a></li>
+    </ul>
+  </li>
 
 </ul>
 
