@@ -16,8 +16,10 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
+import static com.android.internal.util.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -119,17 +121,14 @@ public class DownloadsActivity extends BaseActivity {
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
+        if (DEBUG) checkState(!mSearchManager.isSearching());
+
         // If started in manage roots mode, there has to be a cwd (i.e. the root dir of the managed
         // root).
         Preconditions.checkNotNull(cwd);
 
-        if (mState.currentSearch != null) {
-            // Ongoing search
-            DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
-        } else {
-            // Normal boring directory
-            DirectoryFragment.showDirectory(fm, root, cwd, anim);
-        }
+        // Normal boring directory
+        DirectoryFragment.showDirectory(fm, root, cwd, anim);
     }
 
     @Override
