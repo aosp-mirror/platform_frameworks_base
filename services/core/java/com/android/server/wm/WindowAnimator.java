@@ -530,7 +530,7 @@ public class WindowAnimator {
         for (int i = windows.size() - 1; i >= 0; i--) {
             final WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
-            if (winAnimator.mSurfaceController == null) {
+            if (winAnimator.mSurfaceController == null || !winAnimator.hasSurface()) {
                 continue;
             }
 
