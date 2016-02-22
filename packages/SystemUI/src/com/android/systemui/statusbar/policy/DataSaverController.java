@@ -60,6 +60,10 @@ public class DataSaverController {
 
     public void setDataSaverEnabled(boolean enabled) {
         mPolicyManager.setRestrictBackground(enabled);
+        try {
+            mPolicyListener.onRestrictBackgroundChanged(enabled);
+        } catch (RemoteException e) {
+        }
     }
 
     private final INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {

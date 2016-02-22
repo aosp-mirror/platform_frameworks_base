@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
+import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.UserInfoController;
@@ -53,7 +54,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
  * bar at boot time.  It goes through the normal API for icons, even though it probably
  * strictly doesn't need to.
  */
-public class PhoneStatusBarPolicy implements Callback, RotationLockController.RotationLockControllerCallback {
+public class PhoneStatusBarPolicy implements Callback, RotationLockController.RotationLockControllerCallback, DataSaverController.Listener {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -67,6 +68,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private final String mSlotManagedProfile;
     private final String mSlotRotate;
     private final String mSlotHeadset;
+    private final String mSlotDataSaver;
 
     private final Context mContext;
     private final Handler mHandler = new Handler();
@@ -77,6 +79,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
     private final UserManager mUserManager;
     private final StatusBarIconController mIconController;
     private final RotationLockController mRotationLockController;
+    private final DataSaverController mDataSaver;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -97,7 +100,8 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
 
     public PhoneStatusBarPolicy(Context context, StatusBarIconController iconController,
             CastController cast, HotspotController hotspot, UserInfoController userInfoController,
-            BluetoothController bluetooth, RotationLockController rotationLockController) {
+            BluetoothController bluetooth, RotationLockController rotationLockController,
+            DataSaverController dataSaver) {
         mContext = context;
         mIconController = iconController;
         mCast = cast;
@@ -108,6 +112,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mUserInfoController = userInfoController;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mRotationLockController = rotationLockController;
+        mDataSaver = dataSaver;
 
         mSlotCast = context.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = context.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -120,6 +125,7 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
                 com.android.internal.R.string.status_bar_managed_profile);
         mSlotRotate = context.getString(com.android.internal.R.string.status_bar_rotate);
         mSlotHeadset = context.getString(com.android.internal.R.string.status_bar_headset);
+        mSlotDataSaver = context.getString(com.android.internal.R.string.status_bar_data_saver);
 
         mRotationLockController.addRotationLockControllerCallback(this);
 
@@ -176,6 +182,12 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         mIconController.setIcon(mSlotManagedProfile, R.drawable.stat_sys_managed_profile_status,
                 mContext.getString(R.string.accessibility_managed_profile));
         mIconController.setIconVisibility(mSlotManagedProfile, mManagedProfileIconVisible);
+
+        // data saver
+        mIconController.setIcon(mSlotDataSaver, R.drawable.stat_sys_data_saver,
+                context.getString(R.string.accessibility_data_saver_on));
+        mIconController.setIconVisibility(mSlotDataSaver, false);
+        mDataSaver.addListener(this);
     }
 
     public void setZenMode(int zen) {
@@ -475,6 +487,11 @@ public class PhoneStatusBarPolicy implements Callback, RotationLockController.Ro
         } else {
             mIconController.setIconVisibility(mSlotHeadset, false);
         }
+    }
+
+    @Override
+    public void onDataSaverChanged(boolean isDataSaving) {
+        mIconController.setIconVisibility(mSlotDataSaver, isDataSaving);
     }
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
