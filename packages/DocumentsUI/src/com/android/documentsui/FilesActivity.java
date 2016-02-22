@@ -82,7 +82,6 @@ public class FilesActivity extends BaseActivity {
 
         if (mState.restored) {
             if (DEBUG) Log.d(TAG, "Stack already resolved for uri: " + intent.getData());
-            refreshCurrentRootAndDirectory(ANIM_NONE);
         } else if (!mState.stack.isEmpty()) {
             // If a non-empty stack is present in our state it was read (presumably)
             // from EXTRA_STACK intent extra. In this case, we'll skip other means of
@@ -248,16 +247,13 @@ public class FilesActivity extends BaseActivity {
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
+        if (DEBUG) checkState(!mSearchManager.isSearching());
+
         if (cwd == null) {
             DirectoryFragment.showRecentsOpen(fm, anim);
         } else {
-            if (mState.currentSearch != null) {
-                // Ongoing search
-                DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
-            } else {
-                // Normal boring directory
-                DirectoryFragment.showDirectory(fm, root, cwd, anim);
-            }
+            // Normal boring directory
+            DirectoryFragment.showDirectory(fm, root, cwd, anim);
         }
     }
 

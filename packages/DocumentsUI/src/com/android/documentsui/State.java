@@ -105,9 +105,6 @@ public class State implements android.os.Parcelable {
     private boolean mInitialRootChanged;
     private boolean mInitialDocChanged;
 
-    /** Currently active search, overriding any stack. */
-    public String currentSearch;
-
     /** Instance state for every shown directory */
     public HashMap<String, SparseArray<Parcelable>> dirState = new HashMap<>();
 
@@ -186,7 +183,6 @@ public class State implements android.os.Parcelable {
         out.writeInt(showAdvanced ? 1 : 0);
         out.writeInt(restored ? 1 : 0);
         DurableUtils.writeToParcel(out, stack);
-        out.writeString(currentSearch);
         out.writeMap(dirState);
         out.writeParcelable(selectedDocuments, 0);
         out.writeList(selectedDocumentsForCopy);
@@ -217,7 +213,6 @@ public class State implements android.os.Parcelable {
             state.showAdvanced = in.readInt() != 0;
             state.restored = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
-            state.currentSearch = in.readString();
             in.readMap(state.dirState, loader);
             state.selectedDocuments = in.readParcelable(loader);
             in.readList(state.selectedDocumentsForCopy, loader);

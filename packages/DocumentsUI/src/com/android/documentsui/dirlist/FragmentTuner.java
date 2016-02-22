@@ -84,7 +84,7 @@ public abstract class FragmentTuner {
         return MimePredicate.mimeMatches(mState.acceptMimes, docMimeType);
     }
 
-    abstract void onModelLoaded(Model model, @ResultType int resultType);
+    abstract void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch);
 
     /**
      * Provides support for Platform specific specializations of DirectoryFragment.
@@ -166,7 +166,7 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        void onModelLoaded(Model model, @ResultType int resultType) {
+        void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
             // When launched into empty recents, show drawer
             if (resultType == DirectoryFragment.TYPE_RECENT_OPEN
                     && model.isEmpty()
@@ -211,7 +211,7 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        void onModelLoaded(Model model, @ResultType int resultType) {}
+        void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {}
     }
 
     /**
@@ -248,11 +248,10 @@ public abstract class FragmentTuner {
         }
 
         @Override
-        void onModelLoaded(Model model, @ResultType int resultType) {
+        void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
             if (DEBUG) Log.d(TAG, "Handling model loaded. Has Location shcnage: " + mState.initialLocationHasChanged());
             // When launched into empty root, open drawer.
-            if (model.isEmpty() && !mState.initialLocationHasChanged()
-                    && resultType != DirectoryFragment.TYPE_SEARCH) {
+            if (model.isEmpty() && !mState.initialLocationHasChanged() && !isSearch) {
                 if (DEBUG) Log.d(TAG, "Showing roots drawer cuz stuffs empty.");
 
                 // This noops on layouts without drawer, so no need to guard.
