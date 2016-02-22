@@ -50,6 +50,10 @@ interface ISessionController {
     void setVolumeTo(int value, int flags, String packageName);
 
     // These commands are for the TransportControls
+    void prepare();
+    void prepareFromMediaId(String mediaId, in Bundle extras);
+    void prepareFromSearch(String string, in Bundle extras);
+    void prepareFromUri(in Uri uri, in Bundle extras);
     void play();
     void playFromMediaId(String mediaId, in Bundle extras);
     void playFromSearch(String string, in Bundle extras);
