@@ -106,6 +106,10 @@ public final class IntentFilterVerificationReceiver extends BroadcastReceiver {
                 try {
                     ArrayList<String> sourceAssets = new ArrayList<String>();
                     for (String host : hostList) {
+                        // "*.example.tld" is validated via https://example.tld
+                        if (host.startsWith("*.")) {
+                            host = host.substring(2);
+                        }
                         sourceAssets.add(createWebAssetString(scheme, host));
                     }
                     extras.putStringArrayList(DirectStatementService.EXTRA_SOURCE_ASSET_DESCRIPTORS,
