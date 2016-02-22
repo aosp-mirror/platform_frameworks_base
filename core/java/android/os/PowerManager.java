@@ -385,9 +385,9 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_FLAG_NO_DOZE = 1 << 0;
 
     /**
-     * The value to pass as the 'reason' argument to reboot() to
-     * reboot into recovery mode (for applying system updates, doing
-     * factory resets, etc.).
+     * The value to pass as the 'reason' argument to reboot() to reboot into
+     * recovery mode for tasks other than applying system updates, such as
+     * doing factory resets.
      * <p>
      * Requires the {@link android.Manifest.permission#RECOVERY}
      * permission (in addition to
@@ -396,6 +396,18 @@ public final class PowerManager {
      * @hide
      */
     public static final String REBOOT_RECOVERY = "recovery";
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to reboot into
+     * recovery mode for applying system updates.
+     * <p>
+     * Requires the {@link android.Manifest.permission#RECOVERY}
+     * permission (in addition to
+     * {@link android.Manifest.permission#REBOOT}).
+     * </p>
+     * @hide
+     */
+    public static final String REBOOT_RECOVERY_UPDATE = "recovery-update";
 
     /**
      * The value to pass as the 'reason' argument to reboot() when device owner requests a reboot on

@@ -2863,6 +2863,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.os.RecoverySystem} for accessing the recovery system
+     * service.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String RECOVERY_SERVICE = "recovery";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.view.WindowManager} for accessing the system's window
      * manager.
      *

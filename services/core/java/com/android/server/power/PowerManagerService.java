@@ -2704,12 +2704,9 @@ public final class PowerManagerService extends SystemService
         if (reason == null) {
             reason = "";
         }
-        if (reason.equals(PowerManager.REBOOT_RECOVERY)) {
-            // If we are rebooting to go into recovery, instead of
-            // setting sys.powerctl directly we'll start the
-            // pre-recovery service which will do some preparation for
-            // recovery and then reboot for us.
-            SystemProperties.set("ctl.start", "pre-recovery");
+        if (reason.equals(PowerManager.REBOOT_RECOVERY)
+                || reason.equals(PowerManager.REBOOT_RECOVERY_UPDATE)) {
+            SystemProperties.set("sys.powerctl", "reboot,recovery");
         } else {
             SystemProperties.set("sys.powerctl", "reboot," + reason);
         }
@@ -3422,7 +3419,8 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void reboot(boolean confirm, String reason, boolean wait) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.REBOOT, null);
-            if (PowerManager.REBOOT_RECOVERY.equals(reason)) {
+            if (PowerManager.REBOOT_RECOVERY.equals(reason)
+                    || PowerManager.REBOOT_RECOVERY_UPDATE.equals(reason)) {
                 mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
             }
 
