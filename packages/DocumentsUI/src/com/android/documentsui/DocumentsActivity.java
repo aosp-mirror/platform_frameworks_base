@@ -290,13 +290,8 @@ public class DocumentsActivity extends BaseActivity {
                 mState.derivedMode = visualMimes ? State.MODE_GRID : State.MODE_LIST;
             }
         } else {
-            if (mSearchManager.isSearching()) {
-                // Ongoing search
-                DirectoryFragment.showSearch(fm, root, mState.currentSearch, anim);
-            } else {
                 // Normal boring directory
                 DirectoryFragment.showDirectory(fm, root, cwd, anim);
-            }
         }
 
         // Forget any replacement target

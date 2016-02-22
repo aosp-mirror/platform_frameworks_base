@@ -37,10 +37,50 @@ public final class Shared {
      * specifies if the destination directory needs to create new directory or not.
      */
     public static final String EXTRA_DIRECTORY_COPY = "com.android.documentsui.DIRECTORY_COPY";
+    public static final String EXTRA_STACK = "com.android.documentsui.STACK";
+
+    /**
+     * Extra flag used to store query of type String in the bundle.
+     */
+    public static final String EXTRA_QUERY = "query";
+
+    /**
+     * Extra flag used to store state of type State in the bundle.
+     */
+    public static final String EXTRA_STATE = "state";
+
+    /**
+     * Extra flag used to store type of DirectoryFragment's type ResultType type in the bundle.
+     */
+    public static final String EXTRA_TYPE = "type";
+
+    /**
+     * Extra flag used to store root of type RootInfo in the bundle.
+     */
+    public static final String EXTRA_ROOT = "root";
+
+    /**
+     * Extra flag used to store document of DocumentInfo type in the bundle.
+     */
+    public static final String EXTRA_DOC = "document";
+
+    /**
+     * Extra flag used to store DirectoryFragment's selection of Selection type in the bundle.
+     */
+    public static final String EXTRA_SELECTION = "selection";
+
+    /**
+     * Extra flag used to store DirectoryFragment's search mode of boolean type in the bundle.
+     */
+    public static final String EXTRA_SEARCH_MODE = "searchMode";
+
+    /**
+     * Extra flag used to store DirectoryFragment's ignore state of boolean type in the bundle.
+     */
+    public static final String EXTRA_IGNORE_STATE = "ignoreState";
 
     public static final boolean DEBUG = true;
     public static final String TAG = "Documents";
-    public static final String EXTRA_STACK = "com.android.documentsui.STACK";
 
 
     /**
