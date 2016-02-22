@@ -453,46 +453,8 @@ public class SyncManager {
                         }
                     }
                 }
-                ensureDefaultPeriodicSyncsH();
             }
         });
-    }
-
-    private void ensureDefaultPeriodicSyncsH() {
-
-        long defaultPeriod = SyncStorageEngine.DEFAULT_POLL_FREQUENCY_SECONDS;
-        long defaultFlex = SyncStorageEngine.calculateDefaultFlexTime(defaultPeriod);
-
-        List<AuthorityInfo> authorities = mSyncStorageEngine.getAllAuthorities();
-        List<SyncOperation> syncs = getAllPendingSyncsFromCache();
-        for (AuthorityInfo authority: authorities) {
-            boolean foundPeriodicSync = false;
-            for (SyncOperation op: syncs) {
-                if (op.isPeriodic && authority.target.matchesSpec(op.target)) {
-                    foundPeriodicSync = true;
-                    break;
-                }
-            }
-            if (!foundPeriodicSync) {
-                EndPoint target = authority.target;
-                final RegisteredServicesCache.ServiceInfo<SyncAdapterType>
-                        syncAdapterInfo = mSyncAdapters.getServiceInfo(
-                        SyncAdapterType.newKey(
-                                target.provider, target.account.type),
-                        target.userId);
-                if (syncAdapterInfo == null) {
-                    continue;
-                }
-                scheduleSyncOperationH(
-                    new SyncOperation(target, syncAdapterInfo.uid,
-                            syncAdapterInfo.componentName.getPackageName(),
-                            SyncOperation.REASON_PERIODIC, SyncStorageEngine.SOURCE_PERIODIC,
-                            new Bundle(), syncAdapterInfo.type.allowParallelSyncs(),
-                            true /* periodic */, SyncOperation.NO_JOB_ID, defaultPeriod * 1000L,
-                            defaultFlex * 1000L)
-                );
-            }
-        }
     }
 
     private synchronized void verifyJobScheduler() {
