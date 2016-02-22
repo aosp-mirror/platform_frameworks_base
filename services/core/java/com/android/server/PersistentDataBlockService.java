@@ -27,6 +27,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.persistentdata.IPersistentDataBlockService;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -72,6 +73,9 @@ public class PersistentDataBlockService extends SystemService {
     private static final int MAX_DATA_BLOCK_SIZE = 1024 * 100;
     public static final int DIGEST_SIZE_BYTES = 32;
     private static final String OEM_UNLOCK_PROP = "sys.oem_unlock_allowed";
+    private static final String FLASH_LOCK_PROP = "ro.boot.flash.locked";
+    private static final String FLASH_LOCK_LOCKED = "1";
+    private static final String FLASH_LOCK_UNLOCKED = "0";
 
     private final Context mContext;
     private final String mDataBlockFile;
@@ -451,6 +455,20 @@ public class PersistentDataBlockService extends SystemService {
         public boolean getOemUnlockEnabled() {
             enforceOemUnlockPermission();
             return doGetOemUnlockEnabled();
+        }
+
+        @Override
+        public int getFlashLockState() {
+            enforceOemUnlockPermission();
+            String locked = SystemProperties.get(FLASH_LOCK_PROP);
+            switch (locked) {
+                case FLASH_LOCK_LOCKED:
+                    return PersistentDataBlockManager.FLASH_LOCK_LOCKED;
+                case FLASH_LOCK_UNLOCKED:
+                    return PersistentDataBlockManager.FLASH_LOCK_UNLOCKED;
+                default:
+                    return PersistentDataBlockManager.FLASH_LOCK_UNKNOWN;
+            }
         }
 
         @Override
