@@ -46,17 +46,14 @@ interface IInputMethodManager {
             in IInputContext inputContext, int uid, int pid);
     void removeClient(in IInputMethodClient client);
 
-    InputBindResult startInput(/* @InputMethodClient.StartInputReason */ int startInputReason,
-            in IInputMethodClient client, IInputContext inputContext, in EditorInfo attribute,
-            int controlFlags);
     void finishInput(in IInputMethodClient client);
     boolean showSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
     boolean hideSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
-    // Report that a window has gained focus.  If 'attribute' is non-null,
-    // this will also do a startInput.
-    InputBindResult windowGainedFocus(
+    // If windowToken is null, this just does startInput().  Otherwise this reports that a window
+    // has gained focus, and if 'attribute' is non-null then also does startInput.
+    InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken, int controlFlags,
             int softInputMode, int windowFlags, in EditorInfo attribute,
