@@ -25,6 +25,9 @@ import static android.content.pm.PackageManager.FEATURE_TELEVISION;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
+import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
@@ -6096,6 +6099,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 outInsets.right = getNavigationBarWidth(displayRotation, mUiMode);
             }
+        }
+    }
+
+    @Override
+    public boolean isDockSideAllowed(int dockSide) {
+
+        // We do not allow all dock sides at which the navigation bar touches the docked stack.
+        if (!mNavigationBarCanMove) {
+            return dockSide == DOCKED_TOP || dockSide == DOCKED_LEFT || dockSide == DOCKED_RIGHT;
+        } else {
+            return dockSide == DOCKED_TOP || dockSide == DOCKED_LEFT;
         }
     }
 
