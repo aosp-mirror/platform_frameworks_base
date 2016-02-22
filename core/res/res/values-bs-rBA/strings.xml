@@ -923,7 +923,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Vrati aplikaciju na zadano i pokreni ponovo"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Pošalji povratne informacije"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zatvori"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Zanemari"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Isključiti zvuk dok se uređaj ponovo ne pokrene"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Sačekaj"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Zatvori aplikaciju"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1061,16 +1061,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Dodirnite za više opcija."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Uređaj za USB otklanjanje grešaka povezan"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dodirnite da biste onemogućili USB otklanjanje grešaka."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Podijeliti izvještaj o grešci?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Dijeljenje izvještaja o grešci..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Vaš IT administrator je zatražio izvještaj o grešci kako bi pomogao riješiti problem na ovom uređaju. To može uzrokovati dijeljenje aplikacija i podataka te privremeno usporiti vaš uređaj."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Vaš IT administrator je zatražio izvještaj o grešci kako bi pomogao u rješavanju problema ovog uređaja. Aplikacije i podaci se mogu dijeliti."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"To može privremeno usporiti vaš uređaj"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"PRIHVATI"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ODBACI"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Promijeni tastaturu"</string>
@@ -1562,8 +1557,8 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> stavke su odabrane</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> stavki je odabrano</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Razno"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Vi postavljate značaj ovih oabvještenja."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Ovo je značajno zbog osoba koje su uključene."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Da li dozvoljate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za nalog <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Da li dozvoljavate da <xliff:g id="APP">%1$s</xliff:g> kreira novog korisnika za <xliff:g id="ACCOUNT">%2$s</xliff:g> (Korisnik sa ovim nalogom već postoji)?"</string>

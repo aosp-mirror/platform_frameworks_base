@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"ऐप रीसेट करें और पुन: प्रारंभ करें"</string>
     <string name="aerr_report" msgid="5371800241488400617">"फ़ीडबैक भेजें"</string>
     <string name="aerr_close" msgid="2991640326563991340">"बंद करें"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"म्यूट करें"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"डिवाइस पुन: प्रारंभ होने तक म्यूट करें"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"प्रतीक्षा करें"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"ऐप बंद करें"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"और विकल्पों के लिए स्पर्श करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डीबग करना अक्षम करने के लिए स्‍पर्श करें."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्ट साझा करें?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्ट साझा की जा रही है…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"इस डिवाइस के समस्या निवारण में सहायता हेतु आपके आईटी व्यवस्थापक ने बग रिपोर्ट के लिए अनुरोध किया है. ऐप्स और डेटा को साझा किया जा सकता है और आपके डिवाइस की गति अस्थायी रूप से धीमी हो सकती है."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"आपके आईटी व्यवस्थापक ने इस डिवाइस के समस्या निवारण में सहायता के लिए एक बग रिपोर्ट का अनुरोध किया है. ऐप्स और डेटा साझा किया जा सकता है."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"इससे आपका डिवाइस अस्थायी रूप से धीमा हो सकता है"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार करें"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार करें"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कीबोर्ड बदलें"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"विविध"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"आपने इन नोटिफिकेशन का महत्व सेट किया है."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"यह मौजूद व्यक्तियों के कारण महत्वपूर्ण है."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> को <xliff:g id="ACCOUNT">%2$s</xliff:g> के द्वारा एक नया उपयोगकर्ता बनाने दें?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> को <xliff:g id="ACCOUNT">%2$s</xliff:g> के द्वारा एक नया उपयोगकर्ता बनाने दें (इस खाते वाला एक उपयोगकर्ता पहले से मौजूद है) ?"</string>

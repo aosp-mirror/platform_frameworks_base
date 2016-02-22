@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"I-reset at i-restart ang app"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Magpadala ng feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Isara"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"I-mute"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"I-mute hanggang sa mag-restart ang device"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Maghintay"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Isara ang app"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Pindutin para sa higit pang mga opsyon."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Konektado ang debugging ng USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Pindutin upang i-disable ang pagde-debug ng USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Gusto mo bang ibahagi ang ulat ng bug?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Ibinabahagi ang ulat ng bug…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Humiling ang iyong IT admin ng isang ulat ng bug upang makatulong sa pag-troubleshoot sa device na ito. Maaaring ibahagi ang mga app at data at maaaring pansamantalang bumagal ang iyong device."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Humiling ang iyong IT admin ng isang ulat ng bug upang makatulong sa pag-troubleshoot sa device na ito. Maaaring ibahagi ang mga app at data."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Maaaring pansamantalang bumagal ang iyong device dahil dito"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"TANGGAPIN"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"TANGGIHAN"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Baguhin ang keyboard"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Iba Pa"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Ikaw ang magtatakda ng kahalagahan ng mga notification na ito."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Mahalaga ito dahil sa mga taong kasangkot."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Payagan ang <xliff:g id="APP">%1$s</xliff:g> na gumawa ng bagong User sa <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Payagan ang <xliff:g id="APP">%1$s</xliff:g> na gumawa ng bagong User sa <xliff:g id="ACCOUNT">%2$s</xliff:g> (mayroon nang User sa account na ito) ?"</string>

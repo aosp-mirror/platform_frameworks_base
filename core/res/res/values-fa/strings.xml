@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"بازنشانی و راه‌اندازی مجدد برنامه"</string>
     <string name="aerr_report" msgid="5371800241488400617">"ارسال بازخورد"</string>
     <string name="aerr_close" msgid="2991640326563991340">"بستن"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"بی‌صدا کردن"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"صامت کردن تا وقتی دستگاه راه‌اندازی مجدد شود"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"انتظار"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"بستن برنامه"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"برای گزینه‌های بیشتر لمس کنید."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"‏اشکال‌زدایی USB متصل شد"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"‏غیرفعال‌کردن اشکال‌زدایی‌USB: با لمس آن."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"گزارش اشکال به اشتراک گذاشته شود؟"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"درحال اشتراک‌گذاری گزارش اشکال…‏"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"سرپرست فناوری اطلاعات شما برای کمک به عیب‌یابی این دستگاه، درخواست گزارش اشکال کرده است. ممکن است برنامه‌ها و داده‌ها به اشتراک گذاشته شوند و سرعت دستگاهتان به‌طور موقت کاهش یابد."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"سرپرست فناوری اطلاعات شما برای کمک به عیب‌یابی این دستگاه، گزارش اشکال درخواست کرده است. ممکن است برنامه‌ها و داده‌ها به اشتراک گذاشته شوند."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"ممکن است سرعت دستگاهتان به‌طور موقت کاهش یابد"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"پذیرفتن"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"نپذیرفتن"</string>
     <string name="select_input_method" msgid="8547250819326693584">"تغییر صفحه‌کلید"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="one">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
       <item quantity="other">‏<xliff:g id="COUNT_1">%1$d</xliff:g> انتخاب شد</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"متفرقه"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"شما اهمیت این اعلان‌ها را تنظیم می‌کنید."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"به دلیل افراد درگیر مهم است."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> اضافه کند؟"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"به <xliff:g id="APP">%1$s</xliff:g> امکان داده شود کاربر جدیدی با <xliff:g id="ACCOUNT">%2$s</xliff:g> ایجاد کند (کاربری با این حساب از قبل وجود دارد)؟"</string>

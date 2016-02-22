@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Reimposta e riavvia app"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Invia feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Chiudi"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Disattiva"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Disattiva fino al riavvio del dispositivo"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Attendi"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Chiudi app"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Tocca per visualizzare più opzioni."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Debug USB collegato"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tocca per disattivare il debug USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Condividere la segnalazione di bug?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Condivisione della segnalazione di bug…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"L\'amministratore IT ha richiesto una segnalazione di bug per poter risolvere più facilmente i problemi di questo dispositivo. Potrebbero essere condivisi dati e app e il dispositivo potrebbe rallentare temporaneamente."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"L\'amministratore IT ha richiesto una segnalazione di bug per poter risolvere più facilmente i problemi di questo dispositivo. Potrebbero essere condivisi dati e app."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Il dispositivo potrebbe rallentare temporaneamente"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCETTO"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RIFIUTO"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Cambia tastiera"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> elementi selezionati</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> elemento selezionato</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Vari"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Stabilisci tu l\'importanza di queste notifiche."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Importante a causa delle persone coinvolte."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Consentire a <xliff:g id="APP">%1$s</xliff:g> di creare un nuovo utente con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Esiste già un utente con questo account)"</string>

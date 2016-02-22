@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Վերակայել և վերագործարկել հավելվածը"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Ուղարկել կարծիք"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Փակել"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Անջատել ձայնը"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Անջատել ձայնը մինչև սարքի վերագործարկումը"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Սպասել"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Փակել հավելվածը"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,13 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Հպեք՝ լրացուցիչ ընտրանքների համար:"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB վրիպազերծումը միացված է"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Հպեք` USB կարգաբերումը կասեցնելու համար:"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Տրամադրե՞լ վրիպակի զեկույցը:"</string>
+    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
     <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
+    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
     <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Այս սարքի անսարքությունների վերացման նպատակով ձեր ՏՏ ադմինիստրատորին անհրաժեշտ է վրիպակի զեկույց: Կարող են տրամադրվել տեղեկություններ ձեր հավելվածներնի մասին և այլ տվյալներ:"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Այդ ընթացքում ձեր սարքի աշխատանքը կարող է դանդաղել"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ԸՆԴՈՒՆԵԼ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ՄԵՐԺԵԼ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Փոխել ստեղնաշարը"</string>
@@ -1543,8 +1540,8 @@
       <item quantity="one">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Զանազան"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Դուք սահմանել եք այս ծանուցումների կարևորությունը:"</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Կարևոր է, քանի որ որոշակի մարդիկ են ներգրավված:"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտվող ստեղծել:"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտվող ստեղծել (նման հաշվով Օգտվող արդեն գոյություն ունի):"</string>

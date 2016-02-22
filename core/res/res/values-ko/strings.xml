@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"앱 재설정 및 다시 시작"</string>
     <string name="aerr_report" msgid="5371800241488400617">"의견 보내기"</string>
     <string name="aerr_close" msgid="2991640326563991340">"닫기"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"숨기기"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"기기가 다시 시작될 때까지 알림 끄기"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"대기"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"앱 닫기"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"더 많은 옵션을 확인하려면 터치하세요."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB 디버깅 연결됨"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB 디버깅을 사용하지 않으려면 터치하세요."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"버그 보고서를 공유하시겠습니까?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"버그 신고서 공유 중..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IT 관리자가 이 기기의 문제해결을 위해 버그 신고서를 요청했습니다. 앱과 데이터가 공유될 수 있으며 기기 속도가 일시적으로 느려질 수 있습니다."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IT 관리자가 이 기기의 문제해결을 위해 버그 보고서를 요청했습니다. 앱과 데이터가 공유될 수 있습니다."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"이로 인해 일시적으로 기기 속도가 느려질 수 있습니다."</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"수락"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"거절"</string>
     <string name="select_input_method" msgid="8547250819326693584">"키보드 변경"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>개 선택됨</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"기타"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"이러한 알림의 중요도를 설정했습니다."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(이 계정의 사용자가 이미 있음)(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>

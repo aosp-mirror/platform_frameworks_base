@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Återställ och starta om appen"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Skicka feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Stäng"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Dölj"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Ignorera tills enheten har startat om"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Vänta"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Stäng appen"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Visa fler alternativ genom att trycka."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Tryck om du vill inaktivera USB-felsökning."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Felrapporten delas …"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IT-administratören har bett om en felrapport som hjälp vid felsökningen av den här enheten. Appar och data kan komma att delas. Detta kan tillfälligt göra enheten långsammare."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IT-administratören har bett om en felrapport som hjälp vid felsökningen av den här enheten. Appar och data kan komma att delas."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Detta kan tillfälligt göra enheten långsammare"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"GODKÄNN"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"AVVISA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Byt tangentbord"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> har valts</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> har valts</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Diverse"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Du anger hur viktiga aviseringarna är."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Detta är viktigt på grund av personerna som deltar."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g> (det finns redan en användare med det här kontot)?"</string>

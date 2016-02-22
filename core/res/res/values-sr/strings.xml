@@ -923,7 +923,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Ресетуј и поново покрени апликацију"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Пошаљите повратне информације"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Затвори"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Игнориши"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Игнориши док се уређај не покрене поново"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Чекај"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Затвори апликацију"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1061,16 +1061,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Додирните за још опција."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Отклањање грешака са USB-а је успостављено"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Додирните да бисте онемогућили отклањање грешака са USB-а."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Желите ли да поделите извештај о грешци?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Дели се извештај о грешци…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"ИТ администратор је затражио извештај о грешци ради лакшег решавања проблема у вези са овим уређајем. Апликације и подаци могу да се деле, а уређај ће се привремено успорити."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"ИТ администратор је затражио извештај о грешци ради лакшег решавања проблема у вези са овим уређајем. Апликације и подаци могу да се деле."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Ово ће привремено успорити уређај"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ПРИХВАТИ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ОДБИЈ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Промените тастатуру"</string>
@@ -1562,8 +1557,8 @@
       <item quantity="few">Изабране су <xliff:g id="COUNT_1">%1$d</xliff:g> ставке</item>
       <item quantity="other">Изабрано је <xliff:g id="COUNT_1">%1$d</xliff:g> ставки</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Разно"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Ви подешавате важност ових обавештења."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Ово је важно због људи који учествују."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g> (корисник са овим налогом већ постоји)?"</string>

@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Restableix i reinicia l\'aplicació"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Envia suggeriments"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Tanca"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Silencia"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Silencia fins que es reiniciï el dispositiu"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Espera"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Tanca l\'aplicació"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Toca per veure més opcions."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca per desactivar la depuració USB"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vols compartir l\'informe d\'errors?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"S\'està compartint l\'informe d\'errors…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"L\'administrador de TI ha sol·licitat un informe d\'errors per resoldre els problemes d\'aquest dispositiu. És possible que es comparteixin aplicacions i dades, i que el dispositiu funcioni més a poc a poc durant una estona."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"El teu administrador de TI ha sol·licitat un informe d\'errors per resoldre els problemes d\'aquest dispositiu. És possible que es comparteixin aplicacions i dades."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"És possible que el dispositiu funcioni més a poc a poc durant una estona"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPTA"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REBUTJA"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Canvia el teclat"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="other">Seleccionats: <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Seleccionats: <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Altres"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Tu has definit la importància d\'aquestes notificacions."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Aquest missatge és important per les persones implicades."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ja hi ha un usuari amb aquest compte.)"</string>

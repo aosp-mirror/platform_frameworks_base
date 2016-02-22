@@ -929,7 +929,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Obnovit a restartovat aplikaci"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Odeslat zpětnou vazbu"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Zavřít"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Ignorovat"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Ignorovat do restartu zařízení"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Počkat"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Zavřít aplikaci"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1069,16 +1069,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Klepnutím zobrazíte další možnosti."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ladění přes USB připojeno"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotykem zakážete ladění USB."</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Sdílet zprávu o chybě?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Sdílení zprávy o chybě…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Administrátor IT si vyžádal zprávu o chybě, aby mohl problém odstranit. Mohou být sdíleny aplikace a data a zařízení se může dočasně zpomalit."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administrátor IT si vyžádal zprávu o chybě, aby mohl problém odstranit. Aplikace a data mohou být sdílena."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Zařízení se může dočasně zpomalit"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"PŘIJMOUT"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ODMÍTNOUT"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Změna klávesnice"</string>
@@ -1581,8 +1576,8 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> položek</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> položka</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Různé"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Důležitost oznámení určujete vy."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Tato zpráva je důležitá kvůli lidem zapojeným do konverzace."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Povolit aplikaci <xliff:g id="APP">%1$s</xliff:g> vytvořit nového uživatele s účtem <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Povolit aplikaci <xliff:g id="APP">%1$s</xliff:g> vytvořit nového uživatele s účtem <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Uživatel s tímto účtem již existuje.)"</string>

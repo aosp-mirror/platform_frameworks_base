@@ -917,7 +917,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Réinitialiser et redémarrer l\'application"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Envoyer des commentaires"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Fermer"</string>
-    <string name="aerr_mute" msgid="7698966346654789433">"Ignorer"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Ignorer jusqu\'au redémarrage de l\'appareil"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Attendre"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Fermer l\'application"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1053,16 +1053,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"Appuyez pour afficher plus d\'options"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Appuyez pour désact. débogage USB"</string>
-    <!-- no translation found for share_remote_bugreport_notification_title (4987095013583691873) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7692523022154791488) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (8643704339578372992) -->
-    <skip />
-    <!-- no translation found for share_finished_remote_bugreport_notification_message (4627312060769912353) -->
-    <skip />
-    <!-- no translation found for sharing_remote_bugreport_notification_message (673106383408474893) -->
-    <skip />
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Partage du rapport de bug…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Votre administrateur informatique a demandé un rapport de bug pour l\'aider à résoudre le problème lié à cet appareil. Il est possible que des applications et des données soient partagées et que votre appareil ralentisse temporairement."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Votre administrateur informatique a demandé un rapport de bug pour l\'aider à résoudre le problème lié à cet appareil. Il est possible que des applications et des données soient partagées."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Ceci risque de ralentir temporairement votre appareil."</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ACCEPTER"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"REFUSER"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Changer de clavier"</string>
@@ -1543,8 +1538,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> élément sélectionné</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> éléments sélectionnés</item>
     </plurals>
-    <string name="default_notification_topic_label" msgid="227586145791870829">"Divers"</string>
-    <string name="importance_from_topic" msgid="3572280439880023233">"Vous définissez l\'importance de ces notifications."</string>
+    <!-- no translation found for importance_from_user (7318955817386549931) -->
+    <skip />
     <string name="importance_from_person" msgid="9160133597262938296">"Ces notifications sont importantes en raison des participants."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> (un utilisateur associé à ce compte existe déjà) ?"</string>
