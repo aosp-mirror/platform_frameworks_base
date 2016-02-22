@@ -109,6 +109,35 @@ public class IpManager extends StateMachine {
         public void onQuit() {}
     }
 
+    public static class WaitForProvisioningCallback extends Callback {
+        private LinkProperties mCallbackLinkProperties;
+
+        public LinkProperties waitForProvisioning() {
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {}
+                return mCallbackLinkProperties;
+            }
+        }
+
+        @Override
+        public void onProvisioningSuccess(LinkProperties newLp) {
+            synchronized (this) {
+                mCallbackLinkProperties = newLp;
+                notify();
+            }
+        }
+
+        @Override
+        public void onProvisioningFailure(LinkProperties newLp) {
+            synchronized (this) {
+                mCallbackLinkProperties = null;
+                notify();
+            }
+        }
+    }
+
     /**
      * This class encapsulates parameters to be passed to
      * IpManager#startProvisioning(). A defensive copy is made by IpManager
