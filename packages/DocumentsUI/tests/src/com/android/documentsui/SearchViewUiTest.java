@@ -24,61 +24,59 @@ import android.test.suitebuilder.annotation.LargeTest;
 @LargeTest
 public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
-    private static final String TAG = "SearchViewUiTest";
-
     public SearchViewUiTest() {
         super(FilesActivity.class);
     }
 
     public void testSearchView_ExpandsOnClick() throws Exception {
-        bot.openSearchView();
-        bot.assertSearchTextFiledAndIcon(true, false);
+        bots.main.openSearchView();
+        bots.main.assertSearchTextFiledAndIcon(true, false);
     }
 
     public void testSearchView_CollapsesOnBack() throws Exception {
-        bot.openSearchView();
+        bots.main.openSearchView();
 
         device.pressBack();
 
-        bot.assertSearchTextFiledAndIcon(false, true);
+        bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
     public void testSearchView_ClearsTextOnBack() throws Exception {
         String query = "file2";
-        bot.openSearchView();
-        bot.setSearchQuery(query);
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
 
         device.pressBack();
 
-        bot.assertSearchTextFiledAndIcon(false, true);
+        bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
     public void testSearch_ResultsFound() throws Exception {
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = "file1";
-        bot.openSearchView();
-        bot.setSearchQuery(query);
-        bot.assertSearchTextField(true, query);
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
+        bots.main.assertSearchTextField(true, query);
 
         device.pressEnter();
 
-        bot.assertDocumentsCountOnList(true, 2);
-        bot.assertHasDocuments(fileName1, fileName2);
+        bots.directory.assertDocumentsCountOnList(true, 2);
+        bots.directory.assertDocumentsPresent(fileName1, fileName2);
 
-        bot.assertSearchTextField(false, query);
+        bots.main.assertSearchTextField(false, query);
     }
 
     public void testSearchResultsFound_ClearsOnBack() throws Exception {
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = fileName1;
-        bot.openSearchView();
-        bot.setSearchQuery(query);
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
 
         device.pressEnter();
         device.pressBack();
@@ -88,32 +86,32 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearch_NoResults() throws Exception {
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = "chocolate";
-        bot.openSearchView();
-        bot.setSearchQuery(query);
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
 
         device.pressEnter();
 
-        bot.assertDocumentsCountOnList(false, 0);
+        bots.directory.assertDocumentsCountOnList(false, 0);
 
         device.waitForIdle();
         String msg = String.valueOf(context.getString(R.string.no_results));
-        bot.assertMessageTextView(String.format(msg, "TEST_ROOT_0"));
+        bots.directory.assertMessageTextView(String.format(msg, "TEST_ROOT_0"));
 
-        bot.assertSearchTextField(false, query);
+        bots.main.assertSearchTextField(false, query);
     }
 
     public void testSearchNoResults_ClearsOnBack() throws Exception {
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = "chocolate";
-        bot.openSearchView();
-        bot.setSearchQuery(query);
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
 
         device.pressEnter();
         device.pressBack();
@@ -124,30 +122,30 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = fileName1;
-        bot.openSearchView();
-        bot.setSearchQuery(query);
+        bots.main.openSearchView();
+        bots.main.setSearchQuery(query);
 
         device.pressEnter();
 
-        bot.openRoot(ROOT_1_ID);
+        bots.roots.openRoot(ROOT_1_ID);
         assertDefaultContentOfTestDir1();
 
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
     }
 
     public void testSearchIconVisible_RootWithSearchSupport() throws Exception {
-        bot.openRoot(ROOT_0_ID);
-        bot.assertSearchTextFiledAndIcon(false, true);
+        bots.roots.openRoot(ROOT_0_ID);
+        bots.main.assertSearchTextFiledAndIcon(false, true);
     }
 
     public void testSearchIconHidden_RootNoSearchSupport() throws Exception {
-        bot.openRoot(ROOT_1_ID);
-        bot.assertSearchTextFiledAndIcon(false, false);
+        bots.roots.openRoot(ROOT_1_ID);
+        bots.main.assertSearchTextFiledAndIcon(false, false);
     }
 
 }

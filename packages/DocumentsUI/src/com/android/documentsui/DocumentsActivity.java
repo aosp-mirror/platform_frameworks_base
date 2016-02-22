@@ -23,6 +23,7 @@ import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
 import static com.android.documentsui.State.ACTION_PICK_COPY_DESTINATION;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
+import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -314,6 +315,12 @@ public class DocumentsActivity extends BaseActivity {
     void onSaveRequested(DocumentInfo replaceTarget) {
         new ExistingFinishTask(this, replaceTarget.derivedUri)
                 .executeOnExecutor(getExecutorForCurrentDirectory());
+    }
+
+    @Override
+    void onDirectoryCreated(DocumentInfo doc) {
+        checkArgument(doc.isDirectory());
+        openContainerDocument(doc);
     }
 
     void onSaveRequested(String mimeType, String displayName) {

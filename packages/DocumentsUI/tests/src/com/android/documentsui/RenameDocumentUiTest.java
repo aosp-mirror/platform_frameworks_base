@@ -23,8 +23,6 @@ import android.test.suitebuilder.annotation.LargeTest;
 @LargeTest
 public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
 
-    private static final String TAG = "RenamDocumentUiTest";
-
     private final String newName = "kitties.log";
 
     public RenameDocumentUiTest() {
@@ -35,125 +33,119 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
     public void setUp() throws Exception {
         super.setUp();
         initTestFiles();
-        bot.openRoot(ROOT_0_ID);
+        bots.roots.openRoot(ROOT_0_ID);
     }
 
     public void testRenameEnabled_SingleSelection() throws Exception {
-        bot.selectDocument(fileName1);
-        bot.openOverflowMenu();
-        bot.assertMenuEnabled(R.string.menu_rename, true);
+        bots.directory.selectDocument(fileName1);
+        bots.main.openOverflowMenu();
+        bots.main.assertMenuEnabled(R.string.menu_rename, true);
 
         // Dismiss more options window
         device.pressBack();
     }
 
     public void testNoRenameSupport_SingleSelection() throws Exception {
-        bot.selectDocument(fileNameNoRename);
-        bot.openOverflowMenu();
-        bot.assertMenuEnabled(R.string.menu_rename, false);
+        bots.directory.selectDocument(fileNameNoRename);
+        bots.main.openOverflowMenu();
+        bots.main.assertMenuEnabled(R.string.menu_rename, false);
 
         // Dismiss more options window
         device.pressBack();
     }
 
     public void testOneHasRenameSupport_MultipleSelection() throws Exception {
-        bot.selectDocument(fileName1);
-        bot.selectDocument(fileNameNoRename);
-        bot.openOverflowMenu();
-        bot.assertMenuEnabled(R.string.menu_rename, false);
+        bots.directory.selectDocument(fileName1);
+        bots.directory.selectDocument(fileNameNoRename);
+        bots.main.openOverflowMenu();
+        bots.main.assertMenuEnabled(R.string.menu_rename, false);
 
         // Dismiss more options window
         device.pressBack();
     }
 
     public void testRenameDisabled_MultipleSelection() throws Exception {
-        bot.selectDocument(fileName1);
-        bot.selectDocument(fileName2);
-        bot.openOverflowMenu();
-        bot.assertMenuEnabled(R.string.menu_rename, false);
+        bots.directory.selectDocument(fileName1);
+        bots.directory.selectDocument(fileName2);
+        bots.main.openOverflowMenu();
+        bots.main.assertMenuEnabled(R.string.menu_rename, false);
 
         // Dismiss more options window
         device.pressBack();
     }
 
     public void testRenameFile_OkButton() throws Exception {
-        bot.selectDocument(fileName1);
-        bot.openOverflowMenu();
-        bot.openDialog(R.string.menu_rename);
-        bot.setDialogText(newName);
+        bots.directory.selectDocument(fileName1);
+        bots.main.openOverflowMenu();
+        bots.main.menuRename().click();
+        bots.main.setDialogText(newName);
 
         device.waitForIdle(TIMEOUT);
-        bot.findRenameDialogOkButton().click();
+        bots.main.findRenameDialogOkButton().click();
         device.waitForIdle(TIMEOUT);
 
-        bot.assertDocument(fileName1, false);
-        bot.assertDocument(newName, true);
-        bot.assertDocumentsCount(4);
+        bots.directory.assertDocumentsAbsent(fileName1);
+        bots.directory.assertDocumentsPresent(newName);
+        bots.directory.assertDocumentsCount(4);
     }
 
     public void testRenameFile_Enter() throws Exception {
-        bot.selectDocument(fileName1);
-        bot.openOverflowMenu();
-        bot.openDialog(R.string.menu_rename);
-        bot.setDialogText(newName);
+        bots.directory.selectDocument(fileName1);
+        bots.main.openOverflowMenu();
+        bots.main.menuRename().click();
+        bots.main.setDialogText(newName);
 
-        pressEnter();
+        bots.keyboard.pressEnter();
 
-        bot.assertDocument(fileName1, false);
-        bot.assertDocument(newName, true);
-        bot.assertDocumentsCount(4);
+        bots.directory.assertDocumentsAbsent(fileName1);
+        bots.directory.assertDocumentsPresent(newName);
+        bots.directory.assertDocumentsCount(4);
     }
 
     public void testRenameFile_Cancel() throws Exception {
-        bot.selectDocument(fileName1);
-        bot.openOverflowMenu();
-        bot.openDialog(R.string.menu_rename);
-        bot.setDialogText(newName);
+        bots.directory.selectDocument(fileName1);
+        bots.main.openOverflowMenu();
+        bots.main.menuRename().click();
+        bots.main.setDialogText(newName);
 
         device.waitForIdle(TIMEOUT);
-        bot.findRenameDialogCancelButton().click();
+        bots.main.findRenameDialogCancelButton().click();
         device.waitForIdle(TIMEOUT);
 
-        bot.assertDocument(fileName1, true);
-        bot.assertDocument(newName, false);
-        bot.assertDocumentsCount(4);
+        bots.directory.assertDocumentsPresent(fileName1);
+        bots.directory.assertDocumentsAbsent(newName);
+        bots.directory.assertDocumentsCount(4);
     }
 
     public void testRenameDir() throws Exception {
         String oldName = "Dir1";
         String newName = "Dir123";
 
-        bot.selectDocument(oldName);
-        bot.openOverflowMenu();
-        bot.openDialog(R.string.menu_rename);
-        bot.setDialogText(newName);
+        bots.directory.selectDocument(oldName);
+        bots.main.openOverflowMenu();
+        bots.main.menuRename().click();
+        bots.main.setDialogText(newName);
 
-        pressEnter();
+        bots.keyboard.pressEnter();
 
-        bot.assertDocument(oldName, false);
-        bot.assertDocument(newName, true);
-        bot.assertDocumentsCount(4);
+        bots.directory.assertDocumentsAbsent(oldName);
+        bots.directory.assertDocumentsPresent(newName);
+        bots.directory.assertDocumentsCount(4);
     }
 
     public void testRename_NameExists() throws Exception {
         // Check that document with the new name exists
-        bot.assertDocument(fileName2, true);
-        bot.selectDocument(fileName1);
-        bot.openOverflowMenu();
-        bot.openDialog(R.string.menu_rename);
-        bot.setDialogText(fileName2);
+        bots.directory.assertDocumentsPresent(fileName2);
+        bots.directory.selectDocument(fileName1);
+        bots.main.openOverflowMenu();
+        bots.main.menuRename().click();
+        bots.main.setDialogText(fileName2);
 
-        pressEnter();
+        bots.keyboard.pressEnter();
 
-        bot.assertSnackbar(R.string.rename_error);
-        bot.assertDocument(fileName1, true);
-        bot.assertDocument(fileName2, true);
-        bot.assertDocumentsCount(4);
-    }
-
-    private void pressEnter() {
-        device.waitForIdle(TIMEOUT);
-        device.pressEnter();
-        device.waitForIdle(TIMEOUT);
+        bots.directory.assertSnackbar(R.string.rename_error);
+        bots.directory.assertDocumentsPresent(fileName1);
+        bots.directory.assertDocumentsPresent(fileName2);
+        bots.directory.assertDocumentsCount(4);
     }
 }

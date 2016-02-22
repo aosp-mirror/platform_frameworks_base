@@ -317,6 +317,12 @@ public abstract class BaseActivity extends Activity
         CreateDirectoryFragment.show(getFragmentManager());
     }
 
+    void onDirectoryCreated(DocumentInfo doc) {
+        // By default we do nothing, just let the new directory appear.
+        // DocumentsActivity auto-opens directories after creating them
+        // As that is more attuned to the "picker" use cases it supports.
+    }
+
     /**
      * Returns true if a directory can be created in the current location.
      * @return
@@ -329,11 +335,6 @@ public abstract class BaseActivity extends Activity
                 && !mSearchManager.isSearching()
                 && !root.isRecents()
                 && !root.isDownloads();
-    }
-
-    void onDirectoryCreated(DocumentInfo doc) {
-        checkArgument(doc.isDirectory());
-        openContainerDocument(doc);
     }
 
     void openContainerDocument(DocumentInfo doc) {
