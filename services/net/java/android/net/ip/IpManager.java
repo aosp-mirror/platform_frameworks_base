@@ -24,6 +24,7 @@ import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
+import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
 import android.net.dhcp.DhcpClient;
@@ -31,6 +32,7 @@ import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -63,6 +65,9 @@ import java.util.Objects;
 public class IpManager extends StateMachine {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
+
+    private static final boolean NO_CALLBACKS = false;
+    private static final boolean SEND_CALLBACKS = true;
 
     // For message logging.
     private static final Class[] sMessageClasses = { IpManager.class, DhcpClient.class };
@@ -168,6 +173,8 @@ public class IpManager extends StateMachine {
     private static final int EVENT_PRE_DHCP_ACTION_COMPLETE = 4;
     // Sent by NetlinkTracker to communicate netlink events.
     private static final int EVENT_NETLINK_LINKPROPERTIES_CHANGED = 5;
+    private static final int CMD_UPDATE_TCP_BUFFER_SIZES = 6;
+    private static final int CMD_UPDATE_HTTP_PROXY = 7;
 
     private static final int MAX_LOG_RECORDS = 1000;
 
@@ -189,10 +196,12 @@ public class IpManager extends StateMachine {
     /**
      * Non-final member variables accessed only from within our StateMachine.
      */
+    private ProvisioningConfiguration mConfiguration;
     private IpReachabilityMonitor mIpReachabilityMonitor;
     private DhcpClient mDhcpClient;
     private DhcpResults mDhcpResults;
-    private ProvisioningConfiguration mConfiguration;
+    private String mTcpBufferSizes;
+    private ProxyInfo mHttpProxy;
 
     /**
      * Member variables accessed both from within the StateMachine thread
@@ -301,6 +310,26 @@ public class IpManager extends StateMachine {
         sendMessage(EVENT_PRE_DHCP_ACTION_COMPLETE);
     }
 
+    /**
+     * Set the TCP buffer sizes to use.
+     *
+     * This may be called, repeatedly, at any time before or after a call to
+     * #startProvisioning(). The setting is cleared upon calling #stop().
+     */
+    public void setTcpBufferSizes(String tcpBufferSizes) {
+        sendMessage(CMD_UPDATE_TCP_BUFFER_SIZES, tcpBufferSizes);
+    }
+
+    /**
+     * Set the HTTP Proxy configuration to use.
+     *
+     * This may be called, repeatedly, at any time before or after a call to
+     * #startProvisioning(). The setting is cleared upon calling #stop().
+     */
+    public void setHttpProxy(ProxyInfo proxyInfo) {
+        sendMessage(CMD_UPDATE_HTTP_PROXY, proxyInfo);
+    }
+
     public LinkProperties getLinkProperties() {
         synchronized (mLock) {
             return new LinkProperties(mLinkProperties);
@@ -344,8 +373,10 @@ public class IpManager extends StateMachine {
     // assigned to the interface, etc.
     private void resetLinkProperties() {
         mNetlinkTracker.clearLinkProperties();
-        mDhcpResults = null;
         mConfiguration = null;
+        mDhcpResults = null;
+        mTcpBufferSizes = "";
+        mHttpProxy = null;
 
         synchronized (mLock) {
             mLinkProperties = new LinkProperties();
@@ -502,11 +533,31 @@ public class IpManager extends StateMachine {
             newLp.setDomains(mDhcpResults.domains);
         }
 
+        // [4] Add in TCP buffer sizes and HTTP Proxy config, if available.
+        if (!TextUtils.isEmpty(mTcpBufferSizes)) {
+            newLp.setTcpBufferSizes(mTcpBufferSizes);
+        }
+        if (mHttpProxy != null) {
+            newLp.setHttpProxy(mHttpProxy);
+        }
+
         if (VDBG) {
             Log.d(mTag, "newLp{" + newLp + "}");
         }
-
         return newLp;
+    }
+
+    // Returns false if we have lost provisioning, true otherwise.
+    private boolean handleLinkPropertiesUpdate(boolean sendCallbacks) {
+        final LinkProperties newLp = assembleLinkProperties();
+        if (linkPropertiesUnchanged(newLp)) {
+            return true;
+        }
+        final ProvisioningChange delta = setLinkProperties(newLp);
+        if (sendCallbacks) {
+            dispatchCallback(delta, newLp);
+        }
+        return (delta != ProvisioningChange.LOST_PROVISIONING);
     }
 
     private void clearIPv4Address() {
@@ -587,7 +638,17 @@ public class IpManager extends StateMachine {
                     break;
 
                 case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
-                    setLinkProperties(assembleLinkProperties());
+                    handleLinkPropertiesUpdate(NO_CALLBACKS);
+                    break;
+
+                case CMD_UPDATE_TCP_BUFFER_SIZES:
+                    mTcpBufferSizes = (String) msg.obj;
+                    handleLinkPropertiesUpdate(NO_CALLBACKS);
+                    break;
+
+                case CMD_UPDATE_HTTP_PROXY:
+                    mHttpProxy = (ProxyInfo) msg.obj;
+                    handleLinkPropertiesUpdate(NO_CALLBACKS);
                     break;
 
                 case DhcpClient.CMD_ON_QUIT:
@@ -718,18 +779,23 @@ public class IpManager extends StateMachine {
                     }
                     break;
 
-                case EVENT_NETLINK_LINKPROPERTIES_CHANGED: {
-                    final LinkProperties newLp = assembleLinkProperties();
-                    if (linkPropertiesUnchanged(newLp)) {
-                        break;
-                    }
-                    final ProvisioningChange delta = setLinkProperties(newLp);
-                    dispatchCallback(delta, newLp);
-                    if (delta == ProvisioningChange.LOST_PROVISIONING) {
+                case EVENT_NETLINK_LINKPROPERTIES_CHANGED:
+                    if (!handleLinkPropertiesUpdate(SEND_CALLBACKS)) {
                         transitionTo(mStoppedState);
                     }
                     break;
-                }
+
+                case CMD_UPDATE_TCP_BUFFER_SIZES:
+                    mTcpBufferSizes = (String) msg.obj;
+                    // This cannot possibly change provisioning state.
+                    handleLinkPropertiesUpdate(SEND_CALLBACKS);
+                    break;
+
+                case CMD_UPDATE_HTTP_PROXY:
+                    mHttpProxy = (ProxyInfo) msg.obj;
+                    // This cannot possibly change provisioning state.
+                    handleLinkPropertiesUpdate(SEND_CALLBACKS);
+                    break;
 
                 case DhcpClient.CMD_PRE_DHCP_ACTION:
                     if (VDBG) { Log.d(mTag, "onPreDhcpAction()"); }
