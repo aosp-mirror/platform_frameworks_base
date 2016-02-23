@@ -344,28 +344,6 @@
         <item>midi</item>
     </string-array>
 
-    <!-- Possible values for user theme in Display Settings.
-         Do not translate. -->
-    <string-array name="night_mode_entries" translatable="false">
-        <!-- Do not translate. -->
-        <item>@string/night_mode_no</item>
-        <!-- Do not translate. -->
-        <item>@string/night_mode_yes</item>
-        <!-- Do not translate. -->
-        <item>@string/night_mode_auto</item>
-    </string-array>
-
-    <!-- These values should match up with the MODE_NIGHT constants in UiModeManager.
-         Do not translate. -->
-    <string-array name="night_mode_values" translatable="false">
-        <!-- Do not translate. -->
-        <item>1</item>
-        <!-- Do not translate. -->
-        <item>2</item>
-        <!-- Do not translate. -->
-        <item>0</item>
-    </string-array>
-
     <!-- Display color space adjustment modes for developers -->
     <string-array name="simulate_color_space_entries" translatable="false">
         <item>@string/daltonizer_mode_disabled</item>
