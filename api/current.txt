@@ -19706,12 +19706,14 @@ package android.media {
     field public static final int TYPE_WIRED_HEADSET = 3; // 0x3
   }
 
-  public class AudioFormat {
+  public class AudioFormat implements android.os.Parcelable {
+    method public int describeContents();
     method public int getChannelCount();
     method public int getChannelIndexMask();
     method public int getChannelMask();
     method public int getEncoding();
     method public int getSampleRate();
+    method public void writeToParcel(android.os.Parcel, int);
     field public static final deprecated int CHANNEL_CONFIGURATION_DEFAULT = 1; // 0x1
     field public static final deprecated int CHANNEL_CONFIGURATION_INVALID = 0; // 0x0
     field public static final deprecated int CHANNEL_CONFIGURATION_MONO = 2; // 0x2
@@ -19753,6 +19755,7 @@ package android.media {
     field public static final int CHANNEL_OUT_SIDE_RIGHT = 4096; // 0x1000
     field public static final int CHANNEL_OUT_STEREO = 12; // 0xc
     field public static final int CHANNEL_OUT_SURROUND = 1052; // 0x41c
+    field public static final android.os.Parcelable.Creator<android.media.AudioFormat> CREATOR;
     field public static final int ENCODING_AC3 = 5; // 0x5
     field public static final int ENCODING_DEFAULT = 1; // 0x1
     field public static final int ENCODING_DTS = 7; // 0x7
