@@ -3879,7 +3879,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public boolean onMenuPressed() {
-        return mState == StatusBarState.KEYGUARD && mStatusBarKeyguardViewManager.onMenuPressed();
+        if (mDeviceInteractive && mState != StatusBarState.SHADE
+                && mStatusBarKeyguardViewManager.shouldDismissOnMenuPressed()) {
+            animateCollapsePanels(
+                    CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
+            return true;
+        }
+        return false;
     }
 
     public void endAffordanceLaunch() {
