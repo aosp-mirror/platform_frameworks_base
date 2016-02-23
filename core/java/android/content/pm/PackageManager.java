@@ -1573,6 +1573,48 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: If this feature is supported, the Vulkan native API will enumerate
+     * at least one {@code VkPhysicalDevice}, and the feature version will indicate what
+     * level of optional hardware features limits it supports.
+     * <p>
+     * Level 0 includes the base Vulkan requirements as well as:
+     * <ul><li>{@code VkPhysicalDeviceFeatures::textureCompressionETC2}</li></ul>
+     * <p>
+     * Level 1 additionally includes:
+     * <ul>
+     * <li>{@code VkPhysicalDeviceFeatures::fullDrawIndexUint32}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::imageCubeArray}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::independentBlend}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::geometryShader}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::tessellationShader}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::sampleRateShading}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::textureCompressionASTC_LDR}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::fragmentStoresAndAtomics}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::shaderImageGatherExtended}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::shaderUniformBufferArrayDynamicIndexing}</li>
+     * <li>{@code VkPhysicalDeviceFeatures::shaderSampledImageArrayDynamicIndexing}</li>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VULKAN_HARDWARE_LEVEL = "android.hardware.vulkan.level";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The version of this feature indicates the highest
+     * {@code VkPhysicalDeviceProperties::apiVersion} supported by the physical devices that support
+     * the hardware level indicated by {@link #FEATURE_VULKAN_HARDWARE_LEVEL}. The feature version
+     * uses the same encoding as Vulkan version numbers:
+     * <ul>
+     * <li>Major version number in bits 31-22</li>
+     * <li>Minor version number in bits 21-12</li>
+     * <li>Patch version number in bits 11-0</li>
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes an accelerometer.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -4059,7 +4101,7 @@ public abstract class PackageManager {
      *
      * @return A list of {@link InstrumentationInfo} objects containing one
      *         entry for each matching instrumentation. If there are no
-     *         instrumentation available, returns and empty list. 
+     *         instrumentation available, returns an empty list.
      *
      * @see #GET_META_DATA
      */
