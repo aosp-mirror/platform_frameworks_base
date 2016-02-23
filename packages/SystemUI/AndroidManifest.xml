@@ -337,7 +337,7 @@
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:resizeable="true"
+            android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
@@ -348,7 +348,7 @@
             android:launchMode="singleTop"
             android:taskAffinity=""
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
-            android:resizeable="true"
+            android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             android:excludeFromRecents="true" />
         <activity
