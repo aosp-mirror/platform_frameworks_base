@@ -250,7 +250,7 @@ public class BatteryStatsServTest extends TestCase {
      * Test startLaunchedLocked while not previously launched
      */
     @SmallTest
-    public void testStartLaunchedLockedWhileNotLaunched() throws Exception  {
+    public void testStartLaunchedLockedWhileLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
@@ -288,7 +288,7 @@ public class BatteryStatsServTest extends TestCase {
      * Test startLaunchedLocked while previously launched
      */
     @SmallTest
-    public void testStartLaunchedLockedWhileLaunched() throws Exception  {
+    public void testStartLaunchedLockedWhileNotLaunched() throws Exception  {
         MockBatteryStatsImpl bsi = new MockBatteryStatsImpl() {
             @Override
             public long getBatteryUptimeLocked() {
