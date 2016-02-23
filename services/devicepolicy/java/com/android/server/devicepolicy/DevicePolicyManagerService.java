@@ -4970,7 +4970,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkNotNull(who, "ComponentName is null");
         // Allow setting this policy to true only if there is a split system user.
         if (forceEphemeralUsers && !mInjector.userManagerIsSplitSystemUser()) {
-            throw new IllegalArgumentException(
+            throw new UnsupportedOperationException(
                     "Cannot force ephemeral users on systems without split system user.");
         }
         boolean removeAllUsers = false;
