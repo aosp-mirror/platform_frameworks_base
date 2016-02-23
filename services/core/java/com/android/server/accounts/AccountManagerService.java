@@ -101,9 +101,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -122,7 +125,7 @@ public class AccountManagerService
     private static final String TAG = "AccountManagerService";
 
     private static final String DATABASE_NAME = "accounts.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final int MAX_DEBUG_DB_SIZE = 64;
 
@@ -199,6 +202,11 @@ public class AccountManagerService
     private static final String SELECTION_USERDATA_BY_ACCOUNT =
             EXTRAS_ACCOUNTS_ID + "=(select _id FROM accounts WHERE name=? AND type=?)";
     private static final String[] COLUMNS_EXTRAS_KEY_AND_VALUE = {EXTRAS_KEY, EXTRAS_VALUE};
+
+    private static final String META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX =
+            "auth_uid_for_type:";
+    private static final String META_KEY_DELIMITER = ":";
+    private static final String SELECTION_META_BY_AUTHENTICATOR_TYPE = META_KEY + " LIKE ?";
 
     private final LinkedHashMap<String, Session> mSessions = new LinkedHashMap<String, Session>();
     private final AtomicInteger mNotificationIds = new AtomicInteger(1);
@@ -376,15 +384,69 @@ public class AccountManagerService
             mAuthenticatorCache.invalidateCache(accounts.userId);
         }
 
-        final HashSet<AuthenticatorDescription> knownAuth = Sets.newHashSet();
+        final HashMap<String, Integer> knownAuth = new HashMap<>();
         for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service :
                 mAuthenticatorCache.getAllServices(accounts.userId)) {
-            knownAuth.add(service.type);
+            knownAuth.put(service.type.type, service.uid);
         }
 
         synchronized (accounts.cacheLock) {
             final SQLiteDatabase db = accounts.openHelper.getWritableDatabase();
             boolean accountDeleted = false;
+
+            // Get a list of stored authenticator type and UID
+            Cursor metaCursor = db.query(
+                    TABLE_META,
+                    new String[] {META_KEY, META_VALUE},
+                    SELECTION_META_BY_AUTHENTICATOR_TYPE,
+                    new String[] {META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + "%"},
+                    null /* groupBy */,
+                    null /* having */,
+                    META_KEY);
+            // Create a list of authenticator type whose previous uid no longer exists
+            HashSet<String> obsoleteAuthType = Sets.newHashSet();
+            try {
+                while (metaCursor.moveToNext()) {
+                    String type = TextUtils.split(metaCursor.getString(0), META_KEY_DELIMITER)[1];
+                    String uid = metaCursor.getString(1);
+                    if (TextUtils.isEmpty(type) || TextUtils.isEmpty(uid)) {
+                        // Should never happen.
+                        Slog.e(TAG, "Auth type empty: " + TextUtils.isEmpty(type)
+                                + ", uid empty: " + TextUtils.isEmpty(uid));
+                        continue;
+                    }
+                    Integer knownUid = knownAuth.get(type);
+                    if (knownUid != null && uid.equals(knownUid.toString())) {
+                        // Remove it from the knownAuth list if it's unchanged.
+                        knownAuth.remove(type);
+                    } else {
+                        // Only add it to the list if it no longer exists or uid different
+                        obsoleteAuthType.add(type);
+                        // And delete it from the TABLE_META
+                        db.delete(
+                                TABLE_META,
+                                META_KEY + "=? AND " + META_VALUE + "=?",
+                                new String[] {
+                                        META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + type,
+                                        uid}
+                                );
+                    }
+                }
+            } finally {
+                metaCursor.close();
+            }
+
+            // Add the newly registered authenticator to TABLE_META
+            Iterator<Entry<String, Integer>> iterator = knownAuth.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<String, Integer> entry = iterator.next();
+                ContentValues values = new ContentValues();
+                values.put(META_KEY,
+                        META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + entry.getKey());
+                values.put(META_VALUE, entry.getValue());
+                db.insert(TABLE_META, null, values);
+            }
+
             Cursor cursor = db.query(TABLE_ACCOUNTS,
                     new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
                     null, null, null, null, ACCOUNTS_ID);
@@ -397,9 +459,9 @@ public class AccountManagerService
                     final String accountType = cursor.getString(1);
                     final String accountName = cursor.getString(2);
 
-                    if (!knownAuth.contains(AuthenticatorDescription.newKey(accountType))) {
+                    if (obsoleteAuthType.contains(accountType)) {
                         Slog.w(TAG, "deleting account " + accountName + " because type "
-                                + accountType + " no longer has a registered authenticator");
+                                + accountType + "'s registered authenticator no longer exist.");
                         db.delete(TABLE_ACCOUNTS, ACCOUNTS_ID + "=" + accountId, null);
                         accountDeleted = true;
 
@@ -438,6 +500,18 @@ public class AccountManagerService
                 }
             }
         }
+    }
+
+    private static HashMap<String, Integer> getAuthenticatorTypeAndUIDForUser(
+            Context context,
+            int userId) {
+        AccountAuthenticatorCache authCache = new AccountAuthenticatorCache(context);
+        HashMap<String, Integer> knownAuth = new HashMap<>();
+        for (RegisteredServicesCache.ServiceInfo<AuthenticatorDescription> service : authCache
+                .getAllServices(userId)) {
+            knownAuth.put(service.type.type, service.uid);
+        }
+        return knownAuth;
     }
 
     private UserAccounts getUserAccountsForCaller() {
@@ -3963,8 +4037,13 @@ public class AccountManagerService
 
     static class DatabaseHelper extends SQLiteOpenHelper {
 
+        private final Context mContext;
+        private final int mUserId;
+
         public DatabaseHelper(Context context, int userId) {
             super(context, AccountManagerService.getDatabaseName(userId), null, DATABASE_VERSION);
+            mContext = context;
+            mUserId = userId;
         }
 
         /**
@@ -4053,6 +4132,20 @@ public class AccountManagerService
                     +   "," + GRANTS_GRANTEE_UID + "))");
         }
 
+        private void populateMetaTableWithAuthTypeAndUID(
+                SQLiteDatabase db,
+                Map<String, Integer> authTypeAndUIDMap) {
+            Iterator<Entry<String, Integer>> iterator = authTypeAndUIDMap.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Entry<String, Integer> entry = iterator.next();
+                ContentValues values = new ContentValues();
+                values.put(META_KEY,
+                        META_KEY_FOR_AUTHENTICATOR_UID_FOR_TYPE_PREFIX + entry.getKey());
+                values.put(META_VALUE, entry.getValue());
+                db.insert(TABLE_META, null, values);
+            }
+        }
+
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.e(TAG, "upgrade from version " + oldVersion + " to version " + newVersion);
@@ -4093,6 +4186,13 @@ public class AccountManagerService
 
             if (oldVersion == 7) {
                 addDebugTable(db);
+                oldVersion++;
+            }
+
+            if (oldVersion == 8) {
+                populateMetaTableWithAuthTypeAndUID(
+                        db,
+                        AccountManagerService.getAuthenticatorTypeAndUIDForUser(mContext, mUserId));
                 oldVersion++;
             }
 
