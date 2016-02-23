@@ -9446,7 +9446,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return mDailyPackageChanges;
     }
 
-    long getBatteryUptimeLocked() {
+    protected long getBatteryUptimeLocked() {
         return mOnBatteryTimeBase.getUptime(mClocks.uptimeMillis() * 1000);
     }
 
