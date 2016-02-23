@@ -866,77 +866,77 @@
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.READ_PROFILE"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_PROFILE"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.READ_SOCIAL_STREAM"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_SOCIAL_STREAM"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.READ_USER_DICTIONARY"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_USER_DICTIONARY"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_SMS"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="com.android.browser.permission.WRITE_HISTORY_BOOKMARKS"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.MANAGE_ACCOUNTS"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.USE_CREDENTIALS"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.SUBSCRIBED_FEEDS_READ"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.SUBSCRIBED_FEEDS_WRITE"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.FLASHLIGHT"
         android:protectionLevel="normal"
-        android:permissionFlags="hidden"/>
+        android:permissionFlags="removed"/>
 
     <!-- ====================================================================== -->
     <!-- INSTALL PERMISSIONS                                                    -->

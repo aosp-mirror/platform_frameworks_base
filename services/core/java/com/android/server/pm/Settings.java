@@ -19,8 +19,6 @@ package com.android.server.pm;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
-import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
@@ -28,11 +26,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRAD
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
-import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE;
-import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
-import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
@@ -88,7 +81,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
-import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.PackageManagerService.DumpState;
@@ -4378,7 +4370,7 @@ final class Settings {
                 if ((perm.info.flags&PermissionInfo.FLAG_COSTS_MONEY) != 0) {
                     pw.print(", COSTS_MONEY");
                 }
-                if ((perm.info.flags&PermissionInfo.FLAG_HIDDEN) != 0) {
+                if ((perm.info.flags&PermissionInfo.FLAG_REMOVED) != 0) {
                     pw.print(", HIDDEN");
                 }
                 if ((perm.info.flags&PermissionInfo.FLAG_INSTALLED) != 0) {
@@ -4555,7 +4547,7 @@ final class Settings {
             if (p.perm != null) {
                 pw.print("    perm="); pw.println(p.perm);
                 if ((p.perm.info.flags & PermissionInfo.FLAG_INSTALLED) == 0
-                        || (p.perm.info.flags & PermissionInfo.FLAG_HIDDEN) != 0) {
+                        || (p.perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0) {
                     pw.print("    flags=0x"); pw.println(Integer.toHexString(p.perm.info.flags));
                 }
             }
