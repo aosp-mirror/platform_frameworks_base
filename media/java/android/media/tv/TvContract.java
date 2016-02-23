@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
@@ -1332,7 +1333,7 @@ public final class TvContract {
              * @return an encoded genre string that can be inserted into the
              *         {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
              */
-            public static String encode(String... genres) {
+            public static String encode(@NonNull String... genres) {
                 StringBuilder sb = new StringBuilder();
                 String separator = "";
                 for (String genre : genres) {
@@ -1367,7 +1368,7 @@ public final class TvContract {
              *            {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
              * @return genre strings.
              */
-            public static String[] decode(String genres) {
+            public static String[] decode(@NonNull String genres) {
                 if (genres.isEmpty()) {
                     return EMPTY_STRING_ARRAY;
                 }
