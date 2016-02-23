@@ -26,7 +26,7 @@ package android.database {
 
 package android.media {
 
-  public class AudioFormat {
+  public class AudioFormat implements android.os.Parcelable {
     ctor public AudioFormat();
   }
 
