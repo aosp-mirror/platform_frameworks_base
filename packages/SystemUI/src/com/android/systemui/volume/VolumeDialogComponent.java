@@ -168,11 +168,6 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     private final VolumeDialog.Callback mVolumeDialogCallback = new VolumeDialog.Callback() {
         @Override
-        public void onSettingsClicked() {
-            startSettings(new Intent(Settings.ACTION_NOTIFICATION_SETTINGS));
-        }
-
-        @Override
         public void onZenSettingsClicked() {
             startSettings(ZenModePanel.ZEN_SETTINGS);
         }

@@ -13,13 +13,12 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipChildren="false"
-    android:id="@+id/volume_dialog_row"
-    android:paddingEnd="8dp"
-    android:paddingStart="8dp" >
+    android:id="@+id/volume_dialog_row" >
 
     <TextView
         android:id="@+id/volume_row_header"
@@ -31,7 +30,8 @@
         android:paddingBottom="0dp"
         android:paddingEnd="12dp"
         android:paddingStart="12dp"
-        android:paddingTop="4dp" />
+        android:paddingTop="4dp"
+        android:visibility="gone" />
 
     <com.android.keyguard.AlphaOptimizedImageButton
         android:id="@+id/volume_row_icon"
@@ -54,13 +54,5 @@
         android:focusableInTouchMode="true"
         android:paddingEnd="8dp"
         android:paddingStart="8dp" />
-
-    <com.android.keyguard.AlphaOptimizedImageButton
-        android:id="@+id/volume_settings_button"
-        style="@style/VolumeButtons"
-        android:layout_width="@dimen/volume_button_size"
-        android:layout_height="@dimen/volume_button_size"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@id/volume_row_header" />
 
 </RelativeLayout>
