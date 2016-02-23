@@ -37,8 +37,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings.System;
+import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import java.io.File;
@@ -59,12 +63,22 @@ class RecentTasks extends ArrayList<TaskRecord> {
 
     // Maximum number recent bitmaps to keep in memory.
     private static final int MAX_RECENT_BITMAPS = 3;
+    private static final int DEFAULT_INITIAL_CAPACITY = 5;
 
     /**
      * Save recent tasks information across reboots.
      */
     private final TaskPersister mTaskPersister;
-    private final SparseBooleanArray mUsersWithRecentsLoaded = new SparseBooleanArray(5);
+    private final ActivityManagerService mService;
+    private final SparseBooleanArray mUsersWithRecentsLoaded = new SparseBooleanArray(
+            DEFAULT_INITIAL_CAPACITY);
+
+    /**
+     * Stores for each user task ids that are taken by tasks residing in persistent storage. These
+     * tasks may or may not currently be in memory.
+     */
+    final SparseArray<SparseBooleanArray> mPersistedTaskIds = new SparseArray<>(
+            DEFAULT_INITIAL_CAPACITY);
 
     // Mainly to avoid object recreation on multiple calls.
     private final ArrayList<TaskRecord> mTmpRecents = new ArrayList<TaskRecord>();
@@ -75,6 +89,7 @@ class RecentTasks extends ArrayList<TaskRecord> {
 
     RecentTasks(ActivityManagerService service, ActivityStackSupervisor mStackSupervisor) {
         File systemDir = Environment.getDataSystemDirectory();
+        mService = service;
         mTaskPersister = new TaskPersister(systemDir, mStackSupervisor, service, this);
         mStackSupervisor.setRecentTasks(this);
     }
@@ -87,6 +102,8 @@ class RecentTasks extends ArrayList<TaskRecord> {
      */
     void loadUserRecentsLocked(int userId) {
         if (!mUsersWithRecentsLoaded.get(userId)) {
+            // Load the task ids if not loaded.
+            loadPersistedTaskIdsForUserLocked(userId);
             Slog.i(TAG, "Loading recents for user " + userId + " into memory.");
             addAll(mTaskPersister.restoreTasksForUserLocked(userId));
             cleanupLocked(userId);
@@ -94,21 +111,49 @@ class RecentTasks extends ArrayList<TaskRecord> {
         }
     }
 
+    private void loadPersistedTaskIdsForUserLocked(int userId) {
+        // An empty instead of a null set here means that no persistent taskIds were present
+        // on file when we loaded them.
+        if (mPersistedTaskIds.get(userId) == null) {
+            mPersistedTaskIds.put(userId, mTaskPersister.loadPersistedTaskIdsForUser(userId));
+        }
+    }
+
+    boolean taskIdTakenForUserLocked(int taskId, int userId) {
+        loadPersistedTaskIdsForUserLocked(userId);
+        return mPersistedTaskIds.get(userId).get(taskId);
+    }
+
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
         if (task != null && task.stack != null && task.stack.isHomeStack()) {
             // Never persist the home stack.
             return;
         }
+        syncPersistentTaskIdsLocked();
         mTaskPersister.wakeup(task, flush);
     }
 
-    void onSystemReady() {
-        clear();
-        loadUserRecentsLocked(UserHandle.USER_SYSTEM);
-        startPersisting();
+    private void syncPersistentTaskIdsLocked() {
+        for (int i = mPersistedTaskIds.size() - 1; i >= 0; i--) {
+            int userId = mPersistedTaskIds.keyAt(i);
+            if (mUsersWithRecentsLoaded.get(userId)) {
+                // Recents are loaded only after task ids are loaded. Therefore, the set of taskids
+                // referenced here should not be null.
+                mPersistedTaskIds.valueAt(i).clear();
+            }
+        }
+        for (int i = size() - 1; i >= 0; i--) {
+            TaskRecord task = get(i);
+            if (task.isPersistable && (task.stack == null || !task.stack.isHomeStack())) {
+                // Set of persisted taskIds for task.userId should not be null here
+                mPersistedTaskIds.get(task.userId).put(task.taskId, true);
+            }
+        }
     }
 
-    void startPersisting() {
+
+    void onSystemReadyLocked() {
+        clear();
         mTaskPersister.startPersisting();
     }
 
@@ -125,11 +170,14 @@ class RecentTasks extends ArrayList<TaskRecord> {
     }
 
     void flush() {
+        synchronized (mService) {
+            syncPersistentTaskIdsLocked();
+        }
         mTaskPersister.flush();
     }
 
     /**
-     * Returns all userIds for which recents from storage are loaded
+     * Returns all userIds for which recents from persistent storage are loaded into this list.
      *
      * @return an array of userIds.
      */
@@ -149,17 +197,24 @@ class RecentTasks extends ArrayList<TaskRecord> {
         return usersWithRecentsLoaded;
     }
 
-    /**
-     * Removes recent tasks for this user if they are loaded, does not do anything otherwise.
-     *
-     * @param userId the user id.
-     */
-    void unloadUserRecentsLocked(int userId) {
+    private void unloadUserRecentsLocked(int userId) {
         if (mUsersWithRecentsLoaded.get(userId)) {
             Slog.i(TAG, "Unloading recents for user " + userId + " from memory.");
             mUsersWithRecentsLoaded.delete(userId);
             removeTasksForUserLocked(userId);
         }
+    }
+
+    /**
+     * Removes recent tasks and any other state kept in memory for the passed in user. Does not
+     * touch the information present on persistent storage.
+     *
+     * @param userId the id of the user
+     */
+    void unloadUserDataFromMemoryLocked(int userId) {
+        unloadUserRecentsLocked(userId);
+        mPersistedTaskIds.delete(userId);
+        mTaskPersister.unloadUserDataFromMemory(userId);
     }
 
     TaskRecord taskForIdLocked(int id) {

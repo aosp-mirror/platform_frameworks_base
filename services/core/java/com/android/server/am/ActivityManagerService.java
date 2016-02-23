@@ -1894,7 +1894,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             case SYSTEM_USER_UNLOCK_MSG: {
                 final int userId = msg.arg1;
                 mSystemServiceManager.unlockUser(userId);
-                mRecentTasks.cleanupLocked(userId);
+                mRecentTasks.loadUserRecentsLocked(userId);
                 installEncryptionUnawareProviders(userId);
                 break;
             }
@@ -2541,7 +2541,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void onUserStoppedLocked(int userId) {
-        mRecentTasks.unloadUserRecentsLocked(userId);
+        mRecentTasks.unloadUserDataFromMemoryLocked(userId);
     }
 
     public void initPowerManagement() {
@@ -8739,6 +8739,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     android.Manifest.permission.GET_DETAILED_TASKS)
                     == PackageManager.PERMISSION_GRANTED;
 
+            if (!isUserRunning(userId, ActivityManager.FLAG_AND_UNLOCKED)) {
+                Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
+                return Collections.emptyList();
+            }
             mRecentTasks.loadUserRecentsLocked(userId);
 
             final int recentsCount = mRecentTasks.size();
@@ -12560,7 +12564,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();
 
-            mRecentTasks.onSystemReady();
+            mRecentTasks.onSystemReadyLocked();
             // Check to see if there are any update receivers to run.
             if (!mDidUpdate) {
                 if (mWaitingUpdate) {
