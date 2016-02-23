@@ -248,9 +248,12 @@
              may cost the user money.  Such permissions may be highlighted
              when shown to the user with this additional information.  -->
         <flag name="costsMoney" value="0x0001" />
-        <!-- Additional flag from base permission type: this permission is hidden
-             and should not show in the UI. -->
-        <flag name="hidden" value="0x2" />
+        <!-- Additional flag from base permission type: this permission has been
+             removed and it is no longer enforced. It shouldn't be shown in the
+             UI. Removed permissions are kept as normal permissions for backwards
+             compatibility as apps may be checking them before calling an API.
+        -->
+        <flag name="removed" value="0x2" />
     </attr>
 
     <!-- Specified the name of a group that this permission is associated
