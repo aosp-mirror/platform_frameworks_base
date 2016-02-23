@@ -1375,6 +1375,11 @@ final class UserController {
      * intercept activity launches for work apps when the Work Challenge is present.
      */
     boolean shouldConfirmCredentials(int userId) {
+        synchronized (mService) {
+            if (mStartedUsers.get(userId) == null) {
+                return false;
+            }
+        }
         if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
             return false;
         }

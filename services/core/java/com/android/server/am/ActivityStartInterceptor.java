@@ -98,15 +98,23 @@ class ActivityStartInterceptor {
         mAInfo = aInfo;
         mResolvedType = resolvedType;
         mInTask = inTask;
-        interceptQuietProfileIfNeeded();
-        interceptSuspendPackageIfNeed();
+        if (interceptSuspendPackageIfNeed()) {
+            // Skip the rest of interceptions as the package is suspended by device admin so
+            // no user action can undo this.
+            return;
+        }
+        if (interceptQuietProfileIfNeeded()) {
+            // If work profile is turned off, skip the work challenge since the profile can only
+            // be unlocked when profile's user is running.
+            return;
+        }
         interceptWorkProfileChallengeIfNeeded();
     }
 
-    private void interceptQuietProfileIfNeeded() {
+    private boolean interceptQuietProfileIfNeeded() {
         // Do not intercept if the user has not turned off the profile
         if (!mUserManager.isQuietModeEnabled(UserHandle.of(mUserId))) {
-            return;
+            return false;
         }
         mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId);
         mCallingPid = mRealCallingPid;
@@ -115,15 +123,15 @@ class ActivityStartInterceptor {
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
         mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id);
-        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
-                null /*profilerInfo*/);
+        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
+        return true;
     }
 
-    private void interceptSuspendPackageIfNeed() {
+    private boolean interceptSuspendPackageIfNeed() {
         // Do not intercept if the admin did not suspend the package
         if (mAInfo == null || mAInfo.applicationInfo == null ||
                 (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
-            return;
+            return false;
         }
         mIntent = UnlaunchableAppActivity.createPackageSuspendedDialogIntent(mAInfo.packageName,
                 mUserId);
@@ -137,15 +145,15 @@ class ActivityStartInterceptor {
         } else {
             mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId);
         }
-        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
-                null /*profilerInfo*/);
+        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
+        return true;
     }
 
-    private void interceptWorkProfileChallengeIfNeeded() {
+    private boolean interceptWorkProfileChallengeIfNeeded() {
         final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(mIntent,
                 mResolvedType, mAInfo, mCallingPackage, mUserId);
         if (interceptingIntent == null) {
-            return;
+            return false;
         }
         mIntent = interceptingIntent;
         mCallingPid = mRealCallingPid;
@@ -161,8 +169,8 @@ class ActivityStartInterceptor {
 
         final UserInfo parent = mUserManager.getProfileParent(mUserId);
         mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, parent.id);
-        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags,
-                null /*profilerInfo*/);
+        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
+        return true;
     }
 
     /**
