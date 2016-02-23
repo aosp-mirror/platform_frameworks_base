@@ -1769,5 +1769,44 @@ message MetricsEvent {
     // Logged when the user saves a modification to notification importance. Negative numbers
     // indicate the user lowered the importance; positive means they increased it.
     ACTION_SAVE_IMPORTANCE = 291;
+
+    // Interactive bug report initiated from power menu.
+    ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE = 292;
+
+    // Full bug report initiated from power menu.
+    ACTION_BUGREPORT_FROM_POWER_MENU_FULL = 293;
+
+    // Interactive bug report initiated from Settings.
+    ACTION_BUGREPORT_FROM_SETTINGS_INTERACTIVE = 294;
+
+    // Full bug report initiated from Settings.
+    ACTION_BUGREPORT_FROM_SETTINGS_FULL = 295;
+
+    // Bug report canceled using system notification.
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL = 296;
+
+    // Bug report details screen open using system notification.
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS = 297;
+
+    // Additional Bug report screen shot taken using system notification.
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT = 298;
+
+    // Bug report shared by user using system notification.
+    ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE = 299;
+
+    // User changed bug report name using the details screen.
+    ACTION_BUGREPORT_DETAILS_NAME_CHANGED = 300;
+
+    // User changed bug report title using the details screen.
+    ACTION_BUGREPORT_DETAILS_TITLE_CHANGED = 301;
+
+    // User changed bug report description using the details screen.
+    ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED = 302;
+
+    // Changes made on bug report details screen were saved by user.
+    ACTION_BUGREPORT_DETAILS_SAVED = 303;
+
+    // Changes made on bug report details screen were canceled by user.
+    ACTION_BUGREPORT_DETAILS_CANCELED = 304;
   }
 }
