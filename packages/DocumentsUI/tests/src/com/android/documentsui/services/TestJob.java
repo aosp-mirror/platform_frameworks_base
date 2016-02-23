@@ -21,7 +21,6 @@ import static junit.framework.Assert.assertTrue;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
-import android.os.RemoteException;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -38,7 +37,7 @@ public class TestJob extends Job {
     }
 
     @Override
-    void start() throws RemoteException {
+    void start() {
         mStarted = true;
     }
 
