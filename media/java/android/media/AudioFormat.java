@@ -18,10 +18,13 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * The {@link AudioFormat} class is used to access a number of audio format and
@@ -209,7 +212,7 @@ import java.util.Arrays;
  * AudioTrack.getPlaybackHeadPosition()}),
  * depending on the context where audio frame is used.
  */
-public class AudioFormat {
+public class AudioFormat implements Parcelable {
 
     //---------------------------------------------------------
     // Constants
@@ -872,6 +875,44 @@ public class AudioFormat {
             return this;
         }
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mPropertySetMask, mSampleRate, mEncoding, mChannelMask,
+                mChannelIndexMask);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mPropertySetMask);
+        dest.writeInt(mEncoding);
+        dest.writeInt(mSampleRate);
+        dest.writeInt(mChannelMask);
+        dest.writeInt(mChannelIndexMask);
+    }
+
+    private AudioFormat(Parcel in) {
+        mPropertySetMask = in.readInt();
+        mEncoding = in.readInt();
+        mSampleRate = in.readInt();
+        mChannelMask = in.readInt();
+        mChannelIndexMask = in.readInt();
+    }
+
+    public static final Parcelable.Creator<AudioFormat> CREATOR =
+            new Parcelable.Creator<AudioFormat>() {
+        public AudioFormat createFromParcel(Parcel p) {
+            return new AudioFormat(p);
+        }
+        public AudioFormat[] newArray(int size) {
+            return new AudioFormat[size];
+        }
+    };
 
     @Override
     public String toString () {
