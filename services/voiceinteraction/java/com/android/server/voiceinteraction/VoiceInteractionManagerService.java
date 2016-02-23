@@ -760,6 +760,10 @@ public class VoiceInteractionManagerService extends SystemService {
             final long caller = Binder.clearCallingIdentity();
             boolean deleted = false;
             try {
+                int unloadStatus = mSoundTriggerInternal.unloadKeyphraseModel(keyphraseId);
+                if (unloadStatus != SoundTriggerInternal.STATUS_OK) {
+                    Slog.w(TAG, "Unable to unload keyphrase sound model:" + unloadStatus);
+                }
                 deleted = mDbHelper.deleteKeyphraseSoundModel(keyphraseId, callingUid, bcp47Locale);
                 return deleted ? SoundTriggerInternal.STATUS_OK : SoundTriggerInternal.STATUS_ERROR;
             } finally {

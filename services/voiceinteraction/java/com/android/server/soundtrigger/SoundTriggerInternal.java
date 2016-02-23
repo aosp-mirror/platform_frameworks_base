@@ -75,5 +75,7 @@ public abstract class SoundTriggerInternal {
 
     public abstract ModuleProperties getModuleProperties();
 
+    public abstract int unloadKeyphraseModel(int keyphaseId);
+
     public abstract void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 }

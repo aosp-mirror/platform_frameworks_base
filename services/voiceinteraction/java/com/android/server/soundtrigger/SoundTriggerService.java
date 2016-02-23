@@ -122,10 +122,10 @@ public class SoundTriggerService extends SystemService {
         public int startRecognition(ParcelUuid parcelUuid, IRecognitionStatusCallback callback,
                 RecognitionConfig config) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
+            if (!isInitialized()) return STATUS_ERROR;
             if (DEBUG) {
                 Slog.i(TAG, "startRecognition(): Uuid : " + parcelUuid);
             }
-            if (!isInitialized()) return STATUS_ERROR;
 
             GenericSoundModel model = getSoundModel(parcelUuid);
             if (model == null) {
@@ -173,6 +173,8 @@ public class SoundTriggerService extends SystemService {
             if (DEBUG) {
                 Slog.i(TAG, "deleteSoundModel(): id = " + soundModelId);
             }
+            // Unload the model if it is loaded.
+            mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
             mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
         }
     }
@@ -213,6 +215,12 @@ public class SoundTriggerService extends SystemService {
         public ModuleProperties getModuleProperties() {
             if (!isInitialized()) return null;
             return mSoundTriggerHelper.getModuleProperties();
+        }
+
+        @Override
+        public int unloadKeyphraseModel(int keyphraseId) {
+            if (!isInitialized()) return STATUS_ERROR;
+            return mSoundTriggerHelper.unloadKeyphraseSoundModel(keyphraseId);
         }
 
         @Override
