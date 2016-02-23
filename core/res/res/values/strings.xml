@@ -185,8 +185,6 @@
     <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
-    <!-- Notification title to tell the user that restricted state is changed by access control. -->
-    <string name="RestrictedChangedTitle">Restricted access changed</string>
     <!-- Displayed to tell the user that data service is blocked by access control. -->
     <string name="RestrictedOnData">Data service is blocked.</string>
     <!-- Displayed to tell the user that emergency service is blocked by access control. -->
