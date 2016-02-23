@@ -20,11 +20,11 @@
     <string name="more_options_button" msgid="2243228396432556771">"Další možnosti"</string>
     <string name="label_destination" msgid="9132510997381599275">"Cíl"</string>
     <string name="label_copies" msgid="3634531042822968308">"Kopie"</string>
-    <string name="label_copies_summary" msgid="3861966063536529540">"Počet kopií:"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Kopie:"</string>
     <string name="label_paper_size" msgid="908654383827777759">"Velikost papíru"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"Velikost papíru:"</string>
     <string name="label_color" msgid="1108690305218188969">"Barva"</string>
-    <string name="label_duplex" msgid="1263181386446435253">"Oboustranně"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"Oboustranně"</string>
     <string name="label_orientation" msgid="2853142581990496477">"Orientace"</string>
     <string name="label_pages" msgid="7768589729282182230">"Stránky"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"Vše: <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
@@ -77,7 +77,7 @@
     <string name="restart" msgid="2472034227037808749">"Restartovat"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"Nelze se připojit k tiskárně"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"neznámé"</string>
-    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – není k dispozici"</string>
+    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – není k dispozici"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"Černobíle"</item>
     <item msgid="2762241247228983754">"Barevně"</item>
