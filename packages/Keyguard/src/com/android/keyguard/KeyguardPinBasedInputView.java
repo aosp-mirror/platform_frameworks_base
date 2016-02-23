@@ -89,7 +89,12 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             return true;
         }
         if (keyCode >= KeyEvent.KEYCODE_0 && keyCode <= KeyEvent.KEYCODE_9) {
-            int number = keyCode - KeyEvent.KEYCODE_0 ;
+            int number = keyCode - KeyEvent.KEYCODE_0;
+            performNumberClick(number);
+            return true;
+        }
+        if (keyCode >= KeyEvent.KEYCODE_NUMPAD_0 && keyCode <= KeyEvent.KEYCODE_NUMPAD_9) {
+            int number = keyCode - KeyEvent.KEYCODE_NUMPAD_0;
             performNumberClick(number);
             return true;
         }
