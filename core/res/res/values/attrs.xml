@@ -8182,4 +8182,18 @@ i
         <!-- The current color for the offset inside the gradient. -->
         <attr name="color" />
     </declare-styleable>
+
+    <!-- @hide Attributes which will be read by the Activity to intialize the 
+               base activity TaskDescription. -->
+    <declare-styleable name="ActivityTaskDescription">
+        <!-- @hide From Theme.colorPrimary, used for the TaskDescription primary 
+                   color. -->
+        <attr name="colorPrimary" />
+        <!-- @hide From Theme.windowBackground, used for calculating the 
+                   TaskDescription background color. -->
+        <attr name="windowBackground" />
+        <!-- @hide From Theme.windowBackgroundFallback, used for calculating the 
+                   TaskDescription background color. -->
+        <attr name="windowBackgroundFallback" />
+    </declare-styleable>
 </resources>
