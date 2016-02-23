@@ -10726,7 +10726,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     appId = pkgSetting.appId;
                     if (pkgSetting.getSuspended(userId) != suspended) {
-                        if (!canSuspendPackageForUser(packageName, userId)) {
+                        if (!canSuspendPackageForUserLocked(packageName, userId)) {
                             unactionedPackages.add(packageName);
                             continue;
                         }
@@ -10765,7 +10765,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     // TODO: investigate and add more restrictions for suspending crucial packages.
-    private boolean canSuspendPackageForUser(String packageName, int userId) {
+    private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
             Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
                     + "\": has active device admin");
@@ -10776,6 +10776,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (packageName.equals(activeLauncherPackageName)) {
             Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
                     + "\" because it is set as the active launcher");
+            return false;
+        }
+
+        final PackageParser.Package pkg = mPackages.get(packageName);
+        if (pkg != null && isPrivilegedApp(pkg)) {
+            Slog.w(TAG, "Not suspending/un-suspending package \"" + packageName
+                    + "\" because it is a privileged app");
             return false;
         }
 
