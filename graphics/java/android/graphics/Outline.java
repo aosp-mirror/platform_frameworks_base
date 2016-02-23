@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 
 /**
@@ -173,6 +174,34 @@ public final class Outline {
      */
     public void setRoundRect(@NonNull Rect rect, float radius) {
         setRoundRect(rect.left, rect.top, rect.right, rect.bottom, radius);
+    }
+
+    /**
+     * Populates {@code outBounds} with the outline bounds, if set, and returns
+     * {@code true}. If no outline bounds are set, or if a path has been set
+     * via {@link #setConvexPath(Path)}, returns {@code false}.
+     *
+     * @param outRect the rect to populate with the outline bounds, if set
+     * @return {@code true} if {@code outBounds} was populated with outline
+     *         bounds, or {@code false} if no outline bounds are set
+     */
+    public boolean getRect(@NonNull Rect outRect) {
+        if (mRect == null) {
+            return false;
+        }
+        outRect.set(mRect);
+        return true;
+    }
+
+    /**
+     * Returns the rounded rect radius, if set, or {@code -1} if a path has
+     * been set via {@link #setConvexPath(Path)}. A return value of {@code 0}
+     * indicates a non-rounded rect.
+     *
+     * @return the rounded rect radius or {@code -1}
+     */
+    public float getRadius() {
+        return mRadius;
     }
 
     /**
