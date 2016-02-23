@@ -1037,6 +1037,9 @@ class ActivityStarter {
                 // make sure it becomes visible as it starts (this will also trigger entry
                 // animation). An example of this are PIP activities.
                 mTargetStack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
+                // Go ahead and tell window manager to execute app transition for this activity
+                // since the app transition will not be triggered through the resume channel.
+                mWindowManager.executeAppTransition();
             }
         } else {
             mTargetStack.addRecentActivityLocked(mStartActivity);
