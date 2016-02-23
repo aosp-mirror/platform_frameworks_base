@@ -17823,36 +17823,42 @@ public final class ActivityManagerService extends ActivityManagerNative
             final long origId = Binder.clearCallingIdentity();
             final ActivityStack stack = mStackSupervisor.getStack(fromStackId);
             if (stack != null) {
-                if (fromStackId == DOCKED_STACK_ID) {
+                mWindowManager.deferSurfaceLayout();
+                try {
+                    if (fromStackId == DOCKED_STACK_ID) {
 
-                    // We are moving all tasks from the docked stack to the fullscreen stack, which
-                    // is dismissing the docked stack, so resize all other stacks to fullscreen here
-                    // already so we don't end up with resize trashing.
-                    for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
-                        if (StackId.isResizeableByDockedStack(i)) {
-                            ActivityStack otherStack = mStackSupervisor.getStack(i);
-                            if (otherStack != null) {
-                                mStackSupervisor.resizeStackLocked(i,
-                                        null, null, null, PRESERVE_WINDOWS,
-                                        true /* allowResizeInDockedMode */);
+                        // We are moving all tasks from the docked stack to the fullscreen stack,
+                        // which is dismissing the docked stack, so resize all other stacks to
+                        // fullscreen here already so we don't end up with resize trashing.
+                        for (int i = FIRST_STATIC_STACK_ID; i <= LAST_STATIC_STACK_ID; i++) {
+                            if (StackId.isResizeableByDockedStack(i)) {
+                                ActivityStack otherStack = mStackSupervisor.getStack(i);
+                                if (otherStack != null) {
+                                    mStackSupervisor.resizeStackLocked(i,
+                                            null, null, null, PRESERVE_WINDOWS,
+                                            true /* allowResizeInDockedMode */);
+                                }
                             }
                         }
                     }
-                }
-                final ArrayList<TaskRecord> tasks = stack.getAllTasks();
-                final int size = tasks.size();
-                if (onTop) {
-                    for (int i = 0; i < size; i++) {
-                        mStackSupervisor.moveTaskToStackLocked(tasks.get(i).taskId,
-                                FULLSCREEN_WORKSPACE_STACK_ID, ON_TOP, !FORCE_FOCUS,
-                                "moveTasksToFullscreenStack", ANIMATE);
+                    final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+                    final int size = tasks.size();
+                    if (onTop) {
+                        for (int i = 0; i < size; i++) {
+                            mStackSupervisor.moveTaskToStackLocked(tasks.get(i).taskId,
+                                    FULLSCREEN_WORKSPACE_STACK_ID, onTop, !FORCE_FOCUS,
+                                    "moveTasksToFullscreenStack", ANIMATE);
+                        }
+                    } else {
+                        for (int i = size - 1; i >= 0; i--) {
+                            mStackSupervisor.positionTaskInStackLocked(tasks.get(i).taskId,
+                                    FULLSCREEN_WORKSPACE_STACK_ID, 0);
+                        }
                     }
-                } else {
-                    for (int i = size - 1; i >= 0; i--) {
-                        mStackSupervisor.positionTaskInStackLocked(tasks.get(i).taskId,
-                                FULLSCREEN_WORKSPACE_STACK_ID, 0);
-                    }
+                } finally {
+                    mWindowManager.continueSurfaceLayout();
                 }
+
             }
             Binder.restoreCallingIdentity(origId);
         }
