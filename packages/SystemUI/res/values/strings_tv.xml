@@ -34,8 +34,6 @@
 
     <!-- Picture-in-Picture onboarding screen -->
     <eat-comment />
-    <!-- Title for onboarding screen. -->
-    <string name="pip_onboarding_title" translatable="false">Picture-in-picture</string>
     <!-- Description for onboarding screen. -->
     <string name="pip_onboarding_description" translatable="false">Press and hold the HOME\nbutton to close or control it</string>
     <!-- Button to close onboarding screen. -->
