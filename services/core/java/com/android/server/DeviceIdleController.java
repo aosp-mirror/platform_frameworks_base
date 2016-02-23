@@ -133,7 +133,8 @@ public class DeviceIdleController extends SystemService
     private Intent mLightIdleIntent;
     private Display mCurDisplay;
     private AnyMotionDetector mAnyMotionDetector;
-    private boolean mEnabled;
+    private boolean mLightEnabled;
+    private boolean mDeepEnabled;
     private boolean mForceIdle;
     private boolean mScreenOn;
     private boolean mCharging;
@@ -180,7 +181,7 @@ public class DeviceIdleController extends SystemService
     private static final int LIGHT_STATE_IDLE = 2;
     /** Device is in the light idle state, but temporarily out of idle to do regular maintenance. */
     private static final int LIGHT_STATE_IDLE_MAINTENANCE = 3;
-    /** Device light idle state is overriden, now applying full doze state. */
+    /** Device light idle state is overriden, now applying deep doze state. */
     private static final int LIGHT_STATE_OVERRIDE = 4;
     private static String lightStateToString(int state) {
         switch (state) {
@@ -300,8 +301,8 @@ public class DeviceIdleController extends SystemService
     private static final int EVENT_NORMAL = 1;
     private static final int EVENT_LIGHT_IDLE = 2;
     private static final int EVENT_LIGHT_MAINTENANCE = 3;
-    private static final int EVENT_FULL_IDLE = 4;
-    private static final int EVENT_FULL_MAINTENANCE = 5;
+    private static final int EVENT_DEEP_IDLE = 4;
+    private static final int EVENT_DEEP_MAINTENANCE = 5;
 
     private int[] mEventCmds = new int[EVENT_BUFFER_SIZE];
     private long[] mEventTimes = new long[EVENT_BUFFER_SIZE];
@@ -847,13 +848,13 @@ public class DeviceIdleController extends SystemService
                 case MSG_REPORT_IDLE_ON:
                 case MSG_REPORT_IDLE_ON_LIGHT: {
                     EventLogTags.writeDeviceIdleOnStart();
-                    final boolean fullChanged;
+                    final boolean deepChanged;
                     final boolean lightChanged;
                     if (msg.what == MSG_REPORT_IDLE_ON) {
-                        fullChanged = mLocalPowerManager.setDeviceIdleMode(true);
+                        deepChanged = mLocalPowerManager.setDeviceIdleMode(true);
                         lightChanged = mLocalPowerManager.setLightDeviceIdleMode(false);
                     } else {
-                        fullChanged = mLocalPowerManager.setDeviceIdleMode(false);
+                        deepChanged = mLocalPowerManager.setDeviceIdleMode(false);
                         lightChanged = mLocalPowerManager.setLightDeviceIdleMode(true);
                     }
                     try {
@@ -863,7 +864,7 @@ public class DeviceIdleController extends SystemService
                                 : BatteryStats.DEVICE_IDLE_MODE_LIGHT, null, Process.myUid());
                     } catch (RemoteException e) {
                     }
-                    if (fullChanged) {
+                    if (deepChanged) {
                         getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                     }
                     if (lightChanged) {
@@ -873,7 +874,7 @@ public class DeviceIdleController extends SystemService
                 } break;
                 case MSG_REPORT_IDLE_OFF: {
                     EventLogTags.writeDeviceIdleOffStart("unknown");
-                    final boolean fullChanged = mLocalPowerManager.setDeviceIdleMode(false);
+                    final boolean deepChanged = mLocalPowerManager.setDeviceIdleMode(false);
                     final boolean lightChanged = mLocalPowerManager.setLightDeviceIdleMode(false);
                     try {
                         mNetworkPolicyManager.setDeviceIdleMode(false);
@@ -881,7 +882,7 @@ public class DeviceIdleController extends SystemService
                                 null, Process.myUid());
                     } catch (RemoteException e) {
                     }
-                    if (fullChanged) {
+                    if (deepChanged) {
                         incActiveIdleOps();
                         getContext().sendOrderedBroadcastAsUser(mIdleIntent, UserHandle.ALL,
                                 null, mIdleStartedDoneReceiver, null, 0, null, null);
@@ -901,7 +902,7 @@ public class DeviceIdleController extends SystemService
                     int activeUid = msg.arg1;
                     EventLogTags.writeDeviceIdleOffStart(
                             activeReason != null ? activeReason : "unknown");
-                    final boolean fullChanged = mLocalPowerManager.setDeviceIdleMode(false);
+                    final boolean deepChanged = mLocalPowerManager.setDeviceIdleMode(false);
                     final boolean lightChanged = mLocalPowerManager.setLightDeviceIdleMode(false);
                     try {
                         mNetworkPolicyManager.setDeviceIdleMode(false);
@@ -909,7 +910,7 @@ public class DeviceIdleController extends SystemService
                                 activeReason, activeUid);
                     } catch (RemoteException e) {
                     }
-                    if (fullChanged) {
+                    if (deepChanged) {
                         getContext().sendBroadcastAsUser(mIdleIntent, UserHandle.ALL);
                     }
                     if (lightChanged) {
@@ -1122,7 +1123,7 @@ public class DeviceIdleController extends SystemService
         final PackageManager pm = getContext().getPackageManager();
 
         synchronized (this) {
-            mEnabled = getContext().getResources().getBoolean(
+            mLightEnabled = mDeepEnabled = getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_enableAutoPowerModes);
             SystemConfig sysConfig = SystemConfig.getInstance();
             ArraySet<String> allowPowerExceptIdle = sysConfig.getAllowInPowerSaveExceptIdle();
@@ -1589,17 +1590,17 @@ public class DeviceIdleController extends SystemService
 
     void becomeInactiveIfAppropriateLocked() {
         if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
-        if (((!mScreenOn && !mCharging) || mForceIdle) && mEnabled) {
+        if ((!mScreenOn && !mCharging) || mForceIdle) {
             // Screen has turned off; we are now going to become inactive and start
             // waiting to see if we will ultimately go idle.
-            if (mState == STATE_ACTIVE) {
+            if (mState == STATE_ACTIVE && mDeepEnabled) {
                 mState = STATE_INACTIVE;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
                 resetIdleManagementLocked();
                 scheduleAlarmLocked(mInactiveTimeout, false);
                 EventLogTags.writeDeviceIdle(mState, "no activity");
             }
-            if (mLightState == LIGHT_STATE_ACTIVE) {
+            if (mLightState == LIGHT_STATE_ACTIVE && mLightEnabled) {
                 mLightState = LIGHT_STATE_INACTIVE;
                 if (DEBUG) Slog.d(TAG, "Moved from LIGHT_STATE_ACTIVE to LIGHT_STATE_INACTIVE");
                 resetLightIdleManagementLocked();
@@ -1633,7 +1634,7 @@ public class DeviceIdleController extends SystemService
 
     void stepLightIdleStateLocked(String reason) {
         if (mLightState == LIGHT_STATE_OVERRIDE) {
-            // If we are already in full device idle mode, then
+            // If we are already in deep device idle mode, then
             // there is nothing left to do for light mode.
             return;
         }
@@ -1770,7 +1771,7 @@ public class DeviceIdleController extends SystemService
                     cancelLightAlarmLocked();
                 }
                 EventLogTags.writeDeviceIdle(mState, reason);
-                addEvent(EVENT_FULL_IDLE);
+                addEvent(EVENT_DEEP_IDLE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_ON);
                 break;
             case STATE_IDLE:
@@ -1783,7 +1784,7 @@ public class DeviceIdleController extends SystemService
                         (long)(mNextIdlePendingDelay * mConstants.IDLE_PENDING_FACTOR));
                 mState = STATE_IDLE_MAINTENANCE;
                 EventLogTags.writeDeviceIdle(mState, reason);
-                addEvent(EVENT_FULL_MAINTENANCE);
+                addEvent(EVENT_DEEP_MAINTENANCE);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 break;
         }
@@ -1916,7 +1917,7 @@ public class DeviceIdleController extends SystemService
             becomeInactive = true;
         }
         if (mLightState == LIGHT_STATE_OVERRIDE) {
-            // We went out of light idle mode because we had started full idle mode...  let's
+            // We went out of light idle mode because we had started deep idle mode...  let's
             // now go back and reset things so we resume light idling if appropriate.
             mLightState = STATE_ACTIVE;
             EventLogTags.writeDeviceIdleLight(mLightState, type);
@@ -2235,11 +2236,11 @@ public class DeviceIdleController extends SystemService
         pw.println("  force-idle");
         pw.println("    Force directly into idle mode, regardless of other device state.");
         pw.println("    Use \"step\" to get out.");
-        pw.println("  disable");
+        pw.println("  disable [light|deep|all]");
         pw.println("    Completely disable device idle mode.");
-        pw.println("  enable");
+        pw.println("  enable [light|deep|all]");
         pw.println("    Re-enable device idle mode after it had previously been disabled.");
-        pw.println("  enabled");
+        pw.println("  enabled [light|deep|all]");
         pw.println("    Print 1 if device idle mode is currently enabled, else 0.");
         pw.println("  whitelist");
         pw.println("    Print currently whitelisted apps.");
@@ -2299,7 +2300,7 @@ public class DeviceIdleController extends SystemService
             synchronized (this) {
                 long token = Binder.clearCallingIdentity();
                 try {
-                    if (!mEnabled) {
+                    if (!mDeepEnabled) {
                         pw.println("Unable to go idle; not enabled");
                         return -1;
                     }
@@ -2326,11 +2327,32 @@ public class DeviceIdleController extends SystemService
                     null);
             synchronized (this) {
                 long token = Binder.clearCallingIdentity();
+                String arg = shell.getNextArg();
                 try {
-                    if (mEnabled) {
-                        mEnabled = false;
-                        becomeActiveLocked("disabled", Process.myUid());
-                        pw.println("Idle mode disabled");
+                    boolean becomeActive = false;
+                    boolean valid = false;
+                    if (arg == null || "deep".equals(arg) || "all".equals(arg)) {
+                        valid = true;
+                        if (mDeepEnabled) {
+                            mDeepEnabled = false;
+                            becomeActive = true;
+                            pw.println("Deep idle mode disabled");
+                        }
+                    }
+                    if (arg == null || "light".equals(arg) || "all".equals(arg)) {
+                        valid = true;
+                        if (mLightEnabled) {
+                            mLightEnabled = false;
+                            becomeActive = true;
+                            pw.println("Light idle mode disabled");
+                        }
+                    }
+                    if (becomeActive) {
+                        becomeActiveLocked((arg == null ? "all" : arg) + "-disabled",
+                                Process.myUid());
+                    }
+                    if (!valid) {
+                        pw.println("Unknown idle mode: " + arg);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -2341,12 +2363,31 @@ public class DeviceIdleController extends SystemService
                     null);
             synchronized (this) {
                 long token = Binder.clearCallingIdentity();
+                String arg = shell.getNextArg();
                 try {
-                    exitForceIdleLocked();
-                    if (!mEnabled) {
-                        mEnabled = true;
+                    boolean becomeInactive = false;
+                    boolean valid = false;
+                    if (arg == null || "deep".equals(arg) || "all".equals(arg)) {
+                        valid = true;
+                        if (!mDeepEnabled) {
+                            mDeepEnabled = true;
+                            becomeInactive = true;
+                            pw.println("Deep idle mode enabled");
+                        }
+                    }
+                    if (arg == null || "light".equals(arg) || "all".equals(arg)) {
+                        valid = true;
+                        if (!mLightEnabled) {
+                            mLightEnabled = true;
+                            becomeInactive = true;
+                            pw.println("Light idle mode enable");
+                        }
+                    }
+                    if (becomeInactive) {
                         becomeInactiveIfAppropriateLocked();
-                        pw.println("Idle mode enabled");
+                    }
+                    if (!valid) {
+                        pw.println("Unknown idle mode: " + arg);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -2354,7 +2395,16 @@ public class DeviceIdleController extends SystemService
             }
         } else if ("enabled".equals(cmd)) {
             synchronized (this) {
-                pw.println(mEnabled ? "1" : " 0");
+                String arg = shell.getNextArg();
+                if (arg == null || "all".equals(arg)) {
+                    pw.println(mDeepEnabled && mLightEnabled ? "1" : 0);
+                } else if ("deep".equals(arg)) {
+                    pw.println(mDeepEnabled ? "1" : 0);
+                } else if ("light".equals(arg)) {
+                    pw.println(mLightEnabled ? "1" : 0);
+                } else {
+                    pw.println("Unknown idle mode: " + arg);
+                }
             }
         } else if ("whitelist".equals(cmd)) {
             long token = Binder.clearCallingIdentity();
@@ -2493,8 +2543,8 @@ public class DeviceIdleController extends SystemService
                         case EVENT_NORMAL:              label = "     normal"; break;
                         case EVENT_LIGHT_IDLE:          label = " light-idle"; break;
                         case EVENT_LIGHT_MAINTENANCE:   label = "light-maint"; break;
-                        case EVENT_FULL_IDLE:           label = "  full-idle"; break;
-                        case EVENT_FULL_MAINTENANCE:    label = " full-maint"; break;
+                        case EVENT_DEEP_IDLE:           label = "  deep-idle"; break;
+                        case EVENT_DEEP_MAINTENANCE:    label = " deep-maint"; break;
                         default:                        label = "         ??"; break;
                     }
                     pw.print("    ");
@@ -2580,7 +2630,8 @@ public class DeviceIdleController extends SystemService
                 }
             }
 
-            pw.print("  mEnabled="); pw.println(mEnabled);
+            pw.print("  mLightEnabled="); pw.print(mLightEnabled);
+            pw.print(" mDeepEnabled="); pw.println(mDeepEnabled);
             pw.print("  mForceIdle="); pw.println(mForceIdle);
             pw.print("  mMotionSensor="); pw.println(mMotionSensor);
             pw.print("  mCurDisplay="); pw.println(mCurDisplay);
