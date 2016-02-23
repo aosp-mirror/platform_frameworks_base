@@ -315,15 +315,15 @@ public class AccountManagerService
 
         IntentFilter userFilter = new IntentFilter();
         userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        userFilter.addAction(Intent.ACTION_USER_STARTED);
+        userFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     onUserRemoved(intent);
-                } else if (Intent.ACTION_USER_STARTED.equals(action)) {
-                    onUserStarted(intent);
+                } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                    onUserUnlocked(intent);
                 }
             }
         }, UserHandle.ALL, userFilter, null, null);
@@ -513,7 +513,7 @@ public class AccountManagerService
         }
     }
 
-    private void onUserStarted(Intent intent) {
+    private void onUserUnlocked(Intent intent) {
         int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
         if (userId < 1) return;
 
@@ -991,13 +991,9 @@ public class AccountManagerService
         for (UserInfo user : users) {
             if (user.isRestricted() && (parentUserId == user.restrictedProfileParentId)) {
                 addSharedAccountAsUser(account, user.id);
-                try {
-                    if (ActivityManagerNative.getDefault().isUserRunning(user.id, 0)) {
-                        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
-                                MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
-                    }
-                } catch (RemoteException re) {
-                    // Shouldn't happen
+                if (mUserManager.isUserUnlocked(user.id)) {
+                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(
+                            MESSAGE_COPY_SHARED_ACCOUNT, parentUserId, user.id, account));
                 }
             }
         }
