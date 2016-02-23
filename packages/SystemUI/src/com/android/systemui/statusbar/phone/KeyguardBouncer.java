@@ -79,6 +79,11 @@ public class KeyguardBouncer {
     }
 
     public void show(boolean resetSecuritySelection) {
+        final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
+        if (keyguardUserId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser()) {
+            // In split system user mode, we never unlock system user.
+            return;
+        }
         mFalsingManager.onBouncerShown();
         ensureView();
         if (resetSecuritySelection) {
@@ -91,7 +96,6 @@ public class KeyguardBouncer {
         }
 
         final int activeUserId = ActivityManager.getCurrentUser();
-        final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
         final boolean allowDismissKeyguard =
                 !(UserManager.isSplitSystemUser() && activeUserId == UserHandle.USER_SYSTEM)
                 && activeUserId == keyguardUserId;
