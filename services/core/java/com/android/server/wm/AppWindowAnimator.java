@@ -153,6 +153,13 @@ public class AppWindowAnimator {
         } else {
             mClearProlongedAnimation = true;
         }
+
+        // Since we are finally starting our animation, we don't need the logic anymore to prevent
+        // the app from showing again if we just moved between stacks. See
+        // {@link WindowState#notifyMovedInStack}.
+        for (int i = mAppToken.allAppWindows.size() - 1; i >= 0; i--) {
+            mAppToken.allAppWindows.get(i).resetJustMovedInStack();
+        }
     }
 
     public void setDummyAnimation() {

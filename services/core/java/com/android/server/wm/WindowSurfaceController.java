@@ -62,7 +62,7 @@ class WindowSurfaceController {
     // However, we need to somehow handle the situation where the cropping would completely hide
     // the window. We achieve this by explicitly hiding the surface and not letting it be shown.
     private boolean mHiddenForCrop = false;
-
+    private boolean mHiddenForOtherReasons = false;
     private final String title;
 
     public WindowSurfaceController(SurfaceSession s,
@@ -95,6 +95,11 @@ class WindowSurfaceController {
 
     void hideInTransaction(String reason) {
         if (SHOW_TRANSACTIONS) logSurface("HIDE ( " + reason + " )", null);
+        mHiddenForOtherReasons = true;
+        updateVisibility();
+    }
+
+    private void hideSurface() {
         if (mSurfaceControl != null) {
             mSurfaceShown = false;
             try {
@@ -152,9 +157,10 @@ class WindowSurfaceController {
             if (clipRect.width() > 0 && clipRect.height() > 0) {
                 mSurfaceControl.setWindowCrop(clipRect);
                 mHiddenForCrop = false;
+                updateVisibility();
             } else {
-                hideInTransaction("setCrop");
                 mHiddenForCrop = true;
+                updateVisibility();
             }
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error setting crop surface of " + this
@@ -317,11 +323,26 @@ class WindowSurfaceController {
                 "SHOW (performLayout)", null);
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Showing " + this
                 + " during relayout");
+        mHiddenForOtherReasons = false;
+        return updateVisibility();
+    }
 
-        if (mHiddenForCrop) {
+    private boolean updateVisibility() {
+        if (mHiddenForCrop || mHiddenForOtherReasons) {
+            if (mSurfaceShown) {
+                hideSurface();
+            }
             return false;
+        } else {
+            if (!mSurfaceShown) {
+                return showSurface();
+            } else {
+                return true;
+            }
         }
+    }
 
+    private boolean showSurface() {
         try {
             mSurfaceShown = true;
             mSurfaceControl.show();
