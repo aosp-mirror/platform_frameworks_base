@@ -1923,6 +1923,7 @@ public final class TvInputManagerService extends SystemService {
                     pw.decreaseIndent();
                 }
             }
+            mTvInputHardwareManager.dump(fd, writer, args);
         }
     }
 
