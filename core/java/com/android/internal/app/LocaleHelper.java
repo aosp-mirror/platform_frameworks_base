@@ -16,8 +16,8 @@
 
 package com.android.internal.app;
 
-import android.icu.util.ULocale;
 import android.icu.text.ListFormatter;
+import android.icu.util.ULocale;
 import android.util.LocaleList;
 
 import java.text.Collator;
@@ -99,7 +99,7 @@ public class LocaleHelper {
      * @return the localized name of the locale.
      */
     public static String getDisplayName(Locale locale, Locale displayLocale, boolean sentenceCase) {
-        String result = ULocale.getDisplayName(locale.toLanguageTag(),
+        String result = ULocale.getDisplayNameWithDialect(locale.toLanguageTag(),
                 ULocale.forLocale(displayLocale));
         return sentenceCase ? toSentenceCase(result, displayLocale) : result;
     }
@@ -112,7 +112,8 @@ public class LocaleHelper {
      * @return the localized name of the locale.
      */
     public static String getDisplayName(Locale locale, boolean sentenceCase) {
-        String result = ULocale.getDisplayName(locale.toLanguageTag(), ULocale.getDefault());
+        String result = ULocale.getDisplayNameWithDialect(locale.toLanguageTag(),
+                ULocale.getDefault());
         return sentenceCase ? toSentenceCase(result, Locale.getDefault()) : result;
     }
 
@@ -155,7 +156,7 @@ public class LocaleHelper {
         }
 
         ListFormatter lfn = ListFormatter.getInstance(dispLocale);
-        return lfn.format(localeNames);
+        return lfn.format((Object[]) localeNames);
     }
 
     /**
