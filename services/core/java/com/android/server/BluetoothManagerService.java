@@ -1831,14 +1831,21 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        String errorMsg = null;
         if (mBluetoothBinder == null) {
-            writer.println("Bluetooth Service not connected");
+            errorMsg = "Bluetooth Service not connected";
         } else {
             try {
                 mBluetoothBinder.dump(fd, args);
             } catch (RemoteException re) {
-                writer.println("RemoteException while calling Bluetooth Service");
+                errorMsg = "RemoteException while calling Bluetooth Service";
             }
+        }
+        if (errorMsg != null) {
+            // Silently return if we are extracting metrics in Protobuf format
+            if ((args.length > 0) && args[0].startsWith("--proto"))
+                return;
+            writer.println(errorMsg);
         }
     }
 }
