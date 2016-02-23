@@ -30,7 +30,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.List;
-
+import java.util.Objects;
 
 /**
  * The interface that apps use to talk to the window manager.
@@ -1950,7 +1950,7 @@ public interface WindowManager extends ViewManager {
                 // already have one.
                 packageName = o.packageName;
             }
-            if (o.mTitle != null) {
+            if (!Objects.equals(mTitle, o.mTitle) && o.mTitle != null) {
                 // NOTE: mTitle only copied if the originator set one.
                 mTitle = o.mTitle;
                 changes |= TITLE_CHANGED;
