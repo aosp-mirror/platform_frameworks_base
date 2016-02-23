@@ -21211,6 +21211,7 @@ package android.net.wifi {
     method public void stopTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
     field public static final int MAX_SCAN_PERIOD_MS = 1024000; // 0xfa000
     field public static final int MIN_SCAN_PERIOD_MS = 1000; // 0x3e8
+    field public static final int REASON_DUPLICATE_REQEUST = -5; // 0xfffffffb
     field public static final int REASON_INVALID_LISTENER = -2; // 0xfffffffe
     field public static final int REASON_INVALID_REQUEST = -3; // 0xfffffffd
     field public static final int REASON_NOT_AUTHORIZED = -4; // 0xfffffffc
