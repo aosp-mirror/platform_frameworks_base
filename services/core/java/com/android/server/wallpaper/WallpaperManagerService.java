@@ -104,7 +104,7 @@ import libcore.io.IoUtils;
 
 public class WallpaperManagerService extends IWallpaperManager.Stub {
     static final String TAG = "WallpaperManagerService";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     final Object mLock = new Object();
 

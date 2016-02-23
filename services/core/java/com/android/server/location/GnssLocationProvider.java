@@ -508,18 +508,18 @@ public class GnssLocationProvider implements LocationProviderInterface {
     };
 
     private void subscriptionOrSimChanged(Context context) {
-        Log.d(TAG, "received SIM related action: ");
+        if (DEBUG) Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
         String mccMnc = phone.getSimOperator();
         if (!TextUtils.isEmpty(mccMnc)) {
-            Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
+            if (DEBUG) Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
             synchronized (mLock) {
                 reloadGpsProperties(context, mProperties);
                 mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
             }
         } else {
-            Log.d(TAG, "SIM MCC/MNC is still not available");
+            if (DEBUG) Log.d(TAG, "SIM MCC/MNC is still not available");
         }
     }
 
@@ -569,7 +569,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     private void reloadGpsProperties(Context context, Properties properties) {
-        Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
+        if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
         loadPropertiesFromResource(context, properties);
         boolean isPropertiesLoadedFromFile = false;
         final String gpsHardware = SystemProperties.get("ro.hardware.gps");
@@ -582,7 +582,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (!isPropertiesLoadedFromFile) {
             loadPropertiesFromFile(DEFAULT_PROPERTIES_FILE, properties);
         }
-        Log.d(TAG, "GPS properties reloaded, size = " + properties.size());
+        if (DEBUG) Log.d(TAG, "GPS properties reloaded, size = " + properties.size());
 
         // TODO: we should get rid of C2K specific setting.
         setSuplHostPort(properties.getProperty("SUPL_HOST"),
@@ -603,7 +603,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
                 properties.store(baos, null);
                 native_configuration_update(baos.toString());
-                Log.d(TAG, "final config = " + baos.toString());
+                if (DEBUG) Log.d(TAG, "final config = " + baos.toString());
             } catch (IOException ex) {
                 Log.e(TAG, "failed to dump properties contents");
             }
@@ -628,7 +628,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         String[] configValues = context.getResources().getStringArray(
                 com.android.internal.R.array.config_gpsParameters);
         for (String item : configValues) {
-            Log.d(TAG, "GpsParamsResource: " + item);
+            if (DEBUG) Log.d(TAG, "GpsParamsResource: " + item);
             // We need to support "KEY =", but not "=VALUE".
             String[] split = item.split("=");
             if (split.length == 2) {
@@ -917,11 +917,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     long certainty = mNtpTime.getCacheCertainty();
                     long now = System.currentTimeMillis();
 
-                    Log.d(TAG, "NTP server returned: "
-                            + time + " (" + new Date(time)
-                            + ") reference: " + timeReference
-                            + " certainty: " + certainty
-                            + " system time offset: " + (time - now));
+                    if (DEBUG) {
+                        Log.d(TAG, "NTP server returned: "
+                                + time + " (" + new Date(time)
+                                + ") reference: " + timeReference
+                                + " certainty: " + certainty
+                                + " system time offset: " + (time - now));
+                    }
 
                     native_inject_time(time, timeReference, (int) certainty);
                     delay = NTP_INTERVAL;
@@ -1633,7 +1635,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
                 break;
             default:
-                Log.d(TAG, "Received Unknown AGPS status: " + status);
+                if (DEBUG) Log.d(TAG, "Received Unknown AGPS status: " + status);
         }
     }
 

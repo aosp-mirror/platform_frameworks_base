@@ -623,7 +623,7 @@ public abstract class BatteryStats implements Parcelable {
             /**
              * The statistics associated with a particular service.
              */
-            public abstract class Serv {
+            public static abstract class Serv {
 
                 /**
                  * Returns the amount of time spent started.
