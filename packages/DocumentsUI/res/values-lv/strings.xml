@@ -59,15 +59,17 @@
     <string name="share_via" msgid="8966594246261344259">"Kopīgot, izmantojot"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Notiek failu kopēšana"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Atlikušais laiks: <xliff:g id="DURATION">%s</xliff:g>"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"Notiek <xliff:g id="COUNT">%1$d</xliff:g> faila kopēšana."</item>
-    <item quantity="other" msgid="5175026054495572228">"Notiek <xliff:g id="COUNT">%1$d</xliff:g> failu kopēšana."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="zero">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> failu kopēšana.</item>
+      <item quantity="one">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> faila kopēšana.</item>
+      <item quantity="other">Notiek <xliff:g id="COUNT_1">%1$d</xliff:g> failu kopēšana.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Gatavošanās kopēšanai…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"Nevarēja nokopēt <xliff:g id="COUNT">%1$d</xliff:g> failu."</item>
-    <item quantity="other" msgid="7124097894673644954">"Nevarēja nokopēt <xliff:g id="COUNT">%1$d</xliff:g> failus."</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="zero">Nevarēja nokopēt <xliff:g id="COUNT_1">%1$d</xliff:g> failus</item>
+      <item quantity="one">Nevarēja nokopēt <xliff:g id="COUNT_1">%1$d</xliff:g> failu</item>
+      <item quantity="other">Nevarēja nokopēt <xliff:g id="COUNT_1">%1$d</xliff:g> failus</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Pieskarieties, lai skatītu informāciju"</string>
     <string name="retry" msgid="7564024179122207376">"Mēģināt vēlreiz"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Netika nokopēti šādi faili: <xliff:g id="LIST">%1$s</xliff:g>"</string>

@@ -27,7 +27,7 @@
     <string name="menu_settings" msgid="6008033148948428823">"সেটিংস"</string>
     <string name="menu_open" msgid="432922957274920903">"খুলুন"</string>
     <string name="menu_save" msgid="2394743337684426338">"সংরক্ষণ করুন"</string>
-    <string name="menu_share" msgid="3075149983979628146">"ভাগ করুন"</string>
+    <string name="menu_share" msgid="3075149983979628146">"শেয়ার করুন"</string>
     <string name="menu_delete" msgid="8138799623850614177">"মুছুন"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"সবগুলি নির্বাচন করুন"</string>
     <string name="menu_copy" msgid="3612326052677229148">"এতে অনুলিপি করুন…"</string>
@@ -56,18 +56,18 @@
     <string name="empty" msgid="7858882803708117596">"কোনো আইটেম নেই"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ফাইল খোলা যাবে না"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"কিছু দস্তাবেজ মুছতে অসমর্থ"</string>
-    <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে ভাগ করুন"</string>
+    <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে শেয়ার করুন"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ফাইলগুলি অনুলিপি করা হচ্ছে"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> বাকি"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইল প্রতিলিপি করা হচ্ছে৷"</item>
-    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইল প্রতিলিপি করা হচ্ছে৷"</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"অনুলিপি করার জন্য প্রস্তুত করা হচ্ছে..."</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি"</item>
-    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইলের প্রতিলিপি করা যায়নি</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"বিশদ বিবরণ দেখতে স্পর্শ করুন"</string>
     <string name="retry" msgid="7564024179122207376">"পুনরায় চেষ্টা করুন"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"এই ফাইলগুলির প্রতিলিপি করা হয় নি: <xliff:g id="LIST">%1$s</xliff:g>"</string>
