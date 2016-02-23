@@ -57,6 +57,7 @@ import android.media.SubtitleTrack.RenderingWidget;
 import android.media.SyncParams;
 
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.Preconditions;
 
 import libcore.io.IoBridge;
 import libcore.io.Libcore;
@@ -964,8 +965,8 @@ public class MediaPlayer implements SubtitleController.Listener
      * @param uri the Content URI of the data you want to play
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public void setDataSource(Context context, Uri uri)
-        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(@NonNull Context context, @NonNull Uri uri)
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
         setDataSource(context, uri, null);
     }
 
@@ -981,47 +982,46 @@ public class MediaPlayer implements SubtitleController.Listener
      *                to disallow or allow cross domain redirection.
      * @throws IllegalStateException if it is called in an invalid state
      */
-    public void setDataSource(Context context, Uri uri, Map<String, String> headers)
-            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+    public void setDataSource(@NonNull Context context, @NonNull Uri uri,
+            @Nullable Map<String, String> headers) throws IOException, IllegalArgumentException,
+                    SecurityException, IllegalStateException {
+        final ContentResolver resolver = context.getContentResolver();
         final String scheme = uri.getScheme();
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
             setDataSource(uri.getPath());
             return;
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
                 && Settings.AUTHORITY.equals(uri.getAuthority())) {
-            // Redirect ringtones to go directly to underlying provider
-            uri = RingtoneManager.getActualDefaultRingtoneUri(context,
-                    RingtoneManager.getDefaultType(uri));
-            if (uri == null) {
-                throw new FileNotFoundException("Failed to resolve default ringtone");
-            }
-        }
-
-        AssetFileDescriptor fd = null;
-        try {
-            ContentResolver resolver = context.getContentResolver();
-            fd = resolver.openAssetFileDescriptor(uri, "r");
-            if (fd == null) {
+            // Try cached ringtone first since the actual provider may not be
+            // encryption aware, or it may be stored on CE media storage
+            final int type = RingtoneManager.getDefaultType(uri);
+            final Uri cacheUri = RingtoneManager.getCacheForType(type);
+            final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context, type);
+            if (attemptDataSource(resolver, cacheUri)) {
                 return;
-            }
-            // Note: using getDeclaredLength so that our behavior is the same
-            // as previous versions when the content provider is returning
-            // a full file.
-            if (fd.getDeclaredLength() < 0) {
-                setDataSource(fd.getFileDescriptor());
+            } else if (attemptDataSource(resolver, actualUri)) {
+                return;
             } else {
-                setDataSource(fd.getFileDescriptor(), fd.getStartOffset(), fd.getDeclaredLength());
+                setDataSource(uri.toString(), headers);
             }
-            return;
-        } catch (SecurityException | IOException ex) {
-            Log.w(TAG, "Couldn't open file on client side; trying server side: " + ex);
-        } finally {
-            if (fd != null) {
-                fd.close();
+        } else {
+            // Try requested Uri locally first, or fallback to media server
+            if (attemptDataSource(resolver, uri)) {
+                return;
+            } else {
+                setDataSource(uri.toString(), headers);
             }
         }
+    }
 
-        setDataSource(uri.toString(), headers);
+    private boolean attemptDataSource(ContentResolver resolver, Uri uri) {
+        try (AssetFileDescriptor afd = resolver.openAssetFileDescriptor(uri, "r")) {
+            setDataSource(afd);
+            return true;
+        } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open " + uri + ": " + ex);
+            return false;
+        }
     }
 
     /**
@@ -1100,6 +1100,26 @@ public class MediaPlayer implements SubtitleController.Listener
     private native void nativeSetDataSource(
         IBinder httpServiceBinder, String path, String[] keys, String[] values)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException;
+
+    /**
+     * Sets the data source (AssetFileDescriptor) to use. It is the caller's
+     * responsibility to close the file descriptor. It is safe to do so as soon
+     * as this call returns.
+     *
+     * @param afd the AssetFileDescriptor for the file you want to play
+     */
+    public void setDataSource(@NonNull AssetFileDescriptor afd)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        Preconditions.checkNotNull(afd);
+        // Note: using getDeclaredLength so that our behavior is the same
+        // as previous versions when the content provider is returning
+        // a full file.
+        if (afd.getDeclaredLength() < 0) {
+            setDataSource(afd.getFileDescriptor());
+        } else {
+            setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getDeclaredLength());
+        }
+    }
 
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's responsibility
