@@ -46,6 +46,7 @@ import android.widget.TextView.OnEditorActionListener;
 import com.android.documentsui.BaseActivity;
 import com.android.documentsui.DocumentsApplication;
 import com.android.documentsui.R;
+import com.android.documentsui.Shared;
 import com.android.documentsui.Snackbars;
 import com.android.documentsui.model.DocumentInfo;
 
@@ -55,6 +56,7 @@ import com.android.documentsui.model.DocumentInfo;
 public class RenameDocumentFragment extends DialogFragment {
     private static final String TAG_RENAME_DOCUMENT = "rename_document";
     private DocumentInfo mDocument;
+    private EditText mEditText;
 
     public static void show(FragmentManager fm, DocumentInfo document) {
         final RenameDocumentFragment dialog = new RenameDocumentFragment();
@@ -62,6 +64,11 @@ public class RenameDocumentFragment extends DialogFragment {
         dialog.show(fm, TAG_RENAME_DOCUMENT);
     }
 
+    /**
+     * Creates the dialog UI.
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Context context = getActivity();
@@ -69,8 +76,7 @@ public class RenameDocumentFragment extends DialogFragment {
         LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
         View view = dialogInflater.inflate(R.layout.dialog_file_name, null, false);
 
-        final EditText editText = (EditText) view.findViewById(android.R.id.text1);
-        fillWithFileName(editText, mDocument.displayName);
+        mEditText = (EditText) view.findViewById(android.R.id.text1);
         builder.setTitle(R.string.menu_rename);
         builder.setView(view);
 
@@ -79,7 +85,7 @@ public class RenameDocumentFragment extends DialogFragment {
                 new OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        renameDocuments(editText.getText().toString());
+                        renameDocuments(mEditText.getText().toString());
                     }
                 });
 
@@ -87,7 +93,7 @@ public class RenameDocumentFragment extends DialogFragment {
 
         final AlertDialog dialog = builder.create();
 
-        editText.setOnEditorActionListener(
+        mEditText.setOnEditorActionListener(
                 new OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(
@@ -95,15 +101,48 @@ public class RenameDocumentFragment extends DialogFragment {
                         if ((actionId == EditorInfo.IME_ACTION_DONE) || (event != null
                                 && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
                                 && event.hasNoModifiers())) {
-                            renameDocuments(editText.getText().toString());
+                            renameDocuments(mEditText.getText().toString());
                             dialog.dismiss();
                             return true;
                         }
                         return false;
                     }
                 });
-
         return dialog;
+    }
+
+    /**
+     * Sets/Restores the data.
+     * @param savedInstanceState
+     * @return
+     */
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if(savedInstanceState == null) {
+            // Fragment created for the first time, we set the text.
+            // mDocument value was set in show
+            mEditText.setText(mDocument.displayName);
+        }
+        else {
+            // Fragment restored, text was restored automatically.
+            // mDocument value needs to be restored.
+            mDocument = savedInstanceState.getParcelable(Shared.EXTRA_DOC);
+        }
+        // Do selection in both cases, because we cleared it.
+        selectFileName(mEditText);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // Clear selection before storing state and restore it manually,
+        // because otherwise after rotation selection is displayed with cut/copy menu visible :/
+        clearFileNameSelection(mEditText);
+
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(Shared.EXTRA_DOC, mDocument);
     }
 
     /**
@@ -120,12 +159,20 @@ public class RenameDocumentFragment extends DialogFragment {
      * Fills text field with the file name and selects the name without extension.
      *
      * @param editText text field to be filled
-     * @param name full name of the file
      */
-    private void fillWithFileName(EditText editText, String name) {
-        editText.setText(name);
-        int separatorIndex = name.indexOf(".");
-        editText.setSelection(0, separatorIndex == -1 ? name.length() : separatorIndex);
+    private void selectFileName(EditText editText) {
+        String text = editText.getText().toString();
+        int separatorIndex = text.indexOf(".");
+        editText.setSelection(0, separatorIndex == -1 ? text.length() : separatorIndex);
+    }
+
+    /**
+     * Clears selection in text field.
+     *
+     * @param editText text field to be cleared.
+     */
+    private void clearFileNameSelection(EditText editText) {
+        editText.setSelection(0, 0);
     }
 
     private void renameDocuments(String newDisplayName) {
