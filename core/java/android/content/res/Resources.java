@@ -769,7 +769,6 @@ public class Resources {
      * @deprecated Use {@link #getDrawable(int, Theme)} instead.
      */
     @Deprecated
-    @Nullable
     public Drawable getDrawable(@DrawableRes int id) throws NotFoundException {
         final Drawable d = getDrawable(id, null);
         if (d != null && d.canApplyTheme()) {
@@ -794,7 +793,6 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist.
      */
-    @Nullable
     public Drawable getDrawable(@DrawableRes int id, @Nullable Theme theme)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue(id);
@@ -832,7 +830,6 @@ public class Resources {
      * @deprecated Use {@link #getDrawableForDensity(int, int, Theme)} instead.
      */
     @Deprecated
-    @Nullable
     public Drawable getDrawableForDensity(@DrawableRes int id, int density)
             throws NotFoundException {
         return getDrawableForDensity(id, density, null);
@@ -852,7 +849,6 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      */
-    @Nullable
     public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
         final TypedValue value = obtainTempTypedValue(id);
         try {
