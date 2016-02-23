@@ -2362,6 +2362,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         stack.positionTask(task, position);
         // The task might have already been running and its visibility needs to be synchronized with
         // the visibility of the stack / windows.
+        stack.ensureActivityConfigurationLocked(task.topRunningActivityLocked(), 0,
+                !PRESERVE_WINDOWS);
         stack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
     }
