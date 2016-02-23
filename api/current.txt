@@ -423,6 +423,7 @@ package android {
     field public static final int controlX2 = 16843774; // 0x10103fe
     field public static final int controlY1 = 16843773; // 0x10103fd
     field public static final int controlY2 = 16843775; // 0x10103ff
+    field public static final int countDown = 16844060; // 0x101051c
     field public static final int country = 16843962; // 0x10104ba
     field public static final int cropToPadding = 16843043; // 0x1010123
     field public static final int cursorVisible = 16843090; // 0x1010152
@@ -46075,7 +46076,9 @@ package android.widget {
     method public long getBase();
     method public java.lang.String getFormat();
     method public android.widget.Chronometer.OnChronometerTickListener getOnChronometerTickListener();
+    method public boolean isCountDown();
     method public void setBase(long);
+    method public void setCountDown(boolean);
     method public void setFormat(java.lang.String);
     method public void setOnChronometerTickListener(android.widget.Chronometer.OnChronometerTickListener);
     method public void start();

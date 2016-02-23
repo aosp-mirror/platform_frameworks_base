@@ -3539,6 +3539,9 @@ i
              If no format string is specified, the Chronometer will simply display
              "MM:SS" or "H:MM:SS". -->
         <attr name="format" format="string" localization="suggested" />
+        <!-- Specifies whether this Chronometer counts down or counts up from the base.
+              If not specified this is false and the Chronometer counts up. -->
+        <attr name="countDown" format="boolean" />
     </declare-styleable>
     <declare-styleable name="CompoundButton">
         <!-- Indicates the initial checked state of this button. -->
