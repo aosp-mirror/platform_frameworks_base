@@ -491,7 +491,8 @@ public class DirectoryFragment extends Fragment
             // triggered on "silent" selection updates (i.e. we might be reacting to unfinalized
             // selection changes here)
             final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
+            if ((docFlags & Document.FLAG_SUPPORTS_DELETE) == 0
+                    && (docFlags & Document.FLAG_SUPPORTS_DELETE) == 0) {
                 mNoDeleteCount += selected ? 1 : -1;
             }
             if ((docFlags & Document.FLAG_SUPPORTS_RENAME) != 0) {
@@ -1501,7 +1502,8 @@ public class DirectoryFragment extends Fragment
                     contentsUri = DocumentsContract.setManageMode(contentsUri);
                 }
                 return new DirectoryLoader(
-                        context, mType, mRoot, mDocument, contentsUri, state.userSortOrder, mSearchMode);
+                        context, mType, mRoot, mDocument, contentsUri, state.userSortOrder,
+                        mSearchMode);
             case TYPE_RECENT_OPEN:
                 final RootsCache roots = DocumentsApplication.getRootsCache(context);
                 return new RecentsLoader(context, roots, state);
