@@ -734,6 +734,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         if (targetLeft == 0 && mCurrIconRow != null) {
             mCurrIconRow.resetState();
+            mCurrIconRow = null;
             if (mGearExposedView != null && mGearExposedView == mTranslatingParentView) {
                 mGearExposedView = null;
             }
@@ -3399,7 +3400,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         private static final long GEAR_SHOW_DELAY = 60;
 
-        private ArrayList<View> mTranslatingViews = new ArrayList<>();
         private CheckForDrag mCheckForDrag;
         private Handler mHandler;
         private int mMoveState = MOVE_STATE_UNDEFINED;
@@ -3416,6 +3416,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             // Reset check for drag gesture
             mCheckForDrag = null;
+            mCurrIconRow = null;
 
             // Slide back any notifications that might be showing a gear
             resetExposedGearView();
@@ -3424,9 +3425,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // Set the listener for the current row's gear
                 mCurrIconRow = ((ExpandableNotificationRow) currView).getSettingsRow();
                 mCurrIconRow.setGearListener(NotificationStackScrollLayout.this);
-
-                // And the translating children
-                mTranslatingViews = ((ExpandableNotificationRow) currView).getContentViews();
             }
             mMoveState = MOVE_STATE_UNDEFINED;
         }
@@ -3440,15 +3438,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             mMoveState = newMoveState;
 
-            if (view instanceof ExpandableNotificationRow) {
-                ((ExpandableNotificationRow) view).setTranslationForOutline(translation);
-                if (!isPinnedHeadsUp(view)) {
-                    // Only show the gear if we're not a heads up view.
-                    checkForDrag();
-                    if (mCurrIconRow != null) {
-                        mCurrIconRow.updateSettingsIcons(translation, getSize(view));
-                    }
-                }
+            final boolean gutsExposed = (view instanceof ExpandableNotificationRow)
+                    && ((ExpandableNotificationRow) view).areGutsExposed();
+
+            if (!isPinnedHeadsUp(view) && !gutsExposed) {
+                // Only show the gear if we're not a heads up view and guts aren't exposed.
+                checkForDrag();
             }
         }
 
@@ -3471,12 +3466,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                     (!fromLeft && absTrans >= snapBackThreshold * 0.4f
                             && absTrans <= notiThreshold);
 
-            if (pastGear && !isPinnedHeadsUp(animView)) {
+            if (pastGear && !isPinnedHeadsUp(animView)
+                    && (animView instanceof ExpandableNotificationRow)) {
                 // bouncity
                 final float target = fromLeft ? snapBackThreshold : -snapBackThreshold;
                 mGearExposedView = mTranslatingParentView;
-                if (mGearDisplayedListener != null
-                        && (animView instanceof ExpandableNotificationRow)) {
+                if (mGearDisplayedListener != null) {
                     mGearDisplayedListener.onGearDisplayed((ExpandableNotificationRow) animView);
                 }
                 super.snapChild(animView, target, velocity);
@@ -3486,38 +3481,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        public void onTranslationUpdate(View animView, float value, boolean canBeDismissed) {
-            if (mDismissAllInProgress) {
-                // When dismissing all, we translate the entire view instead.
-                super.onTranslationUpdate(animView, value, canBeDismissed);
-                return;
-            }
-            if (animView instanceof ExpandableNotificationRow) {
-                ((ExpandableNotificationRow) animView).setTranslationForOutline(value);
-            }
-            if (mCurrIconRow != null) {
-                mCurrIconRow.updateSettingsIcons(value, getSize(animView));
-            }
-        }
-
-        @Override
         public Animator getViewTranslationAnimator(View v, float target,
                 AnimatorUpdateListener listener) {
             if (mDismissAllInProgress) {
                 // When dismissing all, we translate the entire view instead.
                 return super.getViewTranslationAnimator(v, target, listener);
+            } else if (v instanceof ExpandableNotificationRow) {
+                return ((ExpandableNotificationRow) v).getTranslateViewAnimator(target, listener);
+            } else {
+                return super.getViewTranslationAnimator(v, target, listener);
             }
-            ArrayList<Animator> animators = new ArrayList<Animator>();
-            for (int i = 0; i < mTranslatingViews.size(); i++) {
-                ObjectAnimator anim = createTranslationAnimation(mTranslatingViews.get(i), target);
-                animators.add(anim);
-                if (i == 0 && listener != null) {
-                    anim.addUpdateListener(listener);
-                }
-            }
-            AnimatorSet set = new AnimatorSet();
-            set.playTogether(animators);
-            return set;
         }
 
         @Override
@@ -3525,13 +3498,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mDismissAllInProgress) {
                 // When dismissing all, we translate the entire view instead.
                 super.setTranslation(v, translate);
-                return;
-            }
-            // Translate the group of views
-            for (int i = 0; i < mTranslatingViews.size(); i++) {
-                if (mTranslatingViews.get(i) != null) {
-                    super.setTranslation(mTranslatingViews.get(i), translate);
-                }
+            } else {
+                ((ExpandableView) v).setTranslation(translate);
             }
         }
 
@@ -3540,14 +3508,10 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mDismissAllInProgress) {
                 // When dismissing all, we translate the entire view instead.
                 return super.getTranslation(v);
+            } else {
+                return ((ExpandableView) v).getTranslation();
             }
-            // All of the views in the list should have same translation, just use first one.
-            if (mTranslatingViews.size() > 0) {
-                return super.getTranslation(mTranslatingViews.get(0));
-            }
-            return 0;
         }
-
 
         /**
          * Returns the horizontal space in pixels required to display the gear behind a
@@ -3603,26 +3567,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             final View prevGearExposedView = mGearExposedView;
             mGearExposedView = null;
 
-            AnimatorListenerAdapter listener = new AnimatorListenerAdapter() {
-                public void onAnimationEnd(Animator animator) {
-                    if (prevGearExposedView instanceof ExpandableNotificationRow) {
-                        ((ExpandableNotificationRow) prevGearExposedView).getSettingsRow()
-                                .resetState();
-                    }
-                }
-            };
-            AnimatorUpdateListener updateListener = new AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    if (prevGearExposedView instanceof ExpandableNotificationRow) {
-                        ((ExpandableNotificationRow) prevGearExposedView)
-                                .setTranslationForOutline((float) animation.getAnimatedValue());
-                    }
-                }
-            };
-            Animator set = getViewTranslationAnimator(prevGearExposedView, 0, updateListener);
-            set.addListener(listener);
-            set.start();
+            Animator anim = getViewTranslationAnimator(prevGearExposedView,
+                    0 /* leftTarget */, null /* updateListener */);
+            if (anim != null) {
+                anim.start();
+            }
         }
     }
 
