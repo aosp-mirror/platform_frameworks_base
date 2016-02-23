@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.notification.FakeShadowView;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -605,20 +606,40 @@ public class StackScrollAlgorithm {
     private void updateZValuesForState(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
         int childCount = algorithmState.visibleChildren.size();
-        int childrenOnTop = 0;
+        float childrenOnTop = 0.0f;
         for (int i = childCount - 1; i >= 0; i--) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             StackViewState childViewState = resultState.getViewStateForView(child);
             if (i > (childCount - 1 - algorithmState.itemsInBottomStack)) {
                 // We are in the bottom stack
                 float numItemsAbove = i - (childCount - 1 - algorithmState.itemsInBottomStack);
-                childViewState.zTranslation = mZBasicHeight
-                        - numItemsAbove * mZDistanceBetweenElements;
+                float zSubtraction;
+                if (numItemsAbove <= 1.0f) {
+                    float factor = 0.2f;
+                    // Lets fade in slower to the threshold to make the shadow fade in look nicer
+                    if (numItemsAbove <= factor) {
+                        zSubtraction = FakeShadowView.SHADOW_SIBLING_TRESHOLD
+                                * numItemsAbove * (1.0f / factor);
+                    } else {
+                        zSubtraction = FakeShadowView.SHADOW_SIBLING_TRESHOLD
+                                + (numItemsAbove - factor) * (1.0f / (1.0f - factor))
+                                        * (mZDistanceBetweenElements
+                                                - FakeShadowView.SHADOW_SIBLING_TRESHOLD);
+                    }
+                } else {
+                    zSubtraction = numItemsAbove * mZDistanceBetweenElements;
+                }
+                childViewState.zTranslation = mZBasicHeight - zSubtraction;
             } else if (child.mustStayOnScreen()
                     && childViewState.yTranslation < ambientState.getTopPadding()
                     + ambientState.getStackTranslation()) {
-                // TODO; do this more cleanly
-                childrenOnTop++;
+                if (childrenOnTop != 0.0f) {
+                    childrenOnTop++;
+                } else {
+                    float overlap = ambientState.getTopPadding()
+                            + ambientState.getStackTranslation() - childViewState.yTranslation;
+                    childrenOnTop += Math.min(1.0f, overlap / childViewState.height);
+                }
                 childViewState.zTranslation = mZBasicHeight
                         + childrenOnTop * mZDistanceBetweenElements;
             } else {

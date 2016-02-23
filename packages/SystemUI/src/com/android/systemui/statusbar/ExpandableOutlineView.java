@@ -70,6 +70,11 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         }
     }
 
+    @Override
+    public float getOutlineAlpha() {
+        return mOutlineAlpha;
+    }
+
     protected void setOutlineRect(RectF rect) {
         if (rect != null) {
             setOutlineRect(rect.left, rect.top, rect.right, rect.bottom);
@@ -78,6 +83,11 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             setClipToOutline(false);
             invalidateOutline();
         }
+    }
+
+    @Override
+    public int getOutlineTranslation() {
+        return mCustomOutline ? mOutlineRect.left : 0;
     }
 
     protected void setOutlineRect(float left, float top, float right, float bottom) {
