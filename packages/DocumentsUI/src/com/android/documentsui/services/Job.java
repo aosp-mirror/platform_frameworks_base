@@ -116,19 +116,17 @@ abstract public class Job implements Runnable {
         listener.onStart(this);
         try {
             start();
-        } catch (Exception e) {
-            // In the case of an unmanaged failure, we still want
-            // to resolve business in an orderly fashion. That'll
-            // ensure the service is shut down and notifications
-            // shown/closed.
-            Log.e(TAG, "Operation failed due to an exception.", e);
+        } catch (RuntimeException e) {
+            // No exceptions should be thrown here, as all calls to the provider must be
+            // handled within Job implementations. However, just in case catch them here.
+            Log.e(TAG, "Operation failed due to an unhandled runtime exception.", e);
             Metrics.logFileOperationErrors(service, operationType, failedFiles);
         } finally {
             listener.onFinished(this);
         }
     }
 
-    abstract void start() throws RemoteException;
+    abstract void start();
 
     abstract Notification getSetupNotification();
     // TODO: Progress notification for deletes.
@@ -186,15 +184,13 @@ abstract public class Job implements Runnable {
         return false;
     }
 
-    final boolean deleteDocument(DocumentInfo doc) {
+    final void deleteDocument(DocumentInfo doc) throws ResourceException {
         try {
             DocumentsContract.deleteDocument(getClient(doc), doc.derivedUri);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to delete file: " + doc.derivedUri, e);
-            return false;
+        } catch (Exception e) {
+            throw new ResourceException("Failed to delete file %s due to an exception.",
+                    doc.derivedUri, e);
         }
-
-        return true;  // victory dance!
     }
 
     Notification getSetupNotification(String content) {
