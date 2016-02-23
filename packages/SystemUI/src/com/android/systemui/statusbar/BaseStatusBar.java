@@ -2139,15 +2139,21 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void updatePublicContentView(Entry entry,
             StatusBarNotification sbn) {
         final RemoteViews publicContentView = entry.cachedPublicContentView;
-        if (publicContentView != null && entry.getPublicContentView() != null) {
+        View inflatedView = entry.getPublicContentView();
+        if (entry.autoRedacted && publicContentView != null && inflatedView != null) {
             final boolean disabledByPolicy =
                     !adminAllowsUnredactedNotifications(entry.notification.getUserId());
-            publicContentView.setTextViewText(android.R.id.title,
-                    mContext.getString(disabledByPolicy
-                            ? com.android.internal.R.string.notification_hidden_by_policy_text
-                            : com.android.internal.R.string.notification_hidden_text));
-            publicContentView.reapply(sbn.getPackageContext(mContext),
-                    entry.getPublicContentView(), mOnClickHandler);
+            String notificationHiddenText = mContext.getString(disabledByPolicy
+                    ? com.android.internal.R.string.notification_hidden_by_policy_text
+                    : com.android.internal.R.string.notification_hidden_text);
+            TextView titleView = (TextView) inflatedView.findViewById(android.R.id.title);
+            if (titleView != null
+                    && !titleView.getText().toString().equals(notificationHiddenText)) {
+                publicContentView.setTextViewText(android.R.id.title, notificationHiddenText);
+                publicContentView.reapply(sbn.getPackageContext(mContext),
+                        inflatedView, mOnClickHandler);
+                entry.row.onNotificationUpdated(entry);
+            }
         }
     }
 
