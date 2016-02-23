@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * Static utility class for dealing with {@link Message} objects.
@@ -62,8 +63,12 @@ public class MessageUtils {
             }
 
             for (Field field : fields) {
-                String name = field.getName();
+                int modifiers = field.getModifiers();
+                if (!Modifier.isStatic(modifiers) | !Modifier.isFinal(modifiers)) {
+                    continue;
+                }
 
+                String name = field.getName();
                 for (String prefix : prefixes) {
                     // Does this look like a constant?
                     if (!name.startsWith(prefix)) {
