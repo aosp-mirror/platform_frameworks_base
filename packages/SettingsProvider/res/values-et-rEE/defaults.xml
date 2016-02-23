@@ -21,4 +21,5 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="def_device_name" msgid="6309317409634339402">"%2$s, %1$s"</string>
     <string name="def_device_name_simple" msgid="9037785625140748221">"%1$s"</string>
+    <string name="def_nfc_payment_component" msgid="5861297439873026958"></string>
 </resources>
