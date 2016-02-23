@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -145,11 +146,12 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_COSTS_MONEY = 1<<0;
 
     /**
-     * Flag for {@link #flags}, corresponding to <code>hidden</code>
+     * Flag for {@link #flags}, corresponding to <code>removed</code>
      * value of {@link android.R.attr#permissionFlags}.
      * @hide
      */
-    public static final int FLAG_HIDDEN = 1<<1;
+    @SystemApi
+    public static final int FLAG_REMOVED = 1<<1;
 
     /**
      * Flag for {@link #flags}, indicating that this permission has been
