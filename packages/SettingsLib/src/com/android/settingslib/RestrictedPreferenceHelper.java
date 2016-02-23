@@ -54,7 +54,7 @@ public class RestrictedPreferenceHelper {
 
         mRestrictedPadlock = RestrictedLockUtils.getRestrictedPadlock(mContext);
         mRestrictedPadlockPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.restricted_lock_icon_padding);
+                R.dimen.restricted_icon_padding);
 
         if (attrs != null) {
             final TypedArray attributes = context.obtainStyledAttributes(attrs,

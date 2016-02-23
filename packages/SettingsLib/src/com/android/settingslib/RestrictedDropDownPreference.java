@@ -49,7 +49,7 @@ public class RestrictedDropDownPreference extends DropDownPreference {
 
         mRestrictedPadlock = RestrictedLockUtils.getRestrictedPadlock(context);
         mRestrictedPadlockPadding = context.getResources().getDimensionPixelSize(
-                R.dimen.restricted_lock_icon_padding);
+                R.dimen.restricted_icon_padding);
     }
 
     private final OnItemSelectedListener mItemSelectedListener = new OnItemSelectedListener() {

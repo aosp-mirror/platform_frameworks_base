@@ -36,7 +36,7 @@ public class RestrictedLockImageSpan extends ImageSpan {
 
         mContext = context;
         mExtraPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.restricted_lock_icon_padding);
+                R.dimen.restricted_icon_padding);
         mRestrictedPadlock = RestrictedLockUtils.getRestrictedPadlock(mContext);
     }
 
@@ -53,7 +53,7 @@ public class RestrictedLockImageSpan extends ImageSpan {
 
         // Add extra padding before the padlock.
         float transX = x + mExtraPadding;
-        float transY = bottom - drawable.getBounds().bottom - paint.getFontMetricsInt().descent;
+        float transY = (bottom - drawable.getBounds().bottom) / 2.0f;
 
         canvas.translate(transX, transY);
         drawable.draw(canvas);
