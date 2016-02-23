@@ -341,6 +341,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_PROVISION_FINALIZATION
             = "android.app.action.PROVISION_FINALIZATION";
@@ -932,30 +933,35 @@ public class DevicePolicyManager {
      * No management for current user in-effect. This is the default.
      * @hide
      */
+    @SystemApi
     public static final int STATE_USER_UNMANAGED = 0;
 
     /**
      * Management partially setup, user setup needs to be completed.
      * @hide
      */
+    @SystemApi
     public static final int STATE_USER_SETUP_INCOMPLETE = 1;
 
     /**
      * Management partially setup, user setup completed.
      * @hide
      */
+    @SystemApi
     public static final int STATE_USER_SETUP_COMPLETE = 2;
 
     /**
      * Management setup and active on current user.
      * @hide
      */
+    @SystemApi
     public static final int STATE_USER_SETUP_FINALIZED = 3;
 
     /**
      * Management partially setup on a managed profile.
      * @hide
      */
+    @SystemApi
     public static final int STATE_USER_PROFILE_COMPLETE = 4;
 
     /**
@@ -5900,6 +5906,7 @@ public class DevicePolicyManager {
      *         return {@link #STATE_USER_UNMANAGED}
      * @hide
      */
+    @SystemApi
     @UserProvisioningState
     public int getUserProvisioningState() {
         if (mService != null) {
