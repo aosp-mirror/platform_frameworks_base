@@ -2226,6 +2226,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
+        if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
+            throw new IllegalArgumentException("moveTaskToStack:"
+                    + "Attempt to move task " + taskId + " to unsupported freeform stack");
+        }
+
         final ActivityRecord topActivity = task.getTopActivity();
         final int sourceStackId = task.stack != null ? task.stack.mStackId : INVALID_STACK_ID;
         final boolean mightReplaceWindow =
@@ -2260,10 +2265,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // Make sure the task has the appropriate bounds/size for the stack it is in.
             if (stackId == FULLSCREEN_WORKSPACE_STACK_ID && task.mBounds != null) {
                 kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
-            } else if (stackId == FREEFORM_WORKSPACE_STACK_ID
-                    && task.mBounds == null && task.mLastNonFullscreenBounds != null) {
-                kept = resizeTaskLocked(task, task.mLastNonFullscreenBounds,
-                        RESIZE_MODE_SYSTEM, !mightReplaceWindow);
+            } else if (stackId == FREEFORM_WORKSPACE_STACK_ID) {
+                Rect bounds = task.getLaunchBounds();
+                if (bounds == null) {
+                    stack.layoutTaskInStack(task, null);
+                    bounds = task.mBounds;
+                }
+                kept = resizeTaskLocked(task, bounds, RESIZE_MODE_FORCED, !mightReplaceWindow);
             } else if (stackId == DOCKED_STACK_ID || stackId == PINNED_STACK_ID) {
                 kept = resizeTaskLocked(task, stack.mBounds, RESIZE_MODE_SYSTEM, !mightReplaceWindow);
             }
