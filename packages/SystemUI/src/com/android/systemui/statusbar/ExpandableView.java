@@ -399,6 +399,18 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
+    public void setFakeShadowIntensity(float shadowIntensity, float outlineAlpha, int shadowYEnd,
+            int outlineTranslation) {
+    }
+
+    public float getOutlineAlpha() {
+        return 0.0f;
+    }
+
+    public int getOutlineTranslation() {
+        return 0;
+    }
+
     /**
      * A listener notifying when {@link #getActualHeight} changes.
      */
