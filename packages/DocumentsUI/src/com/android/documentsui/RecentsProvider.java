@@ -95,6 +95,7 @@ public class RecentsProvider extends ContentProvider {
         public static final String PACKAGE_NAME = "package_name";
         public static final String STACK = "stack";
         public static final String TIMESTAMP = "timestamp";
+        // Indicates handler was an external app, like photos.
         public static final String EXTERNAL = "external";
     }
 
