@@ -276,19 +276,8 @@ public class KeyguardBouncer {
         return mKeyguardView == null || mKeyguardView.getSecurityMode() != SecurityMode.None;
     }
 
-    public boolean onMenuPressed() {
-        ensureView();
-        if (mKeyguardView.handleMenuKey()) {
-
-            // We need to show it in case it is secure. If not, it will get dismissed in any case.
-            mRoot.setVisibility(View.VISIBLE);
-            mFalsingManager.onBouncerShown();
-            mKeyguardView.requestFocus();
-            mKeyguardView.onResume();
-            return true;
-        } else {
-            return false;
-        }
+    public boolean shouldDismissOnMenuPressed() {
+        return mKeyguardView.shouldEnableMenuKey();
     }
 
     public boolean interceptMediaKey(KeyEvent event) {
