@@ -56,6 +56,7 @@ public final class TvContract {
     /**
      * Permission to read TV listings. This is required to read all the TV channel and program
      * information available on the system.
+     * @hide
      */
     public static final String PERMISSION_READ_TV_LISTINGS = "android.permission.READ_TV_LISTINGS";
 
