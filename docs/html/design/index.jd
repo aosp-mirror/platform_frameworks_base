@@ -5,6 +5,7 @@ meta.tags="beautifulapps, design, ux, patterns, holo, appquality, landing"
 page.metaDescription=Create beautiful experiences in your apps.
 header.hide=1
 footer.hide=1
+nonavpage=true
 @jd:body
 
 <section class="dac-expand dac-hero dac-light">
