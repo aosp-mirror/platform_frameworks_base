@@ -199,6 +199,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
                 modelData.setHandle(handle[0]);
                 modelData.setLoaded();
+                Slog.d(TAG, "Generic sound model loaded with handle:" + handle[0]);
             }
             modelData.setCallback(callback);
             modelData.setRecognitionConfig(recognitionConfig);
@@ -227,7 +228,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         synchronized (mLock) {
             if (DBG) {
-                Slog.d(TAG, "startRecognition for keyphraseId=" + keyphraseId
+                Slog.d(TAG, "startKeyphraseRecognition for keyphraseId=" + keyphraseId
                         + " soundModel=" + soundModel + ", listener=" + listener.asBinder()
                         + ", recognitionConfig=" + recognitionConfig);
                 Slog.d(TAG, "moduleProperties=" + mModuleProperties);
@@ -243,13 +244,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             if (mModuleProperties == null) {
-                Slog.w(TAG, "Attempting startRecognition without the capability");
+                Slog.w(TAG, "Attempting startKeyphraseRecognition without the capability");
                 return STATUS_ERROR;
             }
             if (mModule == null) {
                 mModule = SoundTrigger.attachModule(mModuleProperties.id, this, null);
                 if (mModule == null) {
-                    Slog.w(TAG, "startRecognition cannot attach to sound trigger module");
+                    Slog.w(TAG, "startKeyphraseRecognition cannot attach to sound trigger module");
                     return STATUS_ERROR;
                 }
             }
@@ -348,26 +349,29 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             if (currentCallback == null || !modelData.isModelStarted()) {
-                // startRecognition hasn't been called or it failed.
-                Slog.w(TAG, "Attempting stopRecognition without a successful startRecognition");
+                // startGenericRecognition hasn't been called or it failed.
+                Slog.w(TAG, "Attempting stopGenericRecognition without a successful" +
+                        " startGenericRecognition");
                 return STATUS_ERROR;
             }
             if (currentCallback.asBinder() != listener.asBinder()) {
                 // We don't allow a different listener to stop the recognition than the one
                 // that started it.
-                Slog.w(TAG, "Attempting stopRecognition for another recognition");
+                Slog.w(TAG, "Attempting stopGenericRecognition for another recognition");
                 return STATUS_ERROR;
             }
 
-            int status = stopGenericRecognitionLocked(modelData, false /* don't notify for synchronous calls */);
+            int status = stopGenericRecognitionLocked(modelData,
+                    false /* don't notify for synchronous calls */);
             if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "stopGenericRecognition failed: " + status);
                 return status;
             }
 
             // We leave the sound model loaded but not started, this helps us when we start
             // back.
             // Also clear the internal state once the recognition has been stopped.
-            modelData.clearState();
+            modelData.setLoaded();
             modelData.clearCallback();
             if (!computeRecognitionRunning()) {
                 internalClearGlobalStateLocked();
@@ -469,6 +473,66 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     public ModuleProperties getModuleProperties() {
         return mModuleProperties;
+    }
+
+    int unloadKeyphraseSoundModel(int keyphraseId) {
+        if (mModule == null || mCurrentKeyphraseModelHandle == INVALID_VALUE) {
+            return STATUS_ERROR;
+        }
+        if (mKeyphraseId != keyphraseId) {
+            Slog.w(TAG, "Given sound model is not the one loaded.");
+            return STATUS_ERROR;
+        }
+
+        synchronized (mLock) {
+            // Stop recognition if it's the current one.
+            mRequested = false;
+            int status = updateRecognitionLocked(false /* don't notify */);
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "Stop recognition failed for keyphrase ID:" + status);
+            }
+
+            status = mModule.unloadSoundModel(mCurrentKeyphraseModelHandle);
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "unloadKeyphraseSoundModel call failed with " + status);
+            }
+            internalClearKeyphraseSoundModelLocked();
+            return status;
+        }
+    }
+
+    int unloadGenericSoundModel(UUID modelId) {
+        if (modelId == null || mModule == null) {
+            return STATUS_ERROR;
+        }
+        ModelData modelData = mGenericModelDataMap.get(modelId);
+        if (modelData == null) {
+            Slog.w(TAG, "Unload error: Attempting unload invalid generic model with id:" + modelId);
+            return STATUS_ERROR;
+        }
+        synchronized (mLock) {
+            if (!modelData.isModelLoaded()) {
+                // Nothing to do here.
+                Slog.i(TAG, "Unload: Given generic model is not loaded:" + modelId);
+                return STATUS_OK;
+            }
+            if (modelData.isModelStarted()) {
+                int status = stopGenericRecognitionLocked(modelData,
+                        false /* don't notify for synchronous calls */);
+                if (status != SoundTrigger.STATUS_OK) {
+                    Slog.w(TAG, "stopGenericRecognition failed: " + status);
+                }
+            }
+
+            int status = mModule.unloadSoundModel(modelData.getHandle());
+            if (status != SoundTrigger.STATUS_OK) {
+                Slog.w(TAG, "unloadGenericSoundModel() call failed with " + status);
+                Slog.w(TAG, "unloadGenericSoundModel() force-marking model as unloaded.");
+            }
+            mGenericModelDataMap.remove(modelId);
+            if (DBG) dumpGenericModelState();
+            return status;
+        }
     }
 
     //---- SoundTrigger.StatusListener methods
@@ -913,6 +977,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         } else {
+            Slog.i(TAG, "startRecognition successful.");
             modelData.setStarted();
             // Notify of resume if needed.
             if (notify) {
@@ -923,6 +988,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         }
+        if (DBG) dumpGenericModelState();
         return status;
     }
 
@@ -951,7 +1017,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         }
+        if (DBG) dumpGenericModelState();
         return status;
+    }
+
+    private void dumpGenericModelState() {
+        for (UUID modelId : mGenericModelDataMap.keySet()) {
+            ModelData modelData = mGenericModelDataMap.get(modelId);
+            Slog.i(TAG, "Model :" + modelData.toString());
+        }
     }
 
     // Computes whether we have any recognition running at all (voice or generic). Sets
@@ -1068,6 +1142,19 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         synchronized RecognitionConfig getRecognitionConfig() {
             return mRecognitionConfig;
+        }
+
+        String stateToString() {
+            switch(mModelState) {
+                case MODEL_NOTLOADED: return "NOT_LOADED";
+                case MODEL_LOADED: return "LOADED";
+                case MODEL_STARTED: return "STARTED";
+            }
+            return "Unknown state";
+        }
+
+        public String toString() {
+            return "Handle: " + mModelHandle + "ModelState: " + stateToString();
         }
     }
 }
