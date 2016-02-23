@@ -1268,6 +1268,11 @@ public final class StreamConfigurationMap {
 
     private Size[] getInternalFormatSizes(int format, int dataspace,
             boolean output, boolean highRes) {
+        // All depth formats are non-high-res.
+        if (dataspace == HAL_DATASPACE_DEPTH && highRes) {
+            return new Size[0];
+        }
+
         SparseIntArray formatsMap =
                 !output ? mInputFormats :
                 dataspace == HAL_DATASPACE_DEPTH ? mDepthOutputFormats :
@@ -1286,6 +1291,8 @@ public final class StreamConfigurationMap {
 
         StreamConfiguration[] configurations =
                 (dataspace == HAL_DATASPACE_DEPTH) ? mDepthConfigurations : mConfigurations;
+        StreamConfigurationDuration[] minFrameDurations =
+                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthMinFrameDurations : mMinFrameDurations;
 
         for (StreamConfiguration config : configurations) {
             int fmt = config.getFormat();
@@ -1294,8 +1301,8 @@ public final class StreamConfigurationMap {
                     // Filter slow high-res output formats; include for
                     // highRes, remove for !highRes
                     long duration = 0;
-                    for (int i = 0; i < mMinFrameDurations.length; i++) {
-                        StreamConfigurationDuration d = mMinFrameDurations[i];
+                    for (int i = 0; i < minFrameDurations.length; i++) {
+                        StreamConfigurationDuration d = minFrameDurations[i];
                         if (d.getFormat() == fmt &&
                                 d.getWidth() == config.getSize().getWidth() &&
                                 d.getHeight() == config.getSize().getHeight()) {
@@ -1303,7 +1310,8 @@ public final class StreamConfigurationMap {
                             break;
                         }
                     }
-                    if (highRes != (duration > DURATION_20FPS_NS)) {
+                    if (dataspace != HAL_DATASPACE_DEPTH &&
+                            highRes != (duration > DURATION_20FPS_NS)) {
                         continue;
                     }
                 }
