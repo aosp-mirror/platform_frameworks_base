@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"ഈ നെറ്റ്‌വർക്ക് മാറ്റമൊന്നും വരുത്താതെ ഉപയോഗിക്കുക"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"ഈ നെറ്റ്‌വർക്ക് ഉപയോഗിക്കരുത്"</string>
     <string name="action_bar_label" msgid="917235635415966620">"നെറ്റ്‌വർക്കിൽ സൈൻ ഇൻ ചെയ്യുക"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"നിങ്ങൾ ചേരാൻ ശ്രമിക്കുന്ന നെറ്റ്‌വർക്കിൽ സുരക്ഷാ പ്രശ്‌നങ്ങളുണ്ടായിരിക്കാം."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"ഉദാഹരണത്തിന്, കാണിച്ചിരിക്കുന്ന ഓർഗനൈസേഷന്റേതായിരിക്കില്ല ലോഗിൻ പേജ്."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"എന്തായാലും ബ്രൗസർ വഴി തുടരുക"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Bu ağı olduğu gibi kullan"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Bu ağı kullanma"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Ağda oturum açın"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Katılmaya çalıştığınız ağda güvenlik sorunları var."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Örneğin, giriş sayfası, gösterilen kuruluşa ait olmayabilir."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Yine de tarayıcıyla devam et"</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_use_network" msgid="6076184727448466030">"Utiliser ce réseau tel quel"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"Ne pas utiliser ce réseau"</string>
     <string name="action_bar_label" msgid="917235635415966620">"Connectez-vous au réseau"</string>
+    <string name="ssl_error_warning" msgid="6653188881418638872">"Le réseau que vous essayez de rejoindre présente des problèmes de sécurité."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Par exemple, la page de connexion pourrait ne pas appartenir à l\'organisation représentée."</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"Continuer quand même dans un navigateur"</string>
 </resources>
