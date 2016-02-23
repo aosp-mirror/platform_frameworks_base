@@ -156,7 +156,7 @@ public final class WebViewDelegate {
      * Adds the WebView asset path to {@link android.content.res.AssetManager}.
      */
     public void addWebViewAssetPath(Context context) {
-        context.getAssets().addAssetPath(
+        context.getAssets().addAssetPathAsSharedLibrary(
                 WebViewFactory.getLoadedPackageInfo().applicationInfo.sourceDir);
     }
 }
