@@ -2929,10 +2929,27 @@ public class TelephonyManager {
      * @return an IccOpenLogicalChannelResponse object.
      */
     public IccOpenLogicalChannelResponse iccOpenLogicalChannel(String AID) {
+        return iccOpenLogicalChannel(getDefaultSubscription(), AID);
+    }
+
+    /**
+     * Opens a logical channel to the ICC card.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHO command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param AID Application id. See ETSI 102.221 and 101.220.
+     * @return an IccOpenLogicalChannelResponse object.
+     */
+    public IccOpenLogicalChannelResponse iccOpenLogicalChannel(int subId, String AID) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccOpenLogicalChannel(AID);
+                return telephony.iccOpenLogicalChannel(subId, AID);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -2953,10 +2970,28 @@ public class TelephonyManager {
      * @return true if the channel was closed successfully.
      */
     public boolean iccCloseLogicalChannel(int channel) {
+        return iccCloseLogicalChannel(getDefaultSubscription(), channel);
+    }
+
+    /**
+     * Closes a previously opened logical channel to the ICC card.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CCHC command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param channel is the channel id to be closed as retruned by a successful
+     *            iccOpenLogicalChannel.
+     * @return true if the channel was closed successfully.
+     */
+    public boolean iccCloseLogicalChannel(int subId, int channel) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccCloseLogicalChannel(channel);
+                return telephony.iccCloseLogicalChannel(subId, channel);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -2986,10 +3021,38 @@ public class TelephonyManager {
      */
     public String iccTransmitApduLogicalChannel(int channel, int cla,
             int instruction, int p1, int p2, int p3, String data) {
+        return iccTransmitApduLogicalChannel(getDefaultSubscription(), channel, cla,
+                    instruction, p1, p2, p3, data);
+    }
+
+    /**
+     * Transmit an APDU to the ICC card over a logical channel.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CGLA command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param channel is the channel id to be closed as returned by a successful
+     *            iccOpenLogicalChannel.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     */
+    public String iccTransmitApduLogicalChannel(int subId, int channel, int cla,
+            int instruction, int p1, int p2, int p3, String data) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccTransmitApduLogicalChannel(channel, cla,
+                return telephony.iccTransmitApduLogicalChannel(subId, channel, cla,
                     instruction, p1, p2, p3, data);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -3018,10 +3081,36 @@ public class TelephonyManager {
      */
     public String iccTransmitApduBasicChannel(int cla,
             int instruction, int p1, int p2, int p3, String data) {
+        return iccTransmitApduBasicChannel(getDefaultSubscription(), cla,
+                    instruction, p1, p2, p3, data);
+    }
+
+    /**
+     * Transmit an APDU to the ICC card over the basic channel.
+     *
+     * Input parameters equivalent to TS 27.007 AT+CSIM command.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param cla Class of the APDU command.
+     * @param instruction Instruction of the APDU command.
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command. If p3 is negative a 4 byte APDU
+     *            is sent to the SIM.
+     * @param data Data to be sent with the APDU.
+     * @return The APDU response from the ICC card with the status appended at
+     *            the end.
+     */
+    public String iccTransmitApduBasicChannel(int subId, int cla,
+            int instruction, int p1, int p2, int p3, String data) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccTransmitApduBasicChannel(cla,
+                return telephony.iccTransmitApduBasicChannel(subId, cla,
                     instruction, p1, p2, p3, data);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
@@ -3046,10 +3135,31 @@ public class TelephonyManager {
      */
     public byte[] iccExchangeSimIO(int fileID, int command, int p1, int p2, int p3,
             String filePath) {
+        return iccExchangeSimIO(getDefaultSubscription(), fileID, command, p1, p2, p3, filePath);
+    }
+
+    /**
+     * Returns the response APDU for a command APDU sent through SIM_IO.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param fileID
+     * @param command
+     * @param p1 P1 value of the APDU command.
+     * @param p2 P2 value of the APDU command.
+     * @param p3 P3 value of the APDU command.
+     * @param filePath
+     * @return The APDU response.
+     */
+    public byte[] iccExchangeSimIO(int subId, int fileID, int command, int p1, int p2,
+            int p3, String filePath) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.iccExchangeSimIO(fileID, command, p1, p2, p3, filePath);
+                return telephony.iccExchangeSimIO(subId, fileID, command, p1, p2, p3, filePath);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -3071,10 +3181,29 @@ public class TelephonyManager {
      *         returns an empty string.
      */
     public String sendEnvelopeWithStatus(String content) {
+        return sendEnvelopeWithStatus(getDefaultSubscription(), content);
+    }
+
+    /**
+     * Send ENVELOPE to the SIM and return the response.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param content String containing SAT/USAT response in hexadecimal
+     *                format starting with command tag. See TS 102 223 for
+     *                details.
+     * @return The APDU response from the ICC card in hexadecimal format
+     *         with the last 4 bytes being the status word. If the command fails,
+     *         returns an empty string.
+     */
+    public String sendEnvelopeWithStatus(int subId, String content) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.sendEnvelopeWithStatus(content);
+                return telephony.sendEnvelopeWithStatus(subId, content);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
@@ -3632,8 +3761,20 @@ public class TelephonyManager {
      * @return true on success; false on any failure.
      */
     public boolean setPreferredNetworkTypeToGlobal() {
-        return setPreferredNetworkType(getDefaultSubscription(),
-                RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
+        return setPreferredNetworkTypeToGlobal(getDefaultSubscription());
+    }
+
+    /**
+     * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
+     *
+     * <p>
+     * Requires that the calling app has carrier privileges.
+     * @see #hasCarrierPrivileges
+     *
+     * @return true on success; false on any failure.
+     */
+    public boolean setPreferredNetworkTypeToGlobal(int subId) {
+        return setPreferredNetworkType(subId, RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
     /**
@@ -3680,10 +3821,26 @@ public class TelephonyManager {
      * @return true if the app has carrier privileges.
      */
     public boolean hasCarrierPrivileges() {
+        return hasCarrierPrivileges(getDefaultSubscription());
+    }
+
+    /**
+     * Has the calling application been granted carrier privileges by the carrier.
+     *
+     * If any of the packages in the calling UID has carrier privileges, the
+     * call will return true. This access is granted by the owner of the UICC
+     * card and does not depend on the registered carrier.
+     *
+     * @param subId The subscription to use.
+     * @return true if the app has carrier privileges.
+     */
+    public boolean hasCarrierPrivileges(int subId) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.getCarrierPrivilegeStatus() == CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+            if (telephony != null) {
+                return telephony.getCarrierPrivilegeStatus(subId) ==
+                    CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+            }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "hasCarrierPrivileges RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -3707,10 +3864,29 @@ public class TelephonyManager {
      * @return true if the operation was executed correctly.
      */
     public boolean setOperatorBrandOverride(String brand) {
+        return setOperatorBrandOverride(getDefaultSubscription(), brand);
+    }
+
+    /**
+     * Override the branding for the current ICCID.
+     *
+     * Once set, whenever the SIM is present in the device, the service
+     * provider name (SPN) and the operator name will both be replaced by the
+     * brand value input. To unset the value, the same function should be
+     * called with a null brand value.
+     *
+     * <p>Requires that the calling app has carrier privileges.
+     * @see #hasCarrierPrivileges
+     *
+     * @param subId The subscription to use.
+     * @param brand The brand name to display/set.
+     * @return true if the operation was executed correctly.
+     */
+    public boolean setOperatorBrandOverride(int subId, String brand) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.setOperatorBrandOverride(brand);
+                return telephony.setOperatorBrandOverride(subId, brand);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setOperatorBrandOverride RemoteException", ex);
         } catch (NullPointerException ex) {
@@ -3741,10 +3917,37 @@ public class TelephonyManager {
     public boolean setRoamingOverride(List<String> gsmRoamingList,
             List<String> gsmNonRoamingList, List<String> cdmaRoamingList,
             List<String> cdmaNonRoamingList) {
+        return setRoamingOverride(getDefaultSubscription(), gsmRoamingList, gsmNonRoamingList,
+                cdmaRoamingList, cdmaNonRoamingList);
+    }
+
+    /**
+     * Override the roaming preference for the current ICCID.
+     *
+     * Using this call, the carrier app (see #hasCarrierPrivileges) can override
+     * the platform's notion of a network operator being considered roaming or not.
+     * The change only affects the ICCID that was active when this call was made.
+     *
+     * If null is passed as any of the input, the corresponding value is deleted.
+     *
+     * <p>Requires that the caller have carrier privilege. See #hasCarrierPrivileges.
+     *
+     * @param subId for which the roaming overrides apply.
+     * @param gsmRoamingList - List of MCCMNCs to be considered roaming for 3GPP RATs.
+     * @param gsmNonRoamingList - List of MCCMNCs to be considered not roaming for 3GPP RATs.
+     * @param cdmaRoamingList - List of SIDs to be considered roaming for 3GPP2 RATs.
+     * @param cdmaNonRoamingList - List of SIDs to be considered not roaming for 3GPP2 RATs.
+     * @return true if the operation was executed correctly.
+     *
+     * @hide
+     */
+    public boolean setRoamingOverride(int subId, List<String> gsmRoamingList,
+            List<String> gsmNonRoamingList, List<String> cdmaRoamingList,
+            List<String> cdmaNonRoamingList) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
-                return telephony.setRoamingOverride(gsmRoamingList, gsmNonRoamingList,
+                return telephony.setRoamingOverride(subId, gsmRoamingList, gsmNonRoamingList,
                         cdmaRoamingList, cdmaNonRoamingList);
         } catch (RemoteException ex) {
             Rlog.e(TAG, "setRoamingOverride RemoteException", ex);
