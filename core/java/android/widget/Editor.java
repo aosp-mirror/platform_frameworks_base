@@ -3174,7 +3174,7 @@ public class Editor {
                 ((Spannable) mTextView.getText()).removeSpan(mSuggestionRangeSpan);
 
                 mTextView.setCursorVisible(mCursorWasVisibleBeforeSuggestions);
-                if (hasInsertionController()) {
+                if (hasInsertionController() && !extractedTextModeWillBeStarted()) {
                     getInsertionController().show();
                 }
             }
@@ -3324,6 +3324,9 @@ public class Editor {
         @Override
         public void show() {
             if (!(mTextView.getText() instanceof Editable)) return;
+            if (extractedTextModeWillBeStarted()) {
+                return;
+            }
 
             if (updateSuggestions()) {
                 mCursorWasVisibleBeforeSuggestions = mCursorVisible;
