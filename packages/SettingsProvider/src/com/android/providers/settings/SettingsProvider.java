@@ -49,6 +49,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -457,8 +458,28 @@ public class SettingsProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        throw new FileNotFoundException("Direct file access no longer supported; "
-                + "ringtone playback is available through android.media.Ringtone");
+        final String cacheName;
+        if (Settings.System.RINGTONE_CACHE_URI.equals(uri)) {
+            cacheName = Settings.System.RINGTONE_CACHE;
+        } else if (Settings.System.NOTIFICATION_SOUND_CACHE_URI.equals(uri)) {
+            cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
+        } else if (Settings.System.ALARM_ALERT_CACHE_URI.equals(uri)) {
+            cacheName = Settings.System.ALARM_ALERT_CACHE;
+        } else {
+            throw new FileNotFoundException("Direct file access no longer supported; "
+                    + "ringtone playback is available through android.media.Ringtone");
+        }
+
+        final File cacheFile = new File(
+                getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+        return ParcelFileDescriptor.open(cacheFile, ParcelFileDescriptor.parseMode(mode));
+    }
+
+    private File getRingtoneCacheDir(int userId) {
+        final File cacheDir = new File(Environment.getDataSystemDeDirectory(userId), "ringtones");
+        cacheDir.mkdir();
+        SELinux.restorecon(cacheDir);
+        return cacheDir;
     }
 
     @Override
@@ -899,6 +920,21 @@ public class SettingsProvider extends ContentProvider {
         // Only the owning user id can change the setting.
         if (owningUserId != callingUserId) {
             return false;
+        }
+
+        // Invalidate any relevant cache files
+        String cacheName = null;
+        if (Settings.System.RINGTONE.equals(name)) {
+            cacheName = Settings.System.RINGTONE_CACHE;
+        } else if (Settings.System.NOTIFICATION_SOUND.equals(name)) {
+            cacheName = Settings.System.NOTIFICATION_SOUND_CACHE;
+        } else if (Settings.System.ALARM_ALERT.equals(name)) {
+            cacheName = Settings.System.ALARM_ALERT_CACHE;
+        }
+        if (cacheName != null) {
+            final File cacheFile = new File(
+                    getRingtoneCacheDir(UserHandle.getCallingUserId()), cacheName);
+            cacheFile.delete();
         }
 
         // Mutate the value.
