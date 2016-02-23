@@ -334,15 +334,15 @@ static void renderConvexPath(BakedOpRenderer& renderer, const BakedOpState& stat
 }
 
 static void renderPathTexture(BakedOpRenderer& renderer, const BakedOpState& state,
-        PathTexture& texture, const RecordedOp& op) {
+        float xOffset, float yOffset, PathTexture& texture, const SkPaint& paint) {
     Rect dest(texture.width(), texture.height());
-    dest.translate(texture.left - texture.offset,
-            texture.top - texture.offset);
+    dest.translate(xOffset + texture.left - texture.offset,
+            yOffset + texture.top - texture.offset);
     Glop glop;
     GlopBuilder(renderer.renderState(), renderer.caches(), &glop)
             .setRoundRectClipState(state.roundRectClipState)
             .setMeshTexturedUnitQuad(nullptr)
-            .setFillPathTexturePaint(texture, *(op.paint), state.alpha)
+            .setFillPathTexturePaint(texture, paint, state.alpha)
             .setTransform(state.computedState.transform,  TransformFlags::None)
             .setModelViewMapUnitToRect(dest)
             .build();
@@ -368,7 +368,8 @@ void BakedOpDispatcher::onArcOp(BakedOpRenderer& renderer, const ArcOp& op, cons
                 op.startAngle, op.sweepAngle, op.useCenter, op.paint);
         const AutoTexture holder(texture);
         if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, *texture, op);
+            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.right,
+                    *texture, *(op.paint));
         }
     } else {
         SkRect rect = getBoundsOfFill(op);
@@ -519,7 +520,8 @@ void BakedOpDispatcher::onOvalOp(BakedOpRenderer& renderer, const OvalOp& op, co
                 op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
         const AutoTexture holder(texture);
         if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, *texture, op);
+            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.right,
+                    *texture, *(op.paint));
         }
     } else {
         SkPath path;
@@ -562,7 +564,9 @@ void BakedOpDispatcher::onPathOp(BakedOpRenderer& renderer, const PathOp& op, co
     PathTexture* texture = renderer.caches().pathCache.get(op.path, op.paint);
     const AutoTexture holder(texture);
     if (CC_LIKELY(holder.texture)) {
-        renderPathTexture(renderer, state, *texture, op);
+        // Unlike other callers to renderPathTexture, no offsets are used because PathOp doesn't
+        // have any translate built in, other than what's in the SkPath itself
+        renderPathTexture(renderer, state, 0, 0, *texture, *(op.paint));
     }
 }
 
@@ -588,7 +592,8 @@ void BakedOpDispatcher::onRectOp(BakedOpRenderer& renderer, const RectOp& op, co
                      op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.paint);
              const AutoTexture holder(texture);
              if (CC_LIKELY(holder.texture)) {
-                 renderPathTexture(renderer, state, *texture, op);
+                 renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
+                         *texture, *(op.paint));
              }
         } else {
             SkPath path;
@@ -622,7 +627,8 @@ void BakedOpDispatcher::onRoundRectOp(BakedOpRenderer& renderer, const RoundRect
                 op.rx, op.ry, op.paint);
         const AutoTexture holder(texture);
         if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, *texture, op);
+            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
+                    *texture, *(op.paint));
         }
     } else {
         const VertexBuffer* buffer = renderer.caches().tessellationCache.getRoundRect(
