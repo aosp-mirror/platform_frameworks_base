@@ -22760,6 +22760,10 @@ package android.media.tv {
     method public static final android.net.Uri buildProgramsUriForChannel(long, long, long);
     method public static final android.net.Uri buildProgramsUriForChannel(android.net.Uri, long, long);
     method public static final android.net.Uri buildRecordedProgramUri(long);
+    method public static final boolean isChannelUri(android.net.Uri);
+    method public static final boolean isChannelUriForPassthroughInput(android.net.Uri);
+    method public static final boolean isChannelUriForTunerInput(android.net.Uri);
+    method public static final boolean isProgramUri(android.net.Uri);
     field public static final java.lang.String AUTHORITY = "android.media.tv";
   }
 
