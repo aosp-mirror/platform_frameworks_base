@@ -383,8 +383,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      *
      * <p> If the admin is activated by a device owner, then the intent
      * may contain private extras that are relevant to user setup.
-     * {@see DevicePolicyManager#createAndInitializeUser(ComponentName, String, String,
-     *      ComponentName, Intent)}
+     * {@see DevicePolicyManager#createAndManageUser(ComponentName, String, ComponentName,
+     *      PersistableBundle, int)}
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.

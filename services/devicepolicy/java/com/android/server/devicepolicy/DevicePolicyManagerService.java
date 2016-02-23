@@ -6743,57 +6743,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    @Override
-    public UserHandle createUser(ComponentName who, String name) {
-        Preconditions.checkNotNull(who, "ComponentName is null");
-        synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-
-            long id = mInjector.binderClearCallingIdentity();
-            try {
-                UserInfo userInfo = mUserManager.createUser(name, 0 /* flags */);
-                if (userInfo != null) {
-                    return userInfo.getUserHandle();
-                }
-                return null;
-            } finally {
-                mInjector.binderRestoreCallingIdentity(id);
-            }
-        }
-    }
-
-    @Override
-    public UserHandle createAndInitializeUser(ComponentName who, String name,
-            String ownerName, ComponentName profileOwnerComponent, Bundle adminExtras) {
-        UserHandle user = createUser(who, name);
-        if (user == null) {
-            return null;
-        }
-        long id = mInjector.binderClearCallingIdentity();
-        try {
-            String profileOwnerPkg = profileOwnerComponent.getPackageName();
-
-            final int userHandle = user.getIdentifier();
-            try {
-                // Install the profile owner if not present.
-                if (!mIPackageManager.isPackageAvailable(profileOwnerPkg, userHandle)) {
-                    mIPackageManager.installExistingPackageAsUser(profileOwnerPkg, userHandle);
-                }
-
-                // Start user in background.
-                mInjector.getIActivityManager().startUserInBackground(userHandle);
-            } catch (RemoteException e) {
-                Slog.e(LOG_TAG, "Failed to make remote calls for configureUser", e);
-            }
-
-            setActiveAdmin(profileOwnerComponent, true, userHandle, adminExtras);
-            setProfileOwner(profileOwnerComponent, ownerName, userHandle);
-            return user;
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
-        }
-    }
-
     private void sendAdminEnabledBroadcastLocked(int userHandle) {
         DevicePolicyData policyData = getUserData(userHandle);
         if (policyData.mAdminBroadcastPending) {
