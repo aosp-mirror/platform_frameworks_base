@@ -154,7 +154,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static final boolean DBG_ANIMATION_VECTOR_DRAWABLE = false;
 
     /** Local, mutable animator set. */
-    private final VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimator(this);
+    private VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimatorRT(this);
 
     /**
      * The resources against which this drawable was created. Used to attempt
@@ -164,8 +164,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     private AnimatedVectorDrawableState mAnimatedVectorState;
 
-    /** Whether the animator set has been prepared. */
-    private boolean mHasAnimatorSet;
+    /** The animator set that is parsed from the xml. */
+    private AnimatorSet mAnimatorSetFromXml = null;
 
     private boolean mMutated;
 
@@ -234,9 +234,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     @Override
     public void draw(Canvas canvas) {
-        if (canvas.isHardwareAccelerated()) {
-            mAnimatorSet.recordLastSeenTarget((DisplayListCanvas) canvas);
-        }
+        mAnimatorSet.onDraw(canvas);
         mAnimatedVectorState.mVectorDrawable.draw(canvas);
     }
 
@@ -390,6 +388,24 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         // If we don't have any pending animations, we don't need to hold a
         // reference to the resources.
         mRes = state.mPendingAnims == null ? null : res;
+    }
+
+    /**
+     * Force to animate on UI thread.
+     * @hide
+     */
+    public void forceAnimationOnUI() {
+        if (mAnimatorSet instanceof VectorDrawableAnimatorRT) {
+            VectorDrawableAnimatorRT animator = (VectorDrawableAnimatorRT) mAnimatorSet;
+            if (animator.isRunning()) {
+                throw new UnsupportedOperationException("Cannot force Animated Vector Drawable to" +
+                        " run on UI thread when the animation has started on RenderThread.");
+            }
+            mAnimatorSet = new VectorDrawableAnimatorUI(this);
+            if (mAnimatorSetFromXml != null) {
+                mAnimatorSet.init(mAnimatorSetFromXml);
+            }
+        }
     }
 
     @Override
@@ -612,6 +628,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
      * Resets the AnimatedVectorDrawable to the start state as specified in the animators.
      */
     public void reset() {
+        ensureAnimatorSet();
         mAnimatorSet.reset();
     }
 
@@ -623,13 +640,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
     @NonNull
     private void ensureAnimatorSet() {
-        if (!mHasAnimatorSet) {
+        if (mAnimatorSetFromXml == null) {
             // TODO: Skip the AnimatorSet creation and init the VectorDrawableAnimator directly
             // with a list of LocalAnimators.
-            AnimatorSet set = new AnimatorSet();
-            mAnimatedVectorState.prepareLocalAnimators(set, mRes);
-            mHasAnimatorSet = true;
-            mAnimatorSet.initWithAnimatorSet(set);
+            mAnimatorSetFromXml = new AnimatorSet();
+            mAnimatedVectorState.prepareLocalAnimators(mAnimatorSetFromXml, mRes);
+            mAnimatorSet.init(mAnimatorSetFromXml);
             mRes = null;
         }
     }
@@ -724,7 +740,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     // A helper function to clean up the animator listener in the mAnimatorSet.
     private void removeAnimatorSetListener() {
         if (mAnimatorListener != null) {
-            mAnimatorSet.removeListener();
+            mAnimatorSet.removeListener(mAnimatorListener);
             mAnimatorListener = null;
         }
     }
@@ -754,10 +770,100 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         mAnimationCallbacks.clear();
     }
 
+    private interface VectorDrawableAnimator {
+        void init(AnimatorSet set);
+        void start();
+        void end();
+        void reset();
+        void reverse();
+        boolean canReverse();
+        void setListener(AnimatorListener listener);
+        void removeListener(AnimatorListener listener);
+        void onDraw(Canvas canvas);
+        boolean isStarted();
+        boolean isRunning();
+    }
+
+    private static class VectorDrawableAnimatorUI implements VectorDrawableAnimator {
+        private AnimatorSet mSet = new AnimatorSet();
+        private final Drawable mDrawable;
+
+        VectorDrawableAnimatorUI(AnimatedVectorDrawable drawable) {
+            mDrawable = drawable;
+        }
+
+        @Override
+        public void init(AnimatorSet set) {
+            mSet = set;
+        }
+
+        @Override
+        public void start() {
+            if (mSet.isStarted()) {
+                return;
+            }
+            mSet.start();
+            invalidateOwningView();
+        }
+
+        @Override
+        public void end() {
+            mSet.end();
+        }
+
+        @Override
+        public void reset() {
+            start();
+            mSet.cancel();
+        }
+
+        @Override
+        public void reverse() {
+            mSet.reverse();
+            invalidateOwningView();
+        }
+
+        @Override
+        public boolean canReverse() {
+            return mSet.canReverse();
+        }
+
+        @Override
+        public void setListener(AnimatorListener listener) {
+            mSet.addListener(listener);
+        }
+
+        @Override
+        public void removeListener(AnimatorListener listener) {
+            mSet.removeListener(listener);
+        }
+
+        @Override
+        public void onDraw(Canvas canvas) {
+            if (mSet.isStarted()) {
+                invalidateOwningView();
+            }
+        }
+
+        @Override
+        public boolean isStarted() {
+            return mSet.isStarted();
+        }
+
+        @Override
+        public boolean isRunning() {
+            return mSet.isRunning();
+        }
+
+        private void invalidateOwningView() {
+            mDrawable.invalidateSelf();
+        }
+    }
+
     /**
      * @hide
      */
-    public static class VectorDrawableAnimator {
+    public static class VectorDrawableAnimatorRT implements VectorDrawableAnimator {
         private static final int NONE = 0;
         private static final int START_ANIMATION = 1;
         private static final int REVERSE_ANIMATION = 2;
@@ -779,7 +885,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         private int mPendingAnimationAction = NONE;
         private final Drawable mDrawable;
 
-        VectorDrawableAnimator(AnimatedVectorDrawable drawable) {
+        VectorDrawableAnimatorRT(AnimatedVectorDrawable drawable) {
             mDrawable = drawable;
             mSetPtr = nCreateAnimatorSet();
             // Increment ref count on native AnimatorSet, so it doesn't get released before Java
@@ -787,7 +893,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mSetRefBasePtr = new VirtualRefBasePtr(mSetPtr);
         }
 
-        private void initWithAnimatorSet(AnimatorSet set) {
+        @Override
+        public void init(AnimatorSet set) {
             if (mInitialized) {
                 // Already initialized
                 throw new UnsupportedOperationException("VectorDrawableAnimator cannot be " +
@@ -816,7 +923,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             ArrayList<Animator> animators = set.getChildAnimations();
 
             boolean playTogether = set.shouldPlayTogether();
-            // Convert AnimatorSet to VectorDrawableAnimator
+            // Convert AnimatorSet to VectorDrawableAnimatorRT
             for (int i = 0; i < animators.size(); i++) {
                 Animator animator = animators.get(i);
                 // Here we only support ObjectAnimator
@@ -1060,6 +1167,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             mDrawable.invalidateSelf();
         }
 
+        @Override
         public void start() {
             if (!mInitialized) {
                 return;
@@ -1083,6 +1191,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             }
         }
 
+        @Override
         public void end() {
             if (mInitialized && useLastSeenTarget()) {
                 // If no target has ever been set, no-op
@@ -1091,6 +1200,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             }
         }
 
+        @Override
         public void reset() {
             if (mInitialized && useLastSeenTarget()) {
                 // If no target has ever been set, no-op
@@ -1101,7 +1211,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
 
         // Current (imperfect) Java AnimatorSet cannot be reversed when the set contains sequential
         // animators or when the animator set has a start delay
-        void reverse() {
+        @Override
+        public void reverse() {
             if (!mIsReversible || !mInitialized) {
                 return;
             }
@@ -1125,27 +1236,39 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             return mSetPtr;
         }
 
-        boolean canReverse() {
+        @Override
+        public boolean canReverse() {
             return mIsReversible;
         }
 
-        boolean isStarted() {
+        @Override
+        public boolean isStarted() {
             return mStarted;
         }
 
-        boolean isRunning() {
+        @Override
+        public boolean isRunning() {
             if (!mInitialized) {
                 return false;
             }
             return mStarted;
         }
 
-        void setListener(AnimatorListener listener) {
+        @Override
+        public void setListener(AnimatorListener listener) {
             mListener = listener;
         }
 
-        void removeListener() {
+        @Override
+        public void removeListener(AnimatorListener listener) {
             mListener = null;
+        }
+
+        @Override
+        public void onDraw(Canvas canvas) {
+            if (canvas.isHardwareAccelerated()) {
+                recordLastSeenTarget((DisplayListCanvas) canvas);
+            }
         }
 
         private void onAnimationEnd(int listenerId) {
@@ -1162,7 +1285,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         // onFinished: should be called from native
-        private static void callOnFinished(VectorDrawableAnimator set, int id) {
+        private static void callOnFinished(VectorDrawableAnimatorRT set, int id) {
             set.onAnimationEnd(id);
         }
     }
@@ -1183,8 +1306,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static native long nCreateRootAlphaPropertyHolder(long nativePtr, float startValue,
             float endValue);
     private static native void nSetPropertyHolderData(long nativePtr, float[] data, int length);
-    private static native void nStart(long animatorSetPtr, VectorDrawableAnimator set, int id);
-    private static native void nReverse(long animatorSetPtr, VectorDrawableAnimator set, int id);
+    private static native void nStart(long animatorSetPtr, VectorDrawableAnimatorRT set, int id);
+    private static native void nReverse(long animatorSetPtr, VectorDrawableAnimatorRT set, int id);
     private static native void nEnd(long animatorSetPtr);
     private static native void nReset(long animatorSetPtr);
 }
