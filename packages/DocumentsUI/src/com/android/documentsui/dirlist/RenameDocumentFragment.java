@@ -163,7 +163,8 @@ public class RenameDocumentFragment extends DialogFragment {
     private void selectFileName(EditText editText) {
         String text = editText.getText().toString();
         int separatorIndex = text.indexOf(".");
-        editText.setSelection(0, separatorIndex == -1 ? text.length() : separatorIndex);
+        editText.setSelection(0,
+                (separatorIndex == -1 || mDocument.isDirectory()) ? text.length() : separatorIndex);
     }
 
     /**

@@ -92,6 +92,8 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
     public void testCreateDirectory() throws Exception {
         initTestFiles();
 
+        bots.roots.openRoot(ROOT_0_ID);
+
         bots.main.openOverflowMenu();
         bots.main.menuNewFolder().click();
         bots.main.setDialogText("Kung Fu Panda");
