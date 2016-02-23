@@ -269,6 +269,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.SweepGradient",
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
+        "android.graphics.drawable.VectorDrawable",
         "android.os.SystemClock",
         "android.os.SystemProperties",
         "android.text.AndroidBidi",
@@ -321,7 +322,12 @@ public final class CreateInfo implements ICreateInfo {
             "org.kxml2.io.KXmlParser"
         };
 
+    /**
+     * List of fields for which we will update the visibility to be public. This is sometimes
+     * needed when access from the delegate classes is needed.
+     */
     private final static String[] PROMOTED_FIELDS = new String[] {
+        "android.graphics.drawable.VectorDrawable#mVectorState",
         "android.view.Choreographer#mLastFrameTimeNanos"
     };
 
