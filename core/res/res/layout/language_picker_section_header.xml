@@ -23,4 +23,5 @@
           android:paddingStart="18dp"
           android:paddingEnd="18dp"
           android:textColor="?android:attr/colorAccent"
+          android:textStyle="bold"
           tools:text="@string/language_picker_section_all"/>
