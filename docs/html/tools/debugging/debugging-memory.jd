@@ -350,9 +350,9 @@ showing recent app allocations and stack traces in the Allocation Tracker.</p>
 
 
 <p class="note"><strong>Note:</strong> You will always see some allocations from {@code
-DdmVmInternal} and else where that come from the allocation tracker itself.</p>
+DdmVmInternal} and elsewhere that come from the allocation tracker itself.</p>
 
-<p>Although it's not necessary (nor possible) to remove all allocations for your performance
+<p>Although it's not necessary (nor possible) to remove all allocations from your performance
 critical code paths, the allocation tracker can help you identify important issues in your code.
 For instance, some apps might create a new {@link android.graphics.Paint} object on every draw.
 Moving that object into a global member is a simple fix that helps improve performance.</p>
