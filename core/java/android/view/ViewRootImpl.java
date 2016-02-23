@@ -1072,6 +1072,8 @@ public final class ViewRootImpl implements ViewParent,
             mStopped = stopped;
             if (!mStopped) {
                 scheduleTraversals();
+            } else {
+                destroyHardwareResources();
             }
         }
     }
