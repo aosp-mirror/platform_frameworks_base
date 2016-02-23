@@ -22,7 +22,7 @@ package android.service.carrier;
  * @hide
  */
 oneway interface ICarrierMessagingCallback {
-    void onFilterComplete(boolean keepMessage);
+    void onFilterComplete(int result);
     void onSendSmsComplete(int result, int messageRef);
     void onSendMultipartSmsComplete(int result, in int[] messageRefs);
     void onSendMmsComplete(int result, in byte[] sendConfPdu);
