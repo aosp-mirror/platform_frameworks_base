@@ -80,6 +80,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     /** Are we showing the "public" version */
     private boolean mShowingPublic;
     private boolean mSensitive;
+    private boolean mSensitiveHiddenInGeneral;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
 
@@ -1041,8 +1042,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         getShowingLayout().requestSelectLayout(needsAnimation || isUserLocked());
     }
 
-    public void setSensitive(boolean sensitive) {
+    public void setSensitive(boolean sensitive, boolean hideSensitive) {
         mSensitive = sensitive;
+        mSensitiveHiddenInGeneral = hideSensitive;
     }
 
     public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
@@ -1114,7 +1116,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private void updateClearability() {
         // public versions cannot be dismissed
-        mVetoButton.setVisibility(isClearable() && !mShowingPublic ? View.VISIBLE : View.GONE);
+        mVetoButton.setVisibility(isClearable() && (!mShowingPublic
+                || !mSensitiveHiddenInGeneral) ? View.VISIBLE : View.GONE);
     }
 
     public void setChildrenExpanded(boolean expanded, boolean animate) {
