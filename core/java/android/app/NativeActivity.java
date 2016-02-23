@@ -87,8 +87,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
     
     private native long loadNativeCode(String path, String funcname, MessageQueue queue,
             String internalDataPath, String obbPath, String externalDataPath, int sdkVersion,
-            AssetManager assetMgr, byte[] savedState, ClassLoader classLoader, String libraryPath,
-            String isolationPath);
+            AssetManager assetMgr, byte[] savedState, ClassLoader classLoader, String libraryPath);
     private native String getDlError();
     private native void unloadNativeCode(long handle);
     private native void onStartNative(long handle);
@@ -169,8 +168,7 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
                 getAbsolutePath(getFilesDir()), getAbsolutePath(getObbDir()),
                 getAbsolutePath(getExternalFilesDir(null)),
                 Build.VERSION.SDK_INT, getAssets(), nativeSavedState,
-                classLoader, classLoader.getLdLibraryPath(),
-                classLoader.getLibraryPermittedPath());
+                classLoader, classLoader.getLdLibraryPath());
 
         if (mNativeHandle == 0) {
             throw new UnsatisfiedLinkError(
