@@ -4545,14 +4545,10 @@ public class DevicePolicyManager {
      *         user could not be created.
      *
      * @deprecated From {@link android.os.Build.VERSION_CODES#M}
+     * @removed From {@link android.os.Build.VERSION_CODES#N}
      */
     @Deprecated
     public UserHandle createUser(@NonNull ComponentName admin, String name) {
-        try {
-            return mService.createUser(admin, name);
-        } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-        }
         return null;
     }
 
@@ -4582,16 +4578,11 @@ public class DevicePolicyManager {
      *         user could not be created.
      *
      * @deprecated From {@link android.os.Build.VERSION_CODES#M}
+     * @removed From {@link android.os.Build.VERSION_CODES#N}
      */
     @Deprecated
     public UserHandle createAndInitializeUser(@NonNull ComponentName admin, String name,
             String ownerName, @NonNull ComponentName profileOwnerComponent, Bundle adminExtras) {
-        try {
-            return mService.createAndInitializeUser(admin, name, ownerName, profileOwnerComponent,
-                    adminExtras);
-        } catch (RemoteException re) {
-            Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, re);
-        }
         return null;
     }
 
