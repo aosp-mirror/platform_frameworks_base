@@ -175,13 +175,13 @@ static const JNINativeMethod gMethods[] = {
     {"nCreatePathPropertyHolder", "!(JIFF)J", (void*)createPathPropertyHolder},
     {"nCreateRootAlphaPropertyHolder", "!(JFF)J", (void*)createRootAlphaPropertyHolder},
     {"nSetPropertyHolderData", "(J[FI)V", (void*)setPropertyHolderData},
-    {"nStart", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;I)V", (void*)start},
-    {"nReverse", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;I)V", (void*)reverse},
+    {"nStart", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V", (void*)start},
+    {"nReverse", "(JLandroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V", (void*)reverse},
     {"nEnd", "!(J)V", (void*)end},
     {"nReset", "!(J)V", (void*)reset},
 };
 
-const char* const kClassPathName = "android/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator";
+const char* const kClassPathName = "android/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT";
 int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env) {
     gVectorDrawableAnimatorClassInfo.clazz = FindClassOrDie(env, kClassPathName);
     gVectorDrawableAnimatorClassInfo.clazz = MakeGlobalRefOrDie(env,
@@ -189,7 +189,7 @@ int register_android_graphics_drawable_AnimatedVectorDrawable(JNIEnv* env) {
 
     gVectorDrawableAnimatorClassInfo.callOnFinished = GetStaticMethodIDOrDie(
             env, gVectorDrawableAnimatorClassInfo.clazz, "callOnFinished",
-            "(Landroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimator;I)V");
+            "(Landroid/graphics/drawable/AnimatedVectorDrawable$VectorDrawableAnimatorRT;I)V");
     return RegisterMethodsOrDie(env, "android/graphics/drawable/AnimatedVectorDrawable",
             gMethods, NELEM(gMethods));
 }
