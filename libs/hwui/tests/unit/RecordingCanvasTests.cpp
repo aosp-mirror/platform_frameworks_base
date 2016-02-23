@@ -19,6 +19,7 @@
 #include <RecordedOp.h>
 #include <RecordingCanvas.h>
 #include <tests/common/TestUtils.h>
+#include <utils/Color.h>
 
 namespace android {
 namespace uirenderer {
@@ -183,6 +184,19 @@ TEST(RecordingCanvas, drawText_forceAlignLeft) {
         lastX = ((const TextOp&)op).x;
     });
     ASSERT_EQ(3, count);
+}
+
+TEST(RecordingCanvas, drawColor) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.drawColor(Color::Black, SkXfermode::kSrcOver_Mode);
+    });
+
+    ASSERT_EQ(1u, dl->getOps().size()) << "Must be exactly one op";
+    auto op = *(dl->getOps()[0]);
+    EXPECT_EQ(RecordedOpId::RectOp, op.opId);
+    EXPECT_EQ(nullptr, op.localClip);
+    EXPECT_TRUE(op.unmappedBounds.contains(Rect(-1000, -1000, 1000, 1000)))
+            << "no clip, unmappedBounds should resolve to be much larger than DL bounds";
 }
 
 TEST(RecordingCanvas, backgroundAndImage) {
