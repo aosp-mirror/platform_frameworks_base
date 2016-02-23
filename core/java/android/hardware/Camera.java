@@ -19,6 +19,7 @@ package android.hardware;
 import android.app.ActivityThread;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.job.JobInfo;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
@@ -177,19 +178,27 @@ public class Camera {
     private static final int NO_ERROR = 0;
 
     /**
+     * @deprecated This broadcast is no longer delivered by the system; use
+     * {@link android.app.job.JobInfo.Builder JobInfo.Builder}.{@link android.app.job.JobInfo.Builder#addTriggerContentUri}
+     * instead.
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
      * the picture has been added to the media store.
      * {@link android.content.Intent#getData} is URI of the picture.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_NEW_PICTURE = "android.hardware.action.NEW_PICTURE";
 
     /**
+     * @deprecated This broadcast is no longer delivered by the system; use
+     * {@link android.app.job.JobInfo.Builder JobInfo.Builder}.{@link android.app.job.JobInfo.Builder#addTriggerContentUri}
+     * instead.
      * Broadcast Action:  A new video is recorded by the camera, and the entry
      * of the video has been added to the media store.
      * {@link android.content.Intent#getData} is URI of the video.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
 
     /**
