@@ -4434,7 +4434,7 @@ final class Settings {
                 if ((perm.info.flags&PermissionInfo.FLAG_COSTS_MONEY) != 0) {
                     pw.print(", COSTS_MONEY");
                 }
-                if ((perm.info.flags&PermissionInfo.FLAG_HIDDEN) != 0) {
+                if ((perm.info.flags&PermissionInfo.FLAG_REMOVED) != 0) {
                     pw.print(", HIDDEN");
                 }
                 if ((perm.info.flags&PermissionInfo.FLAG_INSTALLED) != 0) {
@@ -4611,7 +4611,7 @@ final class Settings {
             if (p.perm != null) {
                 pw.print("    perm="); pw.println(p.perm);
                 if ((p.perm.info.flags & PermissionInfo.FLAG_INSTALLED) == 0
-                        || (p.perm.info.flags & PermissionInfo.FLAG_HIDDEN) != 0) {
+                        || (p.perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0) {
                     pw.print("    flags=0x"); pw.println(Integer.toHexString(p.perm.info.flags));
                 }
             }
