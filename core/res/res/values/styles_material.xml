@@ -996,7 +996,6 @@ please see styles_device_defaults.xml.
         <item name="alpha">.87</item>
         <item name="textColor">@color/black</item>
         <item name="drawablePadding">8dip</item>
-        <item name="ellipsize">marquee</item>
         <item name="gravity">start|center_vertical</item>
         <item name="layout_gravity">start|center_vertical</item>
         <item name="layout_height">48dip</item>
@@ -1017,7 +1016,6 @@ please see styles_device_defaults.xml.
         <item name="alpha">.87</item>
         <item name="textColor">#009688</item>
         <item name="drawablePadding">8dip</item>
-        <item name="ellipsize">marquee</item>
         <item name="gravity">start|center_vertical</item>
         <item name="layout_gravity">start|center_vertical</item>
         <item name="layout_height">48dip</item>
