@@ -442,6 +442,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void onListenerConnected() {
             if (DEBUG) Log.d(TAG, "onListenerConnected");
             final StatusBarNotification[] notifications = getActiveNotifications();
+            if (notifications == null) {
+                Log.w(TAG, "onListenerConnected unable to get active notifications.");
+                return;
+            }
             final RankingMap currentRanking = getCurrentRanking();
             mHandler.post(new Runnable() {
                 @Override
