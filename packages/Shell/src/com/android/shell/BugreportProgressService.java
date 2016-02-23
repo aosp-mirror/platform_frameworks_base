@@ -769,6 +769,12 @@ public class BugreportProgressService extends Service {
         info.renameScreenshots(mScreenshotsDir);
         info.bugreportFile = bugreportFile;
 
+        final int max = intent.getIntExtra(EXTRA_MAX, -1);
+        if (max != -1) {
+            MetricsLogger.histogram(this, "dumpstate_duration", max);
+            info.max = max;
+        }
+
         final File screenshot = getFileExtra(intent, EXTRA_SCREENSHOT);
         if (screenshot != null) {
             info.addScreenshot(screenshot);
@@ -1541,7 +1547,7 @@ public class BugreportProgressService extends Service {
             return "id: " + id + ", pid: " + pid + ", name: " + name + ", finished: " + finished
                     + "\n\ttitle: " + title + "\n\tdescription: " + description
                     + "\n\tfile: " + bugreportFile + "\n\tscreenshots: " + screenshotFiles
-                    + "\n\tprogress: " + progress + "/" + max + "(" + percent + ")"
+                    + "\n\tprogress: " + progress + "/" + max + " (" + percent + ")"
                     + "\n\tlast_update: " + getFormattedLastUpdate()
                     + "\naddingDetailsToZip: " + addingDetailsToZip
                     + " addedDetailsToZip: " + addedDetailsToZip;
