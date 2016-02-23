@@ -6,6 +6,7 @@ import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
 import android.net.ICaptivePortal;
 import android.net.Network;
+import android.net.wifi.PasspointManagementObjectDefinition;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;
 import android.net.wifi.WifiInfo;
@@ -85,18 +86,20 @@ public class WifiNetworkAdapter {
     }
 
     private void loadAllSps() {
-        Log.d(OSUManager.TAG, "Loading all SPs");
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        int count = 0;
         for (WifiConfiguration config : wifiManager.getPrivilegedConfiguredNetworks()) {
             String moTree = config.getMoTree();
             if (moTree != null) {
                 try {
                     mPasspointConfigs.put(config.FQDN, new PasspointConfig(config));
+                    count++;
                 } catch (IOException | SAXException e) {
                     Log.w(OSUManager.TAG, "Failed to parse MO: " + e);
                 }
             }
         }
+        Log.d(OSUManager.TAG, "Loaded " + count + " SPs");
     }
 
     public Collection<HomeSP> getLoadedSPs() {
@@ -131,21 +134,19 @@ public class WifiNetworkAdapter {
         mContext.startActivity(intent);
     }
 
-    public HomeSP addSP(MOTree instanceTree) throws IOException, SAXException {
+    public int addSP(String xml) throws IOException, SAXException {
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        String xml = instanceTree.toXml();
-        wifiManager.addPasspointManagementObject(xml);
-        return MOManager.buildSP(xml);
+        return wifiManager.addPasspointManagementObject(xml);
     }
 
-    public void removeSP(String fqdn) throws IOException {
+    public int modifySP(HomeSP homeSP, Collection<MOData> mods) throws IOException {
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-    }
-
-    public HomeSP modifySP(HomeSP homeSP, Collection<MOData> mods)
-            throws IOException {
-        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        return null;
+        List<PasspointManagementObjectDefinition> defMods = new ArrayList<>(mods.size());
+        for (MOData mod : mods) {
+            defMods.add(new PasspointManagementObjectDefinition(mod.getBaseURI(),
+                    mod.getURN(), mod.getMOTree().toXml()));
+        }
+        return wifiManager.modifyPasspointManagementObject(homeSP.getFQDN(), defMods);
     }
 
     public Network getCurrentNetwork() {
@@ -184,9 +185,9 @@ public class WifiNetworkAdapter {
         return passpointConfig != null ? passpointConfig.getWifiConfiguration() : null;
     }
 
-    public WifiConfiguration getActivePasspointNetwork() {
+    public HomeSP getCurrentSP() {
         PasspointConfig passpointConfig = getActivePasspointConfig();
-        return passpointConfig != null ? passpointConfig.getWifiConfiguration() : null;
+        return passpointConfig != null ? passpointConfig.getHomeSP() : null;
     }
 
     private PasspointConfig getActivePasspointConfig() {
@@ -201,11 +202,6 @@ public class WifiNetworkAdapter {
             }
         }
         return null;
-    }
-
-    public HomeSP getCurrentSP() {
-        PasspointConfig passpointConfig = getActivePasspointConfig();
-        return passpointConfig != null ? passpointConfig.getHomeSP() : null;
     }
 
     public void doIconQuery(long bssid, String fileName) {
@@ -289,11 +285,11 @@ public class WifiNetworkAdapter {
         WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
         WifiConfiguration config = new WifiConfiguration();
-        config.SSID = '"' + osuInfo.getSSID() + '"';
+        config.SSID = '"' + osuInfo.getOsuSsid() + '"';
         if (osuInfo.getOSUBssid() != 0) {
             config.BSSID = Utils.macToString(osuInfo.getOSUBssid());
             Log.d(OSUManager.TAG, String.format("Setting BSSID of '%s' to %012x",
-                    osuInfo.getSSID(), osuInfo.getOSUBssid()));
+                    osuInfo.getOsuSsid(), osuInfo.getOSUBssid()));
         }
 
         if (osuInfo.getOSUProvider().getOsuNai() == null) {

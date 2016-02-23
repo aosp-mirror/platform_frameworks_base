@@ -29,13 +29,14 @@ public class OSUInfo {
     private final long mBSSID;
     private final long mHESSID;
     private final int mAnqpDomID;
-    private final String mSSID;
+    private final String mOsuSsid;
     private final String mAdvertisingSSID;
     private final OSUProvider mOSUProvider;
     private final int mOsuID;
     private long mOSUBssid;
     private IconStatus mIconStatus = IconStatus.NotQueried;
     private HSIconFileElement mIconFileElement;
+    private String mIconFileName;
     private IconInfo mIconInfo;
 
     public OSUInfo(ScanResult scanResult, String ssid, OSUProvider osuProvider, int osuID) {
@@ -44,7 +45,7 @@ public class OSUInfo {
         mHESSID = scanResult.hessid;
         mAnqpDomID = scanResult.anqpDomainId;
         mAdvertisingSSID = scanResult.SSID;
-        mSSID = ssid;
+        mOsuSsid = ssid;
         mOSUProvider = osuProvider;
     }
 
@@ -64,7 +65,7 @@ public class OSUInfo {
         return mAnqpDomID;
     }
 
-    public String getAdvertisingSSID() {
+    public String getAdvertisingSsid() {
         return mAdvertisingSSID;
     }
 
@@ -146,12 +147,17 @@ public class OSUInfo {
         }
     }
 
+    public String getIconFileName() {
+        return mIconFileName;
+    }
+
     public void setIconFileElement(HSIconFileElement iconFileElement, String fileName) {
         synchronized (mOSUProvider) {
             mIconFileElement = iconFileElement;
             for (IconInfo iconInfo : mOSUProvider.getIcons()) {
                 if (iconInfo.getFileName().equals(fileName)) {
                     mIconInfo = iconInfo;
+                    mIconFileName = fileName;
                     break;
                 }
             }
@@ -236,8 +242,8 @@ public class OSUInfo {
         return mBSSID;
     }
 
-    public String getSSID() {
-        return mSSID;
+    public String getOsuSsid() {
+        return mOsuSsid;
     }
 
     public OSUProvider getOSUProvider() {
@@ -247,6 +253,6 @@ public class OSUInfo {
     @Override
     public String toString() {
         return String.format("OSU Info '%s' %012x -> %s, icon %s",
-                mSSID, mBSSID, getServiceDescription(null), mIconStatus);
+                mOsuSsid, mBSSID, getServiceDescription(null), mIconStatus);
     }
 }
