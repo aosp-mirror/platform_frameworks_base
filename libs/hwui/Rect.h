@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_RECT_H
-#define ANDROID_HWUI_RECT_H
+#pragma once
 
-#include <cmath>
-#include <algorithm>
-#include <SkRect.h>
+#include "Vertex.h"
 
 #include <utils/Log.h>
 
-#include "Vertex.h"
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <ostream>
+#include <SkRect.h>
 
 namespace android {
 namespace uirenderer {
@@ -282,9 +283,23 @@ public:
     void dump(const char* label = nullptr) const {
         ALOGD("%s[l=%.2f t=%.2f r=%.2f b=%.2f]", label ? label : "Rect", left, top, right, bottom);
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const Rect& rect) {
+        if (rect.isEmpty()) {
+            return os << "empty";
+        }
+
+        if (rect.left == 0 && rect.top == 0) {
+            return os << "[" << rect.right << " x " << rect.bottom << "]";
+        }
+
+        return os << "[" << rect.left
+                << " " << rect.top
+                << " " << rect.right
+                << " " << rect.bottom << "]";
+    }
 }; // class Rect
 
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_HWUI_RECT_H

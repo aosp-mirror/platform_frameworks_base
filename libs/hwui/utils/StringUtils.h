@@ -42,7 +42,7 @@ struct SizePrinter {
         static const char* SUFFIXES[] = {"B", "KiB", "MiB"};
         size_t suffix = 0;
         double temp = d.bytes;
-        while (temp > 1000 && suffix < 2) {
+        while (temp > 1024 && suffix < 2) {
             temp /= 1024.0;
             suffix++;
         }

@@ -19,8 +19,9 @@
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #if HWUI_NEW_OPS
-#include "RecordedOp.h"
 #include "BakedOpRenderer.h"
+#include "RecordedOp.h"
+#include "OpDumper.h"
 #endif
 #include "DisplayListOp.h"
 #include "LayerRenderer.h"
@@ -95,6 +96,34 @@ void RenderNode::setStagingDisplayList(DisplayList* displayList) {
  * This function is a simplified version of replay(), where we simply retrieve and log the
  * display list. This function should remain in sync with the replay() function.
  */
+#if HWUI_NEW_OPS
+void RenderNode::output(uint32_t level, const char* label) {
+    ALOGD("%s (%s %p%s%s%s%s%s)",
+            label,
+            getName(),
+            this,
+            (MathUtils::isZero(properties().getAlpha()) ? ", zero alpha" : ""),
+            (properties().hasShadow() ? ", casting shadow" : ""),
+            (isRenderable() ? "" : ", empty"),
+            (properties().getProjectBackwards() ? ", projected" : ""),
+            (mLayer != nullptr ? ", on HW Layer" : ""));
+    properties().debugOutputProperties(level + 1);
+
+    if (mDisplayList) {
+        for (auto&& op : mDisplayList->getOps()) {
+            std::stringstream strout;
+            OpDumper::dump(*op, strout, level + 1);
+            if (op->opId == RecordedOpId::RenderNodeOp) {
+                auto rnOp = reinterpret_cast<const RenderNodeOp*>(op);
+                rnOp->renderNode->output(level + 1, strout.str().c_str());
+            } else {
+                ALOGD("%s", strout.str().c_str());
+            }
+        }
+    }
+    ALOGD("%*s/RenderNode(%s %p)", level * 2, "", getName(), this);
+}
+#else
 void RenderNode::output(uint32_t level) {
     ALOGD("%*sStart display list (%p, %s%s%s%s%s%s)", (level - 1) * 2, "", this,
             getName(),
@@ -104,22 +133,16 @@ void RenderNode::output(uint32_t level) {
             (properties().getProjectBackwards() ? ", projected" : ""),
             (mLayer != nullptr ? ", on HW Layer" : ""));
     ALOGD("%*s%s %d", level * 2, "", "Save", SaveFlags::MatrixClip);
-
     properties().debugOutputProperties(level);
-
     if (mDisplayList) {
-#if HWUI_NEW_OPS
-        LOG_ALWAYS_FATAL("op dumping unsupported");
-#else
         // TODO: consider printing the chunk boundaries here
         for (auto&& op : mDisplayList->getOps()) {
             op->output(level, DisplayListOp::kOpLogFlag_Recurse);
         }
-#endif
     }
-
     ALOGD("%*sDone (%p, %s)", (level - 1) * 2, "", this, getName());
-}
+    }
+#endif
 
 void RenderNode::copyTo(proto::RenderNode *pnode) {
     pnode->set_id(static_cast<uint64_t>(

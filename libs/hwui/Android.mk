@@ -119,6 +119,7 @@ ifeq (true, $(HWUI_NEW_OPS))
         BakedOpState.cpp \
         FrameBuilder.cpp \
         LayerBuilder.cpp \
+        OpDumper.cpp \
         RecordingCanvas.cpp
 
     hwui_cflags += -DHWUI_NEW_OPS
@@ -253,6 +254,7 @@ ifeq (true, $(HWUI_NEW_OPS))
         tests/unit/BakedOpStateTests.cpp \
         tests/unit/FrameBuilderTests.cpp \
         tests/unit/LeakCheckTests.cpp \
+        tests/unit/OpDumperTests.cpp \
         tests/unit/RecordingCanvasTests.cpp
 endif
 

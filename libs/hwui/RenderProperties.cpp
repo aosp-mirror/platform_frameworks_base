@@ -102,22 +102,23 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
 
 void RenderProperties::debugOutputProperties(const int level) const {
     if (mPrimitiveFields.mLeft != 0 || mPrimitiveFields.mTop != 0) {
-        ALOGD("%*sTranslate (left, top) %d, %d", level * 2, "", mPrimitiveFields.mLeft, mPrimitiveFields.mTop);
+        ALOGD("%*s(Translate (left, top) %d, %d)", level * 2, "",
+                mPrimitiveFields.mLeft, mPrimitiveFields.mTop);
     }
     if (mStaticMatrix) {
-        ALOGD("%*sConcatMatrix (static) %p: " SK_MATRIX_STRING,
+        ALOGD("%*s(ConcatMatrix (static) %p: " SK_MATRIX_STRING ")",
                 level * 2, "", mStaticMatrix, SK_MATRIX_ARGS(mStaticMatrix));
     }
     if (mAnimationMatrix) {
-        ALOGD("%*sConcatMatrix (animation) %p: " SK_MATRIX_STRING,
+        ALOGD("%*s(ConcatMatrix (animation) %p: " SK_MATRIX_STRING ")",
                 level * 2, "", mAnimationMatrix, SK_MATRIX_ARGS(mAnimationMatrix));
     }
     if (hasTransformMatrix()) {
         if (isTransformTranslateOnly()) {
-            ALOGD("%*sTranslate %.2f, %.2f, %.2f",
+            ALOGD("%*s(Translate %.2f, %.2f, %.2f)",
                     level * 2, "", getTranslationX(), getTranslationY(), getZ());
         } else {
-            ALOGD("%*sConcatMatrix %p: " SK_MATRIX_STRING,
+            ALOGD("%*s(ConcatMatrix %p: " SK_MATRIX_STRING ")",
                     level * 2, "", mComputedFields.mTransformMatrix, SK_MATRIX_ARGS(mComputedFields.mTransformMatrix));
         }
     }
@@ -132,7 +133,7 @@ void RenderProperties::debugOutputProperties(const int level) const {
 
         if (CC_LIKELY(isLayer || !getHasOverlappingRendering())) {
             // simply scale rendering content's alpha
-            ALOGD("%*sScaleAlpha %.2f", level * 2, "", mPrimitiveFields.mAlpha);
+            ALOGD("%*s(ScaleAlpha %.2f)", level * 2, "", mPrimitiveFields.mAlpha);
         } else {
             // savelayeralpha to create an offscreen buffer to apply alpha
             Rect layerBounds(0, 0, getWidth(), getHeight());
@@ -140,19 +141,18 @@ void RenderProperties::debugOutputProperties(const int level) const {
                 getClippingRectForFlags(clipFlags, &layerBounds);
                 clipFlags = 0; // all clipping done by savelayer
             }
-            ALOGD("%*sSaveLayerAlpha %d, %d, %d, %d, %d, 0x%x", level * 2, "",
+            ALOGD("%*s(SaveLayerAlpha %d, %d, %d, %d, %d, 0x%x)", level * 2, "",
                     (int)layerBounds.left, (int)layerBounds.top,
                     (int)layerBounds.right, (int)layerBounds.bottom,
                     (int)(mPrimitiveFields.mAlpha * 255),
                     SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer);
         }
-
-
     }
+
     if (clipFlags) {
         Rect clipRect;
         getClippingRectForFlags(clipFlags, &clipRect);
-        ALOGD("%*sClipRect %d, %d, %d, %d", level * 2, "",
+        ALOGD("%*s(ClipRect %d, %d, %d, %d)", level * 2, "",
                 (int)clipRect.left, (int)clipRect.top, (int)clipRect.right, (int)clipRect.bottom);
     }
 }

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HWUI_MATRIX_H
-#define ANDROID_HWUI_MATRIX_H
-
-#include <SkMatrix.h>
-
-#include <cutils/compiler.h>
+#pragma once
 
 #include "Rect.h"
+
+#include <cutils/compiler.h>
+#include <iomanip>
+#include <ostream>
+#include <SkMatrix.h>
 
 namespace android {
 namespace uirenderer {
@@ -218,6 +218,22 @@ public:
 
     void dump(const char* label = nullptr) const;
 
+    friend std::ostream& operator<<(std::ostream& os, const Matrix4& matrix) {
+        if (matrix.isSimple()) {
+            os << "offset " << matrix.getTranslateX() << "x" << matrix.getTranslateY();
+            if (!matrix.isPureTranslate()) {
+                os << ", scale " << matrix[kScaleX] << "x" << matrix[kScaleY];
+            }
+        } else {
+            os << "[" << matrix[0];
+            for (int i = 1; i < 16; i++) {
+                os << ", " << matrix[i];
+            }
+            os << "]";
+        }
+        return os;
+    }
+
     static const Matrix4& identity();
 
 private:
@@ -244,4 +260,3 @@ typedef Matrix4 mat4;
 }; // namespace uirenderer
 }; // namespace android
 
-#endif // ANDROID_HWUI_MATRIX_H
