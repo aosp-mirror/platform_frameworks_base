@@ -209,6 +209,15 @@ public final class RemoteConnection {
          * @param extras The extras containing other information associated with the connection.
          */
         public void onExtrasChanged(RemoteConnection connection, @Nullable Bundle extras) {}
+
+        /**
+         * Handles a connection event propagated to this {@link RemoteConnection}.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param event The connection event.
+         * @hide
+         */
+        public void onConnectionEvent(RemoteConnection connection, String event) {}
     }
 
     /**
@@ -1286,6 +1295,20 @@ public final class RemoteConnection {
                 @Override
                 public void run() {
                     callback.onExtrasChanged(connection, extras);
+                }
+            });
+        }
+    }
+
+    /** @hide */
+    void onConnectionEvent(final String event) {
+        for (CallbackRecord record : mCallbackRecords) {
+            final RemoteConnection connection = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onConnectionEvent(connection, event);
                 }
             });
         }
