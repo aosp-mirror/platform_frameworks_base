@@ -1780,6 +1780,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
             case KeyEvent.KEYCODE_SPACE:
+            case KeyEvent.KEYCODE_NUMPAD_ENTER:
                 return true;
             default:
                 return false;
