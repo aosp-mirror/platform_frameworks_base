@@ -20,16 +20,14 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import dalvik.system.PathClassLoader;
 
-class ApplicationLoaders
-{
-    public static ApplicationLoaders getDefault()
-    {
+class ApplicationLoaders {
+    public static ApplicationLoaders getDefault() {
         return gApplicationLoaders;
     }
 
-    public ClassLoader getClassLoader(String zip, boolean isBundled, String librarySearchPath,
-                                      String libraryPermittedPath, ClassLoader parent)
-    {
+    public ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
+                                      String librarySearchPath, String libraryPermittedPath,
+                                      ClassLoader parent) {
         /*
          * This is the parent we use if they pass "null" in.  In theory
          * this should be the "system" class loader; in practice we
@@ -55,10 +53,21 @@ class ApplicationLoaders
                 }
     
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
+
                 PathClassLoader pathClassloader =
-                    new PathClassLoader(zip, isBundled, librarySearchPath,
-                                        libraryPermittedPath, parent);
+                    new PathClassLoader(zip, librarySearchPath, parent);
+
+                String errorMessage = createClassloaderNamespace(pathClassloader,
+                                                                 targetSdkVersion,
+                                                                 librarySearchPath,
+                                                                 libraryPermittedPath,
+                                                                 isBundled);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+                if (errorMessage != null) {
+                    throw new UnsatisfiedLinkError("Unable to create namespace for the classloader " +
+                                                   pathClassloader + ": " + errorMessage);
+                }
 
                 mLoaders.put(zip, pathClassloader);
                 return pathClassloader;
@@ -70,6 +79,12 @@ class ApplicationLoaders
             return pathClassloader;
         }
     }
+
+    private static native String createClassloaderNamespace(ClassLoader classLoader,
+                                                            int targetSdkVersion,
+                                                            String librarySearchPath,
+                                                            String libraryPermittedPath,
+                                                            boolean isShared);
 
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<String, ClassLoader>();
 
