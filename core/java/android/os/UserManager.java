@@ -379,8 +379,7 @@ public class UserManager {
      * Specifies that the user is not allowed to make outgoing
      * phone calls. Emergency calls are still permitted.
      * The default value is <code>false</code>.
-     * <p>This restriction has no effect on managed profiles since call intents are normally
-     * forwarded to the primary user.
+     * <p>This restriction has no effect on managed profiles.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
