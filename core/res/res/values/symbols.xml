@@ -2486,7 +2486,6 @@
   <java-symbol type="string" name="status_bar_clock" />
 
   <!-- Locale picker -->
-  <java-symbol type="id" name="l10nWarn" />
   <java-symbol type="id" name="locale_search_menu" />
   <java-symbol type="layout" name="language_picker_item" />
   <java-symbol type="layout" name="language_picker_section_header" />
