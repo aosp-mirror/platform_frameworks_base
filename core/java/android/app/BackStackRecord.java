@@ -470,6 +470,10 @@ final class BackStackRecord extends FragmentTransaction implements
         }
 
         if (containerViewId != 0) {
+            if (containerViewId == View.NO_ID) {
+                throw new IllegalArgumentException("Can't add fragment "
+                        + fragment + " with tag " + tag + " to container view with no id");
+            }
             if (fragment.mFragmentId != 0 && fragment.mFragmentId != containerViewId) {
                 throw new IllegalStateException("Can't change container ID of fragment "
                         + fragment + ": was " + fragment.mFragmentId
