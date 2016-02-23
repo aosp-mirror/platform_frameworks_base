@@ -7,6 +7,7 @@ page.metaDescription=Bring your apps, games, and content to the biggest screen i
 fullpage=true
 no_footer_links=true
 page.type=about
+nonavpage=true
 
 @jd:body
 
