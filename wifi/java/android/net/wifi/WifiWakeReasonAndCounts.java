@@ -16,8 +16,8 @@
 
 package android.net.wifi;
 
-import android.os.Parcelable;
 import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * A class representing wifi wake reason accounting.
@@ -52,6 +52,8 @@ public class WifiWakeReasonAndCounts implements Parcelable {
     public int ipv4RxMulticast;
     public int ipv6Multicast;
     public int otherRxMulticast;
+    public int[] cmdEventWakeCntArray;
+    public int[] driverFWLocalWakeCntArray;
 
     /* {@hide} */
     public WifiWakeReasonAndCounts () {
@@ -78,6 +80,13 @@ public class WifiWakeReasonAndCounts implements Parcelable {
         sb.append(" ipv4RxMulticast ").append(ipv4RxMulticast);
         sb.append(" ipv6Multicast ").append(ipv6Multicast);
         sb.append(" otherRxMulticast ").append(otherRxMulticast);
+        for (int i = 0; i < cmdEventWakeCntArray.length; i++) {
+            sb.append(" cmdEventWakeCntArray[" + i + "] " + cmdEventWakeCntArray[i]);
+        }
+        for (int i = 0; i < driverFWLocalWakeCntArray.length; i++) {
+            sb.append(" driverFWLocalWakeCntArray[" + i + "] " + driverFWLocalWakeCntArray[i]);
+        }
+
         return sb.toString();
     }
 
@@ -111,6 +120,8 @@ public class WifiWakeReasonAndCounts implements Parcelable {
         dest.writeInt(ipv4RxMulticast);
         dest.writeInt(ipv6Multicast);
         dest.writeInt(otherRxMulticast);
+        dest.writeIntArray(cmdEventWakeCntArray);
+        dest.writeIntArray(driverFWLocalWakeCntArray);
     }
 
     /* Implement the Parcelable interface
@@ -137,6 +148,8 @@ public class WifiWakeReasonAndCounts implements Parcelable {
                 counts.ipv4RxMulticast = in.readInt();
                 counts.ipv6Multicast = in.readInt();
                 counts.otherRxMulticast = in.readInt();
+                in.readIntArray(counts.cmdEventWakeCntArray);
+                in.readIntArray(counts.driverFWLocalWakeCntArray);
                 return counts;
             }
             /* Implement the Parcelable interface
