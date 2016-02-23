@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.R;
@@ -156,16 +155,9 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
                 }
 
                 TextView text = (TextView) convertView.findViewById(R.id.locale);
-                ImageView localized = (ImageView) convertView.findViewById(R.id.l10nWarn);
                 LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
                 text.setText(item.getLabel());
-                if (item.isTranslated() || mCountryMode) {
-                    localized.setVisibility(View.GONE);
-                    text.setTextLocale(item.getLocale());
-                } else {
-                    localized.setVisibility(View.VISIBLE);
-                    text.setTextLocale(Locale.getDefault());
-                }
+                text.setTextLocale(item.getLocale());
                 if (mCountryMode) {
                     int layoutDir = TextUtils.getLayoutDirectionFromLocale(item.getParent());
                     //noinspection ResourceType
