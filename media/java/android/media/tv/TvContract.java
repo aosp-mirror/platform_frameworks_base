@@ -312,33 +312,28 @@ public final class TvContract {
     }
 
     /**
-     * Returns true, if {@code uri} is a channel URI.
-     * @hide
+     * Returns {@code true}, if {@code uri} is a channel URI.
      */
     public static final boolean isChannelUri(Uri uri) {
         return isChannelUriForTunerInput(uri) || isChannelUriForPassthroughInput(uri);
     }
 
     /**
-     * Returns true, if {@code uri} is a channel URI for a tuner input.
-     * @hide
+     * Returns {@code true}, if {@code uri} is a channel URI for a tuner input.
      */
     public static final boolean isChannelUriForTunerInput(Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_CHANNEL);
     }
 
     /**
-     * Returns true, if {@code uri} is a channel URI for a passthrough input.
-     * @hide
+     * Returns {@code true}, if {@code uri} is a channel URI for a pass-through input.
      */
-    @SystemApi
     public static final boolean isChannelUriForPassthroughInput(Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PASSTHROUGH);
     }
 
     /**
-     * Returns true, if {@code uri} is a program URI.
-     * @hide
+     * Returns {@code true}, if {@code uri} is a program URI.
      */
     public static final boolean isProgramUri(Uri uri) {
         return isTvUri(uri) && isTwoSegmentUriStartingWith(uri, PATH_PROGRAM);
