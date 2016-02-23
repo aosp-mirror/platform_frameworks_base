@@ -2780,6 +2780,11 @@ public final class Settings {
          */
         public static final Uri DEFAULT_RINGTONE_URI = getUriFor(RINGTONE);
 
+        /** {@hide} */
+        public static final String RINGTONE_CACHE = "ringtone_cache";
+        /** {@hide} */
+        public static final Uri RINGTONE_CACHE_URI = getUriFor(RINGTONE_CACHE);
+
         /**
          * Persistent store for the system-wide default notification sound.
          *
@@ -2798,6 +2803,11 @@ public final class Settings {
          */
         public static final Uri DEFAULT_NOTIFICATION_URI = getUriFor(NOTIFICATION_SOUND);
 
+        /** {@hide} */
+        public static final String NOTIFICATION_SOUND_CACHE = "notification_sound_cache";
+        /** {@hide} */
+        public static final Uri NOTIFICATION_SOUND_CACHE_URI = getUriFor(NOTIFICATION_SOUND_CACHE);
+
         /**
          * Persistent store for the system-wide default alarm alert.
          *
@@ -2815,6 +2825,11 @@ public final class Settings {
          * @see #DEFAULT_ALARM_ALERT_URI
          */
         public static final Uri DEFAULT_ALARM_ALERT_URI = getUriFor(ALARM_ALERT);
+
+        /** {@hide} */
+        public static final String ALARM_ALERT_CACHE = "alarm_alert_cache";
+        /** {@hide} */
+        public static final Uri ALARM_ALERT_CACHE_URI = getUriFor(ALARM_ALERT_CACHE);
 
         /**
          * Persistent store for the system default media button event receiver.
