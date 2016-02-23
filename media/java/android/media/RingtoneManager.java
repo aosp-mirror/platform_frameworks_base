@@ -18,9 +18,12 @@ package android.media;
 
 import com.android.internal.database.SortCursor;
 
+import libcore.io.Streams;
+
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -33,6 +36,9 @@ import android.provider.Settings;
 import android.provider.Settings.System;
 import android.util.Log;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -654,8 +660,19 @@ public class RingtoneManager {
         if (setting == null) return;
         Settings.System.putString(context.getContentResolver(), setting,
                 ringtoneUri != null ? ringtoneUri.toString() : null);
+
+        // Stream selected ringtone into cache so it's available for playback
+        // when CE storage is still locked
+        final ContentResolver cr = context.getContentResolver();
+        final Uri cacheUri = getCacheForType(type);
+        try (InputStream in = cr.openInputStream(ringtoneUri);
+                OutputStream out = cr.openOutputStream(cacheUri)) {
+            Streams.copy(in, out);
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to cache ringtone: " + e);
+        }
     }
-    
+
     private static String getSettingForType(int type) {
         if ((type & TYPE_RINGTONE) != 0) {
             return Settings.System.RINGTONE;
@@ -667,7 +684,20 @@ public class RingtoneManager {
             return null;
         }
     }
-    
+
+    /** {@hide} */
+    public static Uri getCacheForType(int type) {
+        if ((type & TYPE_RINGTONE) != 0) {
+            return Settings.System.RINGTONE_CACHE_URI;
+        } else if ((type & TYPE_NOTIFICATION) != 0) {
+            return Settings.System.NOTIFICATION_SOUND_CACHE_URI;
+        } else if ((type & TYPE_ALARM) != 0) {
+            return Settings.System.ALARM_ALERT_CACHE_URI;
+        } else {
+            return null;
+        }
+    }
+
     /**
      * Returns whether the given {@link Uri} is one of the default ringtones.
      * 
