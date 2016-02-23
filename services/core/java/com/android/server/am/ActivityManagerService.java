@@ -17219,6 +17219,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ProxyInfo proxy = intent.getParcelableExtra(Proxy.EXTRA_PROXY_INFO);
                     mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
                     break;
+                case android.hardware.Camera.ACTION_NEW_PICTURE:
+                case android.hardware.Camera.ACTION_NEW_VIDEO:
+                    // These broadcasts are no longer allowed by the system, since they can
+                    // cause significant thrashing at a crictical point (using the camera).
+                    // Apps should use JobScehduler to monitor for media provider changes.
+                    Slog.w(TAG, action + " no longer allowed; dropping from "
+                            + UserHandle.formatUid(callingUid));
+                    // Lie; we don't want to crash the app.
+                    return ActivityManager.BROADCAST_SUCCESS;
             }
         }
 
