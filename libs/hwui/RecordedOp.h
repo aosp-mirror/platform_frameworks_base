@@ -119,6 +119,9 @@ class Tree;
 #define BUILD_RENDERABLE_OP_LUT(OP_FN) \
         { MAP_OPS_BASED_ON_TYPE(NULLPTR_OP_FN, OP_FN, OP_FN, OP_FN) }
 
+#define BUILD_FULL_OP_LUT(OP_FN) \
+        { MAP_OPS_BASED_ON_TYPE(OP_FN, OP_FN, OP_FN, OP_FN) }
+
 /**
  * Op mapping functions, which skip unsupported ops.
  *
