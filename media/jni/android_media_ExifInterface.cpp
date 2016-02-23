@@ -101,10 +101,10 @@ static jobject ExifInterface_getRawMetadata(
 
     KeyedVector<String8, String8> map;
 
-    if (image_data.thumbnail_length > 0) {
+    if (image_data.thumbnail.length > 0) {
         map.add(String8("hasThumbnail"), String8("true"));
-        map.add(String8("thumbnailOffset"), String8::format("%d", image_data.thumbnail_offset));
-        map.add(String8("thumbnailLength"), String8::format("%d", image_data.thumbnail_length));
+        map.add(String8("thumbnailOffset"), String8::format("%d", image_data.thumbnail.offset));
+        map.add(String8("thumbnailLength"), String8::format("%d", image_data.thumbnail.length));
     } else {
         map.add(String8("hasThumbnail"), String8("false"));
     }
