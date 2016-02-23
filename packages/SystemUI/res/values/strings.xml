@@ -1201,10 +1201,18 @@
     <!-- Bluetooth enablement ok text [CHAR LIMIT=40] -->
     <string name="enable_bluetooth_confirmation_ok">Turn on</string>
 
-    <!-- Apply notification importance setting to a topic [CHAR LIMIT=NONE] -->
-    <string name="apply_to_topic">Apply to <xliff:g id="topic_name" example="Friend Request">%1$s</xliff:g> notifications</string>
-    <!-- Apply notification importance setting to an app [CHAR LIMIT=NONE] -->
-    <string name="apply_to_app">Apply to all notifications from this app</string>
+    <!-- [CHAR LIMIT=100] Notification importance option -->
+    <string name="show_silently">Show notifications silently</string>
+    <!-- [CHAR LIMIT=100] Notification importance option -->
+    <string name="block">Block all notifications</string>
+    <!-- [CHAR LIMIT=100] Notification importance option -->
+    <string name="do_not_silence">Don\'t silence</string>
+    <!-- [CHAR LIMIT=100] Notification importance option -->
+    <string name="do_not_silence_block">Don\'t silence or block</string>
+
+    <!-- [CHAR LIMIT=NONE] Importance Tuner setting title -->
+    <string name="tuner_full_importance_settings">Show full importance settings</string>
+
     <!-- Notification importance title, blocked status-->
     <string name="blocked_importance">Blocked</string>
     <!-- Notification importance title, low status-->
@@ -1226,10 +1234,10 @@
     <string name="notification_importance_default">Silently show these notifications</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: high importance level description -->
-    <string name="notification_importance_high">Show at the top of the notifications list and make sound</string>
+    <string name="notification_importance_high">Show at the top of the notifications list and allow sound</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
-    <string name="notification_importance_max">Peek onto the screen and make sound</string>
+    <string name="notification_importance_max">Peek onto the screen and allow sound</string>
 
     <!-- Notification: Control panel: Label for button that launches notification settings. [CHAR LIMIT=NONE] -->
     <string name="notification_more_settings">More settings</string>
@@ -1430,6 +1438,9 @@
         <item>Don\'t show this icon</item>
     </string-array>
 
+    <!-- SysUI Tuner: Other section -->
+    <string name="other">Other</string>
+
     <!-- Accessibility label for the divider that separates the windows in split-screen mode [CHAR LIMIT=NONE] -->
     <string name="accessibility_divider">Split-screen divider</string>
 
@@ -1444,4 +1455,5 @@
 
     <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
     <string name="accessibility_action_divider_move_right">Move right</string>
+
 </resources>

@@ -1007,7 +1007,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         });
 
-        guts.bindImportance(sbn, row, mNotificationData.getImportance(sbn.getKey()));
+        guts.bindImportance(pmUser, sbn, row, mNotificationData.getImportance(sbn.getKey()));
     }
 
     protected GearDisplayedListener getGearDisplayedListener() {
@@ -1044,9 +1044,9 @@ public abstract class BaseStatusBar extends SystemUI implements
 
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_NOTE_CONTROLS);
 
-                // ensure that it's layouted but not visible until actually laid out
+                // ensure that it's laid but not visible until actually laid out
                 guts.setVisibility(View.INVISIBLE);
-                // Post to ensure the the guts are properly layed out.
+                // Post to ensure the the guts are properly laid out.
                 guts.post(new Runnable() {
                     public void run() {
                         dismissPopups();

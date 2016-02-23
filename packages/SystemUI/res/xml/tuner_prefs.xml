@@ -134,8 +134,8 @@
     -->
 
     <PreferenceScreen
-        android:key="overview"
-        android:title="@string/overview" >
+        android:key="other"
+        android:title="@string/other" >
 
         <com.android.systemui.tuner.TunerSwitch
             android:key="overview_disable_fast_toggle_via_button"
@@ -146,6 +146,11 @@
             android:key="overview_nav_bar_gesture"
             android:title="@string/overview_nav_bar_gesture"
             android:summary="@string/overview_nav_bar_gesture_desc" />
+
+        <!-- importance -->
+        <com.android.systemui.tuner.TunerSwitch
+                android:key="show_importance_slider"
+                android:title="@string/tuner_full_importance_settings" />
 
     </PreferenceScreen>
 
