@@ -413,21 +413,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      * @return true if the menu key should be enabled
      */
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
-    private boolean shouldEnableMenuKey() {
+    public boolean shouldEnableMenuKey() {
         final Resources res = getResources();
         final boolean configDisabled = res.getBoolean(R.bool.config_disableMenuKeyInLockScreen);
         final boolean isTestHarness = ActivityManager.isRunningInTestHarness();
         final boolean fileOverride = (new File(ENABLE_MENU_KEY_FILE)).exists();
         return !configDisabled || isTestHarness || fileOverride;
-    }
-
-    public boolean handleMenuKey() {
-        // The following enables the MENU key to work for testing automation
-        if (shouldEnableMenuKey()) {
-            dismiss();
-            return true;
-        }
-        return false;
     }
 
     public void setViewMediatorCallback(ViewMediatorCallback viewMediatorCallback) {
