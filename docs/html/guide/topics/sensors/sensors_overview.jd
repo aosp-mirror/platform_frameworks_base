@@ -465,6 +465,7 @@ private Sensor mSensor;
 ...
 
 mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+mSensor = null;
 
 if (mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY) != null){
   List&lt;Sensor&gt; gravSensors = mSensorManager.getSensorList(Sensor.TYPE_GRAVITY);
@@ -476,7 +477,7 @@ if (mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY) != null){
     }
   }
 }
-else{
+if (mSensor == null){
   // Use the accelerometer.
   if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
     mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
