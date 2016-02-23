@@ -369,7 +369,12 @@ final class Session extends IWindowSession.Stub
         if (DEBUG_TASK_POSITIONING) Slog.d(
                 TAG_WM, "startMovingTask: {" + startX + "," + startY + "}");
 
-        return mService.startMovingTask(window, startX, startY);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            return mService.startMovingTask(window, startX, startY);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     public void reportDropResult(IWindow window, boolean consumed) {
