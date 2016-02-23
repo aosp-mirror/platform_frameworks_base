@@ -22,7 +22,6 @@ import static com.android.documentsui.services.FileOperationService.OPERATION_DE
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.documentsui.Metrics;
@@ -81,13 +80,13 @@ final class DeleteJob extends Job {
     }
 
     @Override
-    void start() throws RemoteException {
+    void start() {
         for (DocumentInfo doc : mSrcs) {
             if (DEBUG) Log.d(TAG, "Deleting document @ " + doc.derivedUri);
-            // TODO: Start using mSrcParent as soon as DocumentsProvider::removeDocument() is
-            // implemented.
-            if (!deleteDocument(doc)) {
-                Log.w(TAG, "Failed to delete document @ " + doc.derivedUri);
+            try {
+                deleteDocument(doc);
+            } catch (ResourceException e) {
+                Log.e(TAG, "Failed to delete document @ " + doc.derivedUri);
                 onFileFailed(doc);
             }
         }
