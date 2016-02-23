@@ -907,7 +907,7 @@ android.graphics.drawable.AnimatedVectorDrawable
 android.graphics.drawable.AnimatedVectorDrawable$1
 android.graphics.drawable.AnimatedVectorDrawable$AnimatedVectorDrawableState
 android.graphics.drawable.AnimatedVectorDrawable$AnimatedVectorDrawableState$PendingAnimator
-android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimator
+android.graphics.drawable.AnimatedVectorDrawable$VectorDrawableAnimatorRT
 android.graphics.drawable.AnimationDrawable
 android.graphics.drawable.AnimationDrawable$AnimationState
 android.graphics.drawable.BitmapDrawable
