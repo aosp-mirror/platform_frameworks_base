@@ -353,7 +353,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onPackageBroadcastReceived(Intent intent, int userId) {
-        if (!mUserManager.isUserUnlocked(userId)) return;
+        if (!mUserManager.isUserUnlocked(userId) ||
+                isProfileWithLockedParent(userId)) {
+            return;
+        }
 
         final String action = intent.getAction();
         boolean added = false;
@@ -435,7 +438,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * due to user not being available and package suspension.
      */
     private void reloadWidgetsMaskedStateForUser(int userId) {
-        if (!mUserManager.isUserUnlocked(userId)) return;
+        if (!mUserManager.isUserUnlocked(userId) ||
+                isProfileWithLockedParent(userId)) {
+            return;
+        }
         synchronized (mLock) {
             reloadWidgetPackageSuspensionMaskedStateLocked(userId);
             List<UserInfo> profiles = mUserManager.getEnabledProfiles(userId);
@@ -606,7 +612,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             throw new IllegalStateException(
                     "User " + userId + " must be unlocked for widgets to be available");
         }
-
+        if (isProfileWithLockedParent(userId)) {
+            throw new IllegalStateException(
+                    "Profile " + userId + " must have unlocked parent");
+        }
         final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
 
         // Careful lad, we may have already loaded the state for some
@@ -2458,6 +2467,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onUserUnlocked(int userId) {
+        if (isProfileWithLockedParent(userId)) {
+            return;
+        }
         synchronized (mLock) {
             ensureGroupStateLoadedLocked(userId);
             reloadWidgetsMaskedStateForUser(userId);
@@ -3304,6 +3316,23 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
         }
+    }
+
+    private boolean isProfileWithLockedParent(int userId) {
+        long token = Binder.clearCallingIdentity();
+        try {
+            UserInfo userInfo = mUserManager.getUserInfo(userId);
+            if (userInfo != null && userInfo.isManagedProfile()) {
+                UserInfo parentInfo = mUserManager.getProfileParent(userId);
+                if (parentInfo != null
+                        && !mUserManager.isUserUnlocked(parentInfo.getUserHandle())) {
+                    return true;
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return false;
     }
 
     private boolean isProfileWithUnlockedParent(int userId) {
