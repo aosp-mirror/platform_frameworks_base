@@ -523,7 +523,13 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
-        if (mDark == dark || mContractedChild == null) return;
+        setDark(dark, fade, delay, false /* force */);
+    }
+
+    public void setDark(boolean dark, boolean fade, long delay, boolean force) {
+        if ((!force && mDark == dark) || mContractedChild == null) {
+            return;
+        }
         mDark = dark;
         dark = dark && !mShowingLegacyBackground;
         if (mVisibleType == VISIBLE_TYPE_CONTRACTED || !dark) {
@@ -571,7 +577,6 @@ public class NotificationContentView extends FrameLayout {
         selectLayout(false /* animate */, true /* force */);
         if (mContractedChild != null) {
             mContractedWrapper.notifyContentUpdated(entry.notification);
-            mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
         }
         if (mExpandedChild != null) {
             mExpandedWrapper.notifyContentUpdated(entry.notification);
@@ -579,6 +584,7 @@ public class NotificationContentView extends FrameLayout {
         if (mHeadsUpChild != null) {
             mHeadsUpWrapper.notifyContentUpdated(entry.notification);
         }
+        setDark(mDark, false /* animate */, 0 /* delay */, true /* force */);
     }
 
     private void updateSingleLineView() {
