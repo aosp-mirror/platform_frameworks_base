@@ -11958,6 +11958,8 @@ package android.graphics {
     ctor public Outline(android.graphics.Outline);
     method public boolean canClip();
     method public float getAlpha();
+    method public float getRadius();
+    method public boolean getRect(android.graphics.Rect);
     method public boolean isEmpty();
     method public void offset(int, int);
     method public void set(android.graphics.Outline);
@@ -12985,12 +12987,10 @@ package android.graphics.drawable {
     ctor public deprecated NinePatchDrawable(android.graphics.NinePatch);
     ctor public NinePatchDrawable(android.content.res.Resources, android.graphics.NinePatch);
     method public void draw(android.graphics.Canvas);
-    method public android.graphics.NinePatch getNinePatch();
     method public int getOpacity();
     method public android.graphics.Paint getPaint();
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
-    method public void setNinePatch(android.graphics.NinePatch);
     method public void setTargetDensity(android.graphics.Canvas);
     method public void setTargetDensity(android.util.DisplayMetrics);
     method public void setTargetDensity(int);
