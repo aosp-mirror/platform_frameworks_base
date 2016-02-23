@@ -4,6 +4,7 @@ fullpage=true
 no_footer_links=true
 page.type=about
 page.image=images/cards/android-wear_2x.png
+nonavpage=true
 @jd:body
 
 <style>
