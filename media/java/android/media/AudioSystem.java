@@ -346,6 +346,7 @@ public class AudioSystem
     public static final int DEVICE_OUT_AUX_LINE = 0x200000;
     public static final int DEVICE_OUT_SPEAKER_SAFE = 0x400000;
     public static final int DEVICE_OUT_IP = 0x800000;
+    public static final int DEVICE_OUT_BUS = 0x1000000;
 
     public static final int DEVICE_OUT_DEFAULT = DEVICE_BIT_DEFAULT;
 
@@ -373,6 +374,7 @@ public class AudioSystem
                                               DEVICE_OUT_AUX_LINE |
                                               DEVICE_OUT_SPEAKER_SAFE |
                                               DEVICE_OUT_IP |
+                                              DEVICE_OUT_BUS |
                                               DEVICE_OUT_DEFAULT);
     public static final int DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP |
                                                    DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
@@ -412,6 +414,7 @@ public class AudioSystem
     public static final int DEVICE_IN_BLUETOOTH_A2DP = DEVICE_BIT_IN | 0x20000;
     public static final int DEVICE_IN_LOOPBACK = DEVICE_BIT_IN | 0x40000;
     public static final int DEVICE_IN_IP = DEVICE_BIT_IN | 0x80000;
+    public static final int DEVICE_IN_BUS = DEVICE_BIT_IN | 0x100000;
     public static final int DEVICE_IN_DEFAULT = DEVICE_BIT_IN | DEVICE_BIT_DEFAULT;
 
     public static final int DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION |
@@ -434,6 +437,7 @@ public class AudioSystem
                                              DEVICE_IN_BLUETOOTH_A2DP |
                                              DEVICE_IN_LOOPBACK |
                                              DEVICE_IN_IP |
+                                             DEVICE_IN_BUS |
                                              DEVICE_IN_DEFAULT);
     public static final int DEVICE_IN_ALL_SCO = DEVICE_IN_BLUETOOTH_SCO_HEADSET;
     public static final int DEVICE_IN_ALL_USB = (DEVICE_IN_USB_ACCESSORY |
@@ -469,6 +473,7 @@ public class AudioSystem
     public static final String DEVICE_OUT_AUX_LINE_NAME = "aux_line";
     public static final String DEVICE_OUT_SPEAKER_SAFE_NAME = "speaker_safe";
     public static final String DEVICE_OUT_IP_NAME = "ip";
+    public static final String DEVICE_OUT_BUS_NAME = "bus";
 
     public static final String DEVICE_IN_COMMUNICATION_NAME = "communication";
     public static final String DEVICE_IN_AMBIENT_NAME = "ambient";
@@ -490,6 +495,7 @@ public class AudioSystem
     public static final String DEVICE_IN_BLUETOOTH_A2DP_NAME = "bt_a2dp";
     public static final String DEVICE_IN_LOOPBACK_NAME = "loopback";
     public static final String DEVICE_IN_IP_NAME = "ip";
+    public static final String DEVICE_IN_BUS_NAME = "bus";
 
     public static String getOutputDeviceName(int device)
     {
@@ -542,6 +548,8 @@ public class AudioSystem
             return DEVICE_OUT_SPEAKER_SAFE_NAME;
         case DEVICE_OUT_IP:
             return DEVICE_OUT_IP_NAME;
+        case DEVICE_OUT_BUS:
+            return DEVICE_OUT_BUS_NAME;
         case DEVICE_OUT_DEFAULT:
         default:
             return Integer.toString(device);
@@ -591,6 +599,8 @@ public class AudioSystem
             return DEVICE_IN_LOOPBACK_NAME;
         case DEVICE_IN_IP:
             return DEVICE_IN_IP_NAME;
+        case DEVICE_IN_BUS:
+            return DEVICE_IN_BUS_NAME;
         case DEVICE_IN_DEFAULT:
         default:
             return Integer.toString(device);
