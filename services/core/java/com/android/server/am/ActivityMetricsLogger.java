@@ -7,11 +7,13 @@ import static android.app.ActivityManager.StackId.HOME_STACK_ID;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager.StackId;
 import android.content.Context;
 import android.os.SystemClock;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 
 /**
  * Handles logging into Tron.
@@ -24,6 +26,8 @@ class ActivityMetricsLogger {
     private static final int WINDOW_STATE_FREEFORM = 2;
     private static final int WINDOW_STATE_INVALID = -1;
 
+    private static final long INVALID_START_TIME = -1;
+
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
     private static final String[] TRON_WINDOW_STATE_VARZ_STRINGS = {
@@ -33,6 +37,11 @@ class ActivityMetricsLogger {
     private long mLastLogTimeSecs;
     private final ActivityStackSupervisor mSupervisor;
     private final Context mContext;
+
+    private long mCurrentTransitionStartTime = INVALID_START_TIME;
+    private boolean mLoggedWindowsDrawn;
+    private boolean mLoggedStartingWindowDrawn;
+    private boolean mLoggedTransitionStarting;
 
     ActivityMetricsLogger(ActivityStackSupervisor supervisor, Context context) {
         mLastLogTimeSecs = SystemClock.elapsedRealtime() / 1000;
@@ -72,5 +81,102 @@ class ActivityMetricsLogger {
         } else if (StackId.isStaticStack(stack.mStackId)) {
             throw new IllegalStateException("Unknown stack=" + stack);
         }
+    }
+
+    /**
+     * Notifies the tracker at the earliest possible point when we are starting to launch an
+     * activity.
+     */
+    void notifyActivityLaunching() {
+        mCurrentTransitionStartTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Notifies the tracker the the activity is actually launching.
+     *
+     * @param resultCode one of the ActivityManager.START_* flags, indicating the result of the
+     *                   launch
+     * @param componentName the component name of the activity being launched
+     * @param processRunning whether the process that will contains the activity is already running
+     */
+    void notifyActivityLaunched(int resultCode, @Nullable String componentName,
+            boolean processRunning) {
+
+        if (resultCode < 0 || componentName == null) {
+
+            // Failed to launch, don't track anything.
+            reset();
+            return;
+        }
+
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_COMPONENT_NAME,
+                componentName);
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_PROCESS_RUNNING,
+                processRunning);
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_DEVICE_UPTIME_SECONDS,
+                (int) (SystemClock.uptimeMillis() / 1000));
+    }
+
+    /**
+     * Notifies the tracker that all windows of the app have been drawn.
+     */
+    void notifyWindowsDrawn() {
+        if (!isTransitionActive() || mLoggedWindowsDrawn) {
+            return;
+        }
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS,
+                calculateCurrentDelay());
+        mLoggedWindowsDrawn = true;
+        if (mLoggedTransitionStarting) {
+            reset();
+        }
+    }
+
+    /**
+     * Notifies the tracker that the starting window was drawn.
+     */
+    void notifyStartingWindowDrawn() {
+        if (!isTransitionActive() || mLoggedStartingWindowDrawn) {
+            return;
+        }
+        mLoggedStartingWindowDrawn = true;
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_STARTING_WINDOW_DELAY_MS,
+                calculateCurrentDelay());
+    }
+
+    /**
+     * Notifies the tracker that the app transition is starting.
+     *
+     * @param reason The reason why we started it. Must be on of
+     *               ActivityManagerInternal.APP_TRANSITION_* reasons.
+     */
+    void notifyTransitionStarting(int reason) {
+        if (!isTransitionActive() || mLoggedTransitionStarting) {
+            return;
+        }
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_REASON, reason);
+        MetricsLogger.action(mContext, MetricsEvent.APP_TRANSITION_DELAY_MS,
+                calculateCurrentDelay());
+        mLoggedTransitionStarting = true;
+        if (mLoggedWindowsDrawn) {
+            reset();
+        }
+    }
+
+    private boolean isTransitionActive() {
+        return mCurrentTransitionStartTime != INVALID_START_TIME;
+    }
+
+    private void reset() {
+        mCurrentTransitionStartTime = INVALID_START_TIME;
+        mLoggedWindowsDrawn = false;
+        mLoggedTransitionStarting = false;
+        mLoggedStartingWindowDrawn = false;
+    }
+
+    private int calculateCurrentDelay() {
+
+        // Shouldn't take more than 25 days to launch an app, so int is fine here.
+        return (int) (System.currentTimeMillis() - mCurrentTransitionStartTime);
     }
 }

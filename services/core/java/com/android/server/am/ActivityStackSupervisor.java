@@ -406,7 +406,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
 
-    private final ActivityMetricsLogger mActivityMetricsLogger;
+    final ActivityMetricsLogger mActivityMetricsLogger;
 
     private final ResizeDockedStackTimeout mResizeDockedStackTimeout;
 
