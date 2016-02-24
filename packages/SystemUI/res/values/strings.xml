@@ -1270,7 +1270,7 @@
     <!-- SysUI Tuner: Disclaimer about using dark theme with night mode [CHAR LIMIT=NONE] -->
     <string name="night_mode_disclaimer">The dark theme is applied to
         core areas of Android OS that are normally displayed in a light theme,
-        such as Settings and notifications.</string>
+        such as Settings.</string>
 
     <!-- Button to apply settings [CHAR LIMIT=30] -->
     <string name="color_apply">Apply</string>
