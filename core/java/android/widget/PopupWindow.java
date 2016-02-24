@@ -1632,6 +1632,7 @@ public class PopupWindow {
 
         final PopupDecorView decorView = mDecorView;
         final View contentView = mContentView;
+        final OnDismissListener dismissListener = mOnDismissListener;
 
         final ViewGroup contentHolder;
         final ViewParent contentParent = contentView.getParent();
@@ -1653,7 +1654,7 @@ public class PopupWindow {
         // can expect the OnAttachStateChangeListener to have been called prior
         // to executing this method, so we can rely on that instead.
         final Transition exitTransition = mExitTransition;
-        if (!mIsAnchorRootAttached && exitTransition != null && decorView.isLaidOut()) {
+        if (mIsAnchorRootAttached && exitTransition != null && decorView.isLaidOut()) {
             // The decor view is non-interactive during exit transitions.
             final LayoutParams p = (LayoutParams) decorView.getLayoutParams();
             p.flags |= LayoutParams.FLAG_NOT_TOUCHABLE;
@@ -1675,19 +1676,16 @@ public class PopupWindow {
                     new TransitionListenerAdapter() {
                         @Override
                         public void onTransitionEnd(Transition transition) {
-                            dismissImmediate(decorView, contentHolder, contentView);
+                            dismissImmediate(decorView, contentHolder,
+                                    contentView, dismissListener);
                         }
                     });
         } else {
-            dismissImmediate(decorView, contentHolder, contentView);
+            dismissImmediate(decorView, contentHolder, contentView, dismissListener);
         }
 
         // Clears the anchor view.
         unregisterForViewTreeChanges();
-
-        if (mOnDismissListener != null) {
-            mOnDismissListener.onDismiss();
-        }
     }
 
     /**
@@ -1729,7 +1727,8 @@ public class PopupWindow {
      * Removes the popup from the window manager and tears down the supporting
      * view hierarchy, if necessary.
      */
-    private void dismissImmediate(View decorView, ViewGroup contentHolder, View contentView) {
+    private void dismissImmediate(View decorView, ViewGroup contentHolder,
+            View contentView, OnDismissListener listener) {
         // If this method gets called and the decor view doesn't have a parent,
         // then it was either never added or was already removed. That should
         // never happen, but it's worth checking to avoid potential crashes.
@@ -1746,6 +1745,10 @@ public class PopupWindow {
         mDecorView = null;
         mBackgroundView = null;
         mIsTransitioningToDismiss = false;
+
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
+        }
     }
 
     /**
