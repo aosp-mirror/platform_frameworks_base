@@ -1065,10 +1065,10 @@ public class DirectoryFragment extends Fragment
 
                 // TODO: Expand drop target directory on hover?
                 case DragEvent.ACTION_DRAG_ENTERED:
-                    highlightDropTarget(v, true);
+                    setDropTargetHighlight(v, true);
                     return true;
                 case DragEvent.ACTION_DRAG_EXITED:
-                    highlightDropTarget(v, false);
+                    setDropTargetHighlight(v, false);
                     return true;
 
                 case DragEvent.ACTION_DRAG_LOCATION:
@@ -1085,12 +1085,15 @@ public class DirectoryFragment extends Fragment
                         // TODO: Do not drop into the directory where the documents came from.
                     }
                     copyFromClipData(event.getClipData(), dstDir);
+                    // Clean up the UI.
+                    setDropTargetHighlight(v, false);
+                    mSelectionManager.clearSelection();
                     return true;
             }
             return false;
         }
 
-        private void highlightDropTarget(View v, boolean highlight) {
+        private void setDropTargetHighlight(View v, boolean highlight) {
             // Note: use exact comparison - this code is searching for views which are children of
             // the RecyclerView instance in the UI.
             if (v.getParent() == mRecView) {
