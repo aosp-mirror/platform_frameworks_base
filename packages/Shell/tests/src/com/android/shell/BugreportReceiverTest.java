@@ -19,6 +19,7 @@ package com.android.shell;
 import static android.test.MoreAsserts.assertContainsRegex;
 import static com.android.shell.ActionSendMultipleConsumerActivity.UI_NAME;
 import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
+import static com.android.shell.BugreportProgressService.EXTRA_ID;
 import static com.android.shell.BugreportProgressService.EXTRA_MAX;
 import static com.android.shell.BugreportProgressService.EXTRA_NAME;
 import static com.android.shell.BugreportProgressService.EXTRA_PID;
@@ -46,6 +47,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
+
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Instrumentation;
@@ -104,9 +106,10 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String SCREENSHOT_CONTENT = "A picture is worth a thousand words!\n";
 
     private static final int PID = 42;
-    private static final String PROGRESS_PROPERTY = "dumpstate.42.progress";
-    private static final String MAX_PROPERTY = "dumpstate.42.max";
-    private static final String NAME_PROPERTY = "dumpstate.42.name";
+    private static final int ID = 108;
+    private static final String PROGRESS_PROPERTY = "dumpstate." + PID + ".progress";
+    private static final String MAX_PROPERTY = "dumpstate." + PID + ".max";
+    private static final String NAME_PROPERTY = "dumpstate." + PID + ".name";
     private static final String NAME = "BUG, Y U NO REPORT?";
     private static final String NEW_NAME = "Bug_Forrest_Bug";
     private static final String TITLE = "Wimbugdom Champion 2015";
@@ -115,7 +118,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String NO_NAME = null;
     private static final String NO_SCREENSHOT = null;
     private static final String NO_TITLE = null;
-    private static final int NO_PID = 0;
+    private static final int NO_ID = 0;
     private static final boolean RENAMED_SCREENSHOTS = true;
     private static final boolean DIDNT_RENAME_SCREENSHOTS = false;
 
@@ -177,8 +180,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertProgressNotification(NAME, nf.format(0.25));
 
         Bundle extras =
-                sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
+                sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath, mScreenshotPath);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
                 NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -201,15 +204,15 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertScreenshotButtonEnabled(false);
         waitForScreenshotButtonEnabled(true);
 
-        sendBugreportFinished(PID, mPlainTextPath, mScreenshotPath);
+        sendBugreportFinished(ID, mPlainTextPath, mScreenshotPath);
 
         if (serviceDies) {
-            waitShareNotification(PID);
+            waitShareNotification(ID);
             killService();
         }
 
-        Bundle extras = acceptBugreportAndGetSharedIntent(PID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
+        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
                 NAME, NO_TITLE, NO_DESCRIPTION, 2, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -227,8 +230,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         resetProperties();
 
         sendBugreportStarted(1000);
-        sendBugreportFinished(PID, mPlainTextPath, NO_SCREENSHOT);
-        waitShareNotification(PID);
+        sendBugreportFinished(ID, mPlainTextPath, NO_SCREENSHOT);
+        waitShareNotification(ID);
 
         // There's no indication in the UI about the screenshot finish, so just sleep like a baby...
         Thread.sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
@@ -237,8 +240,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             killService();
         }
 
-        Bundle extras = acceptBugreportAndGetSharedIntent(PID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, PID, ZIP_FILE,
+        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID, PID, ZIP_FILE,
                 NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -249,7 +252,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, PID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
 
         // Check initial name.
         String actualName = detailsUi.nameField.getText().toString();
@@ -281,9 +284,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertPropertyValue(NAME_PROPERTY, NEW_NAME);
         assertProgressNotification(NEW_NAME, "0.00%");
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mPlainTextPath,
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath,
                 mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -302,7 +305,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, PID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
 
         // Check initial name.
         String actualName = detailsUi.nameField.getText().toString();
@@ -319,9 +322,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertPropertyValue(NAME_PROPERTY, NEW_NAME);
         assertProgressNotification(NEW_NAME, "0.00%");
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID,
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID,
                 plainText? mPlainTextPath : mZipPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
                 NEW_NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -332,15 +335,15 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, PID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
 
         detailsUi.nameField.setText("");
         detailsUi.titleField.setText("");
         detailsUi.descField.setText(mDescription);
         detailsUi.clickOk();
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(PID, mZipPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, ZIP_FILE,
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mZipPath, mScreenshotPath);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
                 NO_NAME, NO_TITLE, mDescription, 1, DIDNT_RENAME_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -369,14 +372,14 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             waitForScreenshotButtonEnabled(true);
         }
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, PID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
 
         // Finish the bugreport while user's still typing the name.
         detailsUi.nameField.setText(NEW_NAME);
-        sendBugreportFinished(PID, mPlainTextPath, mScreenshotPath);
+        sendBugreportFinished(ID, mPlainTextPath, mScreenshotPath);
 
         // Wait until the share notification is received...
-        waitShareNotification(PID);
+        waitShareNotification(ID);
         // ...then close notification bar.
         mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
@@ -390,8 +393,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         detailsUi.clickOk();
 
         // Finally, share bugreport.
-        Bundle extras = acceptBugreportAndGetSharedIntent(PID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, PID, TITLE,
+        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
                 NAME, TITLE, mDescription, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
@@ -402,8 +405,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         BugreportPrefs.setWarningState(mContext, BugreportPrefs.STATE_SHOW);
 
         // Send notification and click on share.
-        sendBugreportFinished(NO_PID, mPlainTextPath, null);
-        acceptBugreport(NO_PID);
+        sendBugreportFinished(NO_ID, mPlainTextPath, null);
+        acceptBugreport(NO_ID);
 
         // Handle the warning
         mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm));
@@ -425,9 +428,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     }
 
     public void testShareBugreportAfterServiceDies() throws Exception {
-        sendBugreportFinished(NO_PID, mPlainTextPath, NO_SCREENSHOT);
+        sendBugreportFinished(NO_ID, mPlainTextPath, NO_SCREENSHOT);
         killService();
-        Bundle extras = acceptBugreportAndGetSharedIntent(NO_PID);
+        Bundle extras = acceptBugreportAndGetSharedIntent(NO_ID);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
     }
 
@@ -463,22 +466,23 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private void assertProgressNotification(String name, String percent) {
         // TODO: it currently looks for 3 distinct objects, without taking advantage of their
         // relationship.
-        openProgressNotification(PID);
+        openProgressNotification(ID);
         Log.v(TAG, "Looking for progress notification details: '" + name + "-" + percent + "'");
         mUiBot.getObject(name);
         mUiBot.getObject(percent);
     }
 
-    private void openProgressNotification(int pid) {
-        String title = mContext.getString(R.string.bugreport_in_progress_title, pid);
+    private void openProgressNotification(int id) {
+        String title = mContext.getString(R.string.bugreport_in_progress_title, id);
         Log.v(TAG, "Looking for progress notification title: '" + title + "'");
         mUiBot.getNotification(title);
     }
 
     void resetProperties() {
         // TODO: call method to remove property instead
-        SystemProperties.set(PROGRESS_PROPERTY, "0");
-        SystemProperties.set(MAX_PROPERTY, "0");
+        SystemProperties.set(PROGRESS_PROPERTY, "Reset");
+        SystemProperties.set(MAX_PROPERTY, "Reset");
+        SystemProperties.set(NAME_PROPERTY, "Reset");
     }
 
     /**
@@ -487,6 +491,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private void sendBugreportStarted(int max) throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.putExtra(EXTRA_ID, ID);
         intent.putExtra(EXTRA_PID, PID);
         intent.putExtra(EXTRA_NAME, NAME);
         intent.putExtra(EXTRA_MAX, max);
@@ -500,7 +505,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      */
     private Bundle sendBugreportFinishedAndGetSharedIntent(String bugreportPath,
             String screenshotPath) {
-        return sendBugreportFinishedAndGetSharedIntent(NO_PID, bugreportPath, screenshotPath);
+        return sendBugreportFinishedAndGetSharedIntent(NO_ID, bugreportPath, screenshotPath);
     }
 
     /**
@@ -508,10 +513,10 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      *
      * @return extras sent in the shared intent.
      */
-    private Bundle sendBugreportFinishedAndGetSharedIntent(int pid, String bugreportPath,
+    private Bundle sendBugreportFinishedAndGetSharedIntent(int id, String bugreportPath,
             String screenshotPath) {
-        sendBugreportFinished(pid, bugreportPath, screenshotPath);
-        return acceptBugreportAndGetSharedIntent(pid);
+        sendBugreportFinished(id, bugreportPath, screenshotPath);
+        return acceptBugreportAndGetSharedIntent(id);
     }
 
     /**
@@ -519,8 +524,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      *
      * @return extras sent in the shared intent.
      */
-    private Bundle acceptBugreportAndGetSharedIntent(int pid) {
-        acceptBugreport(pid);
+    private Bundle acceptBugreportAndGetSharedIntent(int id) {
+        acceptBugreport(id);
         mUiBot.chooseActivity(UI_NAME);
         return mListener.getExtras();
     }
@@ -528,25 +533,25 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     /**
      * Waits for the notification to share the finished bugreport.
      */
-    private void waitShareNotification(int pid) {
-        mUiBot.getNotification(mContext.getString(R.string.bugreport_finished_title, pid));
+    private void waitShareNotification(int id) {
+        mUiBot.getNotification(mContext.getString(R.string.bugreport_finished_title, id));
     }
 
     /**
      * Accepts the notification to share the finished bugreport.
      */
-    private void acceptBugreport(int pid) {
-        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title, pid));
+    private void acceptBugreport(int id) {
+        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title, id));
     }
 
     /**
      * Sends a "bugreport finished" intent.
      */
-    private void sendBugreportFinished(int pid, String bugreportPath, String screenshotPath) {
+    private void sendBugreportFinished(int id, String bugreportPath, String screenshotPath) {
         Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        if (pid != NO_PID) {
-            intent.putExtra(EXTRA_PID, pid);
+        if (id != NO_ID) {
+            intent.putExtra(EXTRA_ID, id);
         }
         if (bugreportPath != null) {
             intent.putExtra(EXTRA_BUGREPORT, bugreportPath);
@@ -563,7 +568,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
             String screenshotContent) throws IOException {
-        assertActionSendMultiple(extras, bugreportContent, screenshotContent, PID, ZIP_FILE,
+        assertActionSendMultiple(extras, bugreportContent, screenshotContent, ID, PID, ZIP_FILE,
                 NO_NAME, NO_TITLE, NO_DESCRIPTION, 0, DIDNT_RENAME_SCREENSHOTS);
     }
 
@@ -573,6 +578,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * @param extras extras received in the intent
      * @param bugreportContent expected content in the bugreport file
      * @param screenshotContent expected content in the screenshot file (sent by dumpstate), if any
+     * @param id emulated dumpstate id
      * @param pid emulated dumpstate pid
      * @param name expected subject
      * @param name bugreport name as provided by the user (or received by dumpstate)
@@ -582,7 +588,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * @param renamedScreenshots whether the screenshots are expected to be renamed
      */
     private void assertActionSendMultiple(Bundle extras, String bugreportContent,
-            String screenshotContent, int pid, String subject,
+            String screenshotContent, int id, int pid, String subject,
             String name, String title, String description,
             int numberScreenshots, boolean renamedScreenshots) throws IOException {
         String body = extras.getString(Intent.EXTRA_TEXT);
@@ -781,7 +787,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * Gets the notification button used to take a screenshot.
      */
     private UiObject getScreenshotButton() {
-        openProgressNotification(PID);
+        openProgressNotification(ID);
         return mUiBot.getVisibleObject(
                 mContext.getString(R.string.bugreport_screenshot_action).toUpperCase());
     }
@@ -833,15 +839,15 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         /**
          * Gets the UI objects by opening the progress notification and clicking DETAILS.
          */
-        DetailsUi(UiBot uiBot, int pid) throws UiObjectNotFoundException {
-            openProgressNotification(pid);
+        DetailsUi(UiBot uiBot, int id) throws UiObjectNotFoundException {
+            openProgressNotification(id);
             detailsButton = mUiBot.getVisibleObject(
                     mContext.getString(R.string.bugreport_info_action).toUpperCase());
             mUiBot.click(detailsButton, "details_button");
             // TODO: unhardcode resource ids
             UiObject dialogTitle = mUiBot.getVisibleObjectById("android:id/alertTitle");
             assertEquals("Wrong title", mContext.getString(R.string.bugreport_info_dialog_title,
-                    pid), dialogTitle.getText().toString());
+                    id), dialogTitle.getText().toString());
             nameField = mUiBot.getVisibleObjectById("com.android.shell:id/name");
             titleField = mUiBot.getVisibleObjectById("com.android.shell:id/title");
             descField = mUiBot.getVisibleObjectById("com.android.shell:id/description");
@@ -858,7 +864,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         }
 
         void reOpen() {
-            openProgressNotification(PID);
+            openProgressNotification(ID);
             mUiBot.click(detailsButton, "details_button");
 
         }
