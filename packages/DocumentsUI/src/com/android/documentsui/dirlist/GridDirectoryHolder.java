@@ -63,6 +63,7 @@ final class GridDirectoryHolder extends DocumentHolder {
         this.modelId = modelId;
 
         final String docDisplayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-        mTitle.setText(docDisplayName);
+        mTitle.setText(docDisplayName, TextView.BufferType.SPANNABLE);
+
     }
 }

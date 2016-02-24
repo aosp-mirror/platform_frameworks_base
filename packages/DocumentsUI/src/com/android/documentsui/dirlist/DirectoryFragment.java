@@ -1236,6 +1236,11 @@ public class DirectoryFragment extends Fragment
                 return false;
             }
 
+            // Ignore tab key events.  Those should be handled by the top-level key handler.
+            if (keyCode == KeyEvent.KEYCODE_TAB) {
+                return false;
+            }
+
             if (mFocusManager.handleKey(doc, keyCode, event)) {
                 // Handle range selection adjustments. Extending the selection will adjust the
                 // bounds of the in-progress range selection. Each time an unshifted navigation
