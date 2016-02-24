@@ -109,6 +109,17 @@ public abstract class UserManagerInternal {
     public abstract void removeAllUsers();
 
     /**
+     * Called by the activity manager when the ephemeral user goes to background and its removal
+     * starts as a result.
+     *
+     * <p>It marks the ephemeral user as disabled in order to prevent it from being re-entered
+     * before its removal finishes.
+     *
+     * @param userId the ID of the ephemeral user.
+     */
+    public abstract void onEphemeralUserStop(int userId);
+
+    /**
      * Same as UserManager.createUser(), but bypasses the check for DISALLOW_ADD_USER.
      *
      * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
