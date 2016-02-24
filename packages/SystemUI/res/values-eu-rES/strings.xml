@@ -465,30 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Agerrarazi jakinarazpen hauek pantailan eta egin soinua"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Ezarpen gehiago"</string>
     <string name="notification_done" msgid="5279426047273930175">"Eginda"</string>
-    <!-- no translation found for color_and_appearance (1254323855964993144) -->
-    <skip />
-    <!-- no translation found for night_mode (3540405868248625488) -->
-    <skip />
-    <!-- no translation found for calibrate_display (5974642573432039217) -->
-    <skip />
-    <!-- no translation found for night_mode_on (5597545513026541108) -->
-    <skip />
-    <!-- no translation found for night_mode_off (8035605276956057508) -->
-    <skip />
-    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
-    <skip />
-    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
-    <skip />
-    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
-    <skip />
-    <!-- no translation found for use_dark_theme (2900938704964299312) -->
-    <skip />
-    <!-- no translation found for adjust_tint (3398569573231409878) -->
-    <skip />
-    <!-- no translation found for adjust_brightness (980039329808178246) -->
-    <skip />
-    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
-    <skip />
+    <string name="color_and_appearance" msgid="1254323855964993144">"Kolorea eta itxura"</string>
+    <string name="night_mode" msgid="3540405868248625488">"Gau modua"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"Kalibratu pantaila"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"Aktibatuta"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"Desaktibatuta"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"Aktibatu automatikoki"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Aldatu Gau modura, kokapena eta ordua kontuan izanda"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"Gau modua aktibatuta dagoenean"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Erabili gai iluna Android sistema eragilean"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"Doitu kolorea"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"Doitu distira"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Gai iluna Android sistema eragileko eremu nagusietan aplikatzen da. Normalean gai argian bistaratzen dira eremu horiek, adibidez, Ezarpenak atala eta jakinarazpenak."</string>
     <string name="color_apply" msgid="9212602012641034283">"Aplikatu"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Berretsi ezarpenak"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Baliteke gailua kolore-ezarpen batzuekin ezin erabili izatea. Kolore-ezarpenak berresteko, sakatu Ados. Bestela, hamar segundoren buruan berrezarriko dira ezarpenak."</string>
@@ -500,12 +488,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Hasierako pantaila"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Azkenak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Atzera"</string>
-    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
-    <skip />
-    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Erakutsi bolumena kontrolatzeko aukerekin"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ez molestatu"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Bolumen-botoietarako lasterbidea"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Irten \"Ez molestatu\" egoeratik bolumena igotzean"</string>
     <string name="battery" msgid="7498329822413202973">"Bateria"</string>
     <string name="clock" msgid="7416090374234785905">"Erlojua"</string>
@@ -516,8 +501,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Aktibatuta dago datu-aurrezlea"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Desaktibatuta dago datu-aurrezlea"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Aktibatuta"</string>
-    <!-- no translation found for switch_bar_off (8803270596930432874) -->
-    <skip />
+    <string name="switch_bar_off" msgid="8803270596930432874">"Desaktibatuta"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Nabigazio-barra"</string>
     <string name="start" msgid="6873794757232879664">"Hasi"</string>
     <string name="center" msgid="4327473927066010960">"Erdiratu"</string>
@@ -540,12 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"Aurrebista"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastatu lauzak hemen gehitzeko"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editatu"</string>
-    <!-- no translation found for tuner_time (6572217313285536011) -->
-    <skip />
-    <!-- no translation found for clock_options:0 (5965318737560463480) -->
-    <!-- no translation found for clock_options:1 (1427801730816895300) -->
-    <!-- no translation found for clock_options:2 (3830170141562534721) -->
-    <!-- no translation found for battery_options:0 (3160236755818672034) -->
-    <!-- no translation found for battery_options:1 (2139628951880142927) -->
-    <!-- no translation found for battery_options:2 (3327323682209964956) -->
+    <string name="tuner_time" msgid="6572217313285536011">"Ordua"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"Erakutsi orduak, minutuak eta segundoak"</item>
+    <item msgid="1427801730816895300">"Erakutsi orduak eta minutuak (balio lehenetsia)"</item>
+    <item msgid="3830170141562534721">"Ez erakutsi ikonoa"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"Erakutsi beti ehunekoa"</item>
+    <item msgid="2139628951880142927">"Erakutsi ehunekoa kargatu bitartean (balio lehenetsia)"</item>
+    <item msgid="3327323682209964956">"Ez erakutsi ikonoa"</item>
+  </string-array>
 </resources>
