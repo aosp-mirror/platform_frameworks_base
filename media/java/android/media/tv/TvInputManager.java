@@ -731,9 +731,7 @@ public final class TvInputManager {
          *
          * <p>Because the system automatically creates a <code>TvInputInfo</code> object for each TV
          * input based on the information collected from the <code>AndroidManifest.xml</code>, this
-         * method is only called back when such information has changed dynamically or when the TV
-         * input service implementation wants to pass additional information that is not specified
-         * by the manifest file, such as ability to record and tuner count.
+         * method is only called back when such information has changed dynamically.
          *
          * @param inputInfo The <code>TvInputInfo</code> object that contains new information.
          */

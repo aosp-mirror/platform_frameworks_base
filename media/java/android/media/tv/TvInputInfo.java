@@ -113,14 +113,14 @@ public final class TvInputInfo implements Parcelable {
     private final String mId;
     private final String mParentId;
     private final int mType;
-    private final int mTunerCount;
-    private final boolean mCanRecord;
     private final boolean mIsHardwareInput;
     private final Bundle mExtras;
 
     // Attributes from XML meta data.
     private String mSetupActivity;
     private String mSettingsActivity;
+    private boolean mCanRecord;
+    private int mTunerCount;
 
     private HdmiDeviceInfo mHdmiDeviceInfo;
     private int mLabelResId;
@@ -250,21 +250,17 @@ public final class TvInputInfo implements Parcelable {
      *            {@code false} otherwise.
      * @param isConnectedToHdmiSwitch Whether a CEC device for this TV input is connected to an HDMI
      *            switch, i.e., the device isn't directly connected to a HDMI port.
-     * @param tunerCount The number of tuners this TV input has.
-     * @param canRecord Whether this TV input can record TV programs.
      */
     private TvInputInfo(ResolveInfo service, String id, String parentId, int type,
-            boolean isHardwareInput, boolean isConnectedToHdmiSwitch, int tunerCount,
-            boolean canRecord, Bundle extras) {
+            boolean isHardwareInput, boolean isConnectedToHdmiSwitch, Bundle extras) {
         mService = service;
         mId = id;
         mParentId = parentId;
         mType = type;
         mIsHardwareInput = isHardwareInput;
         mIsConnectedToHdmiSwitch = isConnectedToHdmiSwitch;
-        mTunerCount = tunerCount;
-        mCanRecord = canRecord;
         mExtras = extras;
+        mTunerCount = type == TYPE_TUNER ? 1 : 0;
     }
 
     /**
@@ -791,19 +787,17 @@ public final class TvInputInfo implements Parcelable {
                 type = TYPE_HDMI;
                 isHardwareInput = true;
                 isConnectedToHdmiSwitch = (mHdmiDeviceInfo.getPhysicalAddress() & 0x0FFF) != 0;
-                mTunerCount = 0;
             } else if (mTvInputHardwareInfo != null) {
                 id = generateInputId(componentName, mTvInputHardwareInfo);
                 type = sHardwareTypeToTvInputType.get(mTvInputHardwareInfo.getType(), TYPE_TUNER);
                 isHardwareInput = true;
-                mTunerCount = 0;
             } else {
                 id = generateInputId(componentName);
                 type = TYPE_TUNER;
             }
 
             TvInputInfo info = new TvInputInfo(mResolveInfo, id, mParentId, type, isHardwareInput,
-                    isConnectedToHdmiSwitch, mTunerCount, mCanRecord, mExtras);
+                    isConnectedToHdmiSwitch, mExtras);
             return parseServiceMetadata(type, info);
         }
 
@@ -868,6 +862,12 @@ public final class TvInputInfo implements Parcelable {
                     Log.d(TAG, "Settings activity loaded. [" + info.mSettingsActivity + "] for "
                             + si.name);
                 }
+                info.mCanRecord = sa.getBoolean(
+                        com.android.internal.R.styleable.TvInputService_canRecord, false);
+                info.mTunerCount = sa.getInt(
+                        com.android.internal.R.styleable.TvInputService_tunerCount,
+                        info.mTunerCount);
+
                 sa.recycle();
             } catch (NameNotFoundException e) {
                 throw new XmlPullParserException("Unable to create context for: " + si.packageName);
