@@ -273,7 +273,17 @@ public class AudioSystem
      */
     public interface AudioRecordingCallback
     {
-        void onRecordingConfigurationChanged(int event, int session, int source);
+        /**
+         * Callback for recording activity notifications events
+         * @param event
+         * @param session
+         * @param source
+         * @param recordingFormat an array of ints containing respectively the client and device
+         *    recording configuration. Each set of parameters contains the following parameters
+         *    in this order: format, channel mask, sample rate
+         */
+        void onRecordingConfigurationChanged(int event, int session, int source,
+                int[] recordingFormat);
     }
 
     private static AudioRecordingCallback sRecordingCallback;
@@ -285,13 +295,23 @@ public class AudioSystem
         }
     }
 
-    private static void recordingCallbackFromNative(int event, int session, int source) {
+    /**
+     * Callback from native for recording configuration updates.
+     * @param event
+     * @param session
+     * @param source
+     * @param recordingFormat see
+     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])} for
+     *     the description of the record format.
+     */
+    private static void recordingCallbackFromNative(int event, int session, int source,
+            int[] recordingFormat) {
         AudioRecordingCallback cb = null;
         synchronized (AudioSystem.class) {
             cb = sRecordingCallback;
         }
         if (cb != null) {
-            cb.onRecordingConfigurationChanged(event, session, source);
+            cb.onRecordingConfigurationChanged(event, session, source, recordingFormat);
         }
     }
 
