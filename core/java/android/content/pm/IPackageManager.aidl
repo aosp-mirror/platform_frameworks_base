@@ -46,6 +46,7 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -213,11 +214,19 @@ interface IPackageManager {
     List<InstrumentationInfo> queryInstrumentation(
             String targetPackage, int flags);
 
-    /** @deprecated Use PackageInstaller instead */
+    void installPackage(in String originPath,
+            in IPackageInstallObserver2 observer,
+            int flags,
+            in String installerPackageName,
+            in VerificationParams verificationParams,
+            in String packageAbiOverride);
+
     void installPackageAsUser(in String originPath,
             in IPackageInstallObserver2 observer,
             int flags,
             in String installerPackageName,
+            in VerificationParams verificationParams,
+            in String packageAbiOverride,
             int userId);
 
     void finishPackageInstall(int token);
