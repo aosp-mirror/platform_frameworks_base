@@ -103,6 +103,11 @@ public class UserDetailItemView extends LinearLayout {
         mAvatar.setDisabled(disabled);
     }
 
+    public void setEnabled(boolean enabled) {
+        mName.setEnabled(enabled);
+        mAvatar.setDisabled(!enabled);
+    }
+
     @Override
     protected void onFinishInflate() {
         mAvatar = (UserAvatarView) findViewById(R.id.user_picture);
