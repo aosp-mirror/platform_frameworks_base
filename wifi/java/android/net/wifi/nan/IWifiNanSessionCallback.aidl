@@ -21,7 +21,7 @@ package android.net.wifi.nan;
  *
  * {@hide}
  */
-oneway interface IWifiNanSessionListener
+oneway interface IWifiNanSessionCallback
 {
     void onPublishFail(int reason);
     void onPublishTerminated(int reason);

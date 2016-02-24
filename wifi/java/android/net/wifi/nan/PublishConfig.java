@@ -22,14 +22,29 @@ import android.os.Parcelable;
 import java.util.Arrays;
 
 /**
- * Defines the data for a NAN subscribe session. Built using
- * {@link SubscribeData.Builder}. Subscribe is done using
- * {@link WifiNanManager#subscribe(SubscribeData, SubscribeSettings, WifiNanSessionListener, int)}
- * or
- * {@link WifiNanSubscribeSession#subscribe(SubscribeData, SubscribeSettings)}.
+ * Defines the configuration of a NAN publish session. Built using
+ * {@link PublishConfig.Builder}. Publish is done using
+ * {@link WifiNanManager#publish(PublishConfig, WifiNanSessionListener, int)} or
+ * {@link WifiNanPublishSession#publish(PublishConfig)}.
+ *
  * @hide PROPOSED_NAN_API
  */
-public class SubscribeData implements Parcelable {
+public class PublishConfig implements Parcelable {
+    /**
+     * Defines an unsolicited publish session - i.e. a publish session where
+     * publish packets are transmitted over-the-air. Configuration is done using
+     * {@link PublishConfig.Builder#setPublishType(int)}.
+     */
+    public static final int PUBLISH_TYPE_UNSOLICITED = 0;
+
+    /**
+     * Defines a solicited publish session - i.e. a publish session where
+     * publish packets are not transmitted over-the-air and the device listens
+     * and matches to transmitted subscribe packets. Configuration is done using
+     * {@link PublishConfig.Builder#setPublishType(int)}.
+     */
+    public static final int PUBLISH_TYPE_SOLICITED = 1;
+
     /**
      * @hide
      */
@@ -65,9 +80,24 @@ public class SubscribeData implements Parcelable {
      */
     public final byte[] mRxFilter;
 
-    private SubscribeData(String serviceName, byte[] serviceSpecificInfo,
+    /**
+     * @hide
+     */
+    public final int mPublishType;
+
+    /**
+     * @hide
+     */
+    public final int mPublishCount;
+
+    /**
+     * @hide
+     */
+    public final int mTtlSec;
+
+    private PublishConfig(String serviceName, byte[] serviceSpecificInfo,
             int serviceSpecificInfoLength, byte[] txFilter, int txFilterLength, byte[] rxFilter,
-            int rxFilterLength) {
+            int rxFilterLength, int publishType, int publichCount, int ttlSec) {
         mServiceName = serviceName;
         mServiceSpecificInfoLength = serviceSpecificInfoLength;
         mServiceSpecificInfo = serviceSpecificInfo;
@@ -75,17 +105,21 @@ public class SubscribeData implements Parcelable {
         mTxFilter = txFilter;
         mRxFilterLength = rxFilterLength;
         mRxFilter = rxFilter;
+        mPublishType = publishType;
+        mPublishCount = publichCount;
+        mTtlSec = ttlSec;
     }
 
     @Override
     public String toString() {
-        return "SubscribeData [mServiceName='" + mServiceName + "', mServiceSpecificInfo='"
+        return "PublishConfig [mServiceName='" + mServiceName + "', mServiceSpecificInfo='"
                 + (new String(mServiceSpecificInfo, 0, mServiceSpecificInfoLength))
                 + "', mTxFilter="
                 + (new TlvBufferUtils.TlvIterable(0, 1, mTxFilter, mTxFilterLength)).toString()
                 + ", mRxFilter="
                 + (new TlvBufferUtils.TlvIterable(0, 1, mRxFilter, mRxFilterLength)).toString()
-                + "']";
+                + ", mPublishType=" + mPublishType + ", mPublishCount=" + mPublishCount
+                + ", mTtlSec=" + mTtlSec + "']";
     }
 
     @Override
@@ -108,16 +142,19 @@ public class SubscribeData implements Parcelable {
         if (mRxFilterLength != 0) {
             dest.writeByteArray(mRxFilter, 0, mRxFilterLength);
         }
+        dest.writeInt(mPublishType);
+        dest.writeInt(mPublishCount);
+        dest.writeInt(mTtlSec);
     }
 
-    public static final Creator<SubscribeData> CREATOR = new Creator<SubscribeData>() {
+    public static final Creator<PublishConfig> CREATOR = new Creator<PublishConfig>() {
         @Override
-        public SubscribeData[] newArray(int size) {
-            return new SubscribeData[size];
+        public PublishConfig[] newArray(int size) {
+            return new PublishConfig[size];
         }
 
         @Override
-        public SubscribeData createFromParcel(Parcel in) {
+        public PublishConfig createFromParcel(Parcel in) {
             String serviceName = in.readString();
             int ssiLength = in.readInt();
             byte[] ssi = new byte[ssiLength];
@@ -134,9 +171,11 @@ public class SubscribeData implements Parcelable {
             if (rxFilterLength != 0) {
                 in.readByteArray(rxFilter);
             }
-
-            return new SubscribeData(serviceName, ssi, ssiLength, txFilter, txFilterLength,
-                    rxFilter, rxFilterLength);
+            int publishType = in.readInt();
+            int publishCount = in.readInt();
+            int ttlSec = in.readInt();
+            return new PublishConfig(serviceName, ssi, ssiLength, txFilter, txFilterLength,
+                    rxFilter, rxFilterLength, publishType, publishCount, ttlSec);
         }
     };
 
@@ -146,11 +185,11 @@ public class SubscribeData implements Parcelable {
             return true;
         }
 
-        if (!(o instanceof SubscribeData)) {
+        if (!(o instanceof PublishConfig)) {
             return false;
         }
 
-        SubscribeData lhs = (SubscribeData) o;
+        PublishConfig lhs = (PublishConfig) o;
 
         if (!mServiceName.equals(lhs.mServiceName)
                 || mServiceSpecificInfoLength != lhs.mServiceSpecificInfoLength
@@ -189,7 +228,8 @@ public class SubscribeData implements Parcelable {
             return false; // invalid != invalid
         }
 
-        return true;
+        return mPublishType == lhs.mPublishType && mPublishCount == lhs.mPublishCount
+                && mTtlSec == lhs.mTtlSec;
     }
 
     @Override
@@ -203,12 +243,15 @@ public class SubscribeData implements Parcelable {
         result = 31 * result + Arrays.hashCode(mTxFilter);
         result = 31 * result + mRxFilterLength;
         result = 31 * result + Arrays.hashCode(mRxFilter);
+        result = 31 * result + mPublishType;
+        result = 31 * result + mPublishCount;
+        result = 31 * result + mTtlSec;
 
         return result;
     }
 
     /**
-     * Builder used to build {@link SubscribeData} objects.
+     * Builder used to build {@link PublishConfig} objects.
      */
     public static final class Builder {
         private String mServiceName;
@@ -218,12 +261,15 @@ public class SubscribeData implements Parcelable {
         private byte[] mTxFilter = new byte[0];
         private int mRxFilterLength;
         private byte[] mRxFilter = new byte[0];
+        private int mPublishType;
+        private int mPublishCount;
+        private int mTtlSec;
 
         /**
-         * Specify the service name of the subscribe session. The actual on-air
+         * Specify the service name of the publish session. The actual on-air
          * value is a 6 byte hashed representation of this string.
          *
-         * @param serviceName The service name for the subscribe session.
+         * @param serviceName The service name for the publish session.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
@@ -233,8 +279,8 @@ public class SubscribeData implements Parcelable {
         }
 
         /**
-         * Specify service specific information for the subscribe session. This
-         * is a free-form byte array available to the application to send
+         * Specify service specific information for the publish session. This is
+         * a free-form byte array available to the application to send
          * additional information as part of the discovery operation - i.e. it
          * will not be used to determine whether a publish/subscribe match
          * occurs.
@@ -248,18 +294,23 @@ public class SubscribeData implements Parcelable {
          */
         public Builder setServiceSpecificInfo(byte[] serviceSpecificInfo,
                 int serviceSpecificInfoLength) {
+            if (serviceSpecificInfoLength != 0 && (serviceSpecificInfo == null
+                    || serviceSpecificInfo.length < serviceSpecificInfoLength)) {
+                throw new IllegalArgumentException("Non-matching combination of "
+                        + "serviceSpecificInfo and serviceSpecificInfoLength");
+            }
             mServiceSpecificInfoLength = serviceSpecificInfoLength;
             mServiceSpecificInfo = serviceSpecificInfo;
             return this;
         }
 
         /**
-         * Specify service specific information for the subscribe session - same
-         * as {@link SubscribeData.Builder#setServiceSpecificInfo(byte[], int)}
+         * Specify service specific information for the publish session - same
+         * as {@link PublishConfig.Builder#setServiceSpecificInfo(byte[], int)}
          * but obtaining the data from a String.
          *
          * @param serviceSpecificInfoStr The service specific information string
-         *            to be included (as a byte array) in the subscribe
+         *            to be included (as a byte array) in the publish
          *            information.
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
@@ -271,12 +322,12 @@ public class SubscribeData implements Parcelable {
         }
 
         /**
-         * The transmit filter for an active subscribe session
-         * {@link SubscribeSettings.Builder#setSubscribeType(int)} and
-         * {@link SubscribeSettings#SUBSCRIBE_TYPE_ACTIVE}. Included in
-         * transmitted subscribe packets and used by receivers (passive
-         * publishers) to determine whether they match - in addition to just
-         * relying on the service name.
+         * The transmit filter for an active publish session
+         * {@link PublishConfig.Builder#setPublishType(int)} and
+         * {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED}. Included in
+         * transmitted publish packets and used by receivers (subscribers) to
+         * determine whether they match - in addition to just relying on the
+         * service name.
          * <p>
          * Format is an LV byte array - the {@link TlvBufferUtils} utility class
          * is available to form and parse.
@@ -289,17 +340,22 @@ public class SubscribeData implements Parcelable {
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
         public Builder setTxFilter(byte[] txFilter, int txFilterLength) {
+            if (txFilterLength != 0 && (txFilter == null || txFilter.length < txFilterLength)) {
+                throw new IllegalArgumentException(
+                        "Non-matching combination of txFilter and txFilterLength");
+            }
             mTxFilter = txFilter;
             mTxFilterLength = txFilterLength;
             return this;
         }
 
         /**
-         * The transmit filter for a passive subsribe session
-         * {@link SubscribeSettings.Builder#setSubscribeType(int)} and
-         * {@link SubscribeSettings#SUBSCRIBE_TYPE_PASSIVE}. Used by the
-         * subscriber to determine whether they match transmitted publish
-         * packets - in addition to just relying on the service name.
+         * The transmit filter for a passive publish session
+         * {@link PublishConfig.Builder#setPublishType(int)} and
+         * {@link PublishConfig#PUBLISH_TYPE_SOLICITED}. Used by the publisher
+         * to determine whether they match transmitted subscriber packets
+         * (active subscribers) - in addition to just relying on the service
+         * name.
          * <p>
          * Format is an LV byte array - the {@link TlvBufferUtils} utility class
          * is available to form and parse.
@@ -312,18 +368,83 @@ public class SubscribeData implements Parcelable {
          *         {@code builder.setXXX(..).setXXX(..)}.
          */
         public Builder setRxFilter(byte[] rxFilter, int rxFilterLength) {
+            if (rxFilterLength != 0 && (rxFilter == null || rxFilter.length < rxFilterLength)) {
+                throw new IllegalArgumentException(
+                        "Non-matching combination of rxFilter and rxFilterLength");
+            }
             mRxFilter = rxFilter;
             mRxFilterLength = rxFilterLength;
             return this;
         }
 
         /**
-         * Build {@link SubscribeData} given the current requests made on the
+         * Sets the type of the publish session: solicited (aka active - publish
+         * packets are transmitted over-the-air), or unsolicited (aka passive -
+         * no publish packets are transmitted, a match is made against an active
+         * subscribe session whose packets are transmitted over-the-air).
+         *
+         * @param publishType Publish session type: solicited (
+         *            {@link PublishConfig#PUBLISH_TYPE_SOLICITED}) or
+         *            unsolicited (
+         *            {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED}).
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setPublishType(int publishType) {
+            if (publishType < PUBLISH_TYPE_UNSOLICITED || publishType > PUBLISH_TYPE_SOLICITED) {
+                throw new IllegalArgumentException("Invalid publishType - " + publishType);
+            }
+            mPublishType = publishType;
+            return this;
+        }
+
+        /**
+         * Sets the number of times a solicited (
+         * {@link PublishConfig.Builder#setPublishType(int)}) publish session
+         * will transmit a packet. When the count is reached an event will be
+         * generated for {@link WifiNanSessionListener#onPublishTerminated(int)}
+         * with reason={@link WifiNanSessionListener#TERMINATE_REASON_DONE}.
+         *
+         * @param publishCount Number of publish packets to transmit.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setPublishCount(int publishCount) {
+            if (publishCount < 0) {
+                throw new IllegalArgumentException("Invalid publishCount - must be non-negative");
+            }
+            mPublishCount = publishCount;
+            return this;
+        }
+
+        /**
+         * Sets the time interval (in seconds) a solicited (
+         * {@link PublishConfig.Builder#setPublishCount(int)}) publish session
+         * will be alive - i.e. transmitting a packet. When the TTL is reached
+         * an event will be generated for
+         * {@link WifiNanSessionListener#onPublishTerminated(int)} with reason=
+         * {@link WifiNanSessionListener#TERMINATE_REASON_DONE}.
+         *
+         * @param ttlSec Lifetime of a publish session in seconds.
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setTtlSec(int ttlSec) {
+            if (ttlSec < 0) {
+                throw new IllegalArgumentException("Invalid ttlSec - must be non-negative");
+            }
+            mTtlSec = ttlSec;
+            return this;
+        }
+
+        /**
+         * Build {@link PublishConfig} given the current requests made on the
          * builder.
          */
-        public SubscribeData build() {
-            return new SubscribeData(mServiceName, mServiceSpecificInfo, mServiceSpecificInfoLength,
-                    mTxFilter, mTxFilterLength, mRxFilter, mRxFilterLength);
+        public PublishConfig build() {
+            return new PublishConfig(mServiceName, mServiceSpecificInfo, mServiceSpecificInfoLength,
+                    mTxFilter, mTxFilterLength, mRxFilter, mRxFilterLength, mPublishType,
+                    mPublishCount, mTtlSec);
         }
     }
 }

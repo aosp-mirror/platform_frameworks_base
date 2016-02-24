@@ -16,4 +16,17 @@
 
 package android.net.wifi.nan;
 
-parcelable SubscribeData;
+import android.net.wifi.nan.ConfigRequest;
+
+/**
+ * Callback interface that WifiNanManager implements
+ *
+ * {@hide}
+ */
+oneway interface IWifiNanEventCallback
+{
+    void onConfigCompleted(in ConfigRequest completedConfig);
+    void onConfigFailed(in ConfigRequest failedConfig, int reason);
+    void onNanDown(int reason);
+    void onIdentityChanged();
+}

@@ -25,82 +25,83 @@ import android.util.Log;
  * Base class for NAN events callbacks. Should be extended by applications
  * wanting notifications. These are callbacks applying to the NAN connection as
  * a whole - not to specific publish or subscribe sessions - for that see
- * {@link WifiNanSessionListener}.
+ * {@link WifiNanSessionCallback}.
  * <p>
  * During registration specify which specific events are desired using a set of
- * {@code NanEventListener.LISTEN_*} flags OR'd together. Only those events will
- * be delivered to the registered listener. Override those callbacks
- * {@code NanEventListener.on*} for the registered events.
+ * {@code NanEventCallback.LISTEN_*} flags OR'd together. Only those events will
+ * be delivered to the registered callback. Override those callbacks
+ * {@code WifiNanEventCallback.on*} for the registered events.
  *
  * @hide PROPOSED_NAN_API
  */
-public class WifiNanEventListener {
-    private static final String TAG = "WifiNanEventListener";
+public class WifiNanEventCallback {
+    private static final String TAG = "WifiNanEventCallback";
     private static final boolean DBG = false;
     private static final boolean VDBG = false; // STOPSHIP if true
 
     /**
      * Configuration completion callback event registration flag. Corresponding
-     * callback is {@link WifiNanEventListener#onConfigCompleted(ConfigRequest)}.
+     * callback is {@link WifiNanEventCallback#onConfigCompleted(ConfigRequest)}
+     * .
      */
-    public static final int LISTEN_CONFIG_COMPLETED = 0x1 << 0;
+    public static final int FLAG_LISTEN_CONFIG_COMPLETED = 0x1 << 0;
 
     /**
      * Configuration failed callback event registration flag. Corresponding
      * callback is
-     * {@link WifiNanEventListener#onConfigFailed(ConfigRequest, int)}.
+     * {@link WifiNanEventCallback#onConfigFailed(ConfigRequest, int)}.
      */
-    public static final int LISTEN_CONFIG_FAILED = 0x1 << 1;
+    public static final int FLAG_LISTEN_CONFIG_FAILED = 0x1 << 1;
 
     /**
      * NAN cluster is down callback event registration flag. Corresponding
-     * callback is {@link WifiNanEventListener#onNanDown(int)}.
+     * callback is {@link WifiNanEventCallback#onNanDown(int)}.
      */
-    public static final int LISTEN_NAN_DOWN = 0x1 << 2;
+    public static final int FLAG_LISTEN_NAN_DOWN = 0x1 << 2;
 
     /**
      * NAN identity has changed event registration flag. This may be due to
      * joining a cluster, starting a cluster, or discovery interface change. The
      * implication is that peers you've been communicating with may no longer
      * recognize you and you need to re-establish your identity. Corresponding
-     * callback is {@link WifiNanEventListener#onIdentityChanged()}.
+     * callback is {@link WifiNanEventCallback#onIdentityChanged()}.
      */
-    public static final int LISTEN_IDENTITY_CHANGED = 0x1 << 3;
+    public static final int FLAG_LISTEN_IDENTITY_CHANGED = 0x1 << 3;
 
     private final Handler mHandler;
 
     /**
-     * Constructs a {@link WifiNanEventListener} using the looper of the current
+     * Constructs a {@link WifiNanEventCallback} using the looper of the current
      * thread. I.e. all callbacks will be delivered on the current thread.
      */
-    public WifiNanEventListener() {
+    public WifiNanEventCallback() {
         this(Looper.myLooper());
     }
 
     /**
-     * Constructs a {@link WifiNanEventListener} using the specified looper. I.e.
-     * all callbacks will delivered on the thread of the specified looper.
+     * Constructs a {@link WifiNanEventCallback} using the specified looper.
+     * I.e. all callbacks will delivered on the thread of the specified looper.
      *
      * @param looper The looper on which to execute the callbacks.
      */
-    public WifiNanEventListener(Looper looper) {
+    public WifiNanEventCallback(Looper looper) {
         if (VDBG) Log.v(TAG, "ctor: looper=" + looper);
         mHandler = new Handler(looper) {
             @Override
             public void handleMessage(Message msg) {
                 if (DBG) Log.d(TAG, "What=" + msg.what + ", msg=" + msg);
                 switch (msg.what) {
-                    case LISTEN_CONFIG_COMPLETED:
-                        WifiNanEventListener.this.onConfigCompleted((ConfigRequest) msg.obj);
+                    case FLAG_LISTEN_CONFIG_COMPLETED:
+                        WifiNanEventCallback.this.onConfigCompleted((ConfigRequest) msg.obj);
                         break;
-                    case LISTEN_CONFIG_FAILED:
-                        WifiNanEventListener.this.onConfigFailed((ConfigRequest) msg.obj, msg.arg1);
+                    case FLAG_LISTEN_CONFIG_FAILED:
+                        WifiNanEventCallback.this.onConfigFailed((ConfigRequest) msg.obj, msg.arg1);
                         break;
-                    case LISTEN_NAN_DOWN:
-                        WifiNanEventListener.this.onNanDown(msg.arg1);
+                    case FLAG_LISTEN_NAN_DOWN:
+                        WifiNanEventCallback.this.onNanDown(msg.arg1);
                         break;
-                    case LISTEN_IDENTITY_CHANGED:
-                        WifiNanEventListener.this.onIdentityChanged();
+                    case FLAG_LISTEN_IDENTITY_CHANGED:
+                        WifiNanEventCallback.this.onIdentityChanged();
                         break;
                 }
             }
@@ -109,8 +110,8 @@ public class WifiNanEventListener {
 
     /**
      * Called when NAN configuration is completed. Event will only be delivered
-     * if registered using {@link WifiNanEventListener#LISTEN_CONFIG_COMPLETED}. A
-     * dummy (empty implementation printing out a warning). Make sure to
+     * if registered using {@link WifiNanEventCallback#FLAG_LISTEN_CONFIG_COMPLETED}.
+     * A dummy (empty implementation printing out a warning). Make sure to
      * override if registered.
      *
      * @param completedConfig The actual configuration request which was
@@ -124,11 +125,12 @@ public class WifiNanEventListener {
 
     /**
      * Called when NAN configuration failed. Event will only be delivered if
-     * registered using {@link WifiNanEventListener#LISTEN_CONFIG_FAILED}. A dummy
-     * (empty implementation printing out a warning). Make sure to override if
-     * registered.
+     * registered using {@link WifiNanEventCallback#FLAG_LISTEN_CONFIG_FAILED}. A
+     * dummy (empty implementation printing out a warning). Make sure to
+     * override if registered.
      *
-     * @param reason Failure reason code, see {@code NanSessionListener.FAIL_*}.
+     * @param reason Failure reason code, see
+     *            {@code WifiNanSessionCallback.FAIL_*}.
      */
     public void onConfigFailed(ConfigRequest failedConfig, int reason) {
         Log.w(TAG, "onConfigFailed: called in stub - override if interested or disable");
@@ -136,11 +138,12 @@ public class WifiNanEventListener {
 
     /**
      * Called when NAN cluster is down. Event will only be delivered if
-     * registered using {@link WifiNanEventListener#LISTEN_NAN_DOWN}. A dummy (empty
-     * implementation printing out a warning). Make sure to override if
+     * registered using {@link WifiNanEventCallback#FLAG_LISTEN_NAN_DOWN}. A dummy
+     * (empty implementation printing out a warning). Make sure to override if
      * registered.
      *
-     * @param reason Reason code for event, see {@code NanSessionListener.FAIL_*}.
+     * @param reason Reason code for event, see
+     *            {@code WifiNanSessionCallback.FAIL_*}.
      */
     public void onNanDown(int reason) {
         Log.w(TAG, "onNanDown: called in stub - override if interested or disable");
@@ -152,7 +155,7 @@ public class WifiNanEventListener {
      * implication is that peers you've been communicating with may no longer
      * recognize you and you need to re-establish your identity. Event will only
      * be delivered if registered using
-     * {@link WifiNanEventListener#LISTEN_IDENTITY_CHANGED}. A dummy (empty
+     * {@link WifiNanEventCallback#FLAG_LISTEN_IDENTITY_CHANGED}. A dummy (empty
      * implementation printing out a warning). Make sure to override if
      * registered.
      */
@@ -163,12 +166,12 @@ public class WifiNanEventListener {
     /**
      * {@hide}
      */
-    public IWifiNanEventListener callback = new IWifiNanEventListener.Stub() {
+    public IWifiNanEventCallback callback = new IWifiNanEventCallback.Stub() {
         @Override
         public void onConfigCompleted(ConfigRequest completedConfig) {
             if (VDBG) Log.v(TAG, "onConfigCompleted: configRequest=" + completedConfig);
 
-            Message msg = mHandler.obtainMessage(LISTEN_CONFIG_COMPLETED);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_CONFIG_COMPLETED);
             msg.obj = completedConfig;
             mHandler.sendMessage(msg);
         }
@@ -179,7 +182,7 @@ public class WifiNanEventListener {
                 Log.v(TAG, "onConfigFailed: failedConfig=" + failedConfig + ", reason=" + reason);
             }
 
-            Message msg = mHandler.obtainMessage(LISTEN_CONFIG_FAILED);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_CONFIG_FAILED);
             msg.arg1 = reason;
             msg.obj = failedConfig;
             mHandler.sendMessage(msg);
@@ -189,7 +192,7 @@ public class WifiNanEventListener {
         public void onNanDown(int reason) {
             if (VDBG) Log.v(TAG, "onNanDown: reason=" + reason);
 
-            Message msg = mHandler.obtainMessage(LISTEN_NAN_DOWN);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_NAN_DOWN);
             msg.arg1 = reason;
             mHandler.sendMessage(msg);
         }
@@ -198,7 +201,7 @@ public class WifiNanEventListener {
         public void onIdentityChanged() {
             if (VDBG) Log.v(TAG, "onIdentityChanged");
 
-            Message msg = mHandler.obtainMessage(LISTEN_IDENTITY_CHANGED);
+            Message msg = mHandler.obtainMessage(FLAG_LISTEN_IDENTITY_CHANGED);
             mHandler.sendMessage(msg);
         }
     };
