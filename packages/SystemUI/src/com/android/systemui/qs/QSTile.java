@@ -420,6 +420,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         public int hashCode() {
             return Icon.class.hashCode();
         }
+
+        public int getPadding() {
+            return 0;
+        }
     }
 
     public static class DrawableIcon extends Icon {

@@ -24,9 +24,10 @@ import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.State;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.support.v7.widget.helper.ItemTouchHelper.Callback;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -52,6 +53,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final Context mContext;
 
     private final List<TileInfo> mTiles = new ArrayList<>();
+    private final ItemTouchHelper mItemTouchHelper;
     private int mDividerIndex;
     private List<String> mCurrentSpecs;
     private List<TileInfo> mOtherTiles;
@@ -61,6 +63,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
     public TileAdapter(Context context) {
         mContext = context;
+        mItemTouchHelper = new ItemTouchHelper(mCallbacks);
         setHasStableIds(true);
     }
 
@@ -69,8 +72,8 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         return mTiles.get(position) != null ? mAllTiles.indexOf(mTiles.get(position)) : -1;
     }
 
-    public Callback getCallback() {
-        return mCallbacks;
+    public ItemTouchHelper getItemTouchHelper() {
+        return mItemTouchHelper;
     }
 
     public ItemDecoration getItemDecoration() {
@@ -148,11 +151,18 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     @Override
-    public void onBindViewHolder(Holder holder, int position) {
+    public void onBindViewHolder(final Holder holder, int position) {
         if (holder.getItemViewType() == TYPE_EDIT) return;
 
         TileInfo info = mTiles.get(position);
         holder.mTileView.onStateChanged(info.state);
+        holder.mTileView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mItemTouchHelper.startDrag(holder);
+                return true;
+            }
+        });
     }
 
     public SpanSizeLookup getSizeLookup() {
@@ -266,9 +276,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             int from = viewHolder.getAdapterPosition();
             int to = target.getAdapterPosition();
             if (to > mDividerIndex) {
-                if (from < mDividerIndex) {
-                    to = mDividerIndex;
-                } else {
+                if (from >= mDividerIndex) {
                     return false;
                 }
             }
