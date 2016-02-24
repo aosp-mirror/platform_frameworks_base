@@ -58,12 +58,14 @@ public final class JobStatus {
     final JobInfo job;
     /** Uid of the package requesting this job. */
     final int callingUid;
-    final String name;
-    final String tag;
+    final String batteryName;
 
     final String sourcePackageName;
     final int sourceUserId;
     final int sourceUid;
+    final String sourceTag;
+
+    final String tag;
 
     /**
      * Earliest point in the future at which this job will be eligible to run. A value of 0
@@ -87,6 +89,8 @@ public final class JobStatus {
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
 
+    public int lastEvaluatedPriority;
+
     /**
      * For use only by ContentObserverController: state it is maintaining about content URIs
      * being observed.
@@ -99,12 +103,10 @@ public final class JobStatus {
     }
 
     private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, int numFailures, long earliestRunTimeElapsedMillis,
+            int sourceUserId, String tag, int numFailures, long earliestRunTimeElapsedMillis,
             long latestRunTimeElapsedMillis) {
         this.job = job;
         this.callingUid = callingUid;
-        this.name = job.getService().flattenToShortString();
-        this.tag = "*job*/" + this.name;
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -119,11 +121,24 @@ public final class JobStatus {
             this.sourceUid = callingUid;
             this.sourceUserId = UserHandle.getUserId(callingUid);
             this.sourcePackageName = job.getService().getPackageName();
+            this.sourceTag = null;
         } else {
             this.sourceUid = tempSourceUid;
             this.sourceUserId = sourceUserId;
             this.sourcePackageName = sourcePackageName;
+            this.sourceTag = tag;
         }
+
+        if (this.sourceTag != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(job.getService().getPackageName());
+            sb.append('/');
+            sb.append(this.sourceTag);
+            this.batteryName = sb.toString();
+        } else {
+            this.batteryName = job.getService().flattenToShortString();
+        }
+        this.tag = "*job*/" + this.batteryName;
 
         this.earliestRunTimeElapsedMillis = earliestRunTimeElapsedMillis;
         this.latestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
@@ -158,8 +173,8 @@ public final class JobStatus {
     public JobStatus(JobStatus jobStatus) {
         this(jobStatus.getJob(), jobStatus.getUid(),
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
-                jobStatus.getNumFailures(), jobStatus.getEarliestRunTime(),
-                jobStatus.getLatestRunTimeElapsed());
+                jobStatus.getSourceTag(), jobStatus.getNumFailures(),
+                jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed());
     }
 
     /**
@@ -169,18 +184,18 @@ public final class JobStatus {
      * wallclock runtime rather than resetting it on every boot.
      * We consider a freshly loaded job to no longer be in back-off.
      */
-    public JobStatus(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
-        this(job, callingUid, sourcePackageName, sourceUserId, 0, earliestRunTimeElapsedMillis,
-                latestRunTimeElapsedMillis);
+    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
+            String sourceTag, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis) {
+        this(job, callingUid, sourcePackageName, sourceUserId, sourceTag, 0,
+                earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
     }
 
     /** Create a new job to be rescheduled with the provided parameters. */
     public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
                       long newLatestRuntimeElapsedMillis, int backoffAttempt) {
         this(rescheduling.job, rescheduling.getUid(),
-                rescheduling.getSourcePackageName(),
-                rescheduling.getSourceUserId(), backoffAttempt, newEarliestRuntimeElapsedMillis,
+                rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
+                rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis);
     }
 
@@ -192,7 +207,7 @@ public final class JobStatus {
      * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
      */
     public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId) {
+            int sourceUserId, String tag) {
         final long elapsedNow = SystemClock.elapsedRealtime();
         final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
         if (job.isPeriodic()) {
@@ -204,7 +219,7 @@ public final class JobStatus {
             latestRunTimeElapsedMillis = job.hasLateConstraint() ?
                     elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
         }
-        return new JobStatus(job, callingUid, sourcePackageName, sourceUserId, 0,
+        return new JobStatus(job, callingUid, sourcePackageName, sourceUserId, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis);
     }
 
@@ -240,12 +255,16 @@ public final class JobStatus {
         return UserHandle.getUserId(callingUid);
     }
 
+    public String getSourceTag() {
+        return sourceTag;
+    }
+
     public int getUid() {
         return callingUid;
     }
 
-    public String getName() {
-        return name;
+    public String getBatteryName() {
+        return batteryName;
     }
 
     public String getTag() {
