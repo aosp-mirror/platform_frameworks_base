@@ -24,6 +24,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.os.Debug;
@@ -960,12 +961,24 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         if (!f.mFromLayout) {
                             ViewGroup container = null;
                             if (f.mContainerId != 0) {
-                                container = (ViewGroup)mContainer.onFindViewById(f.mContainerId);
+                                if (f.mContainerId == View.NO_ID) {
+                                    throwException(new IllegalArgumentException(
+                                            "Cannot create fragment "
+                                                    + f
+                                                    + " for a container view with no id"));
+                                }
+                                container = (ViewGroup) mContainer.onFindViewById(f.mContainerId);
                                 if (container == null && !f.mRestored) {
+                                    String resName;
+                                    try {
+                                        resName = f.getResources().getResourceName(f.mContainerId);
+                                    } catch (NotFoundException e) {
+                                        resName = "unknown";
+                                    }
                                     throwException(new IllegalArgumentException(
                                             "No view found for id 0x"
                                             + Integer.toHexString(f.mContainerId) + " ("
-                                            + f.getResources().getResourceName(f.mContainerId)
+                                            + resName
                                             + ") for fragment " + f));
                                 }
                             }
