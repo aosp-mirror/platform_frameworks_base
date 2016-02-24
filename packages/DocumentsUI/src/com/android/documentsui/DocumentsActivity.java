@@ -95,13 +95,27 @@ public class DocumentsActivity extends BaseActivity {
             RootsFragment.show(getFragmentManager(), null);
         }
 
-        if (!mState.restored) {
-            // In this case, we set the activity title in AsyncTask.onPostExecute().  To prevent
-            // talkback from reading aloud the default title, we clear it here.
-            setTitle("");
-            new RestoreStackTask(this).execute();
-        } else {
+        if (mState.restored) {
             refreshCurrentRootAndDirectory(ANIM_NONE);
+        } else {
+            // We set the activity title in AsyncTask.onPostExecute().
+            // To prevent talkback from reading aloud the default title, we clear it here.
+            setTitle("");
+
+            // As a matter of policy we don't load the last used stack for the copy
+            // destination picker (user is already in Files app).
+            // Concensus was that the experice was too confusing.
+            // In all other cases, where the user is visiting us from another app
+            // we restore the stack as last used from that app.
+            if (mState.action == ACTION_PICK_COPY_DESTINATION) {
+                if (DEBUG) Log.d(TAG, "Launching directly into Home directory.");
+                Uri homeUri = DocumentsContract.buildHomeUri();
+                new LoadRootTask(this, homeUri).executeOnExecutor(
+                        ProviderExecutor.forAuthority(homeUri.getAuthority()));
+            } else {
+                if (DEBUG) Log.d(TAG, "Attempting to load last used stack for calling package.");
+                new LoadLastUsedStackTask(this).execute();
+            }
         }
     }
 
@@ -443,16 +457,19 @@ public class DocumentsActivity extends BaseActivity {
     }
 
     /**
-     * Restores the stack from Recents for the specified package.
+     * Loads the last used path (stack) from Recents (history).
+     * The path selected is based on the calling package name. So the last
+     * path for an app like Gmail can be different than the last path
+     * for an app like DropBox.
      */
-    private static final class RestoreStackTask
+    private static final class LoadLastUsedStackTask
             extends PairedTask<DocumentsActivity, Void, Void> {
 
         private volatile boolean mRestoredStack;
         private volatile boolean mExternal;
         private State mState;
 
-        public RestoreStackTask(DocumentsActivity activity) {
+        public LoadLastUsedStackTask(DocumentsActivity activity) {
             super(activity);
             mState = activity.mState;
         }

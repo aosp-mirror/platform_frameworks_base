@@ -71,7 +71,7 @@ public class DownloadsActivity extends BaseActivity {
             // talkback from reading aloud the default title, we clear it here.
             setTitle("");
             final Uri rootUri = getIntent().getData();
-            new RestoreRootTask(this, rootUri).executeOnExecutor(getExecutorForCurrentDirectory());
+            new LoadRootTask(this, rootUri).executeOnExecutor(getExecutorForCurrentDirectory());
         } else {
             refreshCurrentRootAndDirectory(ANIM_NONE);
         }

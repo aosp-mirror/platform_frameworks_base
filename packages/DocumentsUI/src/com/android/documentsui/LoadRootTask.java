@@ -22,12 +22,12 @@ import android.util.Log;
 
 import com.android.documentsui.model.RootInfo;
 
-final class RestoreRootTask extends PairedTask<BaseActivity, Void, RootInfo> {
+final class LoadRootTask extends PairedTask<BaseActivity, Void, RootInfo> {
     private static final String TAG = "RestoreRootTask";
 
     private final Uri mRootUri;
 
-    public RestoreRootTask(BaseActivity activity, Uri rootUri) {
+    public LoadRootTask(BaseActivity activity, Uri rootUri) {
         super(activity);
         mRootUri = rootUri;
     }

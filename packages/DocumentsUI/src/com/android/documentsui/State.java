@@ -157,11 +157,13 @@ public class State implements android.os.Parcelable {
         mStackTouched = true;
     }
 
+    // This will return true even when the initial location is set.
+    // To get a read on if the user has changed something, use #hasInitialLocationChanged.
     public boolean hasLocationChanged() {
         return mStackTouched;
     }
 
-    public boolean initialLocationHasChanged() {
+    public boolean hasInitialLocationChanged() {
         return mInitialRootChanged || mInitialDocChanged;
     }
 
