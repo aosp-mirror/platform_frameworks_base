@@ -1371,8 +1371,12 @@ public class UserManager {
 
     /**
      * Sets the user as enabled, if such an user exists.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
-     * Note that the default is true, it's only that managed profiles might not be enabled.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * <p>Note that the default is true, it's only that managed profiles might not be enabled.
+     * Also ephemeral users can be disabled to indicate that their removal is in progress and they
+     * shouldn't be re-entered. Therefore ephemeral users should not be re-enabled once disabled.
      *
      * @param userHandle the id of the profile to enable
      * @hide
