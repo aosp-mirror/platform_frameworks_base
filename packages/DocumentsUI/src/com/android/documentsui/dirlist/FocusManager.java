@@ -113,6 +113,11 @@ class FocusManager implements View.OnFocusChangeListener {
      * Requests focus on the item that last had focus. Scrolls to that item if necessary.
      */
     public void restoreLastFocus() {
+        if (mAdapter.getItemCount() == 0) {
+            // Nothing to focus.
+            return;
+        }
+
         if (mLastFocusPosition != RecyclerView.NO_POSITION) {
             // The system takes care of situations when a view is no longer on screen, etc,
             focusItem(mLastFocusPosition);
