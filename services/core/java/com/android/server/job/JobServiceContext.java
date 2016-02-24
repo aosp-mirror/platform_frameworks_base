@@ -205,7 +205,7 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 return false;
             }
             try {
-                mBatteryStats.noteJobStart(job.getName(), job.getSourceUid());
+                mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
@@ -581,7 +581,8 @@ public class JobServiceContext extends IJobCallback.Stub implements ServiceConne
                 }
                 completedJob = mRunningJob;
                 try {
-                    mBatteryStats.noteJobFinish(mRunningJob.getName(), mRunningJob.getSourceUid());
+                    mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(),
+                            mRunningJob.getSourceUid());
                 } catch (RemoteException e) {
                     // Whatever.
                 }

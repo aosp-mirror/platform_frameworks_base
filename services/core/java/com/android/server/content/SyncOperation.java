@@ -17,6 +17,7 @@
 package com.android.server.content;
 
 import android.accounts.Account;
+import android.app.job.JobInfo;
 import android.content.pm.PackageManager;
 import android.content.ContentResolver;
 import android.os.Bundle;
@@ -320,11 +321,11 @@ public class SyncOperation {
 
     int findPriority() {
         if (isInitialization()) {
-            return 2;
+            return JobInfo.PRIORITY_SYNC_INITIALIZATION;
         } else if (isExpedited()) {
-            return 1;
+            return JobInfo.PRIORITY_SYNC_EXPEDITED;
         }
-        return 0;
+        return JobInfo.PRIORITY_DEFAULT;
     }
 
     private String toKey() {

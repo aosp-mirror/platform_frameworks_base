@@ -59,7 +59,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setMinimumLatency(runFromMillis)
                 .setPersisted(true)
                 .build();
-        final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1);
+        final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(ts);
         Thread.sleep(IO_WAIT);
         // Manually load tasks from xml file.
@@ -92,8 +92,8 @@ public class JobStoreTest extends AndroidTestCase {
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
-        final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, SOME_UID, null, -1);
-        final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, SOME_UID, null, -1);
+        final JobStatus taskStatus1 = JobStatus.createFromJobInfo(task1, SOME_UID, null, -1, null);
+        final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
         Thread.sleep(IO_WAIT);
@@ -141,7 +141,7 @@ public class JobStoreTest extends AndroidTestCase {
         extras.putInt("into", 3);
         b.setExtras(extras);
         final JobInfo task = b.build();
-        JobStatus taskStatus = JobStatus.createFromJobInfo(task, SOME_UID, null, -1);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
@@ -159,7 +159,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setRequiresCharging(true)
                 .setPersisted(true);
         JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID,
-                "com.google.android.gms", 0);
+                "com.google.android.gms", 0, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
@@ -180,7 +180,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setPeriodic(5*60*60*1000, 1*60*60*1000)
                 .setRequiresCharging(true)
                 .setPersisted(true);
-        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
+        JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
 
         mTaskStoreUnderTest.add(taskStatus);
         Thread.sleep(IO_WAIT);
@@ -206,7 +206,7 @@ public class JobStoreTest extends AndroidTestCase {
         final long invalidEarlyRuntimeElapsedMillis =
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
-                0 /* sourceUserId */,
+                0 /* sourceUserId */, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis);
 
         mTaskStoreUnderTest.add(js);
@@ -232,7 +232,7 @@ public class JobStoreTest extends AndroidTestCase {
                 .setOverrideDeadline(5000)
                 .setPriority(42)
                 .setPersisted(true);
-        final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
+        final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(js);
         Thread.sleep(IO_WAIT);
         final JobSet jobStatusSet = new JobSet();
@@ -248,12 +248,12 @@ public class JobStoreTest extends AndroidTestCase {
         JobInfo.Builder b = new Builder(42, mComponent)
                 .setOverrideDeadline(10000)
                 .setPersisted(false);
-        JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
+        JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(jsNonPersisted);
         b = new Builder(43, mComponent)
                 .setOverrideDeadline(10000)
                 .setPersisted(true);
-        JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1);
+        JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(jsPersisted);
         Thread.sleep(IO_WAIT);
         final JobSet jobStatusSet = new JobSet();
