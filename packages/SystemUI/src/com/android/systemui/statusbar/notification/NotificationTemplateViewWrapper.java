@@ -49,76 +49,65 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                 new ViewTransformationHelper.CustomTransformation() {
                     @Override
                     public boolean transformTo(TransformState ownState,
-                            TransformableView notification, final Runnable endRunnable) {
+                            TransformableView notification, final float transformationAmount) {
                         if (!(notification instanceof HybridNotificationView)) {
                             return false;
                         }
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
                         final View text = ownState.getTransformedView();
-                        CrossFadeHelper.fadeOut(text, endRunnable);
+                        CrossFadeHelper.fadeOut(text, transformationAmount);
                         if (otherState != null) {
-                            int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
-                            int[] ownPosition = ownState.getLaidOutLocationOnScreen();
-                            text.animate()
-                                    .translationY((otherStablePosition[1]
-                                            + otherState.getTransformedView().getHeight()
-                                            - ownPosition[1]) * 0.33f)
-                                    .setDuration(
-                                            StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                                    .withEndAction(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (endRunnable != null) {
-                                                endRunnable.run();
-                                            }
-                                            TransformState.setClippingDeactivated(text,
-                                                    false);
-                                        }
-                                    });
-                            TransformState.setClippingDeactivated(text, true);
+                            ownState.transformViewVerticalTo(otherState, this,
+                                    transformationAmount);
                             otherState.recycle();
                         }
                         return true;
                     }
 
                     @Override
+                    public boolean customTransformTarget(TransformState ownState,
+                            TransformState otherState) {
+                        float endY = getTransformationY(ownState, otherState);
+                        ownState.setTransformationEndY(endY);
+                        return true;
+                    }
+
+                    @Override
                     public boolean transformFrom(TransformState ownState,
-                            TransformableView notification) {
+                            TransformableView notification, float transformationAmount) {
                         if (!(notification instanceof HybridNotificationView)) {
                             return false;
                         }
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
                         final View text = ownState.getTransformedView();
-                        boolean isVisible = text.getVisibility() == View.VISIBLE;
-                        CrossFadeHelper.fadeIn(text);
+                        CrossFadeHelper.fadeIn(text, transformationAmount);
                         if (otherState != null) {
-                            int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
-                            int[] ownStablePosition = ownState.getLaidOutLocationOnScreen();
-                            if (!isVisible) {
-                                text.setTranslationY((otherStablePosition[1]
-                                        + otherState.getTransformedView().getHeight()
-                                        - ownStablePosition[1]) * 0.33f);
-                            }
-                            text.animate()
-                                    .translationY(0)
-                                    .setDuration(
-                                            StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                                    .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                                    .withEndAction(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            TransformState.setClippingDeactivated(text,
-                                                    false);
-                                        }
-                                    });
-                            TransformState.setClippingDeactivated(text, true);
+                            ownState.transformViewVerticalFrom(otherState, this,
+                                    transformationAmount);
                             otherState.recycle();
                         }
                         return true;
                     }
+
+                    @Override
+                    public boolean initTransformation(TransformState ownState,
+                            TransformState otherState) {
+                        float startY = getTransformationY(ownState, otherState);
+                        ownState.setTransformationStartY(startY);
+                        return true;
+                    }
+
+                    private float getTransformationY(TransformState ownState,
+                            TransformState otherState) {
+                        int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
+                        int[] ownStablePosition = ownState.getLaidOutLocationOnScreen();
+                        return (otherStablePosition[1]
+                                + otherState.getTransformedView().getHeight()
+                                - ownStablePosition[1]) * 0.33f;
+                    }
+
                 }, TRANSFORMING_VIEW_TEXT);
     }
 
