@@ -17,8 +17,12 @@
 package android.service.persistentdata;
 
 import android.annotation.SystemApi;
+import android.annotation.IntDef;
 import android.os.RemoteException;
 import android.util.Slog;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface for reading and writing data blocks to a persistent partition.
@@ -42,6 +46,27 @@ import android.util.Slog;
 public class PersistentDataBlockManager {
     private static final String TAG = PersistentDataBlockManager.class.getSimpleName();
     private IPersistentDataBlockService sService;
+
+    /**
+     * Indicates that the device's bootloader lock state is UNKNOWN.
+     */
+    public static final int FLASH_LOCK_UNKNOWN = -1;
+    /**
+     * Indicates that the device's bootloader is UNLOCKED.
+     */
+    public static final int FLASH_LOCK_UNLOCKED = 0;
+    /**
+     * Indicates that the device's bootloader is LOCKED.
+     */
+    public static final int FLASH_LOCK_LOCKED = 1;
+
+    @IntDef({
+        FLASH_LOCK_UNKNOWN,
+        FLASH_LOCK_LOCKED,
+        FLASH_LOCK_UNLOCKED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FlashLockState {}
 
     public PersistentDataBlockManager(IPersistentDataBlockService service) {
         sService = service;
@@ -137,6 +162,24 @@ public class PersistentDataBlockManager {
         } catch (RemoteException e) {
             onError("getting OEM unlock enabled bit");
             return false;
+        }
+    }
+
+    /**
+     * Retrieves available information about this device's flash lock state.
+     *
+     * @return FLASH_LOCK_STATE_LOCKED if device bootloader is locked,
+     * FLASH_LOCK_STATE_UNLOCKED if device bootloader is unlocked,
+     * or FLASH_LOCK_STATE unknown if this information cannot be ascertained
+     * on this device.
+     */
+    @FlashLockState
+    public int getFlashLockState() {
+        try {
+            return sService.getFlashLockState();
+        } catch (RemoteException e) {
+            onError("getting flash lock state");
+            return FLASH_LOCK_UNKNOWN;
         }
     }
 
