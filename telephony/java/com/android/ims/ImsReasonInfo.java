@@ -249,11 +249,32 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_SUPP_SVC_REINVITE_COLLISION = 1203;
 
     /**
+     * DPD Procedure received no response or send failed
+     */
+    public static final int CODE_IWLAN_DPD_FAILURE = 1300;
+
+    /**
+     * Establishment of the ePDG Tunnel Failed
+     */
+    public static final int CODE_EPDG_TUNNEL_ESTABLISH_FAILURE = 1400;
+
+    /**
+     * Re-keying of the ePDG Tunnel Failed; may not always result in teardown
+     */
+    public static final int CODE_EPDG_TUNNEL_REKEY_FAILURE = 1401;
+
+    /**
+     * Connection to the packet gateway is lost
+     */
+    public static final int CODE_EPDG_TUNNEL_LOST_CONNECTION = 1402;
+
+    /**
      * Network string error messages.
      * mExtraMessage may have these values.
      */
     public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED
             = "Forbidden. Not Authorized for Service";
+
 
     // For main reason code
     public int mCode;
