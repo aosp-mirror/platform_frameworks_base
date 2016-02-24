@@ -437,6 +437,7 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
 
         if (handled) {
             adjustMetaAfterKeypress(content);
+            return true;
         }
 
         return super.onKeyDown(view, content, keyCode, event);
@@ -470,4 +471,3 @@ public abstract class BaseKeyListener extends MetaKeyKeyListener
         return true;
     }
 }
-
