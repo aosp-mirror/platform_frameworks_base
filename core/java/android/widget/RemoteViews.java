@@ -454,12 +454,19 @@ public class RemoteViews implements Parcelable, Filter {
                     public void onClick(View v) {
                         // Insure that this view is a child of an AdapterView
                         View parent = (View) v.getParent();
+                        // Break the for loop on the first encounter of:
+                        //    1) an AdapterView,
+                        //    2) an AppWidgetHostView that is not a RemoteViewsFrameLayout, or
+                        //    3) a null parent.
+                        // 2) and 3) are unexpected and catch the case where a child is not
+                        // correctly parented in an AdapterView.
                         while (parent != null && !(parent instanceof AdapterView<?>)
-                                && !(parent instanceof AppWidgetHostView)) {
+                                && !((parent instanceof AppWidgetHostView) &&
+                                    !(parent instanceof RemoteViewsAdapter.RemoteViewsFrameLayout))) {
                             parent = (View) parent.getParent();
                         }
 
-                        if (parent instanceof AppWidgetHostView || parent == null) {
+                        if (!(parent instanceof AdapterView<?>)) {
                             // Somehow they've managed to get this far without having
                             // and AdapterView as a parent.
                             Log.e(LOG_TAG, "Collection item doesn't have AdapterView parent");
