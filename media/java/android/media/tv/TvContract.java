@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.IBinder;
 import android.provider.BaseColumns;
+import android.text.TextUtils;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
@@ -1376,6 +1377,10 @@ public final class TvContract {
              *         {@link #COLUMN_BROADCAST_GENRE} or {@link #COLUMN_CANONICAL_GENRE} column.
              */
             public static String encode(@NonNull String... genres) {
+                if (genres == null) {
+                    // MNC and before will throw a NPE.
+                    return null;
+                }
                 StringBuilder sb = new StringBuilder();
                 String separator = "";
                 for (String genre : genres) {
@@ -1411,7 +1416,8 @@ public final class TvContract {
              * @return genre strings.
              */
             public static String[] decode(@NonNull String genres) {
-                if (genres.isEmpty()) {
+                if (TextUtils.isEmpty(genres)) {
+                    // MNC and before will throw a NPE for {@code null} genres.
                     return EMPTY_STRING_ARRAY;
                 }
                 if (genres.indexOf(COMMA) == -1 && genres.indexOf(DOUBLE_QUOTE) == -1) {
