@@ -16,6 +16,7 @@
 
 package com.android.server.audio;
 
+import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecordConfiguration;
 import android.media.AudioSystem;
@@ -48,11 +49,12 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
     /**
      * Implementation of android.media.AudioSystem.AudioRecordingCallback
      */
-    public void onRecordingConfigurationChanged(int event, int session, int source) {
+    public void onRecordingConfigurationChanged(int event, int session, int source,
+            int[] recordingFormat) {
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             return;
         }
-        if (updateSnapshot(event, session, source)) {
+        if (updateSnapshot(event, session, source, recordingFormat)) {
             final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
             synchronized(mClients) {
                 while (clientIterator.hasNext()) {
@@ -110,15 +112,30 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * @param event
      * @param session
      * @param source
+     * @param recordingFormat see
+     *     {@link AudioSystem.AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])}
+     *     for the definition of the contents of the array
      * @return true if the list of active recording sessions has been modified, false otherwise.
      */
-    private boolean updateSnapshot(int event, int session, int source) {
+    private boolean updateSnapshot(int event, int session, int source, int[] recordingFormat) {
         synchronized(mRecordConfigs) {
             switch (event) {
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
                 // return failure if an unknown recording session stopped
                 return (mRecordConfigs.remove(new Integer(session)) != null);
             case AudioManager.RECORD_CONFIG_EVENT_START:
+                final AudioFormat clientFormat = new AudioFormat.Builder()
+                        .setEncoding(recordingFormat[0])
+                        // FIXME this doesn't support index-based masks
+                        .setChannelMask(recordingFormat[1])
+                        .setSampleRate(recordingFormat[2])
+                        .build();
+                final AudioFormat deviceFormat = new AudioFormat.Builder()
+                        .setEncoding(recordingFormat[3])
+                        // FIXME this doesn't support index-based masks
+                        .setChannelMask(recordingFormat[4])
+                        .setSampleRate(recordingFormat[5])
+                        .build();
                 if (mRecordConfigs.containsKey(new Integer(session))) {
                     // start of session that's already tracked, not worth an update
                     // TO DO in the future when tracking record format: there might be a record
@@ -126,7 +143,8 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     return false;
                 } else {
                     mRecordConfigs.put(new Integer(session),
-                            new AudioRecordConfiguration(session, source));
+                            new AudioRecordConfiguration(session, source,
+                                    clientFormat, deviceFormat));
                     return true;
                 }
             default:

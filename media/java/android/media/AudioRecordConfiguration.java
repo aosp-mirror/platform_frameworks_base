@@ -41,11 +41,12 @@ public class AudioRecordConfiguration implements Parcelable {
     /**
      * @hide
      */
-    public AudioRecordConfiguration(int session, int source) {
+    public AudioRecordConfiguration(int session, int source,
+            AudioFormat clientFormat, AudioFormat deviceFormat) {
         mSessionId = session;
         mClientSource = source;
-        mDeviceFormat = new AudioFormat.Builder().build();
-        mClientFormat = new AudioFormat.Builder().build();
+        mDeviceFormat = deviceFormat;
+        mClientFormat = clientFormat;
         mRecDevice = null;
     }
 
@@ -129,13 +130,17 @@ public class AudioRecordConfiguration implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mSessionId);
         dest.writeInt(mClientSource);
+        mClientFormat.writeToParcel(dest, 0);
+        mDeviceFormat.writeToParcel(dest, 0);
+        //TODO marshall device info
     }
 
     private AudioRecordConfiguration(Parcel in) {
         mSessionId = in.readInt();
         mClientSource = in.readInt();
-        mDeviceFormat = new AudioFormat.Builder().build();
-        mClientFormat = new AudioFormat.Builder().build();
+        mClientFormat = AudioFormat.CREATOR.createFromParcel(in);
+        mDeviceFormat = AudioFormat.CREATOR.createFromParcel(in);
+        //TODO unmarshall device info
         mRecDevice = null;
     }
 
