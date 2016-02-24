@@ -468,7 +468,7 @@ public class BackupManager {
      *
      * @param packages List of package names to backup.
      * @param observer The {@link BackupObserver} to receive callbacks during the backup
-     * operation.
+     * operation. Could be {@code null}.
      * @return {@link BackupManager#SUCCESS} on success; nonzero on error.
      * @exception  IllegalArgumentException on null or empty {@code packages} param.
      *
@@ -479,8 +479,9 @@ public class BackupManager {
         checkServiceBinder();
         if (sService != null) {
             try {
-                BackupObserverWrapper observerWrapper =
-                    new BackupObserverWrapper(mContext, observer);
+                BackupObserverWrapper observerWrapper = observer == null
+                        ? null
+                        : new BackupObserverWrapper(mContext, observer);
                 return sService.requestBackup(packages, observerWrapper);
             } catch (RemoteException e) {
                 Log.e(TAG, "requestBackup() couldn't connect");
