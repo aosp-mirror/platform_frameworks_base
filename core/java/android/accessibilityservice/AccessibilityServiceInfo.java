@@ -686,6 +686,11 @@ public class AccessibilityServiceInfo implements Parcelable {
         return null;
     }
 
+    /** {@hide} */
+    public boolean isEncryptionAware() {
+        return mResolveInfo.serviceInfo.encryptionAware;
+    }
+
     /**
      * {@inheritDoc}
      */
