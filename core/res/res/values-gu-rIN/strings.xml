@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"કૉલર ID પ્રતિબંધિત નહીં પર ડિફોલ્ટ છે. આગલો કૉલ: પ્રતિબંધિત નહીં"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"સેવાની જોગવાઈ કરી નથી."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"તમે કૉલર ID સેટિંગ બદલી શકતાં નથી."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"પ્રતિબંધિત ઍક્સેસ બદલાઈ"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"ડેટા સેવા અવરોધિત છે."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"કટોકટીની સેવા અવરોધિત છે."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"વૉઇસ સેવા અવરોધિત છે."</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"પિન કરો"</string>
     <string name="unpin_target" msgid="3556545602439143442">"અનપિન કરો"</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

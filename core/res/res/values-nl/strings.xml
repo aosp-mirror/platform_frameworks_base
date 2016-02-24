@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Beller-id standaard ingesteld op \'onbeperkt\'. Volgende oproep: onbeperkt."</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service niet voorzien."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-id niet wijzigen."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Beperkte toegang gewijzigd"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Gegevensservice is geblokkeerd."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Alarmservice is geblokkeerd."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Spraakservice is geblokkeerd."</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Vastzetten"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Losmaken"</string>
     <string name="app_info" msgid="6856026610594615344">"App-info"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

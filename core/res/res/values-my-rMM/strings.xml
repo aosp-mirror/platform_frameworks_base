@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ဝန်ဆောင်မှုအား ကန့်သတ်မထားပါ"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"သင်သည် ခေါ်ဆိုသူ ID ဆက်တင်ကို မပြောင်းလဲနိုင်ပါ။"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"ဝင်ရောက်ကြည့်ရှုခြင်းကန့်သတ်ချက်အားပြောင်းထားသည်"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"ဒေတာဝန်ဆောင်မှုပိတ်ထားသည်။"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"အရေးပေါ်ဝန်ဆောင်မှုပိတ်ထားသည်။"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"အသံဝန်ဆောင်မှုပိတ်ထားသည်။"</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"တွဲပါ"</string>
     <string name="unpin_target" msgid="3556545602439143442">"ဖြုတ်ပါ"</string>
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

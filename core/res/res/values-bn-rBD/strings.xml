@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ডিফল্টরুপে কলার ID সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"পরিষেবা প্রস্তুত নয়৷"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"আপনি কলার ID এর সেটিংস পরিবর্তন করতে পারবেন না৷"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"সীমিত অ্যাক্সেসের পরিবর্তন করা হয়েছে"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"ডেটা পরিষেবা অবরুদ্ধ করা আছে৷"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"জরুরী পরিষেবা অবরুদ্ধ করা আছে৷"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"ভয়েস পরিষেবা অবরুদ্ধ করা আছে৷"</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"পিন করুন"</string>
     <string name="unpin_target" msgid="3556545602439143442">"আনপিন করুন"</string>
     <string name="app_info" msgid="6856026610594615344">"অ্যাপ্লিকেশানের তথ্য"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

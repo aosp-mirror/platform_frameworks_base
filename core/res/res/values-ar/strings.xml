@@ -92,7 +92,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"الإعداد الافتراضي لمعرف المتصل هو غير مقيّد. الاتصال التالي: غير مقيّد"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"لا يمكنك تغيير إعداد معرف المتصل."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"تم تغيير الدخول المقيّد"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"خدمة البيانات محظورة."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"خدمة الطوارئ محظورة."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"الخدمة الصوتية محظورة."</string>
@@ -1641,4 +1640,5 @@
     <string name="pin_target" msgid="3052256031352291362">"تثبيت"</string>
     <string name="unpin_target" msgid="3556545602439143442">"إزالة تثبيت"</string>
     <string name="app_info" msgid="6856026610594615344">"معلومات عن التطبيق"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

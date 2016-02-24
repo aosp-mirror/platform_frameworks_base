@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Номурду аныктоонун демейки абалы \"чектелбейт\" деп коюлган. Кийинки чалуу: Чектелбейт"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Кызмат камсыздалган эмес."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Чалуучунун далдаштырма дайындары жөндөөлөрүн өзгөртө албайсыз."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Чектелген мүмкүнчүлүк өзгөртүлдү"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Мобилдик Интернет бөгөттөлгөн."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Өзгөчө кырдаал кызматы бөгөттөлгөн."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Үн кызматы бөгөттөлгөн."</string>
@@ -1056,7 +1055,7 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB мүчүлүштүктөрдү жоюу мүмкүнчүлүгүн өчүрүү үчүн тийип коюңуз."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Мүчүлүштүк тууралуу баяндама бөлүшүлсүнбү?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Мүчүлүштүк тууралуу баяндама бөлүшүлүүдө…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Бул түзмөктүн бузулууларын аныктап оңдоо үчүн IT администраторуңуз мүчүлүштүктөр тууралуу маалыматты сурап жатат. Колдонмолор менен дайындар бөлүшүлүп, түзмөгүңүздүн ылдамдыгы убактылуу төмөндөшү мүмкүн."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Бул түзмөктүн бузулууларын аныктап оңдоо үчүн IT администраторуңуз мүчүлүштүктөр тууралуу маалыматты сурап жатат. Колдонмолор менен дайындар бөлүшүлүп, түзмөгүңүз жайыраак иштеп калышы мүмкүн."</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Бул түзмөктүн бузулууларын аныктап оңдоо үчүн IT администраторуңуз мүчүлүштүктөр тууралуу маалыматты сурап жатат. Колдонмолор менен дайындар бөлүшүлүшү мүмкүн."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Ушуну менен түзмөгүңүздүн ылдамдыгы убактылуу төмөндөйт"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"КАБЫЛ АЛУУ"</string>
@@ -1539,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> тандалды</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> тандалды</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Бул эскертмелердин маанилүүлүгүн белгиледиңиз."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Булар сиз үчүн маанилүү адамдар."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу <xliff:g id="ACCOUNT">%2$s</xliff:g> каттоо эсеби менен жаңы колдонуучу түзө берсинби ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> колдонмосу <xliff:g id="ACCOUNT">%2$s</xliff:g> каттоо эсеби менен жаңы колдонуучу түзө берсинби (мындай каттоо эсеби бар колдонуучу мурунтан эле бар) ?"</string>
@@ -1567,4 +1565,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Кадоо"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Кадоодон алып коюу"</string>
     <string name="app_info" msgid="6856026610594615344">"Колдонмо тууралуу"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

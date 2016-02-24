@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Tjenesten leveres ikke!"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Du kan ikke ændre indstillingen for opkalds-id\'et."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Begrænset adgang ændret"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datatjenesten er blokeret."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Nødtjenesten er blokeret."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Stemmetjenesten er blokeret."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>valgt</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valgt</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Du angiver, hvor vigtige disse underretninger er."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dette er vigtigt på grund af de personer, det handler om."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Vil du give <xliff:g id="APP">%1$s</xliff:g> tilladelse til at oprette en ny bruger med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Vil du give <xliff:g id="APP">%1$s</xliff:g> tilladelse til at oprette en ny bruger med <xliff:g id="ACCOUNT">%2$s</xliff:g> (der findes allerede en bruger med denne konto)?"</string>
@@ -1566,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Fastgør"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Frigør"</string>
     <string name="app_info" msgid="6856026610594615344">"Oplysninger om appen"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

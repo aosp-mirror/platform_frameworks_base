@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"既定: 発信者番号通知、次の発信: 通知"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"発信者番号の設定は変更できません。"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"アクセス制限が変更されました"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"データサービスがブロックされています。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"緊急サービスがブロックされています。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"音声サービスがブロックされています。"</string>
@@ -1539,8 +1538,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>件選択済み</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>件選択済み</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"このような通知の重要度を設定します。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"関係するユーザーのため、この設定は重要です。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？（このアカウントのユーザーはすでに存在します）"</string>
@@ -1572,4 +1570,5 @@
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>
     <string name="unpin_target" msgid="3556545602439143442">"固定を解除"</string>
     <string name="app_info" msgid="6856026610594615344">"アプリ情報"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

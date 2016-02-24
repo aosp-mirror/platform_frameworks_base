@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Impossible de modifier le paramètre relatif au numéro de l\'appelant."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"L\'accès limité a été modifié."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Le service de données est bloqué."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Le service d\'appel d\'urgence est bloqué."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Le service vocal est bloqué."</string>
@@ -1565,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Épingler"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Annuler l\'épinglage"</string>
     <string name="app_info" msgid="6856026610594615344">"Détails de l\'application"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

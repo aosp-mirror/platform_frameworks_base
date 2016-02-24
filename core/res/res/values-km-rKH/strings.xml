@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"បាន​ប្ដូរ​ការ​ចូល​ដំណើរការ​ដែល​បាន​ដាក់​​កម្រិត"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"បាន​ទប់ស្កាត់​សេវាកម្ម​ទិន្នន័យ។"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"បាន​ទប់ស្កាត់​សេវាកម្ម​ពេល​អាសន្ន។"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"សេវាកម្ម​សំឡេង​ត្រូវ​បាន​ទប់ស្កាត់។"</string>
@@ -1567,4 +1566,5 @@
     <string name="pin_target" msgid="3052256031352291362">"ខ្ទាស់"</string>
     <string name="unpin_target" msgid="3556545602439143442">"មិនខ្ទាស់"</string>
     <string name="app_info" msgid="6856026610594615344">"ព័ត៌មាន​កម្មវិធី"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>
