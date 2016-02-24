@@ -388,18 +388,43 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
 }
 
 static void
-android_media_AudioSystem_recording_callback(int event, int session, int source)
+android_media_AudioSystem_recording_callback(int event, int session, int source,
+        const audio_config_base_t *clientConfig, const audio_config_base_t *deviceConfig)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
         return;
     }
+    if (clientConfig == NULL || deviceConfig == NULL) {
+        ALOGE("Unexpected null client/device configurations in recording callback");
+        return;
+    }
 
+    // create an array for 2*3 integers to store the record configurations (client + device)
+    jintArray recParamArray = env->NewIntArray(6);
+    if (recParamArray == NULL) {
+        ALOGE("recording callback: Couldn't allocate int array for configuration data");
+        return;
+    }
+    jint recParamData[6];
+    recParamData[0] = (jint) audioFormatFromNative(clientConfig->format);
+    // FIXME this doesn't support index-based masks
+    recParamData[1] = (jint) inChannelMaskFromNative(clientConfig->channel_mask);
+    recParamData[2] = (jint) clientConfig->sample_rate;
+    recParamData[3] = (jint) audioFormatFromNative(deviceConfig->format);
+    // FIXME this doesn't support index-based masks
+    recParamData[4] = (jint) inChannelMaskFromNative(deviceConfig->channel_mask);
+    recParamData[5] = (jint) deviceConfig->sample_rate;
+    env->SetIntArrayRegion(recParamArray, 0, 6, recParamData);
+
+    // callback into java
     jclass clazz = env->FindClass(kClassPathName);
     env->CallStaticVoidMethod(clazz,
             gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative,
-            event, session, source);
+            event, session, source, recParamArray);
     env->DeleteLocalRef(clazz);
+
+    env->DeleteLocalRef(recParamArray);
 }
 
 static jint
@@ -1819,7 +1844,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
                     "dynamicPolicyCallbackFromNative", "(ILjava/lang/String;I)V");
     gAudioPolicyEventHandlerMethods.postRecordConfigEventFromNative =
             GetStaticMethodIDOrDie(env, env->FindClass(kClassPathName),
-                    "recordingCallbackFromNative", "(III)V");
+                    "recordingCallbackFromNative", "(III[I)V");
 
     jclass audioMixClass = FindClassOrDie(env, "android/media/audiopolicy/AudioMix");
     gAudioMixClass = MakeGlobalRefOrDie(env, audioMixClass);
