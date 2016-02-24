@@ -663,13 +663,15 @@ public class RingtoneManager {
 
         // Stream selected ringtone into cache so it's available for playback
         // when CE storage is still locked
-        final ContentResolver cr = context.getContentResolver();
-        final Uri cacheUri = getCacheForType(type);
-        try (InputStream in = cr.openInputStream(ringtoneUri);
-                OutputStream out = cr.openOutputStream(cacheUri)) {
-            Streams.copy(in, out);
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to cache ringtone: " + e);
+        if (ringtoneUri != null) {
+            final ContentResolver cr = context.getContentResolver();
+            final Uri cacheUri = getCacheForType(type);
+            try (InputStream in = cr.openInputStream(ringtoneUri);
+                    OutputStream out = cr.openOutputStream(cacheUri)) {
+                Streams.copy(in, out);
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to cache ringtone: " + e);
+            }
         }
     }
 
