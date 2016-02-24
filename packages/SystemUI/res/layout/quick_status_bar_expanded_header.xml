@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="16dp"
         android:gravity="start"
         android:orientation="vertical">
