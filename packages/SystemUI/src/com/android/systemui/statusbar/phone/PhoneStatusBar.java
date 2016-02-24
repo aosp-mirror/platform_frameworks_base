@@ -1597,8 +1597,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private boolean packageHasVisibilityOverride(String key) {
-        return mNotificationData.getVisibilityOverride(key)
-                != NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE;
+        return mNotificationData.getVisibilityOverride(key) == Notification.VISIBILITY_PRIVATE;
     }
 
     private void updateClearAll() {
