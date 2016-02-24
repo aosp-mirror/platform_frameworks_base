@@ -35,6 +35,8 @@
 
 #include <android/configuration.h>
 
+#include <memory>
+
 namespace android {
 
 /**
@@ -1876,8 +1878,29 @@ private:
     struct Entry;
     struct Package;
     struct PackageGroup;
-    struct bag_set;
     typedef Vector<Type*> TypeList;
+
+    struct bag_set {
+        size_t numAttrs;    // number in array
+        size_t availAttrs;  // total space in array
+        uint32_t typeSpecFlags;
+        // Followed by 'numAttr' bag_entry structures.
+    };
+
+    /**
+     * Configuration dependent cached data. This must be cleared when the configuration is
+     * changed (setParameters).
+     */
+    struct TypeCacheEntry {
+        TypeCacheEntry() : cachedBags(NULL) {}
+
+        // Computed attribute bags for this type.
+        bag_set** cachedBags;
+
+        // Pre-filtered list of configurations (per asset path) that match the parameters set on this
+        // ResTable.
+        Vector<std::shared_ptr<Vector<const ResTable_type*>>> filteredConfigs;
+    };
 
     status_t addInternal(const void* data, size_t size, const void* idmapData, size_t idmapDataSize,
             bool appAsLib, const int32_t cookie, bool copyData, bool isSystemAsset=false);
@@ -1899,6 +1922,13 @@ private:
     void print_value(const Package* pkg, const Res_value& value) const;
 
     mutable Mutex               mLock;
+
+    // Mutex that controls access to the list of pre-filtered configurations
+    // to check when looking up entries.
+    // When iterating over a bag, the mLock mutex is locked. While mLock is locked,
+    // we do resource lookups.
+    // Mutex is not reentrant, so we must use a different lock than mLock.
+    mutable Mutex               mFilteredConfigLock;
 
     status_t                    mError;
 

@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include <limits>
+#include <memory>
 #include <type_traits>
 
 #include <androidfw/ByteBucketArray.h>
@@ -3193,7 +3194,6 @@ struct ResTable::PackageGroup
         , name(_name)
         , id(_id)
         , largestTypeId(0)
-        , bags(NULL)
         , dynamicRefTable(static_cast<uint8_t>(_id), appAsLib)
         , isSystemAsset(_isSystemAsset)
     { }
@@ -3220,36 +3220,41 @@ struct ResTable::PackageGroup
         }
     }
 
+    /**
+     * Clear all cache related data that depends on parameters/configuration.
+     * This includes the bag caches and filtered types.
+     */
     void clearBagCache() {
-        if (bags) {
+        for (size_t i = 0; i < typeCacheEntries.size(); i++) {
             if (kDebugTableNoisy) {
-                printf("bags=%p\n", bags);
+                printf("type=%zu\n", i);
             }
-            for (size_t i = 0; i < bags->size(); i++) {
+            const TypeList& typeList = types[i];
+            if (!typeList.isEmpty()) {
+                TypeCacheEntry& cacheEntry = typeCacheEntries.editItemAt(i);
+
+                // Reset the filtered configurations.
+                cacheEntry.filteredConfigs.clear();
+
+                bag_set** typeBags = cacheEntry.cachedBags;
                 if (kDebugTableNoisy) {
-                    printf("type=%zu\n", i);
+                    printf("typeBags=%p\n", typeBags);
                 }
-                const TypeList& typeList = types[i];
-                if (!typeList.isEmpty()) {
-                    bag_set** typeBags = bags->get(i);
+
+                if (typeBags) {
+                    const size_t N = typeList[0]->entryCount;
                     if (kDebugTableNoisy) {
-                        printf("typeBags=%p\n", typeBags);
+                        printf("type->entryCount=%zu\n", N);
                     }
-                    if (typeBags) {
-                        const size_t N = typeList[0]->entryCount;
-                        if (kDebugTableNoisy) {
-                            printf("type->entryCount=%zu\n", N);
+                    for (size_t j = 0; j < N; j++) {
+                        if (typeBags[j] && typeBags[j] != (bag_set*)0xFFFFFFFF) {
+                            free(typeBags[j]);
                         }
-                        for (size_t j = 0; j < N; j++) {
-                            if (typeBags[j] && typeBags[j] != (bag_set*)0xFFFFFFFF)
-                                free(typeBags[j]);
-                        }
-                        free(typeBags);
                     }
+                    free(typeBags);
+                    cacheEntry.cachedBags = NULL;
                 }
             }
-            delete bags;
-            bags = NULL;
         }
     }
 
@@ -3277,9 +3282,11 @@ struct ResTable::PackageGroup
 
     uint8_t                         largestTypeId;
 
-    // Computed attribute bags, first indexed by the type and second
-    // by the entry in that type.
-    ByteBucketArray<bag_set**>*     bags;
+    // Cached objects dependent on the parameters/configuration of this ResTable.
+    // Gets cleared whenever the parameters/configuration changes.
+    // These are stored here in a parallel structure because the data in `types` may
+    // be shared by other ResTable's (framework resources are shared this way).
+    ByteBucketArray<TypeCacheEntry> typeCacheEntries;
 
     // The table mapping dynamic references to resolved references for
     // this package group.
@@ -3291,14 +3298,6 @@ struct ResTable::PackageGroup
     // If the package group comes from a system asset. Used in
     // determining non-system locales.
     const bool                      isSystemAsset;
-};
-
-struct ResTable::bag_set
-{
-    size_t numAttrs;    // number in array
-    size_t availAttrs;  // total space in array
-    uint32_t typeSpecFlags;
-    // Followed by 'numAttr' bag_entry structures.
 };
 
 ResTable::Theme::Theme(const ResTable& table)
@@ -4192,39 +4191,32 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
     }
 
     // First see if we've already computed this bag...
-    if (grp->bags) {
-        bag_set** typeSet = grp->bags->get(t);
-        if (typeSet) {
-            bag_set* set = typeSet[e];
-            if (set) {
-                if (set != (bag_set*)0xFFFFFFFF) {
-                    if (outTypeSpecFlags != NULL) {
-                        *outTypeSpecFlags = set->typeSpecFlags;
-                    }
-                    *outBag = (bag_entry*)(set+1);
-                    if (kDebugTableSuperNoisy) {
-                        ALOGI("Found existing bag for: 0x%x\n", resID);
-                    }
-                    return set->numAttrs;
+    TypeCacheEntry& cacheEntry = grp->typeCacheEntries.editItemAt(t);
+    bag_set** typeSet = cacheEntry.cachedBags;
+    if (typeSet) {
+        bag_set* set = typeSet[e];
+        if (set) {
+            if (set != (bag_set*)0xFFFFFFFF) {
+                if (outTypeSpecFlags != NULL) {
+                    *outTypeSpecFlags = set->typeSpecFlags;
                 }
-                ALOGW("Attempt to retrieve bag 0x%08x which is invalid or in a cycle.",
-                     resID);
-                return BAD_INDEX;
+                *outBag = (bag_entry*)(set+1);
+                if (kDebugTableSuperNoisy) {
+                    ALOGI("Found existing bag for: 0x%x\n", resID);
+                }
+                return set->numAttrs;
             }
+            ALOGW("Attempt to retrieve bag 0x%08x which is invalid or in a cycle.",
+                 resID);
+            return BAD_INDEX;
         }
     }
 
     // Bag not found, we need to compute it!
-    if (!grp->bags) {
-        grp->bags = new ByteBucketArray<bag_set**>();
-        if (!grp->bags) return NO_MEMORY;
-    }
-
-    bag_set** typeSet = grp->bags->get(t);
     if (!typeSet) {
         typeSet = (bag_set**)calloc(NENTRY, sizeof(bag_set*));
         if (!typeSet) return NO_MEMORY;
-        grp->bags->set(t, typeSet);
+        cacheEntry.cachedBags = typeSet;
     }
 
     // Mark that we are currently working on this one.
@@ -4430,18 +4422,56 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
 
 void ResTable::setParameters(const ResTable_config* params)
 {
-    mLock.lock();
+    AutoMutex _lock(mLock);
+    AutoMutex _lock2(mFilteredConfigLock);
+
     if (kDebugTableGetEntry) {
         ALOGI("Setting parameters: %s\n", params->toString().string());
     }
     mParams = *params;
-    for (size_t i=0; i<mPackageGroups.size(); i++) {
+    for (size_t p = 0; p < mPackageGroups.size(); p++) {
+        PackageGroup* packageGroup = mPackageGroups.editItemAt(p);
         if (kDebugTableNoisy) {
-            ALOGI("CLEARING BAGS FOR GROUP %zu!", i);
+            ALOGI("CLEARING BAGS FOR GROUP %zu!", p);
         }
-        mPackageGroups[i]->clearBagCache();
+        packageGroup->clearBagCache();
+
+        // Find which configurations match the set of parameters. This allows for a much
+        // faster lookup in getEntry() if the set of values is narrowed down.
+        for (size_t t = 0; t < packageGroup->types.size(); t++) {
+            if (packageGroup->types[t].isEmpty()) {
+                continue;
+            }
+
+            TypeList& typeList = packageGroup->types.editItemAt(t);
+
+            // Retrieve the cache entry for this type.
+            TypeCacheEntry& cacheEntry = packageGroup->typeCacheEntries.editItemAt(t);
+
+            for (size_t ts = 0; ts < typeList.size(); ts++) {
+                Type* type = typeList.editItemAt(ts);
+
+                std::shared_ptr<Vector<const ResTable_type*>> newFilteredConfigs =
+                        std::make_shared<Vector<const ResTable_type*>>();
+
+                for (size_t ti = 0; ti < type->configs.size(); ti++) {
+                    ResTable_config config;
+                    config.copyFromDtoH(type->configs[ti]->config);
+
+                    if (config.match(mParams)) {
+                        newFilteredConfigs->add(type->configs[ti]);
+                    }
+                }
+
+                if (kDebugTableNoisy) {
+                    ALOGD("Updating pkg=%zu type=%zu with %zu filtered configs",
+                          p, t, newFilteredConfigs->size());
+                }
+
+                cacheEntry.filteredConfigs.add(newFilteredConfigs);
+            }
+        }
     }
-    mLock.unlock();
 }
 
 void ResTable::getParameters(ResTable_config* params) const
@@ -5974,9 +6004,32 @@ status_t ResTable::getEntry(
             specFlags = -1;
         }
 
-        const size_t numConfigs = typeSpec->configs.size();
+        const Vector<const ResTable_type*>* candidateConfigs = &typeSpec->configs;
+
+        std::shared_ptr<Vector<const ResTable_type*>> filteredConfigs;
+        if (config && memcmp(&mParams, config, sizeof(mParams)) == 0) {
+            // Grab the lock first so we can safely get the current filtered list.
+            AutoMutex _lock(mFilteredConfigLock);
+
+            // This configuration is equal to the one we have previously cached for,
+            // so use the filtered configs.
+
+            const TypeCacheEntry& cacheEntry = packageGroup->typeCacheEntries[typeIndex];
+            if (i < cacheEntry.filteredConfigs.size()) {
+                if (cacheEntry.filteredConfigs[i]) {
+                    // Grab a reference to the shared_ptr so it doesn't get destroyed while
+                    // going through this list.
+                    filteredConfigs = cacheEntry.filteredConfigs[i];
+
+                    // Use this filtered list.
+                    candidateConfigs = filteredConfigs.get();
+                }
+            }
+        }
+
+        const size_t numConfigs = candidateConfigs->size();
         for (size_t c = 0; c < numConfigs; c++) {
-            const ResTable_type* const thisType = typeSpec->configs[c];
+            const ResTable_type* const thisType = candidateConfigs->itemAt(c);
             if (thisType == NULL) {
                 continue;
             }
