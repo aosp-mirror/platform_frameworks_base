@@ -15,16 +15,19 @@
  */
 package com.android.systemui.qs.tiles;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Checkable;
 import android.widget.ImageView;
@@ -48,6 +51,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
     private int mLevel;
     private boolean mPowerSave;
     private boolean mCharging;
+    private boolean mDetailShown;
 
     public BatteryTile(Host host) {
         super(host);
@@ -120,20 +124,21 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         mLevel = level;
         mCharging = charging;
         refreshState((Integer) level);
-        if (mBatteryDetail.mCurrentView != null) {
-            mBatteryDetail.bindView();
+        if (mDetailShown) {
+            mBatteryDetail.postBindView();
         }
     }
 
     @Override
     public void onPowerSaveChanged(boolean isPowerSave) {
         mPowerSave = isPowerSave;
-        if (mBatteryDetail.mCurrentView != null) {
-            mBatteryDetail.bindView();
+        if (mDetailShown) {
+            mBatteryDetail.postBindView();
         }
     }
 
-    private final class BatteryDetail implements DetailAdapter, View.OnClickListener {
+    private final class BatteryDetail implements DetailAdapter, OnClickListener,
+            OnAttachStateChangeListener {
         private final BatteryMeterDrawable mDrawable = new BatteryMeterDrawable(mHost.getContext(),
                 new Handler(), mHost.getContext().getColor(R.color.batterymeter_frame_color));
         private View mCurrentView;
@@ -155,8 +160,18 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
                         false);
             }
             mCurrentView = convertView;
+            mCurrentView.addOnAttachStateChangeListener(this);
             bindView();
             return convertView;
+        }
+
+        private void postBindView() {
+            mCurrentView.post(new Runnable() {
+                @Override
+                public void run() {
+                    bindView();
+                }
+            });
         }
 
         private void bindView() {
@@ -166,15 +181,15 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             ((ImageView) mCurrentView.findViewById(android.R.id.icon)).setImageDrawable(mDrawable);
             Checkable checkbox = (Checkable) mCurrentView.findViewById(android.R.id.toggle);
             checkbox.setChecked(mPowerSave);
-            if (mCharging) {
-                BatteryInfo.getBatteryInfo(mContext, new BatteryInfo.Callback() {
-                    @Override
-                    public void onBatteryInfoLoaded(BatteryInfo info) {
-                        if (mCurrentView != null) {
-                            bindBatteryInfo(info);
-                        }
+            BatteryInfo.getBatteryInfo(mContext, new BatteryInfo.Callback() {
+                @Override
+                public void onBatteryInfoLoaded(BatteryInfo info) {
+                    if (mCurrentView != null) {
+                        bindBatteryInfo(info);
                     }
-                });
+                }
+            });
+            if (mCharging) {
                 ((TextView) mCurrentView.findViewById(android.R.id.title)).setText(
                         R.string.battery_detail_charging_summary);
                 mCurrentView.findViewById(android.R.id.icon).setVisibility(View.INVISIBLE);
@@ -228,5 +243,29 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         public int getMetricsCategory() {
             return MetricsEvent.QS_BATTERY_DETAIL;
         }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+            if (!mDetailShown) {
+                mDetailShown = true;
+                v.getContext().registerReceiver(mReceiver,
+                        new IntentFilter(Intent.ACTION_TIME_TICK));
+            }
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            if (mDetailShown) {
+                mDetailShown = false;
+                v.getContext().unregisterReceiver(mReceiver);
+            }
+        }
+
+        private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                postBindView();
+            }
+        };
     }
 }
