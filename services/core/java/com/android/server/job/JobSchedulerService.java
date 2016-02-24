@@ -52,6 +52,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import android.util.SparseBooleanArray;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
@@ -159,9 +160,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
     boolean mDeviceIdleMode;
 
     /**
-     * What we last reported to DeviceIdleController about wheter we are active.
+     * What we last reported to DeviceIdleController about whether we are active.
      */
     boolean mReportedActive;
+
+    /**
+     * Which uids are currently in the foreground.
+     */
+    final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
 
     /**
      * Cleans up outstanding jobs when a package is removed. Even if it's being replaced later we
@@ -199,9 +205,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
         @Override public void onUidStateChanged(int uid, int procState) throws RemoteException {
+            updateUidState(uid, procState);
         }
 
         @Override public void onUidGone(int uid) throws RemoteException {
+            updateUidState(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);
         }
 
         @Override public void onUidActive(int uid) throws RemoteException {
@@ -236,11 +244,12 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * @return Result of this operation. See <code>JobScheduler#RESULT_*</code> return codes.
      */
     public int schedule(JobInfo job, int uId) {
-        return scheduleAsPackage(job, uId, null, -1);
+        return scheduleAsPackage(job, uId, null, -1, null);
     }
 
-    public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId) {
-        JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId);
+    public int scheduleAsPackage(JobInfo job, int uId, String packageName, int userId,
+            String tag) {
+        JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
         try {
             if (ActivityManagerNative.getDefault().getAppStartMode(uId,
                     job.getService().getPackageName()) == ActivityManager.APP_START_MODE_DISABLED) {
@@ -353,6 +362,25 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    void updateUidState(int uid, int procState) {
+        synchronized (mLock) {
+            boolean foreground = procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+            boolean changed = false;
+            if (foreground) {
+                if (!mForegroundUids.get(uid)) {
+                    changed = true;
+                    mForegroundUids.put(uid, true);
+                }
+            } else {
+                int index = mForegroundUids.indexOfKey(uid);
+                if (index >= 0) {
+                    mForegroundUids.removeAt(index);
+                    changed = true;
+                }
+            }
+        }
+    }
+
     void updateIdleMode(boolean enabled) {
         boolean changed = false;
         boolean rocking;
@@ -462,7 +490,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             mPowerManager = (PowerManager)getContext().getSystemService(Context.POWER_SERVICE);
             try {
                 ActivityManagerNative.getDefault().registerUidObserver(mUidObserver,
-                        ActivityManager.UID_OBSERVER_IDLE);
+                        ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE
+                        | ActivityManager.UID_OBSERVER_IDLE);
             } catch (RemoteException e) {
                 // ignored; both services live in system_server
             }
@@ -948,6 +977,17 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    private int evaluateJobPriorityLocked(JobStatus job) {
+        int priority = job.getPriority();
+        if (priority >= JobInfo.PRIORITY_FOREGROUND_APP) {
+            return priority;
+        }
+        if (mForegroundUids.get(job.getSourceUid())) {
+            return JobInfo.PRIORITY_FOREGROUND_APP;
+        }
+        return priority;
+    }
+
     /**
      * Takes jobs from pending queue and runs them on available contexts.
      * If no contexts are available, preempts lower priority jobs to
@@ -984,6 +1024,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 continue;
             }
 
+            nextPending.lastEvaluatedPriority = evaluateJobPriorityLocked(nextPending);
+
             // Find a context for nextPending. The context should be available OR
             // it should have lowest priority among all running jobs
             // (sharing the same Uid as nextPending)
@@ -1005,11 +1047,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 if (job.getUid() != nextPending.getUid()) {
                     continue;
                 }
-                if (job.getPriority() >= nextPending.getPriority()) {
+                if (evaluateJobPriorityLocked(job) >= nextPending.lastEvaluatedPriority) {
                     continue;
                 }
-                if (minPriority > nextPending.getPriority()) {
-                    minPriority = nextPending.getPriority();
+                if (minPriority > nextPending.lastEvaluatedPriority) {
+                    minPriority = nextPending.lastEvaluatedPriority;
                     minPriorityContextId = i;
                 }
             }
@@ -1033,18 +1075,18 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     mActiveServices.get(i).preemptExecutingJob();
                     preservePreferredUid = true;
                 } else {
+                    final JobStatus pendingJob = contextIdToJobMap[i];
                     if (DEBUG) {
                         Slog.d(TAG, "About to run job on context "
-                                + String.valueOf(i) + ", job: " + contextIdToJobMap[i]);
+                                + String.valueOf(i) + ", job: " + pendingJob);
                     }
                     for (int ic=0; ic<mControllers.size(); ic++) {
-                        StateController controller = mControllers.get(ic);
-                        controller.prepareForExecutionLocked(contextIdToJobMap[i]);
+                        mControllers.get(ic).prepareForExecutionLocked(pendingJob);
                     }
-                    if (!mActiveServices.get(i).executeRunnableJob(contextIdToJobMap[i])) {
-                        Slog.d(TAG, "Error executing " + contextIdToJobMap[i]);
+                    if (!mActiveServices.get(i).executeRunnableJob(pendingJob)) {
+                        Slog.d(TAG, "Error executing " + pendingJob);
                     }
-                    mPendingJobs.remove(contextIdToJobMap[i]);
+                    mPendingJobs.remove(pendingJob);
                 }
             }
             if (!preservePreferredUid) {
@@ -1143,7 +1185,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public int scheduleAsPackage(JobInfo job, String packageName, int userId)
+        public int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag)
                 throws RemoteException {
             final int callerUid = Binder.getCallingUid();
             if (DEBUG) {
@@ -1165,7 +1207,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             long ident = Binder.clearCallingIdentity();
             try {
                 return JobSchedulerService.this.scheduleAsPackage(job, callerUid,
-                        packageName, userId);
+                        packageName, userId, tag);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -1287,7 +1329,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 mControllers.get(i).dumpControllerStateLocked(pw);
             }
             pw.println();
-            pw.println(printPendingQueue());
+            pw.println("Foreground uids:");
+            for (int i=0; i<mForegroundUids.size(); i++) {
+                pw.print("  "); pw.println(UserHandle.formatUid(mForegroundUids.keyAt(i)));
+            }
+            pw.println();
+            pw.println("Pending queue:");
+            for (int i=0; i<mPendingJobs.size(); i++) {
+                JobStatus job = mPendingJobs.get(i);
+                pw.print("  Pending #"); pw.print(i); pw.print(": ");
+                pw.println(job.toShortString());
+                int priority = evaluateJobPriorityLocked(job);
+                if (priority != JobInfo.PRIORITY_DEFAULT) {
+                    pw.print("    Evaluated priority: "); pw.println(priority);
+                }
+                pw.print("    Tag: "); pw.println(job.getTag());
+            }
             pw.println();
             pw.println("Active jobs:");
             for (int i=0; i<mActiveServices.size(); i++) {
@@ -1303,6 +1360,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     pw.print(" fromnow=");
                     pw.println(timeout-now);
                     jsc.getRunningJob().dump(pw, "  ");
+                    int priority = evaluateJobPriorityLocked(jsc.getRunningJob());
+                    if (priority != JobInfo.PRIORITY_DEFAULT) {
+                        pw.print("  Evaluated priority: "); pw.println(priority);
+                    }
                 }
             }
             pw.println();

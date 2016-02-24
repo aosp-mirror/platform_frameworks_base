@@ -68,10 +68,11 @@ public abstract class JobScheduler {
      * @param packageName The package on behalf of which the job is to be scheduled. This will be
      *                    used to track battery usage and appIdleState.
      * @param userId    User on behalf of whom this job is to be scheduled.
+     * @param tag Debugging tag for dumps associated with this job (instead of the service class)
      * @return {@link #RESULT_SUCCESS} or {@link #RESULT_FAILURE}
      * @hide
      */
-    public abstract int scheduleAsPackage(JobInfo job, String packageName, int userId);
+    public abstract int scheduleAsPackage(JobInfo job, String packageName, int userId, String tag);
 
     /**
      * Cancel a job that is pending in the JobScheduler.
