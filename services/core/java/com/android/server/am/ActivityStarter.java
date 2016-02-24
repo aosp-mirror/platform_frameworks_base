@@ -608,7 +608,13 @@ class ActivityStarter {
                 // app in a locked managed profile from an unlocked parent allow it to resolve
                 // as user will be sent via confirm credentials to unlock the profile.
                 UserManager userManager = UserManager.get(mService.mContext);
-                UserInfo parent = userManager.getProfileParent(userId);
+                UserInfo parent = null;
+                long token = Binder.clearCallingIdentity();
+                try {
+                    parent = userManager.getProfileParent(userId);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
                 if (parent != null
                         && userManager.isUserUnlocked(parent.getUserHandle())
                         && !userManager.isUserUnlocked(userInfo.getUserHandle())) {
