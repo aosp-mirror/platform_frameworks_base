@@ -685,9 +685,28 @@ public class CarrierConfigManager {
      * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
      * @return A {@link PersistableBundle} containing the config for the given subId, or default
      *         values for an invalid subId.
+     *
+     * @deprecated use getConfig.
      */
     @Nullable
     public PersistableBundle getConfigForSubId(int subId) {
+        return getConfig(subId);
+    }
+
+    /**
+     * Gets the configuration values for a particular subscription, which is associated with a
+     * specific SIM card. If an invalid subId is used, the returned config will contain default
+     * values.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *
+     * @param subId the subscription ID, normally obtained from {@link SubscriptionManager}.
+     * @return A {@link PersistableBundle} containing the config for the given subId, or default
+     *         values for an invalid subId.
+     */
+    @Nullable
+    public PersistableBundle getConfig(int subId) {
         try {
             return getICarrierConfigLoader().getConfigForSubId(subId);
         } catch (RemoteException ex) {
@@ -706,11 +725,32 @@ public class CarrierConfigManager {
      * <p>Requires Permission:
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      *
-     * @see #getConfigForSubId
+     * @return A {@link PersistableBundle} containing the config for the default subscription.
      */
     @Nullable
     public PersistableBundle getConfig() {
-        return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId());
+        return getConfig(SubscriptionManager.getDefaultSubscriptionId());
+    }
+
+    /**
+     * Calling this method triggers telephony services to fetch the current carrier configuration.
+     * <p>
+     * Normally this does not need to be called because the platform reloads config on its own.
+     * This should be called by a carrier service app if it wants to update config at an arbitrary
+     * moment.
+     * </p>
+     * <p>Requires that the calling app has carrier privileges.
+     * @see #hasCarrierPrivileges
+     * <p>
+     * This method returns before the reload has completed, and
+     * {@link android.service.carrier.CarrierService#onLoadConfig} will be called from an
+     * arbitrary thread.
+     * </p>
+     *
+     * @deprecated use notifyConfigChanged.
+     */
+    public void notifyConfigChangedForSubId(int subId) {
+        notifyConfigChanged(subId);
     }
 
     /**
@@ -728,7 +768,7 @@ public class CarrierConfigManager {
      * arbitrary thread.
      * </p>
      */
-    public void notifyConfigChangedForSubId(int subId) {
+    public void notifyConfigChanged(int subId) {
         try {
             getICarrierConfigLoader().notifyConfigChangedForSubId(subId);
         } catch (RemoteException ex) {
