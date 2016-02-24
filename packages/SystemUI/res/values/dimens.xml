@@ -174,8 +174,8 @@
     <dimen name="qs_tile_margin">16dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
-    <dimen name="qs_date_anim_translation">36dp</dimen>
-    <dimen name="qs_date_alarm_anim_translation">26dp</dimen>
+    <dimen name="qs_date_anim_translation">32dp</dimen>
+    <dimen name="qs_date_alarm_anim_translation">22dp</dimen>
     <dimen name="qs_date_collapsed_text_size">14sp</dimen>
     <dimen name="qs_date_text_size">16sp</dimen>
     <dimen name="qs_header_gear_translation">150dp</dimen>
