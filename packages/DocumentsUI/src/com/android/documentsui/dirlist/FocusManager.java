@@ -18,7 +18,11 @@ package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
+import android.annotation.Nullable;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.DocumentsContract.Document;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -38,6 +42,8 @@ import com.android.documentsui.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A class that handles navigation and focus within the DirectoryFragment.
@@ -259,10 +265,23 @@ class FocusManager implements View.OnFocusChangeListener {
      * @param pos
      */
     private void focusItem(final int pos) {
+        focusItem(pos, null);
+    }
+
+    /**
+     * Requests focus for the item in the given adapter position, scrolling the RecyclerView if
+     * necessary.
+     *
+     * @param pos
+     * @param callback A callback to call after the given item has been focused.
+     */
+    private void focusItem(final int pos, @Nullable final FocusCallback callback) {
         // If the item is already in view, focus it; otherwise, scroll to it and focus it.
         RecyclerView.ViewHolder vh = mView.findViewHolderForAdapterPosition(pos);
         if (vh != null) {
-            vh.itemView.requestFocus();
+            if (vh.itemView.requestFocus() && callback != null) {
+                callback.onFocus(vh.itemView);
+            }
         } else {
             // Set a one-time listener to request focus when the scroll has completed.
             mView.addOnScrollListener(
@@ -274,7 +293,9 @@ class FocusManager implements View.OnFocusChangeListener {
                                 RecyclerView.ViewHolder vh =
                                         view.findViewHolderForAdapterPosition(pos);
                                 if (vh != null) {
-                                    vh.itemView.requestFocus();
+                                    if (vh.itemView.requestFocus() && callback != null) {
+                                        callback.onFocus(vh.itemView);
+                                    }
                                 } else {
                                     // This might happen in weird corner cases, e.g. if the user is
                                     // scrolling while a delete operation is in progress. In that
@@ -296,6 +317,10 @@ class FocusManager implements View.OnFocusChangeListener {
         return mLayout.getSpanCount() > 1;
     }
 
+    private interface FocusCallback {
+        public void onFocus(View view);
+    }
+
     /**
      * A helper class for handling type-to-focus. Instantiate this class, and pass it KeyEvents via
      * the {@link #handleKey(DocumentHolder, int, KeyEvent)} method. The class internally will build
@@ -304,15 +329,24 @@ class FocusManager implements View.OnFocusChangeListener {
      * highlights instances of the search term found in the view.
      */
     private class TitleSearchHelper {
-        final private KeyListener mTextListener = new TextKeyListener(Capitalize.NONE, false);
-        final private Editable mSearchString = Editable.Factory.getInstance().newEditable("");
-        final private Highlighter mHighlighter = new Highlighter();
-        final private BackgroundColorSpan mSpan;
+        static private final int SEARCH_TIMEOUT = 500;  // ms
+
+        private final KeyListener mTextListener = new TextKeyListener(Capitalize.NONE, false);
+        private final Editable mSearchString = Editable.Factory.getInstance().newEditable("");
+        private final Highlighter mHighlighter = new Highlighter();
+        private final BackgroundColorSpan mSpan;
+
         private List<String> mIndex;
         private boolean mActive;
+        private Timer mTimer;
+        private KeyEvent mLastEvent;
+        private Handler mUiRunner;
 
         public TitleSearchHelper(Context context) {
             mSpan = new BackgroundColorSpan(context.getColor(R.color.accent_dark));
+            // Handler for running things on the main UI thread. Needed for updating the UI from a
+            // timer (see #activate, below).
+            mUiRunner = new Handler(Looper.getMainLooper());
         }
 
         /**
@@ -330,7 +364,7 @@ class FocusManager implements View.OnFocusChangeListener {
                 case KeyEvent.KEYCODE_ENTER:
                     if (mActive) {
                         // These keys end any active searches.
-                        deactivate();
+                        endSearch();
                         return true;
                     } else {
                         // Don't handle these key events if there is no active search.
@@ -338,7 +372,9 @@ class FocusManager implements View.OnFocusChangeListener {
                     }
                 case KeyEvent.KEYCODE_SPACE:
                     // This allows users to search for files with spaces in their names, but ignores
-                    // spacebar events when a text search is not active.
+                    // spacebar events when a text search is not active. Ignoring the spacebar
+                    // event is necessary because other handlers (see FocusManager#handleKey) also
+                    // listen for and handle it.
                     if (!mActive) {
                         return false;
                     }
@@ -346,7 +382,7 @@ class FocusManager implements View.OnFocusChangeListener {
 
             // Navigation keys also end active searches.
             if (Events.isNavigationKeyCode(keyCode)) {
-                deactivate();
+                endSearch();
                 // Don't handle the keycode, so navigation still occurs.
                 return false;
             }
@@ -355,20 +391,17 @@ class FocusManager implements View.OnFocusChangeListener {
             boolean handled = mTextListener.onKeyDown(doc.itemView, mSearchString, keyCode, event);
 
             // Delete is processed by the text listener, but not "handled". Check separately for it.
-            if (handled || keyCode == KeyEvent.KEYCODE_DEL) {
-                String searchString = mSearchString.toString();
-                if (searchString.length() == 0) {
+            if (keyCode == KeyEvent.KEYCODE_DEL) {
+                handled = true;
+            }
+
+            if (handled) {
+                mLastEvent = event;
+                if (mSearchString.length() == 0) {
                     // Don't perform empty searches.
                     return false;
                 }
-                activate();
-                for (int pos = 0; pos < mIndex.size(); pos++) {
-                    String title = mIndex.get(pos);
-                    if (title != null && title.startsWith(searchString)) {
-                        focusItem(pos);
-                        break;
-                    }
-                }
+                search();
             }
 
             return handled;
@@ -378,10 +411,17 @@ class FocusManager implements View.OnFocusChangeListener {
          * Activates the search helper, which changes its key handling and updates the search index
          * and highlights if necessary. Call this each time the search term is updated.
          */
-        private void activate() {
+        private void search() {
             if (!mActive) {
-                // Install listeners.
+                // The model listener invalidates the search index when the model changes.
                 mModel.addUpdateListener(mModelListener);
+
+                // Used to keep the current search alive until the timeout expires. If the user
+                // presses another key within that time, that keystroke is added to the current
+                // search. Otherwise, the current search ends, and subsequent keystrokes start a new
+                // search.
+                mTimer = new Timer();
+                mActive = true;
             }
 
             // If the search index was invalidated, rebuild it
@@ -389,71 +429,42 @@ class FocusManager implements View.OnFocusChangeListener {
                 buildIndex();
             }
 
-            // TODO: Uncomment this to enable search term highlighting in the UI.
-//            mHighlighter.activate();
-
-            mActive = true;
-        }
-
-        /**
-         * Deactivates the search helper (see {@link #activate()}). Call this when a search ends.
-         */
-        private void deactivate() {
-            if (mActive) {
-                // Remove listeners.
-                mModel.removeUpdateListener(mModelListener);
-            }
-
-            // TODO: Uncomment this when search-term highlighting is enabled in the UI.
-//            mHighlighter.deactivate();
-
-            mIndex = null;
-            mSearchString.clear();
-            mActive = false;
-        }
-
-        /**
-         * Applies title highlights to the given view. The view must have a title field that is a
-         * spannable text field.  If this condition is not met, this function does nothing.
-         *
-         * @param view
-         */
-        private void applyHighlight(View view) {
-            TextView titleView = (TextView) view.findViewById(android.R.id.title);
-            if (titleView == null) {
-                return;
-            }
-
-            String searchString = mSearchString.toString();
-            CharSequence tmpText = titleView.getText();
-            if (tmpText instanceof Spannable) {
-                Spannable title = (Spannable) tmpText;
-                String titleString = title.toString();
-                if (titleString.startsWith(searchString)) {
-                    title.setSpan(mSpan, 0, searchString.length(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                } else {
-                    title.removeSpan(mSpan);
+            // Search for the current search term.
+            // Perform case-insensitive search.
+            String searchString = mSearchString.toString().toLowerCase();
+            for (int pos = 0; pos < mIndex.size(); pos++) {
+                String title = mIndex.get(pos);
+                if (title != null && title.startsWith(searchString)) {
+                    focusItem(pos, new FocusCallback() {
+                        @Override
+                        public void onFocus(View view) {
+                            mHighlighter.applyHighlight(view);
+                            // Using a timer repeat period of SEARCH_TIMEOUT/2 means the amount of
+                            // time between the last keystroke and a search expiring is actually
+                            // between 500 and 750 ms. A smaller timer period results in less
+                            // variability but does more polling.
+                            mTimer.schedule(new TimeoutTask(), 0, SEARCH_TIMEOUT / 2);
+                        }
+                    });
+                    break;
                 }
             }
         }
 
         /**
-         * Removes title highlights from the given view. The view must have a title field that is a
-         * spannable text field.  If this condition is not met, this function does nothing.
-         *
-         * @param view
+         * Ends the current search (see {@link #search()}.
          */
-        private void removeHighlight(View view) {
-            TextView titleView = (TextView) view.findViewById(android.R.id.title);
-            if (titleView == null) {
-                return;
+        private void endSearch() {
+            if (mActive) {
+                mModel.removeUpdateListener(mModelListener);
+                mTimer.cancel();
             }
 
-            CharSequence tmpText = titleView.getText();
-            if (tmpText instanceof Spannable) {
-                ((Spannable) tmpText).removeSpan(mSpan);
-            }
+            mHighlighter.removeHighlight();
+
+            mIndex = null;
+            mSearchString.clear();
+            mActive = false;
         }
 
         /**
@@ -466,8 +477,10 @@ class FocusManager implements View.OnFocusChangeListener {
             for (int i = 0; i < itemCount; i++) {
                 String modelId = mAdapter.getModelId(i);
                 if (modelId != null) {
-                    index.add(
-                            getCursorString(mModel.getItem(modelId), Document.COLUMN_DISPLAY_NAME));
+                    String title =
+                            getCursorString(mModel.getItem(modelId), Document.COLUMN_DISPLAY_NAME);
+                    // Perform case-insensitive search.
+                    index.add(title.toLowerCase());
                 } else {
                     index.add("");
                 }
@@ -489,43 +502,58 @@ class FocusManager implements View.OnFocusChangeListener {
             }
         };
 
-        private class Highlighter implements RecyclerView.OnChildAttachStateChangeListener {
-            /**
-             * Starts highlighting instances of the current search term in the UI.
-             */
-            public void activate() {
-                // Update highlights on all views
-                int itemCount = mView.getChildCount();
-                for (int i = 0; i < itemCount; i++) {
-                    applyHighlight(mView.getChildAt(i));
-                }
-                // Keep highlights up-to-date as items come in and out of view.
-                mView.addOnChildAttachStateChangeListener(this);
-            }
-
-            /**
-             * Stops highlighting instances of the current search term in the UI.
-             */
-            public void deactivate() {
-                // Remove highlights on all views
-                int itemCount = mView.getChildCount();
-                for (int i = 0; i < itemCount; i++) {
-                    removeHighlight(mView.getChildAt(i));
-                }
-                // Stop updating highlights.
-                mView.removeOnChildAttachStateChangeListener(this);
-            }
-
+        private class TimeoutTask extends TimerTask {
             @Override
-            public void onChildViewAttachedToWindow(View view) {
-                applyHighlight(view);
+            public void run() {
+                long last = mLastEvent.getEventTime();
+                long now = SystemClock.uptimeMillis();
+                if ((now - last) > SEARCH_TIMEOUT) {
+                    // endSearch must run on the main thread because it does UI work
+                    mUiRunner.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            endSearch();
+                        }
+                    });
+                }
             }
+        };
 
-            @Override
-            public void onChildViewDetachedFromWindow(View view) {
+        private class Highlighter {
+            private Spannable mCurrentHighlight;
+
+            /**
+             * Applies title highlights to the given view. The view must have a title field that is a
+             * spannable text field.  If this condition is not met, this function does nothing.
+             *
+             * @param view
+             */
+            private void applyHighlight(View view) {
                 TextView titleView = (TextView) view.findViewById(android.R.id.title);
-                if (titleView != null) {
-                    removeHighlight(titleView);
+                if (titleView == null) {
+                    return;
+                }
+
+                CharSequence tmpText = titleView.getText();
+                if (tmpText instanceof Spannable) {
+                    if (mCurrentHighlight != null) {
+                        mCurrentHighlight.removeSpan(mSpan);
+                    }
+                    mCurrentHighlight = (Spannable) tmpText;
+                    mCurrentHighlight.setSpan(
+                            mSpan, 0, mSearchString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+
+            /**
+             * Removes title highlights from the given view. The view must have a title field that is a
+             * spannable text field.  If this condition is not met, this function does nothing.
+             *
+             * @param view
+             */
+            private void removeHighlight() {
+                if (mCurrentHighlight != null) {
+                    mCurrentHighlight.removeSpan(mSpan);
                 }
             }
         };
