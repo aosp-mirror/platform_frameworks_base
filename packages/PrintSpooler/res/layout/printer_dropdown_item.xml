@@ -16,10 +16,8 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:paddingStart="8dip"
-      android:paddingEnd="8dip"
-      android:minHeight="56dip"
+      android:layout_height="?android:attr/listPreferredItemHeightSmall"
+      style="?android:attr/spinnerItemStyle"
       android:orientation="horizontal"
       android:gravity="start|center_vertical">
 
@@ -33,10 +31,9 @@
         android:visibility="invisible">
     </ImageView>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_marginStart="8dip"
         android:duplicateParentState="true">
 
@@ -47,8 +44,6 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:singleLine="true"
             android:ellipsize="end"
-            android:textIsSelectable="false"
-            android:gravity="top|start"
             android:textColor="?android:attr/textColorPrimary"
             android:duplicateParentState="true">
         </TextView>
@@ -57,15 +52,15 @@
             android:id="@+id/subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/title"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:singleLine="true"
             android:ellipsize="end"
-            android:textIsSelectable="false"
             android:visibility="gone"
             android:textColor="?android:attr/textColorSecondary"
             android:duplicateParentState="true">
         </TextView>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

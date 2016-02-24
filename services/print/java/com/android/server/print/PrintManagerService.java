@@ -41,13 +41,16 @@ import android.os.UserManager;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
 import android.print.IPrintManager;
+import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
 import android.print.PrintJobInfo;
+import android.print.PrintManager;
 import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.content.PackageMonitor;
@@ -66,6 +69,8 @@ import java.util.List;
  * PrintManager implementation is contained within.
  */
 public final class PrintManagerService extends SystemService {
+    private static final String LOG_TAG = "PrintManagerService";
+
     private final PrintManagerImpl mPrintManagerImpl;
 
     public PrintManagerService(Context context) {
@@ -253,7 +258,10 @@ public final class PrintManagerService extends SystemService {
         }
 
         @Override
-        public List<PrintServiceInfo> getEnabledPrintServices(int userId) {
+        public List<PrintServiceInfo> getPrintServices(int selectionFlags, int userId) {
+            Preconditions.checkFlagsArgument(selectionFlags,
+                    PrintManager.DISABLED_SERVICES | PrintManager.ENABLED_SERVICES);
+
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
             final UserState userState;
             synchronized (mLock) {
@@ -262,34 +270,44 @@ public final class PrintManagerService extends SystemService {
                     return null;
                 }
                 userState = getOrCreateUserStateLocked(resolvedUserId);
-
-                // The user state might be updated via the same observer-set as the caller of this
-                // interface. If the caller is called back first the user state is not yet updated
-                // and the user gets and inconsistent view. Hence force an update.
-                userState.updateIfNeededLocked();
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                return userState.getEnabledPrintServices();
+                return userState.getPrintServices(selectionFlags);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
         }
 
         @Override
-        public List<PrintServiceInfo> getInstalledPrintServices(int userId) {
+        public void setPrintServiceEnabled(ComponentName service, boolean isEnabled, int userId) {
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final int appId = UserHandle.getAppId(Binder.getCallingUid());
+
+            try {
+                if (appId != Process.SYSTEM_UID && appId != UserHandle.getAppId(
+                        mContext.getPackageManager().getPackageUidAsUser(
+                                PrintManager.PRINT_SPOOLER_PACKAGE_NAME, resolvedUserId))) {
+                    throw new SecurityException("Only system and print spooler can call this");
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(LOG_TAG, "Could not verify caller", e);
+                return;
+            }
+
+            service = Preconditions.checkNotNull(service);
+
             final UserState userState;
             synchronized (mLock) {
-                // Only the current group members can get installed services.
+                // Only the current group members can enable / disable services.
                 if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
-                    return null;
+                    return;
                 }
                 userState = getOrCreateUserStateLocked(resolvedUserId);
             }
             final long identity = Binder.clearCallingIdentity();
             try {
-                return userState.getInstalledPrintServices();
+                userState.setPrintServiceEnabled(service, isEnabled);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -496,6 +514,50 @@ public final class PrintManagerService extends SystemService {
         }
 
         @Override
+        public void addPrintServicesChangeListener(IPrintServicesChangeListener listener,
+                int userId) throws RemoteException {
+            listener = Preconditions.checkNotNull(listener);
+
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can add a print services listener.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                userState.addPrintServicesChangeListener(listener);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void removePrintServicesChangeListener(IPrintServicesChangeListener listener,
+                int userId) {
+            listener = Preconditions.checkNotNull(listener);
+
+            final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+            final UserState userState;
+            synchronized (mLock) {
+                // Only the current group members can remove a print job listener.
+                if (resolveCallingProfileParentLocked(resolvedUserId) != getCurrentUserId()) {
+                    return;
+                }
+                userState = getOrCreateUserStateLocked(resolvedUserId);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                userState.removePrintServicesChangeListener(listener);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             fd = Preconditions.checkNotNull(fd);
             pw = Preconditions.checkNotNull(pw);
@@ -560,7 +622,7 @@ public final class PrintManagerService extends SystemService {
                         UserState userState = getOrCreateUserStateLocked(getChangingUserId());
 
                         List<PrintServiceInfo> installedServices = userState
-                                .getInstalledPrintServices();
+                                .getPrintServices(PrintManager.ALL_SERVICES);
                         final int numInstalledServices = installedServices.size();
                         for (int i = 0; i < numInstalledServices; i++) {
                             if (installedServices.get(i).getResolveInfo().serviceInfo.packageName
@@ -601,7 +663,7 @@ public final class PrintManagerService extends SystemService {
                         boolean stoppedSomePackages = false;
 
                         List<PrintServiceInfo> enabledServices = userState
-                                .getEnabledPrintServices();
+                                .getPrintServices(PrintManager.ENABLED_SERVICES);
                         if (enabledServices == null) {
                             return false;
                         }

@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintJobStateChangeListener;
+import android.print.IPrintServicesChangeListener;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobId;
@@ -120,6 +121,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
     private PrinterDiscoverySessionMediator mPrinterDiscoverySession;
 
     private List<PrintJobStateChangeListenerRecord> mPrintJobStateChangeListenerRecords;
+
+    private List<PrintServicesChangeListenerRecord> mPrintServicesChangeListenerRecords;
 
     private boolean mDestroyed;
 
@@ -342,29 +345,63 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         mSpooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
     }
 
-    public @Nullable List<PrintServiceInfo> getEnabledPrintServices() {
+    public @Nullable List<PrintServiceInfo> getPrintServices(int selectionFlags) {
         synchronized (mLock) {
-            List<PrintServiceInfo> enabledServices = null;
+            List<PrintServiceInfo> selectedServices = null;
             final int installedServiceCount = mInstalledServices.size();
             for (int i = 0; i < installedServiceCount; i++) {
                 PrintServiceInfo installedService = mInstalledServices.get(i);
+
                 ComponentName componentName = new ComponentName(
                         installedService.getResolveInfo().serviceInfo.packageName,
                         installedService.getResolveInfo().serviceInfo.name);
-                if (mActiveServices.containsKey(componentName)) {
-                    if (enabledServices == null) {
-                        enabledServices = new ArrayList<PrintServiceInfo>();
+
+                // Update isEnabled under the same lock the final returned list is created
+                installedService.setIsEnabled(mActiveServices.containsKey(componentName));
+
+                if (installedService.isEnabled()) {
+                    if ((selectionFlags & PrintManager.ENABLED_SERVICES) == 0) {
+                        continue;
                     }
-                    enabledServices.add(installedService);
+                } else {
+                    if ((selectionFlags & PrintManager.DISABLED_SERVICES) == 0) {
+                        continue;
+                    }
                 }
+
+                if (selectedServices == null) {
+                    selectedServices = new ArrayList<>();
+                }
+                selectedServices.add(installedService);
             }
-            return enabledServices;
+            return selectedServices;
         }
     }
 
-    public List<PrintServiceInfo> getInstalledPrintServices() {
+    public void setPrintServiceEnabled(@NonNull ComponentName serviceName, boolean isEnabled) {
         synchronized (mLock) {
-            return mInstalledServices;
+            boolean isChanged = false;
+            if (isEnabled) {
+                isChanged = mDisabledServices.remove(serviceName);
+            } else {
+                // Make sure to only disable services that are currently installed
+                final int numServices = mInstalledServices.size();
+                for (int i = 0; i < numServices; i++) {
+                    PrintServiceInfo service = mInstalledServices.get(i);
+
+                    if (service.getComponentName().equals(serviceName)) {
+                        mDisabledServices.add(serviceName);
+                        isChanged = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isChanged) {
+                writeDisabledPrintServicesLocked(mDisabledServices);
+
+                onConfigurationChangedLocked();
+            }
         }
     }
 
@@ -523,11 +560,53 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
+    public void addPrintServicesChangeListener(@NonNull IPrintServicesChangeListener listener)
+            throws RemoteException {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mPrintServicesChangeListenerRecords == null) {
+                mPrintServicesChangeListenerRecords = new ArrayList<>();
+            }
+            mPrintServicesChangeListenerRecords.add(
+                    new PrintServicesChangeListenerRecord(listener) {
+                        @Override
+                        public void onBinderDied() {
+                            mPrintServicesChangeListenerRecords.remove(this);
+                        }
+                    });
+        }
+    }
+
+    public void removePrintServicesChangeListener(@NonNull IPrintServicesChangeListener listener) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mPrintServicesChangeListenerRecords == null) {
+                return;
+            }
+            final int recordCount = mPrintServicesChangeListenerRecords.size();
+            for (int i = 0; i < recordCount; i++) {
+                PrintServicesChangeListenerRecord record =
+                        mPrintServicesChangeListenerRecords.get(i);
+                if (record.listener.asBinder().equals(listener.asBinder())) {
+                    mPrintServicesChangeListenerRecords.remove(i);
+                    break;
+                }
+            }
+            if (mPrintServicesChangeListenerRecords.isEmpty()) {
+                mPrintServicesChangeListenerRecords = null;
+            }
+        }
+    }
+
     @Override
     public void onPrintJobStateChanged(PrintJobInfo printJob) {
         mPrintJobForAppCache.onPrintJobStateChanged(printJob);
         mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_JOB_STATE_CHANGED,
                 printJob.getAppId(), 0, printJob.getId()).sendToTarget();
+    }
+
+    public void onPrintServicesChanged() {
+        mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_SERVICES_CHANGED).sendToTarget();
     }
 
     @Override
@@ -894,6 +973,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 iterator.remove();
             }
         }
+
+        onPrintServicesChanged();
     }
 
     private void addServiceLocked(RemotePrintService service) {
@@ -978,8 +1059,29 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
         }
     }
 
+    private void handleDispatchPrintServicesChanged() {
+        final List<PrintServicesChangeListenerRecord> records;
+        synchronized (mLock) {
+            if (mPrintServicesChangeListenerRecords == null) {
+                return;
+            }
+            records = new ArrayList<>(mPrintServicesChangeListenerRecords);
+        }
+        final int recordCount = records.size();
+        for (int i = 0; i < recordCount; i++) {
+            PrintServicesChangeListenerRecord record = records.get(i);
+
+            try {
+                record.listener.onPrintServicesChanged();;
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error notifying for print services change", re);
+            }
+        }
+    }
+
     private final class UserStateHandler extends Handler {
         public static final int MSG_DISPATCH_PRINT_JOB_STATE_CHANGED = 1;
+        public static final int MSG_DISPATCH_PRINT_SERVICES_CHANGED = 2;
 
         public UserStateHandler(Looper looper) {
             super(looper, null, false);
@@ -987,10 +1089,17 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
 
         @Override
         public void handleMessage(Message message) {
-            if (message.what == MSG_DISPATCH_PRINT_JOB_STATE_CHANGED) {
-                PrintJobId printJobId = (PrintJobId) message.obj;
-                final int appId = message.arg1;
-                handleDispatchPrintJobStateChanged(printJobId, appId);
+            switch (message.what) {
+                case MSG_DISPATCH_PRINT_JOB_STATE_CHANGED:
+                    PrintJobId printJobId = (PrintJobId) message.obj;
+                    final int appId = message.arg1;
+                    handleDispatchPrintJobStateChanged(printJobId, appId);
+                    break;
+                case MSG_DISPATCH_PRINT_SERVICES_CHANGED:
+                    handleDispatchPrintServicesChanged();
+                    break;
+                default:
+                    // not reached
             }
         }
     }
@@ -1003,6 +1112,23 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks {
                 int appId) throws RemoteException {
             this.listener = listener;
             this.appId = appId;
+            listener.asBinder().linkToDeath(this, 0);
+        }
+
+        @Override
+        public void binderDied() {
+            listener.asBinder().unlinkToDeath(this, 0);
+            onBinderDied();
+        }
+
+        public abstract void onBinderDied();
+    }
+
+    private abstract class PrintServicesChangeListenerRecord implements DeathRecipient {
+        @NonNull final IPrintServicesChangeListener listener;
+
+        public PrintServicesChangeListenerRecord(@NonNull IPrintServicesChangeListener listener) throws RemoteException {
+            this.listener = listener;
             listener.asBinder().linkToDeath(this, 0);
         }
 

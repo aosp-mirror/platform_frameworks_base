@@ -18,7 +18,7 @@
     android:shape="oval">
 
     <solid
-        android:color="@color/promoted_action_background_color">
+        android:color="?android:attr/colorAccent">
     </solid>
 
     <size

@@ -17,31 +17,18 @@
 package com.android.printspooler.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
+import android.app.LoaderManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
-import android.content.pm.ActivityInfo;
+import android.content.Loader;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
-import android.database.ContentObserver;
 import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.print.PrintManager;
+import android.print.PrintServicesLoader;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.printservice.PrintServiceInfo;
@@ -59,17 +46,16 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.internal.content.PackageMonitor;
 import com.android.printspooler.R;
 
 import java.util.ArrayList;
@@ -78,25 +64,23 @@ import java.util.List;
 /**
  * This is an activity for selecting a printer.
  */
-public final class SelectPrinterActivity extends Activity {
+public final class SelectPrinterActivity extends Activity implements
+        LoaderManager.LoaderCallbacks<List<PrintServiceInfo>> {
 
     private static final String LOG_TAG = "SelectPrinterFragment";
 
+    private static final int LOADER_ID_PRINT_REGISTRY = 1;
+    private static final int LOADER_ID_PRINT_REGISTRY_INT = 2;
+    private static final int LOADER_ID_ENABLED_PRINT_SERVICES = 3;
+
     public static final String INTENT_EXTRA_PRINTER_ID = "INTENT_EXTRA_PRINTER_ID";
-
-    private static final String FRAGMENT_TAG_ADD_PRINTER_DIALOG =
-            "FRAGMENT_TAG_ADD_PRINTER_DIALOG";
-
-    private static final String FRAGMENT_ARGUMENT_PRINT_SERVICE_INFOS =
-            "FRAGMENT_ARGUMENT_PRINT_SERVICE_INFOS";
 
     private static final String EXTRA_PRINTER_ID = "EXTRA_PRINTER_ID";
 
+    private static final String KEY_NOT_FIRST_CREATE = "KEY_NOT_FIRST_CREATE";
+
     /** If there are any enabled print services */
     private boolean mHasEnabledPrintServices;
-
-    private final ArrayList<PrintServiceInfo> mAddPrinterServices =
-            new ArrayList<>();
 
     private PrinterRegistry mPrinterRegistry;
 
@@ -104,9 +88,9 @@ public final class SelectPrinterActivity extends Activity {
 
     private AnnounceFilterResult mAnnounceFilterResult;
 
-    /** Monitor if new print services get enabled or disabled */
-    private ContentObserver mPrintServicesDisabledObserver;
-    private PackageMonitor mPackageObserver;
+    private void startAddPrinterActivity() {
+        startActivity(new Intent(this, AddPrinterActivity.class));
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -115,7 +99,8 @@ public final class SelectPrinterActivity extends Activity {
 
         setContentView(R.layout.select_printer_activity);
 
-        mPrinterRegistry = new PrinterRegistry(this, null);
+        mPrinterRegistry = new PrinterRegistry(this, null, LOADER_ID_PRINT_REGISTRY,
+                LOADER_ID_PRINT_REGISTRY_INT);
 
         // Hook up the list view.
         mListView = (ListView) findViewById(android.R.id.list);
@@ -145,19 +130,64 @@ public final class SelectPrinterActivity extends Activity {
                 }
 
                 PrinterInfo printer = (PrinterInfo) mListView.getAdapter().getItem(position);
-                onPrinterSelected(printer.getId());
+
+                if (printer == null) {
+                    startAddPrinterActivity();
+                } else {
+                    onPrinterSelected(printer.getId());
+                }
+            }
+        });
+
+        findViewById(R.id.button).setOnClickListener(new OnClickListener() {
+            @Override public void onClick(View v) {
+                startAddPrinterActivity();
             }
         });
 
         registerForContextMenu(mListView);
 
-        // Display a notification about disabled services if there are disabled services
-        String disabledServicesSetting = Settings.Secure.getString(getContentResolver(),
-                Settings.Secure.DISABLED_PRINT_SERVICES);
-        if (!TextUtils.isEmpty(disabledServicesSetting)) {
-            Toast.makeText(this, getString(R.string.print_services_disabled_toast),
-                    Toast.LENGTH_LONG).show();
+        getLoaderManager().initLoader(LOADER_ID_ENABLED_PRINT_SERVICES, null, this);
+
+        // On first creation:
+        //
+        // If no services are installed, instantly open add printer dialog.
+        // If some are disabled and some are enabled show a toast to notify the user
+        if (savedInstanceState == null || !savedInstanceState.getBoolean(KEY_NOT_FIRST_CREATE)) {
+            List<PrintServiceInfo> allServices =
+                    ((PrintManager) getSystemService(Context.PRINT_SERVICE))
+                            .getPrintServices(PrintManager.ALL_SERVICES);
+            boolean hasEnabledServices = false;
+            boolean hasDisabledServices = false;
+
+            if (allServices != null) {
+                final int numServices = allServices.size();
+                for (int i = 0; i < numServices; i++) {
+                    if (allServices.get(i).isEnabled()) {
+                        hasEnabledServices = true;
+                    } else {
+                        hasDisabledServices = true;
+                    }
+                }
+            }
+
+            if (!hasEnabledServices) {
+                startAddPrinterActivity();
+            } else if (hasDisabledServices) {
+                String disabledServicesSetting = Settings.Secure.getString(getContentResolver(),
+                        Settings.Secure.DISABLED_PRINT_SERVICES);
+                if (!TextUtils.isEmpty(disabledServicesSetting)) {
+                    Toast.makeText(this, getString(R.string.print_services_disabled_toast),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_NOT_FIRST_CREATE, true);
     }
 
     @Override
@@ -249,60 +279,13 @@ public final class SelectPrinterActivity extends Activity {
      * Adjust the UI if the enabled print services changed.
      */
     private synchronized void onPrintServicesUpdate() {
-        updateServicesWithAddPrinterActivity();
         updateEmptyView((DestinationAdapter)mListView.getAdapter());
         invalidateOptionsMenu();
-    }
-
-    /**
-     * Register listener for changes to the enabled print services.
-     */
-    private void registerServiceMonitor() {
-        // Listen for services getting disabled
-        mPrintServicesDisabledObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean selfChange) {
-                onPrintServicesUpdate();
-            }
-        };
-
-        // Listen for services getting installed or uninstalled
-        mPackageObserver = new PackageMonitor() {
-            @Override
-            public void onPackageModified(String packageName) {
-                onPrintServicesUpdate();
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                onPrintServicesUpdate();
-            }
-
-            @Override
-            public void onPackageAdded(String packageName, int uid) {
-                onPrintServicesUpdate();
-            }
-        };
-
-        getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.DISABLED_PRINT_SERVICES), false,
-                mPrintServicesDisabledObserver);
-
-        mPackageObserver.register(this, getMainLooper(), false);
-    }
-
-    /**
-     * Unregister the listeners for changes to the enabled print services.
-     */
-    private void unregisterServiceMonitorIfNeeded() {
-        getContentResolver().unregisterContentObserver(mPrintServicesDisabledObserver);
-        mPackageObserver.unregister();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        registerServiceMonitor();
         onPrintServicesUpdate();
     }
 
@@ -316,17 +299,7 @@ public final class SelectPrinterActivity extends Activity {
 
     @Override
     public void onStop() {
-        unregisterServiceMonitorIfNeeded();
         super.onStop();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_add_printer) {
-            showAddPrinterSelectionDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void onPrinterSelected(PrinterId printerId) {
@@ -334,68 +307,6 @@ public final class SelectPrinterActivity extends Activity {
         intent.putExtra(INTENT_EXTRA_PRINTER_ID, printerId);
         setResult(RESULT_OK, intent);
         finish();
-    }
-
-    private void updateServicesWithAddPrinterActivity() {
-        mHasEnabledPrintServices = true;
-        mAddPrinterServices.clear();
-
-        // Get all enabled print services.
-        PrintManager printManager = (PrintManager) getSystemService(Context.PRINT_SERVICE);
-        List<PrintServiceInfo> enabledServices = printManager.getEnabledPrintServices();
-
-        // No enabled print services - done.
-        if (enabledServices.isEmpty()) {
-            mHasEnabledPrintServices = false;
-            return;
-        }
-
-        // Find the services with valid add printers activities.
-        final int enabledServiceCount = enabledServices.size();
-        for (int i = 0; i < enabledServiceCount; i++) {
-            PrintServiceInfo enabledService = enabledServices.get(i);
-
-            // No add printers activity declared - next.
-            if (TextUtils.isEmpty(enabledService.getAddPrintersActivityName())) {
-                continue;
-            }
-
-            ServiceInfo serviceInfo = enabledService.getResolveInfo().serviceInfo;
-            ComponentName addPrintersComponentName = new ComponentName(
-                    serviceInfo.packageName, enabledService.getAddPrintersActivityName());
-            Intent addPritnersIntent = new Intent()
-                .setComponent(addPrintersComponentName);
-
-            // The add printers activity is valid - add it.
-            PackageManager pm = getPackageManager();
-            List<ResolveInfo> resolvedActivities = pm.queryIntentActivities(addPritnersIntent, 0);
-            if (!resolvedActivities.isEmpty()) {
-                // The activity is a component name, therefore it is one or none.
-                ActivityInfo activityInfo = resolvedActivities.get(0).activityInfo;
-                if (activityInfo.exported
-                        && (activityInfo.permission == null
-                                || pm.checkPermission(activityInfo.permission, getPackageName())
-                                        == PackageManager.PERMISSION_GRANTED)) {
-                    mAddPrinterServices.add(enabledService);
-                }
-            }
-        }
-    }
-
-    private void showAddPrinterSelectionDialog() {
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
-        Fragment oldFragment = getFragmentManager().findFragmentByTag(
-                FRAGMENT_TAG_ADD_PRINTER_DIALOG);
-        if (oldFragment != null) {
-            transaction.remove(oldFragment);
-        }
-        AddPrinterAlertDialogFragment newFragment = new AddPrinterAlertDialogFragment();
-        Bundle arguments = new Bundle();
-        arguments.putParcelableArrayList(FRAGMENT_ARGUMENT_PRINT_SERVICE_INFOS,
-                mAddPrinterServices);
-        newFragment.setArguments(arguments);
-        transaction.add(newFragment, FRAGMENT_TAG_ADD_PRINTER_DIALOG);
-        transaction.commit();
     }
 
     public void updateEmptyView(DestinationAdapter adapter) {
@@ -426,71 +337,28 @@ public final class SelectPrinterActivity extends Activity {
         }
     }
 
-    public static class AddPrinterAlertDialogFragment extends DialogFragment {
+    @Override
+    public Loader<List<PrintServiceInfo>> onCreateLoader(int id, Bundle args) {
+        return new PrintServicesLoader((PrintManager) getSystemService(Context.PRINT_SERVICE), this,
+                PrintManager.ENABLED_SERVICES);
+    }
 
-        private String mAddPrintServiceItem;
+    @Override
+    public void onLoadFinished(Loader<List<PrintServiceInfo>> loader,
+            List<PrintServiceInfo> data) {
+        if (data == null || data.isEmpty()) {
+            mHasEnabledPrintServices = false;
+        } else {
+            mHasEnabledPrintServices = true;
+        }
 
-        @Override
-        @SuppressWarnings("unchecked")
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                    .setTitle(R.string.choose_print_service);
+        onPrintServicesUpdate();
+    }
 
-            final List<PrintServiceInfo> printServices = (List<PrintServiceInfo>) (List<?>)
-                    getArguments().getParcelableArrayList(FRAGMENT_ARGUMENT_PRINT_SERVICE_INFOS);
-
-            final ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                    getActivity(), android.R.layout.simple_list_item_1);
-            final int printServiceCount = printServices.size();
-            for (int i = 0; i < printServiceCount; i++) {
-                PrintServiceInfo printService = printServices.get(i);
-                adapter.add(printService.getResolveInfo().loadLabel(
-                        getActivity().getPackageManager()).toString());
-            }
-
-            final String searchUri = Settings.Secure.getString(getActivity().getContentResolver(),
-                    Settings.Secure.PRINT_SERVICE_SEARCH_URI);
-            final Intent viewIntent;
-            if (!TextUtils.isEmpty(searchUri)) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(searchUri));
-                if (getActivity().getPackageManager().resolveActivity(intent, 0) != null) {
-                    viewIntent = intent;
-                    mAddPrintServiceItem = getString(R.string.add_print_service_label);
-                    adapter.add(mAddPrintServiceItem);
-                } else {
-                    viewIntent = null;
-                }
-            } else {
-                viewIntent = null;
-            }
-
-            builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    String item = adapter.getItem(which);
-                    if (item.equals(mAddPrintServiceItem)) {
-                        try {
-                            startActivity(viewIntent);
-                        } catch (ActivityNotFoundException anfe) {
-                            Log.w(LOG_TAG, "Couldn't start add printer activity", anfe);
-                        }
-                    } else {
-                        PrintServiceInfo printService = printServices.get(which);
-                        ComponentName componentName = new ComponentName(
-                                printService.getResolveInfo().serviceInfo.packageName,
-                                printService.getAddPrintersActivityName());
-                        Intent intent = new Intent(Intent.ACTION_MAIN);
-                        intent.setComponent(componentName);
-                        try {
-                            startActivity(intent);
-                        } catch (ActivityNotFoundException anfe) {
-                            Log.w(LOG_TAG, "Couldn't start add printer activity", anfe);
-                        }
-                    }
-                }
-            });
-
-            return builder.create();
+    @Override
+    public void onLoaderReset(Loader<List<PrintServiceInfo>> loader) {
+        if (!isFinishing()) {
+            onLoadFinished(loader, null);
         }
     }
 
@@ -592,14 +460,40 @@ public final class SelectPrinterActivity extends Activity {
         @Override
         public int getCount() {
             synchronized (mLock) {
-                return mFilteredPrinters.size();
+                if (mFilteredPrinters.isEmpty()) {
+                    return 0;
+                } else {
+                    // Add "add printer" item to the end of the list. If the list is empty there is
+                    // a link on the empty view
+                    return mFilteredPrinters.size() + 1;
+                }
+            }
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            // Use separate view types for the "add printer" item an the items referring to printers
+            if (getItem(position) == null) {
+                return 0;
+            } else {
+                return 1;
             }
         }
 
         @Override
         public Object getItem(int position) {
             synchronized (mLock) {
-                return mFilteredPrinters.get(position);
+                if (position < mFilteredPrinters.size()) {
+                    return mFilteredPrinters.get(position);
+                } else {
+                    // Return null to mark this as the "add printer item"
+                    return null;
+                }
             }
         }
 
@@ -615,6 +509,18 @@ public final class SelectPrinterActivity extends Activity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            final PrinterInfo printer = (PrinterInfo) getItem(position);
+
+            // Handle "add printer item"
+            if (printer == null) {
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(R.layout.add_printer_list_item,
+                            parent, false);
+                }
+
+                return convertView;
+            }
+
             if (convertView == null) {
                 convertView = getLayoutInflater().inflate(
                         R.layout.printer_list_item, parent, false);
@@ -622,7 +528,6 @@ public final class SelectPrinterActivity extends Activity {
 
             convertView.setEnabled(isActionable(position));
 
-            final PrinterInfo printer = (PrinterInfo) getItem(position);
 
             CharSequence title = printer.getName();
             Drawable icon = printer.loadIcon(SelectPrinterActivity.this);
@@ -661,7 +566,7 @@ public final class SelectPrinterActivity extends Activity {
                 subtitleView.setVisibility(View.GONE);
             }
 
-            ImageView moreInfoView = (ImageView) convertView.findViewById(R.id.more_info);
+            LinearLayout moreInfoView = (LinearLayout) convertView.findViewById(R.id.more_info);
             if (printer.getInfoIntent() != null) {
                 moreInfoView.setVisibility(View.VISIBLE);
                 moreInfoView.setOnClickListener(new OnClickListener() {
@@ -699,7 +604,12 @@ public final class SelectPrinterActivity extends Activity {
 
         public boolean isActionable(int position) {
             PrinterInfo printer =  (PrinterInfo) getItem(position);
-            return printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE;
+
+            if (printer == null) {
+                return true;
+            } else {
+                return printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE;
+            }
         }
     }
 
