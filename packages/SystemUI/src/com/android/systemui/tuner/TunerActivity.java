@@ -45,6 +45,13 @@ public class TunerActivity extends SettingsDrawerActivity implements
     }
 
     @Override
+    public void onBackPressed() {
+        if (!getFragmentManager().popBackStackImmediate()) {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public boolean onPreferenceStartFragment(PreferenceFragment caller, Preference pref) {
         try {
             Class<?> cls = Class.forName(pref.getFragment());

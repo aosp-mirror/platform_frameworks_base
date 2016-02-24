@@ -91,6 +91,7 @@
 
     <declare-styleable name="TunerSwitch">
         <attr name="defValue" format="boolean" />
+        <attr name="metricsAction" format="integer" />
     </declare-styleable>
 </resources>
 

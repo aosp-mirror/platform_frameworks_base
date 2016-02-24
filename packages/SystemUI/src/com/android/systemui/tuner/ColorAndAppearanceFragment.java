@@ -28,6 +28,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SeekBar;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.NightModeController;
 
@@ -54,12 +56,19 @@ public class ColorAndAppearanceFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER_COLOR_AND_APPEARANCE, true);
         // TODO: Figure out better title model for Tuner, to avoid any more of this.
         getActivity().setTitle(R.string.color_and_appearance);
 
         Preference nightMode = findPreference(KEY_NIGHT_MODE);
         nightMode.setSummary(mNightModeController.isEnabled()
                 ? R.string.night_mode_on : R.string.night_mode_off);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER_COLOR_AND_APPEARANCE, false);
     }
 
     @Override
@@ -76,6 +85,7 @@ public class ColorAndAppearanceFragment extends PreferenceFragment {
     }
 
     private void onApply() {
+        MetricsLogger.action(getContext(), MetricsEvent.ACTION_TUNER_CALIBRATE_DISPLAY_CHANGED);
         mNightModeController.setCustomValues(Settings.Secure.getString(
                 getContext().getContentResolver(), Secure.ACCESSIBILITY_DISPLAY_COLOR_MATRIX));
         getView().removeCallbacks(mResetColorMatrix);
@@ -125,12 +135,19 @@ public class ColorAndAppearanceFragment extends PreferenceFragment {
             bindView(v.findViewById(R.id.r_group), 0);
             bindView(v.findViewById(R.id.g_group), 5);
             bindView(v.findViewById(R.id.b_group), 10);
+            MetricsLogger.visible(getContext(), MetricsEvent.TUNER_CALIBRATE_DISPLAY);
             return new AlertDialog.Builder(getContext())
                     .setTitle(R.string.calibrate_display)
                     .setView(v)
                     .setPositiveButton(R.string.color_apply, this)
                     .setNegativeButton(android.R.string.cancel, null)
                     .create();
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            super.onDismiss(dialog);
+            MetricsLogger.hidden(getContext(), MetricsEvent.TUNER_CALIBRATE_DISPLAY);
         }
 
         private void bindView(View view, final int index) {
