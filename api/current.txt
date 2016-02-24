@@ -23514,6 +23514,17 @@ package android.net {
     method public abstract void onNetworkActive();
   }
 
+  public class ConnectivityMetricsEvent implements android.os.Parcelable {
+    ctor public ConnectivityMetricsEvent(long, int, int, android.os.Parcelable);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.net.ConnectivityMetricsEvent> CREATOR;
+    field public final int componentTag;
+    field public final android.os.Parcelable data;
+    field public final int eventTag;
+    field public final long timestamp;
+  }
+
   public class Credentials {
     ctor public Credentials(int, int, int);
     method public int getGid();
