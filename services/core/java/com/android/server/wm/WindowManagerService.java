@@ -3741,7 +3741,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         for (final WindowState win : mWindowMap.values()) {
             final Task task = win.getTask();
-            if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1) {
+            if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1
+                    && task.inFreeformWorkspace()) {
                 final AppWindowToken appToken = win.mAppToken;
                 if (appToken != null && appToken.mAppAnimator != null) {
                     appToken.mAppAnimator.startProlongAnimation(scaleUp ?
