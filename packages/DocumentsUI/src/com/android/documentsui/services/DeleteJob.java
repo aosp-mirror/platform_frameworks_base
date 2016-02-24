@@ -84,7 +84,7 @@ final class DeleteJob extends Job {
         for (DocumentInfo doc : mSrcs) {
             if (DEBUG) Log.d(TAG, "Deleting document @ " + doc.derivedUri);
             try {
-                deleteDocument(doc);
+                deleteDocument(doc, mSrcParent);
             } catch (ResourceException e) {
                 Log.e(TAG, "Failed to delete document @ " + doc.derivedUri);
                 onFileFailed(doc);

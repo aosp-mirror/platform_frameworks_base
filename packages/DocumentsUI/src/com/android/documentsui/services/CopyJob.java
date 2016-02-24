@@ -376,7 +376,7 @@ class CopyJob extends Job {
         if (Document.MIME_TYPE_DIR.equals(src.mimeType)) {
             copyDirectoryHelper(src, dstInfo);
         } else {
-            copyFileHelper(src, dstInfo, dstMimeType);
+            copyFileHelper(src, dstInfo, dest, dstMimeType);
         }
     }
 
@@ -439,13 +439,14 @@ class CopyJob extends Job {
     /**
      * Handles copying a single file.
      *
-     * @param srcUriInfo Info of the file to copy from.
-     * @param dstUriInfo Info of the *file* to copy to. Must be created beforehand.
+     * @param src Info of the file to copy from.
+     * @param dest Info of the *file* to copy to. Must be created beforehand.
+     * @param destParent Info of the parent of the destination.
      * @param mimeType Mime type for the target. Can be different than source for virtual files.
      * @throws ResourceException
      */
-    private void copyFileHelper(DocumentInfo src, DocumentInfo dest, String mimeType)
-            throws ResourceException {
+    private void copyFileHelper(DocumentInfo src, DocumentInfo dest, DocumentInfo destParent,
+            String mimeType) throws ResourceException {
         CancellationSignal canceller = new CancellationSignal();
         AssetFileDescriptor srcFileAsAsset = null;
         ParcelFileDescriptor srcFile = null;
@@ -527,8 +528,8 @@ class CopyJob extends Job {
                 if (DEBUG) Log.d(TAG, "Cleaning up failed operation leftovers.");
                 canceller.cancel();
                 try {
-                    DocumentsContract.deleteDocument(getClient(dest), dest.derivedUri);
-                } catch (RemoteException | RuntimeException e) {
+                    deleteDocument(dest, destParent);
+                } catch (ResourceException e) {
                     Log.w(TAG, "Failed to cleanup after copy error: " + src.derivedUri, e);
                 }
             }

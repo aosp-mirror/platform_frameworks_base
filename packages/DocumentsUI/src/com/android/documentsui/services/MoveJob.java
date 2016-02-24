@@ -115,6 +115,9 @@ final class MoveJob extends CopyJob {
 
         // If we couldn't do an optimized copy...we fall back to vanilla byte copy.
         byteCopyDocument(src, dest);
+
+        // Remove the source document.
+        deleteDocument(src, srcParent);
     }
 
     @Override
