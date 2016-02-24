@@ -1,0 +1,83 @@
+page.title=SayHi Chat grows installs and user engagement with App Translation Service
+page.metaDescription=The SayHi team used details from Google Analytics, the DAU and user growth numbers, to identify several candidate languages for new translations.
+page.tags="developerstory", "apps", "googleplay"
+page.image=images/cards/distribute/stories/sayhichat.jpg
+page.timestamp=1454440882
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/sayhichat-icon.png"
+  height="113" />
+</div>
+
+<p>
+  The <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.unearby.sayhi">
+  SayHi Chat app</a>, a social app to help its users find people nearby, was
+  first released in Japanese, Chinese, and English. It soon became one of the
+  most popular apps in Japan, Hong Kong, and Taiwan.
+</p>
+
+
+<h3>What they did</h3>
+
+<p>
+  The SayHi team realized that the global growth of SayHi was being restricted
+  by the limited number of languages in which the app was available. Using
+  details from Google Analytics, the DAU and user growth numbers, the SayHi team
+  identified several candidate languages for new translations. After looking at
+  the total of Android and iOS users in each market, they settled on a list of
+  13 additional languages. They then engaged the App Translation Service through
+  the Google Play Developer Console to complete the translations.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:194px">
+  <img width="194"
+   src="{@docRoot}images/distribute/stories/sayhichat-screenshot.jpg"
+   srcset=
+  "{@docRoot}images/distribute/stories/sayhichat-screenshot.jpg 1x
+  {@docRoot}images/distribute/stories/sayhichat-screenshot_2x.jpg 2x">
+  <p class="img-caption">
+    Arabic version of SayHi Chat
+  </p>
+</div>
+
+<p>
+  SayHi launched in its new languages in August 2013 and immediately saw a 120
+  percent increase in install rates. In addition, the app entered the Top 10
+  apps rankings in countries including Poland and Italy.
+</p>
+
+<p>
+  Notably, they also saw steady growth in Spain after replacing their previous
+  non-professional Spanish translation with a professional one produced by the
+  App Translation Service.
+</p>
+
+<p>
+  There was also an increase of about 20 percent in revenue and around a 50
+  percent increase in User Reviews in the new languages.
+</p>
+
+<p>
+  Yan Shi, senior developer at SayHi, says “The App Translation Service is
+  really easy to use and the completion time for translation requests is very
+  good.”
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out more about the
+  <a href="http://developer.android.com/distribute/tools/localization-checklist.html#gp-trans">
+  App Translation Service</a> and read the full
+  <a href="https://developer.android.com/distribute/tools/localization-checklist.html">
+  Localization checklist</a> to simplify the process of localizing your app or
+  game for users across the globe.
+</p>

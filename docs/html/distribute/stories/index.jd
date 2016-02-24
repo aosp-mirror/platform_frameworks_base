@@ -1,6 +1,4 @@
 page.title=Developer Stories
-section.landing=true
-nonavpage=true
 excludeFromSuggestions=true
 page.metaDescription=Android developers, their apps, and their successes with Android and Google Play.
 
@@ -26,7 +24,7 @@ page.metaDescription=Android developers, their apps, and their successes with An
       data-sortOrder="-timestamp"
       data-cardSizes="6x6"
       data-items-per-page="15"
-      data-initial-results="6"></div>
+      data-initial-results="9"></div>
 </div></section>
 
 <section class="dac-section dac-small" id="latest-games"><div class="wrap">
@@ -37,5 +35,5 @@ page.metaDescription=Android developers, their apps, and their successes with An
       data-sortOrder="-timestamp"
       data-cardSizes="6x6"
       data-items-per-page="15"
-      data-initial-results="6"></div>
+      data-initial-results="9"></div>
 </div></section>

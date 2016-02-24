@@ -1,0 +1,90 @@
+page.title=Hothead Games grows retention and revenues with leaderboards and achievements
+page.metaDescription=Following their experience with Google Play games services in Rivals at War: Firefight, Hothead Games includes its features in all their games.
+page.tags="developerstory", "games", "googleplay"
+page.image=images/cards/distribute/stories/hotheadgames-firefight.jpg
+page.timestamp=1454440882
+
+@jd:body
+
+
+<h3>Background</h3>
+
+<div class="figure" style="width:113px">
+  <img src="{@docRoot}images/distribute/stories/hotheadgames-firefight-icon.png"
+  height="113" />
+</div>
+
+<p>
+  Hothead Games was founded in 2006 and took the plunge into mobile games in
+  2011. This move has proved very successful, allowing the company to continue
+  growing into 2016 by creating and publishing great games exclusively for
+  mobile users.
+</p>
+
+<p>
+  Following their experience with Google Play games services in
+  <a class="external-link"
+  href="https://play.google.com/store/apps/details?id=com.hotheadgames.google.free.valorcmd">
+  Rivals at War: Firefight</a> they plan to include its features in all their
+  games.
+</p>
+
+<h3>What they did</h3>
+
+<p>
+  To start, the Google Play games services sign-in icon was given a prominent
+  position on the home screen so it was clear and easily accessible. They then
+  added leaderboards with their own beautifully designed badges as well as
+  achievements. Both were aligned and displayed with related in-game missions
+  showing players their progress and rewards earned. Notifications were used to
+  give players instant gratification when achievements were unlocked.
+</p>
+
+<h3>Results</h3>
+
+<div class="figure" style="width:379px">
+  <img
+   src="{@docRoot}images/distribute/stories/hotheadgames-firefight-screenshot.png"
+   srcset=
+  "{@docRoot}images/distribute/stories/hotheadgames-firefight-screenshot.png 1x
+  {@docRoot}images/distribute/stories/hotheadgames-firefight-screenshot_2x.png 2x">
+  <p class="img-caption">
+    Beautifully designed and specialized leaderboards
+  </p>
+</div>
+
+<p>
+  Hothead games found that retention, average revenue per daily active user
+  (ARPDAU), and average revenue per user (ARPU) positively correlated with
+  Google Play games sign-ins. The metrics for users signed-in with Google Play
+  games services include:
+  <ul>
+    <li>Day one retention <b>125 percent higher</b> and day seven retention
+    <b>182 percent higher</b>.</li>
+    <li>ARPDAU <b>134 percent higher</b>.</li>
+    <li>ARPU <b>900 percent higher</b>.</li>
+  </ul>
+</p>
+
+<p>
+  See examples of how Hothead Games integrated Google Play games services
+  leaderboards and achievements into the
+  <a class="external-link"
+  href="{@docRoot}shareables/stories/HotheadGames_RivalsatWar_gpgs.pdf">
+  UI of Rivals at War: Firefight</a>.
+</p>
+
+<h3>Get started</h3>
+
+<p>
+  Find out how to add
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/leaderboards">
+  leaderboards</a> and
+  <a class="external-link"
+  href="https://developers.google.com/games/services/common/concepts/achievements">
+  achievements</a> to your games and discover more about
+  <a href="https://developer.android.com/distribute/engage/game-services.html">
+  using Google Play games services</a> in your games to increase player
+  engagement and revenues.
+</p>
