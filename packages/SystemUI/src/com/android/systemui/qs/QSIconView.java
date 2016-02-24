@@ -70,11 +70,13 @@ public class QSIconView extends ViewGroup {
     protected void setIcon(ImageView iv, QSTile.State state) {
         if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
             Drawable d = state.icon != null ? state.icon.getDrawable(mContext) : null;
+            int padding = state.icon != null ? state.icon.getPadding() : null;
             if (d != null && state.autoMirrorDrawable) {
                 d.setAutoMirrored(true);
             }
             iv.setImageDrawable(d);
             iv.setTag(R.id.qs_icon_tag, state.icon);
+            iv.setPadding(0, padding, 0, padding);
             if (d instanceof Animatable) {
                 Animatable a = (Animatable) d;
                 a.start();

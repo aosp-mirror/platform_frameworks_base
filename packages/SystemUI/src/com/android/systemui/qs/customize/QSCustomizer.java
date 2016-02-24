@@ -22,12 +22,15 @@ import android.content.Context;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
+import android.widget.Toolbar;
+import android.widget.Toolbar.OnMenuItemClickListener;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTile;
@@ -43,7 +46,9 @@ import java.util.List;
  * This adds itself to the status bar window, so it can appear on top of quick settings and
  * *someday* do fancy animations to get into/out of it.
  */
-public class QSCustomizer extends LinearLayout implements OnClickListener {
+public class QSCustomizer extends LinearLayout implements OnMenuItemClickListener {
+
+    private static final int MENU_RESET = Menu.FIRST;
 
     private final QSDetailClipper mClipper;
 
@@ -53,9 +58,7 @@ public class QSCustomizer extends LinearLayout implements OnClickListener {
     private QSTileHost mHost;
     private RecyclerView mRecyclerView;
     private TileAdapter mTileAdapter;
-    private View mClose;
-    private View mSave;
-    private View mReset;
+    private Toolbar mToolbar;
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, android.R.style.Theme_Material), attrs);
@@ -70,17 +73,26 @@ public class QSCustomizer extends LinearLayout implements OnClickListener {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mClose = findViewById(R.id.close);
-        mSave = findViewById(R.id.save);
-        mReset = findViewById(R.id.reset);
-        mClose.setOnClickListener(this);
-        mSave.setOnClickListener(this);
-        mReset.setOnClickListener(this);
+        mToolbar = (Toolbar) findViewById(com.android.internal.R.id.action_bar);
+        TypedValue value = new TypedValue();
+        mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
+        mToolbar.setNavigationIcon(
+                getResources().getDrawable(R.drawable.ic_close_white, mContext.getTheme()));
+        mToolbar.setNavigationOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                save();
+                hide((int) v.getX() + v.getWidth() / 2, (int) v.getY() + v.getHeight() / 2);
+            }
+        });
+        mToolbar.setOnMenuItemClickListener(this);
+        mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
+                mContext.getString(com.android.internal.R.string.reset));
 
         mRecyclerView = (RecyclerView) findViewById(android.R.id.list);
         mTileAdapter = new TileAdapter(getContext());
         mRecyclerView.setAdapter(mTileAdapter);
-        new ItemTouchHelper(mTileAdapter.getCallback()).attachToRecyclerView(mRecyclerView);
+        mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
         GridLayoutManager layout = new GridLayoutManager(getContext(), 3);
         layout.setSpanSizeLookup(mTileAdapter.getSizeLookup());
         mRecyclerView.setLayoutManager(layout);
@@ -111,6 +123,16 @@ public class QSCustomizer extends LinearLayout implements OnClickListener {
         return isShown;
     }
 
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_RESET:
+                reset();
+                break;
+        }
+        return false;
+    }
+
     private void reset() {
         ArrayList<String> tiles = new ArrayList<>();
         String defTiles = mContext.getString(R.string.quick_settings_tiles_default);
@@ -130,19 +152,6 @@ public class QSCustomizer extends LinearLayout implements OnClickListener {
 
     private void save() {
         mTileAdapter.saveSpecs(mHost);
-        hide((int) mSave.getX() + mSave.getWidth() / 2, (int) mSave.getY() + mSave.getHeight() / 2);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (v == mClose) {
-            hide((int) mClose.getX() + mClose.getWidth() / 2,
-                    (int) mClose.getY() + mClose.getHeight() / 2);
-        } else if (v == mSave) {
-            save();
-        } else if (v == mReset) {
-            reset();
-        }
     }
 
     private final AnimatorListener mCollapseAnimationListener = new AnimatorListenerAdapter() {
