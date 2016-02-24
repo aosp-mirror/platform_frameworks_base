@@ -101,6 +101,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"פלט טקסט לדיבור"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"קצב דיבור"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"המהירות שבה הטקסט נאמר"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"גובה צליל"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"משפיע על הטון של הדיבור המסונתז"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"שפה"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"שימוש בשפת המערכת"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"לא נבחרה שפה"</string>
@@ -272,11 +274,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"אפליקציה פעילה. הקש כדי להחליף מצב."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"שירותים פועלים"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"הצג ושלוט בשירותים הפועלים כעת"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"מצב לילה"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"מושבת"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"פועל תמיד"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"באופן אוטומטי"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"הפעל תצוגת אתר לריבוי עיבודים"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"הרץ מעבדי תצוגת אתר בהליך מבודד"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏יישום WebView"</string>

@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"पाठ-बाट-वाणी उत्पादन"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"वाणी दर"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"पाठ वाचन हुने गति"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"पिच"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"भाषा"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"प्रणाली भाषा प्रयोग गर्नुहोस्"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"भाषा चयन गरिएको छैन"</string>
@@ -248,7 +251,7 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यमा बल प्रयोगको अनुमति प्राप्त अनुप्रयोगहरू"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"म्यानिफेेस्टको उपेक्षा गरी, कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न योग्य बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"गतिविधिहरू रिसाइज गर्नको लागि बाध्य गर्नुहोस्"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउँछ।"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउनुहोस्।"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"फ्रिफर्म विन्डोहरू सक्रिय गर्नुहोस्"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"प्रयोगात्मक फ्रिफर्म विन्डोहरूका लागि समर्थन सक्रिय गर्नुहोस्।"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"डेस्कटप ब्याकअप पासवर्ड"</string>
@@ -272,11 +275,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"रात्री मोड"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"असक्षम गरियो"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"सधैं खुल्‍ला"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"स्वचालित"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"मल्टिप्रोसेस वेबभ्यु सक्षम गर्नुहोस्"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"एउटा पृथक प्रक्रियामा वेबभ्यु रेन्डररहरू चलाउनुहोस्।"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>

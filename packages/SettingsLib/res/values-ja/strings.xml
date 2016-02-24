@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの出力"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"音声の速度"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"テキストの読み上げ速度"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"音の高さ"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"言語"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"システムの言語を使用"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"言語が選択されていません"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"有効です。タップすると切り替わります。"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"実行中のサービス"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"現在実行中のサービスを表示して制御する"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"夜間モード"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"無効"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"常にON"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"自動"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"複数プロセス WebView を有効化"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"別個のプロセスで WebView レンダラを実行します。"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView の実装"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView の実装の設定"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"選択した WebView の実装は無効になっていますが、使用するには有効にする必要があります。有効にしますか？"</string>
@@ -317,8 +313,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for battery_info_status_full (2824614753861462808) -->
     <skip />
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"管理者により管理されています"</string>
     <string name="home" msgid="8263346537524314127">"ホーム"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"あと <xliff:g id="ID_1">%1$s</xliff:g>"</string>

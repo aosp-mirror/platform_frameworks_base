@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"टेक्स्ट-टू-स्पीच आउटपुट"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"बोलण्याचा रेट"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ज्या गतीने मजकूर बोलला जातो ती"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"पिच"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"भाषा"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"सिस्टम भाषा वापरा"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"भाषा निवडलेली नाही"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"सक्रिय. टॉगल करण्यासाठी टॅप करा."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"चालू सेवा"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"सध्या चालत असलेल्या सेवा पहा आणि नियंत्रित करा"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"रात्र मोड"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"अक्षम केले"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"नेहमी चालू"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"स्वयंचलित"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"एकाधिक प्रक्रिया WebView सक्षम करा"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"एक वेगळ्या प्रक्रियेत वेब दृश्य प्रस्तुतकर्ते चालवा."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"वेबदृश्य अंमलबजावणी"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"वेबदृश्य अंमलबजावणी सेट करा"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"निवडलेली WebView अंमलबजावणी अक्षम आहे आणि वापरण्यास सक्षम असणे आवश्यक आहे, आपण ती सक्षम करू इच्छिता?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज होत नाही"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"चार्ज होत नाही"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूर्ण"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"प्रशासकाने नियंत्रित केलेले"</string>
     <string name="home" msgid="8263346537524314127">"मुख्यपृष्ठ"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> पूर्वी"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> शिल्लक"</string>

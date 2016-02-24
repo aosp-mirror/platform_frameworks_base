@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"إخراج تحويل النص إلى كلام"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"معدل سرعة الكلام"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"سرعة نطق الكلام"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"درجة الصوت"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"اللغة"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"استخدام لغة النظام"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"اللغة غير محددة"</string>
@@ -272,11 +275,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"نشط، انقر للتبديل."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"الخدمات قيد التشغيل"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"عرض الخدمات قيد التشغيل في الوقت الحالي والتحكم فيها"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"الوضع الليلي"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"معطَّل"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"التشغيل دائمًا"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"تلقائيًا"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"تمكين عرض ويب متعدد العمليات"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"تشغيل أجهزة عرض الويب في عملية منفصلة."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏تطبيق WebView"</string>

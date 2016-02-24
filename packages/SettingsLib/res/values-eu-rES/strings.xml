@@ -99,8 +99,11 @@
     <string name="launch_defaults_none" msgid="4241129108140034876">"Ez dago hobespen lehenetsirik ezarrita"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Testua ahots bihurtzeko eginbidearen ezarpenak"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Testua ahots bihurtzeko eginbidearen irteera"</string>
-    <string name="tts_default_rate_title" msgid="6030550998379310088">"Hizketa-abiadura"</string>
+    <string name="tts_default_rate_title" msgid="6030550998379310088">"Hizketaren abiadura"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Testua zer abiaduran esaten den"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tonua"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Hizkuntza"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Erabili sistemaren hizkuntza"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Ez da hizkuntza hautatu"</string>
@@ -226,7 +229,7 @@
     <string name="debug_layout" msgid="5981361776594526155">"Erakutsi diseinuaren mugak"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Behartu eskuin-ezker norabidea."</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuinetik ezkerrerakoa izatera eskualdeko ezarpen guztiekin."</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera eskualdeko ezarpen guztiekin."</string>
     <string name="show_cpu_usage" msgid="2389212910758076024">"Erakutsi PUZ erabilera"</string>
     <string name="show_cpu_usage_summary" msgid="2113341923988958266">"PUZ erabilera erakusten duen pantaila-gainjartzea"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Behartu GPU errendatzea"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktibo. Aldatzeko, sakatu hau."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Abian diren zerbitzuak"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Ikusi eta kontrolatu unean abian diren zerbitzuak"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Gau modua"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Desgaituta"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Beti aktibatuta"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Automatikoa"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Gaitu prozesu anitzeko WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Exekutatu WebView errendatzaileak prozesu isolatu batean."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView implementation"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Set WebView implementation"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Desgaituta dago aukeratu den WebView inplementazioa. Erabili nahi izanez gero, gaitu egin behar duzu. Gaitu nahi al duzu?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ez da kargatzen ari"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ez da kargatzen ari"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Beteta"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Administratzaileak kontrolatzen du"</string>
     <string name="home" msgid="8263346537524314127">"Hasierako pantaila"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"Duela <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> guztiz kargatu arte"</string>

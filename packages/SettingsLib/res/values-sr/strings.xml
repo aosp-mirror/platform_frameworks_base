@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Излаз за претварање текста у говор"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Брзина говора"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Брзина изговарања текста"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Ниво"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Језик"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Користи језик система"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Језик није изабран"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Активна. Додирните да бисте је деактивирали."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Покренуте услуге"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Приказ и контрола тренутно покренутих услуга"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Ноћни режим"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Онемогућено"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Увек укључено"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Аутоматски"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Омогући вишепроцесни WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Покрећите WebView приказиваче у оквиру изолованог процеса."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Примена WebView-а"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Подесите примену WebView-а"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Изабрана примена WebView-а је онемогућена, а мора да буде омогућена ради коришћења. Желите ли да је омогућите?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не пуни се"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не пуни се"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Пуно"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Контролише администратор"</string>
     <string name="home" msgid="8263346537524314127">"Почетни"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"Пре <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Још <xliff:g id="ID_1">%1$s</xliff:g>"</string>
