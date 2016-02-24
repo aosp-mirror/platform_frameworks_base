@@ -59,6 +59,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.camera.CameraService;
 import com.android.server.clipboard.ClipboardService;
+import com.android.server.connectivity.MetricsLoggerService;
 import com.android.server.content.ContentService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
@@ -602,6 +603,10 @@ public final class SystemServer {
             } else {
                 mSystemServiceManager.startService(BluetoothService.class);
             }
+
+            traceBeginAndSlog("ConnectivityMetricsLoggerService");
+            mSystemServiceManager.startService(MetricsLoggerService.class);
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
         } catch (RuntimeException e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service", e);
