@@ -24,11 +24,11 @@ public class ResourceException extends Exception {
     }
 
     public ResourceException(String message, Uri uri1, Exception e) {
-        super(message.format(uri1.toString()), e);
+        super(String.format(message, uri1.toString()), e);
     }
 
     public ResourceException(String message, Uri uri1, Uri uri2, Exception e) {
-        super(message.format(uri1.toString(), uri2.toString()), e);
+        super(String.format(message, uri1.toString(), uri2.toString()), e);
     }
 
     public ResourceException(String message) {
@@ -36,7 +36,7 @@ public class ResourceException extends Exception {
     }
 
     public ResourceException(String message, Uri uri1) {
-        super(message.format(uri1.toString()));
+        super(String.format(message, uri1.toString()));
     }
 
     public ResourceException(String message, Uri uri1, Uri uri2) {
