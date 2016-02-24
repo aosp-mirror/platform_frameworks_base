@@ -592,10 +592,11 @@ public final class MediaController {
         }
 
         /**
-         * Request that the player prepare its playback. Once the preparation is done, the session
-         * will change its playback state to {@link PlaybackState#STATE_PAUSED}. Afterwards,
-         * {@link #play} can be called to start playback. If the preparation is not needed,
-         * {@link #play} can be directly called without this method.
+         * Request that the player prepare its playback. In other words, other sessions can continue
+         * to play during the preparation of this session. This method can be used to speed up the
+         * start of the playback. Once the preparation is done, the session will change its playback
+         * state to {@link PlaybackState#STATE_PAUSED}. Afterwards, {@link #play} can be called to
+         * start playback.
          */
         public void prepare() {
             try {
@@ -606,10 +607,12 @@ public final class MediaController {
         }
 
         /**
-         * Request that the player prepare playback for a specific media id. Once the preparation is
-         * done, the session will change its playback state to {@link PlaybackState#STATE_PAUSED}.
-         * Afterwards, {@link #play} can be called to start playback. If the preparation is not
-         * needed, {@link #playFromMediaId} can be directly called without this method.
+         * Request that the player prepare playback for a specific media id. In other words, other
+         * sessions can continue to play during the preparation of this session. This method can be
+         * used to speed up the start of the playback. Once the preparation is done, the session
+         * will change its playback state to {@link PlaybackState#STATE_PAUSED}. Afterwards,
+         * {@link #play} can be called to start playback. If the preparation is not needed,
+         * {@link #playFromMediaId} can be directly called without this method.
          *
          * @param mediaId The id of the requested media.
          * @param extras Optional extras that can include extra information about the media item
@@ -628,12 +631,13 @@ public final class MediaController {
         }
 
         /**
-         * Request that the player prepare playback for a specific search query.
-         * An empty or null query should be treated as a request to prepare any
-         * music. Once the preparation is done, the session will change its playback state to
-         * {@link PlaybackState#STATE_PAUSED}. Afterwards, {@link #play} can be called to start
-         * playback. If the preparation is not needed, {@link #playFromSearch} can be directly
-         * called without this method.
+         * Request that the player prepare playback for a specific search query. An empty or null
+         * query should be treated as a request to prepare any music. In other words, other sessions
+         * can continue to play during the preparation of this session. This method can be used to
+         * speed up the start of the playback. Once the preparation is done, the session will
+         * change its playback state to {@link PlaybackState#STATE_PAUSED}. Afterwards,
+         * {@link #play} can be called to start playback. If the preparation is not needed,
+         * {@link #playFromSearch} can be directly called without this method.
          *
          * @param query The search query.
          * @param extras Optional extras that can include extra information
@@ -653,11 +657,12 @@ public final class MediaController {
         }
 
         /**
-         * Request that the player prepare playback for a specific {@link Uri}.
-         * Once the preparation is done, the session will change its playback state to
-         * {@link PlaybackState#STATE_PAUSED}. Afterwards, {@link #play} can be called to start
-         * playback. If the preparation is not needed, {@link #playFromUri} can be directly
-         * called without this method.
+         * Request that the player prepare playback for a specific {@link Uri}. In other words,
+         * other sessions can continue to play during the preparation of this session. This method
+         * can be used to speed up the start of the playback. Once the preparation is done, the
+         * session will change its playback state to {@link PlaybackState#STATE_PAUSED}. Afterwards,
+         * {@link #play} can be called to start playback. If the preparation is not needed,
+         * {@link #playFromUri} can be directly called without this method.
          *
          * @param uri The URI of the requested media.
          * @param extras Optional extras that can include extra information about the media item
