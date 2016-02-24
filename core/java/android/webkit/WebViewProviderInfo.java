@@ -40,11 +40,12 @@ public class WebViewProviderInfo implements Parcelable {
         public WebViewPackageNotFoundException(Exception e) { super(e); }
     }
 
-    public WebViewProviderInfo(String packageName, String description, String availableByDefault,
-            String[] signatures) {
+    public WebViewProviderInfo(String packageName, String description, boolean availableByDefault,
+            boolean isFallback, String[] signatures) {
         this.packageName = packageName;
         this.description = description;
-        this.availableByDefault = availableByDefault.equals("true");
+        this.availableByDefault = availableByDefault;
+        this.isFallback = isFallback;
         this.signatures = signatures;
     }
 
@@ -114,6 +115,10 @@ public class WebViewProviderInfo implements Parcelable {
         return availableByDefault;
     }
 
+    public boolean isFallbackPackage() {
+        return isFallback;
+    }
+
     private void updatePackageInfo() {
         try {
             PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
@@ -165,6 +170,7 @@ public class WebViewProviderInfo implements Parcelable {
     public String packageName;
     public String description;
     private boolean availableByDefault;
+    private boolean isFallback;
 
     private String[] signatures;
 

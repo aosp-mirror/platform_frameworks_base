@@ -21,6 +21,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -134,6 +135,7 @@ public final class WebViewFactory {
     // Whether or not the provider must be explicitly chosen by the user to be used.
     private static String TAG_AVAILABILITY = "availableByDefault";
     private static String TAG_SIGNATURE = "signature";
+    private static String TAG_FALLBACK = "isFallback";
 
     /**
      * Reads all signatures at the current depth (within the current provider) from the XML parser.
@@ -159,6 +161,7 @@ public final class WebViewFactory {
      * @hide
      * */
     public static WebViewProviderInfo[] getWebViewPackages() {
+        int numFallbackPackages = 0;
         XmlResourceParser parser = null;
         List<WebViewProviderInfo> webViewProviders = new ArrayList<WebViewProviderInfo>();
         try {
@@ -182,13 +185,21 @@ public final class WebViewFactory {
                         throw new MissingWebViewPackageException(
                                 "WebView provider in framework resources missing description");
                     }
-                    String availableByDefault = parser.getAttributeValue(null, TAG_AVAILABILITY);
-                    if (availableByDefault == null) {
-                        availableByDefault = "false";
-                    }
-                    webViewProviders.add(
+                    boolean availableByDefault = "true".equals(
+                            parser.getAttributeValue(null, TAG_AVAILABILITY));
+                    boolean isFallback = "true".equals(
+                            parser.getAttributeValue(null, TAG_FALLBACK));
+                    WebViewProviderInfo currentProvider =
                             new WebViewProviderInfo(packageName, description, availableByDefault,
-                                readSignatures(parser)));
+                                isFallback, readSignatures(parser));
+                    if (currentProvider.isFallbackPackage()) {
+                        numFallbackPackages++;
+                        if (numFallbackPackages > 1) {
+                            throw new AndroidRuntimeException(
+                                    "There can be at most one webview fallback package.");
+                        }
+                    }
+                    webViewProviders.add(currentProvider);
                 }
                 else {
                     Log.e(LOGTAG, "Found an element that is not a webview provider");
@@ -639,6 +650,18 @@ public final class WebViewFactory {
             Log.v(LOGTAG, "loaded with relro file");
         }
         return result;
+    }
+
+    /**
+     * Returns whether the entire package from an ACTION_PACKAGE_CHANGED intent was changed (rather
+     * than just one of its components).
+     * @hide
+     */
+    public static boolean entirePackageChanged(Intent intent) {
+        String[] componentList =
+            intent.getStringArrayExtra(Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+        return Arrays.asList(componentList).contains(
+                intent.getDataString().substring("package:".length()));
     }
 
     private static IWebViewUpdateService getUpdateService() {
