@@ -284,9 +284,9 @@ public class FontFamily_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily,
-            ByteBuffer buffer, final List<FontListParser.Axis> axes,
-            final int weight, final boolean isItalic) {
+    /*package*/ static boolean nAddFontWeightStyle(long nativeFamily, ByteBuffer font,
+            int ttcIndex, List<FontListParser.Axis> listOfAxis,
+            int weight, boolean isItalic) {
         assert false : "The only client of this method has been overriden.";
         return false;
     }
