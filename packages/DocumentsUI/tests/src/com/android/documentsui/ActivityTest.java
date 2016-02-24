@@ -32,8 +32,11 @@ import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
 import android.view.MotionEvent;
 
+import com.android.documentsui.BaseActivity;
+import com.android.documentsui.EventListener;
 import com.android.documentsui.bots.DirectoryListBot;
 import com.android.documentsui.bots.KeyboardBot;
 import com.android.documentsui.bots.RootsListBot;
@@ -64,7 +67,6 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
 
     public RootInfo rootDir0;
     public RootInfo rootDir1;
-
     ContentResolver mResolver;
     DocumentsProviderHelper mDocsHelper;
     ContentProviderClient mClient;
@@ -84,6 +86,23 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         return rootDir0;
     }
 
+    /**
+     * Returns the authority of the testing provider begin used.
+     * By default it's StubProvider's authority.
+     * @return Authority of the provider.
+     */
+    protected String getTestingProviderAuthority() {
+        return DEFAULT_AUTHORITY;
+    }
+
+    /**
+     * Resolves testing roots.
+     */
+    protected void setupTestingRoots() throws RemoteException {
+        rootDir0 = mDocsHelper.getRoot(ROOT_0_ID);
+        rootDir1 = mDocsHelper.getRoot(ROOT_1_ID);
+    }
+
     @Override
     public void setUp() throws Exception {
         device = UiDevice.getInstance(getInstrumentation());
@@ -95,11 +114,8 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         Configurator.getInstance().setToolType(MotionEvent.TOOL_TYPE_MOUSE);
 
         mResolver = context.getContentResolver();
-        mClient = mResolver.acquireUnstableContentProviderClient(DEFAULT_AUTHORITY);
-        mDocsHelper = new DocumentsProviderHelper(DEFAULT_AUTHORITY, mClient);
-
-        rootDir0 = mDocsHelper.getRoot(ROOT_0_ID);
-        rootDir1 = mDocsHelper.getRoot(ROOT_1_ID);
+        mClient = mResolver.acquireUnstableContentProviderClient(getTestingProviderAuthority());
+        mDocsHelper = new DocumentsProviderHelper(getTestingProviderAuthority(), mClient);
 
         launchActivity();
         resetStorage();

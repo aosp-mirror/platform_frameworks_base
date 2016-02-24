@@ -1290,6 +1290,11 @@ public class DirectoryFragment extends Fragment
                 showDirectory();
                 mAdapter.notifyDataSetChanged();
             }
+
+            if (!model.isLoading()) {
+                ((BaseActivity) getActivity()).notifyDirectoryLoaded(
+                    model.doc != null ? model.doc.derivedUri : null);
+            }
         }
 
         @Override
