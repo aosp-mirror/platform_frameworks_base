@@ -262,10 +262,8 @@ public abstract class TvInputService extends Service {
      *
      * <p>The system automatically creates a <code>TvInputInfo</code> object for each TV input,
      * based on the information collected from the <code>AndroidManifest.xml</code>, thus it is not
-     * necessary to call this method unless such information has changed dynamically. This may be
-     * also used to pass additional information that is not specified by the manifest file, such as
-     * ability to record and tuner count. Use {@link TvInputInfo.Builder} to build a new
-     * <code>TvInputInfo</code> object.
+     * necessary to call this method unless such information has changed dynamically.
+     * Use {@link TvInputInfo.Builder} to build a new <code>TvInputInfo</code> object.
      *
      * <p>Attempting to change information about a TV input that the calling package does not own
      * does nothing.
