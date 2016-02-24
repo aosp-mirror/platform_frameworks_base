@@ -21,6 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -242,7 +244,6 @@ public class KeyguardUserSwitcher {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             UserSwitcherController.UserRecord item = getItem(position);
-
             if (!(convertView instanceof UserDetailItemView)
                     || !(convertView.getTag() instanceof UserSwitcherController.UserRecord)) {
                 convertView = LayoutInflater.from(mContext).inflate(
@@ -252,11 +253,17 @@ public class KeyguardUserSwitcher {
             UserDetailItemView v = (UserDetailItemView) convertView;
 
             String name = getName(mContext, item);
+            Drawable drawable;
             if (item.picture == null) {
-                v.bind(name, getDrawable(mContext, item));
+                drawable = getDrawable(mContext, item).mutate();
             } else {
-                v.bind(name, item.picture);
+                drawable = new BitmapDrawable(mContext.getResources(), item.picture);
             }
+            // Disable the icon if switching is disabled
+            if (!item.isSwitchToEnabled) {
+                drawable.setTint(mContext.getColor(R.color.qs_tile_disabled_color));
+            }
+            v.bind(name, drawable);
             convertView.setActivated(item.isCurrent);
             convertView.setTag(item);
             return convertView;
@@ -269,7 +276,7 @@ public class KeyguardUserSwitcher {
                 // Close the switcher if tapping the current user. Guest is excluded because
                 // tapping the guest user while it's current clears the session.
                 mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
-            } else {
+            } else if (user.isSwitchToEnabled) {
                 switchTo(user);
             }
         }
