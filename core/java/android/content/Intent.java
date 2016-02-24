@@ -16,24 +16,13 @@
 
 package android.content;
 
-import android.content.pm.ApplicationInfo;
-import android.os.ResultReceiver;
-import android.os.ShellCommand;
-import android.provider.MediaStore;
-import android.util.ArraySet;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.AnyRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.pm.ActivityInfo;
-
-import static android.content.ContentProvider.maybeAddUserId;
-
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -41,21 +30,24 @@ import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.ResultReceiver;
+import android.os.ShellCommand;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
-
 import com.android.internal.util.XmlUtils;
-
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
@@ -70,6 +62,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+
+import static android.content.ContentProvider.maybeAddUserId;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -757,6 +751,14 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_SHORTCUT_ICON_RESOURCE =
             "android.intent.extra.shortcut.ICON_RESOURCE";
+
+    /**
+     * An activity that provides a user interface for adjusting application preferences.
+     * Optional but recommended settings for all applications which have settings.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_PREFERENCES
+            = "android.intent.action.APPLICATION_PREFERENCES";
 
     /**
      * Represents a shortcut/live folder icon resource.
