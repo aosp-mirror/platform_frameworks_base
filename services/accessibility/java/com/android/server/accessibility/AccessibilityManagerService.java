@@ -351,6 +351,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         // user change and unlock
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
+        intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_PRESENT);
         intentFilter.addAction(Intent.ACTION_SETTING_RESTORED);
@@ -361,6 +362,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 String action = intent.getAction();
                 if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                     switchUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
+                } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                    unlockUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     removeUser(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0));
                 } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
@@ -900,6 +903,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
     }
 
+    private void unlockUser(int userId) {
+        synchronized (mLock) {
+            UserState userState = getUserStateLocked(userId);
+            onUserStateChangedLocked(userState);
+        }
+    }
+
     private void removeUser(int userId) {
         synchronized (mLock) {
             mUserStates.remove(userId);
@@ -1002,8 +1012,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServicesAsUser(
                 new Intent(AccessibilityService.SERVICE_INTERFACE),
                 PackageManager.GET_SERVICES
-                  | PackageManager.GET_META_DATA
-                  | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
+                        | PackageManager.GET_META_DATA
+                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                        | PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
                 mCurrentUserId);
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
@@ -1236,6 +1247,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void manageServicesLocked(UserState userState) {
         Map<ComponentName, Service> componentNameToServiceMap =
                 userState.mComponentNameToServiceMap;
+        boolean isUnlocked = mContext.getSystemService(UserManager.class)
+                .isUserUnlocked(userState.mUserId);
         boolean isEnabled = userState.mIsAccessibilityEnabled;
 
         for (int i = 0, count = userState.mInstalledServices.size(); i < count; i++) {
@@ -1243,6 +1256,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             ComponentName componentName = ComponentName.unflattenFromString(
                     installedService.getId());
             Service service = componentNameToServiceMap.get(componentName);
+
+            // Ignore non-encryption-aware services until user is unlocked
+            if (!isUnlocked && !installedService.isEncryptionAware()) {
+                Slog.d(LOG_TAG, "Ignoring non-encryption-aware service " + componentName);
+                continue;
+            }
 
             if (isEnabled) {
                 // Wait for the binding if it is in process.
@@ -1272,7 +1291,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         // No enabled installed services => disable accessibility to avoid
         // sending accessibility events with no recipient across processes.
-        if (isEnabled && userState.mBoundServices.isEmpty()
+        if (isEnabled && isUnlocked && userState.mBoundServices.isEmpty()
                 && userState.mBindingServices.isEmpty()) {
             userState.mIsAccessibilityEnabled = false;
             final long identity = Binder.clearCallingIdentity();
