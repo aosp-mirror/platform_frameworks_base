@@ -21,6 +21,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -233,9 +234,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_EN_US))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_EN_US), imi);
             assertEquals(1, result.size());
             verifyEquality(autoSubtype, result.get(0));
         }
@@ -257,9 +256,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_EN_US))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_EN_US), imi);
             verifyEquality(nonAutoEnUS, result.get(0));
         }
 
@@ -279,9 +276,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_EN_GB))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_EN_GB), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoEnGB, result.get(0));
         }
@@ -303,9 +298,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_FR))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_FR), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
         }
@@ -323,9 +316,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_FR_CA))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_FR_CA), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFrCA, result.get(0));
         }
@@ -344,9 +335,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_JA_JP))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_JA_JP), imi);
             assertEquals(3, result.size());
             verifyEquality(nonAutoJa, result.get(0));
             verifyEquality(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, result.get(1));
@@ -364,9 +353,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_FIL_PH))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_FIL_PH), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoFil, result.get(0));
         }
@@ -384,9 +371,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_FI))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_FI), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoJa, result.get(0));
         }
@@ -402,9 +387,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_IN))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_IN), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
         }
@@ -418,9 +401,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_ID))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_ID), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoIn, result.get(0));
         }
@@ -434,9 +415,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_IN))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_IN), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
         }
@@ -450,9 +429,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     subtypes);
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
-                            createTargetContextWithLocales(new LocaleList(LOCALE_ID))
-                                    .getResources(),
-                            imi);
+                            getResourcesForLocales(LOCALE_ID), imi);
             assertEquals(1, result.size());
             verifyEquality(nonAutoId, result.get(0));
         }
@@ -636,6 +613,10 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         return getInstrumentation()
                 .getTargetContext()
                 .createConfigurationContext(resourceConfiguration);
+    }
+
+    private Resources getResourcesForLocales(Locale... locales) {
+        return createTargetContextWithLocales(new LocaleList(locales)).getResources();
     }
 
     private String[] getPackageNames(final ArrayList<InputMethodInfo> imis) {
