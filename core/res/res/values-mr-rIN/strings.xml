@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कॉलर ID डीफॉल्‍ट रूपात प्रतिबंधित नाही वर सेट असतो. पुढील कॉल: प्रतिबंधित नाही"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवेची तरतूद केलेली नाही."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"आपण कॉलर ID सेटिंग बदलू शकत नाही."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"प्रतिबंधित प्रवेश बदलला"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा अवरोधित केली आहे."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आणीबाणी सेवा अवरोधित केली आहे."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"व्हॉइस सेवा अवरोधित केली आहे."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडला</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> निवडले</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"आपण या सूचनांचे महत्त्व सेट केले."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून विद्यमान आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"पिन"</string>
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन करा"</string>
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

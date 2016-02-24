@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ਪ੍ਰਤਿਬੰਧਿਤ ਨਾ ਕਰਨ ਲਈ ਕਾਲਰ ID ਡਿਫੌਲਟਸ। ਅਗਲੀ ਕਾਲ: ਪ੍ਰਤਿਬੰਧਿਤ ਨਹੀਂ"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"ਸੇਵਾ ਪ੍ਰਬੰਧਿਤ ਨਹੀਂ ਹੈ।"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"ਤੁਸੀਂ ਕਾਲਰ ID ਸੈਟਿੰਗ ਨਹੀਂ ਬਦਲ ਸਕਦੇ।"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"ਪ੍ਰਤਿਬੰਧਿਤ ਪਹੁੰਚ ਬਦਲੀ ਗਈ"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"ਡਾਟਾ ਸੇਵਾ ਬਲੌਕ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"ਐਮਰਜੈਂਸੀ ਸੇਵਾ ਬਲੌਕ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"ਵੌਇਸ ਸੇਵਾ ਬਲੌਕ ਕੀਤੀ ਹੋਈ ਹੈ।"</string>
@@ -1538,8 +1537,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਚੁਣਿਆ ਗਿਆ</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਦੀ ਮਹੱਤਤਾ ਸੈੱਟ ਕੀਤੀ।"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ਇਹ ਸ਼ਾਮਲ ਲੋਕਾਂ ਦੇ ਕਾਰਨ ਮਹੱਤਵਪੂਰਨ ਹੈ।"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਮਨਜ਼ੂਰੀ ਦੇਣੀ ਹੈ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਇੱਕ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਮਨਜ਼ੂਰੀ ਦੇਣੀ ਹੈ (ਇਸ ਖਾਤੇ ਨਾਲ ਇੱਕ ਵਰਤੋਂਕਾਰ ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਮੌਜੂਦ ਹੈ) ?"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"ਪਿੰਨ ਕਰੋ"</string>
     <string name="unpin_target" msgid="3556545602439143442">"ਅਨਪਿੰਨ ਕਰੋ"</string>
     <string name="app_info" msgid="6856026610594615344">"ਐਪ ਜਾਣਕਾਰੀ"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

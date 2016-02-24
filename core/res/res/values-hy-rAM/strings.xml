@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Զանգողի ID-ն լռելյայն չսահմանափակված է: Հաջորդ զանգը` չսահմանափակված"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Ծառայությունը չի տրամադրվում:"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Դուք չեք կարող փոխել զանգողի ID-ի կարգավորումները:"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Սահմանափակված մուտքը փոխված է"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Տվյալների ծառայությունն արգելափակված է:"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Արտակարգ իրավիճակի ծառայությունն արգելափակված է:"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Ձայնային ծառայությունը արգելափակված է:"</string>
@@ -1054,10 +1053,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB վրիպազերծումը միացված է"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Հպեք` USB կարգաբերումը կասեցնելու համար:"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Տրամադրե՞լ վրիպակի զեկույցը:"</string>
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
-    <skip />
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Վրիպակի զեկույցի տրամադրում…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Այս սարքի անսարքությունների վերացման նպատակով ձեր ՏՏ ադմինիստրատորին անհրաժեշտ է վրիպակի զեկույց: Կարող են տրամադրվել տեղեկություններ ձեր հավելվածների մասին և այլ տվյալներ, իսկ սարքի աշխատանքը կարող է դանդաղել:"</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Այս սարքի անսարքությունների վերացման նպատակով ձեր ՏՏ ադմինիստրատորին անհրաժեշտ է վրիպակի զեկույց: Կարող են տրամադրվել տեղեկություններ ձեր հավելվածներնի մասին և այլ տվյալներ:"</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Այդ ընթացքում ձեր սարքի աշխատանքը կարող է դանդաղել"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ԸՆԴՈՒՆԵԼ"</string>
@@ -1540,8 +1537,7 @@
       <item quantity="one">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="other">Ընտրված է՝ <xliff:g id="COUNT_1">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Դուք սահմանել եք այս ծանուցումների կարևորությունը:"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Կարևոր է, քանի որ որոշակի մարդիկ են ներգրավված:"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտվող ստեղծել:"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Թույլ տա՞լ <xliff:g id="APP">%1$s</xliff:g> հավելվածին <xliff:g id="ACCOUNT">%2$s</xliff:g> հաշվով նոր Օգտվող ստեղծել (նման հաշվով Օգտվող արդեն գոյություն ունի):"</string>
@@ -1568,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Ամրացնել"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Ապամրացնել"</string>
     <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

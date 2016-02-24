@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"සේවාවන් සපයා නැත."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"අමතන්නාගේ ID සැකසීම ඔබට වෙනස්කල නොහැක."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"සීමිත ප්‍රවේශය වෙනස් කෙරිණි"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"දත්ත සේවාව අවහිර කර ඇත."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"හදිසි සේවාව අවහිර කර ඇත."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"හඬ සේවාව බාධා කර ඇත."</string>
@@ -1567,4 +1566,6 @@
     <string name="pin_target" msgid="3052256031352291362">"අමුණන්න"</string>
     <string name="unpin_target" msgid="3556545602439143442">"ගලවන්න"</string>
     <string name="app_info" msgid="6856026610594615344">"යෙදුම් තොරතුරු"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

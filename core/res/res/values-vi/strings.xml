@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Dịch vụ không được cấp phép."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Bạn không thể thay đổi cài đặt ID người gọi."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Quyền truy cập bị giới hạn đã thay đổi"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Dịch vụ dữ liệu bị chặn."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Dịch vụ khẩn cấp đã bị chặn."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Dịch vụ thoại đã bị chặn."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other">Đã chọn <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Đã chọn <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Thông báo này quan trọng vì những người có liên quan."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (người dùng có tài khoản này đã tồn tại)?"</string>
@@ -1566,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Ghim"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Bỏ ghim"</string>
     <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

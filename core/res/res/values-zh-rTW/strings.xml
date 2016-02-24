@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"無法提供此服務。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您無法變更來電顯示設定。"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"受限存取已變更"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"已封鎖數據傳輸服務。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"已封鎖緊急服務。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"已封鎖語音服務。"</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other">已選取 <xliff:g id="COUNT_1">%1$d</xliff:g> 個項目</item>
       <item quantity="one">已選取 <xliff:g id="COUNT_0">%1$d</xliff:g> 個項目</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"這些通知的重要性由您決定。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"這則通知涉及特定人士，因此被歸為重要通知。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"要允許 <xliff:g id="APP">%1$s</xliff:g> 為 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎？"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"要允許 <xliff:g id="APP">%1$s</xliff:g> 為 <xliff:g id="ACCOUNT">%2$s</xliff:g> 建立新使用者嗎 (這個帳戶目前已有使用者)？"</string>
@@ -1566,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資訊"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

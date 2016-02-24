@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелмеген"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Қызмет ұсынылмаған."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Қоңырау шалушы идентификаторы параметрін өзгерту мүмкін емес."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Шектелген қол жетімділік өзгертілген"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Дерекқор қызметі бөгелген."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Төтенше қызмет бөгелген."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Дауыс қызметі бөгелген."</string>
@@ -1055,9 +1054,9 @@
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB жөндеуді өшіру үшін түртіңіз."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Қате туралы есепті бөлісу керек пе?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Қате туралы есеп бөлісілуде…"</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар және деректер бөлісілуі мүмкін, әрі құрылғы уақытша баяулауы мүмкін."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар және деректер бөлісілуі әрі құрылғының жұмысы уақытша баяулауы мүмкін."</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"АТ әкімшісі осы құрылғы ақауларын жоюға көмектесу үшін қате туралы есепті сұрады. Қолданбалар және деректер бөлісілуі мүмкін."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Бұл құрылғыны уақытша баяулатуы мүмкін"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Бұл құрылғы жұмысын уақытша баяулатуы мүмкін"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ҚАБЫЛДАУ"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"ҚАБЫЛДАМАУ"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Пернетақтаны өзгерту"</string>
@@ -1565,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"PIN код"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Босату"</string>
     <string name="app_info" msgid="6856026610594615344">"Қолданба ақпараты"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

@@ -90,7 +90,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID rozmówcy ustawiony jest domyślnie na „nie zastrzeżony”. Następne połączenie: nie zastrzeżony"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usługa nie jest świadczona."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nie możesz zmienić ustawienia ID rozmówcy."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Zmieniono ograniczenie dostępu"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Usługa transmisji danych jest zablokowana."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Usługa połączeń alarmowych jest zablokowana."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Usługa głosowa jest zablokowana."</string>
@@ -1070,10 +1069,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Podłączono moduł debugowania USB"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Dotknij, aby wyłączyć debugowanie USB."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Udostępnić raport o błędzie?"</string>
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
-    <skip />
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Udostępniam raport o błędzie…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Administrator poprosił o raport o błędzie, by szybciej rozwiązać problemy na tym urządzeniu. Raport może zawierać informacje o aplikacjach i inne dane. Urządzenie może przez chwilę działać wolniej."</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administrator poprosił o raport o błędzie, który pomoże w rozwiązaniu problemów na tym urządzeniu. Mogą zostać udostępnione aplikacje i dane."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Urządzenie może przez chwilę działać wolniej"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"AKCEPTUJ"</string>
@@ -1578,8 +1575,7 @@
       <item quantity="other">Wybrano <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Wybrano <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Ustawiłeś ważność tych powiadomień."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ta wiadomość jest ważna ze względu na osoby uczestniczące w wątku."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Zezwalasz aplikacji <xliff:g id="APP">%1$s</xliff:g> na utworzenie nowego użytkownika dla konta <xliff:g id="ACCOUNT">%2$s</xliff:g>)? Użytkownik z tym kontem już istnieje."</string>
@@ -1606,4 +1602,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Przypnij"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Odepnij"</string>
     <string name="app_info" msgid="6856026610594615344">"O aplikacji"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

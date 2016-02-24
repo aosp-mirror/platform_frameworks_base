@@ -90,7 +90,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Skambintojo ID pagal numatytuosius nustatymus yra neapribotas. Kitas skambutis: neapribotas"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Paslauga neteikiama."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Negalima pakeisti skambinančiojo ID nustatymo."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Apribota prieiga pakeista"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Duomenų paslauga užblokuota."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Pagalbos paslauga užblokuota."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Balso paslauga užblokuota."</string>
@@ -1070,10 +1069,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB derinimas prijungtas"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Neleisti USB derinimo."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Bendrinti pranešimą apie riktą?"</string>
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
-    <skip />
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Bendrinamas pranešimas apie riktą..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Jūsų IT administratorius pateikė pranešimo apie riktą užklausą, kad galėtų padėti pašalinti triktis šiame įrenginyje. Programos bei duomenys gali būti bendrinami ir įrenginys gali laikinai lėčiau veikti."</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Jūsų IT administratorius pateikė pranešimo apie riktą užklausą, kad galėtų padėti pašalinti triktis šiame įrenginyje. Programos ir duomenys gali būti bendrinami."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Dėl to įrenginys gali laikinai lėčiau veikti"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"SUTIKTI"</string>
@@ -1578,8 +1575,7 @@
       <item quantity="many">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
       <item quantity="other">Pasir. <xliff:g id="COUNT_1">%1$d</xliff:g> elem.</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Galite nustatyti šių pranešimų svarbą."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Tai svarbu dėl susijusių žmonių."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Leisti „<xliff:g id="APP">%1$s</xliff:g>“ kurti naują <xliff:g id="ACCOUNT">%2$s</xliff:g> naudotoją (šią paskyrą naudojantis naudotojas jau yra)?"</string>
@@ -1606,4 +1602,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Prisegti"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Atsegti"</string>
     <string name="app_info" msgid="6856026610594615344">"Programos informacija"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"–<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

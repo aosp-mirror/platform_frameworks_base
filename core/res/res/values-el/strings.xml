@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"μη περιορισμένη\". Επόμενη κλήση: Μη περιορισμένη"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Η υπηρεσία δεν προβλέπεται."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Δεν μπορείτε να αλλάξετε τη ρύθμιση του αναγνωριστικού καλούντος."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Η περιορισμένη πρόσβαση άλλαξε"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Η υπηρεσία δεδομένων είναι αποκλεισμένη."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Η υπηρεσία έκτακτης ανάγκης είναι αποκλεισμένη."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Η υπηρεσία φωνής έχει αποκλειστεί."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other">Επιλέχτηκαν <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Επιλέχτηκε <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Να επιτραπεί στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με το λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν το λογαριασμό);"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Καρφίτσωμα"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Ξεκαρφίτσωμα"</string>
     <string name="app_info" msgid="6856026610594615344">"Πληροφορίες εφαρμογής"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

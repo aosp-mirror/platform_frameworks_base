@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Nummerpresentatörens standardinställning är inte begränsad. Nästa samtal: Inte begränsad"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Tjänsten är inte etablerad."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Det går inte att ändra inställningen för nummerpresentatör."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Begränsad åtkomst har ändrats"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datatjänsten är blockerad."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Räddningstjänsten är blockerad."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Rösttjänsten är blockerad."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> har valts</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> har valts</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Du anger hur viktiga aviseringarna är."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Detta är viktigt på grund av personerna som deltar."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g> (det finns redan en användare med det här kontot)?"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Fäst"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Lossa"</string>
     <string name="app_info" msgid="6856026610594615344">"Info om appen"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

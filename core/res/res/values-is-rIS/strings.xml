@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Númerabirting er sjálfgefið án takmarkana. Næsta símtal: Án takmarkana"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Þjónustu ekki útdeilt."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Þú getur ekki breytt stillingu númerabirtingar."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Takmörkuðum aðgangi breytt"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Lokað er fyrir gagnaþjónustu."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Lokað er fyrir neyðarþjónustu."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Lokað er fyrir raddþjónustu."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> valið</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valin</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Þú stilltir mikilvægi þessara tilkynninga."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Þetta er mikilvægt vegna fólksins sem tekur þátt í þessu."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Leyfa <xliff:g id="APP">%1$s</xliff:g> að stofna nýjan notanda með <xliff:g id="ACCOUNT">%2$s</xliff:g> (notandi með þennan reikning er þegar fyrir hendi)?"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Festa"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Losa"</string>
     <string name="app_info" msgid="6856026610594615344">"Forritsupplýsingar"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"A hívóazonosító alapértelmezett értéke nem korlátozott. Következő hívás: nem korlátozott"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"A szolgáltatás nincs biztosítva."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Nem tudja módosítani a hívó fél azonosítója beállítást."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"A korlátozott hozzáférés módosítva"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Az adatszolgáltatás le van tiltva."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"A segélyszolgáltatás le van tiltva."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"A hangszolgáltatás letiltva."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> kiválasztva</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kiválasztva</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Ön állította be ezen értesítések fontossági szintjét."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ez az üzenet a résztvevők miatt fontos."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Rögzítés"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Feloldás"</string>
     <string name="app_info" msgid="6856026610594615344">"Alkalmazásinformáció"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

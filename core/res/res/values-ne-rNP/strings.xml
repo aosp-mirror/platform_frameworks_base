@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कलर ID पूर्वनिर्धारितको लागि रोकावट छैन। अर्को कल: रोकावट छैन"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवाको व्यवस्था छैन।"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"तपाईँ कलर ID सेटिङ परिवर्तन गर्न सक्नुहुन्न।"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"प्रतिबन्धित पहुँच परिवर्तन भएको छ"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा रोकिएको छ।"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आपतकालीन सेवा रोकिएको छ।"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"भ्वाइस सेवा ब्लक भएको छ।"</string>
@@ -1059,11 +1058,11 @@
     <string name="usb_notification_message" msgid="7347368030849048437">"थप विकल्पहरूका लागि छुनुहोस्।"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डिबग गर्ने जडित छ"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"USB डिबग गर्ने असक्षम पार्न छुनुहोस्।"</string>
-    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्ट साझा गर्ने हो?"</string>
-    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्ट साझेदारी गर्दै ..."</string>
-    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"तपाईंको आईटी वेवस्थापकले यो यन्त्रको समस्या निवारण गर्नमा मदत गर्न बग रिपोर्टहरूका लागि अनुरोध गरेको छ । Apps र डेटा साझादारी गर्न सक्नुहुन्छ र तपाईंको यन्त्र अस्थायी रूपमा सुस्त हुन सक्छ।"</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"तपाईंको आईटी वेवस्थापकले यो यन्त्रको समस्या निवारण गर्नमा मदत गर्न बग रिपोर्टहरूका लागि अनुरोध गरेको छ । Apps र डेटा साझा गर्न सक्नुहुन्छ ।"</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"यसले अस्थायी रूपमा तपाईंको यन्त्र सुस्त हुन सक्छ"</string>
+    <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्टलाई साझेदारी गर्ने हो?"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्टलाई साझेदारी गर्दै ..."</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"तपाईंको IT प्रशासकले यो यन्त्रको समस्या निवारण गर्नमा मद्दत गर्न बग रिपोर्टहरूका लागि अनुरोध गर्नु भएको छ । अनुप्रयोगहरू र डेटा साझेदारी गर्न सकिन्छ र तपाईंको यन्त्र अस्थायी रूपमा सुस्त हुन सक्छ।"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"तपाईंको IT प्रशासकले यो यन्त्रको समस्या निवारण गर्नमा मदत गर्न बग रिपोर्टहरूका लागि अनुरोध गर्नु भएको छ । Apps र डेटा साझेदारी गर्न सक्नुहुन्छ ।"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"यसले अस्थायी रूपमा तपाईंको यन्त्रलाई सुस्त बनाउन सक्छ"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार गर्नुहोस्"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार गर्नुहोस्"</string>
     <string name="select_input_method" msgid="8547250819326693584">"कुञ्जीपाटी परिवर्तन गर्नुहोस्"</string>
@@ -1571,4 +1570,6 @@
     <string name="pin_target" msgid="3052256031352291362">"पिन गर्नुहोस्"</string>
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन गर्नुहोस्"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

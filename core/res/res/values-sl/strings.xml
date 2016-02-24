@@ -90,7 +90,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ID klicatelja je ponastavljen na neomejeno. Naslednji klic: ni omejeno"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Storitev ni nastavljena in omogočena."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ne morete spremeniti nastavitve ID-ja klicatelja."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Omejen dostop je spremenjen"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Podatkovna storitev je blokirana."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Klic v sili je blokiran."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Glasovna storitev je blokirana."</string>
@@ -1576,8 +1575,7 @@
       <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> izbrani</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> izbranih</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Vi določite raven pomembnosti teh obvestil."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Pomembno zaradi udeleženih ljudi."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Dovolite, da aplikacija <xliff:g id="APP">%1$s</xliff:g> ustvari novega uporabnika za račun <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Dovolite aplikaciji <xliff:g id="APP">%1$s</xliff:g>, da ustvari novega uporabnika za račun <xliff:g id="ACCOUNT">%2$s</xliff:g> (uporabnik s tem računom že obstaja)?"</string>
@@ -1604,4 +1602,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Pripenjanje"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Odpenjanje"</string>
     <string name="app_info" msgid="6856026610594615344">"Podatki o aplikaciji"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

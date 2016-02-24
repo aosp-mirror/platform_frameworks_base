@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандартната идентификация на повикванията е „разрешено“. За следващото обаждане тя е разрешена."</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е обезпечена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не можете да променяте настройката за идентификация на обажданията."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ограниченият достъп е променен"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Услугата за данни е блокирана."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Услугата за спешни обаждания е блокирана."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Услугата за глас е блокирана."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other">Избрахте <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Избрахте <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Зададохте важността на тези известия."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Това е важно заради участващите хора."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g> (вече съществува потребител с този профил)?"</string>
@@ -1566,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Фиксиране"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Освобождаване"</string>
     <string name="app_info" msgid="6856026610594615344">"Информация за приложението"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

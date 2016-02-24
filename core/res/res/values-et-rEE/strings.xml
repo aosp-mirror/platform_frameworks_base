@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Helistaja ID pole vaikimisi piiratud. Järgmine kõne: pole piiratud"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Teenus pole ette valmistatud."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Helistaja ID seadet ei saa muuta."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Piiratud juurdepääs muutunud"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Andmesideteenus on blokeeritud."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Hädaabiteenus on blokeeritud."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Häälteenus on blokeeritud."</string>
@@ -1054,10 +1053,8 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-silumine ühendatud"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Puudutage USB-silumise keelamiseks."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Kas jagada veaaruannet?"</string>
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
-    <skip />
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Veaaruande jagamine …"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IT-administraator taotles veaaruannet, mis aitaks seadmes vigu otsida. Rakendusi ja andmeid võidakse jagada ja see võib ajutiselt teie seadet aeglustada."</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IT-administraator taotles veaaruannet, mis aitaks seadmes vigu otsida. Rakendusi ja andmeid võidakse jagada."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"See võib ajutiselt teie seadet aeglustada"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"NÕUSTU"</string>
@@ -1540,8 +1537,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> on valitud</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> on valitud</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Teie määrasite nende märguannete tähtsuse."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"See on tähtis osalevate inimeste tõttu."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g> (selle kontoga kasutaja on juba olemas)?"</string>
@@ -1568,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Kinnita"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Vabasta"</string>
     <string name="app_info" msgid="6856026610594615344">"Rakenduse teave"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

@@ -89,7 +89,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"ИД позиваоца подразумевано није ограничен. Следећи позив: Није ограничен."</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услуга није добављена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не можете да промените подешавање ИД-а корисника."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ограничени приступ је промењен"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Услуга за податке је блокирана."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Услуга за хитне случајеве је блокирана."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Гласовна услуга је блокирана."</string>
@@ -1557,8 +1556,7 @@
       <item quantity="few">Изабране су <xliff:g id="COUNT_1">%1$d</xliff:g> ставке</item>
       <item quantity="other">Изабрано је <xliff:g id="COUNT_1">%1$d</xliff:g> ставки</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Ви подешавате важност ових обавештења."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Ово је важно због људи који учествују."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g> (корисник са овим налогом већ постоји)?"</string>
@@ -1585,4 +1583,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Закачи"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Откачи"</string>
     <string name="app_info" msgid="6856026610594615344">"Информације о апликацији"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

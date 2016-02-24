@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Chaguo-msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Huduma haitathminiwi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Hauwezi kubadilisha mpangilio wa kitambulisho cha anayepiga."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ufikiaji uliozuiwa umebadilishwa"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Huduma ya data imezuiwa."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Huduma ya dharura imezuiwa."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Huduma ya sauti imezuiwa."</string>
@@ -1058,7 +1057,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Ungependa kushiriki ripoti ya hitilafu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Inashiriki ripoti ya hitilafu…"</string>
     <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Msimamizi wako wa Teknolojia ya Habari ameomba ripoti ya hitilafu ili kusaidia katika utatuzi wa kifaa hiki. Huenda hatua hii ikasababisha programu na data kushirikiwa na kupunguza kasi ya kifaa chako kwa muda."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Msimamizi wako wa IT ameomba ripoti ya hitilafu ili kusaidia katika utatuzi wa kifaa hiki. Programu na data zinaweza kushirikiwa."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Msimamizi wako wa TEHAMA ameomba ripoti ya hitilafu ili kusaidia katika utatuzi wa hitilafu kwenye kifaa hiki. Programu na data zinaweza kushirikiwa."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Hatua hii inaweza kupunguza kasi ya kifaa chako kwa muda"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"KUBALI"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"KATAA"</string>
@@ -1540,8 +1539,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iunde Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Ungependa kuruhusu <xliff:g id="APP">%1$s</xliff:g> iunde Mtumiaji mpya ikitumia <xliff:g id="ACCOUNT">%2$s</xliff:g> (Je, akaunti hii tayari ina Mtumiaji)?"</string>
@@ -1568,4 +1566,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Bandika"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Bandua"</string>
     <string name="app_info" msgid="6856026610594615344">"Maelezo ya programu"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

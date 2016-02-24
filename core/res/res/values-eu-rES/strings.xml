@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Deien identifikazio-zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Zerbitzua ez da hornitu."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ezin duzu deien identifikazio-zerbitzuaren ezarpena aldatu."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Sarbide murriztua aldatu da"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datu-zerbitzua blokeatuta dago."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Larrialdi-zerbitzua blokeatuta dago."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Ahots-zerbitzua blokeatuta dago."</string>
@@ -1056,7 +1055,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Akatsen txostena partekatu nahi duzu?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Akatsen txostena partekatzen…"</string>
     <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"IKT administratzaileak akatsen txostena eskatu du gailuko arazoa konpontzen laguntzeko. Baliteke aplikazioak eta datuak partekatzea, eta agian motelago ibiliko da gailua aldi batez."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IKT administratzaileak akatsen txostena eskatu du gailuko arazoa konpontzen laguntzeko. Baliteke aplikazioak eta datuak partekatzea."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"IKT administratzaileak akatsen txostena eskatu du gailuko arazoa konpontzeko. Baliteke aplikazioak eta datuak partekatzea."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Agian motelago ibiliko da gailua aldi batez"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"ONARTU"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"BAZTERTU"</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> hautatuta</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> hautatuta</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Zuk ezarri zenuen jakinarazpen hauen garrantzia."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Garrantzitsua da eragiten dien pertsonengatik."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzea baimendu nahi diozu?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzea baimendu nahi diozu? (Badago kontu hori duen erabiltzaile bat)"</string>
@@ -1566,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Ainguratu"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Kendu aingura"</string>
     <string name="app_info" msgid="6856026610594615344">"Aplikazioari buruzko informazioa"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

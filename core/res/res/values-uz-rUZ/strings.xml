@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Qo‘ng‘iroq qiluvchi ma’lumotlari cheklanmagan. Keyingi qo‘ng‘iroq: cheklanmagan"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Xizmat ishalamaydi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Qo‘ng‘iroq qiluvchining ID raqami sozlamasini o‘zgartirib bo‘lmaydi."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Cheklangan ruxsatlar o‘zgartirildi"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Ma’lumot xizmati bloklandi."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Favqulodda xizmati bloklandi."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Ovoz xizmati bloklandi."</string>
@@ -917,7 +916,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"Ilovani qayta tiklash va qayta ishga tushirish"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Fikr-mulohaza yuborish"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Yopish"</string>
-    <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chirib yoqilguncha e’tiborsiz qoldirish"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"Qurilma o‘chib yonguncha e’tiborsiz qoldirish"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Kuting"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"Ilovani yopish"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1054,12 +1053,10 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB orqali nosozliklarni tuzatish"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"O‘chirib qo‘yish uchun bosing."</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Xatoliklar hisoboti yuborilsinmi?"</string>
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
-    <skip />
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Xatoliklar hisoboti yuborilmoqda…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi va bu vaqtincha qurilmangizni sekinlashtirishi ham mumkin."</string>
     <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"Administratoringiz bu qurilma nosozliklarini tuzatish uchun xatoliklar hisobotini so‘ramoqda. Ilova va ma’lumotlardan foydalanilishi mumkin."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Bu vaqtincha qurilmangizni sekinlashtirishi mumkin"</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"Qurilmaning ishlash tezligi vaqtincha pasayishi mumkin."</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"QABUL QILISH"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"RAD ETISH"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Klaviaturani o‘zgartirish"</string>
@@ -1540,8 +1537,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta tanlandi</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta tanlandi</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Siz ushbu bildirishnomalarning muhimligini belgilagansiz."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Bu odamlar siz uchun muhim."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>
@@ -1568,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"Qadash"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Olib tashlash"</string>
     <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

@@ -90,7 +90,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"זיהוי מתקשר עובר כברירת מחדל למצב לא מוגבל. השיחה הבאה: לא מוגבלת"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"השירות לא הוקצה."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"אינך יכול לשנות את הגדרת זיהוי המתקשר."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"גישה מוגבלת השתנתה"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"שירות הנתונים חסום."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"שירות חירום חסום."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"השירות הקולי חסום."</string>
@@ -1072,8 +1071,8 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"האם לשתף דוח על באג?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"שיתוף דוח על באג…"</string>
     <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"‏מנהל ה-IT ביקש דוח על באג כדי לסייע בפתרון בעיות במכשיר זה. ייתכן שאפליקציות ונתונים ישותפו. פעילות המכשיר עשויה להאט באופן זמני."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"‏מנהל ה-IT ביקש דוח על באג כדי לסייע בפתרון בעיות במכשיר זה. ייתכן שאפליקציות ונתונים ישותפו."</string>
-    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"פעילות המכשיר עשויה להאט באופן זמני כתוצאה מכך"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"‏מנהל ה-IT שלך ביקש דוח על באג כדי לסייע בפתרון בעיות במכשיר זה. ייתכן שאפליקציות ונתונים ישותפו."</string>
+    <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"קצב הפעולה של המכשיר עשוי להיות איטי יותר באופן זמני כתוצאה מכך"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"אישור"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"דחייה"</string>
     <string name="select_input_method" msgid="8547250819326693584">"שינוי מקלדת"</string>
@@ -1576,8 +1575,7 @@
       <item quantity="other">בחרת <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">בחרת <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"אתה מגדיר את החשיבות של ההודעות האלה."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
@@ -1604,4 +1602,5 @@
     <string name="pin_target" msgid="3052256031352291362">"הצמד"</string>
     <string name="unpin_target" msgid="3556545602439143442">"בטל הצמדה"</string>
     <string name="app_info" msgid="6856026610594615344">"פרטי אפליקציה"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>
