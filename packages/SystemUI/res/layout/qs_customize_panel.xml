@@ -22,47 +22,13 @@
     android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">
 
-    <LinearLayout
+    <Toolbar
+        android:id="@*android:id/action_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="28dp"
-        android:paddingEnd="8dp">
-
-        <ImageView
-            android:id="@+id/close"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:padding="16dp"
-            android:src="@drawable/ic_close_white" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <Button
-            android:id="@+id/save"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button.Inverse"
-            android:textColor="?android:attr/colorAccent"
-            android:text="@string/save" />
-
-        <Button
-            android:id="@+id/reset"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:textAppearance="@android:style/TextAppearance.Material.Widget.Button.Inverse"
-            android:textColor="?android:attr/colorAccent"
-            android:text="@*android:string/reset" />
-
-    </LinearLayout>
+        android:layout_marginTop="28dp"
+        android:navigationContentDescription="@*android:string/action_bar_up_description"
+        style="?android:attr/toolbarStyle" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@android:id/list"

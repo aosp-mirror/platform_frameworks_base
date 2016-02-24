@@ -115,6 +115,12 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
             public Drawable getDrawable(Context context) {
                 return mDrawable;
             }
+
+            @Override
+            public int getPadding() {
+                return mHost.getContext().getResources().getDimensionPixelSize(
+                        R.dimen.qs_battery_padding);
+            }
         };
         state.label = percentage;
     }
