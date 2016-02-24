@@ -4090,16 +4090,24 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
+    public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias,
+            boolean requestAccess) {
         enforceCanManageInstalledKeys(who);
 
-        final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
+        final int callingUid = mInjector.binderGetCallingUid();
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            final KeyChainConnection keyChainConnection = KeyChain.bindAsUser(mContext, userHandle);
+            final KeyChainConnection keyChainConnection =
+                    KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid));
             try {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                return keyChain.installKeyPair(privKey, cert, alias);
+                if (!keyChain.installKeyPair(privKey, cert, alias)) {
+                    return false;
+                }
+                if (requestAccess) {
+                    keyChain.setGrant(callingUid, alias, true);
+                }
+                return true;
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Installing certificate", e);
             } finally {

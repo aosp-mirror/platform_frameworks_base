@@ -145,7 +145,8 @@ interface IDevicePolicyManager {
     void uninstallCaCerts(in ComponentName admin, in String[] aliases);
     void enforceCanManageCaCerts(in ComponentName admin);
 
-    boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer, String alias);
+    boolean installKeyPair(in ComponentName who, in byte[] privKeyBuffer, in byte[] certBuffer,
+            String alias, boolean requestAccess);
     boolean removeKeyPair(in ComponentName who, String alias);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 
