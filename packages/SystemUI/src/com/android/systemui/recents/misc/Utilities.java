@@ -196,7 +196,7 @@ public class Utilities {
      * are not called.
      */
     public static void cancelAnimationWithoutCallbacks(Animator animator) {
-        if (animator != null) {
+        if (animator != null && animator.isStarted()) {
             removeAnimationListenersRecursive(animator);
             animator.cancel();
         }
