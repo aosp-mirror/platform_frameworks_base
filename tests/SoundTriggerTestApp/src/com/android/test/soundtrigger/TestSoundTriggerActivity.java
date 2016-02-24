@@ -204,7 +204,10 @@ public class TestSoundTriggerActivity extends Activity {
         UUID modelUuid = getSelectedUuid();
         SoundTriggerDetector detector = getDetector();
         if (detector == null) {
-            Log.i(TAG, "Created an instance of the SoundTriggerDetector.");
+            Log.i(TAG, "Created an instance of the SoundTriggerDetector for model #" +
+                    mSelectedModelId);
+            postMessage("Created an instance of the SoundTriggerDetector for model #" +
+                    mSelectedModelId);
             detector = mSoundTriggerUtil.createSoundTriggerDetector(modelUuid,
                     new DetectorCallback());
             setDetector(detector);
@@ -213,6 +216,7 @@ public class TestSoundTriggerActivity extends Activity {
         if (!detector.startRecognition(
                 SoundTriggerDetector.RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS)) {
             Log.e(TAG, "Fast failure attempting to start recognition.");
+            postMessage("Fast failure attempting to start recognition:" + mSelectedModelId);
         }
     }
 
@@ -220,11 +224,13 @@ public class TestSoundTriggerActivity extends Activity {
         SoundTriggerDetector detector = getDetector();
         if (detector == null) {
             Log.e(TAG, "Stop called on null detector.");
+            postMessage("Error: Stop called on null detector.");
             return;
         }
         postMessage("Triggering stop recognition for model: " + mSelectedModelId);
         if (!detector.stopRecognition()) {
             Log.e(TAG, "Fast failure attempting to stop recognition.");
+            postMessage("Fast failure attempting to stop recognition: " + mSelectedModelId);
         }
     }
 
