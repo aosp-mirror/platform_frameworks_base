@@ -153,6 +153,7 @@ public class ImageReader implements AutoCloseable {
 
         mSurface = nativeGetSurface();
 
+        mIsReaderValid = true;
         // Estimate the native buffer allocation size and register it so it gets accounted for
         // during GC. Note that this doesn't include the buffers required by the buffer queue
         // itself and the buffers requested by the producer.
@@ -326,7 +327,11 @@ public class ImageReader implements AutoCloseable {
      */
     private int acquireNextSurfaceImage(SurfaceImage si) {
         synchronized (mCloseLock) {
-            int status = nativeImageSetup(si);
+            // A null image will eventually be returned if ImageReader is already closed.
+            int status = ACQUIRE_NO_BUFS;
+            if (mIsReaderValid) {
+                status = nativeImageSetup(si);
+            }
 
             switch (status) {
                 case ACQUIRE_SUCCESS:
@@ -498,6 +503,7 @@ public class ImageReader implements AutoCloseable {
          * acquire operations.
          */
         synchronized (mCloseLock) {
+            mIsReaderValid = false;
             for (Image image : mAcquiredImages) {
                 image.close();
             }
@@ -613,6 +619,7 @@ public class ImageReader implements AutoCloseable {
 
     private final Object mListenerLock = new Object();
     private final Object mCloseLock = new Object();
+    private boolean mIsReaderValid = false;
     private OnImageAvailableListener mListener;
     private ListenerHandler mListenerHandler;
     // Keep track of the successfully acquired Images. This need to be thread safe as the images
@@ -638,7 +645,14 @@ public class ImageReader implements AutoCloseable {
             synchronized (mListenerLock) {
                 listener = mListener;
             }
-            if (listener != null) {
+
+            // It's dangerous to fire onImageAvailable() callback when the ImageReader is being
+            // closed, as application could acquire next image in the onImageAvailable() callback.
+            boolean isReaderValid = false;
+            synchronized (mCloseLock) {
+                isReaderValid = mIsReaderValid;
+            }
+            if (listener != null && isReaderValid) {
                 listener.onImageAvailable(ImageReader.this);
             }
         }
