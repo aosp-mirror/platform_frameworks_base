@@ -11566,20 +11566,41 @@ public class PackageManagerService extends IPackageManager.Stub {
             boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
             // reader
             synchronized (mPackages) {
-                PackageParser.Package pkg = mPackages.get(packageName);
-                if (pkg != null) {
-                    if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
-                        // Check for downgrading.
-                        if ((installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) == 0) {
-                            try {
-                                checkDowngrade(pkg, pkgLite);
-                            } catch (PackageManagerException e) {
-                                Slog.w(TAG, "Downgrade detected: " + e.getMessage());
-                                return PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE;
-                            }
+                // Currently installed package which the new package is attempting to replace or
+                // null if no such package is installed.
+                PackageParser.Package installedPkg = mPackages.get(packageName);
+                // Package which currently owns the data which the new package will own if installed.
+                // If an app is unstalled while keeping data (e.g., adb uninstall -k), installedPkg
+                // will be null whereas dataOwnerPkg will contain information about the package
+                // which was uninstalled while keeping its data.
+                PackageParser.Package dataOwnerPkg = installedPkg;
+                if (dataOwnerPkg  == null) {
+                    PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        dataOwnerPkg = ps.pkg;
+                    }
+                }
+
+                if (dataOwnerPkg != null) {
+                    // If installed, the package will get access to data left on the device by its
+                    // predecessor. As a security measure, this is permited only if this is not a
+                    // version downgrade or if the predecessor package is marked as debuggable and
+                    // a downgrade is explicitly requested.
+                    if (((dataOwnerPkg.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) == 0)
+                            || ((installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) == 0)) {
+                        try {
+                            checkDowngrade(dataOwnerPkg, pkgLite);
+                        } catch (PackageManagerException e) {
+                            Slog.w(TAG, "Downgrade detected: " + e.getMessage());
+                            return PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE;
                         }
+                    }
+                }
+
+                if (installedPkg != null) {
+                    if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                         // Check for updated system application.
-                        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        if ((installedPkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                             if (onSd) {
                                 Slog.w(TAG, "Cannot install update to system app on sdcard");
                                 return PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION;
@@ -11598,7 +11619,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 // App explictly prefers external. Let policy decide
                             } else {
                                 // Prefer previous location
-                                if (isExternal(pkg)) {
+                                if (isExternal(installedPkg)) {
                                     return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
                                 }
                                 return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
