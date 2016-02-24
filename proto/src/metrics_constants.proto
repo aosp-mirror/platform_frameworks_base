@@ -408,5 +408,38 @@ message MetricsEvent {
 
     // Changes made on bug report details screen were canceled by user.
     ACTION_BUGREPORT_DETAILS_CANCELED = 304;
+
+    // Tuner: Open/close calibrate dialog.
+    TUNER_CALIBRATE_DISPLAY = 305;
+
+    // Tuner: Open/close color and appearance.
+    TUNER_COLOR_AND_APPEARANCE = 306;
+
+    // Tuner: Apply calibrate dialog.
+    ACTION_TUNER_CALIBRATE_DISPLAY_CHANGED = 307;
+
+    // Tuner: Open/close night mode.
+    TUNER_NIGHT_MODE = 308;
+
+    // Tuner: Change night mode.
+    ACTION_TUNER_NIGHT_MODE = 309;
+
+    // Tuner: Change night mode auto.
+    ACTION_TUNER_NIGHT_MODE_AUTO = 310;
+
+    // Tuner: Change night mode adjust dark theme.
+    ACTION_TUNER_NIGHT_MODE_ADJUST_DARK_THEME = 311;
+
+    // Tuner: Change night mode adjust tint.
+    ACTION_TUNER_NIGHT_MODE_ADJUST_TINT = 312;
+
+    // Tuner: Change night mode adjust brightness.
+    ACTION_TUNER_NIGHT_MODE_ADJUST_BRIGHTNESS = 313;
+
+    // Tuner: Change do not disturb in volume panel.
+    ACTION_TUNER_DO_NOT_DISTURB_VOLUME_PANEL = 314;
+
+    // Tuner: Change do not disturb volume buttons shortcut.
+    ACTION_TUNER_DO_NOT_DISTURB_VOLUME_SHORTCUT = 315;
   }
 }
