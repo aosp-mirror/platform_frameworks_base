@@ -20514,6 +20514,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "No user info for user #" + targetUserId);
                 return false;
             }
+            if (!targetUserInfo.supportsSwitchTo()) {
+                Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not supported");
+                return false;
+            }
             if (targetUserInfo.isManagedProfile()) {
                 Slog.w(TAG, "Cannot switch to User #" + targetUserId + ": not a full user");
                 return false;

@@ -199,24 +199,26 @@ public class UserSwitcherController {
                         currentUserInfo = info;
                     }
                     boolean switchToEnabled = allowUserSwitching || isCurrent;
-                    if (info.isGuest()) {
-                        guestRecord = new UserRecord(info, null /* picture */,
-                                true /* isGuest */, isCurrent, false /* isAddUser */,
-                                false /* isRestricted */, switchToEnabled);
-                    } else if (info.isEnabled() && info.supportsSwitchToByUser()) {
-                        Bitmap picture = bitmaps.get(info.id);
-                        if (picture == null) {
-                            picture = mUserManager.getUserIcon(info.id);
+                    if (info.isEnabled()) {
+                        if (info.isGuest()) {
+                            guestRecord = new UserRecord(info, null /* picture */,
+                                    true /* isGuest */, isCurrent, false /* isAddUser */,
+                                    false /* isRestricted */, switchToEnabled);
+                        } else if (info.supportsSwitchToByUser()) {
+                            Bitmap picture = bitmaps.get(info.id);
+                            if (picture == null) {
+                                picture = mUserManager.getUserIcon(info.id);
 
-                            if (picture != null) {
-                                picture = BitmapHelper.createCircularClip(
-                                        picture, avatarSize, avatarSize);
+                                if (picture != null) {
+                                    picture = BitmapHelper.createCircularClip(
+                                            picture, avatarSize, avatarSize);
+                                }
                             }
+                            int index = isCurrent ? 0 : records.size();
+                            records.add(index, new UserRecord(info, picture, false /* isGuest */,
+                                    isCurrent, false /* isAddUser */, false /* isRestricted */,
+                                    switchToEnabled));
                         }
-                        int index = isCurrent ? 0 : records.size();
-                        records.add(index, new UserRecord(info, picture, false /* isGuest */,
-                                isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                switchToEnabled));
                     }
                 }
 

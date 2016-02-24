@@ -2982,6 +2982,22 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public void onEphemeralUserStop(int userId) {
+            synchronized (mUsersLock) {
+               UserInfo userInfo = getUserInfoLU(userId);
+               if (userInfo != null && userInfo.isEphemeral()) {
+                    // Do not allow switching back to the ephemeral user again as the user is going
+                    // to be deleted.
+                    userInfo.flags |= UserInfo.FLAG_DISABLED;
+                    if (userInfo.isGuest()) {
+                        // Indicate that the guest will be deleted after it stops.
+                        userInfo.guestToRemove = true;
+                    }
+               }
+            }
+        }
+
+        @Override
         public UserInfo createUserEvenWhenDisallowed(String name, int flags) {
             UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL);
             // Keep this in sync with UserManager.createUser
