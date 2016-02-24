@@ -585,14 +585,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     w = 0;
                 }
                 if (DEBUG_MEASURE) Log.d(mLogTag, "Fixed width: " + w);
+                final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
                 if (w > 0) {
-                    final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
                     widthMeasureSpec = MeasureSpec.makeMeasureSpec(
                             Math.min(w, widthSize), EXACTLY);
                     fixedWidth = true;
                 } else {
                     widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                            widthMeasureSpec - mFloatingInsets.left - mFloatingInsets.right,
+                            widthSize - mFloatingInsets.left - mFloatingInsets.right,
                             AT_MOST);
                     mApplyFloatingHorizontalInsets = true;
                 }
