@@ -8472,6 +8472,7 @@ package android.content {
     field public static final java.lang.String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
     field public static final java.lang.String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     field public static final java.lang.String ACTION_ANSWER = "android.intent.action.ANSWER";
+    field public static final java.lang.String ACTION_APPLICATION_PREFERENCES = "android.intent.action.APPLICATION_PREFERENCES";
     field public static final java.lang.String ACTION_APPLICATION_RESTRICTIONS_CHANGED = "android.intent.action.APPLICATION_RESTRICTIONS_CHANGED";
     field public static final java.lang.String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     field public static final java.lang.String ACTION_ASSIST = "android.intent.action.ASSIST";
