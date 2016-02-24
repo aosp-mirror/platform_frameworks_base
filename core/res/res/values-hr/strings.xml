@@ -89,7 +89,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Zadana postavka ID-a pozivatelja nema ograničenje. Sljedeći poziv: Nije ograničen"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usluga nije rezervirana."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ne možete promijeniti postavku ID-a pozivatelja."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Promijenjen je ograničeni pristup"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Podatkovna usluga je blokirana."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Hitna usluga je blokirana."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Glasovna usluga je blokirana."</string>
@@ -1584,4 +1583,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Prikvači"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Otkvači"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

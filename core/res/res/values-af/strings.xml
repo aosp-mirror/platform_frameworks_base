@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Beller-ID se verstek is nie beperk nie. Volgende oproep: nie beperk nie"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Diens nie verskaf nie."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Jy kan nie die beller-ID-instelling verander nie."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Beperkte toegang het verander"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datadiens word geblokkeer."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Nooddiens word geblokkeer."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Stemdiens word geblokkeer."</string>
@@ -1538,8 +1537,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> gekies</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> gekies</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"Jy stel die belangrikheid van hierdie kennisgewings."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"Dit is belangrik as gevolg van die mense wat betrokke is."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep (\'n gebruiker met hierdie rekening bestaan reeds)?"</string>
@@ -1566,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Speld vas"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Ontspeld"</string>
     <string name="app_info" msgid="6856026610594615344">"Programinligting"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"कॉलर ID प्रतिबंधित नहीं पर डिफ़ॉल्‍ट है. अगली कॉल: प्रतिबंधित नहीं"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"सेवा प्रावधान की हुई नहीं है."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"आप कॉलर आईडी सेटिंग नहीं बदल सकते."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"प्रतिबंधित पहुंच बदली गई"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"डेटा सेवा अवरोधित है."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"आपातकालीन सेवा अवरोधित है."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"ध्‍वनि सेवा अवरोधित है."</string>
@@ -1056,7 +1055,7 @@
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"बग रिपोर्ट साझा करें?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"बग रिपोर्ट साझा की जा रही है…"</string>
     <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"इस डिवाइस के समस्या निवारण में सहायता हेतु आपके आईटी व्यवस्थापक ने बग रिपोर्ट के लिए अनुरोध किया है. ऐप्स और डेटा को साझा किया जा सकता है और आपके डिवाइस की गति अस्थायी रूप से धीमी हो सकती है."</string>
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"आपके आईटी व्यवस्थापक ने इस डिवाइस के समस्या निवारण में सहायता के लिए एक बग रिपोर्ट का अनुरोध किया है. ऐप्स और डेटा साझा किया जा सकता है."</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"आपके आईटी व्यवस्थापक ने इस डिवाइस के समस्या निवारण में सहायता के लिए एक बग रिपोर्ट का अनुरोध किया है. ऐप्स और डेटा साझा किए जा सकते हैं."</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"इससे आपका डिवाइस अस्थायी रूप से धीमा हो सकता है"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"स्वीकार करें"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"अस्वीकार करें"</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"पिन करें"</string>
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन करें"</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

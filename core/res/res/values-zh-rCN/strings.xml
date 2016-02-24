@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"默认显示本机号码，在下一次通话中也显示"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"未提供服务。"</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"您无法更改来电显示设置。"</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"网络可用情况发生变化"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"数据网络服务已停用。"</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"紧急服务已停用。"</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"语音服务已停用。"</string>
@@ -917,7 +916,7 @@
     <string name="aerr_reset" msgid="7645427603514220451">"重置并重启应用"</string>
     <string name="aerr_report" msgid="5371800241488400617">"发送反馈"</string>
     <string name="aerr_close" msgid="2991640326563991340">"关闭"</string>
-    <string name="aerr_mute" msgid="1974781923723235953">"忽略直到设备重新启动"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"忽略（直到设备重启）"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"等待"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"关闭应用"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1054,11 +1053,9 @@
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已连接到USB调试"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"触摸可停用USB调试。"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"要分享错误报告吗？"</string>
-    <!-- no translation found for sharing_remote_bugreport_notification_title (7572089031496651372) -->
-    <skip />
-    <!-- no translation found for share_remote_bugreport_notification_message (752583906074230920) -->
-    <skip />
-    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"您的 IT 管理员请求获取错误报告，以协助您排查此设备的问题。报告可能会透露您设备中的应用和数据。"</string>
+    <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"正在分享错误报告…"</string>
+    <string name="share_remote_bugreport_notification_message" msgid="752583906074230920">"您的 IT 管理员希望获取错误报告，以便排查此设备的问题。报告可能会透露您设备上的应用和数据，设备运行速度也可能会因此而暂时减慢。"</string>
+    <string name="share_finished_remote_bugreport_notification_message" msgid="4627312060769912353">"您的 IT 管理员希望获取错误报告，以便排查此设备的问题。报告可能会透露您设备上的应用和数据。"</string>
     <string name="sharing_remote_bugreport_notification_message" msgid="673106383408474893">"这可能会暂时减慢您设备的运行速度"</string>
     <string name="share_remote_bugreport_notification_accept" msgid="8203856129078669677">"接受"</string>
     <string name="share_remote_bugreport_notification_decline" msgid="6337969352057443969">"拒绝"</string>
@@ -1540,8 +1537,7 @@
       <item quantity="other">已选择 <xliff:g id="COUNT_1">%1$d</xliff:g> 项</item>
       <item quantity="one">已选择 <xliff:g id="COUNT_0">%1$d</xliff:g> 项</item>
     </plurals>
-    <!-- no translation found for importance_from_user (7318955817386549931) -->
-    <skip />
+    <string name="importance_from_user" msgid="7318955817386549931">"这些通知的重要性由您来设置。"</string>
     <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定的人，因此被归为重要通知。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g>（目前已有用户使用此帐号）创建新用户吗？"</string>
@@ -1568,4 +1564,6 @@
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
+    <!-- no translation found for negative_duration (5688706061127375131) -->
+    <skip />
 </resources>

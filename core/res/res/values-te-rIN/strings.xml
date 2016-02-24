@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"కాలర్ ID డిఫాల్ట్‌గా అపరిమితానికి ఉంటుంది. తదుపరి కాల్: అపరిమితం"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"పరిమితం చేయబడిన ప్రాప్యత మార్చబడింది"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"డేటా సేవ బ్లాక్ చేయబడింది."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"అత్యవసర సేవ బ్లాక్ చేయబడింది."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"వాయిస్ సేవ బ్లాక్ చేయబడింది."</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"పిన్ చేయి"</string>
     <string name="unpin_target" msgid="3556545602439143442">"అన్‌‌పిన్‌ ‌చేయి"</string>
     <string name="app_info" msgid="6856026610594615344">"అనువర్తన సమాచారం"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

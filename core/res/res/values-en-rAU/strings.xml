@@ -88,7 +88,6 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Caller ID defaults to not restricted. Next call: Not restricted"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Service not provisioned."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"You can\'t change the caller ID setting."</string>
-    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Restricted access changed"</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Data service is blocked."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Emergency service is blocked."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Voice service is blocked."</string>
@@ -915,7 +914,7 @@
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> keeps stopping"</string>
     <string name="aerr_restart" msgid="9001379185665886595">"Restart app"</string>
     <string name="aerr_reset" msgid="7645427603514220451">"Reset and restart app"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Sending feedback"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Send feedback"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Close"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Mute until device restarts"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Wait"</string>
@@ -1565,4 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Pin"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Unpin"</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>
