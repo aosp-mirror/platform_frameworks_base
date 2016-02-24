@@ -2677,8 +2677,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner to install a certificate and private key pair. The
-     * keypair will be visible to all apps within the profile.
+     * Called by a device or profile owner, or delegated certificate installer, to install a
+     * certificate and corresponding private key. All apps within the profile will be able to access
+     * the certificate and use the private key, given direct user approval.
+     *
+     * <p>Access to the installed credentials will not be granted to the caller of this API without
+     * direct user approval. This is for security - should a certificate installer become
+     * compromised, certificates it had already installed will be protected.
+     *
+     * <p>If the installer must have access to the credentials, call
+     * {@link #installKeyPair(ComponentName, PrivateKey, Certificate, String, boolean)} instead.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
@@ -2690,11 +2698,35 @@ public class DevicePolicyManager {
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate cert, @NonNull String alias) {
+        return installKeyPair(admin, privKey, cert, alias, false);
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate installer, to install a
+     * certificate and corresponding private key. All apps within the profile will be able to access
+     * the certificate and use the private key, given direct user approval.
+     *
+     * <p>The caller of this API may grant itself access to the credential immediately, without user
+     * approval. It is a best practice not to request this unless strictly necessary since it opens
+     * up additional security vulnerabilities.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *            {@code null} if calling from a delegated certificate installer.
+     * @param privKey The private key to install.
+     * @param cert The certificate to install.
+     * @param alias The private key alias under which to install the certificate. If a certificate
+     * with that alias already exists, it will be overwritten.
+     * @param requestAccess {@code true} to request that the calling app be granted access to the
+     * credentials immediately. Otherwise, access to the credentials will be gated by user approval.
+     * @return {@code true} if the keys were installed, {@code false} otherwise.
+     */
+    public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
+            @NonNull Certificate cert, @NonNull String alias, boolean requestAccess) {
         try {
             final byte[] pemCert = Credentials.convertToPem(cert);
             final byte[] pkcs8Key = KeyFactory.getInstance(privKey.getAlgorithm())
                     .getKeySpec(privKey, PKCS8EncodedKeySpec.class).getEncoded();
-            return mService.installKeyPair(admin, pkcs8Key, pemCert, alias);
+            return mService.installKeyPair(admin, pkcs8Key, pemCert, alias, requestAccess);
         } catch (RemoteException e) {
             Log.w(TAG, REMOTE_EXCEPTION_MESSAGE, e);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -2706,8 +2738,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner to remove all user credentials installed under a given
-     * alias.
+     * Called by a device or profile owner, or delegated certificate installer, to remove all user
+     * credentials installed under a given alias.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
