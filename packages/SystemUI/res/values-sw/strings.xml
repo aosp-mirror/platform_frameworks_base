@@ -445,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Onyesha sekunde za saa katika sehemu ya arifa. Inaweza kuathiri muda wa matumizi ya betri."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Panga Upya Mipangilio ya Haraka"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Onyesha unga\'avu katika Mipangilio ya Haraka"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Ruhusu ishara ya kugawanya skrini kwa kutelezesha kidole juu"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Ruhusu kugawanya skrini kwa ishara ya kutelezesha kidole juu"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Washa kipengele cha ishara ili utumie skrini iliyogawanywa kwa kutelezesha kidole juu kutoka kitufe cha Muhtasari"</string>
     <string name="experimental" msgid="6198182315536726162">"Ya majaribio"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Je, ungependa kuwasha Bluetooth?"</string>

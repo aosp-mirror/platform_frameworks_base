@@ -445,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"在状态栏中显示时钟的秒数。这可能会影响电池的续航时间。"</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"重新排列快捷设置"</string>
     <string name="show_brightness" msgid="6613930842805942519">"在快捷设置中显示亮度栏"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"启用分屏向上滑动手势"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"启用分屏上滑手势"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"启用通过从“概览”按钮向上滑动的手势进入分屏模式"</string>
     <string name="experimental" msgid="6198182315536726162">"实验性"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"要开启蓝牙吗？"</string>
@@ -465,30 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"在屏幕上持续显示，并发出提示音"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多设置"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
-    <!-- no translation found for color_and_appearance (1254323855964993144) -->
-    <skip />
-    <!-- no translation found for night_mode (3540405868248625488) -->
-    <skip />
-    <!-- no translation found for calibrate_display (5974642573432039217) -->
-    <skip />
-    <!-- no translation found for night_mode_on (5597545513026541108) -->
-    <skip />
-    <!-- no translation found for night_mode_off (8035605276956057508) -->
-    <skip />
-    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
-    <skip />
-    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
-    <skip />
-    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
-    <skip />
-    <!-- no translation found for use_dark_theme (2900938704964299312) -->
-    <skip />
-    <!-- no translation found for adjust_tint (3398569573231409878) -->
-    <skip />
-    <!-- no translation found for adjust_brightness (980039329808178246) -->
-    <skip />
-    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
-    <skip />
+    <string name="color_and_appearance" msgid="1254323855964993144">"颜色和外观"</string>
+    <string name="night_mode" msgid="3540405868248625488">"夜间模式"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"校准显示画面"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"开启"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"关闭"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"自动开启"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"根据地点和时间适时切换到夜间模式"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"夜间模式开启时"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"对 Android 操作系统使用深色主题背景"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"调整色调"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"调整亮度"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"系统会将深色主题背景应用于 Android 操作系统的核心区域（通常以浅色主题背景显示），例如设置和通知。"</string>
     <string name="color_apply" msgid="9212602012641034283">"应用"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"确认设置"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"部分颜色设置可能会导致此设备无法使用。请点击“确定”确认这些颜色设置，否则，系统将在 10 秒后重置这些设置。"</string>
@@ -500,12 +488,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"主屏幕"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"最近"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"返回"</string>
-    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
-    <skip />
-    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"与音量控件一起显示"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"请勿打扰"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"音量按钮快捷键"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"按音量调高键时退出“请勿打扰”模式"</string>
     <string name="battery" msgid="7498329822413202973">"电池"</string>
     <string name="clock" msgid="7416090374234785905">"时钟"</string>
@@ -516,8 +501,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"流量节省程序已开启"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"流量节省程序已关闭"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"开启"</string>
-    <!-- no translation found for switch_bar_off (8803270596930432874) -->
-    <skip />
+    <string name="switch_bar_off" msgid="8803270596930432874">"关闭"</string>
     <string name="nav_bar" msgid="1993221402773877607">"导航栏"</string>
     <string name="start" msgid="6873794757232879664">"顶部"</string>
     <string name="center" msgid="4327473927066010960">"中心位置"</string>
@@ -540,12 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"预览"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖动即可添加图块"</string>
     <string name="qs_edit" msgid="2232596095725105230">"修改"</string>
-    <!-- no translation found for tuner_time (6572217313285536011) -->
-    <skip />
-    <!-- no translation found for clock_options:0 (5965318737560463480) -->
-    <!-- no translation found for clock_options:1 (1427801730816895300) -->
-    <!-- no translation found for clock_options:2 (3830170141562534721) -->
-    <!-- no translation found for battery_options:0 (3160236755818672034) -->
-    <!-- no translation found for battery_options:1 (2139628951880142927) -->
-    <!-- no translation found for battery_options:2 (3327323682209964956) -->
+    <string name="tuner_time" msgid="6572217313285536011">"时间"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"显示小时、分钟和秒"</item>
+    <item msgid="1427801730816895300">"显示小时和分钟（默认）"</item>
+    <item msgid="3830170141562534721">"不显示此图标"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"一律显示百分比"</item>
+    <item msgid="2139628951880142927">"充电时显示百分比（默认）"</item>
+    <item msgid="3327323682209964956">"不显示此图标"</item>
+  </string-array>
 </resources>
