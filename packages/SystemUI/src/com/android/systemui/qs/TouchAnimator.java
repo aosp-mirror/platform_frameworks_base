@@ -14,8 +14,6 @@
 
 package com.android.systemui.qs;
 
-import android.animation.Keyframe;
-import android.util.Log;
 import android.util.MathUtils;
 import android.util.Property;
 import android.view.View;
@@ -34,7 +32,6 @@ import java.util.List;
 public class TouchAnimator {
 
     private final Object[] mTargets;
-    private final Property[] mProperties;
     private final KeyframeSet[] mKeyframeSets;
     private final float mStartDelay;
     private final float mEndDelay;
@@ -43,10 +40,9 @@ public class TouchAnimator {
     private final Listener mListener;
     private float mLastT;
 
-    private TouchAnimator(Object[] targets, Property[] properties, KeyframeSet[] keyframeSets,
+    private TouchAnimator(Object[] targets, KeyframeSet[] keyframeSets,
             float startDelay, float endDelay, Interpolator interpolator, Listener listener) {
         mTargets = targets;
-        mProperties = properties;
         mKeyframeSets = keyframeSets;
         mStartDelay = startDelay;
         mEndDelay = endDelay;
@@ -73,8 +69,7 @@ public class TouchAnimator {
             mLastT = t;
         }
         for (int i = 0; i < mTargets.length; i++) {
-            Object value = mKeyframeSets[i].getValue(t);
-            mProperties[i].set(mTargets[i], value);
+            mKeyframeSets[i].setValue(t, mTargets[i]);
         }
     }
 
@@ -111,7 +106,6 @@ public class TouchAnimator {
 
     public static class Builder {
         private List<Object> mTargets = new ArrayList<>();
-        private List<Property> mProperties = new ArrayList<>();
         private List<KeyframeSet> mValues = new ArrayList<>();
 
         private float mStartDelay;
@@ -120,18 +114,17 @@ public class TouchAnimator {
         private Listener mListener;
 
         public Builder addFloat(Object target, String property, float... values) {
-            add(target, property, KeyframeSet.ofFloat(values));
+            add(target, KeyframeSet.ofFloat(getProperty(target, property), values));
             return this;
         }
 
         public Builder addInt(Object target, String property, int... values) {
-            add(target, property, KeyframeSet.ofInt(values));
+            add(target, KeyframeSet.ofInt(getProperty(target, property), values));
             return this;
         }
 
-        private void add(Object target, String property, KeyframeSet keyframeSet) {
+        private void add(Object target, KeyframeSet keyframeSet) {
             mTargets.add(target);
-            mProperties.add(getProperty(target, property));
             mValues.add(keyframeSet);
         }
 
@@ -183,7 +176,6 @@ public class TouchAnimator {
 
         public TouchAnimator build() {
             return new TouchAnimator(mTargets.toArray(new Object[mTargets.size()]),
-                    mProperties.toArray(new Property[mProperties.size()]),
                     mValues.toArray(new KeyframeSet[mValues.size()]),
                     mStartDelay, mEndDelay, mInterpolator, mListener);
         }
@@ -199,54 +191,57 @@ public class TouchAnimator {
             mFrameWidth = 1 / (float) (size - 1);
         }
 
-        Object getValue(float fraction) {
+        void setValue(float fraction, Object target) {
             int i;
             for (i = 1; i < mSize - 1 && fraction > mFrameWidth; i++);
             float amount = fraction / mFrameWidth;
-            return interpolate(i, amount);
+            interpolate(i, amount, target);
         }
 
-        protected abstract Object interpolate(int index, float amount);
+        protected abstract void interpolate(int index, float amount, Object target);
 
-        public static KeyframeSet ofInt(int... values) {
-            return new IntKeyframeSet(values);
+        public static KeyframeSet ofInt(Property property, int... values) {
+            return new IntKeyframeSet((Property<?, Integer>) property, values);
         }
 
-        public static KeyframeSet ofFloat(float... values) {
-            return new FloatKeyframeSet(values);
+        public static KeyframeSet ofFloat(Property property, float... values) {
+            return new FloatKeyframeSet((Property<?, Float>) property, values);
         }
     }
 
-    private static class FloatKeyframeSet extends KeyframeSet {
+    private static class FloatKeyframeSet<T> extends KeyframeSet {
         private final float[] mValues;
+        private final Property<T, Float> mProperty;
 
-        public FloatKeyframeSet(float[] values) {
+        public FloatKeyframeSet(Property<T, Float> property, float[] values) {
             super(values.length);
+            mProperty = property;
             mValues = values;
         }
 
         @Override
-        protected Object interpolate(int index, float amount) {
+        protected void interpolate(int index, float amount, Object target) {
             float firstFloat = mValues[index - 1];
             float secondFloat = mValues[index];
-            return firstFloat + (secondFloat - firstFloat) * amount;
+            mProperty.set((T) target, firstFloat + (secondFloat - firstFloat) * amount);
         }
     }
 
-    private static class IntKeyframeSet extends KeyframeSet {
-
+    private static class IntKeyframeSet<T> extends KeyframeSet {
         private final int[] mValues;
+        private final Property<T, Integer> mProperty;
 
-        public IntKeyframeSet(int[] values) {
+        public IntKeyframeSet(Property<T, Integer> property, int[] values) {
             super(values.length);
+            mProperty = property;
             mValues = values;
         }
 
         @Override
-        protected Object interpolate(int index, float amount) {
+        protected void interpolate(int index, float amount, Object target) {
             int firstFloat = mValues[index - 1];
             int secondFloat = mValues[index];
-            return (int) (firstFloat + (secondFloat - firstFloat) * amount);
+            mProperty.set((T) target, (int) (firstFloat + (secondFloat - firstFloat) * amount));
         }
     }
 }
