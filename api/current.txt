@@ -29547,6 +29547,7 @@ package android.preference {
     method protected int getPersistedInt(int);
     method protected long getPersistedLong(long);
     method protected java.lang.String getPersistedString(java.lang.String);
+    method public java.util.Set<java.lang.String> getPersistedStringSet(java.util.Set<java.lang.String>);
     method public android.preference.PreferenceManager getPreferenceManager();
     method public android.content.SharedPreferences getSharedPreferences();
     method public boolean getShouldDisableView();
@@ -29581,6 +29582,7 @@ package android.preference {
     method protected boolean persistInt(int);
     method protected boolean persistLong(long);
     method protected boolean persistString(java.lang.String);
+    method public boolean persistStringSet(java.util.Set<java.lang.String>);
     method public void restoreHierarchyState(android.os.Bundle);
     method public void saveHierarchyState(android.os.Bundle);
     method public void setDefaultValue(java.lang.Object);
