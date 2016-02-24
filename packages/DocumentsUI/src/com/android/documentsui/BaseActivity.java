@@ -33,7 +33,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -66,9 +65,6 @@ import java.util.concurrent.Executor;
 public abstract class BaseActivity extends Activity
         implements SearchManagerListener, NavigationView.Environment {
 
-    // See comments where this const is referenced for details.
-    private static final int DRAWER_NO_FIDDLE_DELAY = 1500;
-
     State mState;
     RootsCache mRoots;
     SearchViewManager mSearchManager;
@@ -79,10 +75,6 @@ public abstract class BaseActivity extends Activity
 
     @LayoutRes
     private int mLayoutId;
-
-    // Track the time we opened the drawer in response to back being pressed.
-    // We use the time gap to figure out whether to close app or reopen the drawer.
-    private long mDrawerLastFiddled;
 
     private boolean mNavDrawerHasFocus;
 
@@ -368,6 +360,11 @@ public abstract class BaseActivity extends Activity
         invalidateOptionsMenu();
     }
 
+    final void loadRoot(final Uri uri) {
+        new LoadRootTask(this, uri).executeOnExecutor(
+                ProviderExecutor.forAuthority(uri.getAuthority()));
+    }
+
     /**
      * Called when search results changed.
      * Refreshes the content of the directory. It doesn't refresh elements on the action bar.
@@ -543,34 +540,16 @@ public abstract class BaseActivity extends Activity
             return;
         }
 
-        int size = mState.stack.size();
-
-        // Do some "do what a I want" drawer fiddling, but don't
-        // do it if user already hit back recently and we recently
-        // did some fiddling.
-        if (mDrawer.isPresent()
-                && (System.currentTimeMillis() - mDrawerLastFiddled) > DRAWER_NO_FIDDLE_DELAY) {
-            // Close drawer if it is open.
-            if (mDrawer.isOpen()) {
-                mDrawer.setOpen(false);
-                mDrawerLastFiddled = System.currentTimeMillis();
-                return;
-            }
-
-            // Open the Close drawer if it is closed and we're at the top of a root.
-            if (size == 1) {
-                mDrawer.setOpen(true);
-                // Remember so we don't just close it again if back is pressed again.
-                mDrawerLastFiddled = System.currentTimeMillis();
-                return;
-            }
-        }
-
-        if (popDir()) {
+        if (onBeforePopDir() || popDir()) {
             return;
         }
 
         super.onBackPressed();
+    }
+
+    boolean onBeforePopDir() {
+        // Files app overrides this with some fancy logic.
+        return false;
     }
 
     public void onStackPicked(DocumentStack stack) {
