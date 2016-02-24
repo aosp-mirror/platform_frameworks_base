@@ -44,7 +44,7 @@ public class WifiPowerEstimator extends PowerCalculator {
         final long WIFI_BPS = 1000000; // TODO: Extract average bit rates from system
         final double WIFI_POWER = profile.getAveragePower(PowerProfile.POWER_WIFI_ACTIVE)
                 / 3600;
-        return (WIFI_POWER / (((double)WIFI_BPS) / 8 / 2048)) / (60*60);
+        return WIFI_POWER / (((double)WIFI_BPS) / 8 / 2048);
     }
 
     @Override
