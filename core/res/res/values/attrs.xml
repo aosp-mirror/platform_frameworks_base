@@ -8048,12 +8048,19 @@ i
          {@link android.media.tv.TvInputService#SERVICE_META_DATA} meta-data entry.
          Described here are the attributes that can be included in that tag. -->
     <declare-styleable name="TvInputService">
-        <!-- Component name of an activity for setup of this service.
-             The setup includes scanning channels and registering EPG data. -->
+        <!-- Component name of an activity that allows the user to set up this service. -->
         <attr name="setupActivity" format="string" />
-        <!-- Component name of an activity that allows the user to modify
-             the settings for this service. -->
+        <!-- Component name of an activity that allows the user to modify the settings for this
+             service. -->
         <attr name="settingsActivity" />
+        <!-- Attribute whether the TV input service can record programs. This value can be changed
+             at runtime by calling
+             {@link android.media.tv.TvInputService#updateTvInputInfo(android.content.Context, android.media.tv.TvInputInfo)}. -->
+        <attr name="canRecord" format="boolean" />
+        <!-- The number of tuners that the TV input service is associated with. This value can be
+             changed at runtime by calling
+             {@link android.media.tv.TvInputService#updateTvInputInfo(android.content.Context, android.media.tv.TvInputInfo)}. -->
+        <attr name="tunerCount" format="integer" />
     </declare-styleable>
 
     <!-- Attributes that can be used with <code>rating-system-definition</code> tags inside of the
