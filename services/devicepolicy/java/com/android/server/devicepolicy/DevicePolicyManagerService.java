@@ -2053,31 +2053,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         enforceFullCrossUsersPermission(userHandle);
-        Intent resolveIntent = new Intent();
-        resolveIntent.setComponent(adminName);
-        List<ResolveInfo> infos = mContext.getPackageManager().queryBroadcastReceiversAsUser(
-                resolveIntent,
-                PackageManager.GET_META_DATA | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
-                PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE,
-                userHandle);
-        if (infos == null || infos.size() <= 0) {
+        ActivityInfo ai = null;
+        try {
+            ai = mIPackageManager.getReceiverInfo(adminName,
+                    PackageManager.GET_META_DATA |
+                    PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS |
+                    PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE, userHandle);
+        } catch (RemoteException e) {
+            // shouldn't happen.
+        }
+        if (ai == null) {
             throw new IllegalArgumentException("Unknown admin: " + adminName);
         }
 
-        final ResolveInfo ri = infos.get(0);
-
-        if (!permission.BIND_DEVICE_ADMIN.equals(ri.activityInfo.permission)) {
+        if (!permission.BIND_DEVICE_ADMIN.equals(ai.permission)) {
             final String message = "DeviceAdminReceiver " + adminName + " must be protected with "
                     + permission.BIND_DEVICE_ADMIN;
             Slog.w(LOG_TAG, message);
             if (throwForMissiongPermission &&
-                    ri.activityInfo.applicationInfo.targetSdkVersion > Build.VERSION_CODES.M) {
+                    ai.applicationInfo.targetSdkVersion > Build.VERSION_CODES.M) {
                 throw new IllegalArgumentException(message);
             }
         }
 
         try {
-            return new DeviceAdminInfo(mContext, ri);
+            return new DeviceAdminInfo(mContext, ai);
         } catch (XmlPullParserException | IOException e) {
             Slog.w(LOG_TAG, "Bad device admin requested for user=" + userHandle + ": " + adminName,
                     e);
