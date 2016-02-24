@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -164,6 +165,10 @@ class PackageDexOptimizer {
             }
 
             for (String path : paths) {
+                if (useProfiles && isUsedByOtherApps(path)) {
+                    // We cannot use profile guided compilation if the apk was used by another app.
+                    useProfiles = false;
+                }
                 int dexoptNeeded;
 
                 try {
@@ -204,8 +209,10 @@ class PackageDexOptimizer {
                         + " vmSafeMode=" + vmSafeMode + " debuggable=" + debuggable
                         + " extractOnly=" + extractOnly + " oatDir = " + oatDir);
                 final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+                // Profile guide compiled oat files should not be public.
+                final boolean isPublic = !pkg.isForwardLocked() && !useProfiles;
                 final int dexFlags = adjustDexoptFlags(
-                        (!pkg.isForwardLocked() ? DEXOPT_PUBLIC : 0)
+                        ( isPublic ? DEXOPT_PUBLIC : 0)
                         | (vmSafeMode ? DEXOPT_SAFEMODE : 0)
                         | (debuggable ? DEXOPT_DEBUGGABLE : 0)
                         | (extractOnly ? DEXOPT_EXTRACTONLY : 0)
@@ -273,6 +280,25 @@ class PackageDexOptimizer {
 
     void systemReady() {
         mSystemReady = true;
+    }
+
+    private boolean isUsedByOtherApps(String apkPath) {
+        try {
+            apkPath = new File(apkPath).getCanonicalPath();
+        } catch (IOException e) {
+            // Log an error but continue without it.
+            Slog.w(TAG, "Failed to get canonical path", e);
+        }
+        String useMarker = apkPath.replace('/', '@');
+        final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
+        for (int i = 0; i < currentUserIds.length; i++) {
+            File profileDir = Environment.getDataProfilesDeForeignDexDirectory(currentUserIds[i]);
+            File foreignUseMark = new File(profileDir, useMarker);
+            if (foreignUseMark.exists()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
