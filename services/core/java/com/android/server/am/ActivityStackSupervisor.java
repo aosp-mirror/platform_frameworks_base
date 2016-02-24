@@ -1700,6 +1700,15 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return false;
     }
 
+    void updateActivityApplicationInfoLocked(ApplicationInfo aInfo) {
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
+            for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                stacks.get(stackNdx).updateActivityApplicationInfoLocked(aInfo);
+            }
+        }
+    }
+
     TaskRecord finishTopRunningActivityLocked(ProcessRecord app, String reason) {
         TaskRecord finishedTask = null;
         ActivityStack focusedStack = getFocusedStack();

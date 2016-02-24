@@ -76,6 +76,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -252,6 +253,10 @@ final class ActivityRecord {
                 pw.print(prefix); pw.print("resDir="); pw.println(appInfo.publicSourceDir);
             }
             pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
+            if (appInfo.splitSourceDirs != null) {
+                pw.print(prefix); pw.print("splitDir=");
+                        pw.println(Arrays.toString(appInfo.splitSourceDirs));
+            }
         }
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);

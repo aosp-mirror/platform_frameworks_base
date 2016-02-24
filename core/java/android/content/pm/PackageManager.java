@@ -538,6 +538,7 @@ public abstract class PackageManager {
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
             INSTALL_EPHEMERAL,
+            INSTALL_DONT_KILL_APP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -638,6 +639,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_EPHEMERAL = 0x00000800;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this package contains
+     * a feature split to an existing application and the existing application should not
+     * be killed during the installation process.
+     *
+     * @hide
+     */
+    public static final int INSTALL_DONT_KILL_APP = 0x00001000;
 
     /**
      * Flag parameter for
@@ -1088,6 +1098,7 @@ public abstract class PackageManager {
             DELETE_KEEP_DATA,
             DELETE_ALL_USERS,
             DELETE_SYSTEM_APP,
+            DELETE_DONT_KILL_APP,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -1118,6 +1129,15 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int DELETE_SYSTEM_APP = 0x00000004;
+
+    /**
+     * Flag parameter for {@link #deletePackage} to indicate that, if you are calling
+     * uninstall on a package that is replaced to provide new feature splits, the
+     * existing application should not be killed during the removal process.
+     *
+     * @hide
+     */
+    public static final int DELETE_DONT_KILL_APP = 0x00000008;
 
     /**
      * Return code for when package deletion succeeds. This is passed to the

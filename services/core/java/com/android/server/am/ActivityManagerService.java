@@ -17145,10 +17145,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                             String ssp;
                             if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
                                 boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(action);
-                                boolean fullUninstall = removed &&
-                                        !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                                final boolean replacing =
+                                        intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
                                 final boolean killProcess =
                                         !intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false);
+                                final boolean fullUninstall = removed && !replacing;
                                 if (killProcess) {
                                     forceStopPackageLocked(ssp, UserHandle.getAppId(
                                             intent.getIntExtra(Intent.EXTRA_UID, -1)),
@@ -17156,7 +17157,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                                             removed ? "pkg removed" : "pkg changed");
                                 }
                                 if (removed) {
-                                    sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
+                                    final int cmd = killProcess
+                                            ? IApplicationThread.PACKAGE_REMOVED
+                                            : IApplicationThread.PACKAGE_REMOVED_DONT_KILL;
+                                    sendPackageBroadcastLocked(cmd,
                                             new String[] {ssp}, userId);
                                     if (fullUninstall) {
                                         mAppOpsService.packageRemoved(
@@ -17191,7 +17195,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                             break;
                     }
                     break;
+                case Intent.ACTION_PACKAGE_REPLACED:
+                {
+                    final Uri data = intent.getData();
+                    final String ssp;
+                    if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
+                        final ApplicationInfo aInfo =
+                                getPackageManagerInternalLocked().getApplicationInfo(
+                                        ssp,
+                                        userId);
+                        mStackSupervisor.updateActivityApplicationInfoLocked(aInfo);
+                        sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REPLACED,
+                                new String[] {ssp}, userId);
+                    }
+                    break;
+                }
                 case Intent.ACTION_PACKAGE_ADDED:
+                {
                     // Special case for adding a package: by default turn on compatibility mode.
                     Uri data = intent.getData();
                     String ssp;
@@ -17209,6 +17229,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     break;
+                }
                 case Intent.ACTION_TIMEZONE_CHANGED:
                     // If this is the time zone changed action, queue up a message that will reset
                     // the timezone of all currently running processes. This message will get

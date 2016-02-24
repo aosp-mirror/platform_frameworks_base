@@ -288,6 +288,19 @@ public class ResourcesManager {
         }
     }
 
+    /**
+     * Removes the top level Resources for applications with the given compatibility info.
+     * @see #getTopLevelResources(String, String[], String[], String[], int, Configuration, CompatibilityInfo, ClassLoader)
+     */
+    void removeTopLevelResources(String resDir, int displayId, Configuration overrideConfiguration,
+            CompatibilityInfo compatInfo) {
+        final float scale = compatInfo.applicationScale;
+        final Configuration overrideConfigCopy = (overrideConfiguration != null)
+                ? new Configuration(overrideConfiguration) : null;
+        final ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfigCopy, scale);
+        mActiveResources.remove(key);
+    }
+
     /* package */ void setDefaultLocalesLocked(LocaleList locales) {
         final int bestLocale;
         if (mHasNonSystemLocales) {
