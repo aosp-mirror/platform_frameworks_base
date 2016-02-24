@@ -1998,8 +1998,10 @@ public class WindowManagerService extends IWindowManager.Stub
             prepareWindowReplacementTransition(atoken);
 
             if (displayContent.isDefaultDisplay) {
-                mPolicy.getInsetHintLw(win.mAttrs, mRotation, outContentInsets, outStableInsets,
-                        outOutsets);
+                if (mPolicy.getInsetHintLw(win.mAttrs, mRotation, outContentInsets, outStableInsets,
+                        outOutsets)) {
+                    res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
+                }
             } else {
                 outContentInsets.setEmpty();
                 outStableInsets.setEmpty();
@@ -2759,6 +2761,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (winAnimator.mReportSurfaceResized) {
                 winAnimator.mReportSurfaceResized = false;
                 result |= WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED;
+            }
+            if (mPolicy.isNavBarForcedShownLw(win)) {
+                result |= WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR;
             }
             if (!win.isGoneForLayoutLw()) {
                 win.mResizedWhileGone = false;

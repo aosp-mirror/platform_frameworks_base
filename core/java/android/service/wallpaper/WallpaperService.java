@@ -271,7 +271,8 @@ public abstract class WallpaperService extends Service {
             @Override
             public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                     Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                    Configuration newConfig, Rect backDropRect, boolean forceLayout) {
+                    Configuration newConfig, Rect backDropRect, boolean forceLayout,
+                    boolean alwaysConsumeNavBar) {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0, outsets);
                 mCaller.sendMessage(msg);
@@ -790,7 +791,7 @@ public abstract class WallpaperService extends Service {
                             mFinalStableInsets.set(mDispatchedStableInsets);
                             WindowInsets insets = new WindowInsets(mFinalSystemInsets,
                                     null, mFinalStableInsets,
-                                    getResources().getConfiguration().isScreenRound());
+                                    getResources().getConfiguration().isScreenRound(), false);
                             if (DEBUG) {
                                 Log.v(TAG, "dispatching insets=" + insets);
                             }

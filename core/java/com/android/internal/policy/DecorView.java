@@ -1002,7 +1002,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean consumingNavBar =
                 (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
-                        && (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+                        && (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0
+                || (insets != null && insets.shouldAlwaysConsumeNavBar());
 
         // If we didn't request fullscreen layout, but we still got it because of the
         // mForceWindowDrawsStatusBarBackground flag, also consume top inset.

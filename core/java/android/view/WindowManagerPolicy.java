@@ -920,9 +920,10 @@ public interface WindowManagerPolicy {
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
      * @param outOutsets The areas that are not real display, but we would like to treat as such.
-     *
+     * @return Whether to always consume the navigation bar.
+     *         See {@link #isNavBarForcedShownLw(WindowState)}.
      */
-    public void getInsetHintLw(WindowManager.LayoutParams attrs, int rotation,
+    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, int rotation,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets);
 
     /**
@@ -1350,6 +1351,12 @@ public interface WindowManagerPolicy {
      */
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             Rect outInsets);
+
+
+    /**
+     * @return true if the navigation bar is forced to stay visible
+     */
+    public boolean isNavBarForcedShownLw(WindowState win);
 
     /**
      * Calculates the insets for the areas that could never be removed in Honeycomb, i.e. system
