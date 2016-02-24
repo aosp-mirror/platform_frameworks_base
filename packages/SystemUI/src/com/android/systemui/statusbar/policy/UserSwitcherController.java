@@ -37,6 +37,8 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -99,7 +101,6 @@ public class UserSwitcherController {
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
     private boolean mPauseRefreshUsers;
-    private boolean mAllowUserSwitchingWhenSystemUserLocked;
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
 
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor,
@@ -140,6 +141,7 @@ public class UserSwitcherController {
         mSettingsObserver.onChange(false);
 
         keyguardMonitor.addCallback(mCallback);
+        listenForCallState();
 
         refreshUsers(UserHandle.USER_NULL);
     }
@@ -186,8 +188,7 @@ public class UserSwitcherController {
                 }
                 ArrayList<UserRecord> records = new ArrayList<>(infos.size());
                 int currentId = ActivityManager.getCurrentUser();
-                boolean allowUserSwitching = mAllowUserSwitchingWhenSystemUserLocked
-                        || mUserManager.isUserUnlocked(UserHandle.SYSTEM);
+                boolean canSwitchUsers = mUserManager.canSwitchUsers();
                 UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
                 int avatarSize = mContext.getResources()
@@ -198,12 +199,14 @@ public class UserSwitcherController {
                     if (isCurrent) {
                         currentUserInfo = info;
                     }
-                    boolean switchToEnabled = allowUserSwitching || isCurrent;
+                    boolean switchToEnabled = canSwitchUsers || isCurrent;
                     if (info.isEnabled()) {
                         if (info.isGuest()) {
+                            // Tapping guest icon triggers remove and a user switch therefore
+                            // the icon shouldn't be enabled even if the user is current
                             guestRecord = new UserRecord(info, null /* picture */,
                                     true /* isGuest */, isCurrent, false /* isAddUser */,
-                                    false /* isRestricted */, switchToEnabled);
+                                    false /* isRestricted */, canSwitchUsers);
                         } else if (info.supportsSwitchToByUser()) {
                             Bitmap picture = bitmaps.get(info.id);
                             if (picture == null) {
@@ -240,7 +243,7 @@ public class UserSwitcherController {
                         if (canCreateGuest) {
                             guestRecord = new UserRecord(null /* info */, null /* picture */,
                                     true /* isGuest */, false /* isCurrent */,
-                                    false /* isAddUser */, createIsRestricted, allowUserSwitching);
+                                    false /* isAddUser */, createIsRestricted, canSwitchUsers);
                             checkIfAddUserDisallowedByAdminOnly(guestRecord);
                             records.add(guestRecord);
                         }
@@ -253,7 +256,7 @@ public class UserSwitcherController {
                 if (!mSimpleUserSwitcher && canCreateUser) {
                     UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
                             false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                            createIsRestricted, allowUserSwitching);
+                            createIsRestricted, canSwitchUsers);
                     checkIfAddUserDisallowedByAdminOnly(addUserRecord);
                     records.add(addUserRecord);
                 }
@@ -359,19 +362,6 @@ public class UserSwitcherController {
         switchToUserId(id);
     }
 
-    public void switchTo(int userId) {
-        final int count = mUsers.size();
-        for (int i = 0; i < count; ++i) {
-            UserRecord record = mUsers.get(i);
-            if (record.info != null && record.info.id == userId) {
-                switchTo(record);
-                return;
-            }
-        }
-
-        Log.e(TAG, "Couldn't switch to user, id=" + userId);
-    }
-
     private void switchToUserId(int id) {
         try {
             pauseRefreshUsers();
@@ -415,6 +405,24 @@ public class UserSwitcherController {
         }
         switchToUserId(newId);
         mUserManager.removeUser(id);
+    }
+
+    private void listenForCallState() {
+        TelephonyManager.from(mContext).listen(new PhoneStateListener() {
+            private int mCallState;
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                if (mCallState == state) return;
+                if (DEBUG) Log.v(TAG, "Call state changed: " + state);
+                mCallState = state;
+                int currentUserId = ActivityManager.getCurrentUser();
+                UserInfo userInfo = mUserManager.getUserInfo(currentUserId);
+                if (userInfo != null && userInfo.isGuest()) {
+                    showGuestNotification(currentUserId);
+                }
+                refreshUsers(UserHandle.USER_NULL);
+            }
+        }, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -488,25 +496,6 @@ public class UserSwitcherController {
             }
         }
 
-        private void showGuestNotification(int guestUserId) {
-            PendingIntent removeGuestPI = PendingIntent.getBroadcastAsUser(mContext,
-                    0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.SYSTEM);
-            Notification notification = new Notification.Builder(mContext)
-                    .setVisibility(Notification.VISIBILITY_SECRET)
-                    .setPriority(Notification.PRIORITY_MIN)
-                    .setSmallIcon(R.drawable.ic_person)
-                    .setContentTitle(mContext.getString(R.string.guest_notification_title))
-                    .setContentText(mContext.getString(R.string.guest_notification_text))
-                    .setContentIntent(removeGuestPI)
-                    .setShowWhen(false)
-                    .addAction(R.drawable.ic_delete,
-                            mContext.getString(R.string.guest_notification_remove_action),
-                            removeGuestPI)
-                    .build();
-            NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST, ID_REMOVE_GUEST,
-                    notification, new UserHandle(guestUserId));
-        }
-
         private void showLogoutNotification(int userId) {
             PendingIntent logoutPI = PendingIntent.getBroadcastAsUser(mContext,
                     0, new Intent(ACTION_LOGOUT_USER), 0, UserHandle.SYSTEM);
@@ -528,6 +517,28 @@ public class UserSwitcherController {
         }
     };
 
+    private void showGuestNotification(int guestUserId) {
+        boolean canSwitchUsers = mUserManager.canSwitchUsers();
+        // Disable 'Remove guest' action if cannot switch users right now
+        PendingIntent removeGuestPI = canSwitchUsers ? PendingIntent.getBroadcastAsUser(mContext,
+                0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.SYSTEM) : null;
+
+        Notification notification = new Notification.Builder(mContext)
+                .setVisibility(Notification.VISIBILITY_SECRET)
+                .setPriority(Notification.PRIORITY_MIN)
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle(mContext.getString(R.string.guest_notification_title))
+                .setContentText(mContext.getString(R.string.guest_notification_text))
+                .setContentIntent(removeGuestPI)
+                .setShowWhen(false)
+                .addAction(R.drawable.ic_delete,
+                        mContext.getString(R.string.guest_notification_remove_action),
+                        removeGuestPI)
+                .build();
+        NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST, ID_REMOVE_GUEST,
+                notification, new UserHandle(guestUserId));
+    }
+
     private final Runnable mUnpauseRefreshUsers = new Runnable() {
         @Override
         public void run() {
@@ -543,9 +554,6 @@ public class UserSwitcherController {
                     SIMPLE_USER_SWITCHER_GLOBAL_SETTING, 0) != 0;
             mAddUsersWhenLocked = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.ADD_USERS_WHEN_LOCKED, 0) != 0;
-            mAllowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
-                    mContext.getContentResolver(),
-                    Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
             refreshUsers(UserHandle.USER_NULL);
         };
     };
