@@ -64,7 +64,8 @@ public class SecurityLog {
     public static final int TAG_SYNC_SEND_FILE = SecurityLogTags.SECURITY_ADB_SYNC_SEND;
     /**
      * Indicate that an app process was started. The log entry contains the following
-     * information about the process in order, accessible via {@link SecurityEvent#getData()}}:
+     * information about the process encapsulated in an {@link Object} array, accessible via
+     * {@link SecurityEvent#getData()}:
      * process name (String), exact start time (long), app Uid (integer), app Pid (integer),
      * seinfo tag (String), SHA-256 hash of the APK in hexadecimal (String)
      */
@@ -77,10 +78,10 @@ public class SecurityLog {
             SecurityLogTags.SECURITY_KEYGUARD_DISMISSED;
     /**
      * Indicate that there has been an authentication attempt to dismiss the keyguard. The log entry
-     * contains the following information about the attempt in order, accessible via
-     * {@link SecurityEvent#getData()}}: attempt result (integer, 1 for successful, 0 for
-     * unsuccessful), strength of auth method (integer, 1 if strong auth method was used,
-     * 0 otherwise)
+     * contains the following information about the attempt encapsulated in an {@link Object} array,
+     * accessible via {@link SecurityEvent#getData()}:
+     * attempt result (integer, 1 for successful, 0 for unsuccessful), strength of auth method
+     * (integer, 1 if strong auth method was used, 0 otherwise)
      */
     public static final int TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT =
             SecurityLogTags.SECURITY_KEYGUARD_DISMISS_AUTH_ATTEMPT;
