@@ -47,6 +47,7 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -4057,6 +4058,21 @@ public class TelephonyManager {
             Rlog.e(TAG, "getCarrierPackageNamesForIntentAndPhone NPE", ex);
         }
         return null;
+    }
+
+    /** @hide */
+    public List<String> getPackagesWithCarrierPrivileges() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getPackagesWithCarrierPrivileges();
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getPackagesWithCarrierPrivileges RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "getPackagesWithCarrierPrivileges NPE", ex);
+        }
+        return Collections.EMPTY_LIST;
     }
 
     /** @hide */
