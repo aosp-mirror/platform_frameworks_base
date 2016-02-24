@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Tekstistä puheeksi -toisto"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Puheen nopeus"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Tekstin puhumisnopeus"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Äänenkorkeus"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Kieli"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Käytä järjestelmän kieltä"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Kieltä ei ole valittu"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Käytössä. Poista käytöstä koskettamalla."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Käynnissä olevat palvelut"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Tarkastele ja hallitse käynnissä olevia palveluita"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Yötila"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Ei käytössä"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Aina käytössä"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Automaattinen"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"WebView\'n usean prosessin tila"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Suorita WebView\'n hahmontajat erillisinä prosesseina."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView-käyttöönotto"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Määritä WebView-käyttöönotto"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Valittu WebView-käyttöönotto on poistettu käytöstä. Haluatko ottaa sen käyttöön?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Ei laturissa"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Ei laturissa"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Täynnä"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Järjestelmänvalvoja hallinnoi tätä asetusta."</string>
     <string name="home" msgid="8263346537524314127">"Aloitusnäyttö"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> sitten"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> jäljellä"</string>

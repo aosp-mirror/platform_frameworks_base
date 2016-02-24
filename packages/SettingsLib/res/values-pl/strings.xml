@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Zamiana tekstu na mowę"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Szybkość mowy"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Szybkość czytania tekstu"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tony"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Język"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Użyj języka systemu"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Nie wybrano języka"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktywna. Dotknij, by zmienić."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Uruchomione usługi"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Wyświetl obecnie uruchomione usługi i zarządzaj nimi"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Tryb nocny"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Wyłączone"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Zawsze włączone"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Automatycznie"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Włącz wieloprocesowy WebView"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Uruchom WebView jako izolowany proces."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacja WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ustaw implementację WebView"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Wybrana implementacja WebView jest wyłączona. Aby jej używać, musisz ją włączyć. Chcesz to zrobić?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nie podłączony"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nie podłączony"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Naładowana"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolowane przez administratora"</string>
     <string name="home" msgid="8263346537524314127">"Ekran główny"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> temu"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"Pozostało <xliff:g id="ID_1">%1$s</xliff:g>"</string>
