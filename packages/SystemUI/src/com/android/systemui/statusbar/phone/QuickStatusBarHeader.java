@@ -21,7 +21,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
@@ -129,14 +128,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         ((RippleDrawable) getBackground()).setForceSoftware(true);
         ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
 
-        addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right,
-                    int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                setClipBounds(new Rect(getPaddingLeft(), 0, getWidth() - getPaddingRight(),
-                        getHeight()));
-            }
-        });
         updateResources();
     }
 
