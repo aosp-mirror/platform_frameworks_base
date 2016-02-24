@@ -463,30 +463,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Дэлгэцэнд яаралтайгаар дуутай гаргах"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Бусад тохиргоо"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дууссан"</string>
-    <!-- no translation found for color_and_appearance (1254323855964993144) -->
-    <skip />
-    <!-- no translation found for night_mode (3540405868248625488) -->
-    <skip />
-    <!-- no translation found for calibrate_display (5974642573432039217) -->
-    <skip />
-    <!-- no translation found for night_mode_on (5597545513026541108) -->
-    <skip />
-    <!-- no translation found for night_mode_off (8035605276956057508) -->
-    <skip />
-    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
-    <skip />
-    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
-    <skip />
-    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
-    <skip />
-    <!-- no translation found for use_dark_theme (2900938704964299312) -->
-    <skip />
-    <!-- no translation found for adjust_tint (3398569573231409878) -->
-    <skip />
-    <!-- no translation found for adjust_brightness (980039329808178246) -->
-    <skip />
-    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
-    <skip />
+    <string name="color_and_appearance" msgid="1254323855964993144">"Өнгө, харагдах байдал"</string>
+    <string name="night_mode" msgid="3540405868248625488">"Шөнийн горим"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"Дэлгэцийг тохируулах"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"Идэвхтэй"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"Идэвхгүй"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"Автоматаар асаах"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Тухайн өдрийн байршил, цагийн тохиромжтой үед Шөнийн горимд шилжүүлэх"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"Шөнийн горим идэвхтэй үед"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android-н үйлдлийн системд бараан загварыг ашиглах"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"Өнгөний нягтаршилыг тохируулах"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"Гэрэлтүүлгийг тохируулах"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Тохиргоо, мэдэгдэл зэрэг тогтмол цайвар загварт харуулдаг Android үйлдлийн системийн гол хэсгийг бараан загварт харуулна."</string>
     <string name="color_apply" msgid="9212602012641034283">"Хэрэгжүүлэх"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Тохиргоог баталгаажуулах"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Зарим өнгөний тохиргоо энэ төхөөрөмжийг ашиглах боломжгүй болгож болзошгүй. OK товчлуурыг дарж эдгээр өнгөний тохиргоог зөвшөөрөхгүй бол энэ тохиргоо нь 10 секундын дараа шинэчлэгдэх болно."</string>
@@ -498,12 +486,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Нүүр хуудас"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Саяхны"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Буцах"</string>
-    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
-    <skip />
-    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Түвшний хяналттай харуулах"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Бүү саад бол"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Түвшний товчлуурын товчлол"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Бүү саад бол тохиргооноос гарахын тулд дууны түвшинг нэмэх"</string>
     <string name="battery" msgid="7498329822413202973">"Зай"</string>
     <string name="clock" msgid="7416090374234785905">"Цаг"</string>
@@ -514,8 +499,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Өгөгдөл хамгаалагчийг асаасан байна"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Өгөгдөл хамгаалагчийг унтраасан байна"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Идэвхтэй"</string>
-    <!-- no translation found for switch_bar_off (8803270596930432874) -->
-    <skip />
+    <string name="switch_bar_off" msgid="8803270596930432874">"Идэвхгүй"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Навигацийн самбар"</string>
     <string name="start" msgid="6873794757232879664">"Эхлэх"</string>
     <string name="center" msgid="4327473927066010960">"Гол хэсэг"</string>
@@ -538,12 +522,15 @@
     <string name="preview" msgid="9077832302472282938">"Урьдчилж харах"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Дөрвөлж нэмэхийн тулд чирнэ үү"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Засах"</string>
-    <!-- no translation found for tuner_time (6572217313285536011) -->
-    <skip />
-    <!-- no translation found for clock_options:0 (5965318737560463480) -->
-    <!-- no translation found for clock_options:1 (1427801730816895300) -->
-    <!-- no translation found for clock_options:2 (3830170141562534721) -->
-    <!-- no translation found for battery_options:0 (3160236755818672034) -->
-    <!-- no translation found for battery_options:1 (2139628951880142927) -->
-    <!-- no translation found for battery_options:2 (3327323682209964956) -->
+    <string name="tuner_time" msgid="6572217313285536011">"Цаг"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"Цаг, минут, секундийг харуулах"</item>
+    <item msgid="1427801730816895300">"Цаг, минутыг харуулах (өгөгдмөл)"</item>
+    <item msgid="3830170141562534721">"Энэ дүрс тэмдгийг бүү үзүүл"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"Хувийг тогтмол харуулах"</item>
+    <item msgid="2139628951880142927">"Цэнэглэх үед хувийг тогтмол харуулах (өгөгдмөл)"</item>
+    <item msgid="3327323682209964956">"Энэ дүрс тэмдгийг бүү үзүүл"</item>
+  </string-array>
 </resources>
