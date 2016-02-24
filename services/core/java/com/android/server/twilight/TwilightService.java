@@ -115,14 +115,14 @@ public final class TwilightService extends SystemService {
         getContext().registerReceiver(mReceiver, filter);
 
         publishLocalService(TwilightManager.class, mService);
-        getContext().getContentResolver().registerContentObserver(
-                Secure.getUriFor(Secure.TWILIGHT_MODE), false, mContentObserver, mCurrentUser);
-        mContentObserver.onChange(true);
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_BOOT_COMPLETED) {
+            getContext().getContentResolver().registerContentObserver(
+                    Secure.getUriFor(Secure.TWILIGHT_MODE), false, mContentObserver, mCurrentUser);
+            mContentObserver.onChange(true);
             mBootCompleted = true;
             sendBroadcast();
         }
