@@ -445,7 +445,7 @@
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Holat panelida soat soniyalari ko‘rsatilsin. Bu batareya resursiga ta’sir qilishi mumkin."</string>
     <string name="qs_rearrange" msgid="8060918697551068765">"Tezkor sozlamalarni qayta tartiblash"</string>
     <string name="show_brightness" msgid="6613930842805942519">"Tezkor sozlamalarda yorqinlikni ko‘rsatish"</string>
-    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Tepaga surib, ekranni bo‘lish ishorasini yoqish"</string>
+    <string name="overview_nav_bar_gesture" msgid="8579814204727917764">"Tepaga surish orqali ekranni ikkiga bo‘lish"</string>
     <string name="overview_nav_bar_gesture_desc" msgid="6329167382305102615">"Umumiy ma’lumot tugmasini tepaga surish orqali ekranni bo‘lish ishorasini yoqish"</string>
     <string name="experimental" msgid="6198182315536726162">"Tajribaviy"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth yoqilsinmi?"</string>
@@ -465,30 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Barcha oynalar ustida signal ovozi bilan ko‘rsatilsin"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Boshqa sozlamalar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tayyor"</string>
-    <!-- no translation found for color_and_appearance (1254323855964993144) -->
-    <skip />
-    <!-- no translation found for night_mode (3540405868248625488) -->
-    <skip />
-    <!-- no translation found for calibrate_display (5974642573432039217) -->
-    <skip />
-    <!-- no translation found for night_mode_on (5597545513026541108) -->
-    <skip />
-    <!-- no translation found for night_mode_off (8035605276956057508) -->
-    <skip />
-    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
-    <skip />
-    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
-    <skip />
-    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
-    <skip />
-    <!-- no translation found for use_dark_theme (2900938704964299312) -->
-    <skip />
-    <!-- no translation found for adjust_tint (3398569573231409878) -->
-    <skip />
-    <!-- no translation found for adjust_brightness (980039329808178246) -->
-    <skip />
-    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
-    <skip />
+    <string name="color_and_appearance" msgid="1254323855964993144">"Rang va ko‘rinishi"</string>
+    <string name="night_mode" msgid="3540405868248625488">"Tungi rejim"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"Ekranni kalibrlash"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"Yoniq"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"O‘chiq"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"Avtomatik yoqish"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Joylashuv va vaqtga mos ravishda tungi rejimga o‘tish"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"Agar tungi rejim yoniq bo‘lsa"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS uchun to‘q rangli mavzudan foyd-sh"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"Rangni o‘zgartirish"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"Yorqinlikni o‘zgartirish"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"To‘q rangli mavzu Android OS’ning o‘zak sahifalariga ham qo‘llaniladi va bu Sozlamalar va bildirishnomalar kabi och rangli mavzularda odatdagiday ko‘rsatiladi."</string>
     <string name="color_apply" msgid="9212602012641034283">"Qo‘llash"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Sozlamalarni tasdiqlang"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Ba’zi rang sozlamalari qurilmadan foydalanishni qiyinlashtirish mumkin. Tanlgan parametrlarni tasdiqlash uchun “OK” tugmasini bosing. Aks holda, ular 10 soniyadan so‘ng qayta tiklanadi."</string>
@@ -500,12 +488,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Bosh ekran"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"So‘nggi ishlatilganlar"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Orqaga"</string>
-    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
-    <skip />
-    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Ovoz balandligini boshqarish tugmalari bilan ko‘rsatilsin"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Bezovta qilinmasin"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Ovoz balandligini boshqarish tezkor tugmalari"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Ovozni ko‘targanda “Bezovta qilinmasin” rejimini o‘chirish"</string>
     <string name="battery" msgid="7498329822413202973">"Batareya"</string>
     <string name="clock" msgid="7416090374234785905">"Soat"</string>
@@ -516,8 +501,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Trafik tejash yoniq"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Trafik tejash o‘chiq"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Yoniq"</string>
-    <!-- no translation found for switch_bar_off (8803270596930432874) -->
-    <skip />
+    <string name="switch_bar_off" msgid="8803270596930432874">"O‘chiq"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Navigatsiya paneli"</string>
     <string name="start" msgid="6873794757232879664">"Boshlash"</string>
     <string name="center" msgid="4327473927066010960">"Markazda"</string>
@@ -540,12 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"Oldindan ko‘rish"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Fragmentlar qo‘shish uchun torting"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Tahrirlash"</string>
-    <!-- no translation found for tuner_time (6572217313285536011) -->
-    <skip />
-    <!-- no translation found for clock_options:0 (5965318737560463480) -->
-    <!-- no translation found for clock_options:1 (1427801730816895300) -->
-    <!-- no translation found for clock_options:2 (3830170141562534721) -->
-    <!-- no translation found for battery_options:0 (3160236755818672034) -->
-    <!-- no translation found for battery_options:1 (2139628951880142927) -->
-    <!-- no translation found for battery_options:2 (3327323682209964956) -->
+    <string name="tuner_time" msgid="6572217313285536011">"Vaqt"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"Soat, daqiqa va soniyalar ko‘rsatilsin"</item>
+    <item msgid="1427801730816895300">"Soat va daqiqalar ko‘rsatilsin (birlamchi)"</item>
+    <item msgid="3830170141562534721">"Bu ikonka boshqa ko‘rsatilmasin"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"Har doim foizda ko‘rsatilsin"</item>
+    <item msgid="2139628951880142927">"Quvvat olayotganda foizda ko‘rsatilsin (birlamchi)"</item>
+    <item msgid="3327323682209964956">"Bu ikonka boshqa ko‘rsatilmasin"</item>
+  </string-array>
 </resources>

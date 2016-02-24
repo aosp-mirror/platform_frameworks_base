@@ -465,30 +465,18 @@
     <string name="notification_importance_max" msgid="5236987171904756134">"Үн менен коштолуп, экранга чыгарылсын"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
     <string name="notification_done" msgid="5279426047273930175">"Аткарылды"</string>
-    <!-- no translation found for color_and_appearance (1254323855964993144) -->
-    <skip />
-    <!-- no translation found for night_mode (3540405868248625488) -->
-    <skip />
-    <!-- no translation found for calibrate_display (5974642573432039217) -->
-    <skip />
-    <!-- no translation found for night_mode_on (5597545513026541108) -->
-    <skip />
-    <!-- no translation found for night_mode_off (8035605276956057508) -->
-    <skip />
-    <!-- no translation found for turn_on_automatically (4167565356762016083) -->
-    <skip />
-    <!-- no translation found for turn_on_auto_summary (2190994512406701520) -->
-    <skip />
-    <!-- no translation found for when_night_mode_on (2969436026899172821) -->
-    <skip />
-    <!-- no translation found for use_dark_theme (2900938704964299312) -->
-    <skip />
-    <!-- no translation found for adjust_tint (3398569573231409878) -->
-    <skip />
-    <!-- no translation found for adjust_brightness (980039329808178246) -->
-    <skip />
-    <!-- no translation found for night_mode_disclaimer (3297928749219711334) -->
-    <skip />
+    <string name="color_and_appearance" msgid="1254323855964993144">"Түсү жана көрүнүшү"</string>
+    <string name="night_mode" msgid="3540405868248625488">"Түнкү режим"</string>
+    <string name="calibrate_display" msgid="5974642573432039217">"Дисплейди калибрлөө"</string>
+    <string name="night_mode_on" msgid="5597545513026541108">"Күйүк"</string>
+    <string name="night_mode_off" msgid="8035605276956057508">"Өчүк"</string>
+    <string name="turn_on_automatically" msgid="4167565356762016083">"Автоматтык түрдө күйгүзүү"</string>
+    <string name="turn_on_auto_summary" msgid="2190994512406701520">"Жайгашкан жерге жана убакытка жараша түнкү режимге которулуңуз"</string>
+    <string name="when_night_mode_on" msgid="2969436026899172821">"Түнкү режим күйүп турганда"</string>
+    <string name="use_dark_theme" msgid="2900938704964299312">"Android OS үчүн караңгы тема колдонуу"</string>
+    <string name="adjust_tint" msgid="3398569573231409878">"Кошумча түсүн тууралоо"</string>
+    <string name="adjust_brightness" msgid="980039329808178246">"Жарыктыгын тууралоо"</string>
+    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Адатта жарык темада көрсөтүлгөн Android OS\'тин, Жөндөөлөр жана эскертмелер сыяктуу негизги аймактарына караңгы тема колдонулат."</string>
     <string name="color_apply" msgid="9212602012641034283">"Колдонуу"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Жөндөөлөрдү ырастоо"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Айрым түс жөндөөлөрү бул түзмөктү колдонулгус кылып коюшу мүмкүн. Бул түс жөндөөлөрүн ырастоо үчүн OK баскычын чыкылдатыңыз, болбосо бул жөндөөлөр 10 секунддан кийин баштапкы абалына келтирилет."</string>
@@ -500,12 +488,9 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"Башкы бет"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Акыркылар"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Артка"</string>
-    <!-- no translation found for tuner_full_zen_title (4540823317772234308) -->
-    <skip />
-    <!-- no translation found for volume_and_do_not_disturb (3373784330208603030) -->
-    <skip />
-    <!-- no translation found for volume_dnd_silent (4363882330723050727) -->
-    <skip />
+    <string name="tuner_full_zen_title" msgid="4540823317772234308">"Үн көзөмөлдөгүчтөрү менен көрсөтүлсүн"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Тынчымды алба"</string>
+    <string name="volume_dnd_silent" msgid="4363882330723050727">"Үндү көзөмөлдөөчү баскычтардын кыска жолдору"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Үн катуулатылганда \"Тынчымды алба\" режиминен чыгуу"</string>
     <string name="battery" msgid="7498329822413202973">"Батарея"</string>
     <string name="clock" msgid="7416090374234785905">"Саат"</string>
@@ -516,8 +501,7 @@
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Дайындарды үнөмдөгүч күйүк"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Дайындарды үнөмдөгүч өчүрүлгөн"</string>
     <string name="switch_bar_on" msgid="1142437840752794229">"Күйүк"</string>
-    <!-- no translation found for switch_bar_off (8803270596930432874) -->
-    <skip />
+    <string name="switch_bar_off" msgid="8803270596930432874">"Өчүк"</string>
     <string name="nav_bar" msgid="1993221402773877607">"Чабыттоо тилкеси"</string>
     <string name="start" msgid="6873794757232879664">"Баштоо"</string>
     <string name="center" msgid="4327473927066010960">"Экрандын ортосунда"</string>
@@ -540,12 +524,15 @@
     <string name="preview" msgid="9077832302472282938">"Алдын ала көрүү"</string>
     <string name="drag_to_add_tiles" msgid="7058945779098711293">"Керектүү нерселерди сүйрөп кошуңуз"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Түзөтүү"</string>
-    <!-- no translation found for tuner_time (6572217313285536011) -->
-    <skip />
-    <!-- no translation found for clock_options:0 (5965318737560463480) -->
-    <!-- no translation found for clock_options:1 (1427801730816895300) -->
-    <!-- no translation found for clock_options:2 (3830170141562534721) -->
-    <!-- no translation found for battery_options:0 (3160236755818672034) -->
-    <!-- no translation found for battery_options:1 (2139628951880142927) -->
-    <!-- no translation found for battery_options:2 (3327323682209964956) -->
+    <string name="tuner_time" msgid="6572217313285536011">"Убакыт"</string>
+  <string-array name="clock_options">
+    <item msgid="5965318737560463480">"Сааттар, мүнөттөр жана секунддар көрсөтүлсүн"</item>
+    <item msgid="1427801730816895300">"Сааттар жана мүнөттөр көрсөтүлсүн (демейки)"</item>
+    <item msgid="3830170141562534721">"Бул сөлөкөт көрсөтүлбөсүн"</item>
+  </string-array>
+  <string-array name="battery_options">
+    <item msgid="3160236755818672034">"Ар дайым пайызы көрсөтүлсүн"</item>
+    <item msgid="2139628951880142927">"Кубаттоо учурунда пайызы көрсөтүлсүн (демейки)"</item>
+    <item msgid="3327323682209964956">"Бул сөлөкөт көрсөтүлбөсүн"</item>
+  </string-array>
 </resources>
