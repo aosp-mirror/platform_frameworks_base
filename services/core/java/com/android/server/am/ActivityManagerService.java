@@ -12291,10 +12291,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     + " from " + proc.initialIdlePss + ")", true);
                         }
                     }
-                } else if (proc.setProcState < ActivityManager.PROCESS_STATE_HOME) {
+                } else if (proc.setProcState < ActivityManager.PROCESS_STATE_HOME
+                        && proc.setProcState > ActivityManager.PROCESS_STATE_NONEXISTENT) {
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
-                    proc.nextPssTime = ProcessList.computeNextPssTime(proc.curProcState, true,
+                    proc.nextPssTime = ProcessList.computeNextPssTime(proc.setProcState, true,
                             mTestPssMode, isSleeping(), now);
                 }
             }
