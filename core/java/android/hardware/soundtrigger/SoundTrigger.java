@@ -595,7 +595,7 @@ public class SoundTrigger {
             }
         };
 
-        private static RecognitionEvent fromParcel(Parcel in) {
+        protected static RecognitionEvent fromParcel(Parcel in) {
             int status = in.readInt();
             int soundModelHandle = in.readInt();
             boolean captureAvailable = in.readByte() == 1;
@@ -980,7 +980,7 @@ public class SoundTrigger {
         public static final Parcelable.Creator<KeyphraseRecognitionEvent> CREATOR
                 = new Parcelable.Creator<KeyphraseRecognitionEvent>() {
             public KeyphraseRecognitionEvent createFromParcel(Parcel in) {
-                return KeyphraseRecognitionEvent.fromParcel(in);
+                return KeyphraseRecognitionEvent.fromParcelForKeyphrase(in);
             }
 
             public KeyphraseRecognitionEvent[] newArray(int size) {
@@ -988,7 +988,7 @@ public class SoundTrigger {
             }
         };
 
-        private static KeyphraseRecognitionEvent fromParcel(Parcel in) {
+        private static KeyphraseRecognitionEvent fromParcelForKeyphrase(Parcel in) {
             int status = in.readInt();
             int soundModelHandle = in.readInt();
             boolean captureAvailable = in.readByte() == 1;
@@ -1093,6 +1093,40 @@ public class SoundTrigger {
             super(status, soundModelHandle, captureAvailable, captureSession,
                     captureDelayMs, capturePreambleMs, triggerInData, captureFormat,
                     data);
+        }
+
+        public static final Parcelable.Creator<GenericRecognitionEvent> CREATOR
+                = new Parcelable.Creator<GenericRecognitionEvent>() {
+            public GenericRecognitionEvent createFromParcel(Parcel in) {
+                return GenericRecognitionEvent.fromParcelForGeneric(in);
+            }
+
+            public GenericRecognitionEvent[] newArray(int size) {
+                return new GenericRecognitionEvent[size];
+            }
+        };
+
+        private static GenericRecognitionEvent fromParcelForGeneric(Parcel in) {
+            RecognitionEvent event = RecognitionEvent.fromParcel(in);
+            return new GenericRecognitionEvent(event.status, event.soundModelHandle,
+                    event.captureAvailable, event.captureSession, event.captureDelayMs,
+                    event.capturePreambleMs, event.triggerInData, event.captureFormat, event.data);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass()) return false;
+            RecognitionEvent other = (RecognitionEvent) obj;
+            return super.equals(obj);
+        }
+
+        @Override
+        public String toString() {
+            return "GenericRecognitionEvent ::" + super.toString();
         }
     }
 

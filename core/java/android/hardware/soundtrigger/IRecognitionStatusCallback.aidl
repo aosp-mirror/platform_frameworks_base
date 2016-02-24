@@ -26,10 +26,20 @@ oneway interface IRecognitionStatusCallback {
      * Called when the keyphrase is spoken.
      *
      * @param recognitionEvent Object containing data relating to the
-     *                         recognition event such as trigger audio data, if it was requested
-     *                         and is available.
+     *                         keyphrase recognition event such as keyphrase
+     *                         extras.
      */
-    void onDetected(in SoundTrigger.RecognitionEvent recognitionEvent);
+    void onKeyphraseDetected(in SoundTrigger.KeyphraseRecognitionEvent recognitionEvent);
+
+   /**
+     * Called when a generic sound trigger event is witnessed.
+     *
+     * @param recognitionEvent Object containing data relating to the
+     *                         recognition event such as trigger audio data (if
+     *                         requested).
+     */
+
+    void onGenericSoundTriggerDetected(in SoundTrigger.GenericRecognitionEvent recognitionEvent);
 
     /**
      * Called when the detection fails due to an error.

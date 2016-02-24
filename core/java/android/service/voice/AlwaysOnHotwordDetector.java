@@ -617,11 +617,7 @@ public class AlwaysOnHotwordDetector {
         }
 
         @Override
-        public void onDetected(RecognitionEvent event) {
-            if (! (event instanceof KeyphraseRecognitionEvent)) {
-                Slog.e(TAG, "onDetected() called for a soundtrigger event.");
-                return;
-            }
+        public void onKeyphraseDetected(KeyphraseRecognitionEvent event) {
             if (DBG) {
                 Slog.d(TAG, "onDetected(" + event + ")");
             } else {
@@ -631,6 +627,10 @@ public class AlwaysOnHotwordDetector {
                     new EventPayload(event.triggerInData, event.captureAvailable,
                             event.captureFormat, event.captureSession, event.data))
                     .sendToTarget();
+        }
+        @Override
+        public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
+            Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
         }
 
         @Override
