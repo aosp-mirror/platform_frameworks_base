@@ -665,7 +665,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void getCurrentTaskTransforms(ArrayList<Task> tasks,
             ArrayList<TaskViewTransform> transformsOut) {
         Utilities.matchTaskListSize(tasks, transformsOut);
-        float focusState = mLayoutAlgorithm.getFocusState();
+        int focusState = mLayoutAlgorithm.getFocusState();
         for (int i = tasks.size() - 1; i >= 0; i--) {
             Task task = tasks.get(i);
             TaskViewTransform transform = transformsOut.get(i);
@@ -684,7 +684,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * Returns the task transforms for all the tasks in the stack if the stack was at the given
      * {@param stackScroll} and {@param focusState}.
      */
-    public void getLayoutTaskTransforms(float stackScroll, float focusState, ArrayList<Task> tasks,
+    public void getLayoutTaskTransforms(float stackScroll, int focusState, ArrayList<Task> tasks,
             ArrayList<TaskViewTransform> transformsOut) {
         Utilities.matchTaskListSize(tasks, transformsOut);
         for (int i = tasks.size() - 1; i >= 0; i--) {
@@ -1055,7 +1055,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     protected Parcelable onSaveInstanceState() {
         Bundle savedState = new Bundle();
         savedState.putParcelable(KEY_SAVED_STATE_SUPER, super.onSaveInstanceState());
-        savedState.putFloat(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE, mLayoutAlgorithm.getFocusState());
+        savedState.putInt(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE, mLayoutAlgorithm.getFocusState());
         savedState.putFloat(KEY_SAVED_STATE_LAYOUT_STACK_SCROLL, mStackScroller.getStackScroll());
         return super.onSaveInstanceState();
     }
@@ -1065,7 +1065,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         Bundle savedState = (Bundle) state;
         super.onRestoreInstanceState(savedState.getParcelable(KEY_SAVED_STATE_SUPER));
 
-        mLayoutAlgorithm.setFocusState(savedState.getFloat(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE));
+        mLayoutAlgorithm.setFocusState(savedState.getInt(KEY_SAVED_STATE_LAYOUT_FOCUSED_STATE));
         mStackScroller.setStackScroll(savedState.getFloat(KEY_SAVED_STATE_LAYOUT_STACK_SCROLL));
     }
 
@@ -1517,7 +1517,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /**** TaskStackLayoutAlgorithm.TaskStackLayoutAlgorithmCallbacks ****/
 
     @Override
-    public void onFocusStateChanged(float prevFocusState, float curFocusState) {
+    public void onFocusStateChanged(int prevFocusState, int curFocusState) {
         if (mDeferredTaskViewLayoutAnimation == null) {
             mUIDozeTrigger.poke();
             relayoutTaskViewsOnNextFrame(AnimationProps.IMMEDIATE);
@@ -1532,6 +1532,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (animation != null) {
             relayoutTaskViewsOnNextFrame(animation);
         }
+        mLayoutAlgorithm.updateFocusStateOnScroll(curScroll, curScroll - prevScroll);
 
         if (mEnterAnimationComplete) {
             if (shouldShowHistoryButton() &&
@@ -1636,11 +1637,19 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(FocusNextTaskViewEvent event) {
+        // Stop any scrolling
+        mStackScroller.stopScroller();
+        mStackScroller.stopBoundScrollAnimation();
+
         setRelativeFocusedTask(true, false /* stackTasksOnly */, true /* animated */, false,
                 event.timerIndicatorDuration);
     }
 
     public final void onBusEvent(FocusPreviousTaskViewEvent event) {
+        // Stop any scrolling
+        mStackScroller.stopScroller();
+        mStackScroller.stopBoundScrollAnimation();
+
         setRelativeFocusedTask(false, false /* stackTasksOnly */, true /* animated */);
     }
 
@@ -1769,10 +1778,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 new AnimationProps(DEFAULT_SYNC_STACK_DURATION, Interpolators.FAST_OUT_SLOW_IN,
                         event.getAnimationTrigger().decrementOnAnimationEnd()));
         removeIgnoreTask(event.task);
-    }
-
-    public final void onBusEvent(StackViewScrolledEvent event) {
-        mLayoutAlgorithm.updateFocusStateOnScroll(event.yMovement.value);
     }
 
     public final void onBusEvent(IterateRecentsEvent event) {

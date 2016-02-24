@@ -16,20 +16,16 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.FloatProperty;
-import android.util.Property;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.ViewDebug;
 
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsActivityLaunchState;
@@ -135,11 +131,11 @@ public class TaskStackLayoutAlgorithm {
             new FreePathInterpolator(FOCUSED_DIM_PATH);
 
     // The various focus states
-    public static final float STATE_FOCUSED = 1f;
-    public static final float STATE_UNFOCUSED = 0f;
+    public static final int STATE_FOCUSED = 1;
+    public static final int STATE_UNFOCUSED = 0;
 
     public interface TaskStackLayoutAlgorithmCallbacks {
-        void onFocusStateChanged(float prevFocusState, float curFocusState);
+        void onFocusStateChanged(int prevFocusState, int curFocusState);
     }
 
     /**
@@ -209,24 +205,6 @@ public class TaskStackLayoutAlgorithm {
         }
     }
 
-    /**
-     * A Property wrapper around the <code>focusState</code> functionality handled by the
-     * {@link TaskStackLayoutAlgorithm#setFocusState(float)} and
-     * {@link TaskStackLayoutAlgorithm#getFocusState()} methods.
-     */
-    private static final Property<TaskStackLayoutAlgorithm, Float> FOCUS_STATE =
-            new FloatProperty<TaskStackLayoutAlgorithm>("focusState") {
-        @Override
-        public void setValue(TaskStackLayoutAlgorithm object, float value) {
-            object.setFocusState(value);
-        }
-
-        @Override
-        public Float get(TaskStackLayoutAlgorithm object) {
-            return object.getFocusState();
-        }
-    };
-
     // A report of the visibility state of the stack
     public class VisibilityReport {
         public int numVisibleTasks;
@@ -289,10 +267,7 @@ public class TaskStackLayoutAlgorithm {
     // The state of the stack focus (0..1), which controls the transition of the stack from the
     // focused to non-focused state
     @ViewDebug.ExportedProperty(category="recents")
-    private float mFocusState;
-
-    // The animator used to reset the focused state
-    private ObjectAnimator mFocusStateAnimator;
+    private int mFocusState;
 
     // The smallest scroll progress, at this value, the back most task will be visible
     @ViewDebug.ExportedProperty(category="recents")
@@ -321,7 +296,8 @@ public class TaskStackLayoutAlgorithm {
     int mMaxTranslationZ;
 
     // Optimization, allows for quick lookup of task -> index
-    private ArrayMap<Task.TaskKey, Integer> mTaskIndexMap = new ArrayMap<>();
+    private SparseIntArray mTaskIndexMap = new SparseIntArray();
+    private SparseArray<Float> mTaskIndexOverrideMap = new SparseArray<>();
 
     // The freeform workspace layout
     FreeformWorkspaceLayoutAlgorithm mFreeformLayoutAlgorithm;
@@ -354,6 +330,7 @@ public class TaskStackLayoutAlgorithm {
      * Resets this layout when the stack view is reset.
      */
     public void reset() {
+        mTaskIndexOverrideMap.clear();
         setFocusState(getDefaultFocusState());
     }
 
@@ -367,8 +344,8 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Sets the focused state.
      */
-    public void setFocusState(float focusState) {
-        float prevFocusState = mFocusState;
+    public void setFocusState(int focusState) {
+        int prevFocusState = mFocusState;
         mFocusState = focusState;
         updateFrontBackTransforms();
         if (mCb != null) {
@@ -379,7 +356,7 @@ public class TaskStackLayoutAlgorithm {
     /**
      * Gets the focused state.
      */
-    public float getFocusState() {
+    public int getFocusState() {
         return mFocusState;
     }
 
@@ -469,7 +446,7 @@ public class TaskStackLayoutAlgorithm {
         int taskCount = stackTasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = stackTasks.get(i);
-            mTaskIndexMap.put(task.key, i);
+            mTaskIndexMap.put(task.key.id, i);
         }
 
         // Calculate the min/max scroll
@@ -516,35 +493,56 @@ public class TaskStackLayoutAlgorithm {
     }
 
     /**
-     * Updates this stack when a scroll happens.
+     * Adds and override task progress for the given task when transitioning from focused to
+     * unfocused state.
      */
-    public void updateFocusStateOnScroll(int yMovement) {
-        Utilities.cancelAnimationWithoutCallbacks(mFocusStateAnimator);
-        if (mFocusState > STATE_UNFOCUSED) {
-            float delta = (float) yMovement / (UNFOCUS_MULTIPLIER * mStackRect.height());
-            setFocusState(mFocusState - Math.min(mFocusState, Math.abs(delta)));
+    public void addUnfocusedTaskOverride(Task task, float stackScroll) {
+        if (mFocusState != STATE_UNFOCUSED) {
+            mFocusedRange.offset(stackScroll);
+            mUnfocusedRange.offset(stackScroll);
+            float focusedRangeX = mFocusedRange.getNormalizedX(mTaskIndexMap.get(task.key.id));
+            float focusedY = mFocusedCurveInterpolator.getInterpolation(focusedRangeX);
+            float unfocusedRangeX = mUnfocusedCurveInterpolator.getX(focusedY);
+            float unfocusedTaskProgress = stackScroll + mUnfocusedRange.getAbsoluteX(unfocusedRangeX);
+            if (Float.compare(focusedRangeX, unfocusedRangeX) != 0) {
+                mTaskIndexOverrideMap.put(task.key.id, unfocusedTaskProgress);
+            }
         }
     }
 
     /**
-     * Aniamtes the focused state back to its orginal state.
+     * Updates this stack when a scroll happens.
      */
-    public void animateFocusState(float newState) {
-        Utilities.cancelAnimationWithoutCallbacks(mFocusStateAnimator);
-        if (Float.compare(newState, getFocusState()) != 0) {
-            mFocusStateAnimator = ObjectAnimator.ofFloat(this, FOCUS_STATE, getFocusState(),
-                    newState);
-            mFocusStateAnimator.setDuration(mContext.getResources().getInteger(
-                    R.integer.recents_animate_task_stack_scroll_duration));
-            mFocusStateAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-            mFocusStateAnimator.start();
+    public void updateFocusStateOnScroll(float stackScroll, float deltaScroll) {
+        for (int i = mTaskIndexOverrideMap.size() - 1; i >= 0; i--) {
+            int taskId = mTaskIndexOverrideMap.keyAt(i);
+            float x = mTaskIndexMap.get(taskId);
+            float overrideX = mTaskIndexOverrideMap.get(taskId, 0f);
+            float newOverrideX = overrideX + deltaScroll;
+            mUnfocusedRange.offset(stackScroll);
+            boolean outOfBounds = mUnfocusedRange.getNormalizedX(newOverrideX) < 0f ||
+                    mUnfocusedRange.getNormalizedX(newOverrideX) > 1f;
+            if (outOfBounds || (overrideX >= x && x >= newOverrideX) ||
+                    (overrideX <= x && x <= newOverrideX)) {
+                // Remove the override once we reach the original task index
+                mTaskIndexOverrideMap.removeAt(i);
+            } else if ((overrideX >= x && deltaScroll <= 0f) ||
+                    (overrideX <= x && deltaScroll >= 0f)) {
+                // Scrolling from override x towards x, then lock the task in place
+                mTaskIndexOverrideMap.put(taskId, newOverrideX);
+            } else {
+                // Scrolling override x away from x, we should still move the scroll towards x
+                float deltaX = overrideX - x;
+                newOverrideX = Math.signum(deltaX) * (Math.abs(deltaX) - deltaScroll);
+                mTaskIndexOverrideMap.put(taskId, x + newOverrideX);
+            }
         }
     }
 
     /**
      * Returns the default focus state.
      */
-    public float getDefaultFocusState() {
+    public int getDefaultFocusState() {
         return STATE_FOCUSED;
     }
 
@@ -650,18 +648,19 @@ public class TaskStackLayoutAlgorithm {
                 false /* forceUpdate */);
     }
 
-    public TaskViewTransform getStackTransform(Task task, float stackScroll, float focusState,
+    public TaskViewTransform getStackTransform(Task task, float stackScroll, int focusState,
         TaskViewTransform transformOut, TaskViewTransform frontTransform, boolean forceUpdate) {
         if (mFreeformLayoutAlgorithm.isTransformAvailable(task, this)) {
             mFreeformLayoutAlgorithm.getTransform(task, transformOut, this);
             return transformOut;
         } else {
             // Return early if we have an invalid index
-            if (task == null || !mTaskIndexMap.containsKey(task.key)) {
+            if (task == null || mTaskIndexMap.get(task.key.id, -1) == -1) {
                 transformOut.reset();
                 return transformOut;
             }
-            getStackTransform(mTaskIndexMap.get(task.key), stackScroll, focusState, transformOut,
+            float taskProgress = getStackScrollForTask(task);
+            getStackTransform(taskProgress, stackScroll, focusState, transformOut,
                     frontTransform, false /* ignoreSingleTaskCase */, forceUpdate);
             return transformOut;
         }
@@ -687,7 +686,7 @@ public class TaskStackLayoutAlgorithm {
      *                             internally to ensure that we can calculate the transform for any
      *                             position in the stack.
      */
-    public void getStackTransform(float taskProgress, float stackScroll, float focusState,
+    public void getStackTransform(float taskProgress, float stackScroll, int focusState,
             TaskViewTransform transformOut, TaskViewTransform frontTransform,
             boolean ignoreSingleTaskCase, boolean forceUpdate) {
         SystemServicesProxy ssp = Recents.getSystemServices();
@@ -773,8 +772,7 @@ public class TaskStackLayoutAlgorithm {
      * stack.
      */
     float getStackScrollForTask(Task t) {
-        if (!mTaskIndexMap.containsKey(t.key)) return 0f;
-        return mTaskIndexMap.get(t.key);
+        return mTaskIndexOverrideMap.get(t.key.id, (float) mTaskIndexMap.get(t.key.id, 0));
     }
 
     /**
