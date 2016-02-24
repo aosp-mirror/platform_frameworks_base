@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Dalja \"tekst-në-ligjërim\""</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Shpejtësia e të folurit"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Shpejtësia me të cilën thuhet teksti"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tonaliteti"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Gjuha"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Përdor gjuhën e sistemit"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Nuk është përzgjedhur gjuha"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktiv. Trokit për ta ndryshuar."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Shërbimet në ekzekutim"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Shiko dhe kontrollo shërbimet që po ekzekutohen aktualisht"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Modaliteti i natës"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Çaktivizuar"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Gjithmonë aktive"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Automatike"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Aktivizo WebView të multiprocesit"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Ekzekuto renderizuesit e WebView në një proces të izoluar."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Zbatimi i WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Cakto zbatimin e WebView"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Është çaktivizuar zbatimi i zgjedhur i WebView dhe duhet të aktivizohet për t\'u përdorur, dëshiron ta aktivizosh?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nuk po ngarkohet"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nuk po ngarkohet"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"E mbushur"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrolluar nga administratori"</string>
     <string name="home" msgid="8263346537524314127">"Kreu"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> më parë"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> të mbetura"</string>

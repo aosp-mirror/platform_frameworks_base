@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"உரையிலிருந்து பேச்சாக மாற்றுதல்"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"பேசப்படும் உரையின் வேகம்"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"ஒலித்திறன்"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"மொழி"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"முறைமையின் மொழியைப் பயன்படுத்து"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"மொழி தேர்ந்தெடுக்கப்படவில்லை"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"செயலில் உள்ளது. மாற்ற, தட்டவும்."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"இரவு பயன்முறை"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"முடக்கப்பட்டது"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"எப்போதும் இயக்கத்தில் வை"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"தானியங்கு"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"பல செயல்முறை WebViewஐ இயக்கு"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"தனிப்படுத்தப்பட்ட செயல்முறையில் WebView ரெண்டரர்களை இயக்கு."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView செயல்படுத்தலை அமை"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"தேர்வுசெய்த WebView செயல்படுத்தல் முடக்கப்பட்டுள்ளது, பயன்படுத்த வேண்டுமெனில் அதைக் கண்டிப்பாக இயக்க வேண்டும். இயக்க விரும்புகிறீர்களா?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"சார்ஜ் செய்யப்படவில்லை"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"சார்ஜ் ஏறவில்லை"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"முழுமை"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"நிர்வாகி கட்டுப்படுத்துகிறார்"</string>
     <string name="home" msgid="8263346537524314127">"முகப்பு"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> முன்"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> உள்ளது"</string>

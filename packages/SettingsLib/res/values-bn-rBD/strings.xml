@@ -101,6 +101,8 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"লেখিত-থেকে-ভাষ্য"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ভাষ্য হার"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"যে গতিতে পাঠ্য উচ্চারিত হয়"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"পিচ"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"সিন্থেসাইজ করা ভাষ্যের স্বরকে প্রভাবিত করে"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ভাষা"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"সিস্টেমের ভাষা ব্যবহার করুন"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"ভাষা নির্বাচন করা নেই"</string>
@@ -248,7 +250,7 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"বহিরাগততে বলপূর্বক মঞ্জুরি"</string>
     <string name="force_allow_on_external_summary" msgid="3191952505860343233">"ম্যানিফেস্ট মানগুলি নির্বিশেষে যেকোনো অ্যাপ্লিকেশানকে বাহ্যিক সঞ্চয়স্থানে লেখার উপযুক্ত বানায়"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"আকার পরিবর্তনযোগ্য করার জন্য ক্রিয়াকলাপগুলিকে জোর করুন"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ম্যানিফেস্ট মানগুলির নির্বিশেষে মাল্টি-উইন্ডোর জন্য সমস্ত ক্রিয়াকলাপগুলিকে আকার পরিবর্তনযোগ্য করুন৷"</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"ম্যানিফেস্ট মানগুলির নির্বিশেষে মাল্টি-উইন্ডোর জন্য সমস্ত ক্রিয়াকলাপগুলির আকার পরিবর্তনযোগ্য করুন৷"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"ফ্রি-ফর্ম উইন্ডোগুলি সক্ষম করুন"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"পরীক্ষামূলক ফ্রি-ফর্ম উইন্ডোগুলির জন্য সহায়তা সক্ষম করুন৷"</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ডেস্কটপ ব্যাকআপ পাসওয়ার্ড"</string>
@@ -272,11 +274,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"সক্রিয় রয়েছে৷ টগল করতে আলতো চাপুন৷"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"এখন চলছে যে পরিষেবাগুলি"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"বর্তমান চলমান পরিষেবাগুলি দেখুন এবং নিয়ন্ত্রণ করুন"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"রাতের মোড"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"অক্ষম করা রয়েছে"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"সবসময় চালু"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"স্বয়ংক্রিয়"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"বহু-প্রক্রিয়া ওয়েবভিউ সক্ষম করুন"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"একটি বিচ্ছিন্ন প্রক্রিয়ায় ওয়েবভিউ রেন্ডারারগুলি চালান৷"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ওয়েবভিউ প্রয়োগ"</string>

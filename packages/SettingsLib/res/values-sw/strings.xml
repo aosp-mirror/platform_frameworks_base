@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Kubadilisha maandishi hadi usemi"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Kiwango cha usemaji"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Kasi ya kutamkwa kwa maneno"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Giza"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Lugha"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Tumia lugha ya mfumo"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Lugha haijachaguliwa"</string>
@@ -272,11 +275,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Inatumika. Gonga ili ugeuze."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Huduma zinazoendeshwa"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Onyesha na dhibiti huduma zinazoendeshwa kwa sasa"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Hali ya usiku"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Imezimwa"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Imewashwa kila wakati"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Otomatiki"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Washa WebView ya michakato mingi"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Tekeleza vitoaji huduma vya WebView katika mchakato mahususi."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Utekelezaji wa WebView"</string>

@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"Pretvaranje teksta u govor"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina kojom se izgovara tekst"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina glasa"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Jezik"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"upotrijebi jezik sustava"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Jezik nije odabran"</string>
@@ -272,11 +275,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Aktivno. Dodirnite da biste to promijenili."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Pogledajte i nadzirite pokrenute procese"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"Noćni način rada"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"Onemogućeno"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"Uvijek uključeno"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"Automatska"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"Omogući višeprocesni WebView"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Pokreni ispunjivače WebViewa u izoliranim procesima."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementacija WebViewa"</string>

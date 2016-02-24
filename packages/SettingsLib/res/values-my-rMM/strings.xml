@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"စာသားမှ အသံထွက်စေခြင်း"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"စကားပြောနှုန်း"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"စာတမ်းအားပြောဆိုသော အမြန်နှုန်း"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"အသံအနိမ့်အမြင့်"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ဘာသာစကား"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"စနစ်၏ ဘာသာစကားကို အသုံးပြုရန်"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"ဘာသာစကား မရွေးချယ်ထားပါ။"</string>
@@ -272,11 +275,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ပွင့်နေသည်။ ပြောင်းရန်တို့ပါ။"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"အလုပ်လုပ်နေသောဝန်ဆောင်မှုများ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ယခုအလုပ်လုပ်နေသောဝန်ဆောင်မှုကို ကြည့်ခြင်းနှင့် ထိန်းသိမ်းခြင်းအား ပြုလုပ်မည်လား?"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"ညသုံး မုဒ်"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"ပိတ်ထား"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"အမြဲတမ်း ဖွင့်ထားရန်"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"အလိုအလျောက်"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"လုပ်ငန်းဖြစ်စဉ်များစွာကြည့်နိုင်သည့် ဝဘ်မြင်ကွင်းကိုဖွင့်ပါ"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"လုပ်ငန်းဖြစ်စဉ်တစ်ခုတည်းအတွက် ဝဘ်မြင်ကွင်း အဖြစ်ပြုလုပ်ခြင်းကို ဖွင့်ပါ။"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>

@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"ટેક્સ્ટ ટુ સ્પીચ આઉટપુટ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"વાણી દર"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ટેક્સ્ટ બોલાયેલ છે તે ઝડપ"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"પિચ"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ભાષા"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"સિસ્ટમ ભાષાનો ઉપયોગ કરો"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"ભાષા પસંદ કરેલ નથી"</string>
@@ -272,15 +275,8 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"સક્રિય. ટોગલ કરવા માટે ટૅપ કરો."</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ચાલુ સેવાઓ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"હાલમાં ચાલતી સેવાઓ જુઓ અને નિયંત્રિત કરો"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"રાત્રિ મોડ"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"અક્ષમ કરેલ"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"હંમેશાં ચાલુ"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"સ્વચલિત"</string>
-    <!-- no translation found for enable_webview_multiprocess (3405948012467585908) -->
-    <skip />
-    <!-- no translation found for enable_webview_multiprocess_desc (852226124223847283) -->
-    <skip />
+    <string name="enable_webview_multiprocess" msgid="3405948012467585908">"મલ્ટિપ્રોસેસ WebView સક્ષમ કરો"</string>
+    <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"પૃથક પ્રક્રિયામાં WebView રેંડરર્સ ચલાવો."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView અમલીકરણ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView અમલીકરણ સેટ કરો"</string>
     <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"પસંદ કરેલ WebView અમલીકરણ અક્ષમ કરેલ છે અને ઉપયોગ કરવા માટે સક્ષમ કરવું આવશ્યક છે, શું તમે તેને સક્ષમ કરવા માગો છો?"</string>
@@ -315,8 +311,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ચાર્જ થઈ રહ્યું નથી"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"પૂર્ણ"</string>
-    <!-- no translation found for disabled_by_admin_summary_text (6750513964908334617) -->
-    <skip />
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"વ્યવસ્થાપક દ્વારા નિયંત્રિત"</string>
     <string name="home" msgid="8263346537524314127">"હોમ"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g> પહેલાં"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"<xliff:g id="ID_1">%1$s</xliff:g> બાકી"</string>
