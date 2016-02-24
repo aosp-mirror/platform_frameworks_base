@@ -86,6 +86,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
     /** The number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT
             = ActivityManager.isLowRamDeviceStatic() ? 3 : 6;
+    /** Enforce a per-app limit on scheduled jobs? */
+    private static final boolean ENFORCE_MAX_JOBS = false;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
 
@@ -263,7 +265,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         JobStatus toCancel;
         synchronized (mLock) {
             // Jobs on behalf of others don't apply to the per-app job cap
-            if (packageName == null) {
+            if (ENFORCE_MAX_JOBS && packageName == null) {
                 if (mJobs.countJobsForUid(uId) > MAX_JOBS_PER_APP) {
                     Slog.w(TAG, "Too many jobs for uid " + uId);
                     throw new IllegalStateException("Apps may not schedule more than "
