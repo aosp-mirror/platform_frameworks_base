@@ -1973,13 +1973,13 @@ public class RemoteViews implements Parcelable, Filter {
 
         public SetRemoteInputsAction(Parcel parcel) {
             viewId = parcel.readInt();
-            remoteInputs = parcel.readParcelableArray(RemoteInput.class.getClassLoader());
+            remoteInputs = parcel.createTypedArray(RemoteInput.CREATOR);
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(TAG);
             dest.writeInt(viewId);
-            dest.writeParcelableArray(remoteInputs, flags);
+            dest.writeTypedArray(remoteInputs, flags);
         }
 
         @Override
