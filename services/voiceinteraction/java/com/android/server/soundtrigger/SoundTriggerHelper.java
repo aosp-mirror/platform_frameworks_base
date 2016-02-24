@@ -573,7 +573,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     }
 
     private boolean isKeyphraseRecognitionEvent(RecognitionEvent event) {
-        return mCurrentKeyphraseModelHandle == event.soundModelHandle;
+        return event instanceof KeyphraseRecognitionEvent;
     }
 
     private void onGenericRecognitionSuccessLocked(GenericRecognitionEvent event) {
@@ -595,9 +595,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         try {
-            callback.onDetected((GenericRecognitionEvent) event);
+            callback.onGenericSoundTriggerDetected((GenericRecognitionEvent) event);
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in onDetected", e);
+            Slog.w(TAG, "RemoteException in onGenericSoundTriggerDetected", e);
         }
 
         model.setStopped();
@@ -715,10 +715,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         try {
             if (mKeyphraseListener != null) {
-                mKeyphraseListener.onDetected((KeyphraseRecognitionEvent) event);
+                mKeyphraseListener.onKeyphraseDetected((KeyphraseRecognitionEvent) event);
             }
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in onDetected", e);
+            Slog.w(TAG, "RemoteException in onKeyphraseDetected", e);
         }
 
         mKeyphraseStarted = false;
@@ -767,7 +767,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             int status = mModule.startRecognition(mCurrentKeyphraseModelHandle,
                     mRecognitionConfig);
             if (status != SoundTrigger.STATUS_OK) {
-                Slog.w(TAG, "startRecognition failed with " + status);
+                Slog.w(TAG, "startKeyphraseRecognition failed with " + status);
                 // Notify of error if needed.
                 if (notify) {
                     try {
@@ -967,7 +967,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         int status = mModule.startRecognition(handle, config);
         if (status != SoundTrigger.STATUS_OK) {
-            Slog.w(TAG, "startRecognition failed with " + status);
+            Slog.w(TAG, "startGenericRecognition failed with " + status);
             // Notify of error if needed.
             if (notify) {
                 try {
