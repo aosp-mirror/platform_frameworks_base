@@ -45,6 +45,7 @@ public class ExpandableIndicator extends ImageView {
         final AnimatedVectorDrawable avd = (AnimatedVectorDrawable) getContext()
                 .getDrawable(res).getConstantState().newDrawable();
         setImageDrawable(avd);
+        avd.forceAnimationOnUI();
         avd.start();
     }
 }
