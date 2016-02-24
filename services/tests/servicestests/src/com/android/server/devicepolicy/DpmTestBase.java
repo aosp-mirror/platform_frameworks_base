@@ -154,8 +154,10 @@ public abstract class DpmTestBase extends AndroidTestCase {
         aci.packageName = admin.getPackageName();
         aci.name = admin.getClassName();
 
-        doReturn(realResolveInfo).when(mMockContext.packageManager).queryBroadcastReceiversAsUser(
-                MockUtils.checkIntentComponent(admin),
+        // Note we don't set up queryBroadcastReceivers.  We don't use it in DPMS.
+
+        doReturn(aci).when(mMockContext.ipackageManager).getReceiverInfo(
+                eq(admin),
                 anyInt(),
                 eq(UserHandle.getUserId(packageUid)));
 

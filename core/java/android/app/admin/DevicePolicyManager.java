@@ -3172,31 +3172,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the DeviceAdminInfo as defined by the administrator's package info &amp; meta-data
-     * @hide
-     */
-    public DeviceAdminInfo getAdminInfo(@NonNull ComponentName cn) {
-        ActivityInfo ai;
-        try {
-            ai = mContext.getPackageManager().getReceiverInfo(cn,
-                    PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Unable to retrieve device policy " + cn, e);
-            return null;
-        }
-
-        ResolveInfo ri = new ResolveInfo();
-        ri.activityInfo = ai;
-
-        try {
-            return new DeviceAdminInfo(mContext, ri);
-        } catch (XmlPullParserException | IOException e) {
-            Log.w(TAG, "Unable to parse device policy " + cn, e);
-            return null;
-        }
-    }
-
-    /**
      * @hide
      */
     public void getRemoveWarning(@Nullable ComponentName admin, RemoteCallback result) {
