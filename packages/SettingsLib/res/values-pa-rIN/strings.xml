@@ -101,6 +101,9 @@
     <string name="tts_settings_title" msgid="1237820681016639683">"ਟੈਕਸਟ-ਟੂ-ਸਪੀਚ ਆਉਟਪੁਟ"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"ਸਪੀਚ ਰੇਟ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ਸਪੀਡ ਜਿਸਤੇ ਟੈਕਸਟ ਬੋਲਿਆ ਜਾਂਦਾ ਹੈ"</string>
+    <string name="tts_default_pitch_title" msgid="6135942113172488671">"ਪਿਚ"</string>
+    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
+    <skip />
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ਭਾਸ਼ਾ"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"ਸਿਸਟਮ ਭਾਸ਼ਾ ਵਰਤੋ"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"ਭਾਸ਼ਾ ਨਹੀਂ ਚੁਣੀ"</string>
@@ -272,11 +275,6 @@
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ਕਿਰਿਆਸ਼ੀਲ। ਟੌਗਲ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ਇਸ ਵੇਲੇ ਚੱਲ ਰਹੀਆਂ ਸੇਵਾਵਾਂ ਦੇਖੋ ਅਤੇ ਇਹਨਾਂ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
-    <string name="night_mode_title" msgid="2594133148531256513">"ਰਾਤ ਮੋਡ"</string>
-    <string name="night_mode_summary" msgid="9196605054622017193">"%s"</string>
-    <string name="night_mode_no" msgid="9171772244775838901">"ਅਸਮਰੱਥ ਬਣਾਇਆ"</string>
-    <string name="night_mode_yes" msgid="2218157265997633432">"ਹਮੇਸ਼ਾ ਚਾਲੂ"</string>
-    <string name="night_mode_auto" msgid="7508348175804304327">"ਆਟੋਮੈਟਿਕ"</string>
     <string name="enable_webview_multiprocess" msgid="3405948012467585908">"ਬਹੁ-ਮੰਤਵ WebView ਨੂੰ ਯੋਗ ਬਣਾਓ"</string>
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ਕਿਸੇ ਵੱਖ ਕੀਤੀ ਗਈ ਪ੍ਰਕਿਰਿਆ ਵਿੱਚ WebView ਰੈਂਡਰਰਾਂ ਨੂੰ ਚਲਾਓ।"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView ਅਮਲ"</string>
