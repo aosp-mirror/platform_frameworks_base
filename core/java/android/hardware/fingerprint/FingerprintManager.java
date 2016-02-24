@@ -40,6 +40,7 @@ import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 
@@ -655,8 +656,23 @@ public class FingerprintManager {
     @RequiresPermission(USE_FINGERPRINT)
     public boolean hasEnrolledFingerprints() {
         if (mService != null) try {
-            return mService.hasEnrolledFingerprints(UserHandle.myUserId(),
-                    mContext.getOpPackageName());
+            return mService.hasEnrolledFingerprints(
+                    UserHandle.myUserId(), mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            USE_FINGERPRINT,
+            INTERACT_ACROSS_USERS})
+    public boolean hasEnrolledFingerprints(int userId) {
+        if (mService != null) try {
+            return mService.hasEnrolledFingerprints(userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
         }
