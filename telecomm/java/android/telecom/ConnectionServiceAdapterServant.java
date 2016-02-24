@@ -240,8 +240,8 @@ final class ConnectionServiceAdapterServant {
                     } finally {
                         args.recycle();
                     }
+                    break;
                 }
-
                 case MSG_ON_CONNECTION_EVENT: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
@@ -249,6 +249,7 @@ final class ConnectionServiceAdapterServant {
                     } finally {
                         args.recycle();
                     }
+                    break;
                 }
             }
         }
