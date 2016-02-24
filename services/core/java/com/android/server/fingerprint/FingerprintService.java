@@ -62,6 +62,7 @@ import android.hardware.fingerprint.IFingerprintDaemon;
 import android.hardware.fingerprint.IFingerprintDaemonCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
@@ -504,6 +505,9 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     }
 
     public boolean hasEnrolledFingerprints(int userId) {
+        if (userId != Binder.getCallingUid()) {
+            checkPermission(INTERACT_ACROSS_USERS);
+        }
         return mFingerprintUtils.getFingerprintsForUser(mContext, userId).size() > 0;
     }
 
