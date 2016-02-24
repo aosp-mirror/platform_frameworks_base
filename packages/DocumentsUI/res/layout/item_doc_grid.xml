@@ -90,7 +90,7 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@id/icon_mime_sm"
             android:singleLine="true"
-            android:ellipsize="middle"
+            android:ellipsize="end"
             android:textAlignment="viewStart"
             android:textAppearance="@android:style/TextAppearance.Material.Subhead"
             android:textColor="@*android:color/primary_text_default_material_light" />
