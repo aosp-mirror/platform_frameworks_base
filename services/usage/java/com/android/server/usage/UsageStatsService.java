@@ -151,6 +151,8 @@ public class UsageStatsService extends SystemService implements
     private ArrayList<UsageStatsManagerInternal.AppIdleStateChangeListener>
             mPackageAccessListeners = new ArrayList<>();
 
+    private List<String> mCarrierPrivilegedApps;
+
     public UsageStatsService(Context context) {
         super(context);
     }
@@ -170,10 +172,18 @@ public class UsageStatsService extends SystemService implements
                     + mUsageStatsDir.getAbsolutePath());
         }
 
-        IntentFilter userActions = new IntentFilter(Intent.ACTION_USER_REMOVED);
-        userActions.addAction(Intent.ACTION_USER_STARTED);
-        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, userActions,
-                null, null);
+        IntentFilter filter = new IntentFilter(Intent.ACTION_USER_REMOVED);
+        filter.addAction(Intent.ACTION_USER_STARTED);
+        getContext().registerReceiverAsUser(new UserActionsReceiver(), UserHandle.ALL, filter,
+                null, mHandler);
+
+        IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        packageFilter.addDataScheme("package");
+
+        getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL, packageFilter,
+                null, mHandler);
 
         mAppIdleEnabled = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_enableAutoPowerModes);
@@ -232,18 +242,29 @@ public class UsageStatsService extends SystemService implements
     }
 
     private class UserActionsReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-            if (Intent.ACTION_USER_REMOVED.equals(intent.getAction())) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 if (userId >= 0) {
                     mHandler.obtainMessage(MSG_REMOVE_USER, userId, 0).sendToTarget();
                 }
-            } else if (Intent.ACTION_USER_STARTED.equals(intent.getAction())) {
+            } else if (Intent.ACTION_USER_STARTED.equals(action)) {
                 if (userId >=0) {
                     postCheckIdleStates(userId);
                 }
+            }
+        }
+    }
+
+    private class PackageReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)
+                    || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
+                clearCarrierPrivilegedApps();
             }
         }
     }
@@ -890,9 +911,30 @@ public class UsageStatsService extends SystemService implements
     }
 
     private boolean isCarrierApp(String packageName) {
-        TelephonyManager telephonyManager = getContext().getSystemService(TelephonyManager.class);
-        return telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
-                    == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
+        synchronized (mLock) {
+            if (mCarrierPrivilegedApps == null) {
+                fetchCarrierPrivilegedAppsLocked();
+            }
+        }
+        return mCarrierPrivilegedApps.contains(packageName);
+    }
+
+    void clearCarrierPrivilegedApps() {
+        if (DEBUG) {
+            Slog.i(TAG, "Clearing carrier privileged apps list");
+        }
+        synchronized (mLock) {
+            mCarrierPrivilegedApps = null; // Need to be refetched.
+        }
+    }
+
+    private void fetchCarrierPrivilegedAppsLocked() {
+        TelephonyManager telephonyManager =
+                getContext().getSystemService(TelephonyManager.class);
+        mCarrierPrivilegedApps = telephonyManager.getPackagesWithCarrierPrivileges();
+        if (DEBUG) {
+            Slog.d(TAG, "apps with carrier privilege " + mCarrierPrivilegedApps);
+        }
     }
 
     private boolean isActiveNetworkScorer(String packageName) {
@@ -961,6 +1003,9 @@ public class UsageStatsService extends SystemService implements
                 mAppIdleHistory.dump(idpw, mUserState.keyAt(i));
                 idpw.decreaseIndent();
             }
+
+            pw.println();
+            pw.println("Carrier privileged apps: " + mCarrierPrivilegedApps);
 
             pw.println();
             pw.println("Settings:");
@@ -1254,6 +1299,17 @@ public class UsageStatsService extends SystemService implements
             UserHandle.formatUid(reason, Binder.getCallingUid());
             mDeviceIdleController.addPowerSaveTempWhitelistApp(packageName, duration, userId,
                     reason.toString());
+        }
+
+        @Override
+        public void onCarrierPrivilegedAppsChanged() {
+            if (DEBUG) {
+                Slog.i(TAG, "Carrier privileged apps changed");
+            }
+            getContext().enforceCallingOrSelfPermission(
+                    android.Manifest.permission.BIND_CARRIER_SERVICES,
+                    "onCarrierPrivilegedAppsChanged can only be called by privileged apps.");
+            UsageStatsService.this.clearCarrierPrivilegedApps();
         }
 
         @Override

@@ -1037,4 +1037,9 @@ interface ITelephony {
      * @return {@code true} if the vibration is set for this PhoneAccount, {@code false} otherwise.
      */
     boolean isVoicemailVibrationEnabled(in PhoneAccountHandle accountHandle);
+
+    /**
+     * Returns a list of packages that have carrier privileges.
+     */
+    List<String> getPackagesWithCarrierPrivileges();
 }
