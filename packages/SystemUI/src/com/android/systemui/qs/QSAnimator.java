@@ -39,6 +39,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     public static final float EXPANDED_TILE_DELAY = .7f;
 
     private final ArrayList<View> mAllViews = new ArrayList<>();
+    private final ArrayList<View> mTopFiveQs = new ArrayList<>();
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanel mQsPanel;
     private final QSContainer mQsContainer;
@@ -86,7 +87,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         firstPageDelayedBuilder.setStartDelay(EXPANDED_TILE_DELAY);
         firstPageBuilder.setListener(this);
         translationYBuilder.setInterpolator(TRANSLATION_Y_INTERPOLATOR);
+        // Fade in the tiles/labels as we reach the final position.
+        firstPageDelayedBuilder.addFloat(mQsPanel.getTileLayout(), "alpha", 0, 1);
         mAllViews.clear();
+        mTopFiveQs.clear();
         for (QSTile<?> tile : tiles) {
             QSTileBaseView tileView = mQsPanel.getTileView(tile);
             final TextView label = ((QSTileView) tileView).getLabel();
@@ -104,21 +108,17 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 translationYBuilder.addFloat(quickTileView, "translationY", 0, yDiff);
 
                 // Counteract the parent translation on the tile. So we have a static base to
-                // animate off from.
+                // animate the label position off from.
                 firstPageBuilder.addFloat(tileView, "translationY", mQsPanel.getHeight(), 0);
 
-                // Move the real tile's icon and label from the quick tile position to its final
+                // Move the real tile's label from the quick tile position to its final
                 // location.
-                firstPageBuilder.addFloat(tileIcon, "translationX", -xDiff, 0);
-                translationYBuilder.addFloat(tileIcon, "translationY", -yDiff, 0);
                 firstPageBuilder.addFloat(label, "translationX", -xDiff, 0);
                 translationYBuilder.addFloat(label, "translationY", -yDiff, 0);
 
-                // Fade in the label as we reach the final position.
-                firstPageDelayedBuilder.addFloat(label, "alpha", 0, 1);
+                mTopFiveQs.add(tileIcon);
+                mAllViews.add(tileIcon);
                 mAllViews.add(quickTileView);
-            } else {
-                firstPageDelayedBuilder.addFloat(tileView, "alpha", 0, 1);
             }
             mAllViews.add(tileView);
             mAllViews.add(label);
@@ -159,17 +159,26 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onAnimationAtStart() {
-
     }
 
     @Override
     public void onAnimationAtEnd() {
         mQuickQsPanel.setVisibility(View.INVISIBLE);
+        final int N = mTopFiveQs.size();
+        for (int i = 0; i < N; i++) {
+            mTopFiveQs.get(i).setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onAnimationStarted() {
         mQuickQsPanel.setVisibility(View.VISIBLE);
+        if (mOnFirstPage) {
+            final int N = mTopFiveQs.size();
+            for (int i = 0; i < N; i++) {
+                mTopFiveQs.get(i).setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     private void clearAnimationState() {
