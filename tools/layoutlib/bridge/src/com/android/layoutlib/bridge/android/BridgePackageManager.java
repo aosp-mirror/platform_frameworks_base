@@ -24,7 +24,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
@@ -43,7 +42,6 @@ import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -555,37 +553,8 @@ public class BridgePackageManager extends PackageManager {
     }
 
     @Override
-    public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName, Uri verificationURI,
-            ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            IPackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
     public void installPackage(Uri packageURI, PackageInstallObserver observer, int flags,
             String installerPackageName) {
-    }
-
-    @Override
-    public void installPackageAsUser(Uri packageURI, PackageInstallObserver observer,int flags,
-            String installerPackageName, int userId) {
-    }
-
-    @Override
-    public void installPackageWithVerification(Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName, Uri verificationURI,
-            ContainerEncryptionParams encryptionParams) {
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
     }
 
     @Override
