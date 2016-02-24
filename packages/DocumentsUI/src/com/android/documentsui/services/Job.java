@@ -184,10 +184,17 @@ abstract public class Job implements Runnable {
         return false;
     }
 
-    final void deleteDocument(DocumentInfo doc) throws ResourceException {
+    final void deleteDocument(DocumentInfo doc, DocumentInfo parent) throws ResourceException {
         try {
-            DocumentsContract.deleteDocument(getClient(doc), doc.derivedUri);
-        } catch (Exception e) {
+            if (doc.isRemoveSupported()) {
+                DocumentsContract.removeDocument(getClient(doc), doc.derivedUri, parent.derivedUri);
+            } else if (doc.isDeleteSupported()) {
+                DocumentsContract.deleteDocument(getClient(doc), doc.derivedUri);
+            } else {
+                throw new ResourceException("Unable to delete source document as the file is " +
+                        "not deletable nor removable: %s.", doc.derivedUri);
+            }
+        } catch (RemoteException | RuntimeException e) {
             throw new ResourceException("Failed to delete file %s due to an exception.",
                     doc.derivedUri, e);
         }
