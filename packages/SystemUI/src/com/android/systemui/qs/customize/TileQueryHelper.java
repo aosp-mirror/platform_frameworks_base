@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.customize;
 
+import android.Manifest.permission;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -132,6 +133,9 @@ public class TileQueryHelper {
                 ComponentName componentName = new ComponentName(packageName, info.serviceInfo.name);
                 String spec = CustomTile.toSpec(componentName);
                 Drawable icon = info.serviceInfo.loadIcon(pm);
+                if (!permission.BIND_QUICK_SETTINGS_TILE.equals(info.serviceInfo.permission)) {
+                    continue;
+                }
                 if (icon != null) {
                     icon.mutate();
                     icon.setTint(mContext.getColor(android.R.color.white));
