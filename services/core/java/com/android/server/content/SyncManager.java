@@ -1319,7 +1319,7 @@ public class SyncManager {
         }
 
         getJobScheduler().scheduleAsPackage(b.build(), syncOperation.owningPackage,
-                syncOperation.target.userId);
+                syncOperation.target.userId, "sync");
     }
 
     /**

@@ -83,6 +83,31 @@ public class JobInfo implements Parcelable {
      */
     public static final int DEFAULT_BACKOFF_POLICY = BACKOFF_POLICY_EXPONENTIAL;
 
+    /**
+     * Default of {@link #getPriority}.
+     * @hide
+     */
+    public static final int PRIORITY_DEFAULT = 0;
+
+    /**
+     * Value of {@link #getPriority} for expedited syncs.
+     * @hide
+     */
+    public static final int PRIORITY_SYNC_EXPEDITED = 10;
+
+    /**
+     * Value of {@link #getPriority} for first time initialization syncs.
+     * @hide
+     */
+    public static final int PRIORITY_SYNC_INITIALIZATION = 20;
+
+    /**
+     * Value of {@link #getPriority} for the current foreground app (overrides the supplied
+     * JobInfo priority if it is smaller).
+     * @hide
+     */
+    public static final int PRIORITY_FOREGROUND_APP = 30;
+
     private final int jobId;
     private final PersistableBundle extras;
     private final ComponentName service;
@@ -406,7 +431,7 @@ public class JobInfo implements Parcelable {
         private int mJobId;
         private PersistableBundle mExtras = PersistableBundle.EMPTY;
         private ComponentName mJobService;
-        private int mPriority;
+        private int mPriority = PRIORITY_DEFAULT;
         // Requirements.
         private boolean mRequiresCharging;
         private boolean mRequiresDeviceIdle;

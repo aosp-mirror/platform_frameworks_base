@@ -323,6 +323,9 @@ public class JobStore {
             if (jobStatus.getSourcePackageName() != null) {
                 out.attribute(null, "sourcePackageName", jobStatus.getSourcePackageName());
             }
+            if (jobStatus.getSourceTag() != null) {
+                out.attribute(null, "sourceTag", jobStatus.getSourceTag());
+            }
             out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
@@ -542,6 +545,8 @@ public class JobStore {
 
             final String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
 
+            final String sourceTag = parser.getAttributeValue(null, "sourceTag");
+
             int eventType;
             // Read out constraints tag.
             do {
@@ -656,7 +661,7 @@ public class JobStore {
             parser.nextTag(); // Consume </extras>
 
             JobStatus js = new JobStatus(
-                    jobBuilder.build(), uid, sourcePackageName, sourceUserId,
+                    jobBuilder.build(), uid, sourcePackageName, sourceUserId, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second);
             return js;
         }
