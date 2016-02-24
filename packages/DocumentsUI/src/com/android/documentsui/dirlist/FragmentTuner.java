@@ -16,7 +16,6 @@
 
 package com.android.documentsui.dirlist;
 
-import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_BROWSE;
 import static com.android.documentsui.State.ACTION_CREATE;
 import static com.android.documentsui.State.ACTION_GET_CONTENT;
@@ -27,12 +26,10 @@ import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.content.Context;
 import android.provider.DocumentsContract.Document;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.android.documentsui.DocumentsActivity;
-import com.android.documentsui.FilesActivity;
+import com.android.documentsui.BaseActivity;
 import com.android.documentsui.Menus;
 import com.android.documentsui.MimePredicate;
 import com.android.documentsui.R;
@@ -155,11 +152,10 @@ public abstract class FragmentTuner {
 
         @Override
         void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
-            // When launched into empty recents, show drawer
-            if (resultType == DirectoryFragment.TYPE_RECENT_OPEN
-                    && model.isEmpty()
-                    && !mState.hasLocationChanged()) {
-                ((DocumentsActivity) mContext).setRootsDrawerOpen(true);
+            // When launched into empty root, open drawer.
+            if (model.isEmpty() && !mState.hasInitialLocationChanged() && !isSearch) {
+                // This noops on layouts without drawer, so no need to guard.
+                ((BaseActivity) mContext).setRootsDrawerOpen(true);
             }
         }
     }
@@ -204,8 +200,6 @@ public abstract class FragmentTuner {
      */
     private static final class FilesTuner extends FragmentTuner {
 
-        private static final String TAG = "FilesTuner";
-
         public FilesTuner(Context context, State state) {
             super(context, state);
         }
@@ -234,20 +228,15 @@ public abstract class FragmentTuner {
 
         @Override
         void onModelLoaded(Model model, @ResultType int resultType, boolean isSearch) {
-            if (DEBUG) Log.d(TAG, "Handling model loaded. Has Location shcnage: " + mState.initialLocationHasChanged());
             // When launched into empty root, open drawer.
-            if (model.isEmpty() && !mState.initialLocationHasChanged() && !isSearch) {
-                if (DEBUG) Log.d(TAG, "Showing roots drawer cuz stuffs empty.");
-
+            if (model.isEmpty() && !mState.hasInitialLocationChanged() && !isSearch) {
                 // This noops on layouts without drawer, so no need to guard.
-                ((FilesActivity) mContext).setRootsDrawerOpen(true);
+                ((BaseActivity) mContext).setRootsDrawerOpen(true);
             }
-            if (DEBUG) Log.d(TAG, "Donezo.");
         }
     }
 
     private static boolean isDirectory(String mimeType) {
         return Document.MIME_TYPE_DIR.equals(mimeType);
     }
-
 }
