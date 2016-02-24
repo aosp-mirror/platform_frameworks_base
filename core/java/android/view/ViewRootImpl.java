@@ -313,6 +313,7 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mPendingContentInsets = new Rect();
     final Rect mPendingOutsets = new Rect();
     final Rect mPendingBackDropFrame = new Rect();
+    boolean mPendingAlwaysConsumeNavBar;
     final ViewTreeObserver.InternalInsetsInfo mLastGivenInsets
             = new ViewTreeObserver.InternalInsetsInfo();
 
@@ -623,6 +624,9 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingContentInsets.set(mAttachInfo.mContentInsets);
                 mPendingStableInsets.set(mAttachInfo.mStableInsets);
                 mPendingVisibleInsets.set(0, 0, 0, 0);
+                mAttachInfo.mAlwaysConsumeNavBar =
+                        (res & WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR) != 0;
+                mPendingAlwaysConsumeNavBar = mAttachInfo.mAlwaysConsumeNavBar;
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -1345,7 +1349,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             mLastWindowInsets = new WindowInsets(contentInsets,
                     null /* windowDecorInsets */, stableInsets,
-                    mContext.getResources().getConfiguration().isScreenRound());
+                    mContext.getResources().getConfiguration().isScreenRound(),
+                    mAttachInfo.mAlwaysConsumeNavBar);
         }
         return mLastWindowInsets;
     }
@@ -1510,6 +1515,9 @@ public final class ViewRootImpl implements ViewParent,
                             + mAttachInfo.mVisibleInsets);
                 }
                 if (!mPendingOutsets.equals(mAttachInfo.mOutsets)) {
+                    insetsChanged = true;
+                }
+                if (mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar) {
                     insetsChanged = true;
                 }
                 if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
@@ -1696,6 +1704,8 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
                 final boolean surfaceSizeChanged = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
+                final boolean alwaysConsumeNavBarChanged =
+                        mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar;
                 if (contentInsetsChanged) {
                     mAttachInfo.mContentInsets.set(mPendingContentInsets);
                     if (DEBUG_LAYOUT) Log.v(mTag, "Content insets changing to: "
@@ -1713,6 +1723,10 @@ public final class ViewRootImpl implements ViewParent,
                     if (DEBUG_LAYOUT) Log.v(mTag, "Decor insets changing to: "
                             + mAttachInfo.mStableInsets);
                     // Need to relayout with content insets.
+                    contentInsetsChanged = true;
+                }
+                if (alwaysConsumeNavBarChanged) {
+                    mAttachInfo.mAlwaysConsumeNavBar = mPendingAlwaysConsumeNavBar;
                     contentInsetsChanged = true;
                 }
                 if (contentInsetsChanged || mLastSystemUiVisibility !=
@@ -3391,6 +3405,7 @@ public final class ViewRootImpl implements ViewParent,
                     mPendingOutsets.set((Rect) args.arg7);
                     mPendingBackDropFrame.set((Rect) args.arg8);
                     mForceNextWindowRelayout = args.argi1 != 0;
+                    mPendingAlwaysConsumeNavBar = args.argi2 != 0;
 
                     args.recycle();
 
@@ -5570,6 +5585,10 @@ public final class ViewRootImpl implements ViewParent,
                 mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingConfiguration,
                 mSurface);
+
+        mPendingAlwaysConsumeNavBar =
+                (relayoutResult & WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_NAV_BAR) != 0;
+
         //Log.d(mTag, "<<<<<< BACK FROM relayout");
         if (restore) {
             params.restore();
@@ -5841,7 +5860,8 @@ public final class ViewRootImpl implements ViewParent,
 
     public void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            Configuration newConfig, Rect backDropFrame, boolean forceLayout) {
+            Configuration newConfig, Rect backDropFrame, boolean forceLayout,
+            boolean alwaysConsumeNavBar) {
         if (DEBUG_LAYOUT) Log.v(mTag, "Resizing " + this + ": frame=" + frame.toShortString()
                 + " contentInsets=" + contentInsets.toShortString()
                 + " visibleInsets=" + visibleInsets.toShortString()
@@ -5878,6 +5898,7 @@ public final class ViewRootImpl implements ViewParent,
         args.arg7 = sameProcessCall ? new Rect(outsets) : outsets;
         args.arg8 = sameProcessCall ? new Rect(backDropFrame) : backDropFrame;
         args.argi1 = forceLayout ? 1 : 0;
+        args.argi2 = alwaysConsumeNavBar ? 1 : 0;
         msg.obj = args;
         mHandler.sendMessage(msg);
     }
@@ -6879,12 +6900,13 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                Configuration newConfig, Rect backDropFrame, boolean forceLayout) {
+                Configuration newConfig, Rect backDropFrame, boolean forceLayout,
+                boolean alwaysConsumeNavBar) {
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(frame, overscanInsets, contentInsets,
                         visibleInsets, stableInsets, outsets, reportDraw, newConfig, backDropFrame,
-                        forceLayout);
+                        forceLayout, alwaysConsumeNavBar);
             }
         }
 

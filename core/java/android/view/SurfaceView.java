@@ -743,7 +743,8 @@ public class SurfaceView extends View {
         @Override
         public void resized(Rect frame, Rect overscanInsets, Rect contentInsets,
                 Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-                Configuration newConfig, Rect backDropRect, boolean forceLayout) {
+                Configuration newConfig, Rect backDropRect, boolean forceLayout,
+                boolean alwaysConsumeNavBar) {
             SurfaceView surfaceView = mSurfaceView.get();
             if (surfaceView != null) {
                 if (DEBUG) Log.v(
