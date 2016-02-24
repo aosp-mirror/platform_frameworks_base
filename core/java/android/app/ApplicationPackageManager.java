@@ -30,7 +30,6 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
-import android.content.pm.ContainerEncryptionParams;
 import android.content.pm.EphemeralApplicationInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IOnPermissionsChangeListener;
@@ -54,7 +53,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
-import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -1469,80 +1467,27 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
                                String installerPackageName) {
-        final VerificationParams verificationParams = new VerificationParams(null, null,
-                null, VerificationParams.NO_UID);
         installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, null, mContext.getUserId());
-    }
-
-    @Override
-    public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName, Uri verificationURI,
-            ContainerEncryptionParams encryptionParams) {
-        final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
-                null, VerificationParams.NO_UID);
-        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, encryptionParams, mContext.getUserId());
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            IPackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-        installCommon(packageURI, new LegacyPackageInstallObserver(observer), flags,
-                installerPackageName, verificationParams, encryptionParams, mContext.getUserId());
+                installerPackageName, mContext.getUserId());
     }
 
     @Override
     public void installPackage(Uri packageURI, PackageInstallObserver observer,
             int flags, String installerPackageName) {
-        installPackageAsUser(packageURI, observer, flags, installerPackageName,
-                mContext.getUserId());
-    }
-
-    @Override
-    public void installPackageAsUser(Uri packageURI, PackageInstallObserver observer, int flags,
-               String installerPackageName, int userId) {
-        final VerificationParams verificationParams = new VerificationParams(null, null,
-                null, VerificationParams.NO_UID);
-        installCommon(packageURI, observer, flags, installerPackageName, verificationParams, null,
-                userId);
-    }
-
-    @Override
-    public void installPackageWithVerification(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            Uri verificationURI,
-            ContainerEncryptionParams encryptionParams) {
-        final VerificationParams verificationParams = new VerificationParams(verificationURI, null,
-                null, VerificationParams.NO_UID);
-        installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
-                encryptionParams, mContext.getUserId());
-    }
-
-    @Override
-    public void installPackageWithVerificationAndEncryption(Uri packageURI,
-            PackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
-        installCommon(packageURI, observer, flags, installerPackageName, verificationParams,
-                encryptionParams, mContext.getUserId());
+        installCommon(packageURI, observer, flags, installerPackageName, mContext.getUserId());
     }
 
     private void installCommon(Uri packageURI,
             PackageInstallObserver observer, int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams,
             int userId) {
         if (!"file".equals(packageURI.getScheme())) {
             throw new UnsupportedOperationException("Only file:// URIs are supported");
-        }
-        if (encryptionParams != null) {
-            throw new UnsupportedOperationException("ContainerEncryptionParams not supported");
         }
 
         final String originPath = packageURI.getPath();
         try {
             mPM.installPackageAsUser(originPath, observer.getBinder(), flags, installerPackageName,
-                    verificationParams, null, userId);
+                    userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

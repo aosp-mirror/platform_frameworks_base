@@ -4598,60 +4598,20 @@ public abstract class PackageManager {
      */
     @Deprecated
     public abstract void installPackage(
-            Uri packageURI, IPackageInstallObserver observer, @InstallFlags int flags,
+            Uri packageURI,
+            IPackageInstallObserver observer,
+            @InstallFlags int flags,
             String installerPackageName);
-
     /**
      * @deprecated replaced by {@link PackageInstaller}
      * @hide
      */
     @Deprecated
-    public abstract void installPackageWithVerification(Uri packageURI,
-            IPackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
-            Uri verificationURI, ContainerEncryptionParams encryptionParams);
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackageWithVerificationAndEncryption(Uri packageURI,
-            IPackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams);
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackage(Uri packageURI, PackageInstallObserver observer,
-            @InstallFlags int flags, String installerPackageName);
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackageAsUser(Uri packageURI, PackageInstallObserver observer,
-            @InstallFlags int flags, String installerPackageName, @UserIdInt int userId);
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackageWithVerification(Uri packageURI,
-            PackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
-            Uri verificationURI, ContainerEncryptionParams encryptionParams);
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackageWithVerificationAndEncryption(Uri packageURI,
-            PackageInstallObserver observer, @InstallFlags int flags, String installerPackageName,
-            VerificationParams verificationParams, ContainerEncryptionParams encryptionParams);
+    public abstract void installPackage(
+            Uri packageURI,
+            PackageInstallObserver observer,
+            @InstallFlags int flags,
+            String installerPackageName);
 
     /**
      * If there is already an application with the given package name installed
