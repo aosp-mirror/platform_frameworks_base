@@ -17,23 +17,20 @@ package com.android.systemui.tuner;
 
 import android.annotation.Nullable;
 import android.app.UiModeManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v14.preference.SwitchPreference;
-import android.support.v7.preference.DropDownPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.Preference.OnPreferenceChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
-
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.NightModeController;
 import com.android.systemui.statusbar.policy.NightModeController.Listener;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -100,6 +97,7 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
             @Override
             public void onClick(View v) {
                 boolean newState = !mNightModeController.isEnabled();
+                MetricsLogger.action(getContext(), MetricsEvent.ACTION_TUNER_NIGHT_MODE, newState);
                 mNightModeController.setNightMode(newState);
                 mSwitch.setChecked(newState);
             }
@@ -109,6 +107,7 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
     @Override
     public void onResume() {
         super.onResume();
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER_NIGHT_MODE, true);
         mNightModeController.addListener(this);
         TunerService.get(getContext()).addTunable(this, Secure.BRIGHTNESS_USE_TWILIGHT,
                 NightModeController.NIGHT_MODE_ADJUST_TINT);
@@ -119,24 +118,33 @@ public class NightModeFragment extends PreferenceFragment implements Tunable,
     @Override
     public void onPause() {
         super.onPause();
+        MetricsLogger.visibility(getContext(), MetricsEvent.TUNER_NIGHT_MODE, false);
         mNightModeController.removeListener(this);
         TunerService.get(getContext()).removeTunable(this);
     }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        final Boolean value = (Boolean) newValue;
         if (mAutoSwitch == preference) {
-            mNightModeController.setAuto((Boolean) newValue);
+            MetricsLogger.action(getContext(), MetricsEvent.ACTION_TUNER_NIGHT_MODE_AUTO, value);
+            mNightModeController.setAuto(value);
         } else if (mDarkTheme == preference) {
-            mUiModeManager.setNightMode(((Boolean) newValue) ? UiModeManager.MODE_NIGHT_AUTO
+            MetricsLogger.action(getContext(),
+                    MetricsEvent.ACTION_TUNER_NIGHT_MODE_ADJUST_DARK_THEME, value);
+            mUiModeManager.setNightMode(value ? UiModeManager.MODE_NIGHT_AUTO
                     : UiModeManager.MODE_NIGHT_NO);
             postCalculateDisabled();
         } else if (mAdjustTint == preference) {
-            mNightModeController.setAdjustTint((Boolean) newValue);
+            MetricsLogger.action(getContext(),
+                    MetricsEvent.ACTION_TUNER_NIGHT_MODE_ADJUST_TINT, value);
+            mNightModeController.setAdjustTint(value);
             postCalculateDisabled();
         } else if (mAdjustBrightness == preference) {
+            MetricsLogger.action(getContext(),
+                    MetricsEvent.ACTION_TUNER_NIGHT_MODE_ADJUST_BRIGHTNESS, value);
             TunerService.get(getContext()).setValue(Secure.BRIGHTNESS_USE_TWILIGHT,
-                    ((Boolean) newValue) ? 1 : 0);
+                    value ? 1 : 0);
             postCalculateDisabled();
         } else {
             return false;

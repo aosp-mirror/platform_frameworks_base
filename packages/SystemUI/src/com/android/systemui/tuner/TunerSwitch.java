@@ -6,18 +6,21 @@ import android.provider.Settings;
 import android.support.v14.preference.SwitchPreference;
 import android.util.AttributeSet;
 
+import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
 import com.android.systemui.tuner.TunerService.Tunable;
 
 public class TunerSwitch extends SwitchPreference implements Tunable {
 
     private final boolean mDefault;
+    private final int mAction;
 
     public TunerSwitch(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TunerSwitch);
         mDefault = a.getBoolean(R.styleable.TunerSwitch_defValue, false);
+        mAction = a.getInt(R.styleable.TunerSwitch_metricsAction, -1);
     }
 
     @Override
@@ -35,6 +38,14 @@ public class TunerSwitch extends SwitchPreference implements Tunable {
     @Override
     public void onTuningChanged(String key, String newValue) {
         setChecked(newValue != null ? Integer.parseInt(newValue) != 0 : mDefault);
+    }
+
+    @Override
+    protected void onClick() {
+        super.onClick();
+        if (mAction != -1) {
+            MetricsLogger.action(getContext(), mAction, isChecked());
+        }
     }
 
     @Override
