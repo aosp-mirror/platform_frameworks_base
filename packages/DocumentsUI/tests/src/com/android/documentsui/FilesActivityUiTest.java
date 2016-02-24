@@ -23,11 +23,18 @@ import android.os.RemoteException;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.view.KeyEvent;
 
+import com.android.documentsui.model.RootInfo;
+
 @LargeTest
 public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
 
     public FilesActivityUiTest() {
         super(FilesActivity.class);
+    }
+
+    @Override
+    protected RootInfo getInitialRoot() {
+        return null;
     }
 
     @Override
