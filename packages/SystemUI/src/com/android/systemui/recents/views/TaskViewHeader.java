@@ -63,7 +63,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 public class TaskViewHeader extends FrameLayout
         implements View.OnClickListener, View.OnLongClickListener {
 
-    private static final float HIGHLIGHT_LIGHTNESS_INCREMENT = 0.125f;
+    private static final float HIGHLIGHT_LIGHTNESS_INCREMENT = 0.075f;
     private static final float OVERLAY_LIGHTNESS_INCREMENT = -0.0625f;
     private static final int OVERLAY_REVEAL_DURATION = 250;
     private static final long FOCUS_INDICATOR_INTERVAL_MS = 30;

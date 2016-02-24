@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -101,34 +100,13 @@ class Range {
  */
 public class TaskStackLayoutAlgorithm {
 
-    // The scale factor to apply to the user movement in the stack to unfocus it
-    private static final float UNFOCUS_MULTIPLIER = 0.8f;
-
     // The distribution of view bounds alpha
     // XXX: This is a hack because you can currently set the max alpha to be > 1f
     public static final float OUTLINE_ALPHA_MIN_VALUE = 0f;
     public static final float OUTLINE_ALPHA_MAX_VALUE = 2f;
 
-    // The distribution of dim to apply to tasks in the stack
-    private static final float DIM_MAX_VALUE = 0.35f;
-    private static final Path UNFOCUSED_DIM_PATH = new Path();
-    private static final Path FOCUSED_DIM_PATH = new Path();
-    static {
-        // The unfocused dim interpolator peaks to 1 at 0.5 (the focused task), then slowly drops
-        // back to 0.5 at the front of the stack
-        UNFOCUSED_DIM_PATH.moveTo(0f, 0f);
-        UNFOCUSED_DIM_PATH.cubicTo(0f, 0.1f, 0.4f, 0.8f, 0.5f, 1f);
-        UNFOCUSED_DIM_PATH.cubicTo(0.6f, 1f, 0.9f, 0.6f, 1f, 0.5f);
-        // The focused dim interpolator peaks to 1 at 0.5 (the focused task), then drops back to 0
-        // at the front of the stack
-        FOCUSED_DIM_PATH.moveTo(0f, 0f);
-        FOCUSED_DIM_PATH.cubicTo(0.1f, 0f, 0.4f, 1f, 0.5f, 1f);
-        FOCUSED_DIM_PATH.cubicTo(0.6f, 1f, 0.9f, 0f, 1f, 0f);
-    }
-    private static final FreePathInterpolator UNFOCUSED_DIM_INTERPOLATOR =
-            new FreePathInterpolator(UNFOCUSED_DIM_PATH);
-    private static final FreePathInterpolator FOCUSED_DIM_INTERPOLATOR =
-            new FreePathInterpolator(FOCUSED_DIM_PATH);
+    // The maximum dim on the tasks
+    private static final float MAX_DIM = 0.25f;
 
     // The various focus states
     public static final int STATE_FOCUSED = 1;
@@ -263,6 +241,13 @@ public class TaskStackLayoutAlgorithm {
     private Path mFocusedCurve;
     private FreePathInterpolator mUnfocusedCurveInterpolator;
     private FreePathInterpolator mFocusedCurveInterpolator;
+
+    // The paths defining the distribution of the dim to apply to tasks in the stack when focused
+    // and unfocused
+    private Path mUnfocusedDimCurve;
+    private Path mFocusedDimCurve;
+    private FreePathInterpolator mUnfocusedDimCurveInterpolator;
+    private FreePathInterpolator mFocusedDimCurveInterpolator;
 
     // The state of the stack focus (0..1), which controls the transition of the stack from the
     // focused to non-focused state
@@ -401,6 +386,11 @@ public class TaskStackLayoutAlgorithm {
         mUnfocusedCurveInterpolator = new FreePathInterpolator(mUnfocusedCurve);
         mFocusedCurve = constructFocusedCurve();
         mFocusedCurveInterpolator = new FreePathInterpolator(mFocusedCurve);
+        mUnfocusedDimCurve = constructUnfocusedDimCurve();
+        mUnfocusedDimCurveInterpolator = new FreePathInterpolator(mUnfocusedDimCurve);
+        mFocusedDimCurve = constructFocusedDimCurve();
+        mFocusedDimCurveInterpolator = new FreePathInterpolator(mFocusedDimCurve);
+
         updateFrontBackTransforms();
     }
 
@@ -733,16 +723,16 @@ public class TaskStackLayoutAlgorithm {
                     unfocusedRangeX)) * mStackRect.height());
             int focusedY = (int) ((1f - mFocusedCurveInterpolator.getInterpolation(
                     focusedRangeX)) * mStackRect.height());
-            float unfocusedDim = 1f - UNFOCUSED_DIM_INTERPOLATOR.getInterpolation(
+            float unfocusedDim = mUnfocusedDimCurveInterpolator.getInterpolation(
                     boundedScrollUnfocusedRangeX);
-            float focusedDim = 1f - FOCUSED_DIM_INTERPOLATOR.getInterpolation(
+            float focusedDim = mFocusedDimCurveInterpolator.getInterpolation(
                     boundedScrollFocusedRangeX);
 
             y = (mStackRect.top - mTaskRect.top) +
                     (int) Utilities.mapRange(focusState, unfocusedY, focusedY);
             z = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedRangeX),
                     mMinTranslationZ, mMaxTranslationZ);
-            dimAlpha = DIM_MAX_VALUE * Utilities.mapRange(focusState, unfocusedDim, focusedDim);
+            dimAlpha = Utilities.mapRange(focusState, unfocusedDim, focusedDim);
             viewOutlineAlpha = Utilities.mapRange(Utilities.clamp01(boundedScrollUnfocusedRangeX),
                     OUTLINE_ALPHA_MIN_VALUE, OUTLINE_ALPHA_MAX_VALUE);
         }
@@ -838,6 +828,34 @@ public class TaskStackLayoutAlgorithm {
         p.cubicTo(0.5f, 1f - peekHeightPct, cpoint2X, cpoint2Y, 1f, 0f);
         return p;
     }
+
+    /**
+     * Creates a new path for the focused dim curve.
+     */
+    private Path constructFocusedDimCurve() {
+        Path p = new Path();
+        // The focused dim interpolator starts at max dim, reduces to zero at 0.5 (the focused
+        // task), then goes back to max dim at the next task
+        p.moveTo(0f, MAX_DIM);
+        p.lineTo(0.5f, 0f);
+        p.lineTo(0.5f + (0.5f / mFocusedRange.relativeMax), MAX_DIM);
+        p.lineTo(1f, MAX_DIM);
+        return p;
+    }
+
+    /**
+     * Creates a new path for the unfocused dim curve.
+     */
+    private Path constructUnfocusedDimCurve() {
+        Path p = new Path();
+        // The unfocused dim interpolator starts at max dim, reduces to zero at 0.5 (the focused
+        // task), then goes back to max dim towards the front of the stack
+        p.moveTo(0f, MAX_DIM);
+        p.cubicTo(0f, 0.1f, 0.4f, 0f, 0.5f, 0f);
+        p.cubicTo(0.6f, 0f, 0.9f, MAX_DIM - 0.1f, 1f, MAX_DIM / 2f);
+        return p;
+    }
+
 
     /**
      * Updates the current transforms that would put a TaskView at the front and back of the stack.

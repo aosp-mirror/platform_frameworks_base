@@ -183,9 +183,9 @@ public class TaskViewThumbnail extends View {
                 mat[0] = scale;
                 mat[6] = scale;
                 mat[12] = scale;
-                mat[4] = mDimAlpha;
-                mat[9] = mDimAlpha;
-                mat[14] = mDimAlpha;
+                mat[4] = mDimAlpha * 255f;
+                mat[9] = mDimAlpha * 255f;
+                mat[14] = mDimAlpha * 255f;
                 TMP_FILTER_COLOR_MATRIX.preConcat(TMP_BRIGHTNESS_COLOR_MATRIX);
                 ColorMatrixColorFilter filter = new ColorMatrixColorFilter(TMP_FILTER_COLOR_MATRIX);
                 mDrawPaint.setColorFilter(filter);
