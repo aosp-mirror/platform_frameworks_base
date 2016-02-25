@@ -704,8 +704,8 @@ public class AppOpsManager {
      * (and system ui) to bypass the user restriction when active.
      */
     private static boolean[] sOpAllowSystemRestrictionBypass = new boolean[] {
-            false, //COARSE_LOCATION
-            false, //FINE_LOCATION
+            true, //COARSE_LOCATION
+            true, //FINE_LOCATION
             false, //GPS
             false, //VIBRATE
             false, //READ_CONTACTS
