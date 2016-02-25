@@ -162,9 +162,8 @@ class Mapper {
 
     /**
      * Starts adding new documents.
-     * The methods decides mapping mode depends on if all documents under the given parent have MTP
-     * identifier or not. If all the documents have MTP identifier, it uses the identifier to find
-     * a corresponding existing row. Otherwise it does heuristic.
+     * It changes the direct child documents of the given document from VALID to INVALIDATED.
+     * Note that it keeps DISCONNECTED documents as they are.
      *
      * @param parentDocumentId Parent document ID or NULL for root documents.
      * @throws FileNotFoundException
@@ -286,12 +285,16 @@ class Mapper {
     }
 
     /**
-     * Maps 'pending' document and 'invalidated' document that shares the same column of groupKey.
-     * If the database does not find corresponding 'invalidated' document, it just removes
-     * 'invalidated' document from the database.
+     * Stops adding documents.
+     * It handles 'invalidated' and 'disconnected' documents which we don't put corresponding
+     * documents so far.
+     * If the type adding document is 'device' or 'storage', the document may appear again
+     * afterward. The method marks such documents as 'disconnected'. If the type of adding document
+     * is 'object', it seems the documents are really removed from the remote MTP device. So the
+     * method deletes the metadata from the database.
      *
      * @param parentId Parent document ID or null for root documents.
-     * @return Whether the methods adds or removed visible rows.
+     * @return Whether the methods changes file metadata in database.
      * @throws FileNotFoundException
      */
     boolean stopAddingDocuments(@Nullable String parentId) throws FileNotFoundException {
@@ -313,7 +316,9 @@ class Mapper {
             mInMappingIds.remove(parentId);
 
             boolean changed = false;
-            // Delete/disconnect all invalidated rows that cannot be mapped.
+            // Delete/disconnect all invalidated/disconnected rows that cannot be mapped.
+            // If parentIdentifier is null, added documents are devices.
+            // if parentIdentifier is DOCUMENT_TYPE_DEVICE, added documents are storages.
             final boolean keepUnmatchedDocument =
                     parentIdentifier == null ||
                     parentIdentifier.mDocumentType == DOCUMENT_TYPE_DEVICE;
@@ -325,8 +330,9 @@ class Mapper {
                 }
             } else {
                 if (mDatabase.deleteDocumentsAndRootsRecursively(
-                        COLUMN_ROW_STATE + " = ? AND " + selection,
-                        DatabaseUtils.appendSelectionArgs(strings(ROW_STATE_INVALIDATED), args))) {
+                        COLUMN_ROW_STATE + " IN (?, ?) AND " + selection,
+                        DatabaseUtils.appendSelectionArgs(
+                                strings(ROW_STATE_INVALIDATED, ROW_STATE_DISCONNECTED), args))) {
                     changed = true;
                 }
             }
