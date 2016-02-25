@@ -80,13 +80,13 @@ public class BrightnessMirrorController {
 
         // Original is slightly larger than the mirror, so make sure to use the center for the
         // positioning.
-        int originalX = mInt2Cache[0] + original.getWidth()/2;
-        int originalY = mInt2Cache[1];
+        int originalX = mInt2Cache[0] + original.getWidth() / 2;
+        int originalY = mInt2Cache[1] + original.getHeight() / 2;
         mBrightnessMirror.setTranslationX(0);
         mBrightnessMirror.setTranslationY(0);
         mBrightnessMirror.getLocationInWindow(mInt2Cache);
-        int mirrorX = mInt2Cache[0] + mBrightnessMirror.getWidth()/2;
-        int mirrorY = mInt2Cache[1];
+        int mirrorX = mInt2Cache[0] + mBrightnessMirror.getWidth() / 2;
+        int mirrorY = mInt2Cache[1] + mBrightnessMirror.getHeight() / 2;
         mBrightnessMirror.setTranslationX(originalX - mirrorX);
         mBrightnessMirror.setTranslationY(originalY - mirrorY);
     }

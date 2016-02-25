@@ -38,7 +38,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 if (mPageIndicator == null) return;
                 mPageIndicator.setLocation(position);
                 if (mPageListener != null) {
-                    mPageListener.onPageChanged(position);
+                    mPageListener.onPageChanged(position == 0);
                 }
             }
 
@@ -47,6 +47,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                     int positionOffsetPixels) {
                 if (mPageIndicator == null) return;
                 mPageIndicator.setLocation(position + positionOffset);
+                if (mPageListener != null) {
+                    mPageListener.onPageChanged(position == 0 && positionOffsetPixels == 0);
+                }
             }
 
             @Override
@@ -209,6 +212,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     };
 
     public interface PageListener {
-        void onPageChanged(int page);
+        void onPageChanged(boolean isFirst);
     }
 }

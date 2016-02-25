@@ -58,7 +58,7 @@ public class TouchAnimator {
         }
         if (mListener != null) {
             if (mLastT == 0 || mLastT == 1) {
-                if (t != 0) {
+                if (t != mLastT) {
                     mListener.onAnimationStarted();
                 }
             } else if (t == 1) {
