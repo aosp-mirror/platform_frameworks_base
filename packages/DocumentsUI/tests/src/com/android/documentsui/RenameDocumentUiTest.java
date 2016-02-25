@@ -33,7 +33,6 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
     public void setUp() throws Exception {
         super.setUp();
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
     }
 
     public void testRenameEnabled_SingleSelection() throws Exception {
