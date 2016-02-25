@@ -180,10 +180,5 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             return dexoptFlags | DEXOPT_OTA;
         }
 
-        @Override
-        protected void recordSuccessfulDexopt(Package pkg, String instructionSet) {
-            // Never record the dexopt, as it's in the B partition.
-        }
-
     }
 }

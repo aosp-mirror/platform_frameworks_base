@@ -637,9 +637,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     // List of packages names to keep cached, even if they are uninstalled for all users
     private List<String> mKeepUninstalledPackages;
 
-    private boolean mUseJitProfiles =
-            SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
-
     private static class IFVerificationParams {
         PackageParser.Package pkg;
         boolean replacing;
@@ -2159,10 +2156,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
 
                         try {
-                            int dexoptNeeded = DexFile.getDexOptNeeded(lib, null, dexCodeInstructionSet, false);
+                            // Shared libraries do not have profiles so we perform a full
+                            // AOT compilation (if needed).
+                            int dexoptNeeded = DexFile.getDexOptNeeded(
+                                    lib, dexCodeInstructionSet,
+                                    DexFile.COMPILATION_TYPE_FULL);
                             if (dexoptNeeded != DexFile.NO_DEXOPT_NEEDED) {
-                                // Shared libraries do not have profiles so we perform a full
-                                // AOT compilation.
                                 mInstaller.dexopt(lib, Process.SYSTEM_UID, dexCodeInstructionSet,
                                         dexoptNeeded, DEXOPT_PUBLIC /*dexFlags*/,
                                         StorageManager.UUID_PRIVATE_INTERNAL,
@@ -6828,7 +6827,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         // Extract pacakges only if profile-guided compilation is enabled because
         // otherwise BackgroundDexOptService will not dexopt them later.
-        if (!mUseJitProfiles || !isUpgrade()) {
+        if (!isUpgrade()) {
             return;
         }
 
@@ -6910,10 +6909,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             targetInstructionSet = instructionSet != null ? instructionSet :
                     getPrimaryInstructionSet(p.applicationInfo);
-            if (!force && !useProfiles && p.mDexOptPerformed.contains(targetInstructionSet)) {
-                // Skip only if we do not use profiles since they might trigger a recompilation.
-                return false;
-            }
         }
         long callingId = Binder.clearCallingIdentity();
         try {
@@ -13832,21 +13827,17 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return;
             }
 
-            // Extract package to save the VM unzipping the APK in memory during
-            // launch. Only do this if profile-guided compilation is enabled because
-            // otherwise BackgroundDexOptService will not dexopt the package later.
-            if (mUseJitProfiles) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
-                // Do not run PackageDexOptimizer through the local performDexOpt
-                // method because `pkg` is not in `mPackages` yet.
-                int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
-                        false /* useProfiles */, true /* extractOnly */);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-                if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
-                    String msg = "Extracking package failed for " + pkgName;
-                    res.setError(INSTALL_FAILED_DEXOPT, msg);
-                    return;
-                }
+
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+            // Do not run PackageDexOptimizer through the local performDexOpt
+            // method because `pkg` is not in `mPackages` yet.
+            int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instructionSets */,
+                    false /* useProfiles */, true /* extractOnly */);
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
+                String msg = "Extracking package failed for " + pkgName;
+                res.setError(INSTALL_FAILED_DEXOPT, msg);
+                return;
             }
         }
 
