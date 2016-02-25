@@ -571,18 +571,6 @@ public:
 
     void getDensityVaryingResources(KeyedVector<Symbol, Vector<SymbolDefinition> >& resources);
 
-    /**
-     * Make an attribute with the specified format. If another attribute with the same name but
-     * different format exists, this method returns false. If the name is not taken, or if the
-     * format is identical, this returns true.
-     */
-    bool makeAttribute(const String16& package,
-                       const String16& name,
-                       const SourcePos& source,
-                       int32_t format,
-                       const String16& comment,
-                       bool appendComment);
-
 private:
     void writePublicDefinitions(const String16& package, FILE* fp, bool pub);
     sp<Package> getPackage(const String16& package);
