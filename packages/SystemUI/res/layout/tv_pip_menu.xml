@@ -18,36 +18,94 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="end"
-    android:paddingStart="10dp"
-    android:paddingEnd="10dp"
-    android:background="#88FFFFFF"
-    android:gravity="center_vertical" >
+    android:orientation="horizontal"
+    android:paddingTop="350dp"
+    android:background="#CC000000"
+    android:gravity="top|center_horizontal"
+    android:clipChildren="false">
 
-    <Button android:id="@+id/full"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="34dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:text="@string/pip_fullscreen"
-        android:textSize="10sp"
-        android:focusable="true" />
+        android:layout_marginEnd="3dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clipChildren="false">
 
-    <Button android:id="@+id/exit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:text="@string/pip_exit"
-        android:textSize="10sp"
-        android:focusable="true" />
+        <ImageView android:id="@+id/full"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:src="@drawable/tv_pip_full_button" />
 
-    <Button android:id="@+id/cancel"
-        android:layout_width="match_parent"
+        <TextView android:id="@+id/full_desc"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:visibility="invisible"
+            android:text="@string/pip_fullscreen"
+            android:fontFamily="sans-serif"
+            android:textSize="12sp"
+            android:textColor="#EEEEEE"
+            android:clipChildren="false" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="34dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:text="@string/pip_cancel"
-        android:textSize="10sp"
-        android:focusable="true" />
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:clipChildren="false">
+
+        <ImageView android:id="@+id/play_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:src="@drawable/tv_pip_pause_button" />
+
+        <TextView android:id="@+id/play_pause_desc"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:visibility="invisible"
+            android:text="@string/pip_pause"
+            android:fontFamily="sans-serif"
+            android:textSize="12sp"
+            android:textColor="#EEEEEE"
+            android:clipChildren="false" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="34dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clipChildren="false">
+
+        <ImageView android:id="@+id/close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:src="@drawable/tv_pip_close_button" />
+
+        <TextView android:id="@+id/close_desc"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:visibility="invisible"
+            android:text="@string/pip_close"
+            android:fontFamily="sans-serif"
+            android:textSize="12sp"
+            android:textColor="#EEEEEE"
+            android:clipChildren="false" />
+    </LinearLayout>
 </LinearLayout>

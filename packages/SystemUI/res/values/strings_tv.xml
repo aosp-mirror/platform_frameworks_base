@@ -20,7 +20,7 @@
     <!-- Picture-in-Picture menu -->
     <eat-comment />
     <!-- Button to close PIP on PIP UI -->
-    <string name="pip_exit" translatable="false">Close PIP</string>
+    <string name="pip_close" translatable="false">Close PIP</string>
     <!-- Button to move PIP screen to the fullscreen on PIP UI -->
     <string name="pip_fullscreen" translatable="false">Full screen</string>
     <!-- Button to play the current media on PIP UI -->
