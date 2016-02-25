@@ -76,9 +76,9 @@
         <item>0</item>
     </array>
     <array name="lg_g4_iso_800_dng">
-        <item>false</item>
-        <item>0</item>
-        <item>0</item>
+        <item>true</item>
+        <item>256</item>
+        <item>144</item>
         <item>true</item>
         <item>53.834507</item>
         <item>10.69585</item>

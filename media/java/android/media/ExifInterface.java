@@ -16,6 +16,8 @@
 
 package android.media;
 
+import android.annotation.NonNull;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.system.ErrnoException;
@@ -24,6 +26,7 @@ import android.system.OsConstants;
 import android.util.Log;
 import android.util.Pair;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -145,6 +148,7 @@ public class ExifInterface {
     private static final String TAG_HAS_THUMBNAIL = "hasThumbnail";
     private static final String TAG_THUMBNAIL_OFFSET = "thumbnailOffset";
     private static final String TAG_THUMBNAIL_LENGTH = "thumbnailLength";
+    private static final String TAG_THUMBNAIL_DATA = "thumbnailData";
 
     // Constants used for the Orientation Exif tag.
     public static final int ORIENTATION_UNDEFINED = 0;
@@ -162,6 +166,9 @@ public class ExifInterface {
     // Constants used for white balance
     public static final int WHITEBALANCE_AUTO = 0;
     public static final int WHITEBALANCE_MANUAL = 1;
+
+    private static final byte[] JPEG_SIGNATURE = new byte[] {(byte) 0xff, (byte) 0xd8, (byte) 0xff};
+    private static final int JPEG_SIGNATURE_SIZE = 3;
 
     private static SimpleDateFormat sFormatter;
 
@@ -408,8 +415,8 @@ public class ExifInterface {
     // Mappings from tag number to tag name and each item represents one IFD tag group.
     private static final HashMap[] sExifTagMapsForReading = new HashMap[EXIF_TAGS.length];
     // Mapping from tag name to tag number and the corresponding tag group.
-    private static final HashMap<String, Pair<Integer, Integer>> sExifTagMapForWriting
-            = new HashMap<>();
+    private static final HashMap<String, Pair<Integer, Integer>> sExifTagMapForWriting =
+            new HashMap<>();
 
     // See JPEG File Interchange Format Version 1.02.
     // The following values are defined for handling JPEG streams. In this implementation, we are
@@ -443,7 +450,7 @@ public class ExifInterface {
 
     static {
         System.loadLibrary("media_jni");
-        initRawNative();
+        nativeInitRaw();
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
@@ -468,10 +475,10 @@ public class ExifInterface {
     }
 
     private final String mFilename;
-    private final FileDescriptor mFileDescriptor;
-    private final InputStream mInputStream;
-    private boolean mIsRaw;
+    private final FileDescriptor mSeekableFileDescriptor;
+    private final AssetManager.AssetInputStream mAssetInputStream;
     private final HashMap<String, String> mAttributes = new HashMap<>();
+    private boolean mIsRaw;
     private boolean mHasThumbnail;
     // The following values used for indicating a thumbnail position.
     private int mThumbnailOffset;
@@ -488,23 +495,33 @@ public class ExifInterface {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
+        FileInputStream in = new FileInputStream(filename);
+        mAssetInputStream = null;
         mFilename = filename;
-        mFileDescriptor = null;
-        mInputStream = new FileInputStream(filename);
-        loadAttributes();
+        if (isSeekableFD(in.getFD())) {
+            mSeekableFileDescriptor = in.getFD();
+        } else {
+            mSeekableFileDescriptor = null;
+        }
+        loadAttributes(in);
     }
 
     /**
-     * Reads Exif tags from the specified image file descriptor.
+     * Reads Exif tags from the specified image file descriptor. Attribute mutation is supported
+     * for seekable file descriptors only.
      */
     public ExifInterface(FileDescriptor fileDescriptor) throws IOException {
         if (fileDescriptor == null) {
             throw new IllegalArgumentException("parcelFileDescriptor cannot be null");
         }
+        mAssetInputStream = null;
         mFilename = null;
-        mFileDescriptor = fileDescriptor;
-        mInputStream = new FileInputStream(fileDescriptor);
-        loadAttributes();
+        if (isSeekableFD(fileDescriptor)) {
+            mSeekableFileDescriptor = fileDescriptor;
+        } else {
+            mSeekableFileDescriptor = null;
+        }
+        loadAttributes(new FileInputStream(fileDescriptor));
     }
 
     /**
@@ -516,9 +533,18 @@ public class ExifInterface {
             throw new IllegalArgumentException("inputStream cannot be null");
         }
         mFilename = null;
-        mFileDescriptor = null;
-        mInputStream = inputStream;
-        loadAttributes();
+        if (inputStream instanceof AssetManager.AssetInputStream) {
+            mAssetInputStream = (AssetManager.AssetInputStream) inputStream;
+            mSeekableFileDescriptor = null;
+        } else if (inputStream instanceof FileInputStream
+                && isSeekableFD(((FileInputStream) inputStream).getFD())) {
+            mAssetInputStream = null;
+            mSeekableFileDescriptor = ((FileInputStream) inputStream).getFD();
+        } else {
+            mAssetInputStream = null;
+            mSeekableFileDescriptor = null;
+        }
+        loadAttributes(inputStream);
     }
 
     /**
@@ -587,76 +613,92 @@ public class ExifInterface {
     }
 
     /**
-     * Initialize mAttributes with the attributes from the file mFilename.
-     *
-     * mAttributes is a HashMap which stores the Exif attributes of the file.
-     * The key is the standard tag name and the value is the tag's value: e.g.
-     * Model -&gt; Nikon. Numeric values are stored as strings.
-     *
-     * This function also initialize mHasThumbnail to indicate whether the
-     * file has a thumbnail inside.
+     * This function decides which parser to read the image data according to the given input stream
+     * type and the content of the input stream. In each case, it reads the first three bytes to
+     * determine whether the image data format is JPEG or not.
      */
-    private void loadAttributes() throws IOException {
-        FileInputStream in = null;
-        try {
-            if (mFilename != null) {
-                in = new FileInputStream(mFilename);
+    private void loadAttributes(@NonNull InputStream in) throws IOException {
+        // Process RAW input stream
+        if (mAssetInputStream != null) {
+            long asset = mAssetInputStream.getNativeAsset();
+            if (handleRawResult(nativeGetRawAttributesFromAsset(asset))) {
+                return;
             }
-            if (mFileDescriptor != null) {
-                in = new FileInputStream(mFileDescriptor);
+        } else if (mSeekableFileDescriptor != null) {
+            if (handleRawResult(nativeGetRawAttributesFromFileDescriptor(
+                    mSeekableFileDescriptor))) {
+                return;
             }
-            if (in != null) {
-                // First test whether a given file is a one of RAW format or not.
-                HashMap map = getRawAttributesNative(Os.dup(in.getFD()));
-                mIsRaw = map != null;
-                if (mIsRaw) {
-                    for (Object obj : map.entrySet()) {
-                        Map.Entry entry = (Map.Entry) obj;
-                        String attrName = (String) entry.getKey();
-                        String attrValue = (String) entry.getValue();
-
-                        switch (attrName) {
-                            case TAG_HAS_THUMBNAIL:
-                                mHasThumbnail = attrValue.equalsIgnoreCase("true");
-                                break;
-                            case TAG_THUMBNAIL_OFFSET:
-                                mThumbnailOffset = Integer.parseInt(attrValue);
-                                break;
-                            case TAG_THUMBNAIL_LENGTH:
-                                mThumbnailLength = Integer.parseInt(attrValue);
-                                break;
-                            default:
-                                mAttributes.put(attrName, attrValue);
-                                break;
-                        }
-                    }
-
-                    if (DEBUG) {
-                        printAttributes();
-                    }
-                    return;
-                }
+        } else {
+            in = new BufferedInputStream(in, JPEG_SIGNATURE_SIZE);
+            if (!isJpegInputStream((BufferedInputStream) in) && handleRawResult(
+                    nativeGetRawAttributesFromInputStream(in))) {
+                return;
             }
-        } catch (ErrnoException e) {
-            e.rethrowAsIOException();
-        } finally {
-            IoUtils.closeQuietly(in);
         }
 
-        try {
-            if (mFileDescriptor != null) {
-                Os.lseek(mFileDescriptor, 0, OsConstants.SEEK_SET);
-            }
+        // Process JPEG input stream
+        getJpegAttributes(in);
 
-            getJpegAttributes(mInputStream);
-        } catch (ErrnoException e) {
-            e.rethrowAsIOException();
-        } finally {
-            IoUtils.closeQuietly(mInputStream);
+        if (DEBUG) {
+            printAttributes();
+        }
+    }
+
+    private static boolean isJpegInputStream(BufferedInputStream in) throws IOException {
+        in.mark(JPEG_SIGNATURE_SIZE);
+        byte[] signatureBytes = new byte[JPEG_SIGNATURE_SIZE];
+        if (in.read(signatureBytes) != JPEG_SIGNATURE_SIZE) {
+            throw new EOFException();
+        }
+        boolean isJpeg = Arrays.equals(JPEG_SIGNATURE, signatureBytes);
+        in.reset();
+        return isJpeg;
+    }
+
+    private boolean handleRawResult(HashMap map) {
+        if (map == null) {
+            return false;
+        }
+
+        // Mark for disabling the save feature.
+        mIsRaw = true;
+
+        for (Object obj : map.entrySet()) {
+            Map.Entry entry = (Map.Entry) obj;
+            String attrName = (String) entry.getKey();
+
+            switch (attrName) {
+                case TAG_HAS_THUMBNAIL:
+                    mHasThumbnail = ((String) entry.getValue()).equalsIgnoreCase("true");
+                    break;
+                case TAG_THUMBNAIL_OFFSET:
+                    mThumbnailOffset = Integer.parseInt((String) entry.getValue());
+                    break;
+                case TAG_THUMBNAIL_LENGTH:
+                    mThumbnailLength = Integer.parseInt((String) entry.getValue());
+                    break;
+                case TAG_THUMBNAIL_DATA:
+                    mThumbnailBytes = (byte[]) entry.getValue();
+                    break;
+                default:
+                    mAttributes.put(attrName, (String) entry.getValue());
+                    break;
+            }
         }
 
         if (DEBUG) {
             printAttributes();
+        }
+        return true;
+    }
+
+    private static boolean isSeekableFD(FileDescriptor fd) throws IOException {
+        try {
+            Os.lseek(fd, 0, OsConstants.SEEK_CUR);
+            return true;
+        } catch (ErrnoException e) {
+            return false;
         }
     }
 
@@ -679,9 +721,9 @@ public class ExifInterface {
             throw new UnsupportedOperationException(
                     "ExifInterface does not support saving attributes on RAW formats.");
         }
-        if (mFileDescriptor == null && mFilename == null) {
+        if (mSeekableFileDescriptor == null && mFilename == null) {
             throw new UnsupportedOperationException(
-                    "ExifInterface does not support saving attributes for input streams.");
+                    "ExifInterface does not support saving attributes for the current input.");
         }
 
         // Keep the thumbnail in memory
@@ -698,11 +740,10 @@ public class ExifInterface {
                 if (!originalFile.renameTo(tempFile)) {
                     throw new IOException("Could'nt rename to " + tempFile.getAbsolutePath());
                 }
-            }
-            if (mFileDescriptor != null) {
+            } else if (mSeekableFileDescriptor != null) {
                 tempFile = File.createTempFile("temp", "jpg");
-                Os.lseek(mFileDescriptor, 0, OsConstants.SEEK_SET);
-                in = new FileInputStream(mFileDescriptor);
+                Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
+                in = new FileInputStream(mSeekableFileDescriptor);
                 out = new FileOutputStream(tempFile);
                 Streams.copy(in, out);
             }
@@ -720,10 +761,9 @@ public class ExifInterface {
             in = new FileInputStream(tempFile);
             if (mFilename != null) {
                 out = new FileOutputStream(mFilename);
-            }
-            if (mFileDescriptor != null) {
-                Os.lseek(mFileDescriptor, 0, OsConstants.SEEK_SET);
-                out = new FileOutputStream(mFileDescriptor);
+            } else if (mSeekableFileDescriptor != null) {
+                Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
+                out = new FileOutputStream(mSeekableFileDescriptor);
             }
             saveJpegAttributes(in, out);
         } catch (ErrnoException e) {
@@ -760,13 +800,15 @@ public class ExifInterface {
 
         // Read the thumbnail.
         FileInputStream in = null;
-        try  {
-            if (mFileDescriptor != null) {
-                Os.lseek(mFileDescriptor, 0, OsConstants.SEEK_SET);
-                in = new FileInputStream(mFileDescriptor);
-            }
-            if (mFilename != null) {
+        try {
+            if (mAssetInputStream != null) {
+                return nativeGetThumbnailFromAsset(
+                        mAssetInputStream.getNativeAsset(), mThumbnailOffset, mThumbnailLength);
+            } else if (mFilename != null) {
                 in = new FileInputStream(mFilename);
+            } else if (mSeekableFileDescriptor != null) {
+                Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
+                in = new FileInputStream(mSeekableFileDescriptor);
             }
             if (in == null) {
                 // Should not be reached this.
@@ -1180,8 +1222,9 @@ public class ExifInterface {
                 mThumbnailOffset = exifOffsetFromBeginning + jpegInterchangeFormat;
                 mThumbnailLength = jpegInterchangeFormatLength;
 
-                // Do not store a thumbnail in memory if the given input can be re-read.
-                if (mFileDescriptor == null && mFilename == null) {
+                if (mFilename == null && mAssetInputStream == null
+                        && mSeekableFileDescriptor == null) {
+                    // Save the thumbnail in memory if the input doesn't support reading again.
                     byte[] thumbnailBytes = new byte[jpegInterchangeFormatLength];
                     dataInputStream.seek(jpegInterchangeFormat);
                     dataInputStream.readFully(thumbnailBytes);
@@ -1988,6 +2031,10 @@ public class ExifInterface {
     }
 
     // JNI methods for RAW formats.
-    private static native void initRawNative();
-    private static native HashMap getRawAttributesNative(FileDescriptor fileDescriptor);
+    private static native void nativeInitRaw();
+    private static native byte[] nativeGetThumbnailFromAsset(
+            long asset, int thumbnailOffset, int thumbnailLength);
+    private static native HashMap nativeGetRawAttributesFromAsset(long asset);
+    private static native HashMap nativeGetRawAttributesFromFileDescriptor(FileDescriptor fd);
+    private static native HashMap nativeGetRawAttributesFromInputStream(InputStream in);
 }
