@@ -52,6 +52,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v13.view.DragStartHelper;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.GridLayoutManager.SpanSizeLookup;
 import android.support.v7.widget.RecyclerView;
@@ -72,7 +73,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -258,7 +258,8 @@ public class DirectoryFragment extends Fragment
         }
         mRecView.setLayoutManager(mLayout);
 
-        mGestureDetector = new ListeningGestureDetector(this.getContext(), new GestureListener());
+        mGestureDetector =
+                new ListeningGestureDetector(this.getContext(), mDragHelper, new GestureListener());
 
         mRecView.addOnItemTouchListener(mGestureDetector);
 
@@ -1051,7 +1052,7 @@ public class DirectoryFragment extends Fragment
             view.setOnDragListener(mOnDragListener);
         }
 
-        view.setOnLongClickListener(mLongClickListener);
+        view.setOnLongClickListener(mDragHelper);
     }
 
     private View.OnDragListener mOnDragListener = new View.OnDragListener() {
@@ -1062,11 +1063,15 @@ public class DirectoryFragment extends Fragment
                     // TODO: Check if the event contains droppable data.
                     return true;
 
-                // TODO: Highlight potential drop target directory?
                 // TODO: Expand drop target directory on hover?
                 case DragEvent.ACTION_DRAG_ENTERED:
-                case DragEvent.ACTION_DRAG_LOCATION:
+                    setDropTargetHighlight(v, true);
+                    return true;
                 case DragEvent.ACTION_DRAG_EXITED:
+                    setDropTargetHighlight(v, false);
+                    return true;
+
+                case DragEvent.ACTION_DRAG_LOCATION:
                 case DragEvent.ACTION_DRAG_ENDED:
                     return true;
 
@@ -1080,9 +1085,23 @@ public class DirectoryFragment extends Fragment
                         // TODO: Do not drop into the directory where the documents came from.
                     }
                     copyFromClipData(event.getClipData(), dstDir);
+                    // Clean up the UI.
+                    setDropTargetHighlight(v, false);
+                    mSelectionManager.clearSelection();
                     return true;
             }
             return false;
+        }
+
+        private void setDropTargetHighlight(View v, boolean highlight) {
+            // Note: use exact comparison - this code is searching for views which are children of
+            // the RecyclerView instance in the UI.
+            if (v.getParent() == mRecView) {
+                RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(v);
+                if (vh instanceof DocumentHolder) {
+                    ((DocumentHolder) vh).setHighlighted(highlight);
+                }
+            }
         }
     };
 
@@ -1109,21 +1128,14 @@ public class DirectoryFragment extends Fragment
      *     a document item view.
      */
     private String getModelId(View view) {
-        while (true) {
-            if (view.getLayoutParams() instanceof RecyclerView.LayoutParams) {
-                RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(view);
-                if (vh instanceof DocumentHolder) {
-                    return ((DocumentHolder) vh).modelId;
-                } else {
-                    return null;
-                }
+        View itemView = mRecView.findContainingItemView(view);
+        if (itemView != null) {
+            RecyclerView.ViewHolder vh = mRecView.getChildViewHolder(itemView);
+            if (vh instanceof DocumentHolder) {
+                return ((DocumentHolder) vh).modelId;
             }
-            ViewParent parent = view.getParent();
-            if (parent == null || !(parent instanceof View)) {
-                return null;
-            }
-            view = (View) parent;
         }
+        return null;
     }
 
     private List<DocumentInfo> getDraggableDocuments(View currentItemView) {
@@ -1304,10 +1316,10 @@ public class DirectoryFragment extends Fragment
         }
     }
 
-    private View.OnLongClickListener mLongClickListener = new View.OnLongClickListener() {
+    private DragStartHelper mDragHelper = new DragStartHelper(null) {
         @Override
-        public boolean onLongClick(View v) {
-            if (mGestureDetector.mouseSpawnedLastEvent()) {
+        protected boolean onDragStart(View v) {
+            if (isSelected(getModelId(v))) {
                 List<DocumentInfo> docs = getDraggableDocuments(v);
                 if (docs.isEmpty()) {
                     return false;
@@ -1333,9 +1345,12 @@ public class DirectoryFragment extends Fragment
             implements OnItemTouchListener {
 
         private int mLastTool = -1;
+        private DragStartHelper mDragHelper;
 
-        public ListeningGestureDetector(Context context, GestureListener listener) {
+        public ListeningGestureDetector(
+                Context context, DragStartHelper dragHelper, GestureListener listener) {
             super(context, listener);
+            mDragHelper = dragHelper;
             setOnDoubleTapListener(listener);
         }
 
@@ -1350,12 +1365,27 @@ public class DirectoryFragment extends Fragment
         @Override
         public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
             mLastTool = e.getToolType(0);
-            onTouchEvent(e);  // bounce this forward to our detecty heart
+
+            // Detect drag events. When a drag is detected, intercept the rest of the gesture.
+            View itemView = rv.findChildViewUnder(e.getX(), e.getY());
+            if (itemView != null && mDragHelper.handleTouch(itemView,  e)) {
+                return true;
+            }
+            // Forward unhandled events to the GestureDetector.
+            onTouchEvent(e);
+
             return false;
         }
 
         @Override
-        public void onTouchEvent(RecyclerView rv, MotionEvent e) {}
+        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+            View itemView = rv.findChildViewUnder(e.getX(), e.getY());
+            mDragHelper.handleTouch(itemView,  e);
+            // Note: even though this event is being handled as part of a drag gesture, continue
+            // forwarding to the GestureDetector. The detector needs to see the entire cluster of
+            // events in order to properly interpret gestures.
+            onTouchEvent(e);
+        }
 
         @Override
         public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {}
