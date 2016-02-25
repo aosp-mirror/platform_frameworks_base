@@ -1279,10 +1279,12 @@ public final class SystemServer {
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
-                Slog.i(TAG, "WebViewFactory preparation");
-                Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
-                mWebViewUpdateService.prepareWebViewInSystemServer();
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                if (!mOnlyCore) {
+                    Slog.i(TAG, "WebViewFactory preparation");
+                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "WebViewFactoryPreparation");
+                    mWebViewUpdateService.prepareWebViewInSystemServer();
+                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                }
 
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "StartSystemUI");
                 try {
