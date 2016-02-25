@@ -410,12 +410,7 @@ class Mapper {
             return null;
         }
         try {
-            final Identifier identifier = mDatabase.createIdentifier(parentId);
-            if (mDatabase.getRowState(parentId) == ROW_STATE_DISCONNECTED) {
-                throw new FileNotFoundException(
-                        "document: " + parentId + " is in disconnected device.");
-            }
-            return identifier;
+            return mDatabase.createIdentifier(parentId);
         } catch (FileNotFoundException error) {
             mInMappingIds.remove(parentId);
             throw error;

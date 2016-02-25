@@ -16,6 +16,8 @@
 
 package com.android.mtp;
 
+import android.annotation.Nullable;
+import android.annotation.WorkerThread;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.mtp.MtpObjectInfo;
@@ -24,6 +26,8 @@ import android.os.Bundle;
 import android.os.Process;
 import android.provider.DocumentsContract;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,23 +42,135 @@ import java.util.LinkedList;
  * background thread to load the rest documents and caches its result for next requests.
  * TODO: Rename this class to ObjectInfoLoader
  */
-class DocumentLoader {
+class DocumentLoader implements AutoCloseable {
     static final int NUM_INITIAL_ENTRIES = 10;
     static final int NUM_LOADING_ENTRIES = 20;
     static final int NOTIFY_PERIOD_MS = 500;
 
+    private final int mDeviceId;
     private final MtpManager mMtpManager;
     private final ContentResolver mResolver;
     private final MtpDatabase mDatabase;
     private final TaskList mTaskList = new TaskList();
-    private boolean mHasBackgroundThread = false;
+    private Thread mBackgroundThread;
 
-    DocumentLoader(MtpManager mtpManager, ContentResolver resolver, MtpDatabase database) {
+    DocumentLoader(int deviceId, MtpManager mtpManager, ContentResolver resolver,
+                   MtpDatabase database) {
+        mDeviceId = deviceId;
         mMtpManager = mtpManager;
         mResolver = resolver;
         mDatabase = database;
     }
 
+    /**
+     * Queries the child documents of given parent.
+     * It loads the first NUM_INITIAL_ENTRIES of object info, then launches the background thread
+     * to load the rest.
+     */
+    synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
+            throws IOException {
+        Preconditions.checkArgument(parent.mDeviceId == mDeviceId);
+        LoaderTask task = mTaskList.findTask(parent);
+        if (task == null) {
+            if (parent.mDocumentId == null) {
+                throw new FileNotFoundException("Parent not found.");
+            }
+            // TODO: Handle nit race around here.
+            // 1. getObjectHandles.
+            // 2. putNewDocument.
+            // 3. startAddingChildDocuemnts.
+            // 4. stopAddingChildDocuments - It removes the new document added at the step 2,
+            //     because it is not updated between start/stopAddingChildDocuments.
+            task = LoaderTask.create(mDatabase, mMtpManager, parent);
+            task.fillDocuments(loadDocuments(
+                    mMtpManager,
+                    parent.mDeviceId,
+                    task.getUnloadedObjectHandles(NUM_INITIAL_ENTRIES)));
+        } else {
+            // Once remove the existing task in order to add it to the head of the list.
+            mTaskList.remove(task);
+        }
+
+        mTaskList.addFirst(task);
+        if (task.getState() == LoaderTask.STATE_LOADING) {
+            resume();
+        }
+        return task.createCursor(mResolver, columnNames);
+    }
+
+    /**
+     * Resumes a background thread.
+     */
+    synchronized void resume() {
+        if (mBackgroundThread == null) {
+            mBackgroundThread = new BackgroundLoaderThread();
+            mBackgroundThread.start();
+        }
+    }
+
+    /**
+     * Obtains next task to be run in background thread, or release the reference to background
+     * thread.
+     *
+     * Worker thread that receives null task needs to exit.
+     */
+    @WorkerThread
+    synchronized @Nullable LoaderTask getNextTaskOrReleaseBackgroundThread() {
+        Preconditions.checkState(mBackgroundThread != null);
+
+        final LoaderTask task = mTaskList.findRunningTask();
+        if (task != null) {
+            return task;
+        }
+
+        final Identifier identifier = mDatabase.getUnmappedDocumentsParent(mDeviceId);
+        if (identifier != null) {
+            final LoaderTask existingTask = mTaskList.findTask(identifier);
+            if (existingTask != null) {
+                Preconditions.checkState(existingTask.getState() != LoaderTask.STATE_LOADING);
+                mTaskList.remove(existingTask);
+            }
+            try {
+                final LoaderTask newTask = LoaderTask.create(mDatabase, mMtpManager, identifier);
+                mTaskList.addFirst(newTask);
+                return newTask;
+            } catch (IOException exception) {
+                Log.e(MtpDocumentsProvider.TAG, "Failed to create a task for mapping", exception);
+                // Continue to release the background thread.
+            }
+        }
+
+        mBackgroundThread = null;
+        return null;
+    }
+
+    /**
+     * Terminates background thread.
+     */
+    @Override
+    public void close() throws InterruptedException {
+        final Thread thread;
+        synchronized (this) {
+            mTaskList.clear();
+            thread = mBackgroundThread;
+        }
+        if (thread != null) {
+            thread.interrupt();
+            thread.join();
+        }
+    }
+
+    synchronized void clearCompletedTasks() {
+        mTaskList.clearCompletedTasks();
+    }
+
+    synchronized void clearTask(Identifier parentIdentifier) {
+        mTaskList.clearTask(parentIdentifier);
+    }
+
+    /**
+     * Helper method to loads multiple object info.
+     */
     private static MtpObjectInfo[] loadDocuments(MtpManager manager, int deviceId, int[] handles)
             throws IOException {
         final ArrayList<MtpObjectInfo> objects = new ArrayList<>();
@@ -70,78 +186,27 @@ class DocumentLoader {
         return objects.toArray(new MtpObjectInfo[objects.size()]);
     }
 
-    synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
-            throws IOException {
-        LoaderTask task = mTaskList.findTask(parent);
-        if (task == null) {
-            if (parent.mDocumentId == null) {
-                throw new FileNotFoundException("Parent not found.");
-            }
-
-            int parentHandle = parent.mObjectHandle;
-            // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
-            // getObjectHandles if we would like to obtain children under the root.
-            if (parent.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
-                parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
-            }
-            // TODO: Handle nit race around here.
-            // 1. getObjectHandles.
-            // 2. putNewDocument.
-            // 3. startAddingChildDocuemnts.
-            // 4. stopAddingChildDocuments - It removes the new document added at the step 2,
-            //     because it is not updated between start/stopAddingChildDocuments.
-            task = new LoaderTask(mDatabase, parent, mMtpManager.getObjectHandles(
-                    parent.mDeviceId, parent.mStorageId, parentHandle));
-            task.fillDocuments(loadDocuments(
-                    mMtpManager,
-                    parent.mDeviceId,
-                    task.getUnloadedObjectHandles(NUM_INITIAL_ENTRIES)));
-        } else {
-            // Once remove the existing task in order to add it to the head of the list.
-            mTaskList.remove(task);
-        }
-
-        mTaskList.addFirst(task);
-        if (task.getState() == LoaderTask.STATE_LOADING && !mHasBackgroundThread) {
-            mHasBackgroundThread = true;
-            new BackgroundLoaderThread().start();
-        }
-        return task.createCursor(mResolver, columnNames);
-    }
-
-    synchronized void clearTasks() {
-        mTaskList.clear();
-    }
-
-    synchronized void clearCompletedTasks() {
-        mTaskList.clearCompletedTasks();
-    }
-
-    synchronized void clearTask(Identifier parentIdentifier) {
-        mTaskList.clearTask(parentIdentifier);
-    }
-
+    /**
+     * Background thread to fetch object info.
+     */
     private class BackgroundLoaderThread extends Thread {
+        /**
+         * Finds task that needs to be processed, then loads NUM_LOADING_ENTRIES of object info and
+         * store them to the database. If it does not find a task, exits the thread.
+         */
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-            while (true) {
-                LoaderTask task;
-                int deviceId;
-                int[] handles;
-                synchronized (DocumentLoader.this) {
-                    task = mTaskList.findRunningTask();
-                    if (task == null) {
-                        mHasBackgroundThread = false;
-                        return;
-                    }
-                    deviceId = task.mIdentifier.mDeviceId;
-                    handles = task.getUnloadedObjectHandles(NUM_LOADING_ENTRIES);
+            while (!Thread.interrupted()) {
+                final LoaderTask task = getNextTaskOrReleaseBackgroundThread();
+                if (task == null) {
+                    return;
                 }
-
                 try {
-                    final MtpObjectInfo[] objectInfos =
-                            loadDocuments(mMtpManager, deviceId, handles);
+                    final MtpObjectInfo[] objectInfos = loadDocuments(
+                            mMtpManager,
+                            task.mIdentifier.mDeviceId,
+                            task.getUnloadedObjectHandles(NUM_LOADING_ENTRIES));
                     task.fillDocuments(objectInfos);
                     final boolean shouldNotify =
                             task.mLastNotified.getTime() <
@@ -157,6 +222,9 @@ class DocumentLoader {
         }
     }
 
+    /**
+     * Task list that has helper methods to search/clear tasks.
+     */
     private static class TaskList extends LinkedList<LoaderTask> {
         LoaderTask findTask(Identifier parent) {
             for (int i = 0; i < size(); i++) {
@@ -197,6 +265,10 @@ class DocumentLoader {
         }
     }
 
+    /**
+     * Loader task.
+     * Each task is responsible for fetching child documents for the given parent document.
+     */
     private static class LoaderTask {
         static final int STATE_LOADING = 0;
         static final int STATE_COMPLETED = 1;
@@ -217,6 +289,11 @@ class DocumentLoader {
             mLastNotified = new Date();
         }
 
+        /**
+         * Returns a cursor that traverses the child document of the parent document handled by the
+         * task.
+         * The returned task may have a EXTRA_LOADING flag.
+         */
         Cursor createCursor(ContentResolver resolver, String[] columnNames) throws IOException {
             final Bundle extras = new Bundle();
             switch (getState()) {
@@ -235,6 +312,9 @@ class DocumentLoader {
             return cursor;
         }
 
+        /**
+         * Returns a state of the task.
+         */
         int getState() {
             if (mError != null) {
                 return STATE_ERROR;
@@ -245,6 +325,9 @@ class DocumentLoader {
             }
         }
 
+        /**
+         * Obtains object handles that have not been loaded yet.
+         */
         int[] getUnloadedObjectHandles(int count) {
             return Arrays.copyOfRange(
                     mObjectHandles,
@@ -252,11 +335,17 @@ class DocumentLoader {
                     Math.min(mNumLoaded + count, mObjectHandles.length));
         }
 
+        /**
+         * Notifies a change of child list of the document.
+         */
         void notify(ContentResolver resolver) {
             resolver.notifyChange(createUri(), null, false);
             mLastNotified = new Date();
         }
 
+        /**
+         * Stores object information into database.
+         */
         void fillDocuments(MtpObjectInfo[] objectInfoList) {
             if (objectInfoList.length == 0 || getState() != STATE_LOADING) {
                 return;
@@ -276,6 +365,9 @@ class DocumentLoader {
             }
         }
 
+        /**
+         * Marks the loading task as error.
+         */
         void setError(Exception error) {
             final int lastState = getState();
             setErrorInternal(error);
@@ -297,6 +389,21 @@ class DocumentLoader {
         private Uri createUri() {
             return DocumentsContract.buildChildDocumentsUri(
                     MtpDocumentsProvider.AUTHORITY, mIdentifier.mDocumentId);
+        }
+
+        /**
+         * Creates a LoaderTask that loads children of the given document.
+         */
+        static LoaderTask create(MtpDatabase database, MtpManager manager, Identifier parent)
+                throws IOException {
+            int parentHandle = parent.mObjectHandle;
+            // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
+            // getObjectHandles if we would like to obtain children under the root.
+            if (parent.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
+                parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
+            }
+            return new LoaderTask(database, parent, manager.getObjectHandles(
+                    parent.mDeviceId, parent.mStorageId, parentHandle));
         }
     }
 }
