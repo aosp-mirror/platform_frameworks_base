@@ -40,6 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -406,15 +407,15 @@ class MtpDatabase {
                         COLUMN_STORAGE_ID,
                         COLUMN_OBJECT_HANDLE,
                         COLUMN_DOCUMENT_TYPE),
-                SELECTION_DOCUMENT_ID,
-                strings(documentId),
+                SELECTION_DOCUMENT_ID + " AND " + COLUMN_ROW_STATE + " IN (?, ?)",
+                strings(documentId, ROW_STATE_VALID, ROW_STATE_INVALIDATED),
                 null,
                 null,
                 null,
                 "1");
         try {
             if (cursor.getCount() == 0) {
-                throw new FileNotFoundException("ID is not found.");
+                throw new FileNotFoundException("ID \"" + documentId + "\" is not found.");
             } else {
                 cursor.moveToNext();
                 return new Identifier(
@@ -595,6 +596,48 @@ class MtpDatabase {
             mDatabase.setTransactionSuccessful();
         } finally {
             mDatabase.endTransaction();
+        }
+    }
+
+    /**
+     * Obtains a document that has already mapped but has unmapped children.
+     * @param deviceId Device to find documents.
+     * @return Identifier of found document or null.
+     */
+    public @Nullable Identifier getUnmappedDocumentsParent(int deviceId) {
+        final String fromClosure =
+                TABLE_DOCUMENTS + " AS child INNER JOIN " +
+                TABLE_DOCUMENTS + " AS parent ON " +
+                "child." + COLUMN_PARENT_DOCUMENT_ID + " = " +
+                "parent." + Document.COLUMN_DOCUMENT_ID;
+        final String whereClosure =
+                "parent." + COLUMN_DEVICE_ID + " = ? AND " +
+                "parent." + COLUMN_ROW_STATE + " IN (?, ?) AND " +
+                "child." + COLUMN_ROW_STATE + " = ?";
+        try (final Cursor cursor = mDatabase.query(
+                fromClosure,
+                strings("parent." + COLUMN_DEVICE_ID,
+                        "parent." + COLUMN_STORAGE_ID,
+                        "parent." + COLUMN_OBJECT_HANDLE,
+                        "parent." + Document.COLUMN_DOCUMENT_ID,
+                        "parent." + COLUMN_DOCUMENT_TYPE),
+                whereClosure,
+                strings(deviceId, ROW_STATE_VALID, ROW_STATE_INVALIDATED,
+                        ROW_STATE_DISCONNECTED),
+                null,
+                null,
+                null,
+                "1")) {
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+            cursor.moveToNext();
+            return new Identifier(
+                    cursor.getInt(0),
+                    cursor.getInt(1),
+                    cursor.getInt(2),
+                    cursor.getString(3),
+                    cursor.getInt(4));
         }
     }
 

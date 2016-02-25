@@ -44,7 +44,7 @@ public class DocumentLoaderTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments(null);
         mDatabase.getMapper().putDeviceDocument(
-                new MtpDeviceRecord(1, "Device", null, true, new MtpRoot[0], null, null));
+                new MtpDeviceRecord(0, "Device", null, true, new MtpRoot[0], null, null));
         mDatabase.getMapper().stopAddingDocuments(null);
 
         mDatabase.getMapper().startAddingDocuments("1");
@@ -55,11 +55,12 @@ public class DocumentLoaderTest extends AndroidTestCase {
 
         mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
-        mLoader = new DocumentLoader(mManager, mResolver, mDatabase);
+        mLoader = new DocumentLoader(0, mManager, mResolver, mDatabase);
     }
 
     @Override
-    public void tearDown() {
+    public void tearDown() throws Exception {
+        mLoader.close();
         mDatabase.close();
     }
 
