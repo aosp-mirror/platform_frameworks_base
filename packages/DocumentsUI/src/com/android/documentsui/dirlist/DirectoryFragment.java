@@ -23,9 +23,6 @@ import static com.android.documentsui.State.MODE_LIST;
 import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
-import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkState;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.StringRes;
@@ -102,6 +99,7 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
+
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
@@ -359,7 +357,9 @@ public class DirectoryFragment extends Fragment
 
     private boolean handleViewItem(String id) {
         final Cursor cursor = mModel.getItem(id);
-        checkNotNull(cursor, "Cursor cannot be null.");
+
+        assert(cursor != null);
+
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         if (mTuner.isDocumentEnabled(docMimeType, docFlags)) {
@@ -430,7 +430,8 @@ public class DirectoryFragment extends Fragment
         int cellMargin = 2 * getResources().getDimensionPixelSize(R.dimen.grid_item_margin);
         int viewPadding = mRecView.getPaddingLeft() + mRecView.getPaddingRight();
 
-        checkState(mRecView.getWidth() > 0);
+        assert(mRecView.getWidth() > 0);
+
         int columnCount = Math.max(1,
                 (mRecView.getWidth() - viewPadding) / (cellWidth + cellMargin));
 
@@ -471,7 +472,9 @@ public class DirectoryFragment extends Fragment
         public boolean onBeforeItemStateChange(String modelId, boolean selected) {
             if (selected) {
                 final Cursor cursor = mModel.getItem(modelId);
-                checkNotNull(cursor, "Cursor cannot be null.");
+
+                assert(cursor != null);
+
                 final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
                 final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
                 return mTuner.canSelectType(docMimeType, docFlags);
@@ -564,7 +567,7 @@ public class DirectoryFragment extends Fragment
         }
 
         private void updateActionMenu() {
-            checkNotNull(mMenu);
+            assert(mMenu != null);
 
             // Delegate update logic to our owning action, since specialized logic is desired.
             mTuner.updateActionMenu(mMenu, mType, canDeleteSelection(), canRenameSelection());
@@ -699,8 +702,8 @@ public class DirectoryFragment extends Fragment
     }
 
     private void deleteDocuments(final Selection selected) {
+        assert(!selected.isEmpty());
 
-        checkArgument(!selected.isEmpty());
         final DocumentInfo srcParent = getDisplayState().stack.peek();
         new GetDocumentsTask() {
             @Override
@@ -777,7 +780,7 @@ public class DirectoryFragment extends Fragment
     private void renameDocuments(Selection selected) {
         // Batch renaming not supported
         // Rename option is only available in menu when 1 document selected
-        checkArgument(selected.size() == 1);
+        assert(selected.size() == 1);
 
         new GetDocumentsTask() {
             @Override
@@ -890,7 +893,8 @@ public class DirectoryFragment extends Fragment
     }
 
     private void copyFromClipData(final ClipData clipData, final DocumentInfo destination) {
-        checkNotNull(clipData);
+        assert(clipData != null);
+
         new AsyncTask<Void, Void, List<DocumentInfo>>() {
 
             @Override
@@ -941,7 +945,7 @@ public class DirectoryFragment extends Fragment
     }
 
     void copySelectionToClipboard(Selection selection) {
-        checkArgument(!selection.isEmpty());
+        assert(!selection.isEmpty());
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(List<DocumentInfo> docs) {
@@ -1059,7 +1063,7 @@ public class DirectoryFragment extends Fragment
             String id = getModelId(v);
             if (id != null) {
                 Cursor dstCursor = mModel.getItem(id);
-                checkNotNull(dstCursor, "Cursor cannot be null.");
+                assert(dstCursor != null);
                 return DocumentInfo.fromDirectoryCursor(dstCursor);
             }
 
@@ -1132,10 +1136,11 @@ public class DirectoryFragment extends Fragment
         }
 
         final Cursor cursor = mModel.getItem(modelId);
-        checkNotNull(cursor, "Cursor cannot be null.");
-        final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
 
-        return Lists.newArrayList(doc);
+        assert(cursor != null);
+
+        return Lists.newArrayList(
+                DocumentInfo.fromDirectoryCursor(cursor));
     }
 
     private Drawable getDragShadowIcon(List<DocumentInfo> docs) {

@@ -28,7 +28,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.documentsui.model.DocumentInfo;
-import com.android.internal.util.Preconditions;
 
 import libcore.io.IoUtils;
 
@@ -85,7 +84,7 @@ public final class DocumentClipper {
      * This should be run from inside an AsyncTask.
      */
     public List<DocumentInfo> getDocumentsFromClipData(ClipData clipData) {
-        Preconditions.checkNotNull(clipData);
+        assert(clipData != null);
         final List<DocumentInfo> srcDocs = new ArrayList<>();
 
         int count = clipData.getItemCount();

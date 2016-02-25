@@ -22,8 +22,6 @@ import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_ENTER;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_LEAVE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_SIDE;
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -54,7 +52,6 @@ import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.RootInfo;
-import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -330,7 +327,8 @@ public abstract class BaseActivity extends Activity
     }
 
     void openContainerDocument(DocumentInfo doc) {
-        checkArgument(doc.isContainer());
+        assert(doc.isContainer());
+
         mState.pushDocument(doc);
         // Show an opening animation only if pressing "back" would get us back to the
         // previous directory. Especially after opening a root document, pressing
@@ -373,7 +371,8 @@ public abstract class BaseActivity extends Activity
     @Override
     public void onSearchChanged(@Nullable String query) {
         // We should not get here if root is not searchable
-        checkState(canSearchRoot());
+        assert(canSearchRoot());
+
         reloadSearch(query);
     }
 
@@ -673,7 +672,8 @@ public abstract class BaseActivity extends Activity
 
         @Override
         protected RootInfo run(RootInfo... roots) {
-            checkArgument(roots.length == 1);
+            assert(roots.length == 1);
+
             final RootInfo currentRoot = roots[0];
             final Collection<RootInfo> cachedRoots = mOwner.mRoots.getRootsBlocking();
             RootInfo homeRoot = null;
@@ -686,7 +686,7 @@ public abstract class BaseActivity extends Activity
                     return null;
                 }
             }
-            Preconditions.checkNotNull(homeRoot);
+            assert(homeRoot != null);
             mHome = mOwner.getRootDocumentBlocking(homeRoot);
             return homeRoot;
         }

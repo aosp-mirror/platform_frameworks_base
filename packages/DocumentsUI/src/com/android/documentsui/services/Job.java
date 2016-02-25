@@ -23,8 +23,6 @@ import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.DrawableRes;
 import android.annotation.PluralsRes;
@@ -98,7 +96,7 @@ abstract public class Job implements Runnable {
     Job(Context service, Context appContext, Listener listener,
             @OpType int operationType, String id, DocumentStack stack) {
 
-        checkArgument(operationType != OPERATION_UNKNOWN);
+        assert(operationType != OPERATION_UNKNOWN);
 
         this.service = service;
         this.appContext = appContext;
@@ -150,7 +148,8 @@ abstract public class Job implements Runnable {
             mClients.put(doc.authority, client);
         }
 
-        return checkNotNull(client);
+        assert(client != null);
+        return client;
     }
 
     final void cleanup() {

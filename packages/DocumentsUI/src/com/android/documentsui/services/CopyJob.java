@@ -29,7 +29,6 @@ import static com.android.documentsui.services.FileOperationService.EXTRA_DIALOG
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
 import static com.android.documentsui.services.FileOperationService.OPERATION_COPY;
-import static com.google.common.base.Preconditions.checkArgument;
 
 import android.annotation.StringRes;
 import android.app.Notification;
@@ -95,7 +94,7 @@ class CopyJob extends Job {
             String id, DocumentStack stack, List<DocumentInfo> srcs) {
         super(service, appContext, listener, OPERATION_COPY, id, stack);
 
-        checkArgument(!srcs.isEmpty());
+        assert(!srcs.isEmpty());
         this.mSrcs = srcs;
     }
 
@@ -108,7 +107,7 @@ class CopyJob extends Job {
             @OpType int opType, String id, DocumentStack destination, List<DocumentInfo> srcs) {
         super(service, appContext, listener, opType, id, destination);
 
-        checkArgument(!srcs.isEmpty());
+        assert(!srcs.isEmpty());
         this.mSrcs = srcs;
     }
 
