@@ -2,7 +2,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
-HWUI_NEW_OPS := true
+HWUI_NEW_OPS := false
 
 # Enables fine-grained GLES error checking
 # If set to true, every GLES call is wrapped & error checked
