@@ -160,21 +160,6 @@ public class ScanResult implements Parcelable {
         }
     }
 
-    /** @hide */
-    public static final int ENABLED                                          = 0;
-    /** @hide */
-    public static final int AUTO_ROAM_DISABLED                               = 16;
-    /** @hide */
-    public static final int AUTO_JOIN_DISABLED                               = 32;
-    /** @hide */
-    public static final int AUTHENTICATION_ERROR                              = 128;
-
-    /**
-     * Status: indicating join status
-     * @hide
-     */
-    public int autoJoinStatus;
-
     /**
      * num IP configuration failures
      * @hide
@@ -186,17 +171,6 @@ public class ScanResult implements Parcelable {
      * Last time we blacklisted the ScanResult
      */
     public long blackListTimestamp;
-
-    /** @hide **/
-    public void setAutoJoinStatus(int status) {
-        if (status < 0) status = 0;
-        if (status == 0) {
-            blackListTimestamp = 0;
-        }  else if (status > autoJoinStatus) {
-            blackListTimestamp = System.currentTimeMillis();
-        }
-        autoJoinStatus = status;
-    }
 
     /**
      * Status: indicating the scan result is not a result
@@ -462,7 +436,6 @@ public class ScanResult implements Parcelable {
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
-            autoJoinStatus = source.autoJoinStatus;
             untrusted = source.untrusted;
             numConnection = source.numConnection;
             numUsage = source.numUsage;
@@ -506,9 +479,6 @@ public class ScanResult implements Parcelable {
 
         sb.append(", passpoint: ");
         sb.append(((flags & FLAG_PASSPOINT_NETWORK) != 0) ? "yes" : "no");
-        if (autoJoinStatus != 0) {
-            sb.append(", status: ").append(autoJoinStatus);
-        }
         sb.append(", ChannelBandwidth: ").append(channelWidth);
         sb.append(", centerFreq0: ").append(centerFreq0);
         sb.append(", centerFreq1: ").append(centerFreq1);
@@ -544,7 +514,6 @@ public class ScanResult implements Parcelable {
         dest.writeInt(centerFreq0);
         dest.writeInt(centerFreq1);
         dest.writeLong(seen);
-        dest.writeInt(autoJoinStatus);
         dest.writeInt(untrusted ? 1 : 0);
         dest.writeInt(numConnection);
         dest.writeInt(numUsage);
@@ -615,7 +584,6 @@ public class ScanResult implements Parcelable {
                 );
 
                 sr.seen = in.readLong();
-                sr.autoJoinStatus = in.readInt();
                 sr.untrusted = in.readInt() != 0;
                 sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
