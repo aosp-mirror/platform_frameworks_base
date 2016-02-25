@@ -161,10 +161,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
     RecentsAppWidgetHost mAppWidgetHost;
-    boolean mBootCompleted;
     boolean mCanReuseTaskStackViews = true;
     boolean mDraggingInRecents;
-    boolean mReloadTasks;
     boolean mLaunchedWhileDocking;
 
     // Task launching
@@ -236,7 +234,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void onBootCompleted() {
-        mBootCompleted = true;
         updateHeaderBarLayout(true /* tryAndBindSearchWidget */, null /* stack */);
     }
 
@@ -317,23 +314,21 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
-        if (mBootCompleted) {
-            if (triggeredFromAltTab && mFastAltTabTrigger.isDozing()) {
-                // The user has released alt-tab before the trigger has run, so just show the next
-                // task immediately
-                showNextTask();
+        if (triggeredFromAltTab && mFastAltTabTrigger.isDozing()) {
+            // The user has released alt-tab before the trigger has run, so just show the next
+            // task immediately
+            showNextTask();
 
-                // Cancel the fast alt-tab trigger
-                mFastAltTabTrigger.stopDozing();
-                mFastAltTabTrigger.resetTrigger();
-                return;
-            }
-
-            // Defer to the activity to handle hiding recents, if it handles it, then it must still
-            // be visible
-            EventBus.getDefault().post(new HideRecentsEvent(triggeredFromAltTab,
-                    triggeredFromHomeKey));
+            // Cancel the fast alt-tab trigger
+            mFastAltTabTrigger.stopDozing();
+            mFastAltTabTrigger.resetTrigger();
+            return;
         }
+
+        // Defer to the activity to handle hiding recents, if it handles it, then it must still
+        // be visible
+        EventBus.getDefault().post(new HideRecentsEvent(triggeredFromAltTab,
+                triggeredFromHomeKey));
     }
 
     public void toggleRecents() {
@@ -347,7 +342,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mTriggeredFromAltTab = false;
 
         try {
-            ViewConfiguration viewConfig = ViewConfiguration.get(mContext);
             SystemServicesProxy ssp = Recents.getSystemServices();
             ActivityManager.RunningTaskInfo topTask = ssp.getTopMostTask();
             MutableBoolean isTopTaskHome = new MutableBoolean(true);
