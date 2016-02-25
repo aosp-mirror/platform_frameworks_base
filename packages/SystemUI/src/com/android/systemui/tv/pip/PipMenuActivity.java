@@ -33,29 +33,62 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
     private final PipManager mPipManager = PipManager.getInstance();
     private MediaController mMediaController;
 
+    private View mFullButtonView;
+    private View mFullDescriptionView;
+    private View mPlayPauseButtonView;
+    private View mPlayPauseDescriptionView;
+    private View mCloseButtonView;
+    private View mCloseDescriptionView;
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.tv_pip_menu);
         mPipManager.addListener(this);
-        findViewById(R.id.full).setOnClickListener(new View.OnClickListener() {
+        mFullButtonView = findViewById(R.id.full);
+        mFullDescriptionView = findViewById(R.id.full_desc);
+        mFullButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPipManager.movePipToFullscreen();
+                finish();
             }
         });
-        findViewById(R.id.exit).setOnClickListener(new View.OnClickListener() {
+        mFullButtonView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                mFullDescriptionView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
+            }
+        });
+
+        mPlayPauseButtonView = findViewById(R.id.play_pause);
+        mPlayPauseDescriptionView = findViewById(R.id.play_pause_desc);
+        mPlayPauseButtonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Implement play/pause.
+            }
+        });
+        mPlayPauseButtonView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                mPlayPauseDescriptionView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
+            }
+        });
+
+        mCloseButtonView = findViewById(R.id.close);
+        mCloseDescriptionView = findViewById(R.id.close_desc);
+        mCloseButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPipManager.closePip();
                 finish();
             }
         });
-        findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+        mCloseButtonView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View v) {
-                mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
-                finish();
+            public void onFocusChange(View v, boolean hasFocus) {
+                mCloseDescriptionView.setVisibility(hasFocus ? View.VISIBLE : View.INVISIBLE);
             }
         });
     }
