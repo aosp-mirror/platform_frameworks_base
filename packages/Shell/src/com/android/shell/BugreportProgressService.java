@@ -473,8 +473,10 @@ public class BugreportProgressService extends Service {
                     + info + ")");
             return;
         }
-        Log.d(TAG, "Sending 'Progress' notification for id " + info.id + "(pid " + info.pid + "): "
-                + percentText);
+        if (DEBUG) {
+            Log.d(TAG, "Sending 'Progress' notification for id " + info.id + "(pid " + info.pid
+                    + "): " + percentText);
+        }
         NotificationManager.from(mContext).notify(TAG, info.id, notification);
     }
 
@@ -1249,6 +1251,8 @@ public class BugreportProgressService extends Service {
          * Sets its internal state and displays the dialog.
          */
         private void initialize(final Context context, BugreportInfo info) {
+            final String dialogTitle =
+                    context.getString(R.string.bugreport_info_dialog_title, info.id);
             // First initializes singleton.
             if (mDialog == null) {
                 @SuppressLint("InflateParams")
@@ -1272,7 +1276,7 @@ public class BugreportProgressService extends Service {
 
                 mDialog = new AlertDialog.Builder(context)
                         .setView(view)
-                        .setTitle(context.getString(R.string.bugreport_info_dialog_title, info.id))
+                        .setTitle(dialogTitle)
                         .setCancelable(false)
                         .setPositiveButton(context.getString(com.android.internal.R.string.ok),
                                 null)
@@ -1297,6 +1301,12 @@ public class BugreportProgressService extends Service {
                         new WindowManager.LayoutParams(
                                 WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG));
 
+            } else {
+                // Re-use view, but reset fields first.
+                mDialog.setTitle(dialogTitle);
+                mInfoName.setText(null);
+                mInfoTitle.setText(null);
+                mInfoDescription.setText(null);
             }
 
             // Then set fields.
