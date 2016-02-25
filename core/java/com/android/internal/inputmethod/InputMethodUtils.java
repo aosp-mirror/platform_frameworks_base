@@ -32,6 +32,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LocaleList;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
@@ -486,18 +487,29 @@ public class InputMethodUtils {
         return NOT_A_SUBTYPE_ID;
     }
 
+    private static final LocaleUtils.LocaleExtractor<InputMethodSubtype> sSubtypeToLocale =
+            new LocaleUtils.LocaleExtractor<InputMethodSubtype>() {
+                @Override
+                public Locale get(InputMethodSubtype source) {
+                    return source != null ? source.getLocaleObject() : null;
+                }
+            };
+
     @VisibleForTesting
     public static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
             Resources res, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = InputMethodUtils.getSubtypes(imi);
-        final String systemLocale = res.getConfiguration().locale.toString();
+        final LocaleList systemLocales = res.getConfiguration().getLocales();
+        final String systemLocale = systemLocales.get(0).toString();
         if (TextUtils.isEmpty(systemLocale)) return new ArrayList<>();
-        final String systemLanguage = res.getConfiguration().locale.getLanguage();
+        final int numSubtypes = subtypes.size();
+
+        // Handle overridesImplicitlyEnabledSubtype mechanism.
+        final String systemLanguage = systemLocales.get(0).getLanguage();
         final HashMap<String, InputMethodSubtype> applicableModeAndSubtypesMap = new HashMap<>();
-        final int N = subtypes.size();
-        for (int i = 0; i < N; ++i) {
+        for (int i = 0; i < numSubtypes; ++i) {
             // scan overriding implicitly enabled subtypes.
-            InputMethodSubtype subtype = subtypes.get(i);
+            final InputMethodSubtype subtype = subtypes.get(i);
             if (subtype.overridesImplicitlyEnabledSubtype()) {
                 final String mode = subtype.getMode();
                 if (!applicableModeAndSubtypesMap.containsKey(mode)) {
@@ -508,42 +520,46 @@ public class InputMethodUtils {
         if (applicableModeAndSubtypesMap.size() > 0) {
             return new ArrayList<>(applicableModeAndSubtypesMap.values());
         }
-        for (int i = 0; i < N; ++i) {
+
+        final ArrayList<InputMethodSubtype> keyboardSubtypes = new ArrayList<>();
+        for (int i = 0; i < numSubtypes; ++i) {
             final InputMethodSubtype subtype = subtypes.get(i);
-            final String locale = subtype.getLocale();
-            final String mode = subtype.getMode();
-            final String language = getLanguageFromLocaleString(locale);
-            // When system locale starts with subtype's locale, that subtype will be applicable
-            // for system locale. We need to make sure the languages are the same, to prevent
-            // locales like "fil" (Filipino) being matched by "fi" (Finnish).
-            //
-            // For instance, it's clearly applicable for cases like system locale = en_US and
-            // subtype = en, but it is not necessarily considered applicable for cases like system
-            // locale = en and subtype = en_US.
-            //
-            // We just call systemLocale.startsWith(locale) in this function because there is no
-            // need to find applicable subtypes aggressively unlike
-            // findLastResortApplicableSubtypeLocked.
-            //
-            // TODO: This check is broken. It won't take scripts into account and doesn't
-            // account for the mandatory conversions performed by Locale#toString.
-            if (language.equals(systemLanguage) && systemLocale.startsWith(locale)) {
-                final InputMethodSubtype applicableSubtype = applicableModeAndSubtypesMap.get(mode);
-                // If more applicable subtypes are contained, skip.
-                if (applicableSubtype != null) {
-                    if (systemLocale.equals(applicableSubtype.getLocale())) continue;
-                    if (!systemLocale.equals(locale)) continue;
+            if (TextUtils.equals(SUBTYPE_MODE_KEYBOARD, subtype.getMode())) {
+                keyboardSubtypes.add(subtype);
+            } else {
+                final Locale locale = subtype.getLocaleObject();
+                final String mode = subtype.getMode();
+                // TODO: Take secondary system locales into consideration.
+                if (locale != null && locale.equals(systemLanguage)) {
+                    final InputMethodSubtype applicableSubtype =
+                            applicableModeAndSubtypesMap.get(mode);
+                    // If more applicable subtypes are contained, skip.
+                    if (applicableSubtype != null) {
+                        if (systemLocale.equals(applicableSubtype.getLocaleObject())) continue;
+                        if (!systemLocale.equals(locale)) continue;
+                    }
+                    applicableModeAndSubtypesMap.put(mode, subtype);
                 }
-                applicableModeAndSubtypesMap.put(mode, subtype);
             }
         }
-        final InputMethodSubtype keyboardSubtype
-                = applicableModeAndSubtypesMap.get(SUBTYPE_MODE_KEYBOARD);
-        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<>(
-                applicableModeAndSubtypesMap.values());
-        if (keyboardSubtype != null && !keyboardSubtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
-            for (int i = 0; i < N; ++i) {
-                final InputMethodSubtype subtype = subtypes.get(i);
+
+        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<>();
+        LocaleUtils.filterByLanguage(keyboardSubtypes, sSubtypeToLocale, systemLocales,
+                applicableSubtypes);
+
+        boolean hasAsciiCapableKeyboard = false;
+        final int numApplicationSubtypes = applicableSubtypes.size();
+        for (int i = 0; i < numApplicationSubtypes; ++i) {
+            final InputMethodSubtype subtype = applicableSubtypes.get(i);
+            if (subtype.containsExtraValueKey(TAG_ASCII_CAPABLE)) {
+                hasAsciiCapableKeyboard = true;
+                break;
+            }
+        }
+        if (!hasAsciiCapableKeyboard) {
+            final int numKeyboardSubtypes = keyboardSubtypes.size();
+            for (int i = 0; i < numKeyboardSubtypes; ++i) {
+                final InputMethodSubtype subtype = keyboardSubtypes.get(i);
                 final String mode = subtype.getMode();
                 if (SUBTYPE_MODE_KEYBOARD.equals(mode) && subtype.containsExtraValueKey(
                         TAG_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE)) {
@@ -551,13 +567,16 @@ public class InputMethodUtils {
                 }
             }
         }
-        if (keyboardSubtype == null) {
+
+        if (applicableSubtypes.isEmpty()) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
                     res, subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
             if (lastResortKeyboardSubtype != null) {
                 applicableSubtypes.add(lastResortKeyboardSubtype);
             }
         }
+
+        applicableSubtypes.addAll(applicableModeAndSubtypesMap.values());
         return applicableSubtypes;
     }
 

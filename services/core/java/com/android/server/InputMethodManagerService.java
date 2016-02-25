@@ -95,6 +95,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.EventLog;
+import android.util.LocaleList;
 import android.util.LruCache;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
@@ -135,7 +136,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * This class provides a system service that manages input methods.
@@ -446,7 +446,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private View mSwitchingDialogTitleView;
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
-    private Locale mLastSystemLocale;
+    private LocaleList mLastSystemLocales;
     private boolean mShowImeWithHardKeyboard;
     private boolean mAccessibilityRequestingNoSoftKeyboard;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
@@ -949,15 +949,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // not system ready
             return;
         }
-        final Locale newLocale = mRes.getConfiguration().locale;
+        final LocaleList newLocales = mRes.getConfiguration().getLocales();
         if (!updateOnlyWhenLocaleChanged
-                || (newLocale != null && !newLocale.equals(mLastSystemLocale))) {
+                || (newLocales != null && !newLocales.equals(mLastSystemLocales))) {
             if (!updateOnlyWhenLocaleChanged) {
                 hideCurrentInputLocked(0, null);
                 resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_RESET_IME);
             }
             if (DEBUG) {
-                Slog.i(TAG, "Locale has been changed to " + newLocale);
+                Slog.i(TAG, "LocaleList has been changed to " + newLocales);
             }
             buildInputMethodListLocked(resetDefaultEnabledIme);
             if (!updateOnlyWhenLocaleChanged) {
@@ -972,7 +972,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 resetDefaultImeLocked(mContext);
             }
             updateFromSettingsLocked(true);
-            mLastSystemLocale = newLocale;
+            mLastSystemLocales = newLocales;
             if (!updateOnlyWhenLocaleChanged) {
                 try {
                     startInputInnerLocked();
@@ -1079,7 +1079,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mSettings.getEnabledInputMethodListLocked(),
                             mSettings.getCurrentUserId(), mContext.getBasePackageName());
                 }
-                mLastSystemLocale = mRes.getConfiguration().locale;
+                mLastSystemLocales = mRes.getConfiguration().getLocales();
                 try {
                     startInputInnerLocked();
                 } catch (RuntimeException e) {
