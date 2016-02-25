@@ -34,7 +34,6 @@ MeshState::MeshState()
     glGenBuffers(1, &mUnitQuadBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, mUnitQuadBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(kUnitQuadVertices), kUnitQuadVertices, GL_STATIC_DRAW);
-
     mCurrentBuffer = mUnitQuadBuffer;
 
     uint16_t regionIndices[kMaxNumberOfQuads * 6];
@@ -78,26 +77,18 @@ void MeshState::dump() {
 // Buffer Objects
 ///////////////////////////////////////////////////////////////////////////////
 
-bool MeshState::bindMeshBuffer() {
-    return bindMeshBuffer(mUnitQuadBuffer);
-}
-
-bool MeshState::bindMeshBuffer(GLuint buffer) {
-    if (!buffer) buffer = mUnitQuadBuffer;
-    return bindMeshBufferInternal(buffer);
-}
-
-bool MeshState::unbindMeshBuffer() {
-    return bindMeshBufferInternal(0);
-}
-
-bool MeshState::bindMeshBufferInternal(GLuint buffer) {
+void MeshState::bindMeshBuffer(GLuint buffer) {
     if (mCurrentBuffer != buffer) {
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         mCurrentBuffer = buffer;
-        return true;
+
+        // buffer has changed, so invalidate cached vertex pos/texcoord pointers
+        resetVertexPointers();
     }
-    return false;
+}
+
+void MeshState::unbindMeshBuffer() {
+    return bindMeshBuffer(0);
 }
 
 void MeshState::genOrUpdateMeshBuffer(GLuint* buffer, GLsizeiptr size,
@@ -122,16 +113,22 @@ void MeshState::deleteMeshBuffer(GLuint buffer) {
 // Vertices
 ///////////////////////////////////////////////////////////////////////////////
 
-void MeshState::bindPositionVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
-    if (force || vertices != mCurrentPositionPointer || stride != mCurrentPositionStride) {
+void MeshState::bindPositionVertexPointer(const GLvoid* vertices, GLsizei stride) {
+    // update pos coords if !current vbo, since vertices may point into mutable memory (e.g. stack)
+    if (mCurrentBuffer == 0
+            || vertices != mCurrentPositionPointer
+            || stride != mCurrentPositionStride) {
         glVertexAttribPointer(Program::kBindingPosition, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentPositionPointer = vertices;
         mCurrentPositionStride = stride;
     }
 }
 
-void MeshState::bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
-    if (force || vertices != mCurrentTexCoordsPointer || stride != mCurrentTexCoordsStride) {
+void MeshState::bindTexCoordsVertexPointer(const GLvoid* vertices, GLsizei stride) {
+    // update tex coords if !current vbo, since vertices may point into mutable memory (e.g. stack)
+    if (mCurrentBuffer == 0
+            || vertices != mCurrentTexCoordsPointer
+            || stride != mCurrentTexCoordsStride) {
         glVertexAttribPointer(Program::kBindingTexCoords, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentTexCoordsPointer = vertices;
         mCurrentTexCoordsStride = stride;
@@ -140,10 +137,6 @@ void MeshState::bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, G
 
 void MeshState::resetVertexPointers() {
     mCurrentPositionPointer = this;
-    mCurrentTexCoordsPointer = this;
-}
-
-void MeshState::resetTexCoordsVertexPointer() {
     mCurrentTexCoordsPointer = this;
 }
 
@@ -166,26 +159,18 @@ void MeshState::disableTexCoordsVertexArray() {
 // Indices
 ///////////////////////////////////////////////////////////////////////////////
 
-bool MeshState::bindIndicesBufferInternal(const GLuint buffer) {
+void MeshState::bindIndicesBuffer(const GLuint buffer) {
     if (mCurrentIndicesBuffer != buffer) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
         mCurrentIndicesBuffer = buffer;
-        return true;
     }
-    return false;
 }
 
-bool MeshState::bindQuadIndicesBuffer() {
-    return bindIndicesBufferInternal(mQuadListIndices);
-}
-
-bool MeshState::unbindIndicesBuffer() {
+void MeshState::unbindIndicesBuffer() {
     if (mCurrentIndicesBuffer) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         mCurrentIndicesBuffer = 0;
-        return true;
     }
-    return false;
 }
 
 } /* namespace uirenderer */

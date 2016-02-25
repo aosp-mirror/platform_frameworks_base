@@ -292,28 +292,27 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
     // ---------- Mesh setup ----------
     // --------------------------------
     // vertices
-    const bool force = meshState().bindMeshBufferInternal(vertices.bufferObject)
-            || (vertices.position != nullptr);
-    meshState().bindPositionVertexPointer(force, vertices.position, vertices.stride);
+    meshState().bindMeshBuffer(vertices.bufferObject);
+    meshState().bindPositionVertexPointer(vertices.position, vertices.stride);
 
     // indices
-    meshState().bindIndicesBufferInternal(indices.bufferObject);
+    meshState().bindIndicesBuffer(indices.bufferObject);
 
     if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
         const Glop::Fill::TextureData& texture = fill.texture;
         // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
+        mCaches->textureState().bindTexture(texture.target, texture.texture->id());
         if (texture.clamp != GL_INVALID_ENUM) {
-            texture.texture->setWrap(texture.clamp, true, false, texture.target);
+            texture.texture->setWrap(texture.clamp, false, false, texture.target);
         }
         if (texture.filter != GL_INVALID_ENUM) {
-            texture.texture->setFilter(texture.filter, true, false, texture.target);
+            texture.texture->setFilter(texture.filter, false, false, texture.target);
         }
 
-        mCaches->textureState().bindTexture(texture.target, texture.texture->id());
         meshState().enableTexCoordsVertexArray();
-        meshState().bindTexCoordsVertexPointer(force, vertices.texCoord, vertices.stride);
+        meshState().bindTexCoordsVertexPointer(vertices.texCoord, vertices.stride);
 
         if (texture.textureTransform) {
             glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1,
@@ -361,11 +360,9 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix) {
         const GLbyte* vertexData = static_cast<const GLbyte*>(vertices.position);
         while (elementsCount > 0) {
             GLsizei drawCount = std::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
-
-            // rebind pointers without forcing, since initial bind handled above
-            meshState().bindPositionVertexPointer(false, vertexData, vertices.stride);
+            meshState().bindPositionVertexPointer(vertexData, vertices.stride);
             if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-                meshState().bindTexCoordsVertexPointer(false,
+                meshState().bindTexCoordsVertexPointer(
                         vertexData + kMeshTextureOffset, vertices.stride);
             }
 
