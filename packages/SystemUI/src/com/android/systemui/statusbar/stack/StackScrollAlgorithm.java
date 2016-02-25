@@ -25,9 +25,10 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.notification.FakeShadowView;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -297,18 +298,22 @@ public class StackScrollAlgorithm {
         int childCount = hostView.getChildCount();
         state.visibleChildren.clear();
         state.visibleChildren.ensureCapacity(childCount);
-        state.increasedPaddingSet.clear();
+        state.increasedPaddingMap.clear();
         int notGoneIndex = 0;
         ExpandableView lastView = null;
         for (int i = 0; i < childCount; i++) {
             ExpandableView v = (ExpandableView) hostView.getChildAt(i);
             if (v.getVisibility() != View.GONE) {
                 notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
-                boolean needsIncreasedPadding = v.needsIncreasedPadding();
-                if (needsIncreasedPadding) {
-                    state.increasedPaddingSet.add(v);
+                float increasedPadding = v.getIncreasedPaddingAmount();
+                if (increasedPadding != 0.0f) {
+                    state.increasedPaddingMap.put(v, increasedPadding);
                     if (lastView != null) {
-                        state.increasedPaddingSet.add(lastView);
+                        Float prevValue = state.increasedPaddingMap.get(lastView);
+                        float newValue = prevValue != null
+                                ? Math.max(prevValue, increasedPadding)
+                                : increasedPadding;
+                        state.increasedPaddingMap.put(lastView, newValue);
                     }
                 }
                 if (v instanceof ExpandableNotificationRow) {
@@ -423,9 +428,12 @@ public class StackScrollAlgorithm {
 
     private int getPaddingAfterChild(StackScrollAlgorithmState algorithmState,
             ExpandableView child) {
-        return algorithmState.increasedPaddingSet.contains(child)
-                ? mIncreasedPaddingBetweenElements
-                : mPaddingBetweenElements;
+        Float paddingValue = algorithmState.increasedPaddingMap.get(child);
+        return paddingValue == null
+                ? mPaddingBetweenElements
+                : (int) NotificationUtils.interpolate(mPaddingBetweenElements,
+                        mIncreasedPaddingBetweenElements,
+                        paddingValue);
     }
 
     private void updateHeadsUpStates(StackScrollState resultState,
@@ -765,9 +773,10 @@ public class StackScrollAlgorithm {
         public final ArrayList<ExpandableView> visibleChildren = new ArrayList<ExpandableView>();
 
         /**
-         * The children from the host that need an increased padding after them.
+         * The children from the host that need an increased padding after them. A value of 0 means
+         * no increased padding, a value of 1 means full padding.
          */
-        public final HashSet<ExpandableView> increasedPaddingSet = new HashSet<>();
+        public final HashMap<ExpandableView, Float> increasedPaddingMap = new HashMap<>();
     }
 
 }
