@@ -28,8 +28,10 @@ public class TaskStackUpdatedEvent extends EventBus.AnimatedEvent {
      * A new TaskStack instance representing the latest stack state.
      */
     public final TaskStack stack;
+    public final boolean inMultiWindow;
 
-    public TaskStackUpdatedEvent(TaskStack stack) {
+    public TaskStackUpdatedEvent(TaskStack stack, boolean inMultiWindow) {
         this.stack = stack;
+        this.inMultiWindow = inMultiWindow;
     }
 }

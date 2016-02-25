@@ -722,6 +722,10 @@
     <string name="recents_history_button_label">History</string>
     <!-- Recents: History clear all string. [CHAR LIMIT=NONE] -->
     <string name="recents_history_clear_all_button_label">Clear</string>
+    <!-- Recents: Non-dockable task drag message. [CHAR LIMIT=NONE] -->
+    <string name="recents_drag_non_dockable_task_message">This app does not support multi-window</string>
+    <!-- Recents: Non-dockable task launch sub header. [CHAR LIMIT=NONE] -->
+    <string name="recents_launch_non_dockable_task_label">App does not support multi-window</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>
