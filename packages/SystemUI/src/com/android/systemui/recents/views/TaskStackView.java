@@ -1573,6 +1573,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Task launchTask = mStack.getStackTasks().get(launchTaskIndex);
             EventBus.getDefault().send(new LaunchTaskEvent(getChildViewForTask(launchTask),
                     launchTask, null, INVALID_STACK_ID, false /* screenPinningRequested */));
+
+            MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_LAUNCH_PREVIOUS_TASK,
+                    launchTask.key.getComponent().toString());
         }
     }
 
