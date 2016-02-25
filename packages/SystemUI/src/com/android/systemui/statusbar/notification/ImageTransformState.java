@@ -62,7 +62,7 @@ public class ImageTransformState extends TransformState {
     }
 
     @Override
-    protected boolean animateScale() {
+    protected boolean transformScale() {
         return true;
     }
 

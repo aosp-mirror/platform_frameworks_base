@@ -142,7 +142,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
-        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_HEADER, mNotificationHeader);
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_HEADER,
+                mNotificationHeader);
     }
 
     @Override
@@ -299,8 +300,18 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
+    public void transformTo(TransformableView notification, float transformationAmount) {
+        mTransformationHelper.transformTo(notification, transformationAmount);
+    }
+
+    @Override
     public void transformFrom(TransformableView notification) {
         mTransformationHelper.transformFrom(notification);
+    }
+
+    @Override
+    public void transformFrom(TransformableView notification, float transformationAmount) {
+        mTransformationHelper.transformFrom(notification, transformationAmount);
     }
 
     @Override

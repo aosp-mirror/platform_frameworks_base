@@ -16,13 +16,17 @@
 
 package com.android.systemui.statusbar;
 
-import android.os.Handler;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.TransformState;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.util.Stack;
 
@@ -33,9 +37,9 @@ public class ViewTransformationHelper implements TransformableView {
 
     private static final int TAG_CONTAINS_TRANSFORMED_VIEW = R.id.contains_transformed_view;
 
-    private final Handler mHandler = new Handler();
     private ArrayMap<Integer, View> mTransformedViews = new ArrayMap<>();
     private ArrayMap<Integer, CustomTransformation> mCustomTransformations = new ArrayMap<>();
+    private ValueAnimator mViewTransformationAnimation;
 
     public void addTransformedView(int key, View transformedView) {
         mTransformedViews.put(key, transformedView);
@@ -59,61 +63,123 @@ public class ViewTransformationHelper implements TransformableView {
     }
 
     @Override
-    public void transformTo(TransformableView notification, Runnable endRunnable) {
-        Runnable runnable = endRunnable;
+    public void transformTo(final TransformableView notification, final Runnable endRunnable) {
+        if (mViewTransformationAnimation != null) {
+            mViewTransformationAnimation.cancel();
+        }
+        mViewTransformationAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
+        mViewTransformationAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                transformTo(notification, animation.getAnimatedFraction());
+            }
+        });
+        mViewTransformationAnimation.setInterpolator(Interpolators.LINEAR);
+        mViewTransformationAnimation.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        if (endRunnable != null) {
+            mViewTransformationAnimation.addListener(new AnimatorListenerAdapter() {
+                public boolean mCancelled;
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endRunnable.run();
+                    if (!mCancelled) {
+                        setVisible(false);
+                    } else {
+                        abortTransformations();
+                    }
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mCancelled = true;
+                }
+            });
+        }
+        mViewTransformationAnimation.start();
+    }
+
+    @Override
+    public void transformTo(TransformableView notification, float transformationAmount) {
         for (Integer viewType : mTransformedViews.keySet()) {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
                 CustomTransformation customTransformation = mCustomTransformations.get(viewType);
                 if (customTransformation != null && customTransformation.transformTo(
-                        ownState, notification, runnable)) {
+                        ownState, notification, transformationAmount)) {
                     ownState.recycle();
-                    runnable = null;
                     continue;
                 }
                 TransformState otherState = notification.getCurrentState(viewType);
                 if (otherState != null) {
-                    boolean run = ownState.transformViewTo(otherState, runnable);
+                    ownState.transformViewTo(otherState, transformationAmount);
                     otherState.recycle();
-                    if (run) {
-                        runnable = null;
-                    }
                 } else {
                     // there's no other view available
-                    CrossFadeHelper.fadeOut(mTransformedViews.get(viewType), runnable);
-                    runnable = null;
+                    CrossFadeHelper.fadeOut(mTransformedViews.get(viewType), transformationAmount);
                 }
                 ownState.recycle();
             }
         }
-        if (runnable != null) {
-            // We need to post, since the visible type is only set after the transformation is
-            // started
-            mHandler.post(runnable);
-        }
     }
 
     @Override
-    public void transformFrom(TransformableView notification) {
+    public void transformFrom(final TransformableView notification) {
+        if (mViewTransformationAnimation != null) {
+            mViewTransformationAnimation.cancel();
+        }
+        mViewTransformationAnimation = ValueAnimator.ofFloat(0.0f, 1.0f);
+        mViewTransformationAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                transformFrom(notification, animation.getAnimatedFraction());
+            }
+        });
+        mViewTransformationAnimation.addListener(new AnimatorListenerAdapter() {
+            public boolean mCancelled;
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!mCancelled) {
+                    setVisible(true);
+                } else {
+                    abortTransformations();
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mCancelled = true;
+            }
+        });
+        mViewTransformationAnimation.setInterpolator(Interpolators.LINEAR);
+        mViewTransformationAnimation.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        mViewTransformationAnimation.start();
+    }
+
+    @Override
+    public void transformFrom(TransformableView notification, float transformationAmount) {
         for (Integer viewType : mTransformedViews.keySet()) {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
                 CustomTransformation customTransformation = mCustomTransformations.get(viewType);
                 if (customTransformation != null && customTransformation.transformFrom(
-                        ownState, notification)) {
+                        ownState, notification, transformationAmount)) {
                     ownState.recycle();
                     continue;
                 }
                 TransformState otherState = notification.getCurrentState(viewType);
                 if (otherState != null) {
-                    ownState.transformViewFrom(otherState);
+                    ownState.transformViewFrom(otherState, transformationAmount);
                     otherState.recycle();
                 } else {
                     // There's no other view, lets fade us in
                     // Certain views need to prepare the fade in and make sure its children are
                     // completely visible. An example is the notification header.
-                    ownState.prepareFadeIn();
-                    CrossFadeHelper.fadeIn(mTransformedViews.get(viewType));
+                    if (transformationAmount == 0.0f) {
+                        ownState.prepareFadeIn();
+                    }
+                    CrossFadeHelper.fadeIn(mTransformedViews.get(viewType), transformationAmount);
                 }
                 ownState.recycle();
             }
@@ -126,6 +192,16 @@ public class ViewTransformationHelper implements TransformableView {
             TransformState ownState = getCurrentState(viewType);
             if (ownState != null) {
                 ownState.setVisible(visible);
+                ownState.recycle();
+            }
+        }
+    }
+
+    private void abortTransformations() {
+        for (Integer viewType : mTransformedViews.keySet()) {
+            TransformState ownState = getCurrentState(viewType);
+            if (ownState != null) {
+                ownState.abortTransformation();
                 ownState.recycle();
             }
         }
@@ -173,22 +249,44 @@ public class ViewTransformationHelper implements TransformableView {
         }
     }
 
-    public interface CustomTransformation {
+    public static abstract class CustomTransformation {
         /**
          * Transform a state to the given view
          * @param ownState the state to transform
          * @param notification the view to transform to
+         * @param transformationAmount how much transformation should be done
          * @return whether a custom transformation is performed
          */
-        boolean transformTo(TransformState ownState, TransformableView notification,
-                Runnable endRunnable);
+        public abstract boolean transformTo(TransformState ownState,
+                TransformableView notification,
+                float transformationAmount);
 
         /**
          * Transform to this state from the given view
          * @param ownState the state to transform to
          * @param notification the view to transform from
+         * @param transformationAmount how much transformation should be done
          * @return whether a custom transformation is performed
          */
-        boolean transformFrom(TransformState ownState, TransformableView notification);
+        public abstract boolean transformFrom(TransformState ownState,
+                TransformableView notification,
+                float transformationAmount);
+
+        /**
+         * Perform a custom initialisation before transforming.
+         *
+         * @param ownState our own state
+         * @param otherState the other state
+         * @return whether a custom initialization is done
+         */
+        public boolean initTransformation(TransformState ownState,
+                TransformState otherState) {
+            return false;
+        }
+
+        public boolean customTransformTarget(TransformState ownState,
+                TransformState otherState) {
+            return false;
+        }
     }
 }

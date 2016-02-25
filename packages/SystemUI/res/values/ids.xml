@@ -44,6 +44,10 @@
     <item type="id" name="notification_screenshot"/>
     <item type="id" name="notification_hidden"/>
     <item type="id" name="notification_volumeui"/>
+    <item type="id" name="transformation_start_x_tag"/>
+    <item type="id" name="transformation_start_y_tag"/>
+    <item type="id" name="transformation_start_scale_x_tag"/>
+    <item type="id" name="transformation_start_scale_y_tag"/>
 
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>

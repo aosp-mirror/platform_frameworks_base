@@ -48,6 +48,7 @@ public class NotificationContentView extends FrameLayout {
     private static final int VISIBLE_TYPE_EXPANDED = 1;
     private static final int VISIBLE_TYPE_HEADSUP = 2;
     private static final int VISIBLE_TYPE_SINGLELINE = 3;
+    private static final int UNDEFINED = -1;
 
     private final Rect mClipBounds = new Rect();
     private final int mMinContractedHeight;
@@ -102,6 +103,8 @@ public class NotificationContentView extends FrameLayout {
     private boolean mExpandable;
     private boolean mClipToActualHeight = true;
     private ExpandableNotificationRow mContainingNotification;
+    private int mTransformationStartVisibleType;
+    private boolean mUserExpanding;
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -349,6 +352,41 @@ public class NotificationContentView extends FrameLayout {
         invalidateOutline();
     }
 
+    private void updateContentTransformation() {
+        int visibleType = calculateVisibleType();
+        if (visibleType != mVisibleType) {
+            // A new transformation starts
+            mTransformationStartVisibleType = mVisibleType;
+            final TransformableView shownView = getTransformableViewForVisibleType(visibleType);
+            final TransformableView hiddenView = getTransformableViewForVisibleType(
+                    mTransformationStartVisibleType);
+            shownView.transformFrom(hiddenView, 0.0f);
+            getViewForVisibleType(visibleType).setVisibility(View.VISIBLE);
+            hiddenView.transformTo(shownView, 0.0f);
+            mVisibleType = visibleType;
+        }
+        if (mTransformationStartVisibleType != UNDEFINED
+                && mVisibleType != mTransformationStartVisibleType) {
+            final TransformableView shownView = getTransformableViewForVisibleType(mVisibleType);
+            final TransformableView hiddenView = getTransformableViewForVisibleType(
+                    mTransformationStartVisibleType);
+            float transformationAmount = calculateTransformationAmount();
+            shownView.transformFrom(hiddenView, transformationAmount);
+            hiddenView.transformTo(shownView, transformationAmount);
+        } else {
+            updateViewVisibilities(visibleType);
+        }
+    }
+
+    private float calculateTransformationAmount() {
+        int startHeight = getViewForVisibleType(mTransformationStartVisibleType).getHeight();
+        int endHeight = getViewForVisibleType(mVisibleType).getHeight();
+        int progress = Math.abs(mContentHeight - startHeight);
+        int totalDistance = Math.abs(endHeight - startHeight);
+        float amount = (float) progress / (float) totalDistance;
+        return Math.min(1.0f, amount);
+    }
+
     public int getContentHeight() {
         return mContentHeight;
     }
@@ -395,6 +433,10 @@ public class NotificationContentView extends FrameLayout {
 
     private void selectLayout(boolean animate, boolean force) {
         if (mContractedChild == null) {
+            return;
+        }
+        if (mUserExpanding) {
+            updateContentTransformation();
             return;
         }
         int visibleType = calculateVisibleType();
@@ -492,9 +534,21 @@ public class NotificationContentView extends FrameLayout {
      * @return one of the static enum types in this view, calculated form the current state
      */
     private int calculateVisibleType() {
-        boolean noExpandedChild = mExpandedChild == null;
-
+        if (mUserExpanding) {
+            int expandedVisualType = getVisualTypeForHeight(
+                    mContainingNotification.getMaxExpandHeight());
+            int collapsedVisualType = getVisualTypeForHeight(
+                    mContainingNotification.getMinExpandHeight());
+            return mTransformationStartVisibleType == collapsedVisualType
+                    ? expandedVisualType
+                    : collapsedVisualType;
+        }
         int viewHeight = Math.min(mContentHeight, mContainingNotification.getIntrinsicHeight());
+        return getVisualTypeForHeight(viewHeight);
+    }
+
+    private int getVisualTypeForHeight(float viewHeight) {
+        boolean noExpandedChild = mExpandedChild == null;
         if (!noExpandedChild && viewHeight == mExpandedChild.getHeight()) {
             return VISIBLE_TYPE_EXPANDED;
         }
@@ -721,6 +775,17 @@ public class NotificationContentView extends FrameLayout {
             removeView(mSingleLineView);
             mSingleLineView = null;
             updateSingleLineView();
+        }
+    }
+
+    public void setUserExpanding(boolean userExpanding) {
+        mUserExpanding = userExpanding;
+        if (userExpanding) {
+            mTransformationStartVisibleType = mVisibleType;
+        } else {
+            mTransformationStartVisibleType = UNDEFINED;
+            mVisibleType = calculateVisibleType();
+            updateViewVisibilities(mVisibleType);
         }
     }
 }
