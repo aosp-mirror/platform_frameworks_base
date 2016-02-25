@@ -37,6 +37,7 @@ import java.util.List;
 import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
 
 final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListener {
+
     private final ActivityManagerService mService;
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
@@ -44,12 +45,17 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
 
     private CharSequence mName;
 
+    static int CANT_SHOW = -1;
+    static int BACKGROUND_USER = -2;
+    static int ALREADY_SHOWING = -3;
+
     // Event 'what' codes
     static final int FORCE_QUIT = 1;
     static final int FORCE_QUIT_AND_REPORT = 2;
     static final int RESTART = 3;
     static final int RESET = 4;
     static final int MUTE = 5;
+    static final int TIMEOUT = 6;
 
     // 5-minute timeout, then we automatically dismiss the crash dialog
     static final long DISMISS_TIMEOUT = 1000 * 60 * 5;
@@ -89,7 +95,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
 
         // After the timeout, pretend the user clicked the quit button
         mHandler.sendMessageDelayed(
-                mHandler.obtainMessage(FORCE_QUIT),
+                mHandler.obtainMessage(TIMEOUT),
                 DISMISS_TIMEOUT);
     }
 
@@ -132,7 +138,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
             mResult.set(result);
 
             // Make sure we don't have time timeout still hanging around.
-            removeMessages(FORCE_QUIT);
+            removeMessages(TIMEOUT);
 
             dismiss();
         }
