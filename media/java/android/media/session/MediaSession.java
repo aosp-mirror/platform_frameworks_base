@@ -512,6 +512,22 @@ public final class MediaSession {
         }
     }
 
+    /**
+     * Returns the name of the package that sent the last media button, transport control, or
+     * command from controllers and the system. This is only valid while in a request callback, such
+     * as {@link Callback#onPlay}.
+     *
+     * @hide
+     */
+    public String getCallingPackage() {
+        try {
+            return mBinder.getCallingPackage();
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Dead object in getCallingPackage.", e);
+        }
+        return null;
+    }
+
     private void dispatchPrepare() {
         postToCallback(CallbackMessageHandler.MSG_PREPARE);
     }
