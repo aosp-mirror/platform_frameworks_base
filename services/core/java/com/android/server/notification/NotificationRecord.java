@@ -227,12 +227,14 @@ public final class NotificationRecord {
             final int N = notification.actions.length;
             for (int i=0; i<N; i++) {
                 final Notification.Action action = notification.actions[i];
-                pw.println(String.format("%s    [%d] \"%s\" -> %s",
-                        prefix,
-                        i,
-                        action.title,
-                        action.actionIntent.toString()
-                        ));
+                if (action != null) {
+                    pw.println(String.format("%s    [%d] \"%s\" -> %s",
+                            prefix,
+                            i,
+                            action.title,
+                            action.actionIntent == null ? "null" : action.actionIntent.toString()
+                    ));
+                }
             }
             pw.println(prefix + "  }");
         }

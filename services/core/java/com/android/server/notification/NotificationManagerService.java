@@ -2307,7 +2307,7 @@ public class NotificationManagerService extends SystemService {
 
             synchronized (mNotificationList) {
                 final StatusBarNotification n = r.sbn;
-                Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
+                if (DBG) Slog.d(TAG, "EnqueueNotificationRunnable.run for: " + n.getKey());
                 NotificationRecord old = mNotificationsByKey.get(n.getKey());
                 if (old != null) {
                     // Retain ranking information from previous record
@@ -2328,7 +2328,7 @@ public class NotificationManagerService extends SystemService {
                 handleGroupedNotificationLocked(r, old, callingUid, callingPid);
                 boolean ignoreNotification =
                         removeUnusedGroupedNotificationLocked(r, old, callingUid, callingPid);
-                Slog.d(TAG, "ignoreNotification is " + ignoreNotification);
+                if (DBG) Slog.d(TAG, "ignoreNotification is " + ignoreNotification);
 
                 // This conditional is a dirty hack to limit the logging done on
                 //     behalf of the download manager without affecting other apps.
