@@ -1814,8 +1814,12 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // it will be set once we reach the boundary
                 mMaxOverScroll = 0.0f;
             }
+            int minScrollY = Math.max(0, scrollRange);
+            if (mExpandedInThisMotion) {
+                minScrollY = Math.min(minScrollY, mMaxScrollAfterExpand);
+            }
             mScroller.fling(mScrollX, mOwnScrollY, 1, velocityY, 0, 0, 0,
-                    Math.max(0, scrollRange), 0, Integer.MAX_VALUE / 2);
+                    minScrollY, 0, mExpandedInThisMotion && mOwnScrollY >= 0 ? 0 : Integer.MAX_VALUE / 2);
 
             postInvalidateOnAnimation();
         }
