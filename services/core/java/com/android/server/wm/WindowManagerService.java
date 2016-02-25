@@ -24,6 +24,9 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -118,6 +121,7 @@ import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IShortcutService;
@@ -7468,6 +7472,35 @@ public class WindowManagerService extends IWindowManager.Stub
         return mCurrentFocus;
     }
 
+    private void showAuditSafeModeNotification() {
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0,
+                new Intent(Intent.ACTION_VIEW,
+                           Uri.parse("https://support.google.com/nexus/answer/2852139")), 0);
+
+        String title = mContext.getString(R.string.audit_safemode_notification);
+
+        Notification notification = new Notification.Builder(mContext)
+                .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
+                .setWhen(0)
+                .setOngoing(true)
+                .setTicker(title)
+                .setLocalOnly(true)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setColor(mContext.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .setContentTitle(title)
+                .setContentText(mContext.getString(R.string.audit_safemode_notification_details))
+                .setContentIntent(pendingIntent)
+                .build();
+
+        NotificationManager notificationManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notifyAsUser(null, R.string.audit_safemode_notification, notification,
+                UserHandle.ALL);
+    }
+
     public boolean detectSafeMode() {
         if (!mInputMonitor.waitForInputDevicesReady(
                 INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS)) {
@@ -7500,6 +7533,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     if (auditSafeMode >= buildDate) {
                         mSafeMode = true;
+                        showAuditSafeModeNotification();
                     } else {
                         SystemProperties.set(ShutdownThread.REBOOT_SAFEMODE_PROPERTY, "");
                         SystemProperties.set(ShutdownThread.AUDIT_SAFEMODE_PROPERTY, "");
