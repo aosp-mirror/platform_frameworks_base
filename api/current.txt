@@ -20211,6 +20211,8 @@ package android.media {
 
   public class ExifInterface {
     ctor public ExifInterface(java.lang.String) throws java.io.IOException;
+    ctor public ExifInterface(java.io.FileDescriptor) throws java.io.IOException;
+    ctor public ExifInterface(java.io.InputStream) throws java.io.IOException;
     method public double getAltitude(double);
     method public java.lang.String getAttribute(java.lang.String);
     method public double getAttributeDouble(java.lang.String, double);
@@ -20232,6 +20234,10 @@ package android.media {
     field public static final java.lang.String TAG_APERTURE = "FNumber";
     field public static final java.lang.String TAG_DATETIME = "DateTime";
     field public static final java.lang.String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
+    field public static final java.lang.String TAG_DIGITAL_ZOOM_RATIO = "DigitalZoomRatio";
+    field public static final java.lang.String TAG_EXPOSURE_BIAS_VALUE = "ExposureBiasValue";
+    field public static final java.lang.String TAG_EXPOSURE_MODE = "ExposureMode";
+    field public static final java.lang.String TAG_EXPOSURE_PROGRAM = "ExposureProgram";
     field public static final java.lang.String TAG_EXPOSURE_TIME = "ExposureTime";
     field public static final java.lang.String TAG_FLASH = "Flash";
     field public static final java.lang.String TAG_FOCAL_LENGTH = "FocalLength";
@@ -20247,9 +20253,12 @@ package android.media {
     field public static final java.lang.String TAG_IMAGE_LENGTH = "ImageLength";
     field public static final java.lang.String TAG_IMAGE_WIDTH = "ImageWidth";
     field public static final java.lang.String TAG_ISO = "ISOSpeedRatings";
+    field public static final java.lang.String TAG_LIGHT_SOURCE = "LightSource";
     field public static final java.lang.String TAG_MAKE = "Make";
+    field public static final java.lang.String TAG_METERING_MODE = "MeteringMode";
     field public static final java.lang.String TAG_MODEL = "Model";
     field public static final java.lang.String TAG_ORIENTATION = "Orientation";
+    field public static final java.lang.String TAG_SUBJECT_DISTANCE = "SubjectDistance";
     field public static final java.lang.String TAG_SUBSEC_TIME = "SubSecTime";
     field public static final java.lang.String TAG_SUBSEC_TIME_DIG = "SubSecTimeDigitized";
     field public static final java.lang.String TAG_SUBSEC_TIME_ORIG = "SubSecTimeOriginal";
