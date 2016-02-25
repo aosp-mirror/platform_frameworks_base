@@ -20,6 +20,7 @@ import static com.android.documentsui.StubProvider.DEFAULT_AUTHORITY;
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
 import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -72,6 +73,17 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         super(activityClass);
     }
 
+    /*
+     * Returns the root that will be opened within the activity.
+     * By default tests are started with one of the test roots.
+     * Override the method if you want to open different root on start.
+     * @return Root that will be opened. Return null if you want to open activity's default root.
+     */
+    @Nullable
+    protected RootInfo getInitialRoot() {
+        return rootDir0;
+    }
+
     @Override
     public void setUp() throws Exception {
         device = UiDevice.getInstance(getInstrumentation());
@@ -106,6 +118,9 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         final Intent intent = context.getPackageManager().getLaunchIntentForPackage(
                 UiBot.TARGET_PKG);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (getInitialRoot() != null) {
+            intent.setData(getInitialRoot().getUri());
+        }
         setActivityIntent(intent);
         getActivity();  // Launch the activity.
     }
@@ -127,13 +142,11 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
     }
 
     void assertDefaultContentOfTestDir0() throws UiObjectNotFoundException {
-        bots.roots.openRoot(ROOT_0_ID);
         bots.directory.assertDocumentsCount(4);
         bots.directory.assertDocumentsPresent(fileName1, fileName2, dirName1, fileNameNoRename);
     }
 
     void assertDefaultContentOfTestDir1() throws UiObjectNotFoundException {
-        bots.roots.openRoot(ROOT_1_ID);
         bots.directory.assertDocumentsCount(2);
         bots.directory.assertDocumentsPresent(fileName3, fileName4);
     }
