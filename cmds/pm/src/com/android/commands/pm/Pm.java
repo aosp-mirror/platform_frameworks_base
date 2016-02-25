@@ -1490,7 +1490,7 @@ public final class Pm {
         System.err.println("    -i: specify the installer package name");
         System.err.println("    -s: install application on sdcard");
         System.err.println("    -f: install application on internal flash");
-        System.err.println("    -d: allow version code downgrade");
+        System.err.println("    -d: allow version code downgrade (debuggable packages only)");
         System.err.println("    -p: partial application install");
         System.err.println("    -g: grant all runtime permissions");
         System.err.println("    -S: size in bytes of entire session");
