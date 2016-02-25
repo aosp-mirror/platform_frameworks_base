@@ -1522,23 +1522,7 @@ class WindowStateAnimator {
             }
 
             if (mWin.mAttrs.type != TYPE_APPLICATION_STARTING && mWin.mAppToken != null) {
-                mWin.mAppToken.firstWindowDrawn = true;
-
-                // We now have a good window to show, remove dead placeholders
-                mWin.mAppToken.removeAllDeadWindows();
-
-                if (mWin.mAppToken.startingData != null) {
-                    if (DEBUG_STARTING_WINDOW || DEBUG_ANIM) Slog.v(TAG, "Finish starting "
-                            + mWin.mToken + ": first real window is shown, no animation");
-                    // If this initial window is animating, stop it -- we
-                    // will do an animation to reveal it from behind the
-                    // starting window, so there is no need for it to also
-                    // be doing its own stuff.
-                    clearAnimation();
-                    mService.mFinishedStarting.add(mWin.mAppToken);
-                    mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
-                }
-                mWin.mAppToken.updateReportedVisibilityLocked();
+                mWin.mAppToken.onFirstWindowDrawn(mWin, this);
             }
 
             return true;

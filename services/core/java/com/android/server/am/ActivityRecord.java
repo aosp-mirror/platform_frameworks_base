@@ -321,6 +321,7 @@ final class ActivityRecord {
                 pw.print(" visible="); pw.print(visible);
                 pw.print(" sleeping="); pw.print(sleeping);
                 pw.print(" idle="); pw.println(idle);
+                pw.print(" mStartingWindowShown="); pw.println(mStartingWindowShown);
         pw.print(prefix); pw.print("fullscreen="); pw.print(fullscreen);
                 pw.print(" noDisplay="); pw.print(noDisplay);
                 pw.print(" immersive="); pw.print(immersive);
