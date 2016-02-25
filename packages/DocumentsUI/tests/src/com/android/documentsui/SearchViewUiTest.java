@@ -53,7 +53,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearch_ResultsFound() throws Exception {
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = "file1";
@@ -71,7 +70,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearchResultsFound_ClearsOnBack() throws Exception {
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = fileName1;
@@ -86,7 +84,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearch_NoResults() throws Exception {
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = "chocolate";
@@ -106,7 +103,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearchNoResults_ClearsOnBack() throws Exception {
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = "chocolate";
@@ -122,7 +118,6 @@ public class SearchViewUiTest extends ActivityTest<FilesActivity> {
 
     public void testSearchResultsFound_ClearsOnDirectoryChange() throws Exception {
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
 
         String query = fileName1;

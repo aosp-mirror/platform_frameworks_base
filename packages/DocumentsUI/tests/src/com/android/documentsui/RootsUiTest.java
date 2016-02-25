@@ -33,7 +33,6 @@ public class RootsUiTest extends ActivityTest<FilesActivity> {
     public void setUp() throws Exception {
         super.setUp();
         initTestFiles();
-        bots.roots.openRoot(ROOT_0_ID);
     }
 
     public void testRootTapped_GoToRootFromChildDir() throws Exception {
