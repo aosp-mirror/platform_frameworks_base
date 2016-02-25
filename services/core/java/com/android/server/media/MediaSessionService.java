@@ -946,7 +946,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // won't release it later
                 session.sendMediaButton(keyEvent,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
-                        mKeyEventReceiver);
+                        mKeyEventReceiver, getContext().getApplicationInfo().uid,
+                        getContext().getPackageName());
             } else {
                 // Launch the last PendingIntent we had with priority
                 UserRecord user = mUserRecords.get(mCurrentUserId);
