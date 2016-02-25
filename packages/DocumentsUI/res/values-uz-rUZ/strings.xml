@@ -29,7 +29,7 @@
     <string name="menu_save" msgid="2394743337684426338">"Saqlash"</string>
     <string name="menu_share" msgid="3075149983979628146">"Ulashish"</string>
     <string name="menu_delete" msgid="8138799623850614177">"O‘chirish"</string>
-    <string name="menu_select_all" msgid="8323579667348729928">"Barchasini belgilash"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"Hammasini belgilash"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Nusxalash…"</string>
     <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Ichki xotirani ko‘rsatish"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD kartani ko‘rsatish"</string>
@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Quyidagi orqali ulashish"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Fayllar nusxalanmoqda"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> qoldi"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g> ta fayl ko‘chirilmoqda."</item>
-    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g> ta fayl ko‘chirilmoqda."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g> ta fayl nusxalanmoqda</item>
+      <item quantity="one"> <xliff:g id="COUNT_0">%1$d</xliff:g> ta fayl nusxalanmoqda</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Nuxsa olishga tayyorgarlik..."</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"<xliff:g id="COUNT">%1$d</xliff:g> ta fayl ko‘chirilmadi"</item>
-    <item quantity="other" msgid="7124097894673644954">"<xliff:g id="COUNT">%1$d</xliff:g> ta fayl ko‘chirilmadi"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ta fayldan nusxa olinmadi</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ta fayldan nusxa olinmadi</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Batafsil ma’lumot olish uchun bosing"</string>
     <string name="retry" msgid="7564024179122207376">"Qayta urinish"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ushbu fayllardan nusxa olinmadi: <xliff:g id="LIST">%1$s</xliff:g>"</string>

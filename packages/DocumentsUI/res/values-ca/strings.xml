@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Comparteix mitjançant"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"S\'estan copiant fitxers"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Temps restant: <xliff:g id="DURATION">%s</xliff:g>"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"S\'està copiant <xliff:g id="COUNT">%1$d</xliff:g> fitxer."</item>
-    <item quantity="other" msgid="5175026054495572228">"S\'estan copiant <xliff:g id="COUNT">%1$d</xliff:g> fitxers."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="other">S\'estan copiant <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers.</item>
+      <item quantity="one">S\'està copiant <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"S\'està preparant una còpia…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"No s\'ha pogut copiar <xliff:g id="COUNT">%1$d</xliff:g> fitxer"</item>
-    <item quantity="other" msgid="7124097894673644954">"No s\'han pogut copiar <xliff:g id="COUNT">%1$d</xliff:g> fitxers"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="other">No s\'han pogut copiar <xliff:g id="COUNT_1">%1$d</xliff:g> fitxers</item>
+      <item quantity="one">No s\'ha pogut copiar <xliff:g id="COUNT_0">%1$d</xliff:g> fitxer</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Toca per veure els detalls"</string>
     <string name="retry" msgid="7564024179122207376">"Torna-ho a provar"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Aquests fitxers no s\'han copiat: <xliff:g id="LIST">%1$s</xliff:g>"</string>

@@ -29,21 +29,20 @@
     <string name="menu_save" msgid="2394743337684426338">"સાચવો"</string>
     <string name="menu_share" msgid="3075149983979628146">"શેર કરો"</string>
     <string name="menu_delete" msgid="8138799623850614177">"કાઢી નાખો"</string>
-    <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" પસંદ કરો"</string>
-    <string name="menu_select_all" msgid="4320518282375109902">"બધા પસંદ કરો"</string>
+    <string name="menu_select_all" msgid="8323579667348729928">"બધા પસંદ કરો"</string>
     <string name="menu_copy" msgid="3612326052677229148">"આના પર કૉપિ કરો…"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ દર્શાવો"</string>
-    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ દર્શાવો"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"આંતરિક સ્ટોરેજ બતાવો"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD કાર્ડ બતાવો"</string>
     <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"આંતરિક સંગ્રહ છુપાવો"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD કાર્ડ છુપાવો"</string>
-    <string name="menu_file_size_show" msgid="3240323619260823076">"ફાઇલ કદ દર્શાવો"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"ફાઇલ કદ બતાવો"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"ફાઇલ કદ છુપાવો"</string>
+    <string name="button_select" msgid="527196987259139214">"પસંદ કરો"</string>
     <string name="button_copy" msgid="8706475544635021302">"કૉપિ કરો"</string>
-    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> પસંદ કર્યા"</string>
     <string name="sort_name" msgid="9183560467917256779">"નામ દ્વારા"</string>
     <string name="sort_date" msgid="586080032956151448">"સંશોધન તારીખ દ્વારા"</string>
     <string name="sort_size" msgid="3350681319735474741">"કદ દ્વારા"</string>
-    <string name="drawer_open" msgid="4545466532430226949">"રૂટ્સ દર્શાવો"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"રૂટ્સ બતાવો"</string>
     <string name="drawer_close" msgid="7602734368552123318">"રૂટ્સ છુપાવો"</string>
     <string name="save_error" msgid="6167009778003223664">"દસ્તાવેજ સાચવવામાં નિષ્ફળ થયાં."</string>
     <string name="create_error" msgid="3735649141335444215">"ફોલ્ડર બનાવવામાં નિષ્ફળ થયા"</string>
@@ -53,7 +52,7 @@
     <string name="root_type_service" msgid="2178854894416775409">"સંગ્રહ સેવાઓ"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"શોર્ટકટ્સ"</string>
     <string name="root_type_device" msgid="7121342474653483538">"ઉપકરણો"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશન્સ"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"વધુ એપ્લિકેશનો"</string>
     <string name="empty" msgid="7858882803708117596">"કોઈ આઇટમ્સ નથી"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ફાઇલ ખોલી શકાતી નથી"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"કેટલાક દસ્તાવેજો કાઢી નાખવામાં અસમર્થ"</string>

@@ -27,7 +27,7 @@
     <string name="menu_settings" msgid="6008033148948428823">"Կարգավորումներ"</string>
     <string name="menu_open" msgid="432922957274920903">"Բացել"</string>
     <string name="menu_save" msgid="2394743337684426338">"Պահել"</string>
-    <string name="menu_share" msgid="3075149983979628146">"Համօգտագործել"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Կիսվել"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Ջնջել"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Ընտրել բոլորը"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Պատճենել…"</string>
@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Տարածել"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Ֆայլերի պատճենում"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Մնացել է <xliff:g id="DURATION">%s</xliff:g>"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"<xliff:g id="COUNT">%1$d</xliff:g> ֆայլի պատճենում:"</item>
-    <item quantity="other" msgid="5175026054495572228">"<xliff:g id="COUNT">%1$d</xliff:g> ֆայլի պատճենում:"</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլի պատճենում:</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլի պատճենում:</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Պատճենման նախապատրաստում…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"Չհաջողվեց պատճենել <xliff:g id="COUNT">%1$d</xliff:g> ֆայլ"</item>
-    <item quantity="other" msgid="7124097894673644954">"Չհաջողվեց պատճենել <xliff:g id="COUNT">%1$d</xliff:g> ֆայլ"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">Չհաջողվեց պատճենել <xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ</item>
+      <item quantity="other">Չհաջողվեց պատճենել <xliff:g id="COUNT_1">%1$d</xliff:g> ֆայլ</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Հպեք՝ մանրամասները դիտելու համար"</string>
     <string name="retry" msgid="7564024179122207376">"Կրկնել"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Հետևյալ ֆայլերը չեն պատճենվել՝ <xliff:g id="LIST">%1$s</xliff:g>"</string>

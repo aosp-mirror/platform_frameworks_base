@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Partager par"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Copie de fichiers..."</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Durée restante : <xliff:g id="DURATION">%s</xliff:g>"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"Copie de <xliff:g id="COUNT">%1$d</xliff:g> fichier en cours."</item>
-    <item quantity="other" msgid="5175026054495572228">"Copie de <xliff:g id="COUNT">%1$d</xliff:g> fichiers en cours."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one">Copier de <xliff:g id="COUNT_1">%1$d</xliff:g> fichier en cours.</item>
+      <item quantity="other">Copier de <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers en cours.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Préparation de la copie en cours"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"Impossible de copier <xliff:g id="COUNT">%1$d</xliff:g> fichier"</item>
-    <item quantity="other" msgid="7124097894673644954">"Impossible de copier <xliff:g id="COUNT">%1$d</xliff:g> fichiers"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">Impossible de copier <xliff:g id="COUNT_1">%1$d</xliff:g> fichier</item>
+      <item quantity="other">Impossible de copier <xliff:g id="COUNT_1">%1$d</xliff:g> fichiers</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Touchez ici pour afficher les détails"</string>
     <string name="retry" msgid="7564024179122207376">"Réessayer"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Ces fichiers ne ont pas été copiés : <xliff:g id="LIST">%1$s</xliff:g>"</string>

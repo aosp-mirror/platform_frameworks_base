@@ -24,7 +24,7 @@
     <string name="menu_list" msgid="7279285939892417279">"Приказ на список"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Подреди по"</string>
     <string name="menu_search" msgid="3816712084502856974">"Пребарај"</string>
-    <string name="menu_settings" msgid="6008033148948428823">"Подесувања"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"Поставки"</string>
     <string name="menu_open" msgid="432922957274920903">"Отвори"</string>
     <string name="menu_save" msgid="2394743337684426338">"Зачувај"</string>
     <string name="menu_share" msgid="3075149983979628146">"Сподели"</string>
@@ -59,15 +59,15 @@
     <string name="share_via" msgid="8966594246261344259">"Сподели преку"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Се копираат датотеки"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Уште <xliff:g id="DURATION">%s</xliff:g>"</string>
-  <plurals name="copy_begin">
-    <item quantity="one" msgid="7775181564278455087">"Се копира <xliff:g id="COUNT">%1$d</xliff:g> датотека."</item>
-    <item quantity="other" msgid="5175026054495572228">"Се копираат <xliff:g id="COUNT">%1$d</xliff:g> датотеки."</item>
-  </plurals>
+    <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
+      <item quantity="one">Се копира <xliff:g id="COUNT_1">%1$d</xliff:g> датотека.</item>
+      <item quantity="other">Се копираат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки.</item>
+    </plurals>
     <string name="copy_preparing" msgid="3896202461003039386">"Се подготвува за копирање…"</string>
-  <plurals name="copy_error_notification_title">
-    <item quantity="one" msgid="2515407675631145507">"Не можеше да копира <xliff:g id="COUNT">%1$d</xliff:g> датотека"</item>
-    <item quantity="other" msgid="7124097894673644954">"Не можеше да копира <xliff:g id="COUNT">%1$d</xliff:g> датотеки"</item>
-  </plurals>
+    <plurals name="copy_error_notification_title" formatted="false" msgid="5267616889076217261">
+      <item quantity="one">Не може да копира <xliff:g id="COUNT_1">%1$d</xliff:g> датотека</item>
+      <item quantity="other">Не може да копираат <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки</item>
+    </plurals>
     <string name="notification_touch_for_details" msgid="4483108577842961665">"Допрете за да ги погледнете деталите"</string>
     <string name="retry" msgid="7564024179122207376">"Обидете се повторно"</string>
     <string name="copy_failure_alert_content" msgid="3715575000297709082">"Датотекиве не се ископирани: <xliff:g id="LIST">%1$s</xliff:g>"</string>
