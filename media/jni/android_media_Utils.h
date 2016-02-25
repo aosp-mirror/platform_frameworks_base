@@ -35,7 +35,6 @@ private:
     size_t mSize;
 
 public:
-    FileStream(const int fd);
     FileStream(const String8 filename);
     ~FileStream();
 
