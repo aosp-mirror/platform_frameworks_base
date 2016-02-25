@@ -391,8 +391,11 @@ public abstract class ExpandableView extends FrameLayout {
     public void setShadowAlpha(float shadowAlpha) {
     }
 
-    public boolean needsIncreasedPadding() {
-        return false;
+    /**
+     * @return an amount between 0 and 1 of increased padding that this child needs
+     */
+    public float getIncreasedPaddingAmount() {
+        return 0.0f;
     }
 
     public boolean mustStayOnScreen() {

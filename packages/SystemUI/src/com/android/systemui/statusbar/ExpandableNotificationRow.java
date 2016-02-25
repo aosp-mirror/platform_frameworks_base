@@ -869,6 +869,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setUserLocked(boolean userLocked) {
         mUserLocked = userLocked;
         mPrivateLayout.setUserExpanding(userLocked);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setUserLocked(userLocked);
+        }
     }
 
     /**
@@ -1175,6 +1178,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         int contentHeight = Math.max(getMinHeight(), height);
         mPrivateLayout.setContentHeight(contentHeight);
         mPublicLayout.setContentHeight(contentHeight);
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setActualHeight(height);
+        }
         if (mGuts != null) {
             mGuts.setActualHeight(height);
         }
@@ -1260,7 +1266,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mMaxExpandHeight != 0;
     }
 
-    private NotificationContentView getShowingLayout() {
+    public NotificationContentView getShowingLayout() {
         return mShowingPublic ? mPublicLayout : mPrivateLayout;
     }
 
@@ -1296,8 +1302,15 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
-    public boolean needsIncreasedPadding() {
-        return mIsSummaryWithChildren && isGroupExpanded();
+    public float getIncreasedPaddingAmount() {
+        if (mIsSummaryWithChildren) {
+            if (isGroupExpanded()) {
+                return 1.0f;
+            } else if (isUserLocked()) {
+                return mChildrenContainer.getChildExpandFraction();
+            }
+        }
+        return 0.0f;
     }
 
     @Override
