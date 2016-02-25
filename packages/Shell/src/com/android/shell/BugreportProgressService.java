@@ -302,8 +302,7 @@ public class BugreportProgressService extends Service {
             }
             final String action = intent.getAction();
             final int pid = intent.getIntExtra(EXTRA_PID, 0);
-            // TODO: temporarily using pid as id until test cases and dumpstate are changed.
-            final int id = intent.getIntExtra(EXTRA_ID, pid);
+            final int id = intent.getIntExtra(EXTRA_ID, 0);
             final int max = intent.getIntExtra(EXTRA_MAX, -1);
             final String name = intent.getStringExtra(EXTRA_NAME);
 
@@ -474,7 +473,8 @@ public class BugreportProgressService extends Service {
                     + info + ")");
             return;
         }
-        Log.v(TAG, "Sending 'Progress' notification for id " + info.id + ": " + percentText);
+        Log.d(TAG, "Sending 'Progress' notification for id " + info.id + "(pid " + info.pid + "): "
+                + percentText);
         NotificationManager.from(mContext).notify(TAG, info.id, notification);
     }
 
@@ -541,7 +541,7 @@ public class BugreportProgressService extends Service {
             final int pid = info.pid;
             final int id = info.id;
             if (info.finished) {
-                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid + "(id: " + id + ")");
+                if (DEBUG) Log.v(TAG, "Skipping finished process " + pid + " (id: " + id + ")");
                 continue;
             }
             activeProcesses++;
@@ -1125,7 +1125,7 @@ public class BugreportProgressService extends Service {
 
     private static boolean setSystemProperty(String key, String value) {
         try {
-            if (DEBUG) Log.v(TAG, "Setting system property" + key + " to " + value);
+            if (DEBUG) Log.v(TAG, "Setting system property " + key + " to " + value);
             SystemProperties.set(key, value);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Could not set property " + key + " to " + value, e);
@@ -1372,7 +1372,7 @@ public class BugreportProgressService extends Service {
             // Must update system property for the cases where dumpstate finishes
             // while the user is still entering other fields (like title or
             // description)
-            setBugreportNameProperty(mId, name);
+            setBugreportNameProperty(mPid, name);
         }
 
        /**
@@ -1517,7 +1517,7 @@ public class BugreportProgressService extends Service {
             final List<File> renamedFiles = new ArrayList<>(screenshotFiles.size());
             for (File oldFile : screenshotFiles) {
                 final String oldName = oldFile.getName();
-                final String newName = oldName.replace(Integer.toString(pid), name);
+                final String newName = oldName.replaceFirst(Integer.toString(pid), name);
                 final File newFile;
                 if (!newName.equals(oldName)) {
                     final File renamedFile = new File(screenshotDir, newName);
