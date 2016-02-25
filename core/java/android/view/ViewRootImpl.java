@@ -1982,7 +1982,7 @@ public final class ViewRootImpl implements ViewParent,
         boolean triggerGlobalLayoutListener = didLayout
                 || mAttachInfo.mRecomputeGlobalAttributes;
         if (didLayout) {
-            performLayout(lp, desiredWindowWidth, desiredWindowHeight);
+            performLayout(lp, mWidth, mHeight);
 
             // By this point all views have been sized and positioned
             // We can compute the transparent area
