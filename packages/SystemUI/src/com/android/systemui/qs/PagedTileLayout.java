@@ -60,6 +60,11 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPageIndicator = (PageIndicator) findViewById(R.id.page_indicator);
