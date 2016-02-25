@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="4469836075319831821">"Çap Spuler"</string>
+    <string name="more_options_button" msgid="2243228396432556771">"Daha çox seçim"</string>
+    <string name="label_destination" msgid="9132510997381599275">"Hədəf"</string>
+    <string name="label_copies" msgid="3634531042822968308">"Surətlər"</string>
+    <string name="label_copies_summary" msgid="3861966063536529540">"Nüsxələr:"</string>
+    <string name="label_paper_size" msgid="908654383827777759">"Kağız ölçüsü"</string>
+    <string name="label_paper_size_summary" msgid="5668204981332138168">"Kağız ölçüsü:"</string>
+    <string name="label_color" msgid="1108690305218188969">"Rəng"</string>
+    <string name="label_duplex" msgid="5370037254347072243">"İkitərəfli"</string>
+    <string name="label_orientation" msgid="2853142581990496477">"Oriyentasiya"</string>
+    <string name="label_pages" msgid="7768589729282182230">"Səhifələr"</string>
+    <string name="template_all_pages" msgid="3322235982020148762">"Bütün <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
+    <string name="template_page_range" msgid="428638530038286328">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> diapazonu"</string>
+    <string name="pages_range_example" msgid="8558694453556945172">"məsələn, 1—5,8,11—13"</string>
+    <string name="print_preview" msgid="8010217796057763343">"Çap önizləmə"</string>
+    <string name="install_for_print_preview" msgid="6366303997385509332">"Önizləmə üçün PDF izləyici quraşdırın"</string>
+    <string name="printing_app_crashed" msgid="854477616686566398">"Çap tətbiqi sındı"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"Çap işi generasiya edilir"</string>
+    <string name="save_as_pdf" msgid="5718454119847596853">"PDF olaraq yadda saxla"</string>
+    <string name="all_printers" msgid="5018829726861876202">"Bütün printerlər..."</string>
+    <string name="print_dialog" msgid="32628687461331979">"Dialoqu çap edin"</string>
+    <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
+    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> səhifədən <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> səhifə"</string>
+    <string name="summary_template" msgid="8899734908625669193">"Cəm, nüsxə <xliff:g id="COPIES">%1$s</xliff:g>, kağız ölçüsü <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
+    <string name="expand_handle" msgid="7282974448109280522">"Dəstəyi genişləndirin"</string>
+    <string name="collapse_handle" msgid="6886637989442507451">"Dəstəyi yığcamlaşdırın"</string>
+    <string name="print_button" msgid="645164566271246268">"Çap"</string>
+    <string name="savetopdf_button" msgid="2976186791686924743">"PDF-də saxlayın"</string>
+    <string name="print_options_expanded" msgid="6944679157471691859">"Çap seçimləri genişləndi"</string>
+    <string name="print_options_collapsed" msgid="7455930445670414332">"Çap seçimləri yığcamlaşdı"</string>
+    <string name="search" msgid="5421724265322228497">"Axtarış"</string>
+    <string name="all_printers_label" msgid="3178848870161526399">"Bütün printerlər"</string>
+    <string name="add_print_service_label" msgid="5356702546188981940">"Xidmət əlavə edin"</string>
+    <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"Axtarış sahəsi görünür"</string>
+    <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"Axtarış sahəsi gizlidir"</string>
+    <string name="print_add_printer" msgid="1088656468360653455">"Printer əlavə edin"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"Printer seçin"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Printeri unudun"</string>
+    <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> printer tapıldı</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> printer tapıldı</item>
+    </plurals>
+    <string name="choose_print_service" msgid="3740309762324459694">"Çap xidmətini seçin"</string>
+    <string name="print_searching_for_printers" msgid="6550424555079932867">"Printer axtarılır"</string>
+    <string name="print_no_printers" msgid="4869403323900054866">"Heç bir printer tapılmadı"</string>
+    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> çap edilir"</string>
+    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> ləğv edilir"</string>
+    <string name="failed_notification_title_template" msgid="2256217208186530973">"Printer xətası <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
+    <string name="blocked_notification_title_template" msgid="1175435827331588646">"Printer <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> işini blokladı"</string>
+    <plurals name="composite_notification_title_template" formatted="false" msgid="6940956968211733780">
+      <item quantity="other"><xliff:g id="PRINT_JOB_NAME_1">%1$d</xliff:g> çap işi</item>
+      <item quantity="one"><xliff:g id="PRINT_JOB_NAME_0">%1$d</xliff:g> çap işi</item>
+    </plurals>
+    <string name="cancel" msgid="4373674107267141885">"Ləğv et"</string>
+    <string name="restart" msgid="2472034227037808749">"Yenidən başlat"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"Printerə heç bir bağlantı yoxdur"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"naməlum"</string>
+    <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>– əlçatmaz"</string>
+  <string-array name="color_mode_labels">
+    <item msgid="7602948745415174937">"Qara &amp; Ağ"</item>
+    <item msgid="2762241247228983754">"Rəng"</item>
+  </string-array>
+  <string-array name="duplex_mode_labels">
+    <item msgid="3882302912790928315">"Heç biri"</item>
+    <item msgid="7296563835355641719">"Uzun kənar"</item>
+    <item msgid="79513688117503758">"Qısa kənar"</item>
+  </string-array>
+  <string-array name="orientation_labels">
+    <item msgid="4061931020926489228">"Portret"</item>
+    <item msgid="3199660090246166812">"Peyzaj"</item>
+  </string-array>
+    <string name="print_write_error_message" msgid="5787642615179572543">"Fayla yazmaq alınmadı"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Üzr istəyirik, alınmadı. Yenidən cəhd edin."</string>
+    <string name="print_error_retry" msgid="1426421728784259538">"Yenidən yoxla"</string>
+    <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Bu printer hazırda əlçatan deyil."</string>
+    <string name="print_preparing_preview" msgid="3939930735671364712">"Önizləməyə hazırlıq gedir..."</string>
+</resources>
