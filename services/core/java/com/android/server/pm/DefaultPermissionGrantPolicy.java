@@ -35,6 +35,7 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Telephony.Sms.Intents;
+import android.telephony.TelephonyManager;
 import android.security.Credentials;
 import android.util.ArraySet;
 import android.util.Log;
@@ -582,6 +583,16 @@ final class DefaultPermissionGrantPolicy {
             if (printSpoolerPackage != null
                     && doesPackageSupportRuntimePermissions(printSpoolerPackage)) {
                 grantRuntimePermissionsLPw(printSpoolerPackage, LOCATION_PERMISSIONS, true, userId);
+            }
+
+            // EmergencyInfo
+            Intent emergencyInfoIntent = new Intent(TelephonyManager.ACTION_EMERGENCY_ASSISTANCE);
+            PackageParser.Package emergencyInfoPckg = getDefaultSystemHandlerActivityPackageLPr(
+                    emergencyInfoIntent, userId);
+            if (emergencyInfoPckg != null
+                    && doesPackageSupportRuntimePermissions(emergencyInfoPckg)) {
+                grantRuntimePermissionsLPw(emergencyInfoPckg, CONTACTS_PERMISSIONS, true, userId);
+                grantRuntimePermissionsLPw(emergencyInfoPckg, PHONE_PERMISSIONS, true, userId);
             }
 
             mService.mSettings.onDefaultRuntimePermissionsGrantedLPr(userId);
