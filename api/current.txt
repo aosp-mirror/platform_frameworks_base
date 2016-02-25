@@ -36140,6 +36140,7 @@ package android.telecom {
     method public final void conferenceRemoteConnections(android.telecom.RemoteConnection, android.telecom.RemoteConnection);
     method public final android.telecom.RemoteConnection createRemoteIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
     method public final android.telecom.RemoteConnection createRemoteOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
+    method public final java.util.Collection<android.telecom.Conference> getAllConferences();
     method public final java.util.Collection<android.telecom.Connection> getAllConnections();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public void onConference(android.telecom.Connection, android.telecom.Connection);
