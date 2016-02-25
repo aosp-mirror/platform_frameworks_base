@@ -22,6 +22,7 @@ import android.mtp.MtpObjectInfo;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.storage.StorageManager;
+import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.system.Os;
 import android.system.OsConstants;
@@ -584,6 +585,79 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(
                     "error_locked_device",
                     cursor.getExtras().getString(DocumentsContract.EXTRA_ERROR));
+        }
+    }
+
+    public void testMappingDisconnectedDocuments() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mMtpManager.addValidDevice(new MtpDeviceRecord(
+                0,
+                "Device A",
+                "device key",
+                true /* unopened */,
+                new MtpRoot[] {
+                    new MtpRoot(
+                            0 /* deviceId */,
+                            1 /* storageId */,
+                            "Storage A" /* volume description */,
+                            1024 /* free space */,
+                            2048 /* total space */,
+                            "" /* no volume identifier */)
+                },
+                null,
+                null));
+
+        final String[] names = strings("Directory A", "Directory B", "Directory C");
+        final int objectHandleOffset = 100;
+        for (int i = 0; i < names.length; i++) {
+            final int parentHandle = i == 0 ?
+                    MtpManager.OBJECT_HANDLE_ROOT_CHILDREN : objectHandleOffset + i - 1;
+            final int objectHandle = i + objectHandleOffset;
+            mMtpManager.setObjectHandles(0, 1, parentHandle, new int[] { objectHandle });
+            mMtpManager.setObjectInfo(
+                    0,
+                    new MtpObjectInfo.Builder()
+                            .setName(names[i])
+                            .setObjectHandle(objectHandle)
+                            .setFormat(MtpConstants.FORMAT_ASSOCIATION)
+                            .setStorageId(1)
+                            .build());
+        }
+
+        mProvider.resumeRootScanner();
+        mResolver.waitForNotification(ROOTS_URI, 1);
+
+        final int documentIdOffset = 2;
+        for (int i = 0; i < names.length; i++) {
+            try (final Cursor cursor = mProvider.queryChildDocuments(
+                    String.valueOf(documentIdOffset + i),
+                    strings(Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME),
+                    null)) {
+                assertEquals(1, cursor.getCount());
+                cursor.moveToNext();
+                assertEquals(String.valueOf(documentIdOffset + i + 1), cursor.getString(0));
+                assertEquals(names[i], cursor.getString(1));
+            }
+        }
+
+        mProvider.closeDevice(0);
+        mResolver.waitForNotification(ROOTS_URI, 2);
+
+        mProvider.openDevice(0);
+        mResolver.waitForNotification(ROOTS_URI, 3);
+
+        for (int i = 0; i < names.length; i++) {
+            mResolver.waitForNotification(DocumentsContract.buildChildDocumentsUri(
+                    MtpDocumentsProvider.AUTHORITY,
+                    String.valueOf(documentIdOffset + i)), 1);
+            try (final Cursor cursor = mProvider.queryChildDocuments(
+                    String.valueOf(documentIdOffset + i),
+                    strings(Document.COLUMN_DOCUMENT_ID),
+                    null)) {
+                assertEquals(1, cursor.getCount());
+                cursor.moveToNext();
+                assertEquals(String.valueOf(documentIdOffset + i + 1), cursor.getString(0));
+            }
         }
     }
 
