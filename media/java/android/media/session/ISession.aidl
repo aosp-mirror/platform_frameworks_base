@@ -50,4 +50,6 @@ interface ISession {
     void setPlaybackToLocal(in AudioAttributes attributes);
     void setPlaybackToRemote(int control, int max);
     void setCurrentVolume(int currentVolume);
+
+    String getCallingPackage();
 }

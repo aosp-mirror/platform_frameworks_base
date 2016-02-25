@@ -77,6 +77,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     private static final int OPTIMISTIC_VOLUME_TIMEOUT = 1000;
 
+    private static final int UID_NOT_SET = -1;
+
     private final MessageHandler mHandler;
 
     private final int mOwnerPid;
@@ -121,6 +123,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private boolean mIsActive = false;
     private boolean mDestroyed = false;
+
+    private int mCallingUid = UID_NOT_SET;
+    private String mCallingPackage;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, MediaSessionService service, Handler handler) {
@@ -419,7 +424,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mSessionCb.mCb;
     }
 
-    public void sendMediaButton(KeyEvent ke, int sequenceId, ResultReceiver cb) {
+    public void sendMediaButton(KeyEvent ke, int sequenceId,
+            ResultReceiver cb, int uid, String packageName) {
+        updateCallingPackage(uid, packageName);
         mSessionCb.sendMediaButton(ke, sequenceId, cb);
     }
 
@@ -680,6 +687,33 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return -1;
     }
 
+    private void updateCallingPackage() {
+        updateCallingPackage(UID_NOT_SET, null);
+    }
+
+    private void updateCallingPackage(int uid, String packageName) {
+        if (uid == UID_NOT_SET) {
+            uid = Binder.getCallingUid();
+        }
+        synchronized (mLock) {
+            if (mCallingUid == UID_NOT_SET || mCallingUid != uid) {
+                mCallingUid = uid;
+                mCallingPackage = packageName;
+                if (mCallingPackage != null) {
+                    return;
+                }
+                Context context = mService.getContext();
+                if (context == null) {
+                    return;
+                }
+                String[] packages = context.getPackageManager().getPackagesForUid(uid);
+                if (packages != null && packages.length > 0) {
+                    mCallingPackage = packages[0];
+                }
+            }
+        }
+    }
+
     private final Runnable mClearOptimisticVolumeRunnable = new Runnable() {
         @Override
         public void run() {
@@ -830,6 +864,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mService.onSessionPlaybackTypeChanged(MediaSessionRecord.this);
                 mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
             }
+        }
+
+        @Override
+        public String getCallingPackage() {
+            return mCallingPackage;
         }
     }
 
@@ -1025,11 +1064,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         @Override
         public void sendCommand(String command, Bundle args, ResultReceiver cb)
                 throws RemoteException {
+            updateCallingPackage();
             mSessionCb.sendCommand(command, args, cb);
         }
 
         @Override
         public boolean sendMediaButton(KeyEvent mediaButtonIntent) {
+            updateCallingPackage();
             return mSessionCb.sendMediaButton(mediaButtonIntent, 0, null);
         }
 
@@ -1111,6 +1152,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void adjustVolume(int direction, int flags, String packageName) {
+            updateCallingPackage();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
@@ -1122,6 +1164,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setVolumeTo(int value, int flags, String packageName) {
+            updateCallingPackage();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
@@ -1133,94 +1176,111 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void prepare() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.prepare();
         }
 
         @Override
         public void prepareFromMediaId(String mediaId, Bundle extras)
                 throws RemoteException {
+            updateCallingPackage();
             mSessionCb.prepareFromMediaId(mediaId, extras);
         }
 
         @Override
         public void prepareFromSearch(String query, Bundle extras) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.prepareFromSearch(query, extras);
         }
 
         @Override
         public void prepareFromUri(Uri uri, Bundle extras) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.prepareFromUri(uri, extras);
         }
 
         @Override
         public void play() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.play();
         }
 
         @Override
         public void playFromMediaId(String mediaId, Bundle extras) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.playFromMediaId(mediaId, extras);
         }
 
         @Override
         public void playFromSearch(String query, Bundle extras) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.playFromSearch(query, extras);
         }
 
         @Override
         public void playFromUri(Uri uri, Bundle extras) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.playFromUri(uri, extras);
         }
 
         @Override
         public void skipToQueueItem(long id) {
+            updateCallingPackage();
             mSessionCb.skipToTrack(id);
         }
 
-
         @Override
         public void pause() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.pause();
         }
 
         @Override
         public void stop() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.stop();
         }
 
         @Override
         public void next() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.next();
         }
 
         @Override
         public void previous() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.previous();
         }
 
         @Override
         public void fastForward() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.fastForward();
         }
 
         @Override
         public void rewind() throws RemoteException {
+            updateCallingPackage();
             mSessionCb.rewind();
         }
 
         @Override
         public void seekTo(long pos) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.seekTo(pos);
         }
 
         @Override
         public void rate(Rating rating) throws RemoteException {
+            updateCallingPackage();
             mSessionCb.rate(rating);
         }
 
         @Override
         public void sendCustomAction(String action, Bundle args)
                 throws RemoteException {
+            updateCallingPackage();
             mSessionCb.sendCustomAction(action, args);
         }
 
