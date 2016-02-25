@@ -8,6 +8,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4
 # The design lib requires that the client package use appcompat themes.
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-appcompat
+LOCAL_STATIC_JAVA_LIBRARIES += android-support-v13
 # Supplies material design components, e.g. Snackbar.
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-design
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v7-recyclerview
