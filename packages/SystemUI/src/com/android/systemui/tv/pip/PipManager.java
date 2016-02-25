@@ -23,11 +23,14 @@ import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.media.session.MediaController;
+import android.media.session.MediaSessionManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -69,6 +72,7 @@ public class PipManager {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private MediaSessionManager mMediaSessionManager;
     private int mState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
@@ -79,6 +83,8 @@ public class PipManager {
     private Rect mRecentsFocusedPipBounds;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
+    private ComponentName mPipComponentName;
+    private MediaController mPipMediaController;
     private boolean mOnboardingShown;
 
     private boolean mIsRecentsShown;
@@ -100,10 +106,15 @@ public class PipManager {
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
+            mPipComponentName = ComponentName.unflattenFromString(
+                    stackInfo.taskNames[stackInfo.taskNames.length - 1]);
             // Set state to overlay so we show it when the pinned stack animation ends.
             mState = STATE_PIP_OVERLAY;
             mCurrentPipBounds = mPipBounds;
             launchPipOnboardingActivityIfNeeded();
+            mMediaSessionManager.addOnActiveSessionsChangedListener(
+                    mActiveMediaSessionListener, null);
+            updateMediaController(mMediaSessionManager.getActiveSessions(null));
         }
     };
     private final Runnable mOnTaskStackChanged = new Runnable() {
@@ -176,6 +187,13 @@ public class PipManager {
 
         }
     };
+    private final MediaSessionManager.OnActiveSessionsChangedListener mActiveMediaSessionListener =
+            new MediaSessionManager.OnActiveSessionsChangedListener() {
+                @Override
+                public void onActiveSessionsChanged(List<MediaController> controllers) {
+                    updateMediaController(controllers);
+                }
+            };
 
     private PipManager() { }
 
@@ -215,6 +233,9 @@ public class PipManager {
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
         mOnboardingShown = Prefs.getBoolean(
                 mContext, TV_PICTURE_IN_PICTURE_ONBOARDING_SHOWN, false);
+
+        mMediaSessionManager =
+                (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
     }
 
     /**
@@ -248,6 +269,8 @@ public class PipManager {
     private void closePipInternal(boolean removePipStack) {
         mState = STATE_NO_PIP;
         mPipTaskId = TASK_ID_NO_PIP;
+        mPipMediaController = null;
+        mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
         if (removePipStack) {
             try {
                 mActivityManager.removeStack(PINNED_STACK_ID);
@@ -502,6 +525,34 @@ public class PipManager {
         }
     }
 
+    private void updateMediaController(List<MediaController> controllers) {
+        MediaController mediaController = null;
+        if (controllers != null && mState != STATE_NO_PIP && mPipComponentName != null) {
+            for (int i = controllers.size() - 1; i >= 0; i--) {
+                MediaController controller = controllers.get(i);
+                // We assumes that an app with PIPable activity
+                // keeps the single instance of media controller especially when PIP is on.
+                if (controller.getPackageName().equals(mPipComponentName.getPackageName())) {
+                    mediaController = controller;
+                    break;
+                }
+            }
+        }
+        if (mPipMediaController != mediaController) {
+            mPipMediaController = mediaController;
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                mListeners.get(i).onMediaControllerChanged();
+            }
+        }
+    }
+
+    /**
+     * Gets the {@link android.media.session.MediaController} for the PIPed activity.
+     */
+    MediaController getMediaController() {
+        return mPipMediaController;
+    }
+
     private class TaskStackListener extends ITaskStackListener.Stub {
         @Override
         public void onTaskStackChanged() throws RemoteException {
@@ -542,6 +593,8 @@ public class PipManager {
         void onMoveToFullscreen();
         /** Invoked when we are above to start resizing the Pip. */
         void onPipResizeAboutToStart();
+        /** Invoked when the MediaController on PIPed activity is changed. */
+        void onMediaControllerChanged();
     }
 
     /**
