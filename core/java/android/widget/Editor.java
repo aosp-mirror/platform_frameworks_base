@@ -4131,13 +4131,15 @@ public class Editor {
                 }
 
                 if (isVisible()) {
-                    final int positionX = parentPositionX + mPositionX;
-                    final int positionY = parentPositionY + mPositionY;
+                    // Transform to the window coordinates to follow the view tranformation.
+                    final int[] pts = { mPositionX + mHotspotX + getHorizontalOffset(), mPositionY};
+                    mTextView.transformFromViewToWindowSpace(pts);
+                    pts[0] -= mHotspotX + getHorizontalOffset();
+
                     if (isShowing()) {
-                        mContainer.update(positionX, positionY, -1, -1);
+                        mContainer.update(pts[0], pts[1], -1, -1);
                     } else {
-                        mContainer.showAtLocation(mTextView, Gravity.NO_GRAVITY,
-                                positionX, positionY);
+                        mContainer.showAtLocation(mTextView, Gravity.NO_GRAVITY, pts[0], pts[1]);
                     }
                 } else {
                     if (isShowing()) {
