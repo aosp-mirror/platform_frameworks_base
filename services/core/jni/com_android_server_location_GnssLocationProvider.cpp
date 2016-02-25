@@ -29,10 +29,11 @@
 #include "android_runtime/Log.h"
 
 #include <arpa/inet.h>
-#include <string.h>
-#include <pthread.h>
+#include <limits>
 #include <linux/in.h>
 #include <linux/in6.h>
+#include <pthread.h>
+#include <string.h>
 
 static jobject mCallbacksObj = NULL;
 
@@ -1090,11 +1091,37 @@ const char *const JavaMethodHelper<bool>::signature_ = "(Z)V";
         if (flags & (flag)) object.callSetter("set" # setter, (value))
 
 static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
+    static uint32_t discontinuity_count_to_handle_old_lock_type = 0;
     JavaObject object(env, "android/location/GnssClock");
     GpsClockFlags flags = clock->flags;
 
     SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND, LeapSecond, clock->leap_second);
-    SET(Type, clock->type);
+
+    // GnssClock only supports the more effective HW_CLOCK type, so type
+    // handling and documentation complexity has been removed.  To convert the
+    // old GPS_CLOCK types (active only in a limited number of older devices),
+    // the GPS time information is handled as an always discontinuous HW clock,
+    // with the GPS time information put into the full_bias_ns instead - so that
+    // time_ns + full_bias_ns = local estimate of GPS time (as remains true, in
+    // the new GnssClock struct.)
+    switch (clock->type) {
+      case GPS_CLOCK_TYPE_UNKNOWN:
+        // Clock type unsupported.
+        ALOGE("Unknown clock type provided.");
+        break;
+      case GPS_CLOCK_TYPE_LOCAL_HW_TIME:
+        // Already local hardware time. No need to do anything.
+        break;
+      case GPS_CLOCK_TYPE_GPS_TIME:
+        // GPS time, need to convert.
+        flags |= GNSS_CLOCK_HAS_FULL_BIAS;
+        clock->full_bias_ns = clock->time_ns;
+        clock->time_ns = 0;
+        SET(HardwareClockDiscontinuityCount,
+            discontinuity_count_to_handle_old_lock_type++);
+        break;
+    }
+
     SET(TimeInNs, clock->time_ns);
     SET_IF(GNSS_CLOCK_HAS_TIME_UNCERTAINTY,
            TimeUncertaintyInNs,

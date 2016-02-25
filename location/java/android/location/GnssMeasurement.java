@@ -272,8 +272,9 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Gets the time offset at which the measurement was taken in nanoseconds.
-     * The reference receiver's time is specified by {@link GnssClock#getTimeInNs()} and should be
-     * interpreted in the same way as indicated by {@link GnssClock#getType()}.
+     *
+     * The reference receiver's time from which this is offset is specified by
+     * {@link GnssClock#getTimeInNs()}.
      *
      * The sign of this value is given by the following equation:
      *      measurement time = time_ns + time_offset_ns
