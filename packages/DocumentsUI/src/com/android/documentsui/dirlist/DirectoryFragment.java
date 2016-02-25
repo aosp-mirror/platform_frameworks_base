@@ -36,7 +36,6 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ClipData;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -101,7 +100,6 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.documentsui.services.FileOperations;
-
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Retention;
@@ -109,6 +107,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Display the documents inside a single directory.
@@ -144,8 +143,6 @@ public class DirectoryFragment extends Fragment
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestCode {}
     public static final int REQUEST_COPY_DESTINATION = 1;
-
-    static final boolean DEBUG_ENABLE_DND = true;
 
     private static final String TAG = "DirectoryFragment";
     private static final int LOADER_ID = 42;
@@ -206,10 +203,9 @@ public class DirectoryFragment extends Fragment
 
         mRecView.setItemAnimator(new DirectoryItemAnimator(getActivity()));
 
-        // TODO: Add a divider between views (which might use RecyclerView.ItemDecoration).
-        if (DEBUG_ENABLE_DND) {
-            setupDragAndDropOnDirectoryView(mRecView);
-        }
+        // Make the recycler and the empty views responsive to drop events.
+        mRecView.setOnDragListener(mOnDragListener);
+        mEmptyView.setOnDragListener(mOnDragListener);
 
         return view;
     }
@@ -813,9 +809,7 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public void onBindDocumentHolder(DocumentHolder holder, Cursor cursor) {
-        if (DEBUG_ENABLE_DND) {
-            setupDragAndDropOnDocumentView(holder.itemView, cursor);
-        }
+        setupDragAndDropOnDocumentView(holder.itemView, cursor);
     }
 
     @Override
@@ -952,25 +946,6 @@ public class DirectoryFragment extends Fragment
         FileOperations.copy(getActivity(), docs, tmpStack);
     }
 
-    private ClipData getClipDataFromDocuments(List<DocumentInfo> docs) {
-        Context context = getActivity();
-        final ContentResolver resolver = context.getContentResolver();
-        ClipData clipData = null;
-        for (DocumentInfo doc : docs) {
-            final Uri uri = DocumentsContract.buildDocumentUri(doc.authority, doc.documentId);
-            if (clipData == null) {
-                // TODO: figure out what this string should be.
-                // Currently it is not displayed anywhere in the UI, but this might change.
-                final String label = "";
-                clipData = ClipData.newUri(resolver, label, uri);
-            } else {
-                // TODO: update list of mime types in ClipData.
-                clipData.addItem(new ClipData.Item(uri));
-            }
-        }
-        return clipData;
-    }
-
     public void copySelectedToClipboard() {
         Selection selection = mSelectionManager.getSelection(new Selection());
         if (!selection.isEmpty()) {
@@ -1039,11 +1014,6 @@ public class DirectoryFragment extends Fragment
         mFocusManager.restoreLastFocus();
     }
 
-    private void setupDragAndDropOnDirectoryView(View view) {
-        // Listen for drops on non-directory items and empty space.
-        view.setOnDragListener(mOnDragListener);
-    }
-
     private void setupDragAndDropOnDocumentView(View view, Cursor cursor) {
         final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         if (Document.MIME_TYPE_DIR.equals(docMimeType)) {
@@ -1052,6 +1022,7 @@ public class DirectoryFragment extends Fragment
             view.setOnDragListener(mOnDragListener);
         }
 
+        // Make all items draggable.
         view.setOnLongClickListener(mDragHelper);
     }
 
@@ -1072,25 +1043,45 @@ public class DirectoryFragment extends Fragment
                     return true;
 
                 case DragEvent.ACTION_DRAG_LOCATION:
+                    return true;
+
                 case DragEvent.ACTION_DRAG_ENDED:
+                    if (event.getResult()) {
+                        // Exit selection mode if the drop was handled.
+                        mSelectionManager.clearSelection();
+                    }
                     return true;
 
                 case DragEvent.ACTION_DROP:
-                    String dstId = getModelId(v);
-                    DocumentInfo dstDir = null;
-                    if (dstId != null) {
-                        Cursor dstCursor = mModel.getItem(dstId);
-                        checkNotNull(dstCursor, "Cursor cannot be null.");
-                        dstDir = DocumentInfo.fromDirectoryCursor(dstCursor);
-                        // TODO: Do not drop into the directory where the documents came from.
-                    }
-                    copyFromClipData(event.getClipData(), dstDir);
-                    // Clean up the UI.
+                    // After a drop event, always stop highlighting the target.
                     setDropTargetHighlight(v, false);
-                    mSelectionManager.clearSelection();
+                    // Don't copy from the cwd into the cwd. Note: this currently doesn't work for
+                    // multi-window drag, because localState isn't carried over from one process to
+                    // another.
+                    Object src = event.getLocalState();
+                    DocumentInfo dst = getDestination(v);
+                    if (Objects.equals(src, dst)) {
+                        return false;
+                    }
+                    copyFromClipData(event.getClipData(), dst);
                     return true;
             }
             return false;
+        }
+
+        private DocumentInfo getDestination(View v) {
+            String id = getModelId(v);
+            if (id != null) {
+                Cursor dstCursor = mModel.getItem(id);
+                checkNotNull(dstCursor, "Cursor cannot be null.");
+                return DocumentInfo.fromDirectoryCursor(dstCursor);
+            }
+
+            if (v == mRecView || v == mEmptyView) {
+                return getDisplayState().stack.peek();
+            }
+
+            return null;
         }
 
         private void setDropTargetHighlight(View v, boolean highlight) {
@@ -1324,10 +1315,10 @@ public class DirectoryFragment extends Fragment
                 if (docs.isEmpty()) {
                     return false;
                 }
-                v.startDrag(
-                        getClipDataFromDocuments(docs),
+                v.startDragAndDrop(
+                        mClipper.getClipDataForDocuments(docs),
                         new DrawableShadowBuilder(getDragShadowIcon(docs)),
-                        null,
+                        getDisplayState().stack.peek(),
                         View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ |
                                 View.DRAG_FLAG_GLOBAL_URI_WRITE
                 );
