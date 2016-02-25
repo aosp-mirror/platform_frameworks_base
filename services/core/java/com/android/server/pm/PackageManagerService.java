@@ -10668,14 +10668,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkgSetting.setInstalled(true, userId);
                     pkgSetting.setHidden(false, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
-                    if (pkgSetting.pkg != null) {
-                        prepareAppDataAfterInstall(pkgSetting.pkg);
-                    }
                     installed = true;
                 }
             }
 
             if (installed) {
+                if (pkgSetting.pkg != null) {
+                    prepareAppDataAfterInstall(pkgSetting.pkg);
+                }
                 sendPackageAddedForUser(packageName, pkgSetting, userId);
             }
         } finally {
@@ -18047,6 +18047,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
      * correct for all installed apps. If there is an ownership mismatch, it
      * will try recovering system apps by wiping data; third-party app data is
      * left intact.
+     * <p>
+     * <em>Note: To avoid a deadlock, do not call this method with {@code mPackages} lock held</em>
      */
     private void prepareAppDataAfterInstall(PackageParser.Package pkg) {
         prepareAppDataAfterInstallInternal(pkg);
