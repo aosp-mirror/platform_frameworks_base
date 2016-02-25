@@ -2263,6 +2263,7 @@ final class ActivityStack {
                             mService.compatibilityInfoForPackageLocked(next.info.applicationInfo),
                             next.nonLocalizedLabel, next.labelRes, next.icon, next.logo,
                             next.windowFlags, null, true);
+                    next.mStartingWindowShown = true;
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2295,6 +2296,7 @@ final class ActivityStack {
                             next.nonLocalizedLabel,
                             next.labelRes, next.icon, next.logo, next.windowFlags,
                             null, true);
+                    next.mStartingWindowShown = true;
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
