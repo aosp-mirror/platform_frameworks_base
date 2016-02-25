@@ -16,6 +16,7 @@
 
 package android.security.net.config;
 
+import android.os.Build;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import java.security.cert.X509Certificate;
@@ -37,7 +38,6 @@ public final class NetworkSecurityConfig {
     public static final boolean DEFAULT_CLEARTEXT_TRAFFIC_PERMITTED = true;
     /** @hide */
     public static final boolean DEFAULT_HSTS_ENFORCED = false;
-    public static final NetworkSecurityConfig DEFAULT = getDefaultBuilder().build();
 
     private final boolean mCleartextTrafficPermitted;
     private final boolean mHstsEnforced;
@@ -163,21 +163,28 @@ public final class NetworkSecurityConfig {
      * <li>Cleartext traffic is permitted.</li>
      * <li>HSTS is not enforced.</li>
      * <li>No certificate pinning is used.</li>
-     * <li>The system and user added trusted certificate stores are trusted for connections.</li>
+     * <li>The system certificate store is trusted for connections.</li>
+     * <li>If the application targets API level 23 (Android M) or lower then the user certificate
+     * store is trusted by default as well.</li>
      * </ol>
      *
      * @hide
      */
-    public static final Builder getDefaultBuilder() {
-        return new Builder()
+    public static final Builder getDefaultBuilder(int targetSdkVersion) {
+        Builder builder = new Builder()
                 .setCleartextTrafficPermitted(DEFAULT_CLEARTEXT_TRAFFIC_PERMITTED)
                 .setHstsEnforced(DEFAULT_HSTS_ENFORCED)
                 // System certificate store, does not bypass static pins.
                 .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
-                // User certificate store, does not bypass static pins.
-                .addCertificatesEntryRef(
-                        new CertificatesEntryRef(UserCertificateSource.getInstance(), false));
+                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false));
+        // Applications targeting N and above must opt in into trusting the user added certificate
+        // store.
+        if (targetSdkVersion <= Build.VERSION_CODES.M) {
+            // User certificate store, does not bypass static pins.
+            builder.addCertificatesEntryRef(
+                    new CertificatesEntryRef(UserCertificateSource.getInstance(), false));
+        }
+        return builder;
     }
 
     /**
