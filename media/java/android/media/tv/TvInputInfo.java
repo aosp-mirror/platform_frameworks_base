@@ -105,7 +105,8 @@ public final class TvInputInfo implements Parcelable {
     public static final int TYPE_DISPLAY_PORT = 1008;
 
     /**
-     * The ID of the TV input to provide to the setup activity and settings activity.
+     * Used as a String extra field in setup intents created by {@link #createSetupIntent()} to
+     * supply the ID of a specific TV input to set up.
      */
     public static final String EXTRA_INPUT_ID = "android.media.tv.extra.INPUT_ID";
 

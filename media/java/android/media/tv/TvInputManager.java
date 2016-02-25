@@ -266,6 +266,14 @@ public final class TvInputManager {
     public static final String META_DATA_CONTENT_RATING_SYSTEMS =
             "android.media.tv.metadata.CONTENT_RATING_SYSTEMS";
 
+    /**
+     * Activity action to set up channel sources i.e.&nbsp;TV inputs of type
+     * {@link TvInputInfo#TYPE_TUNER}. When invoked, the system will display an appropriate UI for
+     * the user to initiate the individual setup flow provided by
+     * {@link android.R.attr#setupActivity} of each TV input service.
+     */
+    public static final String ACTION_SETUP_INPUTS = "android.media.tv.action.SETUP_INPUTS";
+
     private final ITvInputManager mService;
 
     private final Object mLock = new Object();
