@@ -31,4 +31,7 @@
     <!-- Values for focus animation -->
     <dimen name="recents_tv_unselected_item_z">6dp</dimen>
     <dimen name="recents_tv_selected_item_z_delta">10dp</dimen>
+
+    <!-- Extra space around the PIP and its outline in PIP onboarding activity  -->
+    <dimen name="tv_pip_bounds_space">3dp</dimen>
 </resources>

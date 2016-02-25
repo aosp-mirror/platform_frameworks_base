@@ -18,34 +18,43 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pip_onboarding"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#C00288D1"
-    android:gravity="center"
-    android:orientation="vertical" >
+    android:gravity="top|center_horizontal"
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="30sp"
-        android:textColor="@android:color/white"
-        android:text="@string/pip_onboarding_title" />
+    <!-- A rectangle arounds the PIP.
+         Size and positions will be programatically set up
+         to comply with config_defaultPictureInPictureBounds. -->
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_sysbar_home" />
+        android:id="@+id/pip_outline"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/tv_pip_outline" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="30dp"
-        android:textSize="13sp"
-        android:textColor="@android:color/white"
+        android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif"
+        android:textSize="16sp"
+        android:textColor="#EEEEEE"
+        android:lineSpacingMultiplier="1.28"
         android:text="@string/pip_onboarding_description" />
     <Button
         android:id="@+id/close"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
+        android:layout_height="36dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="16sp"
+        android:textColor="#026089"
         android:textAllCaps="true"
-        android:text="@string/pip_onboarding_button" />
+        android:text="@string/pip_onboarding_button"
+        android:background="#EEEEEE"
+        android:elevation="4dp" />
 </LinearLayout>
