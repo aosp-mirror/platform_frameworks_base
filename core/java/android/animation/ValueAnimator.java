@@ -972,7 +972,14 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             // to be consistent with the previous behavior. Otherwise, postpone this until the first
             // frame after the start delay.
             startAnimation();
-            setCurrentFraction(mSeekFraction == -1 ? 0 : mSeekFraction);
+            if (mSeekFraction == -1) {
+                // No seek, start at play time 0. Note that the reason we are not using fraction 0
+                // is because for animations with 0 duration, we want to be consistent with pre-N
+                // behavior: skip to the final value immediately.
+                setCurrentPlayTime(0);
+            } else {
+                setCurrentFraction(mSeekFraction);
+            }
         }
     }
 
