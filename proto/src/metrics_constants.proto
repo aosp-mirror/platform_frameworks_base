@@ -1847,5 +1847,8 @@ message MetricsEvent {
 
     // Logs the action the user takes when an app ANR'd.
     ACTION_APP_ANR = 317;
+
+    // Logged when a user double taps the overview button to launch the previous task
+    OVERVIEW_LAUNCH_PREVIOUS_TASK = 318;
   }
 }

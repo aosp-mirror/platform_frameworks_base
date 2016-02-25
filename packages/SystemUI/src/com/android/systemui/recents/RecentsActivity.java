@@ -528,17 +528,16 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     @Override
     public void onMultiWindowChanged(boolean inMultiWindow) {
         super.onMultiWindowChanged(inMultiWindow);
-        if (!inMultiWindow) {
-            RecentsTaskLoader loader = Recents.getTaskLoader();
-            RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-            launchOpts.loadIcons = false;
-            launchOpts.loadThumbnails = false;
-            launchOpts.onlyLoadForCache = true;
-            RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
-            loader.preloadTasks(loadPlan, -1, false);
-            loader.loadTasks(this, loadPlan, launchOpts);
-            EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack()));
-        }
+        RecentsTaskLoader loader = Recents.getTaskLoader();
+        RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+        launchOpts.loadIcons = false;
+        launchOpts.loadThumbnails = false;
+        launchOpts.onlyLoadForCache = true;
+        RecentsTaskLoadPlan loadPlan = loader.createLoadPlan(this);
+        loader.preloadTasks(loadPlan, -1, false);
+        loader.loadTasks(this, loadPlan, launchOpts);
+        EventBus.getDefault().send(new TaskStackUpdatedEvent(loadPlan.getTaskStack(),
+                inMultiWindow));
     }
 
     @Override
