@@ -21,7 +21,9 @@ import android.graphics.Point;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
+import android.widget.Toast;
 
+import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.events.EventBus;
@@ -148,11 +150,16 @@ public class RecentsViewTouchHandler {
 
         mVisibleDockStates.clear();
         if (!ssp.hasDockedTask() && mRv.getTaskStack().getTaskCount() > 1) {
-            // Add the dock state drop targets (these take priority)
-            TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
-            for (TaskStack.DockState dockState : dockStates) {
-                registerDropTargetForCurrentDrag(dockState);
-                mVisibleDockStates.add(dockState);
+            if (!event.task.isDockable) {
+                Toast.makeText(mRv.getContext(), R.string.recents_drag_non_dockable_task_message,
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                // Add the dock state drop targets (these take priority)
+                TaskStack.DockState[] dockStates = getDockStatesForCurrentOrientation();
+                for (TaskStack.DockState dockState : dockStates) {
+                    registerDropTargetForCurrentDrag(dockState);
+                    mVisibleDockStates.add(dockState);
+                }
             }
         }
 

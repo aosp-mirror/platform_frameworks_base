@@ -1830,12 +1830,28 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     public final void onBusEvent(TaskStackUpdatedEvent event) {
-        // Scroll the stack to the front after it has been updated
+        if (!event.inMultiWindow) {
+            // Scroll the stack to the front after it has been updated
+            event.addPostAnimationCallback(new Runnable() {
+                @Override
+                public void run() {
+                    mStackScroller.animateScroll(mLayoutAlgorithm.mMaxScrollP,
+                            null /* postScrollRunnable */);
+                }
+            });
+        }
+        // When the multi-window state changes, rebind all task view headers again to update their
+        // dockable state
         event.addPostAnimationCallback(new Runnable() {
             @Override
             public void run() {
-                mStackScroller.animateScroll(mLayoutAlgorithm.mMaxScrollP,
-                        null /* postScrollRunnable */);
+                List<TaskView> taskViews = getTaskViews();
+                int taskViewCount = taskViews.size();
+                for (int i = 0; i < taskViewCount; i++) {
+                    TaskView tv = taskViews.get(i);
+                    tv.getHeaderView().rebindToTask(tv.getTask(), tv.mTouchExplorationEnabled,
+                            tv.mIsDisabledInSafeMode);
+                }
             }
         });
     }

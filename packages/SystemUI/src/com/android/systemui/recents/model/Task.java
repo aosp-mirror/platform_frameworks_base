@@ -168,6 +168,8 @@ public class Task {
     public boolean isHistorical;
     @ViewDebug.ExportedProperty(category="recents")
     public boolean isSystemApp;
+    @ViewDebug.ExportedProperty(category="recents")
+    public boolean isDockable;
 
     private ArrayList<TaskCallbacks> mCallbacks = new ArrayList<>();
 
@@ -178,8 +180,8 @@ public class Task {
     public Task(TaskKey key, int affiliationTaskId, int affiliationColor, Drawable icon,
                 Bitmap thumbnail, String title, String contentDescription,
                 String dismissDescription, int colorPrimary, int colorBackground,
-                boolean isHistorical, boolean isLaunchTarget, boolean isSystemApp, Rect bounds,
-                ActivityManager.TaskDescription taskDescription) {
+                boolean isHistorical, boolean isLaunchTarget, boolean isSystemApp,
+                boolean isDockable, Rect bounds, ActivityManager.TaskDescription taskDescription) {
         boolean isInAffiliationGroup = (affiliationTaskId != key.id);
         boolean hasAffiliationGroupColor = isInAffiliationGroup && (affiliationColor != 0);
         this.key = key;
@@ -199,6 +201,7 @@ public class Task {
         this.isLaunchTarget = isLaunchTarget;
         this.isHistorical = isHistorical;
         this.isSystemApp = isSystemApp;
+        this.isDockable = isDockable;
     }
 
     /** Copies the other task. */
@@ -219,6 +222,7 @@ public class Task {
         this.isLaunchTarget = o.isLaunchTarget;
         this.isHistorical = o.isHistorical;
         this.isSystemApp = o.isSystemApp;
+        this.isDockable = o.isDockable;
     }
 
     /**

@@ -139,6 +139,7 @@ public class TaskViewHeader extends FrameLayout
     // Header views
     ImageView mIconView;
     TextView mTitleView;
+    TextView mSubTitleView;
     ImageView mMoveTaskButton;
     ImageView mDismissButton;
     ViewStub mAppOverlayViewStub;
@@ -237,6 +238,7 @@ public class TaskViewHeader extends FrameLayout
         mIconView.setClickable(false);
         mIconView.setOnLongClickListener(this);
         mTitleView = (TextView) findViewById(R.id.title);
+        mSubTitleView = (TextView) findViewById(R.id.sub_title);
         mDismissButton = (ImageView) findViewById(R.id.dismiss_task);
         if (ssp.hasFreeformWorkspaceSupport()) {
             mMoveTaskButton = (ImageView) findViewById(R.id.move_task);
@@ -367,6 +369,7 @@ public class TaskViewHeader extends FrameLayout
 
     /** Binds the bar view to the task */
     public void rebindToTask(Task t, boolean touchExplorationEnabled, boolean disabledInSafeMode) {
+        SystemServicesProxy ssp = Recents.getSystemServices();
         mTask = t;
 
         // If an activity icon is defined, then we use that as the primary icon to show in the bar,
@@ -384,6 +387,13 @@ public class TaskViewHeader extends FrameLayout
         mTitleView.setContentDescription(t.contentDescription);
         mTitleView.setTextColor(t.useLightOnPrimaryColor ?
                 mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
+        if (!t.isDockable && ssp.hasDockedTask()) {
+            mSubTitleView.setVisibility(View.VISIBLE);
+            mSubTitleView.setTextColor(t.useLightOnPrimaryColor ?
+                    mTaskBarViewLightTextColor : mTaskBarViewDarkTextColor);
+        } else {
+            mSubTitleView.setVisibility(View.GONE);
+        }
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
         mDismissButton.setContentDescription(t.dismissDescription);

@@ -198,8 +198,8 @@ public class RecentsTaskLoadPlan {
             // Add the task to the stack
             Task task = new Task(taskKey, t.affiliatedTaskId, t.affiliatedTaskColor, icon,
                     thumbnail, title, contentDescription, dismissDescription, activityColor,
-                    backgroundColor, !isStackTask, isLaunchTarget, isSystemApp, t.bounds,
-                    t.taskDescription);
+                    backgroundColor, !isStackTask, isLaunchTarget, isSystemApp, t.isDockable,
+                    t.bounds, t.taskDescription);
 
             allTasks.add(task);
             affiliatedTaskCounts.put(taskKey.id, affiliatedTaskCounts.get(taskKey.id, 0) + 1);
