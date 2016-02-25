@@ -8,6 +8,7 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"angol (USA), nemzetközi stílus"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"angol (USA), Colemak-stílus"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"angol (USA), Dvorak-stílus"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"angol (USA), „Workman” stílus"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"német"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"francia"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"francia (Kanada)"</string>

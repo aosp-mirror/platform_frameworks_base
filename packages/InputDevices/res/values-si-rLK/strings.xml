@@ -8,6 +8,7 @@
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ඉංග්‍රීසි (US), අන්තර්ජාතික ආකාරය"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"ඉංග්‍රීසි (US), Colemak ආකාරය"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"ඉංග්‍රීසි (US), Dvorak ආකාරය"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"ඉංග්‍රීසි (එ.ජ.), වර්ක්මන් ආකාරය"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"ජර්මානු"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"ප්‍රංශ"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"ප්‍රංශ (කැනඩාව)"</string>

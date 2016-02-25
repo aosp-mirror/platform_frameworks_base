@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="8016145283189546017">"Daxiletmə Cihazları"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android klaviaturası"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"İngilis (BK)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"İngilis (ABŞ)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"İngilis (ABŞ), Beynəlxalq üslub"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"İngilis (ABŞ), Colemak üslubu"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"İngilis (ABŞ), Dvorak üslubu"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"İngilis dili (ABŞ), Workman üslubu"</string>
+    <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Alman"</string>
+    <string name="keyboard_layout_french_label" msgid="813450119589383723">"Fransız"</string>
+    <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Fransız dili (Kanada)"</string>
+    <string name="keyboard_layout_russian_label" msgid="8724879775815042968">"Rus"</string>
+    <string name="keyboard_layout_russian_mac_label" msgid="3795866869038264796">"Rus, Mac üslubu"</string>
+    <string name="keyboard_layout_spanish_label" msgid="7091555148131908240">"İspan"</string>
+    <string name="keyboard_layout_swiss_french_label" msgid="4659191025396371684">"İsverçə Fransızı"</string>
+    <string name="keyboard_layout_swiss_german_label" msgid="2305520941993314258">"İsveçrə Almanı"</string>
+    <string name="keyboard_layout_belgian" msgid="2011984572838651558">"Belçikalı"</string>
+    <string name="keyboard_layout_bulgarian" msgid="8951224309972028398">"Bolqar"</string>
+    <string name="keyboard_layout_italian" msgid="6497079660449781213">"İtalyan"</string>
+    <string name="keyboard_layout_danish" msgid="8036432066627127851">"Danimarkalı"</string>
+    <string name="keyboard_layout_norwegian" msgid="9090097917011040937">"Norveçli"</string>
+    <string name="keyboard_layout_swedish" msgid="732959109088479351">"İsveç"</string>
+    <string name="keyboard_layout_finnish" msgid="5585659438924315466">"Fin"</string>
+    <string name="keyboard_layout_croatian" msgid="4172229471079281138">"Xorvat"</string>
+    <string name="keyboard_layout_czech" msgid="1349256901452975343">"Çex"</string>
+    <string name="keyboard_layout_estonian" msgid="8775830985185665274">"Eston"</string>
+    <string name="keyboard_layout_hungarian" msgid="4154963661406035109">"Macar"</string>
+    <string name="keyboard_layout_icelandic" msgid="5836645650912489642">"İslandiyalı"</string>
+    <string name="keyboard_layout_brazilian" msgid="5117896443147781939">"Braziliyalı"</string>
+    <string name="keyboard_layout_portuguese" msgid="2888198587329660305">"Portuqal"</string>
+    <string name="keyboard_layout_slovak" msgid="2469379934672837296">"Slovak"</string>
+    <string name="keyboard_layout_slovenian" msgid="1735933028924982368">"Sloven"</string>
+    <string name="keyboard_layout_turkish" msgid="7736163250907964898">"Türk"</string>
+    <string name="keyboard_layout_ukrainian" msgid="8176637744389480417">"Ukrayna"</string>
+    <string name="keyboard_layout_arabic" msgid="5671970465174968712">"Ərəb"</string>
+    <string name="keyboard_layout_greek" msgid="7289253560162386040">"Yunan"</string>
+    <string name="keyboard_layout_hebrew" msgid="7241473985890173812">"İvrit"</string>
+    <string name="keyboard_layout_lithuanian" msgid="6943110873053106534">"Litva"</string>
+    <string name="keyboard_layout_spanish_latin" msgid="5690539836069535697">"İspan (Latın)"</string>
+    <string name="keyboard_layout_latvian" msgid="4405417142306250595">"Latış"</string>
+</resources>
