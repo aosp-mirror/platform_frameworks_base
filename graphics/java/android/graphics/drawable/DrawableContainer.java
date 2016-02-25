@@ -898,19 +898,19 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
          * @param res the resources used to inflate density-dependent values
          */
         final void updateDensity(Resources res) {
-            if (mSourceRes != null) {
+            if (res != null) {
                 mSourceRes = res;
-            }
 
-            // The density may have changed since the last update (if any). Any
-            // dimension-type attributes will need their default values scaled.
-            final int targetDensity = Drawable.resolveDensity(res, mDensity);
-            final int sourceDensity = mDensity;
-            mDensity = targetDensity;
+                // The density may have changed since the last update (if any). Any
+                // dimension-type attributes will need their default values scaled.
+                final int targetDensity = Drawable.resolveDensity(res, mDensity);
+                final int sourceDensity = mDensity;
+                mDensity = targetDensity;
 
-            if (sourceDensity != targetDensity) {
-                mCheckedConstantSize = false;
-                mCheckedPadding = false;
+                if (sourceDensity != targetDensity) {
+                    mCheckedConstantSize = false;
+                    mCheckedPadding = false;
+                }
             }
         }
 
