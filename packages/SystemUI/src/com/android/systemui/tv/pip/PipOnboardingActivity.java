@@ -17,9 +17,11 @@
 package com.android.systemui.tv.pip;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 
 import com.android.systemui.R;
 
@@ -33,6 +35,8 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.tv_pip_onboarding);
+        View pipOnboardingView = findViewById(R.id.pip_onboarding);
+        View pipOutlineView = findViewById(R.id.pip_outline);
         mPipManager.addListener(this);
         findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,6 +44,20 @@ public class PipOnboardingActivity extends Activity implements PipManager.Listen
                 finish();
             }
         });
+
+        int pipOutlineSpace = getResources().getDimensionPixelSize(R.dimen.tv_pip_bounds_space);
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        Rect pipBounds = mPipManager.getPipBounds();
+        pipOnboardingView.setPadding(
+                pipBounds.left - pipOutlineSpace,
+                pipBounds.top - pipOutlineSpace,
+                screenWidth - pipBounds.right - pipOutlineSpace, 0);
+
+        // Set width and height for outline view to enclose the PIP.
+        LayoutParams lp = pipOutlineView.getLayoutParams();
+        lp.width = pipBounds.width() + pipOutlineSpace * 2;
+        lp.height = pipBounds.height() + pipOutlineSpace * 2;
+        pipOutlineView.setLayoutParams(lp);
     }
 
     @Override
