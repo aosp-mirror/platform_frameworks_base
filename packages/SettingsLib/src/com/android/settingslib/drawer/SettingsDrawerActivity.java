@@ -18,6 +18,7 @@ package com.android.settingslib.drawer;
 import android.annotation.LayoutRes;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -235,20 +236,24 @@ public class SettingsDrawerActivity extends Activity {
                     Intent.FLAG_ACTIVITY_CLEAR_TASK));
             return true;
         }
-        int numUserHandles = tile.userHandle.size();
-        if (numUserHandles > 1) {
-            ProfileSelectDialog.show(getFragmentManager(), tile);
-            return false;
-        } else if (numUserHandles == 1) {
-            // Show menu on top level items.
-            tile.intent.putExtra(EXTRA_SHOW_MENU, true);
-            tile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivityAsUser(tile.intent, tile.userHandle.get(0));
-        } else {
-            // Show menu on top level items.
-            tile.intent.putExtra(EXTRA_SHOW_MENU, true);
-            tile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(tile.intent);
+        try {
+            int numUserHandles = tile.userHandle.size();
+            if (numUserHandles > 1) {
+                ProfileSelectDialog.show(getFragmentManager(), tile);
+                return false;
+            } else if (numUserHandles == 1) {
+                // Show menu on top level items.
+                tile.intent.putExtra(EXTRA_SHOW_MENU, true);
+                tile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivityAsUser(tile.intent, tile.userHandle.get(0));
+            } else {
+                // Show menu on top level items.
+                tile.intent.putExtra(EXTRA_SHOW_MENU, true);
+                tile.intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(tile.intent);
+            }
+        } catch (ActivityNotFoundException e) {
+            Log.w(TAG, "Couldn't find tile " + tile.intent, e);
         }
         return true;
     }
