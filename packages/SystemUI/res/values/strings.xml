@@ -1430,4 +1430,18 @@
         <item>Don\'t show this icon</item>
     </string-array>
 
+    <!-- Accessibility label for the divider that separates the windows in split-screen mode [CHAR LIMIT=NONE] -->
+    <string name="accessibility_divider">Split-screen divider</string>
+
+    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_move_down">Move down</string>
+
+    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_move_up">Move up</string>
+
+    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_move_left">Move left</string>
+
+    <!-- Accessibility action for moving down the docked stack divider [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_divider_move_right">Move right</string>
 </resources>

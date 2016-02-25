@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.hardware.display.DisplayManager;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -40,6 +41,8 @@ import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -132,6 +135,42 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mGrowRecents;
     private Animator mCurrentAnimator;
 
+    private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+            if (isHorizontalDivision()) {
+                info.addAction(new AccessibilityAction(R.id.action_move_up,
+                        mContext.getString(R.string.accessibility_action_divider_move_up)));
+                info.addAction(new AccessibilityAction(R.id.action_move_down,
+                        mContext.getString(R.string.accessibility_action_divider_move_down)));
+            } else {
+                info.addAction(new AccessibilityAction(R.id.action_move_left,
+                        mContext.getString(R.string.accessibility_action_divider_move_left)));
+                info.addAction(new AccessibilityAction(R.id.action_move_right,
+                        mContext.getString(R.string.accessibility_action_divider_move_right)));
+            }
+        }
+
+        @Override
+        public boolean performAccessibilityAction(View host, int action, Bundle args) {
+            if (action == R.id.action_move_up || action == R.id.action_move_down
+                    || action == R.id.action_move_left || action == R.id.action_move_right) {
+                int position = getCurrentPosition();
+                SnapTarget currentTarget = mSnapAlgorithm.calculateSnapTarget(
+                        position, 0 /* velocity */);
+                SnapTarget nextTarget =
+                        action == R.id.action_move_up || action == R.id.action_move_left
+                                ? mSnapAlgorithm.getPreviousTarget(currentTarget)
+                                : mSnapAlgorithm.getNextTarget(currentTarget);
+                startDragging(true /* animate */, false /* touching */);
+                stopDragging(getCurrentPosition(), nextTarget, 250, Interpolators.FAST_OUT_SLOW_IN);
+                return true;
+            }
+            return super.performAccessibilityAction(host, action, args);
+        }
+    };
+
     public DividerView(Context context) {
         super(context);
     }
@@ -171,6 +210,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         mHandle.setPointerIcon(PointerIcon.getSystemIcon(getContext(),
                 landscape ? STYLE_HORIZONTAL_DOUBLE_ARROW : STYLE_VERTICAL_DOUBLE_ARROW));
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
+        mHandle.setAccessibilityDelegate(mHandleDelegate);
     }
 
     @Override
