@@ -1745,6 +1745,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mCaptionBackgroundDrawable = getContext().getDrawable(
                     R.drawable.decor_caption_title_focused);
         }
+        if (mResizingBackgroundDrawable != null) {
+            mLastBackgroundDrawableCb = mResizingBackgroundDrawable.getCallback();
+            mResizingBackgroundDrawable.setCallback(null);
+        }
     }
 
     // Free floating overlapping windows require a caption.
@@ -1915,11 +1919,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final ThreadedRenderer renderer = getHardwareRenderer();
         if (renderer != null) {
             loadBackgroundDrawablesIfNeeded();
-            if (mResizingBackgroundDrawable != null) {
-                mLastBackgroundDrawableCb = mResizingBackgroundDrawable.getCallback();
-                mResizingBackgroundDrawable.setCallback(null);
-            }
-
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
