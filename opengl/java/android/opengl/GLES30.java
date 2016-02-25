@@ -1791,4 +1791,16 @@ public class GLES30 extends GLES20 {
         java.nio.IntBuffer params
     );
 
+    // C function void glReadPixels ( GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLint offset )
+
+    public static native void glReadPixels(
+        int x,
+        int y,
+        int width,
+        int height,
+        int format,
+        int type,
+        int offset
+    );
+
 }
