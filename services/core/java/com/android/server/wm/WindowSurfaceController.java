@@ -62,7 +62,9 @@ class WindowSurfaceController {
     // However, we need to somehow handle the situation where the cropping would completely hide
     // the window. We achieve this by explicitly hiding the surface and not letting it be shown.
     private boolean mHiddenForCrop = false;
-    private boolean mHiddenForOtherReasons = false;
+
+    // Initially a surface is hidden after just being created.
+    private boolean mHiddenForOtherReasons = true;
     private final String title;
 
     public WindowSurfaceController(SurfaceSession s,
