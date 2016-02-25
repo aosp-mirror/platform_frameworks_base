@@ -69,11 +69,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     }
 
     @Override
-    public void onPageChanged(int page) {
-        mOnFirstPage = page == 0;
-        if (!mOnFirstPage) {
+    public void onPageChanged(boolean isFirst) {
+        if (mOnFirstPage == isFirst) return;
+        if (!isFirst) {
+            setPosition(1);
             clearAnimationState();
         }
+        mOnFirstPage = isFirst;
     }
 
     private void updateAnimators() {
