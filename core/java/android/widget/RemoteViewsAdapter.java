@@ -288,7 +288,7 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
      * A FrameLayout which contains a loading view, and manages the re/applying of RemoteViews when
      * they are loaded.
      */
-    private static class RemoteViewsFrameLayout extends AppWidgetHostView {
+    static class RemoteViewsFrameLayout extends AppWidgetHostView {
         private final FixedSizeRemoteViewsCache mCache;
 
         public RemoteViewsFrameLayout(Context context, FixedSizeRemoteViewsCache cache) {
