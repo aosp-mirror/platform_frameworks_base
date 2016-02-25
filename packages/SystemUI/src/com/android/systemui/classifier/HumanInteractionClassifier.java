@@ -119,7 +119,7 @@ public class HumanInteractionClassifier extends Classifier {
             return;
         }
 
-        // If the user is dragging down the notification, he might want to drag it down
+        // If the user is dragging down the notification, they might want to drag it down
         // enough to see the content, read it for a while and then lift the finger to open
         // the notification. This kind of motion scores very bad in the Classifier so the
         // MotionEvents which are close to the current position of the finger are not

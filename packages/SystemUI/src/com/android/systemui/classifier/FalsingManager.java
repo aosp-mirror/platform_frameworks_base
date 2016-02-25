@@ -23,6 +23,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.MotionEvent;
@@ -64,6 +65,7 @@ public class FalsingManager implements SensorEventListener {
     private boolean mBouncerOn = false;
     private boolean mSessionActive = false;
     private int mState = StatusBarState.SHADE;
+    private boolean mScreenOn;
 
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
@@ -77,6 +79,7 @@ public class FalsingManager implements SensorEventListener {
         mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         mDataCollector = DataCollector.getInstance(mContext);
         mHumanInteractionClassifier = HumanInteractionClassifier.getInstance(mContext);
+        mScreenOn = context.getSystemService(PowerManager.class).isInteractive();
 
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(ENFORCE_BOUNCER), false,
@@ -98,17 +101,21 @@ public class FalsingManager implements SensorEventListener {
                 ENFORCE_BOUNCER, 0);
     }
 
+    private boolean shouldSessionBeActive() {
+        return isEnabled() && mScreenOn &&
+                (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED);
+    }
+
     private boolean sessionEntrypoint() {
-        if (!mSessionActive && isEnabled() &&
-                (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
+        if (!mSessionActive && shouldSessionBeActive()) {
             onSessionStart();
             return true;
         }
         return false;
     }
 
-    private void sessionExitpoint() {
-        if (mSessionActive) {
+    private void sessionExitpoint(boolean force) {
+        if (mSessionActive && (force || !shouldSessionBeActive())) {
             mSessionActive = false;
             mSensorManager.unregisterListener(this);
         }
@@ -167,15 +174,22 @@ public class FalsingManager implements SensorEventListener {
 
     public void setStatusBarState(int state) {
         mState = state;
+        if (shouldSessionBeActive()) {
+            sessionEntrypoint();
+        } else {
+            sessionExitpoint(false /* force */);
+        }
     }
 
     public void onScreenTurningOn() {
+        mScreenOn = true;
         if (sessionEntrypoint()) {
             mDataCollector.onScreenTurningOn();
         }
     }
 
     public void onScreenOnFromTouch() {
+        mScreenOn = true;
         if (sessionEntrypoint()) {
             mDataCollector.onScreenOnFromTouch();
         }
@@ -183,12 +197,13 @@ public class FalsingManager implements SensorEventListener {
 
     public void onScreenOff() {
         mDataCollector.onScreenOff();
-        sessionExitpoint();
+        mScreenOn = false;
+        sessionExitpoint(false /* force */);
     }
 
     public void onSucccessfulUnlock() {
         mDataCollector.onSucccessfulUnlock();
-        sessionExitpoint();
+        sessionExitpoint(true /* force */);
     }
 
     public void onBouncerShown() {
