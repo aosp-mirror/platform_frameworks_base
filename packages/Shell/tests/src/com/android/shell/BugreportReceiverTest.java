@@ -47,7 +47,6 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import libcore.io.Streams;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Instrumentation;
@@ -62,6 +61,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
 import android.support.test.uiautomator.UiObjectNotFoundException;
+import android.support.test.uiautomator.UiSelector;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.text.TextUtils;
@@ -100,19 +100,27 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
     private static final String BUGREPORTS_DIR = "bugreports";
     private static final String BUGREPORT_FILE = "test_bugreport.txt";
     private static final String ZIP_FILE = "test_bugreport.zip";
+    private static final String ZIP_FILE2 = "test_bugreport2.zip";
     private static final String SCREENSHOT_FILE = "test_screenshot.png";
 
     private static final String BUGREPORT_CONTENT = "Dump, might as well dump!\n";
     private static final String SCREENSHOT_CONTENT = "A picture is worth a thousand words!\n";
 
     private static final int PID = 42;
+    private static final int PID2 = 24;
     private static final int ID = 108;
+    private static final int ID2 = 801;
     private static final String PROGRESS_PROPERTY = "dumpstate." + PID + ".progress";
     private static final String MAX_PROPERTY = "dumpstate." + PID + ".max";
     private static final String NAME_PROPERTY = "dumpstate." + PID + ".name";
     private static final String NAME = "BUG, Y U NO REPORT?";
+    private static final String NAME2 = "A bugreport's life";
     private static final String NEW_NAME = "Bug_Forrest_Bug";
+    private static final String NEW_NAME2 = "BugsyReportsy";
     private static final String TITLE = "Wimbugdom Champion 2015";
+    private static final String TITLE2 = "Master of the Universe";
+    private static final String DESCRIPTION = "One's description...";
+    private static final String DESCRIPTION2 = "...is another's treasure.";
 
     private static final String NO_DESCRIPTION = null;
     private static final String NO_NAME = null;
@@ -126,6 +134,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
     private String mPlainTextPath;
     private String mZipPath;
+    private String mZipPath2;
     private String mScreenshotPath;
 
     private Context mContext;
@@ -144,10 +153,12 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         mPlainTextPath = getPath(BUGREPORT_FILE);
         mZipPath = getPath(ZIP_FILE);
+        mZipPath2 = getPath(ZIP_FILE2);
         mScreenshotPath = getPath(SCREENSHOT_FILE);
         createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
         createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
         createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        createZipFile(mZipPath2, BUGREPORT_FILE, BUGREPORT_CONTENT);
 
         // Creates a multi-line description.
         StringBuilder sb = new StringBuilder();
@@ -255,8 +266,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
 
         // Check initial name.
-        String actualName = detailsUi.nameField.getText().toString();
-        assertEquals("Wrong value on field 'name'", NAME, actualName);
+        detailsUi.assertName(NAME);
 
         // Change name - it should have changed system property once focus is changed.
         detailsUi.nameField.setText(NEW_NAME);
@@ -308,8 +318,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
 
         // Check initial name.
-        String actualName = detailsUi.nameField.getText().toString();
-        assertEquals("Wrong value on field 'name'", NAME, actualName);
+        detailsUi.assertName(NAME);
 
         // Change fields.
         detailsUi.reOpen();
@@ -345,6 +354,52 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mZipPath, mScreenshotPath);
         assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
                 NO_NAME, NO_TITLE, mDescription, 1, DIDNT_RENAME_SCREENSHOTS);
+
+        assertServiceNotRunning();
+    }
+
+    /*
+     * TODO: this test can be flanky because it relies in the order the notifications are displayed,
+     * since mUiBot gets the first notification.
+     * Ideally, openProgressNotification() should return the whole notification, so DetailsUi
+     * could use it and find children instead, but unfortunately the notification object hierarchy
+     * is too complex and getting it from the notification text object would be to fragile
+     * (for instance, it could require navigating many parents up in the hierarchy).
+     */
+    public void testProgress_changeJustDetailsIsClearedOnSecondBugreport() throws Exception {
+        resetProperties();
+        sendBugreportStarted(ID, PID, NAME, 1000);
+        waitForScreenshotButtonEnabled(true);
+
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        detailsUi.assertName(NAME);
+        detailsUi.assertTitle(mContext.getString(R.string.bugreport_info_title));
+        detailsUi.assertDescription(mContext.getString(R.string.bugreport_info_description));
+        detailsUi.nameField.setText(NEW_NAME);
+        detailsUi.titleField.setText(TITLE);
+        detailsUi.descField.setText(DESCRIPTION);
+        detailsUi.clickOk();
+
+        sendBugreportStarted(ID2, PID2, NAME2, 1000);
+
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mZipPath, mScreenshotPath);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
+                NEW_NAME, TITLE, DESCRIPTION, 1, RENAMED_SCREENSHOTS);
+
+        detailsUi = new DetailsUi(mUiBot, ID2);
+        detailsUi.assertName(NAME2);
+        detailsUi.assertTitle(mContext.getString(R.string.bugreport_info_title));
+        detailsUi.assertDescription(mContext.getString(R.string.bugreport_info_description));
+        detailsUi.nameField.setText(NEW_NAME2);
+        detailsUi.titleField.setText(TITLE2);
+        detailsUi.descField.setText(DESCRIPTION2);
+        detailsUi.clickOk();
+
+        // Must use a different zip file otherwise it will fail because zip already contains
+        // title.txt and description.txt entries.
+        extras = sendBugreportFinishedAndGetSharedIntent(ID2, mZipPath2, NO_SCREENSHOT);
+        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID2, PID2, TITLE2,
+                NEW_NAME2, TITLE2, DESCRIPTION2, 1, RENAMED_SCREENSHOTS);
 
         assertServiceNotRunning();
     }
@@ -489,11 +544,15 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
      * Sends a "bugreport started" intent with the default values.
      */
     private void sendBugreportStarted(int max) throws Exception {
+        sendBugreportStarted(ID, PID, NAME, max);
+    }
+
+    private void sendBugreportStarted(int id, int pid, String name, int max) throws Exception {
         Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.putExtra(EXTRA_ID, ID);
-        intent.putExtra(EXTRA_PID, PID);
-        intent.putExtra(EXTRA_NAME, NAME);
+        intent.putExtra(EXTRA_ID, id);
+        intent.putExtra(EXTRA_PID, pid);
+        intent.putExtra(EXTRA_NAME, name);
         intent.putExtra(EXTRA_MAX, max);
         mContext.sendBroadcast(intent);
     }
@@ -751,7 +810,7 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         fail("Service status didn't change to " + expectRunning);
     }
 
-    private static void createTextFile(String path, String content) throws IOException {
+    private void createTextFile(String path, String content) throws IOException {
         Log.v(TAG, "createFile(" + path + ")");
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(path)))) {
@@ -841,8 +900,9 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
          */
         DetailsUi(UiBot uiBot, int id) throws UiObjectNotFoundException {
             openProgressNotification(id);
-            detailsButton = mUiBot.getVisibleObject(
-                    mContext.getString(R.string.bugreport_info_action).toUpperCase());
+            detailsButton = mUiBot.getVisibleObject(mContext.getString(
+                    R.string.bugreport_info_action).toUpperCase());
+
             mUiBot.click(detailsButton, "details_button");
             // TODO: unhardcode resource ids
             UiObject dialogTitle = mUiBot.getVisibleObjectById("android:id/alertTitle");
@@ -853,6 +913,28 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
             descField = mUiBot.getVisibleObjectById("com.android.shell:id/description");
             okButton = mUiBot.getObjectById("android:id/button1");
             cancelButton = mUiBot.getObjectById("android:id/button2");
+        }
+
+        private void assertField(String name, UiObject field, String expected) {
+            try {
+                String actual = field.getText().toString();
+                assertEquals("Wrong value on field '" + name + "'", expected, actual);
+            } catch (UiObjectNotFoundException e) {
+                // Should not happen...
+                throw new IllegalStateException("field not found: " + name, e);
+            }
+        }
+
+        void assertName(String expected) {
+            assertField("name", nameField, expected);
+        }
+
+        void assertTitle(String expected) {
+            assertField("title", titleField, expected);
+        }
+
+        void assertDescription(String expected) {
+            assertField("description", descField, expected);
         }
 
         /**
