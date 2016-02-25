@@ -710,7 +710,7 @@ public class BugreportProgressService extends Service {
         }
         final File screenshotFile = new File((String) resultMsg.obj);
 
-        final int msgId;
+        final String msg;
         if (taken) {
             info.addScreenshot(screenshotFile);
             if (info.finished) {
@@ -718,14 +718,13 @@ public class BugreportProgressService extends Service {
                 info.renameScreenshots(mScreenshotsDir);
                 sendBugreportNotification(mContext, info);
             }
-            msgId = R.string.bugreport_screenshot_taken;
+            msg = mContext.getString(R.string.bugreport_screenshot_taken);
         } else {
             // TODO: try again using Framework APIs instead of relying on screencap.
-            msgId = R.string.bugreport_screenshot_failed;
+            msg = mContext.getString(R.string.bugreport_screenshot_failed);
+            Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
-        final String msg = mContext.getString(msgId);
         Log.d(TAG, msg);
-        Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
     }
 
     /**
