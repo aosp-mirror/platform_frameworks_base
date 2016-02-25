@@ -125,16 +125,12 @@ public class WebViewUpdateService extends SystemService {
 
                     updateFallbackState(context, intent);
 
-                    // TODO(gsennton) for now don't update WebView on PACKAGE_CHANGED as this will
-                    // change the current behaviour even more, instead do this in a follow-up.
-                    if (intent.getAction().equals(Intent.ACTION_PACKAGE_CHANGED)) return;
-
                     for (WebViewProviderInfo provider : WebViewFactory.getWebViewPackages()) {
                         String webviewPackage = "package:" + provider.packageName;
 
                         if (webviewPackage.equals(intent.getDataString())) {
                             boolean updateWebView = false;
-                            boolean removedOldPackage = false;
+                            boolean removedOrChangedOldPackage = false;
                             String oldProviderName = null;
                             PackageInfo newPackage = null;
                             synchronized(WebViewUpdateService.this) {
@@ -152,7 +148,7 @@ public class WebViewUpdateService extends SystemService {
                                         || mCurrentWebViewPackage == null;
                                     // We removed the old package if we received an intent to remove
                                     // or replace the old package.
-                                    removedOldPackage =
+                                    removedOrChangedOldPackage =
                                         provider.packageName.equals(oldProviderName);
                                     if (updateWebView) {
                                         onWebViewProviderChanged(newPackage);
@@ -162,7 +158,8 @@ public class WebViewUpdateService extends SystemService {
                                             "relro with " + e);
                                 }
                             }
-                            if(updateWebView && !removedOldPackage && oldProviderName != null) {
+                            if(updateWebView && !removedOrChangedOldPackage
+                                    && oldProviderName != null) {
                                 // If the provider change is the result of adding or replacing a
                                 // package that was not the previous provider then we must kill
                                 // packages dependent on the old package ourselves. The framework
