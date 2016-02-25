@@ -1142,6 +1142,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     @Override
+    public void toggleSplitScreen() {
+        toggleSplitScreenMode();
+    }
+
+    @Override
     public void preloadRecentApps() {
         int msg = MSG_PRELOAD_RECENT_APPS;
         mHandler.removeMessages(msg);
@@ -1210,6 +1215,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
     };
+
+    /**
+     * Toggle docking the app window
+     *
+     * @return {@code true} if the app window is docked after the toggle, {@code false} otherwise.
+     */
+    protected abstract boolean toggleSplitScreenMode();
 
     /** Proxy for RecentsComponent */
 
