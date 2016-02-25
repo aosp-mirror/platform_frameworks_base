@@ -344,6 +344,68 @@ public class DevicePolicyManager {
             = "android.app.action.PROVISION_FINALIZATION";
 
     /**
+     * Action: Bugreport sharing with device owner has been accepted by the user.
+     *
+     * @hide
+     */
+    public static final String ACTION_BUGREPORT_SHARING_ACCEPTED =
+            "com.android.server.action.BUGREPORT_SHARING_ACCEPTED";
+
+    /**
+     * Action: Bugreport sharing with device owner has been declined by the user.
+     *
+     * @hide
+     */
+    public static final String ACTION_BUGREPORT_SHARING_DECLINED =
+            "com.android.server.action.BUGREPORT_SHARING_DECLINED";
+
+    /**
+     * Action: Bugreport has been collected and is dispatched to {@link DevicePolicyManagerService}.
+     *
+     * @hide
+     */
+    public static final String ACTION_REMOTE_BUGREPORT_DISPATCH =
+            "android.intent.action.REMOTE_BUGREPORT_DISPATCH";
+
+    /**
+     * Extra for shared bugreport's SHA-256 hash.
+     *
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_BUGREPORT_HASH =
+            "android.intent.extra.REMOTE_BUGREPORT_HASH";
+
+    /**
+     * Extra for remote bugreport notification shown type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_BUGREPORT_NOTIFICATION_TYPE =
+            "android.app.extra.bugreport_notification_type";
+
+    /**
+     * Notification type for a started remote bugreport flow.
+     *
+     * @hide
+     */
+    public static final int NOTIFICATION_BUGREPORT_STARTED = 1;
+
+    /**
+     * Notification type for a bugreport that has already been accepted to be shared, but is still
+     * being taken.
+     *
+     * @hide
+     */
+    public static final int NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED = 2;
+
+    /**
+     * Notification type for a bugreport that has been taken and can be shared or declined.
+     *
+     * @hide
+     */
+    public static final int NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED = 3;
+
+    /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
      * allows a mobile device management application or NFC programmer application which starts
      * managed provisioning to pass data to the management application instance after provisioning.

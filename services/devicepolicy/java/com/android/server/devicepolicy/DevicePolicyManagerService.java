@@ -328,7 +328,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_DISPATCH.equals(intent.getAction())
+            if (DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH.equals(intent.getAction())
                     && mRemoteBugreportServiceIsActive.get()) {
                 onBugreportFinished(intent);
             }
@@ -342,10 +342,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String action = intent.getAction();
             mInjector.getNotificationManager().cancel(LOG_TAG,
                     RemoteBugreportUtils.NOTIFICATION_ID);
-            if (RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED.equals(action)) {
+            if (DevicePolicyManager.ACTION_BUGREPORT_SHARING_ACCEPTED.equals(action)) {
                 onBugreportSharingAccepted();
-            } else if (RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_DECLINED
-                    .equals(action)) {
+            } else if (DevicePolicyManager.ACTION_BUGREPORT_SHARING_DECLINED.equals(action)) {
                 onBugreportSharingDeclined();
             }
             mContext.unregisterReceiver(mRemoteBugreportConsentReceiver);
@@ -437,15 +436,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     && userHandle == mOwners.getDeviceOwnerUserId()
                     && getDeviceOwnerRemoteBugreportUri() != null) {
                 IntentFilter filterConsent = new IntentFilter();
-                filterConsent.addAction(
-                        RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_DECLINED);
-                filterConsent.addAction(
-                        RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED);
+                filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_DECLINED);
+                filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_ACCEPTED);
                 mContext.registerReceiver(mRemoteBugreportConsentReceiver, filterConsent);
-                mInjector.getNotificationManager().notify(LOG_TAG,
+                mInjector.getNotificationManager().notifyAsUser(LOG_TAG,
                         RemoteBugreportUtils.NOTIFICATION_ID,
                         RemoteBugreportUtils.buildNotification(mContext,
-                                RemoteBugreportUtils.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED));
+                                DevicePolicyManager.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED),
+                                UserHandle.ALL);
             }
             if (Intent.ACTION_BOOT_COMPLETED.equals(action)
                     || ACTION_EXPIRED_PASSWORD_NOTIFICATION.equals(action)) {
@@ -5068,9 +5066,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mRemoteBugreportServiceIsActive.set(true);
             mRemoteBugreportSharingAccepted.set(false);
             registerRemoteBugreportReceivers();
-            mInjector.getNotificationManager().notify(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
                     RemoteBugreportUtils.buildNotification(mContext,
-                            RemoteBugreportUtils.NOTIFICATION_BUGREPORT_STARTED));
+                            DevicePolicyManager.NOTIFICATION_BUGREPORT_STARTED), UserHandle.ALL);
             mHandler.postDelayed(mRemoteBugreportTimeoutRunnable,
                     RemoteBugreportUtils.REMOTE_BUGREPORT_TIMEOUT_MILLIS);
             return true;
@@ -5104,7 +5102,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void registerRemoteBugreportReceivers() {
         try {
             IntentFilter filterFinished = new IntentFilter(
-                    RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_DISPATCH,
+                    DevicePolicyManager.ACTION_REMOTE_BUGREPORT_DISPATCH,
                     RemoteBugreportUtils.BUGREPORT_MIMETYPE);
             mContext.registerReceiver(mRemoteBugreportFinishedReceiver, filterFinished);
         } catch (IntentFilter.MalformedMimeTypeException e) {
@@ -5112,8 +5110,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Slog.w(LOG_TAG, "Failed to set type " + RemoteBugreportUtils.BUGREPORT_MIMETYPE, e);
         }
         IntentFilter filterConsent = new IntentFilter();
-        filterConsent.addAction(RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_DECLINED);
-        filterConsent.addAction(RemoteBugreportUtils.ACTION_REMOTE_BUGREPORT_SHARING_ACCEPTED);
+        filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_DECLINED);
+        filterConsent.addAction(DevicePolicyManager.ACTION_BUGREPORT_SHARING_ACCEPTED);
         mContext.registerReceiver(mRemoteBugreportConsentReceiver, filterConsent);
     }
 
@@ -5126,16 +5124,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             bugreportUriString = bugreportUri.toString();
         }
         String bugreportHash = intent.getStringExtra(
-                RemoteBugreportUtils.EXTRA_REMOTE_BUGREPORT_HASH);
+                DevicePolicyManager.EXTRA_REMOTE_BUGREPORT_HASH);
         if (mRemoteBugreportSharingAccepted.get()) {
             shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
             mInjector.getNotificationManager().cancel(LOG_TAG,
                     RemoteBugreportUtils.NOTIFICATION_ID);
         } else {
             setDeviceOwnerRemoteBugreportUriAndHash(bugreportUriString, bugreportHash);
-            mInjector.getNotificationManager().notify(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
                     RemoteBugreportUtils.buildNotification(mContext,
-                            RemoteBugreportUtils.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED));
+                            DevicePolicyManager.NOTIFICATION_BUGREPORT_FINISHED_NOT_ACCEPTED),
+                            UserHandle.ALL);
         }
         mContext.unregisterReceiver(mRemoteBugreportFinishedReceiver);
     }
@@ -5166,9 +5165,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (bugreportUriString != null) {
             shareBugreportWithDeviceOwnerIfExists(bugreportUriString, bugreportHash);
         } else if (mRemoteBugreportServiceIsActive.get()) {
-            mInjector.getNotificationManager().notify(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
+            mInjector.getNotificationManager().notifyAsUser(LOG_TAG, RemoteBugreportUtils.NOTIFICATION_ID,
                     RemoteBugreportUtils.buildNotification(mContext,
-                            RemoteBugreportUtils.NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED));
+                            DevicePolicyManager.NOTIFICATION_BUGREPORT_ACCEPTED_NOT_FINISHED),
+                            UserHandle.ALL);
         }
     }
 
