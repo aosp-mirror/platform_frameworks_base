@@ -183,5 +183,10 @@ public class QuickQSPanel extends QSPanel {
             // No resources here.
             return false;
         }
+
+        @Override
+        public boolean hasOverlappingRendering() {
+            return false;
+        }
     }
 }
