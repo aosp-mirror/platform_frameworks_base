@@ -394,6 +394,36 @@ public class Patterns {
     public static final Pattern AUTOLINK_WEB_URL = Pattern.compile(
             "(" + WEB_URL_WITH_PROTOCOL + "|" + WEB_URL_WITHOUT_PROTOCOL + ")");
 
+    /**
+     * Regular expression for valid email characters. Does not include some of the valid characters
+     * defined in RFC5321: #&~!^`{}/=$*?|
+     */
+    private static final String EMAIL_CHAR = LABEL_CHAR + "\\+\\-_%'";
+
+    /**
+     * Regular expression for local part of an email address. RFC5321 section 4.5.3.1.1 limits
+     * the local part to be at most 64 octets.
+     */
+    private static final String EMAIL_ADDRESS_LOCAL_PART =
+            "[" + EMAIL_CHAR + "]" + "(?:[" + EMAIL_CHAR + "\\.]{1,62}[" + EMAIL_CHAR + "])?";
+
+    /**
+     * Regular expression for the domain part of an email address. RFC5321 section 4.5.3.1.2 limits
+     * the domain to be at most 255 octets.
+     */
+    private static final String EMAIL_ADDRESS_DOMAIN =
+            "(?=.{1,255}(?:\\s|$|^))" + HOST_NAME;
+
+    /**
+     * Regular expression pattern to match email addresses. It excludes double quoted local parts
+     * and the special characters #&~!^`{}/=$*?| that are included in RFC5321.
+     * @hide
+     */
+    public static final Pattern AUTOLINK_EMAIL_ADDRESS = Pattern.compile("(" + WORD_BOUNDARY +
+            "(?:" + EMAIL_ADDRESS_LOCAL_PART + "@" + EMAIL_ADDRESS_DOMAIN + ")" +
+            WORD_BOUNDARY + ")"
+    );
+
     public static final Pattern EMAIL_ADDRESS
         = Pattern.compile(
             "[a-zA-Z0-9\\+\\.\\_\\%\\-\\+]{1,256}" +

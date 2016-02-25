@@ -25,7 +25,7 @@ import junit.framework.TestCase;
 
 public class PatternsTest extends TestCase {
 
-    //Tests for Patterns.TOP_LEVEL_DOMAIN
+    // Tests for Patterns.TOP_LEVEL_DOMAIN
 
     @SmallTest
     public void testTldPattern() throws Exception {
@@ -56,7 +56,7 @@ public class PatternsTest extends TestCase {
         assertFalse("Matched invalid TLD!", t);
     }
 
-    //Tests for Patterns.IANA_TOP_LEVEL_DOMAINS
+    // Tests for Patterns.IANA_TOP_LEVEL_DOMAINS
 
     @SmallTest
     public void testIanaTopLevelDomains_matchesValidTld() throws Exception {
@@ -94,7 +94,7 @@ public class PatternsTest extends TestCase {
         assertFalse("Should not match invalid Punycode TLD", pattern.matcher("xn").matches());
     }
 
-    //Tests for Patterns.WEB_URL
+    // Tests for Patterns.WEB_URL
 
     @SmallTest
     public void testWebUrl_matchesValidUrlWithSchemeAndHostname() throws Exception {
@@ -208,7 +208,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
-    //Tests for Patterns.AUTOLINK_WEB_URL
+    // Tests for Patterns.AUTOLINK_WEB_URL
 
     @SmallTest
     public void testAutoLinkWebUrl_matchesValidUrlWithSchemeAndHostname() throws Exception {
@@ -419,7 +419,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
-    //Tests for Patterns.IP_ADDRESS
+    // Tests for Patterns.IP_ADDRESS
 
     @SmallTest
     public void testIpPattern() throws Exception {
@@ -432,7 +432,7 @@ public class PatternsTest extends TestCase {
         assertFalse("Invalid IP", t);
     }
 
-    //Tests for Patterns.DOMAIN_NAME
+    // Tests for Patterns.DOMAIN_NAME
 
     @SmallTest
     public void testDomain_matchesPunycodeTld() throws Exception {
@@ -508,7 +508,227 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
-    //Tests for Patterns.PHONE
+    // Tests for Patterns.AUTOLINK_EMAIL_ADDRESS
+
+    public void testAutoLinkEmailAddress_matchesShortValidEmail() throws Exception {
+        String email = "a@a.co";
+        assertTrue("Should match short valid email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesRegularEmail() throws Exception {
+        String email = "email@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesEmailWithMultipleSubdomains() throws Exception {
+        String email = "email@e.somelongdomainnameforandroid.abc.uk";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithDot() throws Exception {
+        String email = "e.mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithPlus() throws Exception {
+        String email = "e+mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithUnderscore() throws Exception {
+        String email = "e_mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithDash() throws Exception {
+        String email = "e-mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithApostrophe() throws Exception {
+        String email = "e'mail@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithDigits() throws Exception {
+        String email = "123@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesUnicodeLocalPart() throws Exception {
+        String email = "\uD604\uAE08\uC601\uC218\uC99D@android.kr";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithEmoji() throws Exception {
+        String email = "smiley\u263A@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartWithSurrogatePairs() throws Exception {
+        String email = "\uD83C\uDF38@android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainWithDash() throws Exception {
+        String email = "email@an-droid.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesUnicodeDomain() throws Exception {
+        String email = "email@\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesUnicodeLocalPartAndDomain() throws Exception {
+        String email = "\uD604\uAE08\uC601\uC218\uC99D@\uD604\uAE08\uC601\uC218\uC99D.kr";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainWithEmoji() throws Exception {
+        String email = "smiley@\u263Aandroid.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainWithSurrogatePairs() throws Exception {
+        String email = "email@\uD83C\uDF38android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartAndDomainWithSurrogatePairs()
+            throws Exception {
+        String email = "\uD83C\uDF38@\uD83C\uDF38android.com";
+        assertTrue("Should match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchStringWithoutAtSign() throws Exception {
+        String email = "android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchPlainString() throws Exception {
+        String email = "email";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchStringWithMultipleAtSigns() throws Exception {
+        String email = "email@android@android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchEmailWithoutTld() throws Exception {
+        String email = "email@android";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchLocalPartEndingWithDot() throws Exception {
+        String email = "email.@android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchLocalPartStartingWithDot() throws Exception {
+        String email = ".email@android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchDomainStartingWithDash() throws Exception {
+        String email = "email@-android.com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchDomainWithConsecutiveDots() throws Exception {
+        String email = "email@android..com";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchEmailWithIpAsDomain() throws Exception {
+        String email = "email@127.0.0.1";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_doesNotMatchEmailWithInvalidTld() throws Exception {
+        String email = "email@android.c";
+        assertFalse("Should not match email: " + email,
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesLocalPartUpTo64Chars() throws Exception {
+        String localPart = "";
+        for (int i = 0; i < 64; i++) {
+            localPart += "a";
+        }
+        String email = localPart + "@android.com";
+
+        assertTrue("Should match local part of length: " + localPart.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+
+        email = localPart + "a@android.com";
+        assertFalse("Should not match local part of length: " + localPart.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesSubdomainUpTo63Chars() throws Exception {
+        String subdomain = "";
+        for (int i = 0; i < 63; i++) {
+            subdomain += "a";
+        }
+        String email = "email@" + subdomain + ".com";
+
+        assertTrue("Should match subdomain of length: " + subdomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+
+        subdomain += "a";
+        email = "email@" + subdomain + ".com";
+        assertFalse("Should not match local part of length: " + subdomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    public void testAutoLinkEmailAddress_matchesDomainUpTo255Chars() throws Exception {
+        String longDomain = "";
+        while (longDomain.length() <= 250) {
+            longDomain += "d.";
+        }
+        longDomain += "com";
+        assertEquals(255, longDomain.length());
+        String email = "a@" + longDomain;
+
+        assertTrue("Should match domain of length: " + longDomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+
+        email = email + "m";
+        assertEquals(258, email.length());
+        assertFalse("Should not match domain of length: " + longDomain.length(),
+                Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
+    }
+
+    // Tests for Patterns.PHONE
 
     @SmallTest
     public void testPhonePattern() throws Exception {

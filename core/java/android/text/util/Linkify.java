@@ -224,7 +224,7 @@ public class Linkify {
         }
 
         if ((mask & EMAIL_ADDRESSES) != 0) {
-            gatherLinks(links, text, Patterns.EMAIL_ADDRESS,
+            gatherLinks(links, text, Patterns.AUTOLINK_EMAIL_ADDRESS,
                 new String[] { "mailto:" },
                 null, null);
         }
