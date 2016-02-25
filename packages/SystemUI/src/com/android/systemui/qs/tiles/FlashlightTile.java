@@ -17,9 +17,11 @@
 package com.android.systemui.qs.tiles;
 
 import android.app.ActivityManager;
-
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.provider.MediaStore;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
@@ -79,9 +81,19 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        // TODO: Flashlight available handling...
-//        state.visible = mFlashlightController.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
+        if (!mFlashlightController.isAvailable()) {
+            Drawable icon = mHost.getContext().getDrawable(R.drawable.ic_signal_flashlight_disable);
+            final int disabledColor = mHost.getContext().getColor(R.color.qs_tile_tint_unavailable);
+            icon.setTint(disabledColor);
+            state.icon = new DrawableIcon(icon);
+            state.label = new SpannableStringBuilder().append(state.label,
+                    new ForegroundColorSpan(disabledColor),
+                    SpannableStringBuilder.SPAN_INCLUSIVE_INCLUSIVE);
+            state.contentDescription = mContext.getString(
+                    R.string.accessibility_quick_settings_flashlight_unavailable);
+            return;
+        }
         if (arg instanceof Boolean) {
             boolean value = (Boolean) arg;
             if (value == state.value) {

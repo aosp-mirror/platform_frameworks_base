@@ -497,6 +497,8 @@
     <string name="accessibility_quick_settings_less_time">Less time.</string>
     <!-- Content description of the flashlight tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_flashlight_off">Flashlight off.</string>
+    <!-- Content description of the flashlight tile in quick settings when unavailable (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_flashlight_unavailable">Flashlight unavailable.</string>
     <!-- Content description of the flashlight tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_flashlight_on">Flashlight on.</string>
     <!-- Announcement made when the flashlight state changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
