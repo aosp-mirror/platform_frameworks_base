@@ -3,9 +3,11 @@ package android.security.net.config;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.Pair;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -34,20 +36,29 @@ public class XmlConfigSource implements ConfigSource {
     private final Object mLock = new Object();
     private final int mResourceId;
     private final boolean mDebugBuild;
+    private final int mTargetSdkVersion;
 
     private boolean mInitialized;
     private NetworkSecurityConfig mDefaultConfig;
     private Set<Pair<Domain, NetworkSecurityConfig>> mDomainMap;
     private Context mContext;
 
+    @VisibleForTesting
     public XmlConfigSource(Context context, int resourceId) {
         this(context, resourceId, false);
     }
 
+    @VisibleForTesting
     public XmlConfigSource(Context context, int resourceId, boolean debugBuild) {
+        this(context, resourceId, debugBuild, Build.VERSION_CODES.CUR_DEVELOPMENT);
+    }
+
+    public XmlConfigSource(Context context, int resourceId, boolean debugBuild,
+            int targetSdkVersion) {
         mResourceId = resourceId;
         mContext = context;
         mDebugBuild = debugBuild;
+        mTargetSdkVersion = targetSdkVersion;
     }
 
     public Set<Pair<Domain, NetworkSecurityConfig>> getPerDomainConfigs() {
@@ -341,7 +352,7 @@ public class XmlConfigSource implements ConfigSource {
         // Use the platform default as the parent of the base config for any values not provided
         // there. If there is no base config use the platform default.
         NetworkSecurityConfig.Builder platformDefaultBuilder =
-                NetworkSecurityConfig.getDefaultBuilder();
+                NetworkSecurityConfig.getDefaultBuilder(mTargetSdkVersion);
         addDebugAnchorsIfNeeded(debugConfigBuilder, platformDefaultBuilder);
         if (baseConfigBuilder != null) {
             baseConfigBuilder.setParent(platformDefaultBuilder);
