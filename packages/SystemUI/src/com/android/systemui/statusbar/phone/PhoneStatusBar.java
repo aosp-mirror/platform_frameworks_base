@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
-import android.app.IWallpaperManagerCallback;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -104,6 +103,8 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.DemoMode;
+import com.android.systemui.DensityContainer;
+import com.android.systemui.DensityContainer.InflateListener;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
@@ -778,8 +779,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStatusBarView.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context);
 
-        mHeader = (BaseStatusBarHeader) mStatusBarWindow.findViewById(R.id.header);
-        mHeader.setActivityStarter(this);
         mKeyguardStatusBar = (KeyguardStatusBarView) mStatusBarWindow.findViewById(R.id.keyguard_header);
         mKeyguardStatusView = mStatusBarWindow.findViewById(R.id.keyguard_status_view);
         mKeyguardBottomArea =
@@ -839,12 +838,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         initSignalCluster(mStatusBarView);
         initSignalCluster(mKeyguardStatusBar);
-        initSignalCluster(mHeader);
-
-        final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
-        if (isAPhone) {
-            mNetworkController.addEmergencyListener(mHeader);
-        }
 
         mFlashlightController = new FlashlightController(mContext);
         mKeyguardBottomArea.setFlashlightController(mFlashlightController);
@@ -863,39 +856,40 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // Set up the quick settings tile panel
-        mQSPanel = (QSPanel) mStatusBarWindow.findViewById(R.id.quick_settings_panel);
-        if (mQSPanel != null) {
+        DensityContainer container = (DensityContainer) mStatusBarWindow.findViewById(
+                R.id.qs_density_container);
+        if (container != null) {
             final QSTileHost qsh = new QSTileHost(mContext, this,
                     mBluetoothController, mLocationController, mRotationLockController,
                     mNetworkController, mZenModeController, mHotspotController,
                     mCastController, mFlashlightController,
                     mUserSwitcherController, mUserInfoController, mKeyguardMonitor,
-                    mSecurityController, mBatteryController, mIconController);
-            mQSPanel.setTiles(qsh.getTiles());
+                    mSecurityController, mBatteryController, mIconController,
+                    mNextAlarmController);
             mBrightnessMirrorController = new BrightnessMirrorController(mStatusBarWindow);
-            mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
-            QSContainer qsContainer = (QSContainer) mStatusBarWindow.findViewById(
-                    R.id.quick_settings_container);
-            qsContainer.setHost(qsh);
-            qsh.addCallback(new QSTileHost.Callback() {
+            container.addInflateListener(new InflateListener() {
                 @Override
-                public void onTilesChanged() {
-                    mQSPanel.setTiles(qsh.getTiles());
+                public void onInflated(View v) {
+                    QSContainer qsContainer = (QSContainer) v.findViewById(
+                            R.id.quick_settings_container);
+                    qsContainer.setHost(qsh);
+                    mQSPanel = qsContainer.getQsPanel();
+                    mQSPanel.setBrightnessMirror(mBrightnessMirrorController);
+                    mHeader = qsContainer.getHeader();
+                    initSignalCluster(mHeader);
+                    mHeader.setActivityStarter(PhoneStatusBar.this);
                 }
             });
         }
 
         // User info. Trigger first load.
-        mHeader.setUserInfoController(mUserInfoController);
         mKeyguardStatusBar.setUserInfoController(mUserInfoController);
         mKeyguardStatusBar.setUserSwitcherController(mUserSwitcherController);
         mUserInfoController.reloadUserInfo();
 
-        mHeader.setBatteryController(mBatteryController);
         ((BatteryMeterView) mStatusBarView.findViewById(R.id.battery)).setBatteryController(
                 mBatteryController);
         mKeyguardStatusBar.setBatteryController(mBatteryController);
-        mHeader.setNextAlarmController(mNextAlarmController);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBroadcastReceiver.onReceive(mContext,

@@ -43,7 +43,7 @@ public class TileServicesTests extends SysuiTestCase {
         QSTileHost host = new QSTileHost(mContext, null, null, null, null,
                 networkController, null,
                 Mockito.mock(HotspotController.class), null,
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         mTileService = new TestTileServices(host, Looper.myLooper());
     }
 
