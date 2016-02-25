@@ -186,7 +186,9 @@
     <!-- Notification title displayed when we fail to take a screenshot. [CHAR LIMIT=50] -->
     <string name="screenshot_failed_title">Couldn\'t capture screenshot.</string>
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
-    <string name="screenshot_failed_text">Can\'t take screenshot due to limited storage space, or it isn\'t allowed by the app or your organization.</string>
+    <string name="screenshot_failed_to_save_text">Can\'t save screenshot due to limited storage space.</string>
+    <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
+    <string name="screenshot_failed_to_capture_text">Taking screenshots is not allowed by the app or your organization.</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>

@@ -946,11 +946,19 @@ public class ActivityManager {
          * Creates a copy of another TaskDescription.
          */
         public TaskDescription(TaskDescription td) {
-            mLabel = td.mLabel;
-            mIcon = td.mIcon;
-            mIconFilename = td.mIconFilename;
-            mColorPrimary = td.mColorPrimary;
-            mColorBackground = td.mColorBackground;
+            copyFrom(td);
+        }
+
+        /**
+         * Copies this the values from another TaskDescription.
+         * @hide
+         */
+        public void copyFrom(TaskDescription other) {
+            mLabel = other.mLabel;
+            mIcon = other.mIcon;
+            mIconFilename = other.mIconFilename;
+            mColorPrimary = other.mColorPrimary;
+            mColorBackground = other.mColorBackground;
         }
 
         private TaskDescription(Parcel source) {

@@ -815,6 +815,9 @@ public class Activity extends ContextThemeWrapper
     private int mDefaultKeyMode = DEFAULT_KEYS_DISABLE;
     private SpannableStringBuilder mDefaultKeySsb = null;
 
+    private ActivityManager.TaskDescription mTaskDescription =
+            new ActivityManager.TaskDescription();
+
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
     @SuppressWarnings("unused")
@@ -1116,6 +1119,34 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Attempts to extract the color from a given drawable.
+     *
+     * @return the extracted color or 0 if no color could be extracted.
+     */
+    private int tryExtractColorFromDrawable(Drawable drawable) {
+        if (drawable instanceof ColorDrawable) {
+            return ((ColorDrawable) drawable).getColor();
+        } else if (drawable instanceof InsetDrawable) {
+            return tryExtractColorFromDrawable(((InsetDrawable) drawable).getDrawable());
+        } else if (drawable instanceof ShapeDrawable) {
+            Paint p = ((ShapeDrawable) drawable).getPaint();
+            if (p != null) {
+                return p.getColor();
+            }
+        } else if (drawable instanceof LayerDrawable) {
+            LayerDrawable ld = (LayerDrawable) drawable;
+            int numLayers = ld.getNumberOfLayers();
+            for (int i = 0; i < numLayers; i++) {
+                int color = tryExtractColorFromDrawable(ld.getDrawable(i));
+                if (color != 0) {
+                    return color;
+                }
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Called when activity start-up is complete (after {@link #onStart}
      * and {@link #onRestoreInstanceState} have been called).  Applications will
      * generally not implement this method; it is intended for system
@@ -1136,6 +1167,36 @@ public class Activity extends ContextThemeWrapper
             mTitleReady = true;
             onTitleChanged(getTitle(), getTitleColor());
         }
+
+        Resources.Theme theme = getTheme();
+        if (theme != null) {
+            // Get the primary color and update the TaskDescription for this activity
+            TypedArray a = theme.obtainStyledAttributes(
+                    com.android.internal.R.styleable.ActivityTaskDescription);
+            if (mTaskDescription.getPrimaryColor() == 0) {
+                int colorPrimary = a.getColor(
+                        com.android.internal.R.styleable.ActivityTaskDescription_colorPrimary, 0);
+                if (colorPrimary != 0 && Color.alpha(colorPrimary) == 0xFF) {
+                    mTaskDescription.setPrimaryColor(colorPrimary);
+                }
+            }
+            if (mTaskDescription.getBackgroundColor() == 0) {
+                int windowBgResourceId = a.getResourceId(
+                        com.android.internal.R.styleable.ActivityTaskDescription_windowBackground,
+                        0);
+                int windowBgFallbackResourceId = a.getResourceId(
+                        com.android.internal.R.styleable.ActivityTaskDescription_windowBackgroundFallback,
+                        0);
+                int colorBg = tryExtractColorFromDrawable(DecorView.getResizingBackgroundDrawable(
+                        this, windowBgResourceId, windowBgFallbackResourceId));
+                if (colorBg != 0 && Color.alpha(colorBg) == 0xFF) {
+                    mTaskDescription.setBackgroundColor(colorBg);
+                }
+            }
+            a.recycle();
+            setTaskDescription(mTaskDescription);
+        }
+
         mCalled = true;
     }
 
@@ -3975,57 +4036,6 @@ public class Activity extends ContextThemeWrapper
             }
             theme.applyStyle(resid, false);
         }
-
-        // Get the primary color and update the TaskDescription for this activity
-        if (theme != null) {
-            TypedArray a = theme.obtainStyledAttributes(com.android.internal.R.styleable.Theme);
-            int windowBgResourceId = a.getResourceId(
-                    com.android.internal.R.styleable.Window_windowBackground, 0);
-            int windowBgFallbackResourceId = a.getResourceId(
-                    com.android.internal.R.styleable.Window_windowBackgroundFallback, 0);
-            int colorPrimary = a.getColor(com.android.internal.R.styleable.Theme_colorPrimary, 0);
-            int colorBg = tryExtractColorFromDrawable(DecorView.getResizingBackgroundDrawable(this,
-                    windowBgResourceId, windowBgFallbackResourceId));
-            a.recycle();
-            if (colorPrimary != 0) {
-                ActivityManager.TaskDescription td = new ActivityManager.TaskDescription();
-                if (Color.alpha(colorPrimary) == 0xFF) {
-                    td.setPrimaryColor(colorPrimary);
-                }
-                if (Color.alpha(colorBg) == 0xFF) {
-                    td.setBackgroundColor(colorBg);
-                }
-                setTaskDescription(td);
-            }
-        }
-    }
-
-    /**
-     * Attempts to extract the color from a given drawable.
-     *
-     * @return the extracted color or 0 if no color could be extracted.
-     */
-    private int tryExtractColorFromDrawable(Drawable drawable) {
-        if (drawable instanceof ColorDrawable) {
-            return ((ColorDrawable) drawable).getColor();
-        } else if (drawable instanceof InsetDrawable) {
-            return tryExtractColorFromDrawable(((InsetDrawable) drawable).getDrawable());
-        } else if (drawable instanceof ShapeDrawable) {
-            Paint p = ((ShapeDrawable) drawable).getPaint();
-            if (p != null) {
-                return p.getColor();
-            }
-        } else if (drawable instanceof LayerDrawable) {
-            LayerDrawable ld = (LayerDrawable) drawable;
-            int numLayers = ld.getNumberOfLayers();
-            for (int i = 0; i < numLayers; i++) {
-                int color = tryExtractColorFromDrawable(ld.getDrawable(i));
-                if (color != 0) {
-                    return color;
-                }
-            }
-        }
-        return 0;
     }
 
     /**
@@ -5651,18 +5661,18 @@ public class Activity extends ContextThemeWrapper
      * @param taskDescription The TaskDescription properties that describe the task with this activity
      */
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
-        ActivityManager.TaskDescription td;
-        // Scale the icon down to something reasonable if it is provided
-        if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
-            final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-            final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size, true);
-            td = new ActivityManager.TaskDescription(taskDescription);
-            td.setIcon(icon);
-        } else {
-            td = taskDescription;
+        if (mTaskDescription != taskDescription) {
+            mTaskDescription.copyFrom(taskDescription);
+            // Scale the icon down to something reasonable if it is provided
+            if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
+                final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
+                final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
+                        true);
+                mTaskDescription.setIcon(icon);
+            }
         }
         try {
-            ActivityManagerNative.getDefault().setTaskDescription(mToken, td);
+            ActivityManagerNative.getDefault().setTaskDescription(mToken, mTaskDescription);
         } catch (RemoteException e) {
         }
     }
