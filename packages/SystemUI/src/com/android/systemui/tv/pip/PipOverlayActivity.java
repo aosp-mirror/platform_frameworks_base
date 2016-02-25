@@ -35,6 +35,7 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     private final PipManager mPipManager = PipManager.getInstance();
     private final Handler mHandler = new Handler();
     private View mGuideOverlayView;
+    private View mGuideButtonsView;
     private final Runnable mHideGuideOverlayRunnable = new Runnable() {
         public void run() {
             mGuideOverlayView.setVisibility(View.INVISIBLE);
@@ -46,13 +47,21 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         super.onCreate(bundle);
         setContentView(R.layout.tv_pip_overlay);
         mGuideOverlayView = findViewById(R.id.guide_overlay);
+        mGuideButtonsView = findViewById(R.id.guide_buttons);
         mPipManager.addListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mGuideOverlayView.setVisibility(View.VISIBLE);
+        // TODO: Implement animation for this
+        if (!mPipManager.isRecentsShown()) {
+            mGuideOverlayView.setVisibility(View.VISIBLE);
+            mGuideButtonsView.setVisibility(View.INVISIBLE);
+        } else {
+            mGuideOverlayView.setVisibility(View.INVISIBLE);
+            mGuideButtonsView.setVisibility(View.VISIBLE);
+        }
         mHandler.removeCallbacks(mHideGuideOverlayRunnable);
         mHandler.postDelayed(mHideGuideOverlayRunnable, SHOW_GUIDE_OVERLAY_VIEW_DURATION_MS);
     }
