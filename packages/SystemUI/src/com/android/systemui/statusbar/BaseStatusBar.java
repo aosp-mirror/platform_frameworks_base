@@ -1872,7 +1872,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry;
     }
 
-    protected StatusBarIconView createIcon(StatusBarNotification sbn) {
+    public StatusBarIconView createIcon(StatusBarNotification sbn) {
         // Construct the icon.
         Notification n = sbn.getNotification();
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
