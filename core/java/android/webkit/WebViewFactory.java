@@ -262,11 +262,11 @@ public final class WebViewFactory {
                         "For security reasons, WebView is not allowed in privileged processes");
             }
 
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
                 Class<WebViewFactoryProvider> providerClass = getProviderClass();
 
-                StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
                 try {
                     sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
@@ -278,10 +278,10 @@ public final class WebViewFactory {
                     throw new AndroidRuntimeException(e);
                 } finally {
                     Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-                    StrictMode.setThreadPolicy(oldPolicy);
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
+                StrictMode.setThreadPolicy(oldPolicy);
             }
         }
     }
