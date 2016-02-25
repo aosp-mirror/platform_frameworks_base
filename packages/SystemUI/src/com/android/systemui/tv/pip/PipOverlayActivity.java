@@ -37,8 +37,7 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
     private View mGuideOverlayView;
     private final Runnable mHideGuideOverlayRunnable = new Runnable() {
         public void run() {
-            // TODO: Uncomment this after the b/27224884 is fixed.
-            //mGuideOverlayView.setVisibility(View.INVISIBLE);
+            mGuideOverlayView.setVisibility(View.INVISIBLE);
         }
     };
 
