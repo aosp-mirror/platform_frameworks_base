@@ -61,6 +61,7 @@ public class ManifestConfigSource implements ConfigSource {
             } catch (PackageManager.NameNotFoundException e) {
                 throw new RuntimeException("Failed to look up ApplicationInfo", e);
             }
+            int targetSdkVersion = info.targetSdkVersion;
             int configResourceId = 0;
             if (info != null && info.metaData != null) {
                 configResourceId = info.metaData.getInt(META_DATA_NETWORK_SECURITY_CONFIG);
@@ -74,14 +75,15 @@ public class ManifestConfigSource implements ConfigSource {
                             + mContext.getResources().getResourceEntryName(configResourceId)
                             + " debugBuild: " + debugBuild);
                 }
-                source = new XmlConfigSource(mContext, configResourceId, debugBuild);
+                source = new XmlConfigSource(mContext, configResourceId, debugBuild,
+                        targetSdkVersion);
             } else {
                 if (DBG) {
                     Log.d(LOG_TAG, "No Network Security Config specified, using platform default");
                 }
                 boolean usesCleartextTraffic =
                         (info.flags & ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC) != 0;
-                source = new DefaultConfigSource(usesCleartextTraffic);
+                source = new DefaultConfigSource(usesCleartextTraffic, targetSdkVersion);
             }
             mConfigSource = source;
             return mConfigSource;
@@ -92,11 +94,11 @@ public class ManifestConfigSource implements ConfigSource {
 
         private final NetworkSecurityConfig mDefaultConfig;
 
-        public DefaultConfigSource(boolean usesCleartextTraffic) {
-            mDefaultConfig = NetworkSecurityConfig.getDefaultBuilder()
+        public DefaultConfigSource(boolean usesCleartextTraffic, int targetSdkVersion) {
+            mDefaultConfig = NetworkSecurityConfig.getDefaultBuilder(targetSdkVersion)
                     .setCleartextTrafficPermitted(usesCleartextTraffic)
                     .build();
-       }
+        }
 
         @Override
         public NetworkSecurityConfig getDefaultConfig() {
