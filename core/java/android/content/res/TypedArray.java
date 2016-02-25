@@ -426,7 +426,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -444,13 +446,13 @@ public class TypedArray {
             return defValue;
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to color: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to color: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -541,7 +543,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -551,13 +555,13 @@ public class TypedArray {
             return data[index+AssetManager.STYLE_DATA];
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to integer: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to integer: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -587,7 +591,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -597,13 +603,13 @@ public class TypedArray {
                     data[index + AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to dimension: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -634,7 +640,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -644,13 +652,13 @@ public class TypedArray {
                     data[index + AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to dimension: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -682,7 +690,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -692,13 +702,13 @@ public class TypedArray {
                 data[index+AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to dimension: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to dimension: type=0x" + Integer.toHexString(type));
     }
 
     /**
@@ -724,7 +734,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type >= TypedValue.TYPE_FIRST_INT
@@ -735,9 +747,9 @@ public class TypedArray {
                 data[index+AssetManager.STYLE_DATA], mMetrics);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
         throw new UnsupportedOperationException(getPositionDescription()
@@ -800,7 +812,9 @@ public class TypedArray {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
 
+        final int attrIndex = index;
         index *= AssetManager.STYLE_NUM_ENTRIES;
+
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         if (type == TypedValue.TYPE_NULL) {
@@ -810,13 +824,13 @@ public class TypedArray {
                 data[index+AssetManager.STYLE_DATA], base, pbase);
         } else if (type == TypedValue.TYPE_ATTRIBUTE) {
             final TypedValue value = mValue;
-            getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value);
+            getValueAt(index, value);
             throw new UnsupportedOperationException(
-                    "Failed to resolve attribute at index " + index + ": " + value);
+                    "Failed to resolve attribute at index " + attrIndex + ": " + value);
         }
 
-        throw new UnsupportedOperationException("Can't convert to fraction: type=0x"
-                + Integer.toHexString(type));
+        throw new UnsupportedOperationException("Can't convert value at index " + attrIndex
+                + " to fraction: type=0x" + Integer.toHexString(type));
     }
 
     /**
