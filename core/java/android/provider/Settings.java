@@ -58,6 +58,7 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.LocaleList;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
@@ -2071,6 +2072,8 @@ public final class Settings {
             if (outConfig.fontScale < 0) {
                 outConfig.fontScale = 1;
             }
+            outConfig.setLocales(LocaleList.forLanguageTags(
+                    Settings.System.getStringForUser(cr, SYSTEM_LOCALES, userHandle)));
         }
 
         /**
@@ -2079,6 +2082,9 @@ public final class Settings {
          */
         public static void clearConfiguration(Configuration inoutConfig) {
             inoutConfig.fontScale = 0;
+            if (!inoutConfig.userSetLocale) {
+                inoutConfig.setLocales(LocaleList.getEmptyLocaleList());
+            }
         }
 
         /**
@@ -2096,12 +2102,15 @@ public final class Settings {
         /** @hide */
         public static boolean putConfigurationForUser(ContentResolver cr, Configuration config,
                 int userHandle) {
-            return Settings.System.putFloatForUser(cr, FONT_SCALE, config.fontScale, userHandle);
+            return Settings.System.putFloatForUser(cr, FONT_SCALE, config.fontScale, userHandle) &&
+                    Settings.System.putStringForUser(
+                            cr, SYSTEM_LOCALES, config.getLocales().toLanguageTags(), userHandle);
         }
 
         /** @hide */
         public static boolean hasInterestingConfigurationChanges(int changes) {
-            return (changes&ActivityInfo.CONFIG_FONT_SCALE) != 0;
+            return (changes & ActivityInfo.CONFIG_FONT_SCALE) != 0 ||
+                    (changes & ActivityInfo.CONFIG_LOCALE) != 0;
         }
 
         /** @deprecated - Do not use */
@@ -2478,6 +2487,18 @@ public final class Settings {
                 }
             }
         };
+
+        /**
+         * The serialized system locale value.
+         *
+         * Do not use this value directory.
+         * To get system locale, use {@link android.util.LocaleList#getDefault} instead.
+         * To update system locale, use {@link com.android.internal.app.LocalePicker#updateLocales}
+         * instead.
+         * @hide
+         */
+        public static final String SYSTEM_LOCALES = "system_locales";
+
 
         /**
          * Name of an application package to be debugged.
