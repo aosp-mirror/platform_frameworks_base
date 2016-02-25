@@ -29,9 +29,7 @@ LOCAL_AAPT_FLAGS := --auto-add-overlay \
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
     $(call all-Iaidl-files-under, src) \
-    $(call all-java-files-under, ../src) \
-    $(call all-proto-files-under, ../src) \
-    src/com/android/systemui/EventLogTags.logtags
+    $(call all-java-files-under, ../src)
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
     frameworks/support/v7/preference/res \
@@ -53,7 +51,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v7-preference \
     android-support-v7-appcompat \
     android-support-v14-preference \
-    android-support-v17-leanback
+    android-support-v17-leanback \
+    SystemUI-proto-tags
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken

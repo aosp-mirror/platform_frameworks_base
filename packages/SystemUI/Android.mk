@@ -1,10 +1,24 @@
 LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := SystemUI-proto-tags
+
+LOCAL_SRC_FILES := $(call all-proto-files-under,src) \
+    src/com/android/systemui/EventLogTags.logtags
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := nano
+LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
+
+# ------------------
+
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-proto-files-under,src) $(call all-Iaidl-files-under, src) \
-    src/com/android/systemui/EventLogTags.logtags
+LOCAL_SRC_FILES := $(call all-java-files-under, src) $(call all-Iaidl-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     Keyguard \
@@ -13,13 +27,12 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v7-appcompat \
     android-support-v14-preference \
     android-support-v17-leanback \
-    framework-protos
+    framework-protos \
+    SystemUI-proto-tags
 
 LOCAL_JAVA_LIBRARIES := telephony-common
 
 LOCAL_PACKAGE_NAME := SystemUI
-LOCAL_PROTOC_OPTIMIZE_TYPE := nano
-LOCAL_PROTO_JAVA_OUTPUT_PARAMS := optional_field_style=accessors
 LOCAL_CERTIFICATE := platform
 LOCAL_PRIVILEGED_MODULE := true
 
