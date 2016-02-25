@@ -20,6 +20,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IShortcutService;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
@@ -566,4 +567,8 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void getStableInsets(Rect outInsets) throws RemoteException {
     }
+
+    @Override
+    public void registerShortcutKey(long shortcutCode, IShortcutService service)
+        throws RemoteException {}
 }
