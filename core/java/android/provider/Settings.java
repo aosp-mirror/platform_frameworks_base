@@ -7890,6 +7890,52 @@ public final class Settings {
         public static final String DOCK_AUDIO_MEDIA_ENABLED = "dock_audio_media_enabled";
 
         /**
+         * The surround sound formats AC3, DTS or IEC61937 are
+         * available for use if they are detected.
+         * This is the default mode.
+         *
+         * Note that AUTO is equivalent to ALWAYS for Android TVs and other
+         * devices that have an S/PDIF output. This is because S/PDIF
+         * is unidirectional and the TV cannot know if a decoder is
+         * connected. So it assumes they are always available.
+         * @hide
+         */
+         public static final int ENCODED_SURROUND_OUTPUT_AUTO = 0;
+
+        /**
+         * AC3, DTS or IEC61937 are NEVER available, even if they
+         * are detected by the hardware. Those formats will not be
+         * reported.
+         *
+         * An example use case would be an AVR reports that it is capable of
+         * surround sound decoding but is broken. If NEVER is chosen
+         * then apps must use PCM output instead of encoded output.
+         * @hide
+         */
+         public static final int ENCODED_SURROUND_OUTPUT_NEVER = 1;
+
+        /**
+         * AC3, DTS or IEC61937 are ALWAYS available, even if they
+         * are not detected by the hardware. Those formats will be
+         * reported as part of the HDMI output capability. Applications
+         * are then free to use either PCM or encoded output.
+         *
+         * An example use case would be a when TV was connected over
+         * TOS-link to an AVR. But the TV could not see it because TOS-link
+         * is unidirectional.
+         * @hide
+         */
+         public static final int ENCODED_SURROUND_OUTPUT_ALWAYS = 2;
+
+        /**
+         * Set to ENCODED_SURROUND_OUTPUT_AUTO,
+         * ENCODED_SURROUND_OUTPUT_NEVER or
+         * ENCODED_SURROUND_OUTPUT_ALWAYS
+         * @hide
+         */
+        public static final String ENCODED_SURROUND_OUTPUT = "encoded_surround_output";
+
+        /**
          * Persisted safe headphone volume management state by AudioService
          * @hide
          */
@@ -8205,6 +8251,7 @@ public final class Settings {
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
             DOCK_AUDIO_MEDIA_ENABLED,
+            ENCODED_SURROUND_OUTPUT,
             LOW_POWER_MODE_TRIGGER_LEVEL
         };
 
