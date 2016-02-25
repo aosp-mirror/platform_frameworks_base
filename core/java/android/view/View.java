@@ -18916,7 +18916,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         transformFromViewToWindowSpace(outLocation);
     }
 
-    void transformFromViewToWindowSpace(@Size(2) int[] inOutLocation) {
+    /** @hide */
+    public void transformFromViewToWindowSpace(@Size(2) int[] inOutLocation) {
         if (inOutLocation == null || inOutLocation.length < 2) {
             throw new IllegalArgumentException("inOutLocation must be an array of two integers");
         }
