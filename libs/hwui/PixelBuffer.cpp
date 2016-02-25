@@ -36,11 +36,13 @@ public:
     CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
-    void unmap() override;
 
     uint8_t* getMappedPointer() const override;
 
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
+
+protected:
+    void unmap() override;
 
 private:
     std::unique_ptr<uint8_t[]> mBuffer;
@@ -81,11 +83,13 @@ public:
     ~GpuPixelBuffer();
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
-    void unmap() override;
 
     uint8_t* getMappedPointer() const override;
 
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
+
+protected:
+    void unmap() override;
 
 private:
     GLuint mBuffer;
@@ -118,6 +122,7 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
             LOG_ALWAYS_FATAL("Failed to map PBO");
         }
         mAccessMode = mode;
+        mCaches.pixelBufferState().unbind();
     }
 
     return mMappedPointer;
@@ -147,6 +152,7 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
     unmap();
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat,
             GL_UNSIGNED_BYTE, reinterpret_cast<void*>(offset));
+    mCaches.pixelBufferState().unbind();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
