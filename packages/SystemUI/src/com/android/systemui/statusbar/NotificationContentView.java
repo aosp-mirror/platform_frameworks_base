@@ -401,10 +401,14 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getMinHeight() {
-        if (mIsChildInGroup && !isGroupExpanded()) {
-            return mSingleLineView.getHeight();
-        } else {
+        return getMinHeight(false /* likeGroupExpanded */);
+    }
+
+    public int getMinHeight(boolean likeGroupExpanded) {
+        if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded()) {
             return mContractedChild.getHeight();
+        } else {
+            return mSingleLineView.getHeight();
         }
     }
 
@@ -535,8 +539,11 @@ public class NotificationContentView extends FrameLayout {
      */
     private int calculateVisibleType() {
         if (mUserExpanding) {
-            int expandedVisualType = getVisualTypeForHeight(
-                    mContainingNotification.getMaxExpandHeight());
+            int height = !mIsChildInGroup || isGroupExpanded()
+                    || mContainingNotification.isExpanded()
+                    ? mContainingNotification.getMaxContentHeight()
+                    : mContainingNotification.getShowingLayout().getMinHeight();
+            int expandedVisualType = getVisualTypeForHeight(height);
             int collapsedVisualType = getVisualTypeForHeight(
                     mContainingNotification.getMinExpandHeight());
             return mTransformationStartVisibleType == collapsedVisualType
@@ -552,7 +559,7 @@ public class NotificationContentView extends FrameLayout {
         if (!noExpandedChild && viewHeight == mExpandedChild.getHeight()) {
             return VISIBLE_TYPE_EXPANDED;
         }
-        if (mIsChildInGroup && !isGroupExpanded()) {
+        if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded()) {
             return VISIBLE_TYPE_SINGLELINE;
         }
 
