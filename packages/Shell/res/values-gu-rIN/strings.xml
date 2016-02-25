@@ -20,7 +20,7 @@
     <string name="bugreport_finished_title" msgid="2293711546892863898">"બગ રિપોર્ટ કેપ્ચર કરી"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"તમારી બગ રિપોર્ટ શેર કરવા માટે ડાબે સ્વાઇપ કરો"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"તમારી બગ રિપોર્ટ શેર કરવા માટે ટચ કરો"</string>
-    <string name="bugreport_confirm" msgid="5130698467795669780">"બગ રિપોર્ટ્સ વ્યક્તિગત અને ખાનગી માહિતી સહિત, સિસ્ટમની વિભિન્ન લૉગ ફાઇલોનો ડેટા ધરાવે છે. બગ રિપોર્ટ્સ ફક્ત તમે વિશ્વાસ કરતા હો તે એપ્લિકેશન્સ અને લોકો સાથે જ શેર કરો."</string>
-    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"આગલી વખતે આ સંદેશ દર્શાવો"</string>
+    <string name="bugreport_confirm" msgid="5130698467795669780">"બગ રિપોર્ટ્સ વ્યક્તિગત અને ખાનગી માહિતી સહિત, સિસ્ટમની વિભિન્ન લૉગ ફાઇલોનો ડેટા ધરાવે છે. બગ રિપોર્ટ્સ ફક્ત તમે વિશ્વાસ કરતા હો તે એપ્લિકેશનો અને લોકો સાથે જ શેર કરો."</string>
+    <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"આગલી વખતે આ સંદેશ બતાવો"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"બગ રિપોર્ટ્સ"</string>
 </resources>

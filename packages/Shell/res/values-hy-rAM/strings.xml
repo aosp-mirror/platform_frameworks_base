@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Խեցի"</string>
-    <string name="bugreport_finished_title" msgid="2293711546892863898">"Վրիպակի զեկույց ստացվեց"</string>
+    <string name="bugreport_finished_title" msgid="2293711546892863898">"Վրիպակի զեկույց է ստացվել"</string>
     <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Սահեցրեք ձախ՝ սխալի հաշվետվությունը համօգտագործելու համար"</string>
     <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Հպեք` ձեր վրիպակի մասին զեկույցը տարածելու համար"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Վրիպակի զեկույցները պարունակում են տվյալներ համակարգի տարբեր մուտքի ֆայլերից, այդ թվում նաև անհատական ​​և գաղտնի տեղեկություններ: Վրիպակի զեկույցները կիսեք միայն այն հավելվածների և մարդկանց հետ, որոնց վստահում եք:"</string>

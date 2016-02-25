@@ -18,8 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="3701846017049540910">"Shell"</string>
     <string name="bugreport_finished_title" msgid="2293711546892863898">"Foutenrapport vastgelegd"</string>
-    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Veeg naar links om uw bugmelding te delen"</string>
-    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Raak aan om uw foutenrapport te delen"</string>
+    <string name="bugreport_finished_text" product="watch" msgid="8389172248433597683">"Veeg naar links om je bugmelding te delen"</string>
+    <string name="bugreport_finished_text" product="default" msgid="3559904746859400732">"Raak aan om je foutenrapport te delen"</string>
     <string name="bugreport_confirm" msgid="5130698467795669780">"Foutenrapporten bevatten gegevens uit de verschillende logbestanden van het systeem, waaronder persoonlijke en privégegevens. Deel foutenrapporten alleen met apps en mensen die u vertrouwt."</string>
     <string name="bugreport_confirm_repeat" msgid="4926842460688645058">"Dit bericht de volgende keer weergeven"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Foutenrapporten"</string>
