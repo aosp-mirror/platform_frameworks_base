@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -157,6 +158,25 @@ class AppWindowToken extends WindowToken {
             } catch (RemoteException e) {
             }
         }
+    }
+
+    void onFirstWindowDrawn(WindowState win, WindowStateAnimator winAnimator) {
+        firstWindowDrawn = true;
+
+        // We now have a good window to show, remove dead placeholders
+        removeAllDeadWindows();
+
+        if (startingData != null) {
+            if (DEBUG_STARTING_WINDOW || DEBUG_ANIM) Slog.v(TAG, "Finish starting "
+                    + win.mToken + ": first real window is shown, no animation");
+            // If this initial window is animating, stop it -- we will do an animation to reveal
+            // it from behind the starting window, so there is no need for it to also be doing its
+            // own stuff.
+            winAnimator.clearAnimation();
+            winAnimator.mService.mFinishedStarting.add(this);
+            winAnimator.mService.mH.sendEmptyMessage(H.FINISHED_STARTING);
+        }
+        updateReportedVisibilityLocked();
     }
 
     void updateReportedVisibilityLocked() {
@@ -357,6 +377,9 @@ class AppWindowToken extends WindowToken {
     void notifyAppStopped() {
         mAppStopped = true;
         destroySurfaces();
+
+        // Remove any starting window that was added for this app if they are still around.
+        mTask.mService.scheduleRemoveStartingWindowLocked(this);
     }
 
     /**
@@ -594,6 +617,9 @@ class AppWindowToken extends WindowToken {
         if (paused) {
             pw.print(prefix); pw.print("paused="); pw.println(paused);
         }
+        if (mAppStopped) {
+            pw.print(prefix); pw.print("mAppStopped="); pw.println(mAppStopped);
+        }
         if (numInterestingWindows != 0 || numDrawnWindows != 0
                 || allDrawn || mAppAnimator.allDrawn) {
             pw.print(prefix); pw.print("numInterestingWindows=");
@@ -619,7 +645,7 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("startingWindow="); pw.print(startingWindow);
                     pw.print(" startingView="); pw.print(startingView);
                     pw.print(" startingDisplayed="); pw.print(startingDisplayed);
-                    pw.print(" startingMoved"); pw.println(startingMoved);
+                    pw.print(" startingMoved="); pw.println(startingMoved);
         }
         if (!mFrozenBounds.isEmpty()) {
             pw.print(prefix); pw.print("mFrozenBounds="); pw.print(mFrozenBounds);
