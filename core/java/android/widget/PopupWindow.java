@@ -1632,7 +1632,6 @@ public class PopupWindow {
 
         final PopupDecorView decorView = mDecorView;
         final View contentView = mContentView;
-        final OnDismissListener dismissListener = mOnDismissListener;
 
         final ViewGroup contentHolder;
         final ViewParent contentParent = contentView.getParent();
@@ -1676,16 +1675,19 @@ public class PopupWindow {
                     new TransitionListenerAdapter() {
                         @Override
                         public void onTransitionEnd(Transition transition) {
-                            dismissImmediate(decorView, contentHolder,
-                                    contentView, dismissListener);
+                            dismissImmediate(decorView, contentHolder, contentView);
                         }
                     });
         } else {
-            dismissImmediate(decorView, contentHolder, contentView, dismissListener);
+            dismissImmediate(decorView, contentHolder, contentView);
         }
 
         // Clears the anchor view.
         unregisterForViewTreeChanges();
+
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
+        }
     }
 
     /**
@@ -1727,8 +1729,7 @@ public class PopupWindow {
      * Removes the popup from the window manager and tears down the supporting
      * view hierarchy, if necessary.
      */
-    private void dismissImmediate(View decorView, ViewGroup contentHolder,
-            View contentView, OnDismissListener listener) {
+    private void dismissImmediate(View decorView, ViewGroup contentHolder, View contentView) {
         // If this method gets called and the decor view doesn't have a parent,
         // then it was either never added or was already removed. That should
         // never happen, but it's worth checking to avoid potential crashes.
@@ -1745,10 +1746,6 @@ public class PopupWindow {
         mDecorView = null;
         mBackgroundView = null;
         mIsTransitioningToDismiss = false;
-
-        if (mOnDismissListener != null) {
-            mOnDismissListener.onDismiss();
-        }
     }
 
     /**
