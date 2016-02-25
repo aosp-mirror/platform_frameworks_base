@@ -1319,6 +1319,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + notification.getKey());
                 }
+            } else if (mNotificationData.getImportance(notification.getKey())
+                    < NotificationListenerService.Ranking.IMPORTANCE_MAX) {
+                if (DEBUG) {
+                    Log.d(TAG, "No Fullscreen intent: not important enough: "
+                            + notification.getKey());
+                }
             } else {
                 // Stop screensaver if the notification has a full-screen intent.
                 // (like an incoming phone call)

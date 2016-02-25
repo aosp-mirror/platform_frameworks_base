@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MIN;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
@@ -33,6 +34,8 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.EventLogTags;
@@ -55,6 +58,8 @@ import java.util.Objects;
  * {@hide}
  */
 public final class NotificationRecord {
+    static final String TAG = "NotificationRecord";
+    static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     final StatusBarNotification sbn;
     final int mOriginalFlags;
     private final Context mContext;
@@ -123,6 +128,8 @@ public final class NotificationRecord {
 
         switch (n.priority) {
             case Notification.PRIORITY_MIN:
+                importance = IMPORTANCE_MIN;
+                break;
             case Notification.PRIORITY_LOW:
                 importance = IMPORTANCE_LOW;
                 break;
@@ -143,25 +150,15 @@ public final class NotificationRecord {
                 || n.sound != null
                 || n.vibrate != null;
         stats.isNoisy = isNoisy;
-        if (!isNoisy && importance > IMPORTANCE_DEFAULT) {
-            importance = IMPORTANCE_DEFAULT;
+
+        if (!isNoisy && importance > IMPORTANCE_LOW) {
+            importance = IMPORTANCE_LOW;
         }
 
-        try {
-            final ApplicationInfo applicationInfo =
-                    mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
-                            0, sbn.getUser().getIdentifier());
-            if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.N) {
-                if (isNoisy) {
-                    if (importance >= IMPORTANCE_HIGH) {
-                        importance = IMPORTANCE_MAX;
-                    } else {
-                        importance = IMPORTANCE_HIGH;
-                    }
-                }
+        if (isNoisy) {
+            if (importance < IMPORTANCE_DEFAULT) {
+                importance = IMPORTANCE_DEFAULT;
             }
-        } catch (NameNotFoundException e) {
-            // oh well.
         }
 
         if (n.fullScreenIntent != null) {

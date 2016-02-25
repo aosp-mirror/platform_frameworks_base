@@ -34570,10 +34570,11 @@ package android.service.notification {
     method public int getSuppressedVisualEffects();
     method public boolean isAmbient();
     method public boolean matchesInterruptionFilter();
-    field public static final int IMPORTANCE_DEFAULT = 2; // 0x2
-    field public static final int IMPORTANCE_HIGH = 3; // 0x3
-    field public static final int IMPORTANCE_LOW = 1; // 0x1
-    field public static final int IMPORTANCE_MAX = 4; // 0x4
+    field public static final int IMPORTANCE_DEFAULT = 3; // 0x3
+    field public static final int IMPORTANCE_HIGH = 4; // 0x4
+    field public static final int IMPORTANCE_LOW = 2; // 0x2
+    field public static final int IMPORTANCE_MAX = 5; // 0x5
+    field public static final int IMPORTANCE_MIN = 1; // 0x1
     field public static final int IMPORTANCE_NONE = 0; // 0x0
     field public static final int IMPORTANCE_UNSPECIFIED = -1000; // 0xfffffc18
   }
