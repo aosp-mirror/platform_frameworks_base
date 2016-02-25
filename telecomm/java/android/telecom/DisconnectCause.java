@@ -92,8 +92,8 @@ public final class DisconnectCause implements Parcelable {
     /**
      * Creates a new DisconnectCause.
      *
-     * @param label The localized label to show to the user to explain the disconnect.
      * @param code The code for the disconnect cause.
+     * @param label The localized label to show to the user to explain the disconnect.
      * @param description The localized description to show to the user to explain the disconnect.
      * @param reason The reason for the disconnect.
      */

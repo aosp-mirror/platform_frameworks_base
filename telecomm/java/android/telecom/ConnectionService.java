@@ -1053,6 +1053,16 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Returns all the active {@code Conference}s for which this {@code ConnectionService}
+     * has taken responsibility.
+     *
+     * @return A collection of {@code Conference}s created by this {@code ConnectionService}.
+     */
+    public final Collection<Conference> getAllConferences() {
+        return mConferenceById.values();
+    }
+
+    /**
      * Create a {@code Connection} given an incoming request. This is used to attach to existing
      * incoming calls.
      *
