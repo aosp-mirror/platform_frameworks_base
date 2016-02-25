@@ -46,7 +46,7 @@ public class HeaderTransformState extends TransformState {
     }
 
     @Override
-    public boolean transformViewTo(TransformState otherState, Runnable endRunnable) {
+    public boolean transformViewTo(TransformState otherState, float transformationAmount) {
         // if the transforming notification has a header, we have ensured that it looks the same
         // but the expand button, so lets fade just that one and transform the work profile icon.
         if (!(mTransformedView instanceof NotificationHeaderView)) {
@@ -62,14 +62,14 @@ public class HeaderTransformState extends TransformState {
             if (headerChild != mExpandButton) {
                 headerChild.setVisibility(View.INVISIBLE);
             } else {
-                CrossFadeHelper.fadeOut(mExpandButton, endRunnable);
+                CrossFadeHelper.fadeOut(mExpandButton, transformationAmount);
             }
         }
         return true;
     }
 
     @Override
-    public void transformViewFrom(TransformState otherState) {
+    public void transformViewFrom(TransformState otherState, float transformationAmount) {
         // if the transforming notification has a header, we have ensured that it looks the same
         // but the expand button, so lets fade just that one and transform the work profile icon.
         if (!(mTransformedView instanceof NotificationHeaderView)) {
@@ -85,12 +85,13 @@ public class HeaderTransformState extends TransformState {
                 continue;
             }
             if (headerChild == mExpandButton) {
-                CrossFadeHelper.fadeIn(mExpandButton);
+                CrossFadeHelper.fadeIn(mExpandButton, transformationAmount);
             } else {
                 headerChild.setVisibility(View.VISIBLE);
                 if (headerChild == mWorkProfileIcon) {
-                    mWorkProfileState.animateViewFrom(
-                            ((HeaderTransformState) otherState).mWorkProfileState);
+                    mWorkProfileState.transformViewFullyFrom(
+                            ((HeaderTransformState) otherState).mWorkProfileState,
+                            transformationAmount);
                 }
             }
         }
