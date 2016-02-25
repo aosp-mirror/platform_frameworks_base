@@ -441,5 +441,11 @@ message MetricsEvent {
 
     // Tuner: Change do not disturb volume buttons shortcut.
     ACTION_TUNER_DO_NOT_DISTURB_VOLUME_SHORTCUT = 315;
+
+    // Logs the action the user takes when an app crashed.
+    ACTION_APP_CRASH = 316;
+
+    // Logs the action the user takes when an app ANR'd.
+    ACTION_APP_ANR = 317;
   }
 }
