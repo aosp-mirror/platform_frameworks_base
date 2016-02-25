@@ -235,7 +235,7 @@
     <dimen name="glowpadview_inner_radius">15dip</dimen>
 
     <!-- The size of the icon in the recents task view header. -->
-    <dimen name="recents_task_view_header_icon_width">64dp</dimen>
+    <dimen name="recents_task_view_header_icon_width">56dp</dimen>
     <dimen name="recents_task_view_header_icon_height">@dimen/recents_task_bar_height</dimen>
 
     <!-- The size of a button in the recents task view header. -->
@@ -263,7 +263,7 @@
     <dimen name="recents_task_view_affiliate_group_enter_offset">32dp</dimen>
 
     <!-- The height of a task view bar. -->
-    <dimen name="recents_task_bar_height">56dp</dimen>
+    <dimen name="recents_task_bar_height">50dp</dimen>
 
     <!-- The height of the search bar space. -->
     <dimen name="recents_search_bar_space_height">64dp</dimen>
