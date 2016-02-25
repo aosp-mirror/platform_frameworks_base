@@ -602,7 +602,8 @@ public abstract class PackageManager {
     /**
      * Flag parameter for {@link #installPackage} to indicate that it is okay
      * to install an update to an app where the newly installed app has a lower
-     * version code than the currently installed app.
+     * version code than the currently installed app. This is permitted only if
+     * the currently installed app is marked debuggable.
      *
      * @hide
      */
