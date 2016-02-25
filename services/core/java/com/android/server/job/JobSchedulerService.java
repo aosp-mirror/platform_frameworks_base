@@ -19,6 +19,7 @@ package com.android.server.job;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,6 +55,7 @@ import android.util.SparseArray;
 
 import android.util.SparseBooleanArray;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobStatusFunctor;
@@ -65,6 +67,8 @@ import com.android.server.job.controllers.IdleController;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.TimeController;
+
+import libcore.util.EmptyArray;
 
 /**
  * Responsible for taking jobs representing work to be performed by a client app, and determining
@@ -142,7 +146,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
      */
     final ArrayList<JobStatus> mPendingJobs = new ArrayList<>();
 
-    final ArrayList<Integer> mStartedUsers = new ArrayList<>();
+    int[] mStartedUsers = EmptyArray.INT;
 
     final JobHandler mHandler;
     final JobSchedulerStub mJobSchedulerStub;
@@ -228,14 +232,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
     @Override
     public void onStartUser(int userHandle) {
-        mStartedUsers.add(userHandle);
+        mStartedUsers = ArrayUtils.appendInt(mStartedUsers, userHandle);
+        // Let's kick any outstanding jobs for this user.
+        mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+    }
+
+    @Override
+    public void onUnlockUser(int userHandle) {
         // Let's kick any outstanding jobs for this user.
         mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
     }
 
     @Override
     public void onStopUser(int userHandle) {
-        mStartedUsers.remove(Integer.valueOf(userHandle));
+        mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
     }
 
     /**
@@ -936,18 +946,31 @@ public final class JobSchedulerService extends com.android.server.SystemService
          *      - It's not pending.
          *      - It's not already running on a JSC.
          *      - The user that requested the job is running.
+         *      - The component is enabled and runnable.
          */
         private boolean isReadyToBeExecutedLocked(JobStatus job) {
             final boolean jobReady = job.isReady();
             final boolean jobPending = mPendingJobs.contains(job);
             final boolean jobActive = isCurrentlyActiveLocked(job);
-            final boolean userRunning = mStartedUsers.contains(job.getUserId());
+
+            final int userId = job.getUserId();
+            final boolean userStarted = ArrayUtils.contains(mStartedUsers, userId);
+            final boolean componentPresent;
+            try {
+                componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+                        job.getServiceComponent(), PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                        userId) != null);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+
             if (DEBUG) {
                 Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
                         + " ready=" + jobReady + " pending=" + jobPending
-                        + " active=" + jobActive + " userRunning=" + userRunning);
+                        + " active=" + jobActive + " userStarted=" + userStarted
+                        + " componentPresent=" + componentPresent);
             }
-            return userRunning && jobReady && !jobPending && !jobActive;
+            return userStarted && componentPresent && jobReady && !jobPending && !jobActive;
         }
 
         /**
@@ -1295,11 +1318,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     void dumpInternal(final PrintWriter pw) {
         final long now = SystemClock.elapsedRealtime();
         synchronized (mLock) {
-            pw.print("Started users: ");
-            for (int i=0; i<mStartedUsers.size(); i++) {
-                pw.print("u" + mStartedUsers.get(i) + " ");
-            }
-            pw.println();
+            pw.println("Started users: " + Arrays.toString(mStartedUsers));
             pw.println("Registered jobs:");
             if (mJobs.size() > 0) {
                 mJobs.forEachJob(new JobStatusFunctor() {
@@ -1319,7 +1338,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         pw.print(" active=");
                         pw.print(isCurrentlyActiveLocked(job));
                         pw.print(" user=");
-                        pw.print(mStartedUsers.contains(job.getUserId()));
+                        pw.print(ArrayUtils.contains(mStartedUsers, job.getUserId()));
                         pw.println(")");
                     }
                 });
