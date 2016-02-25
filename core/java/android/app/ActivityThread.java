@@ -4945,11 +4945,7 @@ public final class ActivityThread {
          * This is what ultimately throws {@link FileUriExposedException}.
          */
         if (data.appInfo.targetSdkVersion >= Build.VERSION_CODES.N) {
-            if ("com.android.qxdmlogger".equals(data.appInfo.packageName)) {
-                // STOPSHIP: Fix security on this logger tool
-            } else {
-                StrictMode.enableDeathOnFileUriExposure();
-            }
+            StrictMode.enableDeathOnFileUriExposure();
         }
 
         NetworkSecurityPolicy.getInstance().setCleartextTrafficPermitted(
