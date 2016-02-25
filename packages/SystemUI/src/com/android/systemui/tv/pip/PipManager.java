@@ -65,16 +65,24 @@ public class PipManager {
     public static final int SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH = 0x2;
     private int mSuspendPipResizingReason;
 
+    private static final float SCALE_FACTOR = 1.1f;
+
     private Context mContext;
     private IActivityManager mActivityManager;
     private int mState = STATE_NO_PIP;
     private final Handler mHandler = new Handler();
     private List<Listener> mListeners = new ArrayList<>();
-    private Rect mPipBound;
-    private Rect mMenuModePipBound;
+    private Rect mCurrentPipBounds;
+    private Rect mPipBounds;
+    private Rect mMenuModePipBounds;
+    private Rect mRecentsPipBounds;
+    private Rect mRecentsFocusedPipBounds;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
     private boolean mOnboardingShown;
+
+    private boolean mIsRecentsShown;
+    private boolean mIsPipFocusedInRecent;
 
     private final Runnable mOnActivityPinnedRunnable = new Runnable() {
         @Override
@@ -83,7 +91,7 @@ public class PipManager {
             try {
                 stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
                 if (stackInfo == null) {
-                    Log.w(TAG, "There is no pinned stack");
+                    Log.w(TAG, "Cannot find pinned stack");
                     return;
                 }
             } catch (RemoteException e) {
@@ -94,6 +102,7 @@ public class PipManager {
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
             // Set state to overlay so we show it when the pinned stack animation ends.
             mState = STATE_PIP_OVERLAY;
+            mCurrentPipBounds = mPipBounds;
             launchPipOnboardingActivityIfNeeded();
         }
     };
@@ -133,10 +142,13 @@ public class PipManager {
     private final Runnable mOnPinnedStackAnimationEnded = new Runnable() {
         @Override
         public void run() {
-            if (mState == STATE_PIP_OVERLAY) {
-                showPipOverlay();
-            } else if (mState == STATE_PIP_MENU) {
-                showPipMenu();
+            switch (mState) {
+                case STATE_PIP_OVERLAY:
+                    showPipOverlay();
+                    break;
+                case STATE_PIP_MENU:
+                    showPipMenu();
+                    break;
             }
         }
     };
@@ -177,10 +189,18 @@ public class PipManager {
         mInitialized = true;
         mContext = context;
         Resources res = context.getResources();
-        mPipBound = Rect.unflattenFromString(res.getString(
+        mPipBounds = Rect.unflattenFromString(res.getString(
                 com.android.internal.R.string.config_defaultPictureInPictureBounds));
-        mMenuModePipBound = Rect.unflattenFromString(res.getString(
+        mMenuModePipBounds = Rect.unflattenFromString(res.getString(
                 com.android.internal.R.string.config_centeredPictureInPictureBounds));
+        mRecentsPipBounds = Rect.unflattenFromString(res.getString(
+                com.android.internal.R.string.config_pictureInPictureBoundsInRecents));
+        float scaleBy = (SCALE_FACTOR - 1.0f) / 2;
+        mRecentsFocusedPipBounds = new Rect(
+                (int) (mRecentsPipBounds.left - scaleBy * mRecentsPipBounds.width()),
+                (int) (mRecentsPipBounds.top - scaleBy * mRecentsPipBounds.height()),
+                (int) (mRecentsPipBounds.right + scaleBy * mRecentsPipBounds.width()),
+                (int) (mRecentsPipBounds.bottom + scaleBy * mRecentsPipBounds.height()));
 
         mActivityManager = ActivityManagerNative.getDefault();
         TaskStackListener taskStackListener = new TaskStackListener();
@@ -203,7 +223,7 @@ public class PipManager {
      */
     public void requestTvPictureInPicture() {
         if (DEBUG) Log.d(TAG, "requestTvPictureInPicture()");
-        if (!hasPipTasks()) {
+        if (!isPipShown()) {
             startPip();
         } else if (mState == STATE_PIP_OVERLAY) {
             resizePinnedStack(STATE_PIP_MENU);
@@ -212,7 +232,7 @@ public class PipManager {
 
     private void startPip() {
         try {
-            mActivityManager.moveTopActivityToPinnedStack(FULLSCREEN_WORKSPACE_STACK_ID, mPipBound);
+            mActivityManager.moveTopActivityToPinnedStack(FULLSCREEN_WORKSPACE_STACK_ID, mPipBounds);
         } catch (RemoteException|IllegalArgumentException e) {
             Log.e(TAG, "moveTopActivityToPinnedStack failed", e);
         }
@@ -234,6 +254,9 @@ public class PipManager {
             } catch (RemoteException e) {
                 Log.e(TAG, "removeStack failed", e);
             }
+        }
+        for (int i = mListeners.size() - 1; i >= 0; --i) {
+            mListeners.get(i).onPipActivityClosed();
         }
     }
 
@@ -295,34 +318,97 @@ public class PipManager {
     public void resizePinnedStack(int state) {
         if (DEBUG) Log.d(TAG, "resizePinnedStack() state=" + state);
         mState = state;
-        Rect bounds;
         for (int i = mListeners.size() - 1; i >= 0; --i) {
             mListeners.get(i).onPipResizeAboutToStart();
         }
-        switch (mState) {
-            case STATE_PIP_MENU:
-                bounds = mMenuModePipBound;
-                break;
-            case STATE_NO_PIP:
-                bounds = null;
-                break;
-            default:
-                bounds = mPipBound;
-                break;
-        }
-
         if (mSuspendPipResizingReason != 0) {
             if (DEBUG) Log.d(TAG,
                     "resizePinnedStack() deferring mSuspendPipResizingReason=" +
                             mSuspendPipResizingReason);
             return;
         }
-
+        switch (mState) {
+            case STATE_NO_PIP:
+                mCurrentPipBounds = null;
+                break;
+            case STATE_PIP_MENU:
+                mCurrentPipBounds = mMenuModePipBounds;
+                break;
+            case STATE_PIP_OVERLAY:
+                if (mIsRecentsShown) {
+                    if (mIsPipFocusedInRecent) {
+                        mCurrentPipBounds = mRecentsFocusedPipBounds;
+                    } else {
+                        mCurrentPipBounds = mRecentsPipBounds;
+                    }
+                } else {
+                    mCurrentPipBounds = mPipBounds;
+                }
+                break;
+            default:
+                mCurrentPipBounds = mPipBounds;
+                break;
+        }
         try {
-            mActivityManager.resizeStack(PINNED_STACK_ID, bounds, true, true, true);
+            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds, true, true, true);
         } catch (RemoteException e) {
             Log.e(TAG, "showPipMenu failed", e);
         }
+    }
+
+    /**
+     * Returns the current PIP bound for activities to sync their UI with PIP.
+     */
+    public Rect getPipBounds() {
+        return mCurrentPipBounds;
+    }
+
+    /**
+     * Called when Recents is started.
+     * PIPed activity will be resized accordingly and overlay will show available buttons.
+     */
+    public void onRecentsStarted() {
+        mIsRecentsShown = true;
+        mIsPipFocusedInRecent = false;
+        if (mState == STATE_NO_PIP) {
+            return;
+        }
+        resizePinnedStack(STATE_PIP_OVERLAY);
+    }
+
+    /**
+     * Called when Recents is stopped.
+     * PIPed activity will be resized accordingly and overlay will hide available buttons.
+     */
+    public void onRecentsStopped() {
+        mIsRecentsShown = false;
+        mIsPipFocusedInRecent = false;
+        if (mState == STATE_NO_PIP) {
+            return;
+        }
+        resizePinnedStack(STATE_PIP_OVERLAY);
+    }
+
+    /**
+     * Returns {@code true} if recents is shown.
+     */
+    boolean isRecentsShown() {
+        return mIsRecentsShown;
+    }
+
+    /**
+     * Called when the PIP view in {@link com.android.systemui.recents.tv.RecentsTvActivity}
+     * is focused.
+     * This only resizes pinned stack so it looks like it's in Recents.
+     * This should be called only by {@link com.android.systemui.recents.tv.RecentsTvActivity}.
+     */
+    public void onPipViewFocusChangedInRecents(boolean hasFocus) {
+        mIsPipFocusedInRecent = hasFocus;
+        if (mState != STATE_PIP_OVERLAY) {
+            Log.w(TAG, "There is no pinned stack to handle focus change.");
+            return;
+        }
+        resizePinnedStack(STATE_PIP_OVERLAY);
     }
 
     /**
@@ -360,6 +446,13 @@ public class PipManager {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         }
+    }
+
+    /**
+     * Returns {@code true} if PIP is shown.
+     */
+    public boolean isPipShown() {
+        return hasPipTasks();
     }
 
     private boolean hasPipTasks() {

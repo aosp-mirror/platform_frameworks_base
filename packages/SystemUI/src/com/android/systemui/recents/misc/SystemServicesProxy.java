@@ -998,20 +998,4 @@ public class SystemServicesProxy {
             e.printStackTrace();
         }
     }
-    
-    public void focusPinnedStack() {
-        try {
-            mIam.setFocusedStack(PINNED_STACK_ID);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void focusHomeStack() {
-        try {
-            mIam.setFocusedStack(HOME_STACK_ID);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-    }
 }
