@@ -26,7 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Property;
-import android.widget.ImageButton;
+import android.view.View;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -34,7 +34,7 @@ import com.android.systemui.R;
 /**
  * View for the handle in the docked stack divider.
  */
-public class DividerHandleView extends ImageButton {
+public class DividerHandleView extends View {
 
     private final static Property<DividerHandleView, Integer> WIDTH_PROPERTY
             = new Property<DividerHandleView, Integer>(Integer.class, "width") {

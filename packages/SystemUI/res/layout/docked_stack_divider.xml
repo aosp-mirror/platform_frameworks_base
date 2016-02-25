@@ -27,6 +27,7 @@
     <com.android.systemui.stackdivider.DividerHandleView
         style="@style/DockedDividerHandle"
         android:id="@+id/docked_divider_handle"
+        android:contentDescription="@string/accessibility_divider"
         android:background="@null"/>
 
 </com.android.systemui.stackdivider.DividerView>
