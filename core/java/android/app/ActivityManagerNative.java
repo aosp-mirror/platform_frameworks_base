@@ -1540,6 +1540,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_MEMORY_TRIM_LEVEL_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int level = getMemoryTrimLevel();
+            reply.writeNoException();
+            reply.writeInt(level);
+            return true;
+        }
+
         case ENTER_SAFE_MODE_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             enterSafeMode();
@@ -4873,6 +4881,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    public int getMemoryTrimLevel() throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_MEMORY_TRIM_LEVEL_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int level = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return level;
     }
     public void enterSafeMode() throws RemoteException {
         Parcel data = Parcel.obtain();

@@ -134,6 +134,10 @@ public final class JobStatus {
             sb.append(job.getService().getPackageName());
             sb.append('/');
             sb.append(this.sourceTag);
+            if (sourcePackageName != null) {
+                sb.append('/');
+                sb.append(this.sourcePackageName);
+            }
             this.batteryName = sb.toString();
         } else {
             this.batteryName = job.getService().flattenToShortString();
@@ -433,10 +437,10 @@ public final class JobStatus {
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(" jId=");
         sb.append(job.getId());
-        sb.append(" uid=");
+        sb.append(' ');
         UserHandle.formatUid(sb, callingUid);
         sb.append(' ');
-        sb.append(job.getService().flattenToShortString());
+        sb.append(batteryName);
         return sb.toString();
     }
 
@@ -468,75 +472,71 @@ public final class JobStatus {
     }
 
     // Dumpsys infrastructure
-    public void dump(PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw, String prefix, boolean full) {
         pw.print(prefix); UserHandle.formatUid(pw, callingUid);
         pw.print(" tag="); pw.println(tag);
         pw.print(prefix);
         pw.print("Source: uid="); UserHandle.formatUid(pw, getSourceUid());
         pw.print(" user="); pw.print(getSourceUserId());
         pw.print(" pkg="); pw.println(getSourcePackageName());
-        pw.print(prefix); pw.println("JobInfo:");
-        pw.print(prefix); pw.print("  Service: ");
-        pw.println(job.getService().flattenToShortString());
-        if (job.isPeriodic()) {
-            pw.print(prefix); pw.print("  PERIODIC: interval=");
-            TimeUtils.formatDuration(job.getIntervalMillis(), pw);
-            pw.print(" flex=");
-            TimeUtils.formatDuration(job.getFlexMillis(), pw);
-            pw.println();
-        }
-        if (job.isPersisted()) {
-            pw.print(prefix); pw.println("  PERSISTED");
-        }
-        if (job.getPriority() != 0) {
-            pw.print(prefix); pw.print("  Priority: ");
-            pw.println(job.getPriority());
-        }
-        pw.print(prefix); pw.print("  Requires: charging=");
-        pw.print(job.isRequireCharging());
-        pw.print(" deviceIdle=");
-        pw.println(job.isRequireDeviceIdle());
-        if (job.getTriggerContentUris() != null) {
-            pw.print(prefix); pw.println("  Trigger content URIs:");
-            for (int i=0; i<job.getTriggerContentUris().length; i++) {
-                JobInfo.TriggerContentUri trig = job.getTriggerContentUris()[i];
-                pw.print(prefix); pw.print("    ");
-                pw.print(Integer.toHexString(trig.getFlags()));
-                pw.print(' ' );
-                pw.println(trig.getUri());
+        if (full) {
+            pw.print(prefix); pw.println("JobInfo:"); pw.print(prefix);
+            pw.print("  Service: "); pw.println(job.getService().flattenToShortString());
+            if (job.isPeriodic()) {
+                pw.print(prefix); pw.print("  PERIODIC: interval=");
+                TimeUtils.formatDuration(job.getIntervalMillis(), pw);
+                pw.print(" flex="); TimeUtils.formatDuration(job.getFlexMillis(), pw);
+                pw.println();
             }
-        }
-        if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
-            pw.print(prefix); pw.print("  Network type: ");
-            pw.println(job.getNetworkType());
-        }
-        if (job.getMinLatencyMillis() != 0) {
-            pw.print(prefix); pw.print("  Minimum latency: ");
-            TimeUtils.formatDuration(job.getMinLatencyMillis(), pw);
+            if (job.isPersisted()) {
+                pw.print(prefix); pw.println("  PERSISTED");
+            }
+            if (job.getPriority() != 0) {
+                pw.print(prefix); pw.print("  Priority: "); pw.println(job.getPriority());
+            }
+            pw.print(prefix); pw.print("  Requires: charging=");
+            pw.print(job.isRequireCharging()); pw.print(" deviceIdle=");
+            pw.println(job.isRequireDeviceIdle());
+            if (job.getTriggerContentUris() != null) {
+                pw.print(prefix); pw.println("  Trigger content URIs:");
+                for (int i = 0; i < job.getTriggerContentUris().length; i++) {
+                    JobInfo.TriggerContentUri trig = job.getTriggerContentUris()[i];
+                    pw.print(prefix); pw.print("    ");
+                    pw.print(Integer.toHexString(trig.getFlags()));
+                    pw.print(' '); pw.println(trig.getUri());
+                }
+            }
+            if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
+                pw.print(prefix); pw.print("  Network type: "); pw.println(job.getNetworkType());
+            }
+            if (job.getMinLatencyMillis() != 0) {
+                pw.print(prefix); pw.print("  Minimum latency: ");
+                TimeUtils.formatDuration(job.getMinLatencyMillis(), pw);
+                pw.println();
+            }
+            if (job.getMaxExecutionDelayMillis() != 0) {
+                pw.print(prefix); pw.print("  Max execution delay: ");
+                TimeUtils.formatDuration(job.getMaxExecutionDelayMillis(), pw);
+                pw.println();
+            }
+            pw.print(prefix); pw.print("  Backoff: policy="); pw.print(job.getBackoffPolicy());
+            pw.print(" initial="); TimeUtils.formatDuration(job.getInitialBackoffMillis(), pw);
             pw.println();
-        }
-        if (job.getMaxExecutionDelayMillis() != 0) {
-            pw.print(prefix); pw.print("  Max execution delay: ");
-            TimeUtils.formatDuration(job.getMaxExecutionDelayMillis(), pw);
-            pw.println();
-        }
-        pw.print(prefix); pw.print("  Backoff: policy=");
-        pw.print(job.getBackoffPolicy());
-        pw.print(" initial=");
-        TimeUtils.formatDuration(job.getInitialBackoffMillis(), pw);
-        pw.println();
-        if (job.hasEarlyConstraint()) {
-            pw.print(prefix); pw.println("  Has early constraint");
-        }
-        if (job.hasLateConstraint()) {
-            pw.print(prefix); pw.println("  Has late constraint");
+            if (job.hasEarlyConstraint()) {
+                pw.print(prefix); pw.println("  Has early constraint");
+            }
+            if (job.hasLateConstraint()) {
+                pw.print(prefix); pw.println("  Has late constraint");
+            }
         }
         pw.print(prefix); pw.print("Required constraints:");
         dumpConstraints(pw, requiredConstraints);
         pw.println();
-        pw.print(prefix); pw.print("Satisfied constraints:");
-        dumpConstraints(pw, satisfiedConstraints);
-        pw.println();
+        if (full) {
+            pw.print(prefix); pw.print("Satisfied constraints:");
+            dumpConstraints(pw, satisfiedConstraints);
+            pw.println();
+        }
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
             for (int i=0; i<changedAuthorities.size(); i++) {
