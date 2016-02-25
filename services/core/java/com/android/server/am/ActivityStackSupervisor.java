@@ -119,6 +119,7 @@ import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
@@ -3252,9 +3253,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             return;
         }
 
-        if (!task.canGoInDockedStack() || task.inCropWindowsResizeMode()) {
+        if (!task.canGoInDockedStack() || task.mResizeMode == RESIZE_MODE_FORCE_RESIZEABLE) {
             // Display warning toast if we tried to put a non-dockable task in the docked stack or
-            // the task is running in cropped window mode.
+            // the task was forced to be resizable by the system.
             mWindowManager.scheduleShowNonResizeableDockToast(task.taskId);
         }
     }

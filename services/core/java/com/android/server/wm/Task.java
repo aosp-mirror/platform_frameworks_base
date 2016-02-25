@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
 import static android.app.ActivityManager.StackId.HOME_STACK_ID;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
@@ -134,12 +135,6 @@ class Task implements DimLayer.DimLayerUser {
 
         mShowNonResizeableDockToast = false;
 
-        if (isResizeable()) {
-            Slog.wtf(TAG,
-                    "Trying to show non-resizeable toast when task is resizeable task=" + this);
-            return;
-        }
-
         if (mResizeMode == RESIZE_MODE_UNRESIZEABLE) {
             final String text =
                     mService.mContext.getString(R.string.dock_non_resizeble_failed_to_dock_text);
@@ -148,7 +143,7 @@ class Task implements DimLayer.DimLayerUser {
         }
 
         final int dockSide = mStack.getDockSide();
-        if (!inCropWindowsResizeMode() || dockSide == DOCKED_INVALID) {
+        if (mResizeMode != RESIZE_MODE_FORCE_RESIZEABLE || dockSide == DOCKED_INVALID) {
             return;
         }
 
@@ -176,7 +171,7 @@ class Task implements DimLayer.DimLayerUser {
             yOffset = mTmpRect2.bottom - mTmpRect.bottom;
         }
         final String text =
-                mService.mContext.getString(R.string.dock_cropped_windows_text);
+                mService.mContext.getString(R.string.dock_forced_resizable);
         mService.mH.obtainMessage(SHOW_NON_RESIZEABLE_DOCK_TOAST,
                 xOffset, yOffset, text).sendToTarget();
     }

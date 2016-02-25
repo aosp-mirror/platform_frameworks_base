@@ -8189,7 +8189,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case SHOW_NON_RESIZEABLE_DOCK_TOAST: {
                     final Toast toast = Toast.makeText(
-                            mContext, (String) msg.obj, Toast.LENGTH_LONG);
+                            mContext, (String) msg.obj, Toast.LENGTH_SHORT);
                     final int gravity = toast.getGravity();
                     final int xOffset = toast.getXOffset() + msg.arg1;
                     final int yOffset = toast.getYOffset() + msg.arg2;
