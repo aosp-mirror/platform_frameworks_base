@@ -223,6 +223,13 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                     int xDiff = Math.abs(x - mDownX);
                     if (Math.abs(y - mDownY) > mScrollTouchSlop && yDiff > xDiff) {
                         mIsScrolling = true;
+                        float stackScroll = mScroller.getStackScroll();
+                        List<TaskView> taskViews = mSv.getTaskViews();
+                        for (int i = taskViews.size() - 1; i >= 0; i--) {
+                            layoutAlgorithm.addUnfocusedTaskOverride(taskViews.get(i).getTask(),
+                                    stackScroll);
+                        }
+                        layoutAlgorithm.setFocusState(TaskStackLayoutAlgorithm.STATE_UNFOCUSED);
 
                         // Disallow parents from intercepting touch events
                         final ViewParent parent = mSv.getParent();
@@ -429,8 +436,7 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 // Otherwise, offset the scroll by the movement of the anchor task
                 float anchorTaskScroll = layoutAlgorithm.getStackScrollForTask(anchorTask);
                 float stackScrollOffset = (anchorTaskScroll - prevAnchorTaskScroll);
-                if (layoutAlgorithm.getFocusState() !=
-                        TaskStackLayoutAlgorithm.STATE_FOCUSED) {
+                if (layoutAlgorithm.getFocusState() != TaskStackLayoutAlgorithm.STATE_FOCUSED) {
                     // If we are focused, we don't want the front task to move, but otherwise, we
                     // allow the back task to move up, and the front task to move back
                     stackScrollOffset /= 2;
