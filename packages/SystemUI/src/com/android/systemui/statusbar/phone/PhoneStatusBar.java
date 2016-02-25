@@ -4091,7 +4091,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         ExpandableNotificationRow row = null;
         if (expandView instanceof ExpandableNotificationRow) {
             row = (ExpandableNotificationRow) expandView;
-            row.setUserExpanded(true);
+            row.setUserExpanded(true /* userExpanded */, true /* allowChildExpansion */);
         }
         boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
                 || !mShowLockscreenNotifications || mFalsingManager.shouldEnforceBouncer();
