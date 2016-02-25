@@ -31,7 +31,7 @@
         android:showDividers="middle">
         <ListView
             android:id="@+id/suggestionContainer"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="8dp"
             android:paddingBottom="0dp"
