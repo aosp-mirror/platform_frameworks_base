@@ -215,7 +215,7 @@ public class Editor {
 
     boolean mInBatchEditControllers;
     boolean mShowSoftInputOnFocus = true;
-    boolean mPreserveDetachedSelection;
+    private boolean mPreserveDetachedSelection;
     boolean mTemporaryDetach;
 
     boolean mIsBeingLongClicked;
@@ -352,7 +352,6 @@ public class Editor {
 
     void replace() {
         int middle = (mTextView.getSelectionStart() + mTextView.getSelectionEnd()) / 2;
-        stopTextActionMode();
         Selection.setSelection((Spannable) mTextView.getText(), middle);
         showSuggestions();
     }
@@ -429,10 +428,8 @@ public class Editor {
             mSpellChecker = null;
         }
 
-        mPreserveDetachedSelection = true;
         hideCursorAndSpanControllers();
-        stopTextActionMode();
-        mPreserveDetachedSelection = false;
+        stopTextActionModeWithPreservingSelection();
         mTemporaryDetach = false;
     }
 
@@ -1103,7 +1100,6 @@ public class Editor {
                 mInsertionControllerEnabled) {
             final int offset = mTextView.getOffsetForPosition(mLastDownPositionX,
                     mLastDownPositionY);
-            stopTextActionMode();
             Selection.setSelection((Spannable) mTextView.getText(), offset);
             getInsertionController().show();
             mIsInsertionActionModeStartPending = true;
@@ -1207,18 +1203,15 @@ public class Editor {
             mTextView.onEndBatchEdit();
 
             if (mTextView.isInExtractedMode()) {
-                // terminateTextSelectionMode removes selection, which we want to keep when
-                // ExtractEditText goes out of focus.
-                final int selStart = mTextView.getSelectionStart();
-                final int selEnd = mTextView.getSelectionEnd();
                 hideCursorAndSpanControllers();
-                stopTextActionMode();
-                Selection.setSelection((Spannable) mTextView.getText(), selStart, selEnd);
+                stopTextActionModeWithPreservingSelection();
             } else {
-                if (mTemporaryDetach) mPreserveDetachedSelection = true;
                 hideCursorAndSpanControllers();
-                stopTextActionMode();
-                if (mTemporaryDetach) mPreserveDetachedSelection = false;
+                if (mTemporaryDetach) {
+                    stopTextActionModeWithPreservingSelection();
+                } else {
+                    stopTextActionMode();
+                }
                 downgradeEasyCorrectionSpans();
             }
             // No need to create the controller
@@ -1289,10 +1282,8 @@ public class Editor {
                 makeBlink();
             }
             final InputMethodManager imm = InputMethodManager.peekInstance();
-            final boolean immFullScreen = (imm != null && imm.isFullscreenMode());
-            if (mSelectionModifierCursorController != null && mTextView.hasSelection()
-                    && !immFullScreen && mTextActionMode != null) {
-                mSelectionModifierCursorController.show();
+            if (mTextView.hasSelection() && !extractedTextModeWillBeStarted()) {
+                startSelectionActionMode();
             }
         } else {
             if (mBlink != null) {
@@ -1303,9 +1294,7 @@ public class Editor {
             }
             // Order matters! Must be done before onParentLostFocus to rely on isShowingUp
             hideCursorAndSpanControllers();
-            if (mSelectionModifierCursorController != null) {
-                mSelectionModifierCursorController.hide();
-            }
+            stopTextActionModeWithPreservingSelection();
             if (mSuggestionsPopupWindow != null) {
                 mSuggestionsPopupWindow.onParentLostFocus();
             }
@@ -1855,6 +1844,38 @@ public class Editor {
         }
     }
 
+    void refreshTextActionMode() {
+        if (extractedTextModeWillBeStarted()) {
+            return;
+        }
+        final boolean hasSelection = mTextView.hasSelection();
+        final SelectionModifierCursorController selectionController = getSelectionController();
+        final InsertionPointCursorController insertionController = getInsertionController();
+        if ((selectionController != null && selectionController.isCursorBeingModified())
+                || (insertionController != null && insertionController.isCursorBeingModified())) {
+            // ActionMode should be managed by the currently active cursor controller.
+            return;
+        }
+        if (hasSelection) {
+            if (mTextActionMode == null || selectionController == null
+                    || !selectionController.isActive()) {
+                // Avoid dismissing the selection if it exists.
+                stopTextActionModeWithPreservingSelection();
+                startSelectionActionMode();
+            } else {
+                mTextActionMode.invalidateContentRect();
+            }
+        } else {
+            // Insertion action mode is started only when insertion controller is explicitly
+            // activated.
+            if (insertionController == null || !insertionController.isActive()) {
+                stopTextActionMode();
+            } else if (mTextActionMode != null) {
+                mTextActionMode.invalidateContentRect();
+            }
+        }
+    }
+
     /**
      * Start an Insertion action mode.
      */
@@ -1878,17 +1899,15 @@ public class Editor {
 
     /**
      * Starts a Selection Action Mode with the current selection and ensures the selection handles
-     * are shown if there is a selection, otherwise the insertion handle is shown. This should be
-     * used when the mode is started from a non-touch event.
+     * are shown if there is a selection. This should be used when the mode is started from a
+     * non-touch event.
      *
      * @return true if the selection mode was actually started.
      */
-    boolean startSelectionActionMode() {
+    private boolean startSelectionActionMode() {
         boolean selectionStarted = startSelectionActionModeInternal();
         if (selectionStarted) {
             getSelectionController().show();
-        } else if (getInsertionController() != null) {
-            getInsertionController().show();
         }
         return selectionStarted;
     }
@@ -1906,66 +1925,52 @@ public class Editor {
         if (extractedTextModeWillBeStarted()) {
             return false;
         }
-        if (mTextActionMode != null) {
-            mTextActionMode.finish();
-        }
-        if (!checkFieldAndSelectCurrentWord()) {
+        if (!checkField()) {
             return false;
         }
-
-        // Avoid dismissing the selection if it exists.
-        mPreserveDetachedSelection = true;
-        stopTextActionMode();
-        mPreserveDetachedSelection = false;
-
+        if (!mTextView.hasSelection() && !selectCurrentWord()) {
+            // No selection and cannot select a word.
+            return false;
+        }
+        stopTextActionModeWithPreservingSelection();
         getSelectionController().enterDrag(
                 SelectionModifierCursorController.DRAG_ACCELERATOR_MODE_WORD);
         return true;
     }
 
     /**
-     * Checks whether a selection can be performed on the current TextView and if so selects
-     * the current word.
+     * Checks whether a selection can be performed on the current TextView.
      *
-     * @return true if there already was a selection or if the current word was selected.
+     * @return true if a selection can be performed
      */
-    boolean checkFieldAndSelectCurrentWord() {
+    boolean checkField() {
         if (!mTextView.canSelectText() || !mTextView.requestFocus()) {
             Log.w(TextView.LOG_TAG,
                     "TextView does not support text selection. Selection cancelled.");
             return false;
         }
-
-        if (!mTextView.hasSelection()) {
-            // There may already be a selection on device rotation
-            return selectCurrentWord();
-        }
         return true;
     }
 
     private boolean startSelectionActionModeInternal() {
+        if (extractedTextModeWillBeStarted()) {
+            return false;
+        }
         if (mTextActionMode != null) {
             // Text action mode is already started
             mTextActionMode.invalidate();
             return false;
         }
 
-        if (!checkFieldAndSelectCurrentWord()) {
+        if (!checkField() || !mTextView.hasSelection()) {
             return false;
         }
 
-        boolean willExtract = extractedTextModeWillBeStarted();
+        ActionMode.Callback actionModeCallback =
+                new TextActionModeCallback(true /* hasSelection */);
+        mTextActionMode = mTextView.startActionMode(actionModeCallback, ActionMode.TYPE_FLOATING);
 
-        // Do not start the action mode when extracted text will show up full screen, which would
-        // immediately hide the newly created action bar and would be visually distracting.
-        if (!willExtract) {
-            ActionMode.Callback actionModeCallback =
-                    new TextActionModeCallback(true /* hasSelection */);
-            mTextActionMode = mTextView.startActionMode(
-                    actionModeCallback, ActionMode.TYPE_FLOATING);
-        }
-
-        final boolean selectionStarted = mTextActionMode != null || willExtract;
+        final boolean selectionStarted = mTextActionMode != null;
         if (selectionStarted && !mTextView.isTextSelectable() && mShowSoftInputOnFocus) {
             // Show the IME to be able to replace text, except when selecting non editable text.
             final InputMethodManager imm = InputMethodManager.peekInstance();
@@ -2104,6 +2109,12 @@ public class Editor {
             // This will hide the mSelectionModifierCursorController
             mTextActionMode.finish();
         }
+    }
+
+    private void stopTextActionModeWithPreservingSelection() {
+        mPreserveDetachedSelection = true;
+        stopTextActionMode();
+        mPreserveDetachedSelection = false;
     }
 
     /**
@@ -2433,16 +2444,14 @@ public class Editor {
         if (offset == -1) {
             return;
         }
-        mPreserveDetachedSelection = true;
-        stopTextActionMode();
-        mPreserveDetachedSelection = false;
+        stopTextActionModeWithPreservingSelection();
         final boolean isOnSelection = mTextView.hasSelection()
                 && offset >= mTextView.getSelectionStart() && offset <= mTextView.getSelectionEnd();
         if (!isOnSelection) {
             // Right clicked position is not on the selection. Remove the selection and move the
             // cursor to the right clicked position.
-            stopTextActionMode();
             Selection.setSelection((Spannable) mTextView.getText(), offset);
+            stopTextActionMode();
         }
 
         if (shouldOfferToShowSuggestions()) {
@@ -3483,7 +3492,6 @@ public class Editor {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             Editable editable = (Editable) mTextView.getText();
             SuggestionInfo suggestionInfo = mSuggestionInfos[position];
-
             final int spanStart = editable.getSpanStart(suggestionInfo.mSuggestionSpan);
             final int spanEnd = editable.getSpanEnd(suggestionInfo.mSuggestionSpan);
             if (spanStart < 0 || spanEnd <= spanStart) {
@@ -4384,7 +4392,7 @@ public class Editor {
                         if (distanceSquared < touchSlop * touchSlop) {
                             // Tapping on the handle toggles the insertion action mode.
                             if (mTextActionMode != null) {
-                                mTextActionMode.finish();
+                                stopTextActionMode();
                             } else {
                                 startInsertionActionMode();
                             }
@@ -4801,6 +4809,10 @@ public class Editor {
          * preventing the activity from being recycled.
          */
         public void onDetached();
+
+        public boolean isCursorBeingModified();
+
+        public boolean isActive();
     }
 
     private class InsertionPointCursorController implements CursorController {
@@ -4843,6 +4855,16 @@ public class Editor {
             observer.removeOnTouchModeChangeListener(this);
 
             if (mHandle != null) mHandle.onDetached();
+        }
+
+        @Override
+        public boolean isCursorBeingModified() {
+            return mHandle != null && mHandle.isDragging();
+        }
+
+        @Override
+        public boolean isActive() {
+            return mHandle != null && mHandle.isShowing();
         }
     }
 
@@ -5033,9 +5055,7 @@ public class Editor {
 
                         if (mStartOffset != offset) {
                             // Start character based drag accelerator.
-                            if (mTextActionMode != null) {
-                                mTextActionMode.finish();
-                            }
+                            stopTextActionMode();
                             enterDrag(DRAG_ACCELERATOR_MODE_CHARACTER);
                             mDiscardNextActionUp = true;
                             mHaventMovedEnoughToStartDrag = false;
@@ -5109,9 +5129,7 @@ public class Editor {
             if (mInsertionActionModeRunnable != null) {
                 mTextView.removeCallbacks(mInsertionActionModeRunnable);
             }
-            if (mTextActionMode != null) {
-                mTextActionMode.finish();
-            }
+            stopTextActionMode();
             if (!selectCurrentParagraph()) {
                 return false;
             }
@@ -5220,6 +5238,12 @@ public class Editor {
             mStartOffset = -1;
             mDragAcceleratorMode = DRAG_ACCELERATOR_MODE_INACTIVE;
             mSwitchedLines = false;
+            final int selectionStart = mTextView.getSelectionStart();
+            final int selectionEnd = mTextView.getSelectionEnd();
+            if (selectionStart > selectionEnd) {
+                Selection.setSelection((Spannable) mTextView.getText(),
+                        selectionEnd, selectionStart);
+            }
         }
 
         /**
@@ -5227,6 +5251,12 @@ public class Editor {
          */
         public boolean isSelectionStartDragged() {
             return mStartHandle != null && mStartHandle.isDragging();
+        }
+
+        @Override
+        public boolean isCursorBeingModified() {
+            return isDragAcceleratorActive() || isSelectionStartDragged()
+                    || (mEndHandle != null && mEndHandle.isDragging());
         }
 
         /**
@@ -5249,6 +5279,11 @@ public class Editor {
 
             if (mStartHandle != null) mStartHandle.onDetached();
             if (mEndHandle != null) mEndHandle.onDetached();
+        }
+
+        @Override
+        public boolean isActive() {
+            return mStartHandle != null && mStartHandle.isShowing();
         }
     }
 
