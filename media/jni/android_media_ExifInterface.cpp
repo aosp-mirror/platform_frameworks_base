@@ -83,18 +83,19 @@ static void ExifInterface_initRaw(JNIEnv *env) {
 }
 
 static jobject ExifInterface_getRawMetadata(
-        JNIEnv* env, jclass /* clazz */, jobject jfileDescriptor) {
-    int fd = jniGetFDFromFileDescriptor(env, jfileDescriptor);
-    if (fd < 0) {
-        ALOGI("Invalid file descriptor");
+        JNIEnv* env, jclass /* clazz */, jstring jfilename) {
+    const char* filenameChars = env->GetStringUTFChars(jfilename, NULL);
+    if (filenameChars == NULL) {
         return NULL;
     }
+    String8 filename(filenameChars);
+    env->ReleaseStringUTFChars(jfilename, filenameChars);
 
     piex::PreviewImageData image_data;
-    std::unique_ptr<FileStream> stream(new FileStream(fd));
+    std::unique_ptr<FileStream> stream(new FileStream(filename));
 
-    if (!GetExifFromRawImage(stream.get(), String8("[file descriptor]"), image_data)) {
-        ALOGI("Raw image not detected");
+    if (!GetExifFromRawImage(stream.get(), filename, image_data)) {
+        ALOGI("Raw image not detected: %s", filename.string());
         return NULL;
     }
 
@@ -262,7 +263,7 @@ static jobject ExifInterface_getRawMetadata(
 
 static JNINativeMethod gMethods[] = {
     { "initRawNative", "()V", (void *)ExifInterface_initRaw },
-    { "getRawAttributesNative", "(Ljava/io/FileDescriptor;)Ljava/util/HashMap;",
+    { "getRawAttributesNative", "(Ljava/lang/String;)Ljava/util/HashMap;",
       (void*)ExifInterface_getRawMetadata },
 };
 
