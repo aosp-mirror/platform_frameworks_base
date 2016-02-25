@@ -18,11 +18,13 @@ package com.android.test.uibench;
 import android.app.ActivityOptions;
 import android.app.SharedElementCallback;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 
 import java.util.List;
@@ -90,6 +92,13 @@ public class ActivityTransition extends AppCompatActivity {
         getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
         setContentView(R.layout.activity_transition);
         setupHero();
+
+        // Ensure that all images are visible regardless of orientation.
+        GridLayout gridLayout = (GridLayout) findViewById(R.id.transition_grid_layout);
+        boolean isPortrait =
+                getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        gridLayout.setRowCount(isPortrait ? 4 : 2);
+        gridLayout.setColumnCount(isPortrait ? 2 : 4);
     }
 
     private void setupHero() {
