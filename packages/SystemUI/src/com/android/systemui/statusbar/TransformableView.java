@@ -30,6 +30,7 @@ public interface TransformableView {
 
     /**
      * Get the current state of a view in a transform animation
+     *
      * @param fadingView which view we are interested in
      * @return the current transform state of this viewtype
      */
@@ -37,18 +38,37 @@ public interface TransformableView {
 
     /**
      * Transform to the given view
+     *
      * @param notification the view to transform to
      */
     void transformTo(TransformableView notification, Runnable endRunnable);
 
     /**
+     * Transform to the given view by a specified amount.
+     *
+     * @param notification the view to transform to
+     * @param transformationAmount how much transformation should be done
+     */
+    void transformTo(TransformableView notification, float transformationAmount);
+
+    /**
      * Transform to this view from the given view
+     *
      * @param notification the view to transform from
      */
     void transformFrom(TransformableView notification);
 
     /**
+     * Transform to this view from the given view by a specified amount.
+     *
+     * @param notification the view to transform from
+     * @param transformationAmount how much transformation should be done
+     */
+    void transformFrom(TransformableView notification, float transformationAmount);
+
+    /**
      * Set this view to be fully visible or gone
+     *
      * @param visible
      */
     void setVisible(boolean visible);

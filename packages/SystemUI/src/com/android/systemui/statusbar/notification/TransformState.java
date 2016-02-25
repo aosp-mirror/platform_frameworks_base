@@ -30,23 +30,30 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.ViewTransformationHelper;
 
 /**
  * A transform state of a view.
 */
 public class TransformState {
 
-    private static final int ANIMATE_X = 0x1;
-    private static final int ANIMATE_Y = 0x10;
-    private static final int ANIMATE_ALL = ANIMATE_X | ANIMATE_Y;
+    private static final float UNDEFINED = -1f;
+    private static final int TRANSOFORM_X = 0x1;
+    private static final int TRANSOFORM_Y = 0x10;
+    private static final int TRANSOFORM_ALL = TRANSOFORM_X | TRANSOFORM_Y;
     private static final int CLIP_CLIPPING_SET = R.id.clip_children_set_tag;
     private static final int CLIP_CHILDREN_TAG = R.id.clip_children_tag;
     private static final int CLIP_TO_PADDING = R.id.clip_to_padding_tag;
+    private static final int TRANSFORMATION_START_X = R.id.transformation_start_x_tag;
+    private static final int TRANSFORMATION_START_Y = R.id.transformation_start_y_tag;
+    private static final int TRANSFORMATION_START_SCLALE_X = R.id.transformation_start_scale_x_tag;
+    private static final int TRANSFORMATION_START_SCLALE_Y = R.id.transformation_start_scale_y_tag;
     private static Pools.SimplePool<TransformState> sInstancePool = new Pools.SimplePool<>(40);
 
     protected View mTransformedView;
     private int[] mOwnPosition = new int[2];
+    private float mTransformationEndY = UNDEFINED;
+    private float mTransformationEndX = UNDEFINED;
 
     public void initFrom(View view) {
         mTransformedView = view;
@@ -55,129 +62,233 @@ public class TransformState {
     /**
      * Transforms the {@link #mTransformedView} from the given transformviewstate
      * @param otherState the state to transform from
+     * @param transformationAmount how much to transform
      */
-    public void transformViewFrom(TransformState otherState) {
+    public void transformViewFrom(TransformState otherState, float transformationAmount) {
         mTransformedView.animate().cancel();
         if (sameAs(otherState)) {
-            // We have the same content, lets show ourselves
-            mTransformedView.setAlpha(1.0f);
-            mTransformedView.setVisibility(View.VISIBLE);
+            if (mTransformedView.getVisibility() == View.INVISIBLE) {
+                // We have the same content, lets show ourselves
+                mTransformedView.setAlpha(1.0f);
+                mTransformedView.setVisibility(View.VISIBLE);
+            }
         } else {
-            CrossFadeHelper.fadeIn(mTransformedView);
+            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount);
         }
-        animateViewFrom(otherState);
+        transformViewFullyFrom(otherState, transformationAmount);
     }
 
-    public void animateViewFrom(TransformState otherState) {
-        animateViewFrom(otherState, ANIMATE_ALL);
+    public void transformViewFullyFrom(TransformState otherState, float transformationAmount) {
+        transformViewFrom(otherState, TRANSOFORM_ALL, null, transformationAmount);
     }
 
-    public void animateViewVerticalFrom(TransformState otherState) {
-        animateViewFrom(otherState, ANIMATE_Y);
+    public void transformViewVerticalFrom(TransformState otherState,
+            ViewTransformationHelper.CustomTransformation customTransformation,
+            float transformationAmount) {
+        transformViewFrom(otherState, TRANSOFORM_Y, customTransformation, transformationAmount);
     }
 
-    private void animateViewFrom(TransformState otherState, int animationFlags) {
+    public void transformViewVerticalFrom(TransformState otherState, float transformationAmount) {
+        transformViewFrom(otherState, TRANSOFORM_Y, null, transformationAmount);
+    }
+
+    private void transformViewFrom(TransformState otherState, int transformationFlags,
+            ViewTransformationHelper.CustomTransformation customTransformation,
+            float transformationAmount) {
         final View transformedView = mTransformedView;
+        boolean transformX = (transformationFlags & TRANSOFORM_X) != 0;
+        boolean transformY = (transformationFlags & TRANSOFORM_Y) != 0;
+        boolean transformScale = transformScale();
         // lets animate the positions correctly
-        int[] otherPosition = otherState.getLocationOnScreen();
-        int[] ownStablePosition = getLaidOutLocationOnScreen();
-        if ((animationFlags & ANIMATE_X) != 0) {
-            transformedView.setTranslationX(otherPosition[0] - ownStablePosition[0]);
-            transformedView.animate().translationX(0);
-        }
-        if ((animationFlags & ANIMATE_Y) != 0) {
-            transformedView.setTranslationY(otherPosition[1] - ownStablePosition[1]);
-            transformedView.animate().translationY(0);
-        }
-        if (animateScale()) {
-            // we also want to animate the scale if we're the same
-            View otherView = otherState.getTransformedView();
-            if (otherView.getWidth() != transformedView.getWidth()) {
-                float scaleX = (otherView.getWidth() * otherView.getScaleX()
-                        / (float) transformedView.getWidth());
-                transformedView.setScaleX(scaleX);
-                transformedView.setPivotX(0);
-                transformedView.animate().scaleX(1.0f);
+        if (transformationAmount == 0.0f) {
+            int[] otherPosition = otherState.getLocationOnScreen();
+            int[] ownStablePosition = getLaidOutLocationOnScreen();
+            if (customTransformation == null
+                    || !customTransformation.initTransformation(this, otherState)) {
+                if (transformX) {
+                    setTransformationStartX(otherPosition[0] - ownStablePosition[0]);
+                }
+                if (transformY) {
+                    setTransformationStartY(otherPosition[1] - ownStablePosition[1]);
+                }
+                // we also want to animate the scale if we're the same
+                View otherView = otherState.getTransformedView();
+                if (transformScale && otherView.getWidth() != transformedView.getWidth()) {
+                    setTransformationStartScaleX(otherView.getWidth() * otherView.getScaleX()
+                            / (float) transformedView.getWidth());
+                    transformedView.setPivotX(0);
+                } else {
+                    setTransformationStartScaleX(UNDEFINED);
+                }
+                if (transformScale && otherView.getHeight() != transformedView.getHeight()) {
+                    setTransformationStartScaleY(otherView.getHeight() * otherView.getScaleY()
+                            / (float) transformedView.getHeight());
+                    transformedView.setPivotY(0);
+                } else {
+                    setTransformationStartScaleY(UNDEFINED);
+                }
             }
-            if (otherView.getHeight() != transformedView.getHeight()) {
-                float scaleY = (otherView.getHeight() * otherView.getScaleY()
-                        / (float) transformedView.getHeight());
-                transformedView.setScaleY(scaleY);
-                transformedView.setPivotY(0);
-                transformedView.animate().scaleY(1.0f);
+            if (!transformX) {
+                setTransformationStartX(UNDEFINED);
+            }
+            if (!transformY) {
+                setTransformationStartY(UNDEFINED);
+            }
+            if (!transformScale) {
+                setTransformationStartScaleX(UNDEFINED);
+                setTransformationStartScaleY(UNDEFINED);
+            }
+            setClippingDeactivated(transformedView, true);
+        }
+        float interpolatedValue = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                transformationAmount);
+        if (transformX) {
+            transformedView.setTranslationX(NotificationUtils.interpolate(getTransformationStartX(),
+                    0.0f,
+                    interpolatedValue));
+        }
+        if (transformY) {
+            transformedView.setTranslationY(NotificationUtils.interpolate(getTransformationStartY(),
+                    0.0f,
+                    interpolatedValue));
+        }
+        if (transformScale) {
+            float transformationStartScaleX = getTransformationStartScaleX();
+            if (transformationStartScaleX != UNDEFINED) {
+                transformedView.setScaleX(
+                        NotificationUtils.interpolate(transformationStartScaleX,
+                                1.0f,
+                                interpolatedValue));
+            }
+            float transformationStartScaleY = getTransformationStartScaleY();
+            if (transformationStartScaleY != UNDEFINED) {
+                transformedView.setScaleY(
+                        NotificationUtils.interpolate(transformationStartScaleY,
+                                1.0f,
+                                interpolatedValue));
             }
         }
-        transformedView.animate()
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        setClippingDeactivated(transformedView, false);
-                    }
-                });
-        setClippingDeactivated(transformedView, true);
     }
 
-    protected boolean animateScale() {
+    protected boolean transformScale() {
         return false;
     }
 
     /**
      * Transforms the {@link #mTransformedView} to the given transformviewstate
      * @param otherState the state to transform from
-     * @param endRunnable a runnable to run at the end of the animation
+     * @param transformationAmount how much to transform
      * @return whether an animation was started
      */
-    public boolean transformViewTo(TransformState otherState, final Runnable endRunnable) {
+    public boolean transformViewTo(TransformState otherState, float transformationAmount) {
         mTransformedView.animate().cancel();
         if (sameAs(otherState)) {
             // We have the same text, lets show ourselfs
-            mTransformedView.setAlpha(0.0f);
-            mTransformedView.setVisibility(View.INVISIBLE);
+            if (mTransformedView.getVisibility() == View.VISIBLE) {
+                mTransformedView.setAlpha(0.0f);
+                mTransformedView.setVisibility(View.INVISIBLE);
+            }
             return false;
         } else {
-            CrossFadeHelper.fadeOut(mTransformedView, endRunnable);
+            CrossFadeHelper.fadeOut(mTransformedView, transformationAmount);
         }
-        animateViewTo(otherState, endRunnable);
+        transformViewFullyTo(otherState, transformationAmount);
         return true;
     }
 
-    public void animateViewTo(TransformState otherState, Runnable endRunnable) {
-        animateViewTo(otherState, endRunnable, ANIMATE_ALL);
+    public void transformViewFullyTo(TransformState otherState, float transformationAmount) {
+        transformViewTo(otherState, TRANSOFORM_ALL, null, transformationAmount);
     }
 
-    public void animateViewVerticalTo(TransformState otherState, Runnable endRunnable) {
-        animateViewTo(otherState, endRunnable, ANIMATE_Y);
+    public void transformViewVerticalTo(TransformState otherState,
+            ViewTransformationHelper.CustomTransformation customTransformation,
+            float transformationAmount) {
+        transformViewTo(otherState, TRANSOFORM_Y, customTransformation, transformationAmount);
     }
 
-    private void animateViewTo(TransformState otherState, final Runnable endRunnable,
-            int animationFlags) {
+    public void transformViewVerticalTo(TransformState otherState, float transformationAmount) {
+        transformViewTo(otherState, TRANSOFORM_Y, null, transformationAmount);
+    }
+
+    private void transformViewTo(TransformState otherState, int transformationFlags,
+            ViewTransformationHelper.CustomTransformation customTransformation,
+            float transformationAmount) {
         // lets animate the positions correctly
+
+        final View transformedView = mTransformedView;
+        boolean transformX = (transformationFlags & TRANSOFORM_X) != 0;
+        boolean transformY = (transformationFlags & TRANSOFORM_Y) != 0;
+        boolean transformScale = transformScale();
+        // lets animate the positions correctly
+        if (transformationAmount == 0.0f) {
+            if (transformX) {
+                float transformationStartX = getTransformationStartX();
+                float start = transformationStartX != UNDEFINED ? transformationStartX
+                        : transformedView.getTranslationX();
+                setTransformationStartX(start);
+            }
+            if (transformY) {
+                float transformationStartY = getTransformationStartY();
+                float start = transformationStartY != UNDEFINED ? transformationStartY
+                        : transformedView.getTranslationY();
+                setTransformationStartY(start);
+            }
+            View otherView = otherState.getTransformedView();
+            if (transformScale && otherView.getWidth() != transformedView.getWidth()) {
+                setTransformationStartScaleX(transformedView.getScaleX());
+                transformedView.setPivotX(0);
+            } else {
+                setTransformationStartScaleX(UNDEFINED);
+            }
+            if (transformScale && otherView.getHeight() != transformedView.getHeight()) {
+                setTransformationStartScaleY(transformedView.getScaleY());
+                transformedView.setPivotY(0);
+            } else {
+                setTransformationStartScaleY(UNDEFINED);
+            }
+            setClippingDeactivated(transformedView, true);
+        }
+        float interpolatedValue = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(
+                transformationAmount);
         int[] otherStablePosition = otherState.getLaidOutLocationOnScreen();
         int[] ownPosition = getLaidOutLocationOnScreen();
-        final View transformedView = mTransformedView;
-        if ((animationFlags & ANIMATE_X) != 0) {
-            transformedView.animate()
-                    .translationX(otherStablePosition[0] - ownPosition[0]);
+        if (transformX) {
+            float endX = otherStablePosition[0] - ownPosition[0];
+            if (customTransformation != null
+                    && customTransformation.customTransformTarget(this, otherState)) {
+                endX = mTransformationEndX;
+            }
+            transformedView.setTranslationX(NotificationUtils.interpolate(getTransformationStartX(),
+                    endX,
+                    interpolatedValue));
         }
-        if ((animationFlags & ANIMATE_Y) != 0) {
-            transformedView.animate()
-                    .translationY(otherStablePosition[1] - ownPosition[1]);
+        if (transformY) {
+            float endY = otherStablePosition[1] - ownPosition[1];
+            if (customTransformation != null
+                    && customTransformation.customTransformTarget(this, otherState)) {
+                endY = mTransformationEndY;
+            }
+            transformedView.setTranslationY(NotificationUtils.interpolate(getTransformationStartY(),
+                    endY,
+                    interpolatedValue));
         }
-        transformedView.animate()
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD)
-                .withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (endRunnable != null) {
-                            endRunnable.run();
-                        }
-                        setClippingDeactivated(transformedView, false);
-                    }
-                });
-        setClippingDeactivated(transformedView, true);
+        if (transformScale) {
+            View otherView = otherState.getTransformedView();
+            float transformationStartScaleX = getTransformationStartScaleX();
+            if (transformationStartScaleX != UNDEFINED) {
+                transformedView.setScaleX(
+                        NotificationUtils.interpolate(transformationStartScaleX,
+                                (otherView.getWidth() / (float) transformedView.getWidth()),
+                                interpolatedValue));
+            }
+            float transformationStartScaleY = getTransformationStartScaleY();
+            if (transformationStartScaleY != UNDEFINED) {
+                transformedView.setScaleY(
+                        NotificationUtils.interpolate(transformationStartScaleY,
+                                (otherView.getHeight() / (float) transformedView.getHeight()),
+                                interpolatedValue));
+            }
+        }
     }
 
     public static void setClippingDeactivated(final View transformedView, boolean deactivated) {
@@ -281,8 +392,54 @@ public class TransformState {
         }
     }
 
+    public void setTransformationEndY(float transformationEndY) {
+        mTransformationEndY = transformationEndY;
+    }
+
+    public void setTransformationEndX(float transformationEndX) {
+        mTransformationEndX = transformationEndX;
+    }
+
+    public float getTransformationStartX() {
+        Object tag = mTransformedView.getTag(TRANSFORMATION_START_X);
+        return tag == null ? UNDEFINED : (float) tag;
+    }
+
+    public float getTransformationStartY() {
+        Object tag = mTransformedView.getTag(TRANSFORMATION_START_Y);
+        return tag == null ? UNDEFINED : (float) tag;
+    }
+
+    public float getTransformationStartScaleX() {
+        Object tag = mTransformedView.getTag(TRANSFORMATION_START_SCLALE_X);
+        return tag == null ? UNDEFINED : (float) tag;
+    }
+
+    public float getTransformationStartScaleY() {
+        Object tag = mTransformedView.getTag(TRANSFORMATION_START_SCLALE_Y);
+        return tag == null ? UNDEFINED : (float) tag;
+    }
+
+    public void setTransformationStartX(float transformationStartX) {
+        mTransformedView.setTag(TRANSFORMATION_START_X, transformationStartX);
+    }
+
+    public void setTransformationStartY(float transformationStartY) {
+        mTransformedView.setTag(TRANSFORMATION_START_Y, transformationStartY);
+    }
+
+    private void setTransformationStartScaleX(float startScaleX) {
+        mTransformedView.setTag(TRANSFORMATION_START_SCLALE_X, startScaleX);
+    }
+
+    private void setTransformationStartScaleY(float startScaleY) {
+        mTransformedView.setTag(TRANSFORMATION_START_SCLALE_Y, startScaleY);
+    }
+
     protected void reset() {
         mTransformedView = null;
+        mTransformationEndX = UNDEFINED;
+        mTransformationEndY = UNDEFINED;
     }
 
     public void setVisible(boolean visible) {
@@ -306,6 +463,15 @@ public class TransformState {
         mTransformedView.setTranslationY(0);
         mTransformedView.setScaleX(1.0f);
         mTransformedView.setScaleY(1.0f);
+        setClippingDeactivated(mTransformedView, false);
+        abortTransformation();
+    }
+
+    public void abortTransformation() {
+        mTransformedView.setTag(TRANSFORMATION_START_X, UNDEFINED);
+        mTransformedView.setTag(TRANSFORMATION_START_Y, UNDEFINED);
+        mTransformedView.setTag(TRANSFORMATION_START_SCLALE_X, UNDEFINED);
+        mTransformedView.setTag(TRANSFORMATION_START_SCLALE_Y, UNDEFINED);
     }
 
     public static TransformState obtain() {

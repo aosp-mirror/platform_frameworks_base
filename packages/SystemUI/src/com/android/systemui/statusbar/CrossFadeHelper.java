@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.view.View;
 
 import com.android.systemui.Interpolators;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 /**
  * A helper to fade views in and out.
@@ -44,7 +45,34 @@ public class CrossFadeHelper {
         if (view.hasOverlappingRendering()) {
             view.animate().withLayer();
         }
+    }
 
+    public static void fadeOut(View view, float fadeOutAmount) {
+        view.animate().cancel();
+        if (fadeOutAmount == 1.0f) {
+            view.setVisibility(View.INVISIBLE);
+        } else if (view.getVisibility() == View.INVISIBLE) {
+            view.setVisibility(View.VISIBLE);
+        }
+        fadeOutAmount = mapToFadeDuration(fadeOutAmount);
+        float alpha = Interpolators.ALPHA_OUT.getInterpolation(1.0f - fadeOutAmount);
+        view.setAlpha(alpha);
+        updateLayerType(view, alpha);
+    }
+
+    private static float mapToFadeDuration(float fadeOutAmount) {
+        // Assuming a linear interpolator, we can easily map it to our new duration
+        float endPoint = (float) ANIMATION_DURATION_LENGTH
+                / (float) StackStateAnimator.ANIMATION_DURATION_STANDARD;
+        return Math.min(fadeOutAmount / endPoint, 1.0f);
+    }
+
+    private static void updateLayerType(View view, float alpha) {
+        if (view.hasOverlappingRendering() && alpha > 0.0f && alpha < 1.0f) {
+            view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        } else if (view.getLayerType() == View.LAYER_TYPE_HARDWARE) {
+            view.setLayerType(View.LAYER_TYPE_NONE, null);
+        }
     }
 
     public static void fadeIn(final View view) {
@@ -61,5 +89,16 @@ public class CrossFadeHelper {
         if (view.hasOverlappingRendering()) {
             view.animate().withLayer();
         }
+    }
+
+    public static void fadeIn(View view, float fadeInAmount) {
+        view.animate().cancel();
+        if (view.getVisibility() == View.INVISIBLE) {
+            view.setVisibility(View.VISIBLE);
+        }
+        fadeInAmount = mapToFadeDuration(fadeInAmount);
+        float alpha = Interpolators.ALPHA_IN.getInterpolation(fadeInAmount);
+        view.setAlpha(alpha);
+        updateLayerType(view, alpha);
     }
 }

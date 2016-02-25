@@ -34,4 +34,8 @@ public class NotificationUtils {
         v.setTag(R.id.icon_is_grayscale, grayscale);
         return grayscale;
     }
+
+    public static float interpolate(float start, float end, float amount) {
+        return start * (1.0f - amount) + end * amount;
+    }
 }

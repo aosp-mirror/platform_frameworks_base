@@ -868,6 +868,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setUserLocked(boolean userLocked) {
         mUserLocked = userLocked;
+        mPrivateLayout.setUserExpanding(userLocked);
     }
 
     /**

@@ -71,13 +71,13 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
                 new ViewTransformationHelper.CustomTransformation() {
                     @Override
                     public boolean transformTo(TransformState ownState, TransformableView notification,
-                            Runnable endRunnable) {
+                            float transformationAmount) {
                         // We want to transform to the same y location as the title
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeOut(mTextView, endRunnable);
+                        CrossFadeHelper.fadeOut(mTextView, transformationAmount);
                         if (otherState != null) {
-                            ownState.animateViewVerticalTo(otherState, endRunnable);
+                            ownState.transformViewVerticalTo(otherState, transformationAmount);
                             otherState.recycle();
                         }
                         return true;
@@ -85,13 +85,13 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
                     @Override
                     public boolean transformFrom(TransformState ownState,
-                            TransformableView notification) {
+                            TransformableView notification, float transformationAmount) {
                         // We want to transform from the same y location as the title
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeIn(mTextView);
+                        CrossFadeHelper.fadeIn(mTextView, transformationAmount);
                         if (otherState != null) {
-                            ownState.animateViewVerticalFrom(otherState);
+                            ownState.transformViewVerticalFrom(otherState, transformationAmount);
                             otherState.recycle();
                         }
                         return true;
@@ -133,8 +133,18 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     }
 
     @Override
+    public void transformTo(TransformableView notification, float transformationAmount) {
+        mTransformationHelper.transformTo(notification, transformationAmount);
+    }
+
+    @Override
     public void transformFrom(TransformableView notification) {
         mTransformationHelper.transformFrom(notification);
+    }
+
+    @Override
+    public void transformFrom(TransformableView notification, float transformationAmount) {
+        mTransformationHelper.transformFrom(notification, transformationAmount);
     }
 
     @Override
