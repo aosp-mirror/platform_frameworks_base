@@ -198,6 +198,25 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
+    public void testProgress_cancel() throws Exception {
+        resetProperties();
+        sendBugreportStarted(1000);
+        waitForScreenshotButtonEnabled(true);
+
+        final NumberFormat nf = NumberFormat.getPercentInstance();
+        nf.setMinimumFractionDigits(2);
+        nf.setMaximumFractionDigits(2);
+
+        assertProgressNotification(NAME, nf.format(0));
+
+        openProgressNotification(ID);
+        UiObject cancelButton = mUiBot.getVisibleObject(mContext.getString(
+                com.android.internal.R.string.cancel).toUpperCase());
+        mUiBot.click(cancelButton, "cancel_button");
+
+        waitForService(false);
+    }
+
     public void testProgress_takeExtraScreenshot() throws Exception {
         takeExtraScreenshotTest(false);
     }
@@ -339,12 +358,20 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         assertServiceNotRunning();
     }
 
-    public void testProgress_changeJustDetails() throws Exception {
+    public void testProgress_changeJustDetailsTouchingDetails() throws Exception {
+        changeJustDetailsTest(true);
+    }
+
+    public void testProgress_changeJustDetailsTouchingNotification() throws Exception {
+        changeJustDetailsTest(false);
+    }
+
+    private void changeJustDetailsTest(boolean touchDetails) throws Exception {
         resetProperties();
         sendBugreportStarted(1000);
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
+        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, touchDetails);
 
         detailsUi.nameField.setText("");
         detailsUi.titleField.setText("");
@@ -527,10 +554,10 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
         mUiBot.getObject(percent);
     }
 
-    private void openProgressNotification(int id) {
+    private UiObject openProgressNotification(int id) {
         String title = mContext.getString(R.string.bugreport_in_progress_title, id);
         Log.v(TAG, "Looking for progress notification title: '" + title + "'");
-        mUiBot.getNotification(title);
+        return mUiBot.getNotification(title);
     }
 
     void resetProperties() {
@@ -899,11 +926,23 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
          * Gets the UI objects by opening the progress notification and clicking DETAILS.
          */
         DetailsUi(UiBot uiBot, int id) throws UiObjectNotFoundException {
-            openProgressNotification(id);
+            this(uiBot, id, true);
+        }
+
+        /**
+         * Gets the UI objects by opening the progress notification and clicking on DETAILS or in
+         * the notification itself.
+         */
+        DetailsUi(UiBot uiBot, int id, boolean clickDetails) throws UiObjectNotFoundException {
+            UiObject notification = openProgressNotification(id);
             detailsButton = mUiBot.getVisibleObject(mContext.getString(
                     R.string.bugreport_info_action).toUpperCase());
 
-            mUiBot.click(detailsButton, "details_button");
+            if (clickDetails) {
+                mUiBot.click(detailsButton, "details_button");
+            } else {
+                mUiBot.click(notification, "notification");
+            }
             // TODO: unhardcode resource ids
             UiObject dialogTitle = mUiBot.getVisibleObjectById("android:id/alertTitle");
             assertEquals("Wrong title", mContext.getString(R.string.bugreport_info_dialog_title,
