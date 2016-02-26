@@ -149,6 +149,9 @@ public class BugreportProgressService extends Service {
     private static final int MSG_SCREENSHOT_REQUEST = 4;
     private static final int MSG_SCREENSHOT_RESPONSE = 5;
 
+    // Passed to Message.obtain() when msg.arg2 is not used.
+    private static final int UNUSED_ARG2 = -2;
+
     /**
      * Delay before a screenshot is taken.
      * <p>
@@ -664,11 +667,8 @@ public class BugreportProgressService extends Service {
         final String screenshotPath =
                 new File(mScreenshotsDir, info.getPathNextScreenshot()).getAbsolutePath();
 
-        final Message requestMsg = new Message();
-        requestMsg.what = MSG_SCREENSHOT_REQUEST;
-        requestMsg.arg1 = id;
-        requestMsg.obj = screenshotPath;
-        mScreenshotHandler.sendMessage(requestMsg);
+        Message.obtain(mScreenshotHandler, MSG_SCREENSHOT_REQUEST, id, UNUSED_ARG2, screenshotPath)
+                .sendToTarget();
     }
 
     /**
@@ -694,12 +694,8 @@ public class BugreportProgressService extends Service {
         boolean taken = takeScreenshot(mContext, screenshotFile);
         setTakingScreenshot(false);
 
-        final Message resultMsg = new Message();
-        resultMsg.what = MSG_SCREENSHOT_RESPONSE;
-        resultMsg.arg1 = requestMsg.arg1;
-        resultMsg.arg2 = taken ? 1 : 0;
-        resultMsg.obj = screenshotFile;
-        mMainHandler.sendMessage(resultMsg);
+        Message.obtain(mMainHandler, MSG_SCREENSHOT_RESPONSE, requestMsg.arg1, taken ? 1 : 0,
+                screenshotFile).sendToTarget();
     }
 
     private void handleScreenshotResponse(Message resultMsg) {
