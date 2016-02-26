@@ -389,7 +389,8 @@ android_media_AudioSystem_dyn_policy_callback(int event, String8 regId, int val)
 
 static void
 android_media_AudioSystem_recording_callback(int event, int session, int source,
-        const audio_config_base_t *clientConfig, const audio_config_base_t *deviceConfig)
+        const audio_config_base_t *clientConfig, const audio_config_base_t *deviceConfig,
+        audio_patch_handle_t patchHandle)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
@@ -401,12 +402,14 @@ android_media_AudioSystem_recording_callback(int event, int session, int source,
     }
 
     // create an array for 2*3 integers to store the record configurations (client + device)
-    jintArray recParamArray = env->NewIntArray(6);
+    //                 plus 1 integer for the patch handle
+    const int REC_PARAM_SIZE = 7;
+    jintArray recParamArray = env->NewIntArray(REC_PARAM_SIZE);
     if (recParamArray == NULL) {
         ALOGE("recording callback: Couldn't allocate int array for configuration data");
         return;
     }
-    jint recParamData[6];
+    jint recParamData[REC_PARAM_SIZE];
     recParamData[0] = (jint) audioFormatFromNative(clientConfig->format);
     // FIXME this doesn't support index-based masks
     recParamData[1] = (jint) inChannelMaskFromNative(clientConfig->channel_mask);
@@ -415,7 +418,8 @@ android_media_AudioSystem_recording_callback(int event, int session, int source,
     // FIXME this doesn't support index-based masks
     recParamData[4] = (jint) inChannelMaskFromNative(deviceConfig->channel_mask);
     recParamData[5] = (jint) deviceConfig->sample_rate;
-    env->SetIntArrayRegion(recParamArray, 0, 6, recParamData);
+    recParamData[6] = (jint) patchHandle;
+    env->SetIntArrayRegion(recParamArray, 0, REC_PARAM_SIZE, recParamData);
 
     // callback into java
     jclass clazz = env->FindClass(kClassPathName);
