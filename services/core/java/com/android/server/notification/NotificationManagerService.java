@@ -1304,7 +1304,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void setImportance(String pkg, int uid,  int importance) {
+        public void setImportance(String pkg, int uid, int importance) {
             enforceSystemOrSystemUI("Caller not system or systemui");
             setNotificationsEnabledForPackageImpl(pkg, uid,
                     importance != NotificationListenerService.Ranking.IMPORTANCE_NONE);

@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.NotificationManager.InterruptionFilter;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Parcel;
@@ -30,7 +31,7 @@ public class AutomaticZenRule implements Parcelable {
 
     private boolean enabled = false;
     private String name;
-    private int interruptionFilter;
+    private @InterruptionFilter int interruptionFilter;
     private Uri conditionId;
     private ComponentName owner;
     private String id;
@@ -140,9 +141,9 @@ public class AutomaticZenRule implements Parcelable {
 
     /**
      * Sets the interruption filter that is applied when this rule is active.
-     * @param interruptionFilter One of the INTERRUPTION_FILTER_ constants in NotificationManager.
+     * @param interruptionFilter The do not disturb mode to enter when this rule is active.
      */
-    public void setInterruptionFilter(int interruptionFilter) {
+    public void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
         this.interruptionFilter = interruptionFilter;
     }
 
