@@ -32,6 +32,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final View mView;
     protected boolean mDark;
+    protected boolean mDarkInitialized = false;
 
     public static NotificationViewWrapper wrap(Context ctx, View v) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
@@ -61,6 +62,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public void setDark(boolean dark, boolean fade, long delay) {
         mDark = dark;
+        mDarkInitialized = true;
     }
 
     /**
@@ -68,7 +70,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * @param notification
      */
     public void notifyContentUpdated(StatusBarNotification notification) {
-        mDark = false;
+        mDarkInitialized = false;
     };
 
     /**
