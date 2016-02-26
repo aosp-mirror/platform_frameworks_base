@@ -241,6 +241,16 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_ANSWERED_ELSEWHERE = 1014;
 
     /**
+     * Call pull request failure from the network.
+     */
+    public static final int CODE_CALL_PULL_OUT_OF_SYNC = 1015;
+
+    /**
+     * Call ended due to being pulled onto another device.
+     */
+    public static final int CODE_CALL_END_CAUSE_CALL_PULL = 1016;
+
+    /**
      * Supplementary services (HOLD/RESUME) failure error codes.
      * Values for Supplemetary services failure - Failed, Cancelled and Re-Invite collision.
      */
