@@ -155,7 +155,6 @@ class MtpManager {
         }
     }
 
-    @VisibleForTesting
     long getPartialObject(int deviceId, int objectHandle, long offset, long size, byte[] buffer)
             throws IOException {
         final MtpDevice device = getDevice(deviceId);

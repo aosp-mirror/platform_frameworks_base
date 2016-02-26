@@ -192,7 +192,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestStorage("1");
 
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(101, "image.jpg", MtpConstants.FORMAT_EXIF_JPEG, 2 * 1024 * 1024),
                 createDocument(102, "music.mp3", MtpConstants.FORMAT_MP3, 3 * 1024 * 1024)
@@ -259,6 +259,58 @@ public class MtpDatabaseTest extends AndroidTestCase {
                 MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT, getInt(cursor, COLUMN_DOCUMENT_TYPE));
 
         cursor.close();
+    }
+
+    public void testPutChildDocuments_operationsSupported() throws Exception {
+        addTestDevice();
+        addTestStorage("1");
+
+        // Put a document with empty supported operations.
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", new int[0], new MtpObjectInfo[] {
+                createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024)
+        });
+        mDatabase.getMapper().stopAddingDocuments("2");
+
+        try (final Cursor cursor =
+                mDatabase.queryChildDocuments(strings(Document.COLUMN_FLAGS), "2")) {
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals(0, cursor.getInt(0));
+        }
+
+        // Put a document with writable operations.
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", new int[] {
+                MtpConstants.OPERATION_SEND_OBJECT,
+                MtpConstants.OPERATION_SEND_OBJECT_INFO,
+        }, new MtpObjectInfo[] {
+                createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024)
+        });
+        mDatabase.getMapper().stopAddingDocuments("2");
+
+        try (final Cursor cursor =
+                mDatabase.queryChildDocuments(strings(Document.COLUMN_FLAGS), "2")) {
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals(Document.FLAG_SUPPORTS_WRITE, cursor.getInt(0));
+        }
+
+        // Put a document with deletable operations.
+        mDatabase.getMapper().startAddingDocuments("2");
+        mDatabase.getMapper().putChildDocuments(0, "2", new int[] {
+                MtpConstants.OPERATION_DELETE_OBJECT
+        }, new MtpObjectInfo[] {
+                createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024)
+        });
+        mDatabase.getMapper().stopAddingDocuments("2");
+
+        try (final Cursor cursor =
+                mDatabase.queryChildDocuments(strings(Document.COLUMN_FLAGS), "2")) {
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals(Document.FLAG_SUPPORTS_DELETE, cursor.getInt(0));
+        }
     }
 
     public void testRestoreIdForRootDocuments() throws Exception {
@@ -335,7 +387,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestStorage("1");
 
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(101, "image.jpg", MtpConstants.FORMAT_EXIF_JPEG, 2 * 1024 * 1024),
                 createDocument(102, "music.mp3", MtpConstants.FORMAT_MP3, 3 * 1024 * 1024)
@@ -353,7 +405,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         }
 
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
                 createDocument(203, "video.mp4", MtpConstants.FORMAT_MP4_CONTAINER, 1024),
         });
@@ -486,7 +538,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestDevice();
         addTestStorage("1");
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(50, "A", MtpConstants.FORMAT_ASSOCIATION, 0),
                 createDocument(51, "B", MtpConstants.FORMAT_ASSOCIATION, 0),
         });
@@ -495,10 +547,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Put note.txt in each directory.
         mDatabase.getMapper().startAddingDocuments("3");
         mDatabase.getMapper().startAddingDocuments("4");
-        mDatabase.getMapper().putChildDocuments(0, "3", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "3", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(100, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
         });
-        mDatabase.getMapper().putChildDocuments(0, "4", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "4", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(101, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
         });
 
@@ -509,7 +561,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestDevice();
         addTestStorage("1");
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(50, "A", MtpConstants.FORMAT_ASSOCIATION, 0),
                 createDocument(51, "B", MtpConstants.FORMAT_ASSOCIATION, 0),
         });
@@ -518,10 +570,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Add note.txt in each directory again.
         mDatabase.getMapper().startAddingDocuments("3");
         mDatabase.getMapper().startAddingDocuments("4");
-        mDatabase.getMapper().putChildDocuments(0, "3", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "3", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
         });
-        mDatabase.getMapper().putChildDocuments(0, "4", new MtpObjectInfo[] {
+        mDatabase.getMapper().putChildDocuments(0, "4", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
                 createDocument(201, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
         });
         mDatabase.getMapper().stopAddingDocuments("3");
@@ -802,12 +854,9 @@ public class MtpDatabaseTest extends AndroidTestCase {
         mDatabase.getMapper().stopAddingDocuments("1");
 
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(
-                0,
-                "2",
-                new MtpObjectInfo[] {
-                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-                });
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
+                createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
+        });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         assertEquals("2", mDatabase.getParentIdentifier("3").mDocumentId);
@@ -818,21 +867,15 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestStorage("1");
 
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(
-                0,
-                "2",
-                new MtpObjectInfo[] {
-                        createDocument(200, "dir", MtpConstants.FORMAT_ASSOCIATION, 1024),
-                });
+        mDatabase.getMapper().putChildDocuments(0, "2", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
+                createDocument(200, "dir", MtpConstants.FORMAT_ASSOCIATION, 1024),
+        });
         mDatabase.getMapper().stopAddingDocuments("2");
 
         mDatabase.getMapper().startAddingDocuments("3");
-        mDatabase.getMapper().putChildDocuments(
-                0,
-                "3",
-                new MtpObjectInfo[] {
-                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
-                });
+        mDatabase.getMapper().putChildDocuments(0, "3", OPERATIONS_SUPPORTED, new MtpObjectInfo[] {
+                createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024),
+        });
         mDatabase.getMapper().stopAddingDocuments("3");
 
         mDatabase.deleteDocument("3");
@@ -861,7 +904,8 @@ public class MtpDatabaseTest extends AndroidTestCase {
         assertEquals(
                 "3",
                 mDatabase.putNewDocument(
-                        0, "2", createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024)));
+                        0, "2", OPERATIONS_SUPPORTED,
+                        createDocument(200, "note.txt", MtpConstants.FORMAT_TEXT, 1024)));
 
         {
             final Cursor cursor =
@@ -879,8 +923,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments("2");
         mDatabase.putNewDocument(
-                0,
-                "2",
+                0, "2", OPERATIONS_SUPPORTED,
                 createDocument(201, "note.txt", MtpConstants.FORMAT_TEXT, 1024));
         mDatabase.getMapper().stopAddingDocuments("2");
 

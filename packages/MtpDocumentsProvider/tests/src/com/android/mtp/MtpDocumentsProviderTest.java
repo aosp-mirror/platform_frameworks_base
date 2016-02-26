@@ -412,7 +412,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         assertEquals("image/jpeg", cursor.getString(1));
         assertEquals("image.jpg", cursor.getString(2));
         assertEquals(0, cursor.getLong(3));
-        assertEquals(DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL, cursor.getInt(4));
+        assertEquals(Document.FLAG_SUPPORTS_THUMBNAIL, cursor.getInt(4));
         assertEquals(1024 * 1024 * 5, cursor.getInt(5));
 
         cursor.close();

@@ -46,9 +46,11 @@ class PipeManager {
         return task.getReadingFileDescriptor();
     }
 
-    ParcelFileDescriptor writeDocument(Context context, MtpManager model, Identifier identifier)
+    ParcelFileDescriptor writeDocument(Context context, MtpManager model, Identifier identifier,
+                                       int[] operationsSupported)
             throws IOException {
-        final Task task = new WriteDocumentTask(context, model, identifier, mDatabase);
+        final Task task = new WriteDocumentTask(
+                context, model, identifier, operationsSupported, mDatabase);
         mExecutor.execute(task);
         return task.getWritingFileDescriptor();
     }
@@ -103,13 +105,18 @@ class PipeManager {
     private static class WriteDocumentTask extends Task {
         private final Context mContext;
         private final MtpDatabase mDatabase;
+        private final int[] mOperationsSupported;
 
-        WriteDocumentTask(
-                Context context, MtpManager model, Identifier identifier, MtpDatabase database)
+        WriteDocumentTask(Context context,
+                          MtpManager model,
+                          Identifier identifier,
+                          int[] supportedOperations,
+                          MtpDatabase database)
                 throws IOException {
             super(model, identifier);
             mContext = context;
             mDatabase = database;
+            mOperationsSupported = supportedOperations;
         }
 
         @Override
@@ -160,6 +167,7 @@ class PipeManager {
                         mIdentifier.mDocumentId,
                         mIdentifier.mDeviceId,
                         parentIdentifier.mDocumentId,
+                        mOperationsSupported,
                         newObjectInfo);
             } catch (IOException error) {
                 Log.w(MtpDocumentsProvider.TAG,

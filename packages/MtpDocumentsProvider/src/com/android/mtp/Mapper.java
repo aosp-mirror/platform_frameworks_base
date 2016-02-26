@@ -130,12 +130,14 @@ class Mapper {
      * @param documents List of document information.
      * @throws FileNotFoundException
      */
-    synchronized void putChildDocuments(int deviceId, String parentId, MtpObjectInfo[] documents)
+    synchronized void putChildDocuments(
+            int deviceId, String parentId, int[] operationsSupported, MtpObjectInfo[] documents)
             throws FileNotFoundException {
         final ContentValues[] valuesList = new ContentValues[documents.length];
         for (int i = 0; i < documents.length; i++) {
             valuesList[i] = new ContentValues();
-            MtpDatabase.getObjectDocumentValues(valuesList[i], deviceId, parentId, documents[i]);
+            MtpDatabase.getObjectDocumentValues(
+                    valuesList[i], deviceId, parentId, operationsSupported, documents[i]);
         }
         putDocuments(
                 parentId,
