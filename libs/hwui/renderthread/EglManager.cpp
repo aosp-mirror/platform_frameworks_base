@@ -324,6 +324,10 @@ void EglManager::damageFrame(const Frame& frame, const SkRect& dirty) {
 #endif
 }
 
+bool EglManager::damageRequiresSwap() {
+    return EglExtensions.setDamage && mSwapBehavior == SwapBehavior::BufferAge;
+}
+
 bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
 
     if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
