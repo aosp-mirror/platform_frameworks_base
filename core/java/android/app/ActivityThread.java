@@ -2252,8 +2252,8 @@ public final class ActivityThread {
                         memInfo.getTotalSwappablePss(),
                         memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
                         memInfo.getTotalSharedClean(), memInfo.getTotalPrivateClean(),
-                        memInfo.hasSwappedOutPss ? memInfo.getTotalSwappedOut() :
-                        memInfo.getTotalSwappedOutPss(),
+                        memInfo.hasSwappedOutPss ? memInfo.getTotalSwappedOutPss() :
+                        memInfo.getTotalSwappedOut(),
                         nativeMax+dalvikMax, nativeAllocated+dalvikAllocated,
                         nativeFree+dalvikFree);
             } else {
