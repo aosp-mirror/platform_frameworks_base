@@ -6628,9 +6628,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.noteStateNotSaved();
 
         if (mToken != null && mParent == null) {
-            // We might have view roots that were preserved during a relaunch, we need to start them
-            // again. We don't need to check mStopped, the roots will check if they were actually
-            // stopped.
+            // No need to check mStopped, the roots will check if they were actually stopped.
             WindowManagerGlobal.getInstance().setStoppedState(mToken, false /* stopped */);
         }
 
@@ -6728,7 +6726,7 @@ public class Activity extends ContextThemeWrapper
         onUserLeaveHint();
     }
 
-    final void performStop() {
+    final void performStop(boolean preserveWindow) {
         mDoReportFullyDrawn = false;
         mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
 
@@ -6737,7 +6735,10 @@ public class Activity extends ContextThemeWrapper
                 mWindow.closeAllPanels();
             }
 
-            if (mToken != null && mParent == null) {
+            // If we're preserving the window, don't setStoppedState to true, since we
+            // need the window started immediately again. Stopping the window will
+            // destroys hardware resources and causes flicker.
+            if (!preserveWindow && mToken != null && mParent == null) {
                 WindowManagerGlobal.getInstance().setStoppedState(mToken, true);
             }
 
