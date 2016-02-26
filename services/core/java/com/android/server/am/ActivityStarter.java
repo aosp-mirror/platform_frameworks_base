@@ -593,6 +593,7 @@ class ActivityStarter {
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
+        mSupervisor.mActivityMetricsLogger.notifyActivityLaunching();
         boolean componentSpecified = intent.getComponent() != null;
 
         // Save a copy in case ephemeral needs it
@@ -722,11 +723,13 @@ class ActivityStarter {
                 }
             }
 
+            final ActivityRecord[] outRecord = new ActivityRecord[1];
             int res = startActivityLocked(caller, intent, ephemeralIntent, resolvedType,
                     aInfo, rInfo, voiceSession, voiceInteractor,
                     resultTo, resultWho, requestCode, callingPid,
                     callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
-                    options, ignoreTargetSecurity, componentSpecified, null, container, inTask);
+                    options, ignoreTargetSecurity, componentSpecified, outRecord, container,
+                    inTask);
 
             Binder.restoreCallingIdentity(origId);
 
@@ -773,6 +776,13 @@ class ActivityStarter {
                 }
             }
 
+            final String componentName = outRecord[0] != null ? outRecord[0].shortComponentName
+                    : null;
+            final boolean processRunning = outRecord[0] != null &&
+                    mService.mProcessNames.get(outRecord[0].processName,
+                            outRecord[0].appInfo.uid) != null;
+            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, componentName,
+                    processRunning);
             return res;
         }
     }

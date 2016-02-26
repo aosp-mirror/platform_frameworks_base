@@ -1850,5 +1850,33 @@ message MetricsEvent {
 
     // Logged when a user double taps the overview button to launch the previous task
     OVERVIEW_LAUNCH_PREVIOUS_TASK = 318;
+
+    // Logged when we execute an app transition. This indicates the total delay from startActivity
+    // until the app transition is starting to animate, in milliseconds.
+    APP_TRANSITION_DELAY_MS = 319;
+
+    // Logged when we execute an app transition. This indicates the reason why the transition
+    // started. Must be one of ActivityManagerInternal.APP_TRANSITION_* reasons.
+    APP_TRANSITION_REASON = 320;
+
+    // Logged when we execute an app transition and we drew a starting window. This indicates the
+    // delay from startActivity until the starting window was drawn.
+    APP_TRANSITION_STARTING_WINDOW_DELAY_MS = 321;
+
+    // Logged when we execute an app transition and all windows of the app got drawn. This indicates
+    // the delay from startActivity until all windows have been drawn.
+    APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS = 322;
+
+    // Logged when we execute an app transition. This indicates the component name of the current
+    // transition.
+    APP_TRANSITION_COMPONENT_NAME = 323;
+
+    // Logged when we execute an app transition. This indicates whether the process was already
+    // running.
+    APP_TRANSITION_PROCESS_RUNNING = 324;
+
+    // Logged when we execute an app transition. This indicates the device uptime in seconds when
+    // the transition was executed.
+    APP_TRANSITION_DEVICE_UPTIME_SECONDS = 325;
   }
 }

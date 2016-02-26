@@ -1371,7 +1371,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     int mProcessLimitOverride = -1;
 
     WindowManagerService mWindowManager;
-
     final ActivityThread mSystemThread;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -2486,7 +2485,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         mStackSupervisor = new ActivityStackSupervisor(this);
         mActivityStarter = new ActivityStarter(this, mStackSupervisor);
         mRecentTasks = new RecentTasks(this, mStackSupervisor);
-
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -20766,6 +20764,20 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.onLocalVoiceInteractionStartedLocked(activity,
                         voiceSession, voiceInteractor);
+            }
+        }
+
+        @Override
+        public void notifyStartingWindowDrawn() {
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.mActivityMetricsLogger.notifyStartingWindowDrawn();
+            }
+        }
+
+        @Override
+        public void notifyAppTransitionStarting(int reason) {
+            synchronized (ActivityManagerService.this) {
+                mStackSupervisor.mActivityMetricsLogger.notifyTransitionStarting(reason);
             }
         }
     }
