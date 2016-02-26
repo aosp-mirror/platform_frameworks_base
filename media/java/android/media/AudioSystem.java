@@ -279,8 +279,14 @@ public class AudioSystem
          * @param session
          * @param source
          * @param recordingFormat an array of ints containing respectively the client and device
-         *    recording configuration. Each set of parameters contains the following parameters
-         *    in this order: format, channel mask, sample rate
+         *    recording configurations (2*3 ints), followed by the patch handle:
+         *    index 0: client format
+         *          1: client channel mask
+         *          2: client sample rate
+         *          3: device format
+         *          4: device channel mask
+         *          5: device sample rate
+         *          6: patch handle
          */
         void onRecordingConfigurationChanged(int event, int session, int source,
                 int[] recordingFormat);
