@@ -46,10 +46,10 @@ public abstract class JobService extends Service {
      * Job services must be protected with this permission:
      *
      * <pre class="prettyprint">
-     *     <service android:name="MyJobService"
-     *              android:permission="android.permission.BIND_JOB_SERVICE" >
+     *     &#60;service android:name="MyJobService"
+     *              android:permission="android.permission.BIND_JOB_SERVICE" &#62;
      *         ...
-     *     </service>
+     *     &#60;/service&#62;
      * </pre>
      *
      * <p>If a job service is declared in the manifest but not protected with this
