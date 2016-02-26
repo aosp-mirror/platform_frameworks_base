@@ -203,6 +203,11 @@ public final class Installer extends SystemService {
         mInstaller.execute("linkfile", relativePath, fromBase, toBase);
     }
 
+    public void moveAb(String apkPath, String instructionSet, String outputPath)
+            throws InstallerException {
+        mInstaller.execute("move_ab", apkPath, instructionSet, outputPath);
+    }
+
     private static void assertValidInstructionSet(String instructionSet)
             throws InstallerException {
         for (String abi : Build.SUPPORTED_ABIS) {

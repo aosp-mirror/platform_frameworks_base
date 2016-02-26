@@ -16,36 +16,28 @@
 
 package com.android.server.pm;
 
-import android.app.AppGlobals;
+import static com.android.server.pm.Installer.DEXOPT_OTA;
+import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
+
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.IOtaDexopt;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
-import android.content.pm.ResolveInfo;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.os.storage.StorageManager;
-import android.util.ArraySet;
 import android.util.Log;
+import android.util.Slog;
 
-import dalvik.system.DexFile;
+import com.android.internal.os.InstallerConnection.InstallerException;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-
-import static com.android.server.pm.Installer.DEXOPT_OTA;
 
 /**
  * A service for A/B OTA dexopting.
@@ -70,6 +62,9 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
         // Use the package manager install and install lock here for the OTA dex optimizer.
         mPackageDexOptimizer = new OTADexoptPackageDexOptimizer(packageManagerService.mInstaller,
                 packageManagerService.mInstallLock, context);
+
+        // Now it's time to check whether we need to move any A/B artifacts.
+        moveAbArtifacts(packageManagerService.mInstaller);
     }
 
     public static OtaDexoptService main(Context context,
@@ -150,20 +145,50 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 false /* extractOnly */);
     }
 
-    private ArraySet<String> getPackageNamesForIntent(Intent intent, int userId) {
-        List<ResolveInfo> ris = null;
-        try {
-            ris = AppGlobals.getPackageManager().queryIntentReceivers(
-                    intent, null, 0, userId);
-        } catch (RemoteException e) {
+    private void moveAbArtifacts(Installer installer) {
+        if (mDexoptPackages != null) {
+            throw new IllegalStateException("Should not be ota-dexopting when trying to move.");
         }
-        ArraySet<String> pkgNames = new ArraySet<String>(ris == null ? 0 : ris.size());
-        if (ris != null) {
-            for (ResolveInfo ri : ris) {
-                pkgNames.add(ri.activityInfo.packageName);
+
+        // Look into all packages.
+        Collection<PackageParser.Package> pkgs = mPackageManagerService.getPackages();
+        for (PackageParser.Package pkg : pkgs) {
+            if (pkg == null) {
+                continue;
+            }
+
+            // Does the package have code? If not, there won't be any artifacts.
+            if (!PackageDexOptimizer.canOptimizePackage(pkg)) {
+                continue;
+            }
+            if (pkg.codePath == null) {
+                Slog.w(TAG, "Package " + pkg + " can be optimized but has null codePath");
+                continue;
+            }
+
+            // If the path is in /system or /vendor, ignore. It will have been ota-dexopted into
+            // /data/ota and moved into the dalvik-cache already.
+            if (pkg.codePath.startsWith("/system") || pkg.codePath.startsWith("/vendor")) {
+                continue;
+            }
+
+            final String[] instructionSets = getAppDexInstructionSets(pkg.applicationInfo);
+            final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
+            final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+            for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                for (String path : paths) {
+                    String oatDir = PackageDexOptimizer.getOatDir(new File(pkg.codePath)).
+                            getAbsolutePath();
+
+                    // TODO: Check first whether there is an artifact, to save the roundtrip time.
+
+                    try {
+                        installer.moveAb(path, dexCodeInstructionSet, oatDir);
+                    } catch (InstallerException e) {
+                    }
+                }
             }
         }
-        return pkgNames;
     }
 
     private static class OTADexoptPackageDexOptimizer extends

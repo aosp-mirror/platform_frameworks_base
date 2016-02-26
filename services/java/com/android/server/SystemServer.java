@@ -431,6 +431,24 @@ public final class SystemServer {
         mPackageManager = mSystemContext.getPackageManager();
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
 
+        // Manages A/B OTA dexopting. This is a bootstrap service as we need it to rename
+        // A/B artifacts after boot, before anything else might touch/need them.
+        // Note: this isn't needed during decryption (we don't have /data anyways).
+        if (!mOnlyCore) {
+            boolean disableOtaDexopt = SystemProperties.getBoolean("config.disable_otadexopt",
+                    false);
+            if (!disableOtaDexopt) {
+                traceBeginAndSlog("StartOtaDexOptService");
+                try {
+                    OtaDexoptService.main(mSystemContext, mPackageManagerService);
+                } catch (Throwable e) {
+                    reportWtf("starting OtaDexOptService", e);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                }
+            }
+        }
+
         traceBeginAndSlog("StartUserManagerService");
         ServiceManager.addService(Context.USER_SERVICE, UserManagerService.getInstance());
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
@@ -1124,19 +1142,6 @@ public final class SystemServer {
                     reportWtf("starting BackgroundDexOptService", e);
                 }
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-
-                // Manages A/B OTA dexopting.
-                boolean disableOtaDexopt = SystemProperties.getBoolean("config.disable_otadexopt",
-                        false);
-                if (!disableOtaDexopt) {
-                    traceBeginAndSlog("StartOtaDexOptService");
-                    try {
-                        OtaDexoptService.main(mSystemContext, mPackageManagerService);
-                    } catch (Throwable e) {
-                        reportWtf("starting BackgroundDexOptService", e);
-                    }
-                    Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-                }
             }
 
             mSystemServiceManager.startService(LauncherAppsService.class);
