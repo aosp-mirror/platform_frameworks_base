@@ -505,7 +505,7 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
     }
 
     public boolean hasEnrolledFingerprints(int userId) {
-        if (userId != Binder.getCallingUid()) {
+        if (userId != UserHandle.getCallingUserId()) {
             checkPermission(INTERACT_ACROSS_USERS);
         }
         return mFingerprintUtils.getFingerprintsForUser(mContext, userId).size() > 0;
