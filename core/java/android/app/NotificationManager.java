@@ -18,6 +18,7 @@ package android.app;
 
 import com.android.internal.util.Preconditions;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -45,6 +46,8 @@ import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.List;
 
@@ -137,6 +140,13 @@ public class NotificationManager
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL
             = "android.app.action.INTERRUPTION_FILTER_CHANGED_INTERNAL";
+
+
+    /** @hide */
+    @IntDef({INTERRUPTION_FILTER_NONE, INTERRUPTION_FILTER_PRIORITY, INTERRUPTION_FILTER_ALARMS,
+            INTERRUPTION_FILTER_ALL, INTERRUPTION_FILTER_UNKNOWN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InterruptionFilter {}
 
     /**
      * {@link #getCurrentInterruptionFilter() Interruption filter} constant -
@@ -507,7 +517,10 @@ public class NotificationManager
         return false;
     }
 
-    public int getImportance() {
+    /**
+     * Returns the user specified importance for notifications from the calling package.
+     */
+    public @NotificationListenerService.Ranking.Importance int getImportance() {
         INotificationManager service = getService();
         try {
             return service.getPackageImportance(mContext.getPackageName());
@@ -516,6 +529,9 @@ public class NotificationManager
         return NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
     }
 
+    /**
+     * Returns whether notifications from the calling package are blocked.
+     */
     public boolean areNotificationsEnabled() {
         INotificationManager service = getService();
         try {
@@ -874,7 +890,7 @@ public class NotificationManager
      * Only available if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      */
-    public final int getCurrentInterruptionFilter() {
+    public final @InterruptionFilter int getCurrentInterruptionFilter() {
         final INotificationManager service = getService();
         try {
             return zenModeToInterruptionFilter(service.getZenMode());
