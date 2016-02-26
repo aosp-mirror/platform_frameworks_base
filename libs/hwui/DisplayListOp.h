@@ -28,6 +28,7 @@
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
+#include "VectorDrawable.h"
 
 #include <algorithm>
 
@@ -1105,6 +1106,30 @@ private:
     float* mX;
     float* mY;
     float* mRadius;
+};
+
+class DrawVectorDrawableOp : public DrawOp {
+public:
+    DrawVectorDrawableOp(VectorDrawableRoot* tree)
+            : DrawOp(nullptr), mTree(tree) {}
+
+    virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
+        const SkBitmap& bitmap = mTree->getBitmapUpdateIfDirty();
+        SkPaint* paint = mTree->getPaint();
+        const SkRect bounds = mTree->getBounds();
+        renderer.drawBitmap(&bitmap, Rect(0, 0, bitmap.width(), bitmap.height()),
+                bounds, paint);
+    }
+
+    virtual void output(int level, uint32_t logFlags) const override {
+        OP_LOG("Draw Vector Drawable %p", mTree);
+    }
+
+    virtual const char* name() override { return "DrawVectorDrawable"; }
+
+private:
+    VectorDrawableRoot* mTree;
+
 };
 
 class DrawOvalOp : public DrawStrokableOp {
