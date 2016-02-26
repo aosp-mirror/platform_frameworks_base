@@ -620,7 +620,7 @@ final class UserController {
             }
         } else {
             Slog.w(TAG, "Mount service not published; guessing locked state based on property");
-            return !StorageManager.isFileBasedEncryptionEnabled();
+            return !StorageManager.isFileEncryptedNativeOrEmulated();
         }
     }
 

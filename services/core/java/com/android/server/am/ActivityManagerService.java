@@ -10884,7 +10884,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * belonging to any running apps.
      */
     private void installEncryptionUnawareProviders(int userId) {
-        if (!StorageManager.isFileBasedEncryptionEnabled()) {
+        if (!StorageManager.isFileEncryptedNativeOrEmulated()) {
             // TODO: eventually pivot this back to look at current user state,
             // similar to the comment in UserManager.isUserUnlocked(), but for
             // now, if we started apps when "unlocked" then unaware providers
