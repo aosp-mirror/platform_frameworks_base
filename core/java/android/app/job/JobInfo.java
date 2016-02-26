@@ -102,11 +102,18 @@ public class JobInfo implements Parcelable {
     public static final int PRIORITY_SYNC_INITIALIZATION = 20;
 
     /**
-     * Value of {@link #getPriority} for the current foreground app (overrides the supplied
+     * Value of {@link #getPriority} for a foreground app (overrides the supplied
      * JobInfo priority if it is smaller).
      * @hide
      */
     public static final int PRIORITY_FOREGROUND_APP = 30;
+
+    /**
+     * Value of {@link #getPriority} for the current top app (overrides the supplied
+     * JobInfo priority if it is smaller).
+     * @hide
+     */
+    public static final int PRIORITY_TOP_APP = 40;
 
     private final int jobId;
     private final PersistableBundle extras;
