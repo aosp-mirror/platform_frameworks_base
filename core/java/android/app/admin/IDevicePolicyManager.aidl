@@ -91,7 +91,7 @@ interface IDevicePolicyManager {
 
     int setStorageEncryption(in ComponentName who, boolean encrypt);
     boolean getStorageEncryption(in ComponentName who, int userHandle);
-    int getStorageEncryptionStatus(int userHandle);
+    int getStorageEncryptionStatus(in String callerPackage, int userHandle);
 
     boolean requestBugreport(in ComponentName who);
 
