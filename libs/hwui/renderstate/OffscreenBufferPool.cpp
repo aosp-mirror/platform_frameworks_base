@@ -54,6 +54,14 @@ Rect OffscreenBuffer::getTextureCoordinates() {
     return Rect(0, viewportHeight * texY, viewportWidth * texX, 0);
 }
 
+void OffscreenBuffer::dirty(Rect dirtyArea) {
+    dirtyArea.doIntersect(0, 0, viewportWidth, viewportHeight);
+    if (!dirtyArea.isEmpty()) {
+        region.orSelf(android::Rect(dirtyArea.left, dirtyArea.top,
+                dirtyArea.right, dirtyArea.bottom));
+    }
+}
+
 void OffscreenBuffer::updateMeshFromRegion() {
     // avoid T-junctions as they cause artifacts in between the resultant
     // geometry when complex transforms occur.

@@ -48,6 +48,8 @@ public:
 
     Rect getTextureCoordinates();
 
+    void dirty(Rect dirtyArea);
+
     // must be called prior to rendering, to construct/update vertex buffer
     void updateMeshFromRegion();
 
