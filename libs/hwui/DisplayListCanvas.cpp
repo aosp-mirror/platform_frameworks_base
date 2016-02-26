@@ -415,12 +415,7 @@ void DisplayListCanvas::drawPoints(const float* points, int count, const SkPaint
 
 void DisplayListCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     mDisplayList->ref(tree);
-    const SkBitmap& bitmap = tree->getBitmapUpdateIfDirty();
-    SkPaint* paint = tree->getPaint();
-    const SkRect bounds = tree->getBounds();
-    addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(bitmap),
-            0, 0, bitmap.width(), bitmap.height(),
-            bounds.left(), bounds.top(), bounds.right(), bounds.bottom(), refPaint(paint)));
+    addDrawOp(new (alloc()) DrawVectorDrawableOp(tree));
 }
 
 void DisplayListCanvas::drawTextOnPath(const uint16_t* glyphs, int count,
