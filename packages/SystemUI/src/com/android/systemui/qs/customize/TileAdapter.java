@@ -107,7 +107,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mOtherTiles = new ArrayList<TileInfo>(mAllTiles);
         mTiles.clear();
         for (int i = 0; i < mCurrentSpecs.size(); i++) {
-            mTiles.add(getAndRemoveOther(mCurrentSpecs.get(i)));
+            final TileInfo tile = getAndRemoveOther(mCurrentSpecs.get(i));
+            if (tile != null) {
+                mTiles.add(tile);
+            }
         }
         mTiles.add(null);
         mTiles.addAll(mOtherTiles);
