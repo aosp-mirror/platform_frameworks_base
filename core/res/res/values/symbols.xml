@@ -2541,4 +2541,7 @@
   <java-symbol type="string" name="carrier_app_notification_title" />
   <java-symbol type="string" name="carrier_app_notification_text" />
   <java-symbol type="string" name="negative_duration" />
+
+  <!-- WallpaperManager config -->
+  <java-symbol type="string" name="config_wallpaperCropperPackage" />
 </resources>

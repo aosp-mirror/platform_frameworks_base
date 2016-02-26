@@ -767,7 +767,9 @@ public class WallpaperManager {
         }
 
         // fallback crop activity
-        cropAndSetWallpaperIntent.setPackage("com.android.wallpapercropper");
+        final String cropperPackage = mContext.getString(
+                com.android.internal.R.string.config_wallpaperCropperPackage);
+        cropAndSetWallpaperIntent.setPackage(cropperPackage);
         List<ResolveInfo> cropAppList = packageManager.queryIntentActivities(
                 cropAndSetWallpaperIntent, 0);
         if (cropAppList.size() > 0) {
