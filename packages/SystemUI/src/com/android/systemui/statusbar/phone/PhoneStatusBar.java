@@ -1144,30 +1144,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         @Override
         public boolean onLongClick(View v) {
-            if (mRecents != null) {
-                int dockSide = WindowManagerProxy.getInstance().getDockSide();
-                if (dockSide == WindowManager.DOCKED_INVALID) {
-                    Point realSize = new Point();
-                    mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
-                            .getRealSize(realSize);
-                    Rect initialBounds= new Rect(0, 0, realSize.x, realSize.y);
-                    boolean docked = mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
-                            ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
-                            initialBounds);
-                    if (docked) {
-                        MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS);
-                        return true;
-                    }
-                } else {
-                    EventBus.getDefault().send(new UndockingTaskEvent());
-                    MetricsLogger.action(mContext, MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS);
-                    return true;
-                }
-
+            if (mRecents == null) {
+                return false;
+            }
+            boolean initiallyDocked = WindowManagerProxy.getInstance().getDockSide()
+                    == WindowManager.DOCKED_INVALID;
+            boolean dockedAtEnd = toggleSplitScreenMode();
+            if (dockedAtEnd != initiallyDocked) {
+                int logAction = dockedAtEnd ? MetricsEvent.ACTION_WINDOW_DOCK_LONGPRESS
+                        : MetricsEvent.ACTION_WINDOW_UNDOCK_LONGPRESS;
+                MetricsLogger.action(mContext, logAction);
+                return true;
             }
             return false;
         }
     };
+
+    @Override
+    protected boolean toggleSplitScreenMode() {
+        if (mRecents == null) {
+            return false;
+        }
+        int dockSide = WindowManagerProxy.getInstance().getDockSide();
+        if (dockSide == WindowManager.DOCKED_INVALID) {
+            Point realSize = new Point();
+            mContext.getSystemService(DisplayManager.class).getDisplay(Display.DEFAULT_DISPLAY)
+                    .getRealSize(realSize);
+            Rect initialBounds= new Rect(0, 0, realSize.x, realSize.y);
+            return mRecents.dockTopTask(NavigationBarGestureHelper.DRAG_MODE_NONE,
+                    ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT,
+                    initialBounds);
+        } else {
+            EventBus.getDefault().send(new UndockingTaskEvent());
+            return false;
+        }
+    }
 
     private final View.OnLongClickListener mLongPressHomeListener
             = new View.OnLongClickListener() {

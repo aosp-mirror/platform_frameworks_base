@@ -334,7 +334,7 @@ public abstract class AccessibilityService extends Service {
     public static final int GLOBAL_ACTION_HOME = 2;
 
     /**
-     * Action to open the recent apps.
+     * Action to toggle showing the overview of recent apps
      */
     public static final int GLOBAL_ACTION_RECENTS = 3;
 
@@ -352,6 +352,11 @@ public abstract class AccessibilityService extends Service {
      * Action to open the power long-press dialog.
      */
     public static final int GLOBAL_ACTION_POWER_DIALOG = 6;
+
+    /**
+     * Action to toggle docking the current app's window
+     */
+    public static final int GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN = 7;
 
     private static final String LOG_TAG = "AccessibilityService";
 

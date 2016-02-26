@@ -116,6 +116,11 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    protected boolean toggleSplitScreenMode() {
+        return false;
+    }
+
+    @Override
     public void maybeEscalateHeadsUp() {
     }
 

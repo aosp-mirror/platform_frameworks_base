@@ -72,6 +72,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_ADD_QS_TILE                   = 27 << MSG_SHIFT;
     private static final int MSG_REMOVE_QS_TILE                = 28 << MSG_SHIFT;
     private static final int MSG_CLICK_QS_TILE                 = 29 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_APP_SPLIT_SCREEN       = 30 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -104,6 +105,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void showRecentApps(boolean triggeredFromAltTab);
         public void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
         public void toggleRecentApps();
+        public void toggleSplitScreen();
         public void preloadRecentApps();
         public void toggleKeyboardShortcutsMenu();
         public void cancelPreloadRecentApps();
@@ -220,6 +222,13 @@ public class CommandQueue extends IStatusBar.Stub {
             mHandler.obtainMessage(MSG_HIDE_RECENT_APPS,
                     triggeredFromAltTab ? 1 : 0, triggeredFromHomeKey ? 1 : 0,
                     null).sendToTarget();
+        }
+    }
+
+    public void toggleSplitScreen() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_APP_SPLIT_SCREEN);
+            mHandler.obtainMessage(MSG_TOGGLE_APP_SPLIT_SCREEN, 0, 0, null).sendToTarget();
         }
     }
 
@@ -463,6 +472,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_CLICK_QS_TILE:
                     mCallbacks.clickTile((ComponentName) msg.obj);
+                    break;
+                case MSG_TOGGLE_APP_SPLIT_SCREEN:
+                    mCallbacks.toggleSplitScreen();
                     break;
             }
         }

@@ -2666,6 +2666,7 @@ package android.accessibilityservice {
     field public static final int GLOBAL_ACTION_POWER_DIALOG = 6; // 0x6
     field public static final int GLOBAL_ACTION_QUICK_SETTINGS = 5; // 0x5
     field public static final int GLOBAL_ACTION_RECENTS = 3; // 0x3
+    field public static final int GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN = 7; // 0x7
     field public static final java.lang.String SERVICE_INTERFACE = "android.accessibilityservice.AccessibilityService";
     field public static final java.lang.String SERVICE_META_DATA = "android.accessibilityservice";
   }
@@ -44091,6 +44092,7 @@ package android.view.accessibility {
     field public static final int TYPE_ACCESSIBILITY_OVERLAY = 4; // 0x4
     field public static final int TYPE_APPLICATION = 1; // 0x1
     field public static final int TYPE_INPUT_METHOD = 2; // 0x2
+    field public static final int TYPE_SPLIT_SCREEN_DIVIDER = 5; // 0x5
     field public static final int TYPE_SYSTEM = 3; // 0x3
   }
 
