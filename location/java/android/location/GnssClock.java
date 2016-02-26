@@ -16,41 +16,15 @@
 
 package android.location;
 
-import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * A class containing a GPS clock timestamp.
  * It represents a measurement of the GPS receiver's clock.
  */
 public final class GnssClock implements Parcelable {
-
     // The following enumerations must be in sync with the values declared in gps.h
-
-    /** The type of the GPS Clock. */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CLOCK_TYPE_UNKNOWN, CLOCK_TYPE_LOCAL_HW_TIME, CLOCK_TYPE_GPS_TIME})
-    public @interface GnssClockType {}
-
-    /**
-     * The type of the time stored is not available or it is unknown.
-     */
-    public static final byte CLOCK_TYPE_UNKNOWN = 0;
-
-    /**
-     * The source of the time value reported by this class is the 'Local Hardware Clock'.
-     */
-    public static final byte CLOCK_TYPE_LOCAL_HW_TIME = 1;
-
-    /**
-     * The source of the time value reported by this class is the 'GPS time' derived from
-     * satellites (epoch = Jan 6, 1980).
-     */
-    public static final byte CLOCK_TYPE_GPS_TIME = 2;
 
     private static final short HAS_NO_FLAGS = 0;
     private static final short HAS_LEAP_SECOND = (1<<0);
@@ -65,7 +39,6 @@ public final class GnssClock implements Parcelable {
 
     private short mFlags;
     private short mLeapSecond;
-    private byte mType;
     private long mTimeInNs;
     private double mTimeUncertaintyInNs;
     private long mFullBiasInNs;
@@ -85,7 +58,6 @@ public final class GnssClock implements Parcelable {
     public void set(GnssClock clock) {
         mFlags = clock.mFlags;
         mLeapSecond = clock.mLeapSecond;
-        mType = clock.mType;
         mTimeInNs = clock.mTimeInNs;
         mTimeUncertaintyInNs = clock.mTimeUncertaintyInNs;
         mFullBiasInNs = clock.mFullBiasInNs;
@@ -101,38 +73,6 @@ public final class GnssClock implements Parcelable {
      */
     public void reset() {
         initialize();
-    }
-
-    /**
-     * Gets the type of time reported by {@link #getTimeInNs()}.
-     */
-    @GnssClockType
-    public byte getType() {
-        return mType;
-    }
-
-    /**
-     * Sets the type of time reported.
-     */
-    public void setType(@GnssClockType byte value) {
-        mType = value;
-    }
-
-    /**
-     * Gets a string representation of the 'type'.
-     * For internal and logging use only.
-     */
-    private String getTypeString() {
-        switch (mType) {
-            case CLOCK_TYPE_UNKNOWN:
-                return "Unknown";
-            case CLOCK_TYPE_GPS_TIME:
-                return "GpsTime";
-            case CLOCK_TYPE_LOCAL_HW_TIME:
-                return "LocalHwClock";
-            default:
-                return "<Invalid:" + mType + ">";
-        }
     }
 
     /**
@@ -170,10 +110,7 @@ public final class GnssClock implements Parcelable {
     }
 
     /**
-     * Gets the GPS receiver internal clock value in nanoseconds.
-     * This can be either the 'local hardware clock' value ({@link #CLOCK_TYPE_LOCAL_HW_TIME}), or the
-     * current GPS time derived inside GPS receiver ({@link #CLOCK_TYPE_GPS_TIME}).
-     * {@link #getType()} defines the time reported.
+     * Gets the GNSS receiver internal clock value in nanoseconds.
      *
      * For 'local hardware clock' this value is expected to be monotonically increasing during the
      * reporting session. The real GPS time can be derived by compensating
@@ -241,15 +178,14 @@ public final class GnssClock implements Parcelable {
      * Gets the difference between hardware clock ({@link #getTimeInNs()}) inside GPS receiver and
      * the true GPS time since 0000Z, January 6, 1980, in nanoseconds.
      *
-     * This value is available if {@link #CLOCK_TYPE_LOCAL_HW_TIME} is set, and GPS receiver has solved
-     * the clock for GPS time.
-     * {@link #getBiasUncertaintyInNs()} should be used for quality check.
+     * This value is available if the receiver has estimated GPS time. If the computed time is for a
+     * non-GPS constellation, the time offset of that constellation to GPS has to be applied to fill
+     * this value. The value contains the 'bias uncertainty' {@link #getBiasUncertaintyInNs()} in
+     * it, and it should be used for quality check. The value is only available if
+     * {@link #hasFullBiasInNs()} is true.
      *
      * The sign of the value is defined by the following equation:
-     *      true time (GPS time) = time_ns + (full_bias_ns + bias_ns)
-     *
-     * The reported full bias includes {@link #getBiasUncertaintyInNs()}.
-     * The value is onl available if {@link #hasFullBiasInNs()} is true.
+     *      local estimate of GPS time = time_ns + (full_bias_ns + bias_ns)
      */
     public long getFullBiasInNs() {
         return mFullBiasInNs;
@@ -423,7 +359,6 @@ public final class GnssClock implements Parcelable {
 
             gpsClock.mFlags = (short) parcel.readInt();
             gpsClock.mLeapSecond = (short) parcel.readInt();
-            gpsClock.mType = parcel.readByte();
             gpsClock.mTimeInNs = parcel.readLong();
             gpsClock.mTimeUncertaintyInNs = parcel.readDouble();
             gpsClock.mFullBiasInNs = parcel.readLong();
@@ -446,7 +381,6 @@ public final class GnssClock implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mFlags);
         parcel.writeInt(mLeapSecond);
-        parcel.writeByte(mType);
         parcel.writeLong(mTimeInNs);
         parcel.writeDouble(mTimeUncertaintyInNs);
         parcel.writeLong(mFullBiasInNs);
@@ -467,8 +401,6 @@ public final class GnssClock implements Parcelable {
         final String format = "   %-15s = %s\n";
         final String formatWithUncertainty = "   %-15s = %-25s   %-26s = %s\n";
         StringBuilder builder = new StringBuilder("GnssClock:\n");
-
-        builder.append(String.format(format, "Type", getTypeString()));
 
         builder.append(String.format(format, "LeapSecond", hasLeapSecond() ? mLeapSecond : null));
 
@@ -498,17 +430,12 @@ public final class GnssClock implements Parcelable {
                 "DriftUncertaintyInNsPerSec",
                 hasDriftUncertaintyInNsPerSec() ? mDriftUncertaintyInNsPerSec : null));
 
-        builder.append(String.format(format, "HardwareClockDiscontinuityCount",
-                getType() == CLOCK_TYPE_LOCAL_HW_TIME
-                        ? mHardwareClockDiscontinuityCount : null));
-
         return builder.toString();
     }
 
     private void initialize() {
         mFlags = HAS_NO_FLAGS;
         resetLeapSecond();
-        setType(CLOCK_TYPE_UNKNOWN);
         setTimeInNs(Long.MIN_VALUE);
         resetTimeUncertaintyInNs();
         resetFullBiasInNs();
