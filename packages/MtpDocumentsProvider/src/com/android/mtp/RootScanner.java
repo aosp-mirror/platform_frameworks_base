@@ -26,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 final class RootScanner {
@@ -56,7 +55,7 @@ final class RootScanner {
     final MtpDatabase mDatabase;
 
     ExecutorService mExecutor;
-    FutureTask<Void> mCurrentTask;
+    private UpdateRootsRunnable mCurrentTask;
 
     RootScanner(
             ContentResolver resolver,
@@ -84,13 +83,12 @@ final class RootScanner {
             mExecutor = Executors.newSingleThreadExecutor();
         }
         if (mCurrentTask != null) {
-            // Cancel previous task.
-            mCurrentTask.cancel(true);
+            // Stop previous task.
+            mCurrentTask.stop();
         }
-        final UpdateRootsRunnable runnable = new UpdateRootsRunnable();
-        mCurrentTask = new FutureTask<Void>(runnable, null);
-        mExecutor.submit(mCurrentTask);
-        return runnable.mFirstScanCompleted;
+        mCurrentTask = new UpdateRootsRunnable();
+        mExecutor.execute(mCurrentTask);
+        return mCurrentTask.mFirstScanCompleted;
     }
 
     /**
@@ -112,13 +110,21 @@ final class RootScanner {
      * Runnable to scan roots and update the database information.
      */
     private final class UpdateRootsRunnable implements Runnable {
+        /**
+         * Count down latch that specifies the runnable is stopped.
+         */
+        final CountDownLatch mStopped = new CountDownLatch(1);
+
+        /**
+         * Count down latch that specifies the first scan is completed.
+         */
         final CountDownLatch mFirstScanCompleted = new CountDownLatch(1);
 
         @Override
         public void run() {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             int pollingCount = 0;
-            while (true) {
+            while (mStopped.getCount() > 0) {
                 boolean changed = false;
 
                 // Update devices.
@@ -170,12 +176,16 @@ final class RootScanner {
                     // Use SHORT_POLLING_PERIOD for the first SHORT_POLLING_TIMES because it is
                     // more likely to add new root just after the device is added.
                     // TODO: Use short interval only for a device that is just added.
-                    Thread.sleep(pollingCount > SHORT_POLLING_TIMES ?
-                        LONG_POLLING_INTERVAL : SHORT_POLLING_INTERVAL);
+                    mStopped.await(pollingCount > SHORT_POLLING_TIMES ?
+                            LONG_POLLING_INTERVAL : SHORT_POLLING_INTERVAL, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException exp) {
                     break;
                 }
             }
+        }
+
+        void stop() {
+            mStopped.countDown();
         }
     }
 }
