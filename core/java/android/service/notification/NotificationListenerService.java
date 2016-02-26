@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.app.INotificationManager;
@@ -42,6 +43,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -910,6 +913,14 @@ public abstract class NotificationListenerService extends Service {
      * current {@link RankingMap}.
      */
     public static class Ranking {
+
+        /** @hide */
+        @IntDef({VISIBILITY_NO_OVERRIDE, IMPORTANCE_UNSPECIFIED, IMPORTANCE_NONE,
+                IMPORTANCE_MIN, IMPORTANCE_LOW, IMPORTANCE_DEFAULT, IMPORTANCE_HIGH,
+                IMPORTANCE_MAX})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Importance {}
+
         /** Value signifying that the user has not expressed a per-app visibility override value.
          * @hide */
         public static final int VISIBILITY_NO_OVERRIDE = -1000;
@@ -960,7 +971,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mMatchesInterruptionFilter;
         private int mVisibilityOverride;
         private int mSuppressedVisualEffects;
-        private int mImportance;
+        private @Importance int mImportance;
         private CharSequence mImportanceExplanation;
 
         public Ranking() {}
@@ -1026,7 +1037,7 @@ public abstract class NotificationListenerService extends Service {
          *
          * @return the rank of the notification
          */
-        public int getImportance() {
+        public @Importance int getImportance() {
             return mImportance;
         }
 
