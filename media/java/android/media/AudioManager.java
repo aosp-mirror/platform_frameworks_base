@@ -3321,6 +3321,7 @@ public class AudioManager {
      * Used as a key for {@link #getProperty} to request the native or optimal output sample rate
      * for this device's primary output stream, in decimal Hz.
      */
+    // FIXME Deprecate
     public static final String PROPERTY_OUTPUT_SAMPLE_RATE =
             "android.media.property.OUTPUT_SAMPLE_RATE";
 
@@ -3328,6 +3329,7 @@ public class AudioManager {
      * Used as a key for {@link #getProperty} to request the native or optimal output buffer size
      * for this device's primary output stream, in decimal PCM frames.
      */
+    // FIXME Deprecate
     public static final String PROPERTY_OUTPUT_FRAMES_PER_BUFFER =
             "android.media.property.OUTPUT_FRAMES_PER_BUFFER";
 
