@@ -111,11 +111,11 @@ public class NotificationData {
             if (updatedNotification != null) {
                 final Notification.Builder updatedNotificationBuilder
                         = Notification.Builder.recoverBuilder(ctx, updatedNotification);
-                final RemoteViews newContentView = updatedNotificationBuilder.makeContentView();
+                final RemoteViews newContentView = updatedNotificationBuilder.createContentView();
                 final RemoteViews newBigContentView =
-                        updatedNotificationBuilder.makeBigContentView();
+                        updatedNotificationBuilder.createBigContentView();
                 final RemoteViews newHeadsUpContentView =
-                        updatedNotificationBuilder.makeHeadsUpContentView();
+                        updatedNotificationBuilder.createHeadsUpContentView();
                 final RemoteViews newPublicNotification
                         = updatedNotificationBuilder.makePublicContentView();
 
@@ -137,9 +137,9 @@ public class NotificationData {
                 final Notification.Builder builder
                         = Notification.Builder.recoverBuilder(ctx, notification.getNotification());
 
-                cachedContentView = builder.makeContentView();
-                cachedBigContentView = builder.makeBigContentView();
-                cachedHeadsUpContentView = builder.makeHeadsUpContentView();
+                cachedContentView = builder.createContentView();
+                cachedBigContentView = builder.createBigContentView();
+                cachedHeadsUpContentView = builder.createHeadsUpContentView();
                 cachedPublicContentView = builder.makePublicContentView();
 
                 applyInPlace = false;
