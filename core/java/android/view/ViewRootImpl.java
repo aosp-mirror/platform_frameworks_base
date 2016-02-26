@@ -1077,7 +1077,10 @@ public final class ViewRootImpl implements ViewParent,
             if (!mStopped) {
                 scheduleTraversals();
             } else {
-                destroyHardwareResources();
+                if (mAttachInfo.mHardwareRenderer != null) {
+                    mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
+                    mAttachInfo.mHardwareRenderer.updateSurface(null);
+                }
             }
         }
     }
