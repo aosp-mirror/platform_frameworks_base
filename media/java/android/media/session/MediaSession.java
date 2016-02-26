@@ -830,40 +830,45 @@ public final class MediaSession {
         }
 
         /**
-         * Override to handle requests to prepare playback. The state of playback should be updated
-         * to {@link PlaybackState#STATE_PAUSED} after the preparation is done. Override
-         * {@link #onPlay} to handle requests for starting playback of prepared content.
+         * Override to handle requests to prepare playback. During the preparation, a session should
+         * not hold audio focus in order to allow other sessions play seamlessly. The state of
+         * playback should be updated to {@link PlaybackState#STATE_PAUSED} after the preparation is
+         * done.
          */
         public void onPrepare() {
         }
 
         /**
          * Override to handle requests to prepare for playing a specific mediaId that was provided
-         * by your app's {@link MediaBrowserService}. The state of playback should be updated
-         * to {@link PlaybackState#STATE_PAUSED} after the preparation is done. The playback of
-         * the prepared content should start in the implementation of {@link #onPlay}. Override
-         * {@link #onPlayFromMediaId} to handle requests for starting playback without preparation.
+         * by your app's {@link MediaBrowserService}. During the preparation, a session should not
+         * hold audio focus in order to allow other sessions play seamlessly. The state of playback
+         * should be updated to {@link PlaybackState#STATE_PAUSED} after the preparation is done.
+         * The playback of the prepared content should start in the implementation of
+         * {@link #onPlay}. Override {@link #onPlayFromMediaId} to handle requests for starting
+         * playback without preparation.
          */
         public void onPrepareFromMediaId(String mediaId, Bundle extras) {
         }
 
         /**
-         * Override to handle requests to prepare playback from a search query. An
-         * empty query indicates that the app may prepare any music. The
-         * implementation should attempt to make a smart choice about what to
-         * play. The state of playback should be updated to {@link PlaybackState#STATE_PAUSED}
-         * after the preparation is done. The playback of the prepared content should start
-         * in the implementation of {@link #onPlay}. Override {@link #onPlayFromSearch}
-         * to handle requests for starting playback without preparation.
+         * Override to handle requests to prepare playback from a search query. An empty query
+         * indicates that the app may prepare any music. The implementation should attempt to make a
+         * smart choice about what to play. During the preparation, a session should not hold audio
+         * focus in order to allow other sessions play seamlessly. The state of playback should be
+         * updated to {@link PlaybackState#STATE_PAUSED} after the preparation is done. The playback
+         * of the prepared content should start in the implementation of {@link #onPlay}. Override
+         * {@link #onPlayFromSearch} to handle requests for starting playback without preparation.
          */
         public void onPrepareFromSearch(String query, Bundle extras) {
         }
 
         /**
          * Override to handle requests to prepare a specific media item represented by a URI.
-         * The state of playback should be updated to {@link PlaybackState#STATE_PAUSED}
-         * after the preparation is done. The playback of the prepared content should start in
-         * the implementation of {@link #onPlay}. Override {@link #onPlayFromUri} to handle requests
+         * During the preparation, a session should not hold audio focus in order to allow
+         * other sessions play seamlessly. The state of playback should be updated to
+         * {@link PlaybackState#STATE_PAUSED} after the preparation is done.
+         * The playback of the prepared content should start in the implementation of
+         * {@link #onPlay}. Override {@link #onPlayFromUri} to handle requests
          * for starting playback without preparation.
          */
         public void onPrepareFromUri(Uri uri, Bundle extras) {
