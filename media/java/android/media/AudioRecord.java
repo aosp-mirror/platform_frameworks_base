@@ -395,20 +395,21 @@ public class AudioRecord implements AudioRouting
      */
     /*package*/ AudioRecord(long nativeRecordInJavaObj) {
         int[] session = { 0 };
+        int[] rates = { 0 };
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         // Note that for this native_setup, we are providing an already created/initialized
         // *Native* AudioRecord, so the attributes parameters to native_setup() are ignored.
         int initResult = native_setup(new WeakReference<AudioRecord>(this),
                 null /*mAudioAttributes*/,
-                null /*mSampleRates*/,
+                rates /*mSampleRates*/,
                 0 /*mChannelMask*/,
                 0 /*mChannelIndexMask*/,
                 0 /*mAudioFormat*/,
                 0 /*mNativeBufferSizeInBytes*/,
                 session,
                 ActivityThread.currentOpPackageName(),
-                mNativeRecorderInJavaObj);
+                nativeRecordInJavaObj);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
