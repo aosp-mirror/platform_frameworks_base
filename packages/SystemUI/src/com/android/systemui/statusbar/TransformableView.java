@@ -27,6 +27,7 @@ public interface TransformableView {
     int TRANSFORMING_VIEW_TEXT = 2;
     int TRANSFORMING_VIEW_IMAGE = 3;
     int TRANSFORMING_VIEW_PROGRESS = 4;
+    int TRANSFORMING_VIEW_ACTIONS = 5;
 
     /**
      * Get the current state of a view in a transform animation

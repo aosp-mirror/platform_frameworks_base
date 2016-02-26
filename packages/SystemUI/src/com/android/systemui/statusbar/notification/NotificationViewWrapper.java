@@ -40,6 +40,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
                 return new NotificationBigPictureTemplateViewWrapper(ctx, v);
             } else if ("bigText".equals(v.getTag())) {
                 return new NotificationBigTextTemplateViewWrapper(ctx, v);
+            } else if ("media".equals(v.getTag()) || "bigMediaNarrow".equals(v.getTag())) {
+                return new NotificationMediaTemplateViewWrapper(ctx, v);
             }
             return new NotificationTemplateViewWrapper(ctx, v);
         } else if (v instanceof NotificationHeaderView) {
