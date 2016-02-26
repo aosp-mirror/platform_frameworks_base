@@ -651,6 +651,62 @@ TEST(FrameBuilder, saveLayerUnclipped_mergedClears) {
             << "Expect 4 copyTos, 4 copyFroms, 1 clear SimpleRects, and 1 rect.";
 }
 
+TEST(FrameBuilder, saveLayerUnclipped_clearClip) {
+    class SaveLayerUnclippedClearClipTestRenderer : public TestRendererBase {
+    public:
+        void onCopyToLayerOp(const CopyToLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+        }
+        void onSimpleRectsOp(const SimpleRectsOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            ASSERT_NE(nullptr, op.paint);
+            EXPECT_EQ(SkXfermode::kClear_Mode, PaintUtils::getXfermodeDirect(op.paint));
+            EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clippedBounds)
+                    << "Expect dirty rect as clip";
+            ASSERT_NE(nullptr, state.computedState.clipState);
+            EXPECT_EQ(Rect(50, 50, 150, 150), state.computedState.clipState->rect);
+            EXPECT_EQ(ClipMode::Rectangle, state.computedState.clipState->mode);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void onCopyFromLayerOp(const CopyFromLayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(3, mIndex++);
+        }
+    };
+
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        // save smaller than clip, so we get unclipped behavior
+        canvas.saveLayerAlpha(10, 10, 190, 190, 128, (SaveFlags::Flags)(0));
+        canvas.drawRect(0, 0, 200, 200, SkPaint());
+        canvas.restore();
+    });
+
+    // draw with partial screen dirty, and assert we see that rect later
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeLTRB(50, 50, 150, 150), 200, 200,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, nullptr);
+    SaveLayerUnclippedClearClipTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(4, renderer.getIndex());
+}
+
+TEST(FrameBuilder, saveLayerUnclipped_reject) {
+    auto node = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& props, RecordingCanvas& canvas) {
+        // unclipped savelayer + rect both in area that won't intersect with dirty
+        canvas.saveLayerAlpha(100, 100, 200, 200, 128, (SaveFlags::Flags)(0));
+        canvas.drawRect(100, 100, 200, 200, SkPaint());
+        canvas.restore();
+    });
+
+    // draw with partial screen dirty that doesn't intersect with savelayer
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(100, 100), 200, 200,
+            TestUtils::createSyncedNodeList(node), sLightGeometry, nullptr);
+    FailRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+}
+
 /* saveLayerUnclipped { saveLayer { saveLayerUnclipped { rect } } } will play back as:
  * - startTemporaryLayer, onCopyToLayer, onSimpleRects, onRect, onCopyFromLayer, endLayer
  * - startFrame, onCopyToLayer, onSimpleRects, drawLayer, onCopyFromLayer, endframe

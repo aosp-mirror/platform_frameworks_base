@@ -21,6 +21,15 @@
 namespace android {
 namespace uirenderer {
 
+static int computeClipSideFlags(const Rect& clip, const Rect& bounds) {
+    int clipSideFlags = 0;
+    if (clip.left > bounds.left) clipSideFlags |= OpClipSideFlags::Left;
+    if (clip.top > bounds.top) clipSideFlags |= OpClipSideFlags::Top;
+    if (clip.right < bounds.right) clipSideFlags |= OpClipSideFlags::Right;
+    if (clip.bottom < bounds.bottom) clipSideFlags |= OpClipSideFlags::Bottom;
+    return clipSideFlags;
+}
+
 ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& snapshot,
         const RecordedOp& recordedOp, bool expandForStroke) {
     // resolvedMatrix = parentMatrix * localMatrix
@@ -55,10 +64,7 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
         clippedBounds.setEmpty();
     } else {
         // Not rejected! compute true clippedBounds and clipSideFlags
-        if (clipRect.left > clippedBounds.left) clipSideFlags |= OpClipSideFlags::Left;
-        if (clipRect.top > clippedBounds.top) clipSideFlags |= OpClipSideFlags::Top;
-        if (clipRect.right < clippedBounds.right) clipSideFlags |= OpClipSideFlags::Right;
-        if (clipRect.bottom < clippedBounds.bottom) clipSideFlags |= OpClipSideFlags::Bottom;
+        clipSideFlags = computeClipSideFlags(clipRect, clippedBounds);
         clippedBounds.doIntersect(clipRect);
     }
 }
@@ -69,11 +75,13 @@ ResolvedRenderState::ResolvedRenderState(LinearAllocator& allocator, Snapshot& s
         , clippedBounds(clipState->rect)
         , clipSideFlags(OpClipSideFlags::Full) {}
 
-ResolvedRenderState::ResolvedRenderState(const ClipRect* viewportRect, const Rect& dstRect)
+ResolvedRenderState::ResolvedRenderState(const ClipRect* clipRect, const Rect& dstRect)
         : transform(Matrix4::identity())
-        , clipState(viewportRect)
+        , clipState(clipRect)
         , clippedBounds(dstRect)
-        , clipSideFlags(OpClipSideFlags::None) {}
+        , clipSideFlags(computeClipSideFlags(clipRect->rect, dstRect)) {
+    clippedBounds.doIntersect(clipRect->rect);
+}
 
 } // namespace uirenderer
 } // namespace android

@@ -347,7 +347,7 @@ void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {
         if (valid) {
             dirty = android::Rect(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
         } else {
-            dirty = android::Rect(0, 0,
+            dirty = android::Rect(
                     mRenderTarget.offscreenBuffer->viewportWidth,
                     mRenderTarget.offscreenBuffer->viewportHeight);
         }

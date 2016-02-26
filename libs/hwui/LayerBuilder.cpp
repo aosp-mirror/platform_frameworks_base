@@ -199,10 +199,10 @@ LayerBuilder::LayerBuilder(uint32_t width, uint32_t height,
         : width(width)
         , height(height)
         , repaintRect(repaintRect)
+        , repaintClip(repaintRect)
         , offscreenBuffer(renderNode ? renderNode->getLayer() : nullptr)
         , beginLayerOp(beginLayerOp)
-        , renderNode(renderNode)
-        , viewportClip(Rect(width, height)) {}
+        , renderNode(renderNode) {}
 
 // iterate back toward target to see if anything drawn since should overlap the new op
 // if no target, merging ops still iterate to find similar batch to insert after
@@ -260,7 +260,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
                 Matrix4::identity(), nullptr, paint,
                 verts, vertCount);
         BakedOpState* bakedState = BakedOpState::directConstruct(allocator,
-                &viewportClip, bounds, *op);
+                &repaintClip, bounds, *op);
         deferUnmergeableOp(allocator, bakedState, OpBatchType::Vertices);
     }
 }
