@@ -110,6 +110,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     private final Context mContext;
 
     private String ssid;
+    private String bssid;
     private int security;
     private int networkId = WifiConfiguration.INVALID_NETWORK_ID;
 
@@ -333,6 +334,10 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     public String getSsidStr() {
         return ssid;
+    }
+
+    public String getBssid() {
+        return bssid;
     }
 
     public CharSequence getSsid() {
@@ -657,6 +662,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         else
             ssid = (config.SSID == null ? "" : removeDoubleQuotes(config.SSID));
 
+        bssid = config.BSSID;
         security = getSecurity(config);
         networkId = config.networkId;
         mConfig = config;
@@ -664,6 +670,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     private void initWithScanResult(ScanResult result) {
         ssid = result.SSID;
+        bssid = result.BSSID;
         security = getSecurity(result);
         if (security == SECURITY_PSK)
             pskType = getPskType(result);
