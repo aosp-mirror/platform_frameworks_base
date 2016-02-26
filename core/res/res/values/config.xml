@@ -2256,12 +2256,15 @@
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
 
-    <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
-          when evaluating RSRP for LTE antenna bar display
-           0. Strict threshold
-           1. Lenient threshold
-    -->
-    <integer name="config_LTE_RSRP_threshold_type">1</integer>
+    <!--Thresholds for LTE dbm in status bar-->
+    <integer-array translatable="false" name="config_lteDbmThresholds">
+        <item>-140</item>    <!-- SIGNAL_STRENGTH_NONE_OR_UNKNOWN -->
+        <item>-128</item>    <!-- SIGNAL_STRENGTH_POOR -->
+        <item>-118</item>    <!-- SIGNAL_STRENGTH_MODERATE -->
+        <item>-108</item>    <!-- SIGNAL_STRENGTH_GOOD -->
+        <item>-98</item>     <!-- SIGNAL_STRENGTH_GREAT -->
+        <item>-44</item>
+    </integer-array>
 
     <!-- Enabled built-in zen mode condition providers -->
     <string-array translatable="false" name="config_system_condition_providers">
