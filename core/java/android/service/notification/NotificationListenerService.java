@@ -15,7 +15,6 @@
  */
 
 package android.service.notification;
-import android.service.notification.IStatusBarNotificationHolder;
 
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
@@ -752,9 +751,9 @@ public abstract class NotificationListenerService extends Service {
     private void maybePopulateRemoteViews(Notification notification) {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
             Builder builder = Builder.recoverBuilder(getContext(), notification);
-            notification.contentView = builder.makeContentView();
-            notification.bigContentView = builder.makeBigContentView();
-            notification.headsUpContentView = builder.makeHeadsUpContentView();
+            notification.contentView = builder.createContentView();
+            notification.bigContentView = builder.createBigContentView();
+            notification.headsUpContentView = builder.createHeadsUpContentView();
         }
     }
 

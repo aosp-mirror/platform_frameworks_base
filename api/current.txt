@@ -5050,12 +5050,12 @@ package android.app {
     method public android.app.Notification.Builder addExtras(android.os.Bundle);
     method public android.app.Notification.Builder addPerson(java.lang.String);
     method public android.app.Notification build();
+    method public android.widget.RemoteViews createBigContentView();
+    method public android.widget.RemoteViews createContentView();
+    method public android.widget.RemoteViews createHeadsUpContentView();
     method public android.app.Notification.Builder extend(android.app.Notification.Extender);
     method public android.os.Bundle getExtras();
     method public deprecated android.app.Notification getNotification();
-    method public android.widget.RemoteViews makeBigContentView();
-    method public android.widget.RemoteViews makeContentView();
-    method public android.widget.RemoteViews makeHeadsUpContentView();
     method public static android.app.Notification.Builder recoverBuilder(android.content.Context, android.app.Notification);
     method public android.app.Notification.Builder setActions(android.app.Notification.Action...);
     method public android.app.Notification.Builder setAutoCancel(boolean);
