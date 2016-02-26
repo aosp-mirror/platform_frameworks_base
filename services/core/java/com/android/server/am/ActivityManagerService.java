@@ -13395,6 +13395,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public int getMemoryTrimLevel() {
+        enforceNotIsolatedCaller("getMyMemoryState");
+        synchronized (this) {
+            return mLastMemoryLevel;
+        }
+    }
+
+    @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ResultReceiver resultReceiver) {
         (new ActivityManagerShellCommand(this, false)).exec(

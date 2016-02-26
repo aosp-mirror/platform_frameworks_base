@@ -308,6 +308,7 @@ public interface IActivityManager extends IInterface {
     public void setActivityController(IActivityController watcher)
         throws RemoteException;
     public void setLenientBackgroundCheck(boolean enabled) throws RemoteException;
+    public int getMemoryTrimLevel() throws RemoteException;
 
     public void enterSafeMode() throws RemoteException;
 
@@ -980,4 +981,5 @@ public interface IActivityManager extends IInterface {
     int NOTIFY_PINNED_STACK_ANIMATION_ENDED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION + 366;
     int REMOVE_STACK = IBinder.FIRST_CALL_TRANSACTION + 367;
     int SET_LENIENT_BACKGROUND_CHECK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+368;
+    int GET_MEMORY_TRIM_LEVEL_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+369;
 }
