@@ -15,12 +15,6 @@
  */
 package com.android.server.notification;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_LOW;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 

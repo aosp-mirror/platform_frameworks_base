@@ -1221,6 +1221,8 @@
 
     <!-- Notification importance title, blocked status-->
     <string name="blocked_importance">Blocked</string>
+    <!-- Notification importance title, min status-->
+    <string name="min_importance">Min importance</string>
     <!-- Notification importance title, low status-->
     <string name="low_importance">Low importance</string>
     <!-- Notification importance title, normal status-->
@@ -1233,17 +1235,20 @@
     <!-- [CHAR LIMIT=100] Notification Importance slider: blocked importance level description -->
     <string name="notification_importance_blocked">Never show these notifications</string>
 
+    <!-- [CHAR LIMIT=100] Notification Importance slider: min importance level description -->
+    <string name="notification_importance_min">Silently show at the bottom of the notification list</string>
+
     <!-- [CHAR LIMIT=100] Notification Importance slider: low importance level description -->
-    <string name="notification_importance_low">Silently show at the bottom of the notification list</string>
+    <string name="notification_importance_low">Silently show these notifications</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: normal importance level description -->
-    <string name="notification_importance_default">Silently show these notifications</string>
+    <string name="notification_importance_default">Allow these notification to make sounds</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: high importance level description -->
-    <string name="notification_importance_high">Show at the top of the notifications list and allow sound</string>
+    <string name="notification_importance_high">Peek onto the screen and allow sound and allow sound</string>
 
     <!-- [CHAR LIMIT=100] Notification Importance slider: max importance level description -->
-    <string name="notification_importance_max">Peek onto the screen and allow sound</string>
+    <string name="notification_importance_max">Show at the top of the notifications list, peek onto the screen and allow sound</string>
 
     <!-- Notification: Control panel: Label for button that launches notification settings. [CHAR LIMIT=NONE] -->
     <string name="notification_more_settings">More settings</string>

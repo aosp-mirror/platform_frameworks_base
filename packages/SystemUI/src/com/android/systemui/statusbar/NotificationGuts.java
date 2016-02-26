@@ -183,7 +183,7 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                     mContext.getColor(R.color.notification_guts_disabled_icon_tint));
         }
         final int minProgress = systemApp ?
-                NotificationListenerService.Ranking.IMPORTANCE_LOW
+                NotificationListenerService.Ranking.IMPORTANCE_MIN
                 : NotificationListenerService.Ranking.IMPORTANCE_NONE;
         mSeekBar.setMax(NotificationListenerService.Ranking.IMPORTANCE_MAX);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -215,6 +215,11 @@ public class NotificationGuts extends LinearLayout implements TunerService.Tunab
                         importanceSummary.setText(mContext.getString(
                                 R.string.notification_importance_blocked));
                         importanceTitle.setText(mContext.getString(R.string.blocked_importance));
+                        break;
+                    case NotificationListenerService.Ranking.IMPORTANCE_MIN:
+                        importanceSummary.setText(mContext.getString(
+                                R.string.notification_importance_min));
+                        importanceTitle.setText(mContext.getString(R.string.min_importance));
                         break;
                     case NotificationListenerService.Ranking.IMPORTANCE_LOW:
                         importanceSummary.setText(mContext.getString(
