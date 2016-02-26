@@ -2556,11 +2556,25 @@ public class RemoteViews implements Parcelable, Filter {
      * @param format The Chronometer format string, or null to
      *               simply display the timer value.
      * @param started True if you want the clock to be started, false if not.
+     *
+     * @see #setChronometerCountsDown(int, boolean)
      */
     public void setChronometer(int viewId, long base, String format, boolean started) {
         setLong(viewId, "setBase", base);
         setString(viewId, "setFormat", format);
         setBoolean(viewId, "setStarted", started);
+    }
+
+    /**
+     * Equivalent to calling {@link Chronometer#setCountDown(boolean) Chronometer.setCountDown} on
+     * the chronometer with the given viewId.
+     *
+     * @param viewId The id of the {@link Chronometer} to change
+     * @param isCountDown True if you want the chronometer to count down to base instead of
+     *                    counting up.
+     */
+    public void setChronometerCountsDown(int viewId, boolean isCountDown) {
+        setBoolean(viewId, "setCountDown", isCountDown);
     }
 
     /**

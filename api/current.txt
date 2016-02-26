@@ -4906,6 +4906,7 @@ package android.app {
     field public static final int DEFAULT_VIBRATE = 2; // 0x2
     field public static final java.lang.String EXTRA_BACKGROUND_IMAGE_URI = "android.backgroundImageUri";
     field public static final java.lang.String EXTRA_BIG_TEXT = "android.bigText";
+    field public static final java.lang.String EXTRA_CHRONOMETER_COUNTS_DOWN = "android.chronometerCountsDown";
     field public static final java.lang.String EXTRA_COMPACT_ACTIONS = "android.compactActions";
     field public static final java.lang.String EXTRA_INFO_TEXT = "android.infoText";
     field public static final java.lang.String EXTRA_LARGE_ICON = "android.largeIcon";
@@ -5057,6 +5058,7 @@ package android.app {
     method public android.app.Notification.Builder setActions(android.app.Notification.Action...);
     method public android.app.Notification.Builder setAutoCancel(boolean);
     method public android.app.Notification.Builder setCategory(java.lang.String);
+    method public android.app.Notification.Builder setChronometerCountsDown(boolean);
     method public android.app.Notification.Builder setColor(int);
     method public deprecated android.app.Notification.Builder setContent(android.widget.RemoteViews);
     method public android.app.Notification.Builder setContentInfo(java.lang.CharSequence);
@@ -47165,6 +47167,7 @@ package android.widget {
     method public void setChar(int, java.lang.String, char);
     method public void setCharSequence(int, java.lang.String, java.lang.CharSequence);
     method public void setChronometer(int, long, java.lang.String, boolean);
+    method public void setChronometerCountsDown(int, boolean);
     method public void setContentDescription(int, java.lang.CharSequence);
     method public void setDisplayedChild(int, int);
     method public void setDouble(int, java.lang.String, double);
