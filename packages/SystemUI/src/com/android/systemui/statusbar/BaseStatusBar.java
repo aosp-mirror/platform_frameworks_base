@@ -110,7 +110,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_MAX;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public abstract class BaseStatusBar extends SystemUI implements
@@ -2219,6 +2219,16 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
+        if (isSnoozedPackage(sbn)) {
+            if (DEBUG) Log.d(TAG, "No peeking: snoozed package: " + sbn.getKey());
+            return false;
+        }
+
+        if (mNotificationData.getImportance(sbn.getKey()) < IMPORTANCE_HIGH) {
+            if (DEBUG) Log.d(TAG, "No peeking: unimportant notification: " + sbn.getKey());
+            return false;
+        }
+
         if (sbn.getNotification().fullScreenIntent != null) {
             if (mAccessibilityManager.isTouchExplorationEnabled()) {
                 if (DEBUG) Log.d(TAG, "No peeking: accessible fullscreen: " + sbn.getKey());
@@ -2226,16 +2236,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             } else {
                 return true;
             }
-        }
-
-        if (isSnoozedPackage(sbn)) {
-            if (DEBUG) Log.d(TAG, "No peeking: snoozed package: " + sbn.getKey());
-            return false;
-        }
-
-        if (mNotificationData.getImportance(sbn.getKey()) < IMPORTANCE_MAX) {
-            if (DEBUG) Log.d(TAG, "No peeking: unimportant notification: " + sbn.getKey());
-            return false;
         }
 
         return true;

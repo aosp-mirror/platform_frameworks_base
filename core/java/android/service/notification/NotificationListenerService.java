@@ -929,26 +929,31 @@ public abstract class NotificationListenerService extends Service {
         public static final int IMPORTANCE_NONE = 0;
 
         /**
-         * Low notification importance: only shows in the shade, below the fold.
+         * Min notification importance: only shows in the shade, below the fold.
          */
-        public static final int IMPORTANCE_LOW = 1;
+        public static final int IMPORTANCE_MIN = 1;
 
         /**
-         * Default notification importance: shows everywhere, but is not intrusive.
+         * Low notification importance: shows everywhere, but is not intrusive.
          */
-        public static final int IMPORTANCE_DEFAULT = 2;
+        public static final int IMPORTANCE_LOW = 2;
 
         /**
-         * Higher notification importance: shows everywhere, makes noise,
+         * Default notification importance: shows everywhere, allowed to makes noise,
          * but does not visually intrude.
          */
-        public static final int IMPORTANCE_HIGH = 3;
+        public static final int IMPORTANCE_DEFAULT = 3;
 
         /**
-         * Highest notification importance: shows everywhere, makes noise,
-         * and also visually intrudes.
+         * Higher notification importance: shows everywhere, allowed to makes noise and peek.
          */
-        public static final int IMPORTANCE_MAX = 4;
+        public static final int IMPORTANCE_HIGH = 4;
+
+        /**
+         * Highest notification importance: shows everywhere, allowed to makes noise, peek, and
+         * use full screen intents.
+         */
+        public static final int IMPORTANCE_MAX = 5;
 
         private String mKey;
         private int mRank = -1;
@@ -1041,7 +1046,7 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation) {
             mKey = key;
             mRank = rank;
-            mIsAmbient = importance < IMPORTANCE_DEFAULT;
+            mIsAmbient = importance < IMPORTANCE_LOW;
             mMatchesInterruptionFilter = matchesInterruptionFilter;
             mVisibilityOverride = visibilityOverride;
             mSuppressedVisualEffects = suppressedVisualEffects;
@@ -1058,6 +1063,8 @@ public abstract class NotificationListenerService extends Service {
                     return "UNSPECIFIED";
                 case IMPORTANCE_NONE:
                     return "NONE";
+                case IMPORTANCE_MIN:
+                    return "MIN";
                 case IMPORTANCE_LOW:
                     return "LOW";
                 case IMPORTANCE_DEFAULT:

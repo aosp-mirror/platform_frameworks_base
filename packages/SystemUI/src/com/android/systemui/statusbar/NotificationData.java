@@ -203,11 +203,11 @@ public class NotificationData {
 
             String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
 
-            // PRIORITY_MIN media streams are allowed to drift to the bottom
+            // IMPORTANCE_MIN media streams are allowed to drift to the bottom
             final boolean aMedia = a.key.equals(mediaNotification)
-                    && aImportance > Ranking.IMPORTANCE_LOW;
+                    && aImportance > Ranking.IMPORTANCE_MIN;
             final boolean bMedia = b.key.equals(mediaNotification)
-                    && bImportance > Ranking.IMPORTANCE_LOW;
+                    && bImportance > Ranking.IMPORTANCE_MIN;
 
             boolean aSystemMax = aImportance >= Ranking.IMPORTANCE_MAX &&
                     isSystemNotification(na);

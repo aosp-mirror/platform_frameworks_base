@@ -86,6 +86,122 @@ public class NotificationTestList extends TestActivity
     }
 
     private Test[] mTests = new Test[] {
+            new Test("Min priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Min priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7000, n);
+                }
+            },
+            new Test("Min priority, high pri flag") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Min priority, high pri flag")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MIN)
+                            .setFullScreenIntent(makeIntent2(), true)
+                            .build();
+                    mNM.notify(7001, n);
+                }
+            },
+            new Test("Low priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Low priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_LOW)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7002, n);
+                }
+            },
+            new Test("Default priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Default priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_DEFAULT)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7004, n);
+                }
+            },
+            new Test("High priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("High priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_HIGH)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7006, n);
+                }
+            },
+            new Test("Max priority") {
+                public void run()
+                {
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Max priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7008, n);
+                }
+            },
+            new Test("Max priority with delay") {
+                public void run()
+                {
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                    }
+                    Notification n = new Notification.Builder(NotificationTestList.this)
+                            .setSmallIcon(R.drawable.icon2)
+                            .setContentTitle("Max priority")
+                            .setLights(0xff0000ff, 1, 0)
+                            .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE)
+                            .setSound(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
+                                    getPackageName() + "/raw/ringer"))
+                            .setPriority(Notification.PRIORITY_MAX)
+                            .setFullScreenIntent(makeIntent2(), false)
+                            .build();
+                    mNM.notify(7008, n);
+                }
+            },
         new Test("Off") {
             public void run() {
                 PowerManager pm = (PowerManager)NotificationTestList.this.getSystemService(Context.POWER_SERVICE);
