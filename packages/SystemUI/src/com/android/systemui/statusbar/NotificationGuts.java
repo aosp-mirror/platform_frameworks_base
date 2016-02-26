@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import android.app.INotificationManager;
-import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -39,23 +38,31 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.tuner.TunerService;
 
 /**
  * The guts of a notification revealed when performing a long press.
  */
-public class NotificationGuts extends LinearLayout {
+public class NotificationGuts extends LinearLayout implements TunerService.Tunable {
+    public static final String SHOW_SLIDER = "show_importance_slider";
 
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
     private boolean mExposed;
-    private SeekBar mSeekBar;
     private INotificationManager mINotificationManager;
     private int mStartingImportance;
+    private boolean mShowSlider;
+
+    private SeekBar mSeekBar;
+    private RadioButton mBlock;
+    private RadioButton mSilent;
+    private RadioButton mReset;
 
     public NotificationGuts(Context context, AttributeSet attrs) {
         super(context, attrs);
         setWillNotDraw(false);
+        TunerService.get(mContext).addTunable(this, SHOW_SLIDER);
     }
 
     @Override
@@ -102,27 +109,77 @@ public class NotificationGuts extends LinearLayout {
         }
     }
 
-    void bindImportance(final StatusBarNotification sbn, final ExpandableNotificationRow row,
-            final int importance) {
+    void bindImportance(final PackageManager pm, final StatusBarNotification sbn,
+            final ExpandableNotificationRow row, final int importance) {
         mStartingImportance = importance;
         mINotificationManager = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-
-        final TextView importanceSummary = ((TextView) row.findViewById(R.id.summary));
-        final TextView importanceTitle = ((TextView) row.findViewById(R.id.title));
-        mSeekBar = (SeekBar) row.findViewById(R.id.seekbar);
         boolean systemApp = false;
         try {
-            final PackageManager pm = BaseStatusBar.getPackageManagerForUser(
-                    getContext(), sbn.getUser().getIdentifier());
             final PackageInfo info =
                     pm.getPackageInfo(sbn.getPackageName(), PackageManager.GET_SIGNATURES);
             systemApp = Utils.isSystemPackage(pm, info);
         } catch (PackageManager.NameNotFoundException e) {
             // unlikely.
         }
+
+        final View importanceSlider = row.findViewById(R.id.importance_slider);
+        final View importanceButtons = row.findViewById(R.id.importance_buttons);
+        if (mShowSlider) {
+            bindSlider(importanceSlider, sbn, systemApp);
+            importanceSlider.setVisibility(View.VISIBLE);
+            importanceButtons.setVisibility(View.GONE);
+        } else {
+            bindToggles(importanceButtons, sbn, systemApp);
+            importanceButtons.setVisibility(View.VISIBLE);
+            importanceSlider.setVisibility(View.GONE);
+        }
+    }
+
+    void saveImportance(final StatusBarNotification sbn) {
+        int progress;
+        if (mSeekBar!= null && mSeekBar.isShown()) {
+            progress = mSeekBar.getProgress();
+        } else {
+            if (mBlock.isChecked()) {
+                progress = NotificationListenerService.Ranking.IMPORTANCE_NONE;
+            } else if (mSilent.isChecked()) {
+                progress = NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
+            } else {
+                progress = NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
+            }
+        }
+        MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
+                progress - mStartingImportance);
+        try {
+            mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(), progress);
+        } catch (RemoteException e) {
+            // :(
+        }
+    }
+
+    private void bindToggles(final View importanceButtons, final StatusBarNotification sbn,
+            final boolean systemApp) {
+        mBlock = (RadioButton) importanceButtons.findViewById(R.id.block_importance);
+        mSilent = (RadioButton) importanceButtons.findViewById(R.id.silent_importance);
+        mReset = (RadioButton) importanceButtons.findViewById(R.id.reset_importance);
         if (systemApp) {
-            ((ImageView) row.findViewById(R.id.low_importance)).getDrawable().setTint(
+            mBlock.setVisibility(View.GONE);
+            mReset.setText(mContext.getString(R.string.do_not_silence));
+        } else {
+            mReset.setText(mContext.getString(R.string.do_not_silence_block));
+        }
+        mReset.setChecked(true);
+    }
+
+    private void bindSlider(final View importanceSlider, final StatusBarNotification sbn,
+            final boolean systemApp) {
+        final TextView importanceSummary = ((TextView) importanceSlider.findViewById(R.id.summary));
+        final TextView importanceTitle = ((TextView) importanceSlider.findViewById(R.id.title));
+        mSeekBar = (SeekBar) importanceSlider.findViewById(R.id.seekbar);
+
+        if (systemApp) {
+            ((ImageView) importanceSlider.findViewById(R.id.low_importance)).getDrawable().setTint(
                     mContext.getColor(R.color.notification_guts_disabled_icon_tint));
         }
         final int minProgress = systemApp ?
@@ -182,18 +239,7 @@ public class NotificationGuts extends LinearLayout {
                 }
             }
         });
-        mSeekBar.setProgress(importance);
-    }
-
-    void saveImportance(final StatusBarNotification sbn) {
-        int progress = mSeekBar.getProgress();
-        MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
-                progress - mStartingImportance);
-        try {
-            mINotificationManager.setImportance(sbn.getPackageName(), sbn.getUid(), progress);
-        } catch (RemoteException e) {
-            // :(
-        }
+        mSeekBar.setProgress(mStartingImportance);
     }
 
     public void setActualHeight(int actualHeight) {
@@ -223,5 +269,12 @@ public class NotificationGuts extends LinearLayout {
 
     public boolean areGutsExposed() {
         return mExposed;
+    }
+
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        if (SHOW_SLIDER.equals(key)) {
+            mShowSlider = newValue != null && Integer.parseInt(newValue) != 0;
+        }
     }
 }
