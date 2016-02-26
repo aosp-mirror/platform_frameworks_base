@@ -823,6 +823,12 @@ public class Notification implements Parcelable
     public static final String EXTRA_SHOW_CHRONOMETER = "android.showChronometer";
 
     /**
+     * {@link #extras} key: whether the chronometer set on the notification should count down
+     * instead of counting up. Is only relevant if key {@link #EXTRA_SHOW_CHRONOMETER} is present.
+     */
+    public static final String EXTRA_CHRONOMETER_COUNTS_DOWN = "android.chronometerCountsDown";
+
+    /**
      * {@link #extras} key: whether {@link #when} should be shown,
      * as supplied to {@link Builder#setShowWhen(boolean)}.
      */
@@ -2158,11 +2164,28 @@ public class Notification implements Parcelable
          *
          * Useful when showing an elapsed time (like an ongoing phone call).
          *
+         * The counter can also be set to count down to <code>when</code> when using
+         * {@link #setChronometerCountsDown(boolean)}.
+         *
          * @see android.widget.Chronometer
          * @see Notification#when
+         * @see #setChronometerCountsDown(boolean)
          */
         public Builder setUsesChronometer(boolean b) {
             mN.extras.putBoolean(EXTRA_SHOW_CHRONOMETER, b);
+            return this;
+        }
+
+        /**
+         * Sets the Chronometer to count down instead of counting up.
+         *
+         * <p>This is only relevant if {@link #setUsesChronometer(boolean)} has been set to true.
+         * If it isn't set the chronometer will count up.
+         *
+         * @see #setUsesChronometer(boolean)
+         */
+        public Builder setChronometerCountsDown(boolean countsDown) {
+            mN.extras.putBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN, countsDown);
             return this;
         }
 
@@ -3097,6 +3120,8 @@ public class Notification implements Parcelable
                     contentView.setLong(R.id.chronometer, "setBase",
                             mN.when + (SystemClock.elapsedRealtime() - System.currentTimeMillis()));
                     contentView.setBoolean(R.id.chronometer, "setStarted", true);
+                    boolean countsDown = mN.extras.getBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN);
+                    contentView.setChronometerCountsDown(R.id.chronometer, countsDown);
                 } else {
                     contentView.setViewVisibility(R.id.time, View.VISIBLE);
                     contentView.setLong(R.id.time, "setTime", mN.when);
@@ -3328,6 +3353,8 @@ public class Notification implements Parcelable
                     savedBundle.getBoolean(EXTRA_SHOW_WHEN));
             publicExtras.putBoolean(EXTRA_SHOW_CHRONOMETER,
                     savedBundle.getBoolean(EXTRA_SHOW_CHRONOMETER));
+            publicExtras.putBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN,
+                    savedBundle.getBoolean(EXTRA_CHRONOMETER_COUNTS_DOWN));
             publicExtras.putCharSequence(EXTRA_TITLE,
                     mContext.getString(R.string.notification_hidden_text));
             mN.extras = publicExtras;
