@@ -163,7 +163,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
-        if (dark == mDark) {
+        if (dark == mDark && mDarkInitialized) {
             return;
         }
         super.setDark(dark, fade, delay);
