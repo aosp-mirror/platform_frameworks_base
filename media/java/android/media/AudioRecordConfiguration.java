@@ -18,7 +18,9 @@ package android.media;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -28,6 +30,7 @@ import java.util.Objects;
  *
  */
 public class AudioRecordConfiguration implements Parcelable {
+    private final static String TAG = new String("AudioRecordConfiguration");
 
     private final int mSessionId;
 
@@ -36,30 +39,18 @@ public class AudioRecordConfiguration implements Parcelable {
     private final AudioFormat mDeviceFormat;
     private final AudioFormat mClientFormat;
 
-    private final AudioDeviceInfo mRecDevice;
-
-    /**
-     * @hide
-     */
-    public AudioRecordConfiguration(int session, int source,
-            AudioFormat clientFormat, AudioFormat deviceFormat) {
-        mSessionId = session;
-        mClientSource = source;
-        mDeviceFormat = deviceFormat;
-        mClientFormat = clientFormat;
-        mRecDevice = null;
-    }
+    private final int mPatchHandle;
 
     /**
      * @hide
      */
     public AudioRecordConfiguration(int session, int source, AudioFormat devFormat,
-            AudioFormat clientFormat, AudioDeviceInfo device) {
+            AudioFormat clientFormat, int patchHandle) {
         mSessionId = session;
         mClientSource = source;
         mDeviceFormat = devFormat;
         mClientFormat = clientFormat;
-        mRecDevice = device;
+        mPatchHandle = patchHandle;
     }
 
     /**
@@ -96,10 +87,38 @@ public class AudioRecordConfiguration implements Parcelable {
     public AudioFormat getClientFormat() { return mClientFormat; }
 
     /**
-     * Returns the audio input device used for this recording.
-     * @return the audio recording device
+     * Returns information about the audio input device used for this recording.
+     * @return the audio recording device or null if this information cannot be retrieved
      */
-    public AudioDeviceInfo getAudioDevice() { return mRecDevice; }
+    public AudioDeviceInfo getAudioDevice() {
+        // build the AudioDeviceInfo from the patch handle
+        ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
+        if (AudioManager.listAudioPatches(patches) != AudioManager.SUCCESS) {
+            Log.e(TAG, "Error retrieving list of audio patches");
+            return null;
+        }
+        for (int i = 0 ; i < patches.size() ; i++) {
+            final AudioPatch patch = patches.get(i);
+            if (patch.id() == mPatchHandle) {
+                final AudioPortConfig[] sources = patch.sources();
+                if ((sources != null) && (sources.length > 0)) {
+                    // not supporting multiple sources, so just look at the first source
+                    final int devId = sources[0].port().id();
+                    final AudioDeviceInfo[] devices =
+                            AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
+                    for (int j = 0; j < devices.length; j++) {
+                        if (devices[j].getId() == devId) {
+                            return devices[j];
+                        }
+                    }
+                }
+                // patch handle is unique, there won't be another with the same handle
+                break;
+            }
+        }
+        Log.e(TAG, "Couldn't find device for recording, did recording end already?");
+        return null;
+    }
 
     public static final Parcelable.Creator<AudioRecordConfiguration> CREATOR
             = new Parcelable.Creator<AudioRecordConfiguration>() {
@@ -132,7 +151,7 @@ public class AudioRecordConfiguration implements Parcelable {
         dest.writeInt(mClientSource);
         mClientFormat.writeToParcel(dest, 0);
         mDeviceFormat.writeToParcel(dest, 0);
-        //TODO marshall device info
+        dest.writeInt(mPatchHandle);
     }
 
     private AudioRecordConfiguration(Parcel in) {
@@ -140,8 +159,7 @@ public class AudioRecordConfiguration implements Parcelable {
         mClientSource = in.readInt();
         mClientFormat = AudioFormat.CREATOR.createFromParcel(in);
         mDeviceFormat = AudioFormat.CREATOR.createFromParcel(in);
-        //TODO unmarshall device info
-        mRecDevice = null;
+        mPatchHandle = in.readInt();
     }
 
     @Override
@@ -149,8 +167,12 @@ public class AudioRecordConfiguration implements Parcelable {
         if (this == o) return true;
         if (o == null || !(o instanceof AudioRecordConfiguration)) return false;
 
-        final AudioRecordConfiguration that = (AudioRecordConfiguration) o;
-         return ((mSessionId == that.mSessionId)
-                 && (mClientSource == that.mClientSource));
+        AudioRecordConfiguration that = (AudioRecordConfiguration) o;
+
+        return ((mSessionId == that.mSessionId)
+                && (mClientSource == that.mClientSource)
+                && (mPatchHandle == that.mPatchHandle)
+                && (mClientFormat.equals(that.mClientFormat))
+                && (mDeviceFormat.equals(that.mDeviceFormat)));
     }
 }
