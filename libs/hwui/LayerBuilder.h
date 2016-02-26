@@ -109,10 +109,10 @@ public:
     const uint32_t width;
     const uint32_t height;
     const Rect repaintRect;
+    const ClipRect repaintClip;
     OffscreenBuffer* offscreenBuffer;
     const BeginLayerOp* beginLayerOp;
     const RenderNode* renderNode;
-    const ClipRect viewportClip;
 
     // list of deferred CopyFromLayer ops, to be deferred upon encountering EndUnclippedLayerOps
     std::vector<BakedOpState*> activeUnclippedSaveLayers;

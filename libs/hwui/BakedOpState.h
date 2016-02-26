@@ -175,8 +175,8 @@ private:
             , projectionPathMask(snapshot.projectionPathMask)
             , op(shadowOpPtr) {}
 
-    BakedOpState(const ClipRect* viewportRect, const Rect& dstRect, const RecordedOp& recordedOp)
-            : computedState(viewportRect, dstRect)
+    BakedOpState(const ClipRect* clipRect, const Rect& dstRect, const RecordedOp& recordedOp)
+            : computedState(clipRect, dstRect)
             , alpha(1.0f)
             , roundRectClipState(nullptr)
             , projectionPathMask(nullptr)
