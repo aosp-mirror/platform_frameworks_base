@@ -3758,7 +3758,7 @@ public final class ActivityThread {
             if (!keepShown) {
                 try {
                     // Now we are idle.
-                    r.activity.performStop();
+                    r.activity.performStop(false /*preserveWindow*/);
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
@@ -3899,7 +3899,7 @@ public final class ActivityThread {
             if (!r.stopped && !r.isPreHoneycomb()) {
                 try {
                     // Now we are idle.
-                    r.activity.performStop();
+                    r.activity.performStop(false /*preserveWindow*/);
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
@@ -4069,7 +4069,7 @@ public final class ActivityThread {
             }
             if (!r.stopped) {
                 try {
-                    r.activity.performStop();
+                    r.activity.performStop(r.mPreserveWindow);
                 } catch (SuperNotCalledException e) {
                     throw e;
                 } catch (Exception e) {
