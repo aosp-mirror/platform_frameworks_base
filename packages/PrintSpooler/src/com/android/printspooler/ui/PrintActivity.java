@@ -320,8 +320,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (isFinishing() || (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
                     return;
                 }
-                mPrintedDocument.cancel();
                 setState(STATE_PRINT_CANCELED);
+                mPrintedDocument.cancel(true);
                 doFinish();
             }
         }, PrintActivity.this);
@@ -1013,7 +1013,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     }
 
     private void requestCreatePdfFileOrFinish() {
-        mPrintedDocument.cancel();
+        mPrintedDocument.cancel(false);
 
         if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
             startCreateDocumentActivity();
@@ -1130,7 +1130,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private void cancelPrint() {
         setState(STATE_PRINT_CANCELED);
         updateOptionsUi();
-        mPrintedDocument.cancel();
+        mPrintedDocument.cancel(true);
         doFinish();
     }
 
@@ -1889,7 +1889,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     public void onPrinterUnavailable(PrinterInfo printer) {
         if (mCurrentPrinter.getId().equals(printer.getId())) {
             setState(STATE_PRINTER_UNAVAILABLE);
-            mPrintedDocument.cancel();
+            mPrintedDocument.cancel(false);
             ensureErrorUiShown(getString(R.string.print_error_printer_unavailable),
                     PrintErrorFragment.ACTION_NONE);
             updateOptionsUi();
