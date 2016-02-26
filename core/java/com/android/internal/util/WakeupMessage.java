@@ -21,7 +21,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
- /**
+/**
  * An AlarmListener that sends the specified message to a Handler and keeps the system awake until
  * the message is processed.
  *
@@ -33,19 +33,17 @@ import android.os.Message;
  * the message, but does not guarantee that the system will be awake until the target object has
  * processed it. This is because as soon as the onAlarmListener sends the message and returns, the
  * AlarmManager releases its wakelock and the system is free to go to sleep again.
- *
  */
 public class WakeupMessage implements AlarmManager.OnAlarmListener {
-    private static AlarmManager sAlarmManager;
+    private final AlarmManager mAlarmManager;
     private final Handler mHandler;
     private final String mCmdName;
     private final int mCmd, mArg1, mArg2;
+    private boolean mScheduled;
 
     public WakeupMessage(Context context, Handler handler,
             String cmdName, int cmd, int arg1, int arg2) {
-        if (sAlarmManager == null) {
-            sAlarmManager = context.getSystemService(AlarmManager.class);
-        }
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mHandler = handler;
         mCmdName = cmdName;
         mCmd = cmd;
@@ -61,19 +59,43 @@ public class WakeupMessage implements AlarmManager.OnAlarmListener {
         this(context, handler, cmdName, cmd, 0, 0);
     }
 
-    public void schedule(long when) {
-        sAlarmManager.setExact(
+    /**
+     * Schedule the message to be delivered at the time in milliseconds of the
+     * {@link android.os.SystemClock#elapsedRealtime SystemClock.elapsedRealtime()} clock and wakeup
+     * the device when it goes off. If schedule is called multiple times without the message being
+     * dispatched then the alarm is rescheduled to the new time.
+     */
+    public synchronized void schedule(long when) {
+        mAlarmManager.setExact(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP, when, mCmdName, this, mHandler);
+        mScheduled = true;
     }
 
-    public void cancel() {
-        sAlarmManager.cancel(this);
+    /**
+     * Cancel all pending messages. This includes alarms that may have been fired, but have not been
+     * run on the handler yet.
+     */
+    public synchronized void cancel() {
+        if (mScheduled) {
+            mAlarmManager.cancel(this);
+            mScheduled = false;
+        }
     }
 
     @Override
     public void onAlarm() {
-        Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2);
-        mHandler.handleMessage(msg);
-        msg.recycle();
+        // Once this method is called the alarm has already been fired and removed from
+        // AlarmManager (it is still partially tracked, but only for statistics). The alarm can now
+        // be marked as unscheduled so that it can be rescheduled in the message handler.
+        final boolean stillScheduled;
+        synchronized (this) {
+            stillScheduled = mScheduled;
+            mScheduled = false;
+        }
+        if (stillScheduled) {
+            Message msg = mHandler.obtainMessage(mCmd, mArg1, mArg2);
+            mHandler.handleMessage(msg);
+            msg.recycle();
+        }
     }
 }
