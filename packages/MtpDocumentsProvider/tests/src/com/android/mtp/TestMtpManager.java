@@ -22,6 +22,7 @@ import android.os.ParcelFileDescriptor;
 import android.util.SparseArray;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,16 +85,16 @@ public class TestMtpManager extends MtpManager {
     }
 
     @Override
-    void openDevice(int deviceId) throws IOException {
+    MtpDeviceRecord openDevice(int deviceId) throws IOException {
         final MtpDeviceRecord device = mDevices.get(deviceId);
         if (device == null) {
             throw new IOException();
         }
-        mDevices.put(
-                deviceId,
-                new MtpDeviceRecord(
-                        device.deviceId, device.name, device.deviceKey, true, device.roots, null,
-                        null));
+        final MtpDeviceRecord record = new MtpDeviceRecord(
+                device.deviceId, device.name, device.deviceKey, true, device.roots,
+                device.operationsSupported, device.eventsSupported);
+        mDevices.put(deviceId, record);
+        return record;
     }
 
     @Override
@@ -195,19 +196,6 @@ public class TestMtpManager extends MtpManager {
         } else {
             throw new IOException();
         }
-    }
-
-    @Override
-    int[] getOpenedDeviceIds() {
-        final int[] result = new int[mDevices.size()];
-        int count = 0;
-        for (int i = 0; i < mDevices.size(); i++) {
-            final MtpDeviceRecord device = mDevices.valueAt(i);
-            if (device.opened) {
-                result[count++] = device.deviceId;
-            }
-        }
-        return Arrays.copyOf(result, count);
     }
 
     @Override
