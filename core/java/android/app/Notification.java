@@ -21,7 +21,6 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -65,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -3258,7 +3256,7 @@ public class Notification implements Parcelable
          *   2. Style's proposed content view
          *   3. Standard template view
          */
-        public RemoteViews makeContentView() {
+        public RemoteViews createContentView() {
             if (mN.contentView != null && (mStyle == null || !mStyle.displayCustomViewInline())) {
                 return mN.contentView;
             } else if (mStyle != null) {
@@ -3273,7 +3271,7 @@ public class Notification implements Parcelable
         /**
          * Construct a RemoteViews for the final big notification layout.
          */
-        public RemoteViews makeBigContentView() {
+        public RemoteViews createBigContentView() {
             RemoteViews result = null;
             if (mN.bigContentView != null
                     && (mStyle == null || !mStyle.displayCustomViewInline())) {
@@ -3316,7 +3314,7 @@ public class Notification implements Parcelable
         /**
          * Construct a RemoteViews for the final heads-up notification layout.
          */
-        public RemoteViews makeHeadsUpContentView() {
+        public RemoteViews createHeadsUpContentView() {
             if (mN.headsUpContentView != null
                     && (mStyle == null ||  !mStyle.displayCustomViewInline())) {
                 return mN.headsUpContentView;
@@ -3329,7 +3327,6 @@ public class Notification implements Parcelable
                 return null;
             }
 
-
             return applyStandardTemplateWithActions(getBigBaseLayoutResource());
         }
 
@@ -3341,7 +3338,7 @@ public class Notification implements Parcelable
         public RemoteViews makePublicContentView() {
             if (mN.publicVersion != null) {
                 final Builder builder = recoverBuilder(mContext, mN.publicVersion);
-                return builder.makeContentView();
+                return builder.createContentView();
             }
             Bundle savedBundle = mN.extras;
             Style style = mStyle;
@@ -3464,6 +3461,11 @@ public class Notification implements Parcelable
             return mN;
         }
 
+        /**
+         * Creates a Builder from an existing notification so further changes can be made.
+         * @param context The context for your application / activity.
+         * @param n The notification to create a Builder from.
+         */
         public static Notification.Builder recoverBuilder(Context context, Notification n) {
             // Re-create notification context so we can access app resources.
             ApplicationInfo applicationInfo = n.extras.getParcelable(
@@ -3525,19 +3527,19 @@ public class Notification implements Parcelable
 
             if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
                 if (mN.contentView == null) {
-                    mN.contentView = makeContentView();
+                    mN.contentView = createContentView();
                     mN.extras.putInt(EXTRA_REBUILD_CONTENT_VIEW_ACTION_COUNT,
                             mN.contentView.getSequenceNumber());
                 }
                 if (mN.bigContentView == null) {
-                    mN.bigContentView = makeBigContentView();
+                    mN.bigContentView = createBigContentView();
                     if (mN.bigContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_BIG_CONTENT_VIEW_ACTION_COUNT,
                                 mN.bigContentView.getSequenceNumber());
                     }
                 }
                 if (mN.headsUpContentView == null) {
-                    mN.headsUpContentView = makeHeadsUpContentView();
+                    mN.headsUpContentView = createHeadsUpContentView();
                     if (mN.headsUpContentView != null) {
                         mN.extras.putInt(EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT,
                                 mN.headsUpContentView.getSequenceNumber());
