@@ -57,10 +57,6 @@ public class AudioRecord implements AudioRouting
     // Constants
     //--------------------
 
-    /** Minimum value for sample rate */
-    private static final int SAMPLE_RATE_HZ_MIN = 4000;
-    /** Maximum value for sample rate */
-    private static final int SAMPLE_RATE_HZ_MAX = 192000;
 
     /**
      *  indicates AudioRecord state is not successfully initialized.
@@ -168,8 +164,9 @@ public class AudioRecord implements AudioRouting
     //--------------------
     /**
      * The audio data sampling rate in Hz.
+     * Never {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED}.
      */
-    private int mSampleRate;
+    private int mSampleRate; // initialized by all constructors via audioParamCheck()
     /**
      * The number of input audio channels (1 is mono, 2 is stereo)
      */
@@ -251,6 +248,9 @@ public class AudioRecord implements AudioRouting
      * @param sampleRateInHz the sample rate expressed in Hertz. 44100Hz is currently the only
      *   rate that is guaranteed to work on all devices, but other rates such as 22050,
      *   16000, and 11025 may work on some devices.
+     *   {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED} means to use a route-dependent value
+     *   which is usually the sample rate of the source.
+     *   {@link #getSampleRate()} can be used to retrieve the actual sample rate chosen.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_IN_MONO} and
      *   {@link AudioFormat#CHANNEL_IN_STEREO}.  {@link AudioFormat#CHANNEL_IN_MONO} is guaranteed
@@ -337,16 +337,9 @@ public class AudioRecord implements AudioRouting
             mAudioAttributes = attributes;
         }
 
-        int rate = 0;
-        if ((format.getPropertySetMask()
-                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) != 0)
-        {
-            rate = format.getSampleRate();
-        } else {
-            rate = AudioSystem.getPrimaryOutputSamplingRate();
-            if (rate <= 0) {
-                rate = 44100;
-            }
+        int rate = format.getSampleRate();
+        if (rate == AudioFormat.SAMPLE_RATE_UNSPECIFIED) {
+            rate = 0;
         }
 
         int encoding = AudioFormat.ENCODING_DEFAULT;
@@ -373,12 +366,13 @@ public class AudioRecord implements AudioRouting
 
         audioBuffSizeCheck(bufferSizeInBytes);
 
+        int[] sampleRate = new int[] {mSampleRate};
         int[] session = new int[1];
         session[0] = sessionId;
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
-                mAudioAttributes, mSampleRate, mChannelMask, mChannelIndexMask,
+                mAudioAttributes, sampleRate, mChannelMask, mChannelIndexMask,
                 mAudioFormat, mNativeBufferSizeInBytes,
                 session, ActivityThread.currentOpPackageName());
         if (initResult != SUCCESS) {
@@ -386,6 +380,7 @@ public class AudioRecord implements AudioRouting
             return; // with mState == STATE_UNINITIALIZED
         }
 
+        mSampleRate = sampleRate[0];
         mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
@@ -623,6 +618,7 @@ public class AudioRecord implements AudioRouting
 
         return mask;
     }
+
     // postconditions:
     //    mRecordSource is valid
     //    mAudioFormat is valid
@@ -642,7 +638,9 @@ public class AudioRecord implements AudioRouting
 
         //--------------
         // sample rate
-        if ((sampleRateInHz < SAMPLE_RATE_HZ_MIN) || (sampleRateInHz > SAMPLE_RATE_HZ_MAX)) {
+        if ((sampleRateInHz < AudioFormat.SAMPLE_RATE_HZ_MIN ||
+                sampleRateInHz > AudioFormat.SAMPLE_RATE_HZ_MAX) &&
+                sampleRateInHz != AudioFormat.SAMPLE_RATE_UNSPECIFIED) {
             throw new IllegalArgumentException(sampleRateInHz
                     + "Hz is not a supported sample rate.");
         }
@@ -714,7 +712,11 @@ public class AudioRecord implements AudioRouting
     // Getters
     //--------------------
     /**
-     * Returns the configured audio data sample rate in Hz
+     * Returns the configured audio sink sample rate in Hz.
+     * The sink sample rate never changes after construction.
+     * If the constructor had a specific sample rate, then the sink sample rate is that value.
+     * If the constructor had {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED},
+     * then the sink sample rate is a route-dependent default value based on the source [sic].
      */
     public int getSampleRate() {
         return mSampleRate;
@@ -861,6 +863,7 @@ public class AudioRecord implements AudioRouting
      * See {@link #AudioRecord(int, int, int, int, int)} for more information on valid
      * configuration values.
      * @param sampleRateInHz the sample rate expressed in Hertz.
+     *   {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED} is not permitted.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_IN_MONO} and
      *   {@link AudioFormat#CHANNEL_IN_STEREO}
@@ -1708,7 +1711,7 @@ public class AudioRecord implements AudioRouting
 
     private native final int native_setup(Object audiorecord_this,
             Object /*AudioAttributes*/ attributes,
-            int sampleRate, int channelMask, int channelIndexMask, int audioFormat,
+            int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int[] sessionId, String opPackageName);
 
     // TODO remove: implementation calls directly into implementation of native_release()

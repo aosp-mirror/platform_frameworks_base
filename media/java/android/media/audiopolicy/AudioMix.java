@@ -277,6 +277,7 @@ public class AudioMix {
                 mRouteFlags = ROUTE_FLAG_RENDER;
             }
             if (mFormat == null) {
+                // FIXME Can we eliminate this?  Will AudioMix work with an unspecified sample rate?
                 int rate = AudioSystem.getPrimaryOutputSamplingRate();
                 if (rate <= 0) {
                     rate = 44100;
