@@ -93,6 +93,17 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         });
     }
 
+    private void restorePipAndFinish() {
+        mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
+        finish();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        restorePipAndFinish();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -103,8 +114,7 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
 
     @Override
     public void onBackPressed() {
-        mPipManager.resizePinnedStack(PipManager.STATE_PIP_OVERLAY);
-        finish();
+        restorePipAndFinish();
     }
 
     @Override
