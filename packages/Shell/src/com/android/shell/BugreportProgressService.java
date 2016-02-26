@@ -436,10 +436,12 @@ public class BugreportProgressService extends Service {
         final Intent infoIntent = new Intent(mContext, BugreportProgressService.class);
         infoIntent.setAction(INTENT_BUGREPORT_INFO_LAUNCH);
         infoIntent.putExtra(EXTRA_ID, info.id);
+        final PendingIntent infoPendingIntent =
+                PendingIntent.getService(mContext, info.id, infoIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
         final Action infoAction = new Action.Builder(null,
                 mContext.getString(R.string.bugreport_info_action),
-                PendingIntent.getService(mContext, info.id, infoIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT)).build();
+                infoPendingIntent).build();
         final Intent screenshotIntent = new Intent(mContext, BugreportProgressService.class);
         screenshotIntent.setAction(INTENT_BUGREPORT_SCREENSHOT);
         screenshotIntent.putExtra(EXTRA_ID, info.id);
@@ -466,6 +468,7 @@ public class BugreportProgressService extends Service {
                 .setLocalOnly(true)
                 .setColor(mContext.getColor(
                         com.android.internal.R.color.system_notification_accent_color))
+                .setContentIntent(infoPendingIntent)
                 .addAction(infoAction)
                 .addAction(screenshotAction)
                 .addAction(cancelAction)
