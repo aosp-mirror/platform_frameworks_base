@@ -505,7 +505,7 @@ public class AudioTrack implements AudioRouting
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
                 sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
-                mNativeBufferSizeInBytes, mDataLoadMode, session);
+                mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
@@ -528,8 +528,6 @@ public class AudioTrack implements AudioRouting
      * (associated with an OpenSL ES player).
      */
     /*package*/ AudioTrack(long nativeTrackInJavaObj) {
-        mNativeTrackInJavaObj = nativeTrackInJavaObj;
-
         // "final"s
         mAttributes = null;
         mAppOps = null;
@@ -542,6 +540,25 @@ public class AudioTrack implements AudioRouting
         mInitializationLooper = looper;
 
         // other initialization...
+        // Note that for this native_setup, we are providing an already created/initialized
+        // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
+        int[] session = { 0 };
+        int initResult = native_setup(new WeakReference<AudioTrack>(this),
+                null /*mAttributes - NA*/,
+                null /*sampleRate - NA*/,
+                0 /*mChannelMask - NA*/,
+                0 /*mChannelIndexMask - NA*/,
+                0 /*mAudioFormat - NA*/,
+                0 /*mNativeBufferSizeInBytes - NA*/,
+                0 /*mDataLoadMode - NA*/,
+                session,
+                mNativeTrackInJavaObj);
+        if (initResult != SUCCESS) {
+            loge("Error code "+initResult+" when initializing AudioTrack.");
+            return; // with mState == STATE_UNINITIALIZED
+        }
+
+        mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
     }
@@ -2773,7 +2790,7 @@ public class AudioTrack implements AudioRouting
     private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int mode, int[] sessionId);
+            int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack);
 
     private native final void native_finalize();
 
