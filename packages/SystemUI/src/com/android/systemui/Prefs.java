@@ -48,6 +48,7 @@ public final class Prefs {
         Key.QS_DATA_SAVER_ADDED,
         Key.QS_INVERT_COLORS_ADDED,
         Key.QS_WORK_ADDED,
+        Key.QS_NIGHT_ADDED,
     })
     public @interface Key {
         String OVERVIEW_SEARCH_APP_WIDGET_ID = "searchAppWidgetId";
@@ -68,6 +69,7 @@ public final class Prefs {
         String QS_DATA_SAVER_ADDED = "QsDataSaverAdded";
         String QS_INVERT_COLORS_ADDED = "QsInvertColorsAdded";
         String QS_WORK_ADDED = "QsWorkAdded";
+        String QS_NIGHT_ADDED = "QsNightAdded";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {
