@@ -91,8 +91,11 @@ public class Canvas {
     // a Canvas object.
     private static final long NATIVE_ALLOCATION_SIZE = 525;
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-        getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+    // Use a Holder to allow static initialization of Canvas in the boot image.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+    }
 
     // This field is used to finalize the native Canvas properly
     private Runnable mFinalizer;
@@ -107,7 +110,8 @@ public class Canvas {
         if (!isHardwareAccelerated()) {
             // 0 means no native bitmap
             mNativeCanvasWrapper = initRaster(null);
-            mFinalizer = sRegistry.registerNativeAllocation(this, mNativeCanvasWrapper);
+            mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                    this, mNativeCanvasWrapper);
         } else {
             mFinalizer = null;
         }
@@ -128,7 +132,8 @@ public class Canvas {
         }
         throwIfCannotDraw(bitmap);
         mNativeCanvasWrapper = initRaster(bitmap);
-        mFinalizer = sRegistry.registerNativeAllocation(this, mNativeCanvasWrapper);
+        mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                this, mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
@@ -139,7 +144,8 @@ public class Canvas {
             throw new IllegalStateException();
         }
         mNativeCanvasWrapper = nativeCanvas;
-        mFinalizer = sRegistry.registerNativeAllocation(this, mNativeCanvasWrapper);
+        mFinalizer = NoImagePreloadHolder.sRegistry.registerNativeAllocation(
+                this, mNativeCanvasWrapper);
         mDensity = Bitmap.getDefaultDensity();
     }
 

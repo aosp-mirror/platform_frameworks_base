@@ -44,8 +44,11 @@ public class Paint {
     // The approximate size of a native paint object.
     private static final long NATIVE_PAINT_SIZE = 98;
 
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-        nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
+    // Use a Holder to allow static initialization of Paint in the boot image.
+    private static class NoImagePreloadHolder {
+        public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                nGetNativeFinalizer(), NATIVE_PAINT_SIZE);
+    }
 
     /**
      * @hide
@@ -452,7 +455,7 @@ public class Paint {
      */
     public Paint(int flags) {
         mNativePaint = nInit();
-        sRegistry.registerNativeAllocation(this, mNativePaint);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativePaint);
         setFlags(flags | HIDDEN_DEFAULT_PAINT_FLAGS);
         // TODO: Turning off hinting has undesirable side effects, we need to
         //       revisit hinting once we add support for subpixel positioning
@@ -471,7 +474,7 @@ public class Paint {
      */
     public Paint(Paint paint) {
         mNativePaint = nInitWithPaint(paint.getNativeInstance());
-        sRegistry.registerNativeAllocation(this, mNativePaint);
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativePaint);
         setClassVariablesFrom(paint);
     }
 
