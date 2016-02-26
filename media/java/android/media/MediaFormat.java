@@ -644,6 +644,21 @@ public final class MediaFormat {
     /** Full range. Y, Cr and Cb component values range from 0 to 255 for 8-bit content. */
     public static final int COLOR_RANGE_FULL = 1;
 
+    /**
+     * A key describing a unique ID for the content of a media track.
+     *
+     * <p>This key is used by {@link MediaExtractor}. Some extractors provide multiple encodings
+     * of the same track (e.g. float audio tracks for FLAC and WAV may be expressed as two
+     * tracks via MediaExtractor: a normal PCM track for backward compatibility, and a float PCM
+     * track for added fidelity. Similarly, Dolby Vision extractor may provide a baseline SDR
+     * version of a DV track.) This key can be used to identify which MediaExtractor tracks refer
+     * to the same underlying content.
+     * </p>
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_TRACK_ID = "track-id";
+
     /* package private */ MediaFormat(Map<String, Object> map) {
         mMap = map;
     }
