@@ -259,8 +259,7 @@ static jlong
 loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName,
         jobject messageQueue, jstring internalDataDir, jstring obbDir,
         jstring externalDataDir, jint sdkVersion, jobject jAssetMgr,
-        jbyteArray savedState, jobject classLoader, jstring libraryPath,
-        jstring isolationPath) {
+        jbyteArray savedState, jobject classLoader, jstring libraryPath) {
     if (kLogTrace) {
         ALOGD("loadNativeCode_native");
     }
@@ -269,8 +268,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
     std::unique_ptr<NativeCode> code;
     bool needNativeBridge = false;
 
-    void* handle = OpenNativeLibrary(env, sdkVersion, pathStr, classLoader,
-                                     false, libraryPath, isolationPath);
+    void* handle = OpenNativeLibrary(env, sdkVersion, pathStr, classLoader, libraryPath);
     if (handle == NULL) {
         if (NativeBridgeIsSupported(pathStr)) {
             handle = NativeBridgeLoadLibrary(pathStr, RTLD_LAZY);
@@ -656,7 +654,7 @@ onContentRectChanged_native(JNIEnv* env, jobject clazz, jlong handle,
 
 static const JNINativeMethod g_methods[] = {
     { "loadNativeCode",
-        "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[BLjava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)J",
+        "(Ljava/lang/String;Ljava/lang/String;Landroid/os/MessageQueue;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILandroid/content/res/AssetManager;[BLjava/lang/ClassLoader;Ljava/lang/String;)J",
         (void*)loadNativeCode_native },
     { "getDlError", "()Ljava/lang/String;", (void*) getDlError_native },
     { "unloadNativeCode", "(J)V", (void*)unloadNativeCode_native },
