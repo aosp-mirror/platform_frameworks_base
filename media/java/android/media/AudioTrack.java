@@ -543,16 +543,17 @@ public class AudioTrack implements AudioRouting
         // Note that for this native_setup, we are providing an already created/initialized
         // *Native* AudioTrack, so the attributes parameters to native_setup() are ignored.
         int[] session = { 0 };
+        int[] rates = { 0 };
         int initResult = native_setup(new WeakReference<AudioTrack>(this),
                 null /*mAttributes - NA*/,
-                null /*sampleRate - NA*/,
+                rates /*sampleRate - NA*/,
                 0 /*mChannelMask - NA*/,
                 0 /*mChannelIndexMask - NA*/,
                 0 /*mAudioFormat - NA*/,
                 0 /*mNativeBufferSizeInBytes - NA*/,
                 0 /*mDataLoadMode - NA*/,
                 session,
-                mNativeTrackInJavaObj);
+                nativeTrackInJavaObj);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
