@@ -17,6 +17,7 @@
 package com.android.mtp;
 
 import android.annotation.Nullable;
+import android.mtp.MtpConstants;
 
 class MtpDeviceRecord {
     public final int deviceId;
@@ -37,5 +38,30 @@ class MtpDeviceRecord {
         this.deviceKey = deviceKey;
         this.operationsSupported = operationsSupported;
         this.eventsSupported = eventsSupported;
+    }
+
+    /**
+     * Helper method to check operations/events are supported by the device or not.
+     */
+    static boolean isSupported(@Nullable int[] supportedList, int code) {
+        if (supportedList == null) {
+            return false;
+        }
+        for (int i = 0; i < supportedList.length; i++) {
+            if (supportedList[i] == code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean isPartialReadSupported(@Nullable int[] supportedList, long fileSize) {
+        return fileSize <= 0xffffffffl &&
+                 isSupported(supportedList, MtpConstants.OPERATION_GET_PARTIAL_OBJECT);
+    }
+
+    static boolean isWritingSupported(@Nullable int[] supportedList) {
+        return isSupported(supportedList, MtpConstants.OPERATION_SEND_OBJECT_INFO) &&
+                isSupported(supportedList, MtpConstants.OPERATION_SEND_OBJECT);
     }
 }

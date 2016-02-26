@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeoutException;
 
 import static com.android.mtp.MtpDatabase.strings;
+import static com.android.mtp.TestUtil.OPERATIONS_SUPPORTED;
 
 @MediumTest
 public class MtpDocumentsProviderTest extends AndroidTestCase {
@@ -77,7 +78,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                             2048 /* total space */,
                             "" /* no volume identifier */)
                 },
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
 
         mProvider.resumeRootScanner();
@@ -98,7 +99,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         } catch (Throwable error) {
             assertTrue(error instanceof IOException);
         }
-        assertEquals(0, mProvider.getOpenedDeviceIds().length);
+        assertEquals(0, mProvider.getOpenedDeviceRecordsCache().length);
 
         // Check if the following notification is the first one or not.
         mMtpManager.addValidDevice(new MtpDeviceRecord(
@@ -115,7 +116,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                             2048 /* total space */,
                             "" /* no volume identifier */)
                 },
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
         mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
@@ -139,7 +140,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                             2048 /* total space */,
                             "" /* no volume identifier */)
                 },
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
         mMtpManager.setObjectHandles(0, 1, -1, new int[0]);
         mProvider.resumeRootScanner();
@@ -155,16 +156,16 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             assertEquals(1, cursor.getLong(1));
         }
         {
-            final int [] openedDevice = mProvider.getOpenedDeviceIds();
+            final MtpDeviceRecord[] openedDevice = mProvider.getOpenedDeviceRecordsCache();
             assertEquals(0, openedDevice.length);
         }
         // Device is opened automatically when querying its children.
         try (final Cursor cursor = mProvider.queryChildDocuments("1", null, null)) {}
 
         {
-            final int [] openedDevice = mProvider.getOpenedDeviceIds();
+            final MtpDeviceRecord[] openedDevice = mProvider.getOpenedDeviceRecordsCache();
             assertEquals(1, openedDevice.length);
-            assertEquals(0, openedDevice[0]);
+            assertEquals(0, openedDevice[0].deviceId);
         }
     }
 
@@ -184,7 +185,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                                 2048 /* total space */,
                                 "" /* no volume identifier */)
                 },
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
@@ -200,7 +201,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                             4096 /* total space */,
                             "Identifier B" /* no volume identifier */)
                 },
-                null,
+                new int[0] /* No operations supported */,
                 null));
 
         {
@@ -225,7 +226,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
             cursor.moveToNext();
             cursor.moveToNext();
             assertEquals("2", cursor.getString(0));
-            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE, cursor.getInt(1));
+            assertEquals(Root.FLAG_SUPPORTS_IS_CHILD, cursor.getInt(1));
             assertEquals(R.drawable.ic_root_mtp, cursor.getInt(2));
             assertEquals("Device B Storage B", cursor.getString(3));
             assertEquals("2", cursor.getString(4));
@@ -241,7 +242,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                 "Device key A",
                 false /* unopened */,
                 new MtpRoot[0],
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
         mMtpManager.addValidDevice(new MtpDeviceRecord(
                 1,
@@ -257,7 +258,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
                             4096 /* total space */,
                             "Identifier B" /* no volume identifier */)
                 },
-                null,
+                OPERATIONS_SUPPORTED,
                 null));
         {
             mProvider.openDevice(0);
@@ -544,14 +545,14 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testBusyDevice() throws Exception {
         mMtpManager = new TestMtpManager(getContext()) {
             @Override
-            void openDevice(int deviceId) throws IOException {
+            MtpDeviceRecord openDevice(int deviceId) throws IOException {
                 throw new BusyDeviceException();
             }
         };
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
-                0, "Device A", null /* deviceKey */, false /* unopened */, new MtpRoot[0], null,
-                null));
+                0, "Device A", null /* deviceKey */, false /* unopened */, new MtpRoot[0],
+                OPERATIONS_SUPPORTED, null));
 
         mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
@@ -571,7 +572,8 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
     public void testLockedDevice() throws Exception {
         setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
         mMtpManager.addValidDevice(new MtpDeviceRecord(
-                0, "Device A", null, false /* unopened */, new MtpRoot[0], null, null));
+                0, "Device A", null, false /* unopened */, new MtpRoot[0], OPERATIONS_SUPPORTED,
+                null));
 
         mProvider.resumeRootScanner();
         mResolver.waitForNotification(ROOTS_URI, 1);
@@ -661,6 +663,60 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         }
     }
 
+    public void testCreateDocument_noWritingSupport() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mMtpManager.addValidDevice(new MtpDeviceRecord(
+                0, "Device A", null /* deviceKey */, false /* unopened */,
+                new MtpRoot[] {
+                        new MtpRoot(
+                                0 /* deviceId */,
+                                1 /* storageId */,
+                                "Storage A" /* volume description */,
+                                1024 /* free space */,
+                                2048 /* total space */,
+                                "" /* no volume identifier */)
+                },
+                new int[0] /* no operations supported */, null));
+        mProvider.resumeRootScanner();
+        mResolver.waitForNotification(ROOTS_URI, 1);
+        try {
+            mProvider.createDocument("1", "text/palin", "note.txt");
+            fail();
+        } catch (UnsupportedOperationException exception) {}
+    }
+
+    public void testOpenDocument_noWritingSupport() throws Exception {
+        setupProvider(MtpDatabaseConstants.FLAG_DATABASE_IN_MEMORY);
+        mMtpManager.addValidDevice(new MtpDeviceRecord(
+                0, "Device A", null /* deviceKey */, false /* unopened */,
+                new MtpRoot[] {
+                        new MtpRoot(
+                                0 /* deviceId */,
+                                1 /* storageId */,
+                                "Storage A" /* volume description */,
+                                1024 /* free space */,
+                                2048 /* total space */,
+                                "" /* no volume identifier */)
+                },
+                new int[0] /* no operations supported */, null));
+        mMtpManager.setObjectHandles(
+                0, 1, MtpManager.OBJECT_HANDLE_ROOT_CHILDREN, new int[] { 100 });
+        mMtpManager.setObjectInfo(
+                0, new MtpObjectInfo.Builder().setObjectHandle(100).setName("note.txt").build());
+        mProvider.resumeRootScanner();
+        mResolver.waitForNotification(ROOTS_URI, 1);
+        try (final Cursor cursor = mProvider.queryChildDocuments(
+                "1", strings(Document.COLUMN_DOCUMENT_ID), null)) {
+            assertEquals(1, cursor.getCount());
+            cursor.moveToNext();
+            assertEquals("3", cursor.getString(0));
+        }
+        try {
+            mProvider.openDocument("3", "w", null);
+            fail();
+        } catch (UnsupportedOperationException exception) {}
+    }
+
     private void setupProvider(int flag) {
         mDatabase = new MtpDatabase(getContext(), flag);
         mProvider = new MtpDocumentsProvider();
@@ -691,7 +747,7 @@ public class MtpDocumentsProviderTest extends AndroidTestCase {
         final int changeCount = mResolver.getChangeCount(ROOTS_URI);
         mMtpManager.addValidDevice(
                 new MtpDeviceRecord(deviceId, "Device", null /* deviceKey */, false /* unopened */,
-                roots, null, null));
+                roots, OPERATIONS_SUPPORTED, null));
         mProvider.openDevice(deviceId);
         mResolver.waitForNotification(ROOTS_URI, changeCount + 1);
         return getStrings(mProvider.queryRoots(strings(DocumentsContract.Root.COLUMN_ROOT_ID)));

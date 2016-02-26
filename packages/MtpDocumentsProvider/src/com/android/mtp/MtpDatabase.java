@@ -689,9 +689,7 @@ class MtpDatabase {
         values.putNull(Document.COLUMN_SIZE);
 
         extraValues.clear();
-        extraValues.put(
-                Root.COLUMN_FLAGS,
-                Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
+        extraValues.put(Root.COLUMN_FLAGS, getRootFlags(device.operationsSupported));
         extraValues.putNull(Root.COLUMN_AVAILABLE_BYTES);
         extraValues.putNull(Root.COLUMN_CAPACITY_BYTES);
         extraValues.put(Root.COLUMN_MIME_TYPES, "");
@@ -700,12 +698,16 @@ class MtpDatabase {
     /**
      * Gets {@link ContentValues} for the given root.
      * @param values {@link ContentValues} that receives values.
+     * @param extraValues {@link ContentValues} that receives extra values for roots.
+     * @param parentDocumentId Parent document ID.
+     * @param supportedOperations Array of Operation code supported by the device.
      * @param root Root to be converted {@link ContentValues}.
      */
     static void getStorageDocumentValues(
             ContentValues values,
             ContentValues extraValues,
             String parentDocumentId,
+            int[] operationsSupported,
             MtpRoot root) {
         values.clear();
         values.put(COLUMN_DEVICE_ID, root.mDeviceId);
@@ -722,9 +724,7 @@ class MtpDatabase {
         values.put(Document.COLUMN_FLAGS, 0);
         values.put(Document.COLUMN_SIZE, root.mMaxCapacity - root.mFreeSpace);
 
-        extraValues.put(
-                Root.COLUMN_FLAGS,
-                Root.FLAG_SUPPORTS_IS_CHILD | Root.FLAG_SUPPORTS_CREATE);
+        extraValues.put(Root.COLUMN_FLAGS, getRootFlags(operationsSupported));
         extraValues.put(Root.COLUMN_AVAILABLE_BYTES, root.mFreeSpace);
         extraValues.put(Root.COLUMN_CAPACITY_BYTES, root.mMaxCapacity);
         extraValues.put(Root.COLUMN_MIME_TYPES, "");
@@ -783,6 +783,14 @@ class MtpDatabase {
         }
         // We don't know the file type.
         return "application/octet-stream";
+    }
+
+    private static int getRootFlags(int[] operationsSupported) {
+        int rootFlag = Root.FLAG_SUPPORTS_IS_CHILD;
+        if (MtpDeviceRecord.isWritingSupported(operationsSupported)) {
+            rootFlag |= Root.FLAG_SUPPORTS_CREATE;
+        }
+        return rootFlag;
     }
 
     static String[] strings(Object... args) {

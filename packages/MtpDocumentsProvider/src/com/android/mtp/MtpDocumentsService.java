@@ -67,38 +67,25 @@ public class MtpDocumentsService extends Service {
      */
     private boolean updateForegroundState() {
         final MtpDocumentsProvider provider = MtpDocumentsProvider.getInstance();
-        final int[] deviceIds = provider.getOpenedDeviceIds();
         int notificationId = 0;
         Notification notification = null;
         // TODO: Hide notification if the device has already been removed.
-        for (final int deviceId : deviceIds) {
-            try {
-                final String title = getResources().getString(
-                        R.string.accessing_notification_title,
-                        provider.getDeviceName(deviceIds[0]));
-                final String description = getResources().getString(
-                        R.string.accessing_notification_description);
-                notificationId = deviceId;
-                notification = new Notification.Builder(this)
-                        .setLocalOnly(true)
-                        .setContentTitle(title)
-                        .setContentText(description)
-                        .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
-                        .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setPriority(Notification.PRIORITY_LOW)
-                        .build();
-                mNotificationManager.notify(deviceId, notification);
-            } catch (IOException exp) {
-                logErrorMessage(exp);
-                // If we failed to obtain device name, it looks the device is unusable.
-                // Because this is the last device we opened, we should hide the notification
-                // for the case.
-                try {
-                    provider.closeDevice(deviceIds[0]);
-                } catch (IOException | InterruptedException closeError) {
-                    logErrorMessage(closeError);
-                }
-            }
+        for (final MtpDeviceRecord record : provider.getOpenedDeviceRecordsCache()) {
+            final String title = getResources().getString(
+                    R.string.accessing_notification_title,
+                    record.name);
+            final String description = getResources().getString(
+                    R.string.accessing_notification_description);
+            notificationId = record.deviceId;
+            notification = new Notification.Builder(this)
+                    .setLocalOnly(true)
+                    .setContentTitle(title)
+                    .setContentText(description)
+                    .setSmallIcon(com.android.internal.R.drawable.stat_sys_data_usb)
+                    .setCategory(Notification.CATEGORY_SYSTEM)
+                    .setPriority(Notification.PRIORITY_LOW)
+                    .build();
+            mNotificationManager.notify(record.deviceId, notification);
         }
 
         if (notification != null) {
