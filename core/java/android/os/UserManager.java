@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -700,8 +699,7 @@ public class UserManager {
         try {
             return mService.getUserInfo(getUserHandle()).name;
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user name", re);
-            return "";
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -771,8 +769,7 @@ public class UserManager {
         try {
             return mService.isRestricted();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not check if user is limited ", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -784,8 +781,7 @@ public class UserManager {
         try {
             return mService.canHaveRestrictedProfile(userId);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not check if user can have restricted profile", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -847,8 +843,8 @@ public class UserManager {
     public boolean isUserRunning(int userId) {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
-        } catch (RemoteException e) {
-            return false;
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -864,8 +860,8 @@ public class UserManager {
             // TODO: reconcile stopped vs stopping?
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_OR_STOPPED);
-        } catch (RemoteException e) {
-            return false;
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -893,8 +889,8 @@ public class UserManager {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_LOCKED);
-        } catch (RemoteException e) {
-            return false;
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -922,8 +918,8 @@ public class UserManager {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
-        } catch (RemoteException e) {
-            return false;
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -968,8 +964,7 @@ public class UserManager {
         try {
             return mService.getUserInfo(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user info", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -990,8 +985,7 @@ public class UserManager {
         try {
             return mService.getUserRestrictions(userHandle.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user restrictions", re);
-            return Bundle.EMPTY;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1007,9 +1001,7 @@ public class UserManager {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get base user restrictions for user " +
-                    userHandle.getIdentifier(), re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1065,7 +1057,7 @@ public class UserManager {
         try {
             mService.setUserRestriction(key, value, userHandle.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set user restriction", re);
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1092,8 +1084,7 @@ public class UserManager {
             return mService.hasUserRestriction(restrictionKey,
                     userHandle.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not check user restrictions", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1147,7 +1138,7 @@ public class UserManager {
                 mService.setUserRestriction(DISALLOW_OUTGOING_CALLS, true, user.id);
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not create a user", re);
+            throw re.rethrowAsRuntimeException();
         }
         return user;
     }
@@ -1167,7 +1158,7 @@ public class UserManager {
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not create a user", re);
+            throw re.rethrowAsRuntimeException();
         }
         return guest;
     }
@@ -1188,8 +1179,7 @@ public class UserManager {
         try {
             return mService.createProfileForUser(name, flags, userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not create a user", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1211,10 +1201,9 @@ public class UserManager {
                         UserHandle.of(user.id));
             }
             return user;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not create a restricted profile", e);
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
-        return null;
     }
 
     /**
@@ -1282,8 +1271,7 @@ public class UserManager {
         try {
             return mService.getSeedAccountName();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get the seed account name", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1297,8 +1285,7 @@ public class UserManager {
         try {
             return mService.getSeedAccountType();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get the seed account type", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1314,8 +1301,7 @@ public class UserManager {
         try {
             return mService.getSeedAccountOptions();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get the seed account options", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1336,7 +1322,7 @@ public class UserManager {
             mService.setSeedAccountData(userId, accountName, accountType, accountOptions,
                     /* persist= */ true);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set the seed account data", re);
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1349,7 +1335,7 @@ public class UserManager {
         try {
             mService.clearSeedAccountData();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not clear the seed account data", re);
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1364,8 +1350,7 @@ public class UserManager {
         try {
             return mService.markGuestForDeletion(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not mark guest for deletion", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1384,8 +1369,8 @@ public class UserManager {
     public void setUserEnabled(@UserIdInt int userHandle) {
         try {
             mService.setUserEnabled(userHandle);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not enable the profile", e);
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1407,8 +1392,7 @@ public class UserManager {
         try {
             return mService.getUsers(false);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user list", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1430,8 +1414,7 @@ public class UserManager {
             }
             return result;
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get users list", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1447,8 +1430,7 @@ public class UserManager {
         try {
             return mService.getUserAccount(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user account", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1464,7 +1446,7 @@ public class UserManager {
         try {
             mService.setUserAccount(userHandle, accountName);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set user account", re);
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1479,8 +1461,7 @@ public class UserManager {
         try {
             return mService.getPrimaryUser();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get Primary user", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1517,8 +1498,7 @@ public class UserManager {
         try {
             return mService.canAddMoreManagedProfiles(userId, allowedToRemoveOne);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not check if we can add more managed profiles", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1537,8 +1517,7 @@ public class UserManager {
         try {
             return mService.getProfiles(userHandle, false /* enabledOnly */);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user list", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1553,8 +1532,7 @@ public class UserManager {
         try {
             return mService.isSameProfileGroup(userId, otherUserId);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user list", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1572,8 +1550,7 @@ public class UserManager {
         try {
             return mService.getProfiles(userHandle, true /* enabledOnly */);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user list", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1589,8 +1566,7 @@ public class UserManager {
         try {
             users = mService.getProfiles(UserHandle.myUserId(), true /* enabledOnly */);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user list", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
         for (UserInfo info : users) {
             UserHandle userHandle = new UserHandle(info.id);
@@ -1610,8 +1586,7 @@ public class UserManager {
         try {
             return mService.getCredentialOwnerProfile(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get credential owner", re);
-            return -1;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1625,8 +1600,7 @@ public class UserManager {
         try {
             return mService.getProfileParent(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get profile parent", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1640,8 +1614,8 @@ public class UserManager {
     public void setQuietModeEnabled(@UserIdInt int userHandle, boolean enableQuietMode) {
         try {
             mService.setQuietModeEnabled(userHandle, enableQuietMode);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not change the profile's quiet mode", e);
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1654,10 +1628,9 @@ public class UserManager {
     public boolean isQuietModeEnabled(UserHandle userHandle) {
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            Log.w(TAG, "Could not query the profile's quiet mode", e);
+        } catch (RemoteException re) {
+            throw re.rethrowAsRuntimeException();
         }
-        return false;
     }
 
     /**
@@ -1742,8 +1715,7 @@ public class UserManager {
         try {
             return mService.getUsers(excludeDying);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user list", re);
-            return null;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1757,8 +1729,7 @@ public class UserManager {
         try {
             return mService.removeUser(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not remove user ", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1774,7 +1745,7 @@ public class UserManager {
         try {
             mService.setUserName(userHandle, name);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set the user name ", re);
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1788,7 +1759,7 @@ public class UserManager {
         try {
             mService.setUserIcon(userHandle, icon);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set the user icon ", re);
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1813,7 +1784,7 @@ public class UserManager {
                 }
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get the user icon ", re);
+            throw re.rethrowAsRuntimeException();
         }
         return null;
     }
@@ -1869,9 +1840,8 @@ public class UserManager {
         try {
             return mService.getUserSerialNumber(userHandle);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get serial number for user " + userHandle);
+            throw re.rethrowAsRuntimeException();
         }
-        return -1;
     }
 
     /**
@@ -1887,9 +1857,8 @@ public class UserManager {
         try {
             return mService.getUserHandle(userSerialNumber);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get userHandle for user " + userSerialNumber);
+            throw re.rethrowAsRuntimeException();
         }
-        return -1;
     }
 
     /**
@@ -1915,9 +1884,8 @@ public class UserManager {
         try {
             return mService.getApplicationRestrictions(packageName);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get application restrictions for package " + packageName);
+            throw re.rethrowAsRuntimeException();
         }
-        return null;
     }
 
     /**
@@ -1927,9 +1895,8 @@ public class UserManager {
         try {
             return mService.getApplicationRestrictionsForUser(packageName, user.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get application restrictions for user " + user.getIdentifier());
+            throw re.rethrowAsRuntimeException();
         }
-        return null;
     }
 
     /**
@@ -1940,7 +1907,7 @@ public class UserManager {
         try {
             mService.setApplicationRestrictions(packageName, restrictions, user.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set application restrictions for user " + user.getIdentifier());
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1964,7 +1931,7 @@ public class UserManager {
         try {
             mService.setDefaultGuestRestrictions(restrictions);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set guest restrictions");
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -1976,9 +1943,8 @@ public class UserManager {
         try {
             return mService.getDefaultGuestRestrictions();
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not set guest restrictions");
+            throw re.rethrowAsRuntimeException();
         }
-        return new Bundle();
     }
 
     /**
@@ -1991,8 +1957,7 @@ public class UserManager {
         try {
             return mService.getUserCreationTime(userHandle.getIdentifier());
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not get user creation time", re);
-            return 0;
+            throw re.rethrowAsRuntimeException();
         }
     }
 
@@ -2008,8 +1973,7 @@ public class UserManager {
         try {
             return mService.someUserHasSeedAccount(accountName, accountType);
         } catch (RemoteException re) {
-            Log.w(TAG, "Could not check seed accounts", re);
-            return false;
+            throw re.rethrowAsRuntimeException();
         }
     }
 }
