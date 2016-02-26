@@ -196,7 +196,12 @@ final class ActivityRecord {
 
     private boolean inHistory;  // are we in the history stack?
     final ActivityStackSupervisor mStackSupervisor;
-    boolean mStartingWindowShown = false;
+
+    static final int STARTING_WINDOW_NOT_SHOWN = 0;
+    static final int STARTING_WINDOW_SHOWN = 1;
+    static final int STARTING_WINDOW_REMOVED = 2;
+    int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
+
     boolean mUpdateTaskThumbnailWhenHidden;
     ActivityContainer mInitialActivityContainer;
 
@@ -213,6 +218,19 @@ final class ActivityRecord {
 
     boolean pendingVoiceInteractionStart;   // Waiting for activity-invoked voice session
     IVoiceInteractionSession voiceSession;  // Voice interaction session for this activity
+
+    private static String startingWindowStateToString(int state) {
+        switch (state) {
+            case STARTING_WINDOW_NOT_SHOWN:
+                return "STARTING_WINDOW_NOT_SHOWN";
+            case STARTING_WINDOW_SHOWN:
+                return "STARTING_WINDOW_SHOWN";
+            case STARTING_WINDOW_REMOVED:
+                return "STARTING_WINDOW_REMOVED";
+            default:
+                return "unknown state=" + state;
+        }
+    }
 
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
@@ -320,8 +338,9 @@ final class ActivityRecord {
                 pw.print(" inHistory="); pw.print(inHistory);
                 pw.print(" visible="); pw.print(visible);
                 pw.print(" sleeping="); pw.print(sleeping);
-                pw.print(" idle="); pw.println(idle);
-                pw.print(" mStartingWindowShown="); pw.println(mStartingWindowShown);
+                pw.print(" idle="); pw.print(idle);
+                pw.print(" mStartingWindowState=");
+                pw.println(startingWindowStateToString(mStartingWindowState));
         pw.print(prefix); pw.print("fullscreen="); pw.print(fullscreen);
                 pw.print(" noDisplay="); pw.print(noDisplay);
                 pw.print(" immersive="); pw.print(immersive);
