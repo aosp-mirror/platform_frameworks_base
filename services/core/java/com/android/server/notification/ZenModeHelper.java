@@ -238,13 +238,13 @@ public class ZenModeHelper {
         return mZenMode;
     }
 
-    public List<AutomaticZenRule> getAutomaticZenRules() {
-        List<AutomaticZenRule> rules = new ArrayList<>();
+    public List<ZenRule> getZenRules() {
+        List<ZenRule> rules = new ArrayList<>();
         synchronized (mConfig) {
             if (mConfig == null) return rules;
             for (ZenRule rule : mConfig.automaticRules.values()) {
                 if (canManageAutomaticZenRule(rule)) {
-                    rules.add(createAutomaticZenRule(rule));
+                    rules.add(rule);
                 }
             }
         }
@@ -264,10 +264,7 @@ public class ZenModeHelper {
         return null;
     }
 
-    public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
-        if (!TextUtils.isEmpty(automaticZenRule.getId())) {
-            throw new IllegalArgumentException("Rule already exists");
-        }
+    public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
         if (!isSystemRule(automaticZenRule)) {
             ServiceInfo owner = getServiceInfo(automaticZenRule.getOwner());
             if (owner == null) {
@@ -293,14 +290,15 @@ public class ZenModeHelper {
             populateZenRule(automaticZenRule, rule, true);
             newConfig.automaticRules.put(rule.id, rule);
             if (setConfigLocked(newConfig, reason, true)) {
-                return createAutomaticZenRule(rule);
+                return rule.id;
             } else {
                 return null;
             }
         }
     }
 
-    public boolean updateAutomaticZenRule(AutomaticZenRule automaticZenRule, String reason) {
+    public boolean updateAutomaticZenRule(String ruleId, AutomaticZenRule automaticZenRule,
+            String reason) {
         ZenModeConfig newConfig;
         synchronized (mConfig) {
             if (mConfig == null) return false;
@@ -309,7 +307,6 @@ public class ZenModeHelper {
                         + " reason=" + reason);
             }
             newConfig = mConfig.copy();
-            final String ruleId = automaticZenRule.getId();
             ZenModeConfig.ZenRule rule;
             if (ruleId == null) {
                 throw new IllegalArgumentException("Rule doesn't exist");
@@ -437,7 +434,7 @@ public class ZenModeHelper {
     private AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
         return new AutomaticZenRule(rule.name, rule.component, rule.conditionId,
                 NotificationManager.zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
-                rule.id, rule.creationTime);
+                rule.creationTime);
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String reason) {

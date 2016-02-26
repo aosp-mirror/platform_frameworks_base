@@ -97,9 +97,9 @@ interface INotificationManager
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
     AutomaticZenRule getAutomaticZenRule(String id);
-    List<AutomaticZenRule> getAutomaticZenRules();
-    AutomaticZenRule addAutomaticZenRule(in AutomaticZenRule automaticZenRule);
-    boolean updateAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    List<ZenModeConfig.ZenRule> getZenRules();
+    String addAutomaticZenRule(in AutomaticZenRule automaticZenRule);
+    boolean updateAutomaticZenRule(String id, in AutomaticZenRule automaticZenRule);
     boolean removeAutomaticZenRule(String id);
     boolean removeAutomaticZenRules(String packageName);
     int getRuleInstanceCount(in ComponentName owner);

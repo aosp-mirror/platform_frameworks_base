@@ -1698,9 +1698,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public List<AutomaticZenRule> getAutomaticZenRules() throws RemoteException {
+        public List<ZenModeConfig.ZenRule> getZenRules() throws RemoteException {
             enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRules");
-            return mZenModeHelper.getAutomaticZenRules();
+            return mZenModeHelper.getZenRules();
         }
 
         @Override
@@ -1711,7 +1711,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule)
+        public String addAutomaticZenRule(AutomaticZenRule automaticZenRule)
                 throws RemoteException {
             Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
             Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
@@ -1724,7 +1724,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean updateAutomaticZenRule(AutomaticZenRule automaticZenRule)
+        public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule)
                 throws RemoteException {
             Preconditions.checkNotNull(automaticZenRule, "automaticZenRule is null");
             Preconditions.checkNotNull(automaticZenRule.getName(), "Name is null");
@@ -1732,7 +1732,7 @@ public class NotificationManagerService extends SystemService {
             Preconditions.checkNotNull(automaticZenRule.getConditionId(), "ConditionId is null");
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
-            return mZenModeHelper.updateAutomaticZenRule(automaticZenRule,
+            return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
                     "updateAutomaticZenRule");
         }
 
