@@ -1,5 +1,9 @@
 package com.android.server.wm;
 
+import static android.app.ActivityManagerInternal.APP_TRANSITION_SAVED_SURFACE;
+import static android.app.ActivityManagerInternal.APP_TRANSITION_STARTING_WINDOW;
+import static android.app.ActivityManagerInternal.APP_TRANSITION_TIMEOUT;
+import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
@@ -42,6 +46,7 @@ import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -782,6 +787,7 @@ class WindowSurfacePlacer {
                                 }
                             }
                         } else if (w.isDrawnLw()) {
+                            mService.mH.sendEmptyMessage(NOTIFY_STARTING_WINDOW_DRAWN);
                             atoken.startingDisplayed = true;
                         }
                     }
@@ -1262,6 +1268,7 @@ class WindowSurfacePlacer {
                 "Checking " + appsCount + " opening apps (frozen="
                         + mService.mDisplayFrozen + " timeout="
                         + mService.mAppTransition.isTimeout() + ")...");
+        int reason = APP_TRANSITION_TIMEOUT;
         if (!mService.mAppTransition.isTimeout()) {
             for (int i = 0; i < appsCount; i++) {
                 AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
@@ -1271,10 +1278,17 @@ class WindowSurfacePlacer {
                         + wtoken.startingDisplayed + " startingMoved="
                         + wtoken.startingMoved);
 
+                final boolean drawnBeforeRestoring = wtoken.allDrawn;
                 wtoken.restoreSavedSurfaces();
 
                 if (!wtoken.allDrawn && !wtoken.startingDisplayed && !wtoken.startingMoved) {
                     return false;
+                }
+                if (wtoken.allDrawn) {
+                    reason = drawnBeforeRestoring ? APP_TRANSITION_WINDOWS_DRAWN
+                            : APP_TRANSITION_SAVED_SURFACE;
+                } else {
+                    reason = APP_TRANSITION_STARTING_WINDOW;
                 }
             }
 
@@ -1285,9 +1299,15 @@ class WindowSurfacePlacer {
             }
 
             // If the wallpaper is visible, we need to check it's ready too.
-            return !mWallpaperControllerLocked.isWallpaperVisible() ||
+            boolean wallpaperReady = !mWallpaperControllerLocked.isWallpaperVisible() ||
                     mWallpaperControllerLocked.wallpaperTransitionReady();
+            if (wallpaperReady) {
+                mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reason, 0).sendToTarget();
+                return true;
+            }
+            return false;
         }
+        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING, reason, 0).sendToTarget();
         return true;
     }
 
