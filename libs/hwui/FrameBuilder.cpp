@@ -782,39 +782,46 @@ void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
     boundsTransform.mapRect(dstRect);
     dstRect.doIntersect(mCanvasState.currentSnapshot()->getRenderTargetClip());
 
-    // Allocate a holding position for the layer object (copyTo will produce, copyFrom will consume)
-    OffscreenBuffer** layerHandle = mAllocator.create<OffscreenBuffer*>(nullptr);
+    if (dstRect.isEmpty()) {
+        // Unclipped layer rejected - push a null op, so next EndUnclippedLayerOp is ignored
+        currentLayer().activeUnclippedSaveLayers.push_back(nullptr);
+    } else {
+        // Allocate a holding position for the layer object (copyTo will produce, copyFrom will consume)
+        OffscreenBuffer** layerHandle = mAllocator.create<OffscreenBuffer*>(nullptr);
 
-    /**
-     * First, defer an operation to copy out the content from the rendertarget into a layer.
-     */
-    auto copyToOp = mAllocator.create_trivial<CopyToLayerOp>(op, layerHandle);
-    BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator,
-            &(currentLayer().viewportClip), dstRect, *copyToOp);
-    currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::CopyToLayer);
+        /**
+         * First, defer an operation to copy out the content from the rendertarget into a layer.
+         */
+        auto copyToOp = mAllocator.create_trivial<CopyToLayerOp>(op, layerHandle);
+        BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator,
+                &(currentLayer().repaintClip), dstRect, *copyToOp);
+        currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::CopyToLayer);
 
-    /**
-     * Defer a clear rect, so that clears from multiple unclipped layers can be drawn
-     * both 1) simultaneously, and 2) as long after the copyToLayer executes as possible
-     */
-    currentLayer().deferLayerClear(dstRect);
+        /**
+         * Defer a clear rect, so that clears from multiple unclipped layers can be drawn
+         * both 1) simultaneously, and 2) as long after the copyToLayer executes as possible
+         */
+        currentLayer().deferLayerClear(dstRect);
 
-    /**
-     * And stash an operation to copy that layer back under the rendertarget until
-     * a balanced EndUnclippedLayerOp is seen
-     */
-    auto copyFromOp = mAllocator.create_trivial<CopyFromLayerOp>(op, layerHandle);
-    bakedState = BakedOpState::directConstruct(mAllocator,
-            &(currentLayer().viewportClip), dstRect, *copyFromOp);
-    currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
+        /**
+         * And stash an operation to copy that layer back under the rendertarget until
+         * a balanced EndUnclippedLayerOp is seen
+         */
+        auto copyFromOp = mAllocator.create_trivial<CopyFromLayerOp>(op, layerHandle);
+        bakedState = BakedOpState::directConstruct(mAllocator,
+                &(currentLayer().repaintClip), dstRect, *copyFromOp);
+        currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
+    }
 }
 
 void FrameBuilder::deferEndUnclippedLayerOp(const EndUnclippedLayerOp& /* ignored */) {
     LOG_ALWAYS_FATAL_IF(currentLayer().activeUnclippedSaveLayers.empty(), "no layer to end!");
 
     BakedOpState* copyFromLayerOp = currentLayer().activeUnclippedSaveLayers.back();
-    currentLayer().deferUnmergeableOp(mAllocator, copyFromLayerOp, OpBatchType::CopyFromLayer);
     currentLayer().activeUnclippedSaveLayers.pop_back();
+    if (copyFromLayerOp) {
+        currentLayer().deferUnmergeableOp(mAllocator, copyFromLayerOp, OpBatchType::CopyFromLayer);
+    }
 }
 
 } // namespace uirenderer
