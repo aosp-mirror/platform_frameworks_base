@@ -31,6 +31,7 @@ import android.annotation.IntDef;
 import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -38,6 +39,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -149,9 +151,6 @@ public class DirectoryFragment extends Fragment
 
     private static final String TAG = "DirectoryFragment";
     private static final int LOADER_ID = 42;
-    private static final int DELETE_UNDO_TIMEOUT = 5000;
-    private static final int DELETE_JOB_DELAY = 5500;
-    private static final int EMPTY_REVEAL_DURATION = 250;
 
     private Model mModel;
     private MultiSelectManager mSelectionManager;
@@ -704,46 +703,28 @@ public class DirectoryFragment extends Fragment
         final DocumentInfo srcParent = getDisplayState().stack.peek();
         new GetDocumentsTask() {
             @Override
-            void onDocumentsReady(List<DocumentInfo> docs) {
-                // Hide the files in the UI.
-                final SparseArray<String> hidden = mAdapter.hide(selected.getAll());
-
-                checkState(DELETE_JOB_DELAY > DELETE_UNDO_TIMEOUT);
-                String operationId = FileOperations.delete(
-                        getActivity(), docs, srcParent, getDisplayState().stack,
-                        DELETE_JOB_DELAY);
-                showDeleteSnackbar(hidden, operationId);
-            }
-        }.execute(selected);
-    }
-
-    private void showDeleteSnackbar(final SparseArray<String> hidden, final String jobId) {
-
-        Context context = getActivity();
-        String message = Shared.getQuantityString(context, R.plurals.deleting, hidden.size());
-
-        // Show a snackbar informing the user that files will be deleted, and give them an option to
-        // cancel.
-        final Activity activity = getActivity();
-        Snackbars.makeSnackbar(activity, message, DELETE_UNDO_TIMEOUT)
-                .setAction(
-                        R.string.undo,
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {}
-                        })
-                .setCallback(
-                        new Snackbar.Callback() {
-                            @Override
-                            public void onDismissed(Snackbar snackbar, int event) {
-                                if (event == Snackbar.Callback.DISMISS_EVENT_ACTION) {
-                                    // If the delete was cancelled, just unhide the files.
-                                    FileOperations.cancel(activity, jobId);
-                                    mAdapter.unhide(hidden);
-                                }
+            void onDocumentsReady(final List<DocumentInfo> docs) {
+                new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.delete_confirmation_title)
+                    .setMessage(
+                            Shared.getQuantityString(
+                                    getActivity(),
+                                    R.plurals.delete_confirmation_message,
+                                    docs.size()))
+                    .setPositiveButton(
+                         android.R.string.yes,
+                         new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // Hide the files in the UI.
+                                mAdapter.hide(selected.getAll());
+                                FileOperations.delete(
+                                        getActivity(), docs, srcParent, getDisplayState().stack);
                             }
                         })
-                .show();
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
+            }
+        }.execute(selected);
     }
 
     private void transferDocuments(final Selection selected, final @OpType int mode) {

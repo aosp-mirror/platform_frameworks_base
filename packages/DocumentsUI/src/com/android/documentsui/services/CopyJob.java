@@ -67,12 +67,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 class CopyJob extends Job {
+
     private static final String TAG = "CopyJob";
-    private static final int PROGRESS_INTERVAL_MILLIS = 1000;
+    private static final int PROGRESS_INTERVAL_MILLIS = 500;
+
     final List<DocumentInfo> mSrcs;
     final ArrayList<DocumentInfo> convertedFiles = new ArrayList<>();
 
     private long mStartTime = -1;
+
     private long mBatchSize;
     private long mBytesCopied;
     private long mLastNotificationTime;
@@ -496,8 +499,8 @@ class CopyJob extends Job {
             try {
                 while ((len = in.read(buffer)) != -1) {
                     if (isCanceled()) {
-                        throw new ResourceException("Canceled copy mid-copy of %s",
-                                src.derivedUri);
+                        if (DEBUG) Log.d(TAG, "Canceled copy mid-copy of: " + src.derivedUri);
+                        return;
                     }
                     out.write(buffer, 0, len);
                     makeCopyProgress(len);

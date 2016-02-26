@@ -168,12 +168,16 @@ public class UiBot extends BaseBot {
         return findObject("android:id/content", "android:id/text1");
     }
 
-    public UiObject findRenameDialogOkButton() {
-        return findObject("android:id/content", "android:id/button1");
+    public UiObject findDialogOkButton() {
+        UiObject object = findObject("android:id/content", "android:id/button1");
+        object.waitForExists(mTimeout);
+        return object;
     }
 
-    public UiObject findRenameDialogCancelButton() {
-        return findObject("android:id/content", "android:id/button2");
+    public UiObject findDialogCancelButton() {
+        UiObject object = findObject("android:id/content", "android:id/button2");
+        object.waitForExists(mTimeout);
+        return object;
     }
 
     UiObject findMenuLabelWithName(String label) {

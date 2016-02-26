@@ -80,7 +80,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bots.main.setDialogText(newName);
 
         device.waitForIdle(TIMEOUT);
-        bots.main.findRenameDialogOkButton().click();
+        bots.main.findDialogOkButton().click();
         device.waitForIdle(TIMEOUT);
 
         bots.directory.assertDocumentsAbsent(fileName1);
@@ -108,7 +108,7 @@ public class RenameDocumentUiTest extends ActivityTest<FilesActivity> {
         bots.main.setDialogText(newName);
 
         device.waitForIdle(TIMEOUT);
-        bots.main.findRenameDialogCancelButton().click();
+        bots.main.findDialogCancelButton().click();
         device.waitForIdle(TIMEOUT);
 
         bots.directory.assertDocumentsPresent(fileName1);

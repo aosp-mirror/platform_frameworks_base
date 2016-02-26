@@ -134,6 +134,8 @@
     <string name="copy_notification_title">Copying files</string>
     <!-- Title of the move notification [CHAR LIMIT=24] -->
     <string name="move_notification_title">Moving files</string>
+    <!-- Title of the move notification [CHAR LIMIT=24] -->
+    <string name="delete_notification_title">Deleting files</string>
     <!-- Text shown on the copy notification to indicate remaining time, in minutes [CHAR LIMIT=24] -->
     <string name="copy_remaining"><xliff:g id="duration" example="3 minutes">%s</xliff:g> left</string>
     <!-- Toast shown when a file copy is kicked off -->
@@ -206,4 +208,11 @@
     <string name="allow">Allow</string>
     <!-- Text in the button asking user to deny access to a given directory. -->
     <string name="deny">Deny</string>
+    <!-- Dialog title shown to users when asking if they want to delete files (a confirmation). -->
+    <string name="delete_confirmation_title">Delete files?</string>
+    <!-- Dialog text shown to users when asking if they want to delete files (a confirmation). -->
+    <plurals name="delete_confirmation_message">
+        <item quantity="one">Are you sure you want to delete <xliff:g id="count" example="1">%1$d</xliff:g> file?</item>
+        <item quantity="other">Are you sure you want to delete <xliff:g id="count" example="3">%1$d</xliff:g> files?</item>
+    </plurals>
 </resources>
