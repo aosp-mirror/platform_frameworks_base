@@ -171,6 +171,10 @@ public class BackupManagerService {
     static final boolean MORE_DEBUG = false;
     static final boolean DEBUG_SCHEDULING = MORE_DEBUG || true;
 
+    // File containing backup-enabled state.  Contains a single byte;
+    // nonzero == enabled.  File missing or contains a zero byte == disabled.
+    static final String BACKUP_ENABLE_FILE = "backup_enabled";
+
     // System-private key used for backing up an app's widget state.  Must
     // begin with U+FFxx by convention (we reserve all keys starting
     // with U+FF00 or higher for system use).
@@ -354,11 +358,30 @@ public class BackupManagerService {
             if (userId == UserHandle.USER_SYSTEM) {
                 sInstance.initialize(userId);
 
-                ContentResolver r = sInstance.mContext.getContentResolver();
-                boolean areEnabled = Settings.Secure.getIntForUser(r,
-                        Settings.Secure.BACKUP_ENABLED, 0, userId) != 0;
+                // Migrate legacy setting
+                if (!backupSettingMigrated(userId)) {
+                    if (DEBUG) {
+                        Slog.i(TAG, "Backup enable apparently not migrated");
+                    }
+                    final ContentResolver r = sInstance.mContext.getContentResolver();
+                    final int enableState = Settings.Secure.getIntForUser(r,
+                            Settings.Secure.BACKUP_ENABLED, -1, userId);
+                    if (enableState >= 0) {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Migrating enable state " + (enableState != 0));
+                        }
+                        writeBackupEnableState(enableState != 0, userId);
+                        Settings.Secure.putStringForUser(r,
+                                Settings.Secure.BACKUP_ENABLED, null, userId);
+                    } else {
+                        if (DEBUG) {
+                            Slog.i(TAG, "Backup not yet configured; retaining null enable state");
+                        }
+                    }
+                }
+
                 try {
-                    sInstance.setBackupEnabled(areEnabled);
+                    sInstance.setBackupEnabled(readBackupEnableState(userId));
                 } catch (RemoteException e) {
                     // can't happen; it's a local object
                 }
@@ -9314,6 +9337,58 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
+    private static boolean backupSettingMigrated(int userId) {
+        File base = new File(Environment.getDataDirectory(), "backup");
+        File enableFile = new File(base, BACKUP_ENABLE_FILE);
+        return enableFile.exists();
+    }
+
+    private static boolean readBackupEnableState(int userId) {
+        File base = new File(Environment.getDataDirectory(), "backup");
+        File enableFile = new File(base, BACKUP_ENABLE_FILE);
+        if (enableFile.exists()) {
+            try (FileInputStream fin = new FileInputStream(enableFile)) {
+                int state = fin.read();
+                return state != 0;
+            } catch (IOException e) {
+                // can't read the file; fall through to assume disabled
+                Slog.e(TAG, "Cannot read enable state; assuming disabled");
+            }
+        } else {
+            if (DEBUG) {
+                Slog.i(TAG, "isBackupEnabled() => false due to absent settings file");
+            }
+        }
+        return false;
+    }
+
+    private static void writeBackupEnableState(boolean enable, int userId) {
+        File base = new File(Environment.getDataDirectory(), "backup");
+        File enableFile = new File(base, BACKUP_ENABLE_FILE);
+        File stage = new File(base, BACKUP_ENABLE_FILE + "-stage");
+        FileOutputStream fout = null;
+        try {
+            fout = new FileOutputStream(stage);
+            fout.write(enable ? 1 : 0);
+            fout.close();
+            stage.renameTo(enableFile);
+            // will be synced immediately by the try-with-resources call to close()
+        } catch (IOException|RuntimeException e) {
+            // Whoops; looks like we're doomed.  Roll everything out, disabled,
+            // including the legacy state.
+            Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
+                    + e.getMessage());
+
+            final ContentResolver r = sInstance.mContext.getContentResolver();
+            Settings.Secure.putStringForUser(r,
+                    Settings.Secure.BACKUP_ENABLED, null, userId);
+            enableFile.delete();
+            stage.delete();
+        } finally {
+            IoUtils.closeQuietly(fout);
+        }
+    }
+
     // Enable/disable backups
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
@@ -9325,8 +9400,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         try {
             boolean wasEnabled = mEnabled;
             synchronized (this) {
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.BACKUP_ENABLED, enable ? 1 : 0);
+                writeBackupEnableState(enable, UserHandle.USER_SYSTEM);
                 mEnabled = enable;
             }
 
