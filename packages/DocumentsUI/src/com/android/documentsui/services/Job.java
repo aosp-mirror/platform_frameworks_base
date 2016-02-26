@@ -201,8 +201,8 @@ abstract public class Job implements Runnable {
     }
 
     Notification getSetupNotification(String content) {
-        mProgressBuilder.setProgress(0, 0, true);
-        mProgressBuilder.setContentText(content);
+        mProgressBuilder.setProgress(0, 0, true)
+                .setContentText(content);
         return mProgressBuilder.build();
     }
 
@@ -221,6 +221,7 @@ abstract public class Job implements Runnable {
                 .setCategory(Notification.CATEGORY_ERROR)
                 .setSmallIcon(icon)
                 .setAutoCancel(true);
+
         return errorBuilder.build();
     }
 

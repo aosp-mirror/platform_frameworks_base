@@ -57,8 +57,8 @@ final class DeleteJob extends Job {
     @Override
     Builder createProgressBuilder() {
         return super.createProgressBuilder(
-                service.getString(R.string.move_notification_title),
-                R.drawable.ic_menu_copy,
+                service.getString(R.string.delete_notification_title),
+                R.drawable.ic_menu_delete,
                 service.getString(android.R.string.cancel),
                 R.drawable.ic_cab_cancel);
     }
