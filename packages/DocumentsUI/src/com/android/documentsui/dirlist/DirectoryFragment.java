@@ -216,7 +216,7 @@ public class DirectoryFragment extends Fragment
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
+        mSelectionManager.clearSelection();
 
         // Cancel any outstanding thumbnail requests
         final int count = mRecView.getChildCount();
@@ -224,6 +224,8 @@ public class DirectoryFragment extends Fragment
             final View view = mRecView.getChildAt(i);
             cancelThumbnailTask(view);
         }
+
+        super.onDestroyView();
     }
 
     @Override
@@ -309,12 +311,15 @@ public class DirectoryFragment extends Fragment
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+        mSelectionManager.getSelection(mSelection);
+
         outState.putInt(Shared.EXTRA_TYPE, mType);
         outState.putParcelable(Shared.EXTRA_ROOT, mRoot);
         outState.putParcelable(Shared.EXTRA_DOC, mDocument);
         outState.putString(Shared.EXTRA_QUERY, mQuery);
-        outState.putParcelable(Shared.EXTRA_SELECTION, mSelectionManager.getSelection());
+        outState.putParcelable(Shared.EXTRA_SELECTION, mSelection);
         outState.putBoolean(Shared.EXTRA_SEARCH_MODE, mSearchMode);
+
     }
 
     @Override
@@ -1479,6 +1484,7 @@ public class DirectoryFragment extends Fragment
         args.putParcelable(Shared.EXTRA_ROOT, root);
         args.putParcelable(Shared.EXTRA_DOC, doc);
         args.putString(Shared.EXTRA_QUERY, query);
+        args.putParcelable(Shared.EXTRA_SELECTION, new Selection());
 
         final FragmentTransaction ft = fm.beginTransaction();
         switch (anim) {

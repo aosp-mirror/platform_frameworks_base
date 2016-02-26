@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.StubProvider.ROOT_0_ID;
+import static com.android.documentsui.StubProvider.ROOT_1_ID;
 
 import android.test.suitebuilder.annotation.LargeTest;
 
@@ -42,4 +43,13 @@ public class RootsUiTest extends ActivityTest<FilesActivity> {
         bots.main.assertWindowTitle(ROOT_0_ID);
         assertDefaultContentOfTestDir0();
     }
+
+    public void testRootChanged_ClearSelection() throws Exception {
+        bots.directory.selectDocument(fileName1);
+        bots.main.assertInActionMode(true);
+
+        bots.roots.openRoot(ROOT_1_ID);
+        bots.main.assertInActionMode(false);
+    }
+
 }

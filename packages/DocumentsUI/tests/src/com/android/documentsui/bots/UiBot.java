@@ -88,6 +88,11 @@ public class UiBot extends BaseBot {
         assertEquals(searchIconExists, findSearchViewIcon().exists());
     }
 
+    public void assertInActionMode(boolean inActionMode) {
+        UiObject actionModeBar = findActionModeBar();
+        assertEquals(inActionMode, actionModeBar.exists());
+    }
+
     public void openSearchView() throws UiObjectNotFoundException {
         UiObject searchView = findSearchView();
         searchView.click();
