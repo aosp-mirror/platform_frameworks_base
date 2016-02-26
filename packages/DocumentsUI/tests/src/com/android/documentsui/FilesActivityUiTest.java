@@ -119,24 +119,23 @@ public class FilesActivityUiTest extends ActivityTest<FilesActivity> {
         device.waitForIdle();
         bots.main.menuDelete().click();
 
-        bots.directory.waitForDeleteSnackbar();
+        bots.main.findDialogOkButton().click();
+
         bots.directory.assertDocumentsAbsent("file1.png");
+    }
 
-        bots.directory.waitForDeleteSnackbarGone();
-        bots.directory.assertDocumentsAbsent("file1.png");
+    public void testDeleteDocument_Cancel() throws Exception {
+        initTestFiles();
 
-        // Now delete from another root.
-        bots.roots.openRoot(ROOT_1_ID);
+        bots.roots.openRoot(ROOT_0_ID);
 
-        bots.directory.clickDocument("poodles.text");
+        bots.directory.clickDocument("file1.png");
         device.waitForIdle();
         bots.main.menuDelete().click();
 
-        bots.directory.waitForDeleteSnackbar();
-        bots.directory.assertDocumentsAbsent("poodles.text");
+        bots.main.findDialogCancelButton().click();
 
-        bots.directory.waitForDeleteSnackbarGone();
-        bots.directory.assertDocumentsAbsent("poodles.text");
+        bots.directory.assertDocumentsPresent("file1.png");
     }
 
     // Tests that pressing tab switches focus between the roots and directory listings.

@@ -22,7 +22,6 @@ import static com.android.documentsui.Shared.EXTRA_STACK;
 import static com.android.documentsui.Shared.asArrayList;
 import static com.android.documentsui.Shared.getQuantityString;
 import static com.android.documentsui.services.FileOperationService.EXTRA_CANCEL;
-import static com.android.documentsui.services.FileOperationService.EXTRA_DELAY;
 import static com.android.documentsui.services.FileOperationService.EXTRA_JOB_ID;
 import static com.android.documentsui.services.FileOperationService.EXTRA_OPERATION;
 import static com.android.documentsui.services.FileOperationService.EXTRA_SRC_LIST;
@@ -165,19 +164,16 @@ public final class FileOperations {
      *     Use {@link #createJobId} if you don't have one handy.
      * @param srcDocs A list of src files to copy.
      * @param srcParent Parent of all the source documents.
-     * @param delay Number of milliseconds to wait before executing the job.
      * @return Id of the job.
      */
     public static String delete(
             Activity activity, List<DocumentInfo> srcDocs, DocumentInfo srcParent,
-            DocumentStack location, int delay) {
+            DocumentStack location) {
         String jobId = createJobId();
-        if (DEBUG) Log.d(TAG, "Initiating 'delete' operation id " + jobId
-                + " delayed by " + delay + " milliseconds.");
+        if (DEBUG) Log.d(TAG, "Initiating 'delete' operation id " + jobId + ".");
 
         Intent intent = createBaseIntent(OPERATION_DELETE, activity, jobId, srcDocs, srcParent,
                 location);
-        intent.putExtra(EXTRA_DELAY, delay);
         activity.startService(intent);
 
         return jobId;
