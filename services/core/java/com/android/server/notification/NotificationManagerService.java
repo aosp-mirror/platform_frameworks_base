@@ -36,7 +36,7 @@ import static android.service.notification.NotificationListenerService.SUPPRESSE
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
-import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_HIGH;
+import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_DEFAULT;
 import static android.service.notification.NotificationListenerService.Ranking.IMPORTANCE_NONE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -2524,7 +2524,7 @@ public class NotificationManagerService extends SystemService {
         final Notification notification = record.sbn.getNotification();
 
         // Should this notification make noise, vibe, or use the LED?
-        final boolean aboveThreshold = record.getImportance() >= IMPORTANCE_HIGH;
+        final boolean aboveThreshold = record.getImportance() >= IMPORTANCE_DEFAULT;
         final boolean canInterrupt = aboveThreshold && !record.isIntercepted();
         if (DBG || record.isIntercepted())
             Slog.v(TAG,
