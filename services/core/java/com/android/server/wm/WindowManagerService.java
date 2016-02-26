@@ -4018,10 +4018,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void removeAppStartingWindow(IBinder token) {
         synchronized (mWindowMap) {
-            AppWindowToken wtoken = mTokenMap.get(token).appWindowToken;
-            if (wtoken.startingWindow != null) {
-                scheduleRemoveStartingWindowLocked(wtoken);
-            }
+            final AppWindowToken wtoken = mTokenMap.get(token).appWindowToken;
+            scheduleRemoveStartingWindowLocked(wtoken);
         }
     }
 
@@ -4500,17 +4498,30 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void scheduleRemoveStartingWindowLocked(AppWindowToken wtoken) {
+        if (wtoken == null) {
+            return;
+        }
         if (mH.hasMessages(H.REMOVE_STARTING, wtoken)) {
             // Already scheduled.
             return;
         }
-        if (wtoken != null && wtoken.startingWindow != null) {
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, Debug.getCallers(1) +
-                    ": Schedule remove starting " + wtoken + (wtoken != null ?
-                    " startingWindow=" + wtoken.startingWindow : ""));
-            Message m = mH.obtainMessage(H.REMOVE_STARTING, wtoken);
-            mH.sendMessage(m);
+
+        if (wtoken.startingWindow == null) {
+            if (wtoken.startingData != null) {
+                // Starting window has not been added yet, but it is scheduled to be added.
+                // Go ahead and cancel the request.
+                if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                        "Clearing startingData for token=" + wtoken);
+                wtoken.startingData = null;
+            }
+            return;
         }
+
+        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, Debug.getCallers(1) +
+                ": Schedule remove starting " + wtoken + (wtoken != null ?
+                " startingWindow=" + wtoken.startingWindow : ""));
+        Message m = mH.obtainMessage(H.REMOVE_STARTING, wtoken);
+        mH.sendMessage(m);
     }
 
     void dumpAppTokensLocked() {
