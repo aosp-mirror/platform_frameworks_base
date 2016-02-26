@@ -20020,6 +20020,7 @@ package android.media {
   public abstract interface AudioRouting {
     method public abstract void addOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method public abstract android.media.AudioDeviceInfo getPreferredDevice();
+    method public abstract android.media.AudioDeviceInfo getRoutedDevice();
     method public abstract void removeOnRoutingListener(android.media.AudioRouting.OnRoutingChangedListener);
     method public abstract boolean setPreferredDevice(android.media.AudioDeviceInfo);
   }
