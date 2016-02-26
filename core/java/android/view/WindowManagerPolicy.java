@@ -29,7 +29,9 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.view.animation.Animation;
+import com.android.internal.policy.IShortcutService;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -119,6 +121,14 @@ public interface WindowManagerPolicy {
      * {@link #interceptKeyBeforeQueueing}.
      */
     public final static int ACTION_PASS_TO_USER = 0x00000001;
+
+    /**
+     * Register shortcuts for window manager to dispatch.
+     * Shortcut code is packed as (metaState << Integer.SIZE) | keyCode
+     * @hide
+     */
+    void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+            throws RemoteException;
 
     /**
      * Interface to the Window Manager state associated with a particular
