@@ -2387,10 +2387,7 @@ final class Settings {
             if (DEBUG_KERNEL) Slog.d(TAG, "Dropping mapping " + name);
 
             mKernelMapping.remove(name);
-
-            final File dir = new File(mKernelMappingFilename, name);
-            FileUtils.deleteContents(dir);
-            dir.delete();
+            new File(mKernelMappingFilename, name).delete();
         }
     }
 
