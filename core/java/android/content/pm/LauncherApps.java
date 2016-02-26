@@ -171,7 +171,7 @@ public class LauncherApps {
         try {
             activities = mService.getLauncherActivities(packageName, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService", re);
+            throw re.rethrowFromSystemServer();
         }
         if (activities == null) {
             return Collections.EMPTY_LIST;
@@ -208,7 +208,7 @@ public class LauncherApps {
                 return info;
             }
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService", re);
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
@@ -229,7 +229,7 @@ public class LauncherApps {
         try {
             mService.startActivityAsUser(component, sourceBounds, opts, user);
         } catch (RemoteException re) {
-            // Oops!
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -247,7 +247,7 @@ public class LauncherApps {
         try {
             mService.showAppDetailsAsUser(component, sourceBounds, opts, user);
         } catch (RemoteException re) {
-            // Oops!
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -263,7 +263,7 @@ public class LauncherApps {
         try {
             return mService.isPackageEnabled(packageName, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -282,7 +282,7 @@ public class LauncherApps {
         try {
             return mService.getApplicationInfo(packageName, flags, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -298,7 +298,7 @@ public class LauncherApps {
         try {
             return mService.isActivityEnabled(component, user);
         } catch (RemoteException re) {
-            throw new RuntimeException("Failed to call LauncherAppsService", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -327,6 +327,7 @@ public class LauncherApps {
                     try {
                         mService.addOnAppsChangedListener(mAppsChangedListener);
                     } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
                     }
                 }
             }
@@ -346,6 +347,7 @@ public class LauncherApps {
                 try {
                     mService.removeOnAppsChangedListener(mAppsChangedListener);
                 } catch (RemoteException re) {
+                    throw re.rethrowFromSystemServer();
                 }
             }
         }

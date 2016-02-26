@@ -699,7 +699,7 @@ public class UserManager {
         try {
             return mService.getUserInfo(getUserHandle()).name;
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -769,7 +769,7 @@ public class UserManager {
         try {
             return mService.isRestricted();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -781,7 +781,7 @@ public class UserManager {
         try {
             return mService.canHaveRestrictedProfile(userId);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -844,7 +844,7 @@ public class UserManager {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -861,7 +861,7 @@ public class UserManager {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_OR_STOPPED);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -890,7 +890,7 @@ public class UserManager {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_LOCKED);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -919,7 +919,7 @@ public class UserManager {
             return ActivityManagerNative.getDefault().isUserRunning(
                     user.getIdentifier(), ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -964,7 +964,7 @@ public class UserManager {
         try {
             return mService.getUserInfo(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -985,7 +985,7 @@ public class UserManager {
         try {
             return mService.getUserRestrictions(userHandle.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1001,7 +1001,7 @@ public class UserManager {
         try {
             return mService.hasBaseUserRestriction(restrictionKey, userHandle.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1057,7 +1057,7 @@ public class UserManager {
         try {
             mService.setUserRestriction(key, value, userHandle.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1084,7 +1084,7 @@ public class UserManager {
             return mService.hasUserRestriction(restrictionKey,
                     userHandle.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1138,7 +1138,7 @@ public class UserManager {
                 mService.setUserRestriction(DISALLOW_OUTGOING_CALLS, true, user.id);
             }
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
         return user;
     }
@@ -1158,7 +1158,7 @@ public class UserManager {
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
             }
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
         return guest;
     }
@@ -1179,7 +1179,7 @@ public class UserManager {
         try {
             return mService.createProfileForUser(name, flags, userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1202,7 +1202,7 @@ public class UserManager {
             }
             return user;
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1271,7 +1271,7 @@ public class UserManager {
         try {
             return mService.getSeedAccountName();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1285,7 +1285,7 @@ public class UserManager {
         try {
             return mService.getSeedAccountType();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1301,7 +1301,7 @@ public class UserManager {
         try {
             return mService.getSeedAccountOptions();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1322,7 +1322,7 @@ public class UserManager {
             mService.setSeedAccountData(userId, accountName, accountType, accountOptions,
                     /* persist= */ true);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1335,7 +1335,7 @@ public class UserManager {
         try {
             mService.clearSeedAccountData();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1350,7 +1350,7 @@ public class UserManager {
         try {
             return mService.markGuestForDeletion(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1370,7 +1370,7 @@ public class UserManager {
         try {
             mService.setUserEnabled(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1392,7 +1392,7 @@ public class UserManager {
         try {
             return mService.getUsers(false);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1414,7 +1414,7 @@ public class UserManager {
             }
             return result;
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1430,7 +1430,7 @@ public class UserManager {
         try {
             return mService.getUserAccount(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1446,7 +1446,7 @@ public class UserManager {
         try {
             mService.setUserAccount(userHandle, accountName);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1461,7 +1461,7 @@ public class UserManager {
         try {
             return mService.getPrimaryUser();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1498,7 +1498,7 @@ public class UserManager {
         try {
             return mService.canAddMoreManagedProfiles(userId, allowedToRemoveOne);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1517,7 +1517,7 @@ public class UserManager {
         try {
             return mService.getProfiles(userHandle, false /* enabledOnly */);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1532,7 +1532,7 @@ public class UserManager {
         try {
             return mService.isSameProfileGroup(userId, otherUserId);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1550,7 +1550,7 @@ public class UserManager {
         try {
             return mService.getProfiles(userHandle, true /* enabledOnly */);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1566,7 +1566,7 @@ public class UserManager {
         try {
             users = mService.getProfiles(UserHandle.myUserId(), true /* enabledOnly */);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
         for (UserInfo info : users) {
             UserHandle userHandle = new UserHandle(info.id);
@@ -1586,7 +1586,7 @@ public class UserManager {
         try {
             return mService.getCredentialOwnerProfile(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1600,7 +1600,7 @@ public class UserManager {
         try {
             return mService.getProfileParent(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1615,7 +1615,7 @@ public class UserManager {
         try {
             mService.setQuietModeEnabled(userHandle, enableQuietMode);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1629,7 +1629,7 @@ public class UserManager {
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1715,7 +1715,7 @@ public class UserManager {
         try {
             return mService.getUsers(excludeDying);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1729,7 +1729,7 @@ public class UserManager {
         try {
             return mService.removeUser(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1745,7 +1745,7 @@ public class UserManager {
         try {
             mService.setUserName(userHandle, name);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1759,7 +1759,7 @@ public class UserManager {
         try {
             mService.setUserIcon(userHandle, icon);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1784,7 +1784,7 @@ public class UserManager {
                 }
             }
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
@@ -1840,7 +1840,7 @@ public class UserManager {
         try {
             return mService.getUserSerialNumber(userHandle);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1857,7 +1857,7 @@ public class UserManager {
         try {
             return mService.getUserHandle(userSerialNumber);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1884,7 +1884,7 @@ public class UserManager {
         try {
             return mService.getApplicationRestrictions(packageName);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1895,7 +1895,7 @@ public class UserManager {
         try {
             return mService.getApplicationRestrictionsForUser(packageName, user.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1907,7 +1907,7 @@ public class UserManager {
         try {
             mService.setApplicationRestrictions(packageName, restrictions, user.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1931,7 +1931,7 @@ public class UserManager {
         try {
             mService.setDefaultGuestRestrictions(restrictions);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1943,7 +1943,7 @@ public class UserManager {
         try {
             return mService.getDefaultGuestRestrictions();
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1957,7 +1957,7 @@ public class UserManager {
         try {
             return mService.getUserCreationTime(userHandle.getIdentifier());
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1973,7 +1973,7 @@ public class UserManager {
         try {
             return mService.someUserHasSeedAccount(accountName, accountType);
         } catch (RemoteException re) {
-            throw re.rethrowAsRuntimeException();
+            throw re.rethrowFromSystemServer();
         }
     }
 }

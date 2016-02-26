@@ -353,8 +353,7 @@ public class AccountManager {
         try {
             return mService.getPassword(account);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -382,8 +381,7 @@ public class AccountManager {
         try {
             return mService.getUserData(account, key);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -402,8 +400,7 @@ public class AccountManager {
         try {
             return mService.getAuthenticatorTypes(UserHandle.getCallingUserId());
         } catch (RemoteException e) {
-            // will never happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -424,8 +421,7 @@ public class AccountManager {
         try {
             return mService.getAuthenticatorTypes(userId);
         } catch (RemoteException e) {
-            // will never happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -449,8 +445,7 @@ public class AccountManager {
         try {
             return mService.getAccounts(null, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -475,8 +470,7 @@ public class AccountManager {
         try {
             return mService.getAccountsAsUser(null, userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -493,8 +487,7 @@ public class AccountManager {
         try {
             return mService.getAccountsForPackage(packageName, uid, mContext.getOpPackageName());
         } catch (RemoteException re) {
-            // won't ever happen
-            throw new RuntimeException(re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -512,8 +505,7 @@ public class AccountManager {
             return mService.getAccountsByTypeForPackage(type, packageName,
                     mContext.getOpPackageName());
         } catch (RemoteException re) {
-            // won't ever happen
-            throw new RuntimeException(re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -552,8 +544,7 @@ public class AccountManager {
             return mService.getAccountsAsUser(type, userHandle.getIdentifier(),
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -572,8 +563,7 @@ public class AccountManager {
         try {
             mService.updateAppPermission(account, authTokenType, uid, value);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -742,8 +732,7 @@ public class AccountManager {
         try {
             return mService.addAccountExplicitly(account, password, userdata);
         } catch (RemoteException e) {
-            // Can happen if there was a SecurityException was thrown.
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -768,7 +757,7 @@ public class AccountManager {
         try {
             return mService.accountAuthenticated(account);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -836,8 +825,7 @@ public class AccountManager {
         try {
             return mService.getPreviousName(account);
         } catch (RemoteException e) {
-            // will never happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1008,8 +996,7 @@ public class AccountManager {
         try {
             return mService.removeAccountExplicitly(account);
         } catch (RemoteException e) {
-            // May happen if the caller doesn't match the signature of the authenticator.
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1036,8 +1023,7 @@ public class AccountManager {
                 mService.invalidateAuthToken(accountType, authToken);
             }
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1068,8 +1054,7 @@ public class AccountManager {
         try {
             return mService.peekAuthToken(account, authTokenType);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1098,8 +1083,7 @@ public class AccountManager {
         try {
             mService.setPassword(account, password);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1127,8 +1111,7 @@ public class AccountManager {
         try {
             mService.clearPassword(account);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1156,8 +1139,7 @@ public class AccountManager {
         try {
             mService.setUserData(account, key, value);
         } catch (RemoteException e) {
-            // Will happen if there is not signature match.
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1186,8 +1168,7 @@ public class AccountManager {
         try {
             mService.setAuthToken(account, authTokenType, authToken);
         } catch (RemoteException e) {
-            // won't ever happen
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1588,7 +1569,7 @@ public class AccountManager {
             mService.addSharedAccountsFromParentUser(parentUser.getIdentifier(),
                     user.getIdentifier());
         } catch (RemoteException re) {
-            throw new IllegalStateException(re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1641,8 +1622,7 @@ public class AccountManager {
             boolean val = mService.removeSharedAccountAsUser(account, user.getIdentifier());
             return val;
         } catch (RemoteException re) {
-            // won't ever happen
-            throw new RuntimeException(re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1655,8 +1635,7 @@ public class AccountManager {
         try {
             return mService.getSharedAccountsAsUser(user.getIdentifier());
         } catch (RemoteException re) {
-            // won't ever happen
-            throw new RuntimeException(re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -1878,7 +1857,7 @@ public class AccountManager {
         try {
             return mService.someUserHasAccount(account);
         } catch (RemoteException re) {
-            throw new RuntimeException(re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -2039,8 +2018,7 @@ public class AccountManager {
                     try {
                         doWork();
                     } catch (RemoteException e) {
-                        // this will only happen if the system process is dead, which means
-                        // we will be dying ourselves
+                        throw e.rethrowFromSystemServer();
                     }
                 } else {
                     set(bundle);

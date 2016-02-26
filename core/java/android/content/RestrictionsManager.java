@@ -422,7 +422,7 @@ public class RestrictionsManager {
                 return mService.getApplicationRestrictions(mContext.getPackageName());
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Couldn't reach service");
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
@@ -439,7 +439,7 @@ public class RestrictionsManager {
                 return mService.hasRestrictionsProvider();
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Couldn't reach service");
+            throw re.rethrowFromSystemServer();
         }
         return false;
     }
@@ -477,7 +477,7 @@ public class RestrictionsManager {
                         request);
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Couldn't reach service");
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -487,7 +487,7 @@ public class RestrictionsManager {
                 return mService.createLocalApprovalIntent();
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Couldn't reach service");
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
@@ -519,7 +519,7 @@ public class RestrictionsManager {
                 mService.notifyPermissionResponse(packageName, response);
             }
         } catch (RemoteException re) {
-            Log.w(TAG, "Couldn't reach service");
+            throw re.rethrowFromSystemServer();
         }
     }
 

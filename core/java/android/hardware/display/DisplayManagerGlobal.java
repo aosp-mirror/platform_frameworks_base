@@ -132,8 +132,7 @@ public final class DisplayManagerGlobal {
                 return info;
             }
         } catch (RemoteException ex) {
-            Log.e(TAG, "Could not get display information from display manager.", ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -159,8 +158,7 @@ public final class DisplayManagerGlobal {
                 return displayIds;
             }
         } catch (RemoteException ex) {
-            Log.e(TAG, "Could not get display ids from display manager.", ex);
-            return new int[] { Display.DEFAULT_DISPLAY };
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -237,8 +235,7 @@ public final class DisplayManagerGlobal {
             try {
                 mDm.registerCallback(mCallback);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Failed to register callback with display manager service.", ex);
-                mCallback = null;
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -267,7 +264,7 @@ public final class DisplayManagerGlobal {
                 try {
                     mDm.startWifiDisplayScan();
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Failed to scan for Wifi displays.", ex);
+                    throw ex.rethrowFromSystemServer();
                 }
             }
         }
@@ -279,7 +276,7 @@ public final class DisplayManagerGlobal {
                 try {
                     mDm.stopWifiDisplayScan();
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "Failed to scan for Wifi displays.", ex);
+                    throw ex.rethrowFromSystemServer();
                 }
             } else if (mWifiDisplayScanNestCount < 0) {
                 Log.wtf(TAG, "Wifi display scan nest count became negative: "
@@ -297,7 +294,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.connectWifiDisplay(deviceAddress);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to connect to Wifi display " + deviceAddress + ".", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -305,7 +302,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.pauseWifiDisplay();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to pause Wifi display.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -313,7 +310,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.resumeWifiDisplay();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to resume Wifi display.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -321,7 +318,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.disconnectWifiDisplay();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to disconnect from Wifi display.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -333,8 +330,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.renameWifiDisplay(deviceAddress, alias);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to rename Wifi display " + deviceAddress
-                    + " with alias " + alias + ".", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -346,7 +342,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.forgetWifiDisplay(deviceAddress);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to forget Wifi display.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -354,8 +350,7 @@ public final class DisplayManagerGlobal {
         try {
             return mDm.getWifiDisplayStatus();
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to get Wifi display status.", ex);
-            return new WifiDisplayStatus();
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -363,7 +358,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.requestColorTransform(displayId, colorTransformId);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Failed to request color transform.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -385,8 +380,7 @@ public final class DisplayManagerGlobal {
             displayId = mDm.createVirtualDisplay(callbackWrapper, projectionToken,
                     context.getPackageName(), name, width, height, densityDpi, surface, flags);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Could not create virtual display: " + name, ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
         if (displayId < 0) {
             Log.e(TAG, "Could not create virtual display: " + name);
@@ -399,6 +393,7 @@ public final class DisplayManagerGlobal {
             try {
                 mDm.releaseVirtualDisplay(callbackWrapper);
             } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
             }
             return null;
         }
@@ -409,7 +404,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.setVirtualDisplaySurface(token, surface);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Failed to set virtual display surface.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -418,7 +413,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.resizeVirtualDisplay(token, width, height, densityDpi);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Failed to resize virtual display.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -426,7 +421,7 @@ public final class DisplayManagerGlobal {
         try {
             mDm.releaseVirtualDisplay(token);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Failed to release virtual display.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 

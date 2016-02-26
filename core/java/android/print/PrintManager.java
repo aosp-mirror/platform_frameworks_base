@@ -232,9 +232,8 @@ public final class PrintManager {
         try {
             return mService.getPrintJobInfo(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting a print job info:" + printJobId, re);
+            throw re.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -258,7 +257,7 @@ public final class PrintManager {
             mService.addPrintJobStateChangeListener(wrappedListener, mAppId, mUserId);
             mPrintJobStateChangeListeners.put(listener, wrappedListener);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error adding print job state change listener", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -288,7 +287,7 @@ public final class PrintManager {
         try {
             mService.removePrintJobStateChangeListener(wrappedListener, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error removing print job state change listener", re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -311,7 +310,7 @@ public final class PrintManager {
                 return new PrintJob(printJob, this);
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting print job", re);
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
@@ -334,9 +333,8 @@ public final class PrintManager {
         try {
             return mService.getCustomPrinterIcon(printerId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting custom printer icon", re);
+            throw re.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -362,9 +360,8 @@ public final class PrintManager {
             }
             return printJobs;
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting print jobs", re);
+            throw re.rethrowFromSystemServer();
         }
-        return Collections.emptyList();
     }
 
     void cancelPrintJob(PrintJobId printJobId) {
@@ -375,7 +372,7 @@ public final class PrintManager {
         try {
             mService.cancelPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error canceling a print job: " + printJobId, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -387,7 +384,7 @@ public final class PrintManager {
         try {
             mService.restartPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error restarting a print job: " + printJobId, re);
+            throw re.rethrowFromSystemServer();
         }
     }
 
@@ -475,7 +472,7 @@ public final class PrintManager {
                 }
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error creating a print job", re);
+            throw re.rethrowFromSystemServer();
         }
         return null;
     }
@@ -497,7 +494,7 @@ public final class PrintManager {
                 return enabledServices;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting the enabled print services", re);
+            throw re.rethrowFromSystemServer();
         }
         return Collections.emptyList();
     }
@@ -519,7 +516,7 @@ public final class PrintManager {
                 return installedServices;
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting the installed print services", re);
+            throw re.rethrowFromSystemServer();
         }
         return Collections.emptyList();
     }

@@ -252,7 +252,7 @@ public final class LoadedApk {
             ai = ActivityThread.getPackageManager().getApplicationInfo(packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES, UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw new AssertionError(e);
+            throw e.rethrowFromSystemServer();
         }
 
         if (ai == null) {
@@ -285,7 +285,7 @@ public final class LoadedApk {
                 try {
                     ActivityThread.getPackageManager().notifyPackageUse(mPackageName);
                 } catch (RemoteException re) {
-                    // Ignored.
+                    throw re.rethrowFromSystemServer();
                 }
             }
 
@@ -297,6 +297,7 @@ public final class LoadedApk {
                 try {
                     ActivityManagerNative.getDefault().addPackageDependency(mPackageName);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
 
@@ -452,8 +453,7 @@ public final class LoadedApk {
             pi = pm.getPackageInfo(mPackageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw new IllegalStateException("Unable to get package info for "
-                    + mPackageName + "; is system dying?", e);
+            throw e.rethrowFromSystemServer();
         }
         if (pi == null) {
             throw new IllegalStateException("Unable to get package info for "
@@ -710,7 +710,7 @@ public final class LoadedApk {
                         ActivityManagerNative.getDefault().unregisterReceiver(
                                 rd.getIIntentReceiver());
                     } catch (RemoteException e) {
-                        // system crashed, nothing we can do
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
@@ -736,7 +736,7 @@ public final class LoadedApk {
                         ActivityManagerNative.getDefault().unbindService(
                                 sd.getIServiceConnection());
                     } catch (RemoteException e) {
-                        // system crashed, nothing we can do
+                        throw e.rethrowFromSystemServer();
                     }
                     sd.doForget();
                 }
@@ -861,7 +861,7 @@ public final class LoadedApk {
                         }
                         mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
                     } catch (RemoteException e) {
-                        Slog.w(ActivityThread.TAG, "Couldn't finish broadcast to unregistered receiver");
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }

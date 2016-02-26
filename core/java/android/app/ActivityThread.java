@@ -1693,7 +1693,7 @@ public final class ActivityThread {
                             am.activityIdle(a.token, a.createdConfig, stopProfiling);
                             a.createdConfig = null;
                         } catch (RemoteException ex) {
-                            // Ignore
+                            throw ex.rethrowFromSystemServer();
                         }
                     }
                     prev = a;
@@ -1833,7 +1833,7 @@ public final class ActivityThread {
                             | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                     userId);
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
 
         if (ai != null) {
@@ -2592,6 +2592,7 @@ public final class ActivityThread {
         try {
             displayId = ActivityManagerNative.getDefault().getActivityDisplayId(r.token);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
 
         ContextImpl appContext = ContextImpl.createActivityContext(
@@ -2697,7 +2698,7 @@ public final class ActivityThread {
                     .finishActivity(r.token, Activity.RESULT_CANCELED, null,
                             Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
-                // Ignore
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -2726,6 +2727,7 @@ public final class ActivityThread {
             ActivityManagerNative.getDefault().reportSizeConfigurations(r.token,
                     horizontal.copyKeys(), vertical.copyKeys(), smallest.copyKeys());
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
 
     }
@@ -2802,6 +2804,7 @@ public final class ActivityThread {
         try {
             mgr.reportAssistContextExtras(cmd.requestToken, data, structure, content, referrer);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2838,6 +2841,7 @@ public final class ActivityThread {
         try {
             ActivityManagerNative.getDefault().backgroundResourcesReleased(token);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2992,8 +2996,7 @@ public final class ActivityThread {
                 return;
             }
         } catch (RemoteException e) {
-            Slog.e(TAG, "Can't reach package manager", e);
-            return;
+            throw e.rethrowFromSystemServer();
         }
 
         // no longer idle; we have backup work to do
@@ -3054,7 +3057,7 @@ public final class ActivityThread {
             try {
                 ActivityManagerNative.getDefault().backupAgentCreated(packageName, binder);
             } catch (RemoteException e) {
-                // nothing to do.
+                throw e.rethrowFromSystemServer();
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to create BackupAgent "
@@ -3116,7 +3119,7 @@ public final class ActivityThread {
                 ActivityManagerNative.getDefault().serviceDoneExecuting(
                         data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
             } catch (RemoteException e) {
-                // nothing to do.
+                throw e.rethrowFromSystemServer();
             }
         } catch (Exception e) {
             if (!mInstrumentation.onException(service, e)) {
@@ -3147,6 +3150,7 @@ public final class ActivityThread {
                     }
                     ensureJitEnabled();
                 } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
                 }
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
@@ -3174,6 +3178,7 @@ public final class ActivityThread {
                                 data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
                     }
                 } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
                 }
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
@@ -3255,7 +3260,7 @@ public final class ActivityThread {
                     ActivityManagerNative.getDefault().serviceDoneExecuting(
                             data.token, SERVICE_DONE_EXECUTING_START, data.startId, res);
                 } catch (RemoteException e) {
-                    // nothing to do.
+                    throw e.rethrowFromSystemServer();
                 }
                 ensureJitEnabled();
             } catch (Exception e) {
@@ -3286,9 +3291,7 @@ public final class ActivityThread {
                     ActivityManagerNative.getDefault().serviceDoneExecuting(
                             token, SERVICE_DONE_EXECUTING_STOP, 0, 0);
                 } catch (RemoteException e) {
-                    // nothing to do.
-                    Slog.i(TAG, "handleStopService: unable to execute serviceDoneExecuting for "
-                            + token, e);
+                    throw e.rethrowFromSystemServer();
                 }
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
@@ -3398,6 +3401,7 @@ public final class ActivityThread {
                     willBeVisible = ActivityManagerNative.getDefault().willActivityBeVisible(
                             a.getActivityToken());
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
             if (r.window == null && !a.mFinished && willBeVisible) {
@@ -3481,6 +3485,7 @@ public final class ActivityThread {
                 try {
                     ActivityManagerNative.getDefault().activityResumed(token);
                 } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
                 }
             }
 
@@ -3492,6 +3497,7 @@ public final class ActivityThread {
                     .finishActivity(token, Activity.RESULT_CANCELED, null,
                             Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -3577,6 +3583,7 @@ public final class ActivityThread {
                 try {
                     ActivityManagerNative.getDefault().activityPaused(token);
                 } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
                 }
             }
             mSomeActivitiesChanged = true;
@@ -3670,6 +3677,7 @@ public final class ActivityThread {
                 ActivityManagerNative.getDefault().activityStopped(
                     activity.token, state, persistentState, description);
             } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
             }
         }
     }
@@ -3909,6 +3917,7 @@ public final class ActivityThread {
             try {
                 ActivityManagerNative.getDefault().activitySlept(r.token);
             } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
             }
         } else {
             if (r.stopped && r.activity.mVisibleFromServer) {
@@ -4175,7 +4184,7 @@ public final class ActivityThread {
             try {
                 ActivityManagerNative.getDefault().activityDestroyed(token);
             } catch (RemoteException ex) {
-                // If the system process has died, it's game over for everyone.
+                throw ex.rethrowFromSystemServer();
             }
         }
         mSomeActivitiesChanged = true;
@@ -4216,7 +4225,7 @@ public final class ActivityThread {
                         try {
                             ActivityManagerNative.getDefault().activityRelaunched(token);
                         } catch (RemoteException e) {
-                            e.printStackTrace();
+                            throw e.rethrowFromSystemServer();
                         }
                     }
                     break;
@@ -4337,7 +4346,7 @@ public final class ActivityThread {
                 try {
                     ActivityManagerNative.getDefault().activityRelaunched(tmp.token);
                 } catch (RemoteException e) {
-                    // If the system process has died, it's game over for everyone.
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return;
@@ -4363,7 +4372,7 @@ public final class ActivityThread {
                 WindowManagerGlobal.getWindowSession().prepareToReplaceChildren(r.token);
             }
         } catch (RemoteException e) {
-            // If the system process has died, it's game over for everyone.
+            throw e.rethrowFromSystemServer();
         }
 
 
@@ -4408,7 +4417,7 @@ public final class ActivityThread {
                     r.window.reportActivityRelaunched();
                 }
             } catch (RemoteException e) {
-                // If the system process has died, it's game over for everyone.
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -4688,6 +4697,7 @@ public final class ActivityThread {
         try {
             ActivityManagerNative.getDefault().dumpHeapFinished(dhd.path);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -4770,7 +4780,7 @@ public final class ActivityThread {
                 RenderScriptCacheDir.setupDiskCache(cacheDir);
             }
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -4962,6 +4972,7 @@ public final class ActivityThread {
                 try {
                     mgr.showWaitingForDebugger(mAppThread, true);
                 } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
                 }
 
                 Debug.waitForDebugger();
@@ -4969,6 +4980,7 @@ public final class ActivityThread {
                 try {
                     mgr.showWaitingForDebugger(mAppThread, false);
                 } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
                 }
 
             } else {
@@ -4996,7 +5008,9 @@ public final class ActivityThread {
             try {
                 final ProxyInfo proxyInfo = service.getProxyForNetwork(null);
                 Proxy.setHttpProxySystemProperty(proxyInfo);
-            } catch (RemoteException e) {}
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         // Instrumentation info affects the class loader, so load it before
@@ -5160,6 +5174,7 @@ public final class ActivityThread {
         try {
             am.finishInstrumentation(mAppThread, resultCode, results);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -5189,6 +5204,7 @@ public final class ActivityThread {
             ActivityManagerNative.getDefault().publishContentProviders(
                 getApplicationThread(), results);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -5210,6 +5226,7 @@ public final class ActivityThread {
             holder = ActivityManagerNative.getDefault().getContentProvider(
                     getApplicationThread(), auth, userId, stable);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
         if (holder == null) {
             Slog.e(TAG, "Failed to find provider info for " + auth);
@@ -5497,6 +5514,7 @@ public final class ActivityThread {
                     ActivityManagerNative.getDefault()
                             .appNotRespondingViaProvider(prc.holder.connection);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
@@ -5676,7 +5694,7 @@ public final class ActivityThread {
             try {
                 mgr.attachApplication(mAppThread);
             } catch (RemoteException ex) {
-                // Ignore
+                throw ex.rethrowFromSystemServer();
             }
             // Watch for getting close to heap limit.
             BinderInternal.addGcWatcher(new Runnable() {
@@ -5695,6 +5713,7 @@ public final class ActivityThread {
                         try {
                             mgr.releaseSomeActivities(mAppThread);
                         } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
                         }
                     }
                 }
