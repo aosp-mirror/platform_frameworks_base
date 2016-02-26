@@ -8056,7 +8056,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                             + " txPackets=" + entry.txPackets);
                 }
 
-                if (entry.rxBytes == 0 || entry.txBytes == 0) {
+                if (entry.rxBytes == 0 && entry.txBytes == 0) {
+                    // Skip the lookup below since there is no work to do.
                     continue;
                 }
 
