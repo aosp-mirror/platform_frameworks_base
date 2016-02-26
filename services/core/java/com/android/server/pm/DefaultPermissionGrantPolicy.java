@@ -119,6 +119,9 @@ final class DefaultPermissionGrantPolicy {
         STORAGE_PERMISSIONS.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
     }
 
+    private static final String ACTION_TWINNING =
+            "com.google.android.clockwork.intent.TWINNING_SETTINGS";
+
     private final PackageManagerService mService;
 
     private PackagesProvider mImePackagesProvider;
@@ -571,8 +574,9 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(musicPackage, STORAGE_PERMISSIONS, userId);
             }
 
-            // Android Wear Home
+            // Android Wear
             if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH)) {
+                // Android Wear Home
                 Intent homeIntent = new Intent(Intent.ACTION_MAIN);
                 homeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
 
@@ -588,6 +592,17 @@ final class DefaultPermissionGrantPolicy {
                             userId);
                     grantRuntimePermissionsLPw(wearHomePackage, LOCATION_PERMISSIONS, false,
                             userId);
+                }
+
+                // AT&T NumberSync
+                Intent twinningIntent = new Intent(ACTION_TWINNING);
+                PackageParser.Package twinningPackage = getDefaultSystemHandlerActivityPackageLPr(
+                        twinningIntent, userId);
+
+                if (twinningPackage != null
+                        && doesPackageSupportRuntimePermissions(twinningPackage)) {
+                    grantRuntimePermissionsLPw(twinningPackage, PHONE_PERMISSIONS, false, userId);
+                    grantRuntimePermissionsLPw(twinningPackage, SMS_PERMISSIONS, false, userId);
                 }
             }
 
