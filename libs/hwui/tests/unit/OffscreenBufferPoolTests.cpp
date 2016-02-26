@@ -55,6 +55,14 @@ TEST(OffscreenBuffer, getTextureCoordinates) {
     });
 }
 
+TEST(OffscreenBuffer, dirty) {
+    TestUtils::runOnRenderThread([] (renderthread::RenderThread& thread) {
+        OffscreenBuffer buffer(thread.renderState(), Caches::getInstance(), 256u, 256u);
+        buffer.dirty(Rect(-100, -100, 100, 100));
+        EXPECT_EQ(android::Rect(100, 100), buffer.region.getBounds());
+    });
+}
+
 TEST(OffscreenBufferPool, construct) {
     TestUtils::runOnRenderThread([] (renderthread::RenderThread& thread) {
         OffscreenBufferPool pool;
