@@ -30,10 +30,11 @@ import java.io.FileNotFoundException;
 import static android.provider.DocumentsContract.Document.*;
 import static com.android.mtp.MtpDatabase.strings;
 import static com.android.mtp.MtpDatabaseConstants.*;
+import static com.android.mtp.TestUtil.OPERATIONS_SUPPORTED;
 
 @SmallTest
 public class MtpDatabaseTest extends AndroidTestCase {
-    private final String[] COLUMN_NAMES = new String[] {
+    private static final String[] COLUMN_NAMES = new String[] {
         DocumentsContract.Document.COLUMN_DOCUMENT_ID,
         MtpDatabaseConstants.COLUMN_DEVICE_ID,
         MtpDatabaseConstants.COLUMN_STORAGE_ID,
@@ -75,13 +76,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
     }
 
     public void testPutSingleStorageDocuments() throws Exception {
-        mDatabase.getMapper().startAddingDocuments(null);
-        mDatabase.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", null /* deviceKey */, true, new MtpRoot[0], null, null));
-        mDatabase.getMapper().stopAddingDocuments(null);
+        addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 1, "Storage", 1000, 2000, "")
         });
         mDatabase.getMapper().stopAddingDocuments("1");
@@ -143,7 +141,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 1, "Storage", 1000, 2000, ""),
                 new MtpRoot(0, 2, "Storage", 2000, 4000, ""),
                 new MtpRoot(0, 3, "/@#%&<>Storage", 3000, 6000,"")
@@ -273,7 +271,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Add device and two storages.
         addTestDevice();
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage A", 1000, 0, ""),
                 new MtpRoot(0, 101, "Storage B", 1001, 0, "")
         });
@@ -304,7 +302,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         // Add two storages, but one's name is different from previous one.
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 200, "Storage A", 2000, 0, ""),
                 new MtpRoot(0, 202, "Storage C", 2002, 0, "")
         });
@@ -398,10 +396,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments("1");
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage", 0, 0, "")
         });
-        mDatabase.getMapper().putStorageDocuments("2", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("2", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(1, 100, "Storage", 0, 0, "")
         });
 
@@ -442,10 +440,10 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
         mDatabase.getMapper().startAddingDocuments("1");
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 200, "Storage", 2000, 0, "")
         });
-        mDatabase.getMapper().putStorageDocuments("2", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("2", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(1, 300, "Storage", 3000, 0, "")
         });
         mDatabase.getMapper().stopAddingDocuments("1");
@@ -562,7 +560,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage", 0, 0, ""),
         });
         mDatabase.getMapper().clearMapping();
@@ -576,7 +574,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         }
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 200, "Storage", 2000, 0, ""),
         });
         mDatabase.getMapper().clearMapping();
@@ -584,7 +582,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 300, "Storage", 3000, 0, ""),
         });
         mDatabase.getMapper().stopAddingDocuments("1");
@@ -625,7 +623,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Add a device and two storages that has same name.
         addTestDevice();
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 200, "Storage", 2000, 0, ""),
                 new MtpRoot(0, 201, "Storage", 2001, 0, ""),
         });
@@ -658,13 +656,13 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // The client code should be able to replace existing rows with new information.
         // Add one.
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage A", 0, 0, ""),
         });
         mDatabase.getMapper().stopAddingDocuments("1");
         // Replace it.
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage B", 1000, 1000, ""),
         });
         mDatabase.getMapper().stopAddingDocuments("1");
@@ -703,7 +701,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         // Add one.
         addTestDevice();
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage A", 0, 0, ""),
         });
         mDatabase.getMapper().clearMapping();
@@ -717,11 +715,11 @@ public class MtpDatabaseTest extends AndroidTestCase {
 
             // Add one.
             mDatabase.getMapper().startAddingDocuments("1");
-            mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+            mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                     new MtpRoot(0, 101, "Storage B", 1000, 1000, ""),
             });
             // Add one more before resolving unmapped documents.
-            mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+            mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                     new MtpRoot(0, 102, "Storage B", 1000, 1000, ""),
             });
             mDatabase.getMapper().stopAddingDocuments("1");
@@ -763,7 +761,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         }
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage A", 0, 0, "")
         });
         mDatabase.getMapper().stopAddingDocuments("1");
@@ -778,7 +776,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         }
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage A", 0, 0, ""),
                 new MtpRoot(0, 101, "Storage B", 0, 0, "")
         });
@@ -798,7 +796,7 @@ public class MtpDatabaseTest extends AndroidTestCase {
         addTestDevice();
 
         mDatabase.getMapper().startAddingDocuments("1");
-        mDatabase.getMapper().putStorageDocuments("1", new MtpRoot[] {
+        mDatabase.getMapper().putStorageDocuments("1", OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage A", 0, 0, ""),
         });
         mDatabase.getMapper().stopAddingDocuments("1");

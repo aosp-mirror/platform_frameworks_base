@@ -19,6 +19,7 @@ package com.android.mtp;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.mtp.MtpConstants;
 import android.os.SystemClock;
 
 import java.io.FileNotFoundException;
@@ -31,6 +32,12 @@ import java.util.Objects;
  */
 final class TestUtil {
     private TestUtil() {}
+
+    static final int[] OPERATIONS_SUPPORTED = new int[] {
+            MtpConstants.OPERATION_GET_PARTIAL_OBJECT,
+            MtpConstants.OPERATION_SEND_OBJECT,
+            MtpConstants.OPERATION_SEND_OBJECT_INFO,
+    };
 
     /**
      * Requests permission for a MTP device and returns the first MTP device that has at least one
@@ -59,14 +66,14 @@ final class TestUtil {
     static void addTestDevice(MtpDatabase database) throws FileNotFoundException {
         database.getMapper().startAddingDocuments(null);
         database.getMapper().putDeviceDocument(new MtpDeviceRecord(
-                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0], null,
-                null));
+                0, "Device", "device_key", /* opened is */ true, new MtpRoot[0],
+                OPERATIONS_SUPPORTED, null));
         database.getMapper().stopAddingDocuments(null);
     }
 
     static void addTestStorage(MtpDatabase database, String parentId) throws FileNotFoundException {
         database.getMapper().startAddingDocuments(parentId);
-        database.getMapper().putStorageDocuments(parentId, new MtpRoot[] {
+        database.getMapper().putStorageDocuments(parentId, OPERATIONS_SUPPORTED, new MtpRoot[] {
                 new MtpRoot(0, 100, "Storage", 1024, 1024, ""),
         });
         database.getMapper().stopAddingDocuments(parentId);
