@@ -98,13 +98,15 @@ public final class Debug
     /**
      * Default trace file path and file
      */
-    private static final String DEFAULT_TRACE_PATH_PREFIX =
-        Environment.getLegacyExternalStorageDirectory().getPath() + "/";
     private static final String DEFAULT_TRACE_BODY = "dmtrace";
     private static final String DEFAULT_TRACE_EXTENSION = ".trace";
-    private static final String DEFAULT_TRACE_FILE_PATH =
-        DEFAULT_TRACE_PATH_PREFIX + DEFAULT_TRACE_BODY
-        + DEFAULT_TRACE_EXTENSION;
+    private static class NoPreloadHolder {
+        private static final String DEFAULT_TRACE_PATH_PREFIX =
+                Environment.getLegacyExternalStorageDirectory().getPath() + "/";
+        private static final String DEFAULT_TRACE_FILE_PATH =
+                DEFAULT_TRACE_PATH_PREFIX + DEFAULT_TRACE_BODY
+                + DEFAULT_TRACE_EXTENSION;
+    }
 
 
     /**
@@ -942,7 +944,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * tracing.
      */
     public static void startMethodTracing() {
-        VMDebug.startMethodTracing(DEFAULT_TRACE_FILE_PATH, 0, 0, false, 0);
+        VMDebug.startMethodTracing(fixTraceName(null), 0, 0, false, 0);
     }
 
     /**
@@ -1032,9 +1034,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      */
     private static String fixTraceName(String traceName) {
         if (traceName == null)
-            traceName = DEFAULT_TRACE_FILE_PATH;
+            traceName = NoPreloadHolder.DEFAULT_TRACE_FILE_PATH;
         if (traceName.charAt(0) != '/')
-            traceName = DEFAULT_TRACE_PATH_PREFIX + traceName;
+            traceName = NoPreloadHolder.DEFAULT_TRACE_PATH_PREFIX + traceName;
         if (!traceName.endsWith(DEFAULT_TRACE_EXTENSION))
             traceName = traceName + DEFAULT_TRACE_EXTENSION;
 
