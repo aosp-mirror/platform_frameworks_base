@@ -91,11 +91,6 @@ public class AudioTrack implements AudioRouting
      */
     private static final float GAIN_MAX = 1.0f;
 
-    /** Minimum value for sample rate */
-    private static final int SAMPLE_RATE_HZ_MIN = 4000;
-    /** Maximum value for sample rate */
-    private static final int SAMPLE_RATE_HZ_MAX = 192000;
-
     /** Maximum value for AudioTrack channel count
      * @hide public for MediaCode only, do not un-hide or change to a numeric literal
      */
@@ -254,6 +249,7 @@ public class AudioTrack implements AudioRouting
     private final Looper mInitializationLooper;
     /**
      * The audio data source sampling rate in Hz.
+     * Never {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED}.
      */
     private int mSampleRate; // initialized by all constructors via audioParamCheck()
     /**
@@ -340,6 +336,9 @@ public class AudioTrack implements AudioRouting
      *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC},
      *   {@link AudioManager#STREAM_ALARM}, and {@link AudioManager#STREAM_NOTIFICATION}.
      * @param sampleRateInHz the initial source sample rate expressed in Hz.
+     *   {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED} means to use a route-dependent value
+     *   which is usually the sample rate of the sink.
+     *   {@link #getSampleRate()} can be used to retrieve the actual sample rate chosen.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
@@ -389,6 +388,8 @@ public class AudioTrack implements AudioRouting
      *   {@link AudioManager#STREAM_RING}, {@link AudioManager#STREAM_MUSIC},
      *   {@link AudioManager#STREAM_ALARM}, and {@link AudioManager#STREAM_NOTIFICATION}.
      * @param sampleRateInHz the initial source sample rate expressed in Hz.
+     *   {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED} means to use a route-dependent value
+     *   which is usually the sample rate of the sink.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
@@ -461,16 +462,11 @@ public class AudioTrack implements AudioRouting
             looper = Looper.getMainLooper();
         }
 
-        int rate = 0;
-        if ((format.getPropertySetMask() & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) != 0)
-        {
-            rate = format.getSampleRate();
-        } else {
-            rate = AudioSystem.getPrimaryOutputSamplingRate();
-            if (rate <= 0) {
-                rate = 44100;
-            }
+        int rate = format.getSampleRate();
+        if (rate == AudioFormat.SAMPLE_RATE_UNSPECIFIED) {
+            rate = 0;
         }
+
         int channelIndexMask = 0;
         if ((format.getPropertySetMask()
                 & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) != 0) {
@@ -503,17 +499,19 @@ public class AudioTrack implements AudioRouting
             throw new IllegalArgumentException("Invalid audio session ID: "+sessionId);
         }
 
+        int[] sampleRate = new int[] {mSampleRate};
         int[] session = new int[1];
         session[0] = sessionId;
         // native initialization
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
-                mSampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
+                sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
         }
 
+        mSampleRate = sampleRate[0];
         mSessionId = session[0];
 
         if (mDataLoadMode == MODE_STATIC) {
@@ -712,7 +710,7 @@ public class AudioTrack implements AudioRouting
             if (mFormat == null) {
                 mFormat = new AudioFormat.Builder()
                         .setChannelMask(AudioFormat.CHANNEL_OUT_STEREO)
-                        .setSampleRate(AudioSystem.getPrimaryOutputSamplingRate())
+                        //.setSampleRate(AudioFormat.SAMPLE_RATE_UNSPECIFIED)
                         .setEncoding(AudioFormat.ENCODING_DEFAULT)
                         .build();
             }
@@ -762,7 +760,9 @@ public class AudioTrack implements AudioRouting
                                  int audioFormat, int mode) {
         //--------------
         // sample rate, note these values are subject to change
-        if (sampleRateInHz < SAMPLE_RATE_HZ_MIN || sampleRateInHz > SAMPLE_RATE_HZ_MAX) {
+        if ((sampleRateInHz < AudioFormat.SAMPLE_RATE_HZ_MIN ||
+                sampleRateInHz > AudioFormat.SAMPLE_RATE_HZ_MAX) &&
+                sampleRateInHz != AudioFormat.SAMPLE_RATE_UNSPECIFIED) {
             throw new IllegalArgumentException(sampleRateInHz
                     + "Hz is not a supported sample rate.");
         }
@@ -948,7 +948,13 @@ public class AudioTrack implements AudioRouting
     }
 
     /**
-     * Returns the configured audio data sample rate in Hz
+     * Returns the configured audio source sample rate in Hz.
+     * The initial source sample rate depends on the constructor parameters,
+     * but the source sample rate may change if {@link #setPlaybackRate(int)} is called.
+     * If the constructor had a specific sample rate, then the initial sink sample rate is that
+     * value.
+     * If the constructor had {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED},
+     * then the initial sink sample rate is a route-dependent default value based on the source [sic].
      */
     public int getSampleRate() {
         return mSampleRate;
@@ -1218,6 +1224,7 @@ public class AudioTrack implements AudioRouting
      * to a higher value than the initial source sample rate, be sure to configure the buffer size
      * based on the highest planned sample rate.
      * @param sampleRateInHz the source sample rate expressed in Hz.
+     *   {@link AudioFormat#SAMPLE_RATE_UNSPECIFIED} is not permitted.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_OUT_MONO} and
      *   {@link AudioFormat#CHANNEL_OUT_STEREO}
@@ -1255,7 +1262,9 @@ public class AudioTrack implements AudioRouting
         }
 
         // sample rate, note these values are subject to change
-        if ( (sampleRateInHz < SAMPLE_RATE_HZ_MIN) || (sampleRateInHz > SAMPLE_RATE_HZ_MAX) ) {
+        // Note: AudioFormat.SAMPLE_RATE_UNSPECIFIED is not allowed
+        if ( (sampleRateInHz < AudioFormat.SAMPLE_RATE_HZ_MIN) ||
+                (sampleRateInHz > AudioFormat.SAMPLE_RATE_HZ_MAX) ) {
             loge("getMinBufferSize(): " + sampleRateInHz + " Hz is not a supported sample rate.");
             return ERROR_BAD_VALUE;
         }
@@ -2763,7 +2772,7 @@ public class AudioTrack implements AudioRouting
     //     AudioAttributes.USAGE_MEDIA will map to AudioManager.STREAM_MUSIC
     private native final int native_setup(Object /*WeakReference<AudioTrack>*/ audiotrack_this,
             Object /*AudioAttributes*/ attributes,
-            int sampleRate, int channelMask, int channelIndexMask, int audioFormat,
+            int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId);
 
     private native final void native_finalize();

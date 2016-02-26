@@ -335,6 +335,24 @@ public class AudioFormat implements Parcelable {
             CHANNEL_OUT_LOW_FREQUENCY);
     // CHANNEL_OUT_ALL is not yet defined; if added then it should match AUDIO_CHANNEL_OUT_ALL
 
+    /** Minimum value for sample rate,
+     *  assuming AudioTrack and AudioRecord share the same limitations.
+     * @hide
+     */
+    // never unhide
+    public static final int SAMPLE_RATE_HZ_MIN = 4000;
+    /** Maximum value for sample rate,
+     *  assuming AudioTrack and AudioRecord share the same limitations.
+     * @hide
+     */
+    // never unhide
+    public static final int SAMPLE_RATE_HZ_MAX = 192000;
+    /** Sample rate will be a route-dependent value.
+     * For AudioTrack, it is usually the sink sample rate,
+     * and for AudioRecord it is usually the source sample rate.
+     */
+    public static final int SAMPLE_RATE_UNSPECIFIED = 0;
+
     /**
      * @hide
      * Return the input channel mask corresponding to an output channel mask.
@@ -561,7 +579,7 @@ public class AudioFormat implements Parcelable {
     }
 
     /**
-     * Constructor used by the JNI
+     * Constructor used by the JNI.  Parameters are not checked for validity.
      */
     // Update sound trigger JNI in core/jni/android_hardware_SoundTrigger.cpp when modifying this
     // constructor
@@ -610,12 +628,9 @@ public class AudioFormat implements Parcelable {
     /**
      * Return the sample rate.
      * @return one of the values that can be set in {@link Builder#setSampleRate(int)} or
-     * 0 if not set.
+     * {@link #SAMPLE_RATE_UNSPECIFIED} if not set.
      */
     public int getSampleRate() {
-        if ((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) == 0) {
-            return 0;
-        }
         return mSampleRate;
     }
 
@@ -687,7 +702,7 @@ public class AudioFormat implements Parcelable {
      */
     public static class Builder {
         private int mEncoding = ENCODING_INVALID;
-        private int mSampleRate = 0;
+        private int mSampleRate = SAMPLE_RATE_UNSPECIFIED;
         private int mChannelMask = CHANNEL_INVALID;
         private int mChannelIndexMask = 0;
         private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;
@@ -718,6 +733,8 @@ public class AudioFormat implements Parcelable {
         public AudioFormat build() {
             AudioFormat af = new AudioFormat(1980/*ignored*/);
             af.mEncoding = mEncoding;
+            // not calling setSampleRate is equivalent to calling
+            // setSampleRate(SAMPLE_RATE_UNSPECIFIED)
             af.mSampleRate = mSampleRate;
             af.mChannelMask = mChannelMask;
             af.mChannelIndexMask = mChannelIndexMask;
@@ -795,7 +812,7 @@ public class AudioFormat implements Parcelable {
          *    are specified but do not have the same channel count.
          */
         public @NonNull Builder setChannelMask(int channelMask) {
-            if (channelMask == 0) {
+            if (channelMask == CHANNEL_INVALID) {
                 throw new IllegalArgumentException("Invalid zero channel mask");
             } else if (/* channelMask != 0 && */ mChannelIndexMask != 0 &&
                     Integer.bitCount(channelMask) != Integer.bitCount(mChannelIndexMask)) {
@@ -867,7 +884,11 @@ public class AudioFormat implements Parcelable {
          * @throws java.lang.IllegalArgumentException
          */
         public Builder setSampleRate(int sampleRate) throws IllegalArgumentException {
-            if ((sampleRate <= 0) || (sampleRate > 192000)) {
+            // TODO Consider whether to keep the MIN and MAX range checks here.
+            // It is not necessary and poses the problem of defining the limits independently from
+            // native implementation or platform capabilities.
+            if (((sampleRate < SAMPLE_RATE_HZ_MIN) || (sampleRate > SAMPLE_RATE_HZ_MAX)) &&
+                    sampleRate != SAMPLE_RATE_UNSPECIFIED) {
                 throw new IllegalArgumentException("Invalid sample rate " + sampleRate);
             }
             mSampleRate = sampleRate;

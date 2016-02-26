@@ -215,8 +215,12 @@ static inline audio_channel_mask_t nativeChannelMaskFromJavaChannelMasks(
 static jint
 android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jobject jaa,
-        jint sampleRateInHertz, jint channelPositionMask, jint channelIndexMask,
+        jintArray jSampleRate, jint channelPositionMask, jint channelIndexMask,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession) {
+
+    jint elements[1];
+    env->GetIntArrayRegion(jSampleRate, 0, 1, elements);
+    int sampleRateInHertz = elements[0];
 
     ALOGV("sampleRate=%d, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d",
         sampleRateInHertz, channelPositionMask, channelIndexMask, audioFormat, buffSizeInBytes);
@@ -369,6 +373,11 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     nSession[0] = lpTrack->getSessionId();
     env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
     nSession = NULL;
+
+    {
+        const jint elements[1] = { (jint) lpTrack->getSampleRate() };
+        env->SetIntArrayRegion(jSampleRate, 0, 1, elements);
+    }
 
     {   // scope for the lock
         Mutex::Autolock l(sLock);
@@ -1114,7 +1123,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_stop",          "()V",      (void *)android_media_AudioTrack_stop},
     {"native_pause",         "()V",      (void *)android_media_AudioTrack_pause},
     {"native_flush",         "()V",      (void *)android_media_AudioTrack_flush},
-    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;IIIIII[I)I",
+    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[I)I",
                                          (void *)android_media_AudioTrack_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
