@@ -19185,7 +19185,6 @@ package android.location {
     method public short getLeapSecond();
     method public long getTimeInNs();
     method public double getTimeUncertaintyInNs();
-    method public byte getType();
     method public boolean hasBiasInNs();
     method public boolean hasBiasUncertaintyInNs();
     method public boolean hasDriftInNsPerSec();
@@ -19211,15 +19210,8 @@ package android.location {
     method public void setLeapSecond(short);
     method public void setTimeInNs(long);
     method public void setTimeUncertaintyInNs(double);
-    method public void setType(byte);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final byte CLOCK_TYPE_GPS_TIME = 2; // 0x2
-    field public static final byte CLOCK_TYPE_LOCAL_HW_TIME = 1; // 0x1
-    field public static final byte CLOCK_TYPE_UNKNOWN = 0; // 0x0
     field public static final android.os.Parcelable.Creator<android.location.GnssClock> CREATOR;
-  }
-
-  public static abstract class GnssClock.GnssClockType implements java.lang.annotation.Annotation {
   }
 
   public final class GnssMeasurement implements android.os.Parcelable {
