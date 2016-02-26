@@ -2474,4 +2474,9 @@
          much in the way of user data.
     -->
     <bool name="config_strongAuthRequiredOnBoot">true</bool>
+
+    <!-- Wallpaper cropper package. Used as the default cropper if the active launcher doesn't
+         handle wallpaper cropping.
+    -->
+    <string name="config_wallpaperCropperPackage" translatable="false">com.android.wallpapercropper</string>
 </resources>
