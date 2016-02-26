@@ -120,6 +120,7 @@ import android.widget.Toast;
 
 import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
+import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -10602,6 +10603,16 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             InputManager.getInstance().setPointerIconShape(PointerIcon.STYLE_DEFAULT);
         }
+    }
+
+    public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
+            throws RemoteException {
+        if (!checkCallingPermission(Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS,
+                "registerShortcutKey")) {
+            throw new SecurityException(
+                    "Requires REGISTER_WINDOW_MANAGER_LISTENERS permission");
+        }
+        mPolicy.registerShortcutKey(shortcutCode, shortcutKeyReceiver);
     }
 
     private final class LocalService extends WindowManagerInternal {

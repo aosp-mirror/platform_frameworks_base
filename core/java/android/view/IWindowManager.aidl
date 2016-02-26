@@ -20,6 +20,7 @@ import com.android.internal.app.IAssistScreenshotReceiver;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
+import com.android.internal.policy.IShortcutService;
 
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -387,4 +388,11 @@ interface IWindowManager
      * Retrieves the current stable insets from the primary display.
      */
     void getStableInsets(out Rect outInsets);
+
+    /**
+     * Register shortcut key. Shortcut code is packed as:
+     * (MetaState << Integer.SIZE) | KeyCode
+     * @hide
+     */
+    void registerShortcutKey(in long shortcutCode, IShortcutService keySubscriber);
 }

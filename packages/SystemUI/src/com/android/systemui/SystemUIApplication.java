@@ -54,7 +54,8 @@ public class SystemUIApplication extends Application {
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.keyboard.KeyboardUI.class,
-            com.android.systemui.tv.pip.PipUI.class
+            com.android.systemui.tv.pip.PipUI.class,
+            com.android.systemui.shortcut.ShortcutKeyDispatcher.class
     };
 
     /**
@@ -143,12 +144,14 @@ public class SystemUIApplication extends Application {
             Class<?> cl = services[i];
             if (DEBUG) Log.d(TAG, "loading: " + cl);
             try {
-                mServices[i] = (SystemUI) cl.newInstance();
+                Object newService = SystemUIFactory.getInstance().createInstance(cl);
+                mServices[i] = (SystemUI) ((newService == null) ? cl.newInstance() : newService);
             } catch (IllegalAccessException ex) {
                 throw new RuntimeException(ex);
             } catch (InstantiationException ex) {
                 throw new RuntimeException(ex);
             }
+
             mServices[i].mContext = this;
             mServices[i].mComponents = mComponents;
             if (DEBUG) Log.d(TAG, "running: " + mServices[i]);

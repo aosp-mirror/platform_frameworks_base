@@ -107,6 +107,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.LongSparseArray;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
@@ -135,6 +136,7 @@ import android.view.animation.AnimationUtils;
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.PhoneWindow;
+import com.android.internal.policy.IShortcutService;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
@@ -335,6 +337,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarWidthForRotationDefault = new int[4];
     int[] mNavigationBarHeightForRotationInCarMode = new int[4];
     int[] mNavigationBarWidthForRotationInCarMode = new int[4];
+
+    private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
     // Whether to allow dock apps with METADATA_DOCK_HOME to temporarily take over the Home key.
     // This is for car dock and this is updated from resource.
@@ -3100,7 +3104,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 dispatchDirectAudioEvent(event);
                 return -1;
             }
-        } else if (KeyEvent.isMetaKey(keyCode)) {
+        }
+
+        if (KeyEvent.isMetaKey(keyCode)) {
             if (down) {
                 mPendingMetaAction = true;
             } else if (mPendingMetaAction) {
@@ -3215,6 +3221,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return -1;
         }
 
+        if (down) {
+            long shortcutCode = (long) keyCode;
+            if (event.isCtrlPressed()) {
+                shortcutCode |= ((long) KeyEvent.META_CTRL_ON) << Integer.SIZE;
+            }
+
+            if (event.isAltPressed()) {
+                shortcutCode |= ((long) KeyEvent.META_ALT_ON) << Integer.SIZE;
+            }
+
+            if (event.isShiftPressed()) {
+                shortcutCode |= ((long) KeyEvent.META_SHIFT_ON) << Integer.SIZE;
+            }
+
+            if (event.isMetaPressed()) {
+                shortcutCode |= ((long) KeyEvent.META_META_ON) << Integer.SIZE;
+            }
+
+            IShortcutService shortcutService = mShortcutKeyServices.get(shortcutCode);
+            if (shortcutService != null) {
+                try {
+                    shortcutService.notifyShortcutKeyPressed(shortcutCode);
+                } catch (RemoteException e) {
+                    mShortcutKeyServices.delete(shortcutCode);
+                }
+                return -1;
+            }
+        }
+
         // Reserve all the META modifier combos for system behavior
         if ((metaState & KeyEvent.META_META_ON) != 0) {
             return -1;
@@ -3302,6 +3337,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return false;
+    }
+
+    public void registerShortcutKey(long shortcutCode, IShortcutService shortcutService)
+            throws RemoteException {
+        synchronized (mLock) {
+            IShortcutService service = mShortcutKeyServices.get(shortcutCode);
+            if (service != null && service.asBinder().isBinderAlive()) {
+                    throw new RemoteException("Key already exists.");
+            }
+
+            mShortcutKeyServices.put(shortcutCode, shortcutService);
+        }
     }
 
     private void launchAssistLongPressAction() {
