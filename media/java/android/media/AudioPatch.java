@@ -53,6 +53,13 @@ public class AudioPatch {
         return mSinks;
     }
 
+    /**
+     * Get the system unique patch ID.
+     */
+    public int id() {
+        return mHandle.id();
+    }
+
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

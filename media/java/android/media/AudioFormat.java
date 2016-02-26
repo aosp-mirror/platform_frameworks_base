@@ -877,6 +877,26 @@ public class AudioFormat implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AudioFormat that = (AudioFormat) o;
+
+        if (mPropertySetMask != that.mPropertySetMask) return false;
+
+        // return false if any of the properties is set and the values differ
+        return !((((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_ENCODING) != 0)
+                            && (mEncoding != that.mEncoding))
+                    || (((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE) != 0)
+                            && (mSampleRate != that.mSampleRate))
+                    || (((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0)
+                            && (mChannelMask != that.mChannelMask))
+                    || (((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) != 0)
+                            && (mChannelIndexMask != that.mChannelIndexMask)));
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(mPropertySetMask, mSampleRate, mEncoding, mChannelMask,
                 mChannelIndexMask);

@@ -50,11 +50,11 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * Implementation of android.media.AudioSystem.AudioRecordingCallback
      */
     public void onRecordingConfigurationChanged(int event, int session, int source,
-            int[] recordingFormat) {
+            int[] recordingInfo) {
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             return;
         }
-        if (updateSnapshot(event, session, source, recordingFormat)) {
+        if (updateSnapshot(event, session, source, recordingInfo)) {
             final Iterator<RecMonitorClient> clientIterator = mClients.iterator();
             synchronized(mClients) {
                 while (clientIterator.hasNext()) {
@@ -117,7 +117,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      *     for the definition of the contents of the array
      * @return true if the list of active recording sessions has been modified, false otherwise.
      */
-    private boolean updateSnapshot(int event, int session, int source, int[] recordingFormat) {
+    private boolean updateSnapshot(int event, int session, int source, int[] recordingInfo) {
         synchronized(mRecordConfigs) {
             switch (event) {
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
@@ -125,26 +125,35 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 return (mRecordConfigs.remove(new Integer(session)) != null);
             case AudioManager.RECORD_CONFIG_EVENT_START:
                 final AudioFormat clientFormat = new AudioFormat.Builder()
-                        .setEncoding(recordingFormat[0])
+                        .setEncoding(recordingInfo[0])
                         // FIXME this doesn't support index-based masks
-                        .setChannelMask(recordingFormat[1])
-                        .setSampleRate(recordingFormat[2])
+                        .setChannelMask(recordingInfo[1])
+                        .setSampleRate(recordingInfo[2])
                         .build();
                 final AudioFormat deviceFormat = new AudioFormat.Builder()
-                        .setEncoding(recordingFormat[3])
+                        .setEncoding(recordingInfo[3])
                         // FIXME this doesn't support index-based masks
-                        .setChannelMask(recordingFormat[4])
-                        .setSampleRate(recordingFormat[5])
+                        .setChannelMask(recordingInfo[4])
+                        .setSampleRate(recordingInfo[5])
                         .build();
-                if (mRecordConfigs.containsKey(new Integer(session))) {
-                    // start of session that's already tracked, not worth an update
-                    // TO DO in the future when tracking record format: there might be a record
-                    //       format change during a recording that requires reporting
-                    return false;
-                } else {
-                    mRecordConfigs.put(new Integer(session),
+                final int patchHandle = recordingInfo[6];
+                final Integer sessionKey = new Integer(session);
+                if (mRecordConfigs.containsKey(sessionKey)) {
+                    final AudioRecordConfiguration updatedConfig =
                             new AudioRecordConfiguration(session, source,
-                                    clientFormat, deviceFormat));
+                                    clientFormat, deviceFormat, patchHandle);
+                    if (updatedConfig.equals(mRecordConfigs.get(sessionKey))) {
+                        return false;
+                    } else {
+                        // config exists but has been modified
+                        mRecordConfigs.remove(sessionKey);
+                        mRecordConfigs.put(sessionKey, updatedConfig);
+                        return true;
+                    }
+                } else {
+                    mRecordConfigs.put(sessionKey,
+                            new AudioRecordConfiguration(session, source,
+                                    clientFormat, deviceFormat, patchHandle));
                     return true;
                 }
             default:
