@@ -1256,10 +1256,38 @@ public class AppOpsManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Sets given app op in the specified mode for app ops in the UID.
+     * This applies to all apps currently in the UID or installed in
+     * this UID in the future.
+     *
+     * @param code The app op.
+     * @param uid The UID for which to set the app.
+     * @param mode The app op mode to set.
+     * @hide
+     */
     public void setUidMode(int code, int uid, int mode) {
         try {
             mService.setUidMode(code, uid, mode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets given app op in the specified mode for app ops in the UID.
+     * This applies to all apps currently in the UID or installed in
+     * this UID in the future.
+     *
+     * @param appOp The app op.
+     * @param uid The UID for which to set the app.
+     * @param mode The app op mode to set.
+     * @hide
+     */
+    @SystemApi
+    public void setUidMode(String appOp, int uid, int mode) {
+        try {
+            mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

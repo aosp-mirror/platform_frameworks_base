@@ -3110,6 +3110,7 @@ public class ActivityManager {
      *
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.KILL_UID)
     public void killUid(int uid, String reason) {
         try {
