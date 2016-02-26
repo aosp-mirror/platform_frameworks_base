@@ -374,7 +374,7 @@ public class AudioRecord implements AudioRouting
         int initResult = native_setup( new WeakReference<AudioRecord>(this),
                 mAudioAttributes, sampleRate, mChannelMask, mChannelIndexMask,
                 mAudioFormat, mNativeBufferSizeInBytes,
-                session, ActivityThread.currentOpPackageName());
+                session, ActivityThread.currentOpPackageName(), 0 /*nativeRecordInJavaObj*/);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
@@ -390,12 +390,31 @@ public class AudioRecord implements AudioRouting
      * A constructor which explicitly connects a Native (C++) AudioRecord. For use by
      * the AudioRecordRoutingProxy subclass.
      * @param nativeRecordInJavaObj A C/C++ pointer to a native AudioRecord
-     * (associated with an OpenSL ES recorder).
+     * (associated with an OpenSL ES recorder). Note: the caller must ensure a correct
+     * value here as no error checking is or can be done.
      */
     /*package*/ AudioRecord(long nativeRecordInJavaObj) {
-        mNativeRecorderInJavaObj = nativeRecordInJavaObj;
+        int[] session = { 0 };
+        //TODO: update native initialization when information about hardware init failure
+        //      due to capture device already open is available.
+        // Note that for this native_setup, we are providing an already created/initialized
+        // *Native* AudioRecord, so the attributes parameters to native_setup() are ignored.
+        int initResult = native_setup(new WeakReference<AudioRecord>(this),
+                null /*mAudioAttributes*/,
+                null /*mSampleRates*/,
+                0 /*mChannelMask*/,
+                0 /*mChannelIndexMask*/,
+                0 /*mAudioFormat*/,
+                0 /*mNativeBufferSizeInBytes*/,
+                session,
+                ActivityThread.currentOpPackageName(),
+                mNativeRecorderInJavaObj);
+        if (initResult != SUCCESS) {
+            loge("Error code "+initResult+" when initializing native AudioRecord object.");
+            return; // with mState == STATE_UNINITIALIZED
+        }
 
-        // other initialization here...
+        mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
     }
@@ -1712,7 +1731,8 @@ public class AudioRecord implements AudioRouting
     private native final int native_setup(Object audiorecord_this,
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
-            int buffSizeInBytes, int[] sessionId, String opPackageName);
+            int buffSizeInBytes, int[] sessionId, String opPackageName,
+            long nativeRecordInJavaObj);
 
     // TODO remove: implementation calls directly into implementation of native_release()
     private native final void native_finalize();

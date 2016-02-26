@@ -41,6 +41,14 @@ public interface AudioRouting {
     public AudioDeviceInfo getPreferredDevice();
 
     /**
+     * Returns an {@link AudioDeviceInfo} identifying the current routing of this
+     * AudioTrack/AudioRecord.
+     * Note: The query is only valid if the AudioTrack/AudioRecord is currently playing.
+     * If it is not, <code>getRoutedDevice()</code> will return null.
+     */
+    public AudioDeviceInfo getRoutedDevice();
+
+    /**
      * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
      * changes on this AudioTrack/AudioRecord.
      * @param listener The {@link AudioRouting.OnRoutingChangedListener} interface to receive
