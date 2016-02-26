@@ -231,11 +231,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                             }
                             if (lockWallpaperChanged
                                     || (wallpaper.whichPending & FLAG_SET_LOCK) != 0) {
-                                // either a lock-only wallpaper commit or a system+lock event,
-                                // so tell keyguard about it
                                 if (DEBUG) {
-                                    Slog.i(TAG, "Lock-relevant wallpaper changed; telling listener");
+                                    Slog.i(TAG, "Lock-relevant wallpaper changed");
                                 }
+                                // either a lock-only wallpaper commit or a system+lock event.
+                                // if it's system-plus-lock we need to wipe the lock bookkeeping;
+                                // we're falling back to displaying the system wallpaper there.
+                                if (!lockWallpaperChanged) {
+                                    mLockWallpaperMap.remove(wallpaper.userId);
+                                }
+                                // and in any case, tell keyguard about it
                                 final IWallpaperManagerCallback cb = mKeyguardListener;
                                 if (cb != null) {
                                     try {
@@ -245,7 +250,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                                     }
                                 }
                             }
-                            saveSettingsLocked(wallpaper);
+                            saveSettingsLocked(wallpaper.userId);
                         }
                     }
                 }
@@ -479,7 +484,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     // when we have an engine, but I'm not sure about
                     // locking there and anyway we always need to be able to
                     // recover if there is something wrong.
-                    saveSettingsLocked(mWallpaper);
+                    saveSettingsLocked(mWallpaper.userId);
                 }
             }
         }
@@ -995,7 +1000,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             if (width != wallpaper.width || height != wallpaper.height) {
                 wallpaper.width = width;
                 wallpaper.height = height;
-                saveSettingsLocked(wallpaper);
+                saveSettingsLocked(userId);
                 if (mCurrentUserId != userId) return; // Don't change the properties now
                 if (wallpaper.connection != null) {
                     if (wallpaper.connection.mEngine != null) {
@@ -1052,7 +1057,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
             if (!padding.equals(wallpaper.padding)) {
                 wallpaper.padding.set(padding);
-                saveSettingsLocked(wallpaper);
+                saveSettingsLocked(userId);
                 if (mCurrentUserId != userId) return; // Don't change the properties now
                 if (wallpaper.connection != null) {
                     if (wallpaper.connection.mEngine != null) {
@@ -1488,55 +1493,72 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         return new JournaledFile(new File(base), new File(base + ".tmp"));
     }
 
-    private void saveSettingsLocked(WallpaperData wallpaper) {
-        JournaledFile journal = makeJournaledFile(wallpaper.userId);
-        FileOutputStream stream = null;
+    private void saveSettingsLocked(int userId) {
+        JournaledFile journal = makeJournaledFile(userId);
+        FileOutputStream fstream = null;
+        BufferedOutputStream stream = null;
         try {
-            stream = new FileOutputStream(journal.chooseForWrite(), false);
             XmlSerializer out = new FastXmlSerializer();
+            fstream = new FileOutputStream(journal.chooseForWrite(), false);
+            stream = new BufferedOutputStream(fstream);
             out.setOutput(stream, StandardCharsets.UTF_8.name());
             out.startDocument(null, true);
 
-            out.startTag(null, "wp");
-            out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
-            out.attribute(null, "width", Integer.toString(wallpaper.width));
-            out.attribute(null, "height", Integer.toString(wallpaper.height));
+            WallpaperData wallpaper;
 
-            out.attribute(null, "cropLeft", Integer.toString(wallpaper.cropHint.left));
-            out.attribute(null, "cropTop", Integer.toString(wallpaper.cropHint.top));
-            out.attribute(null, "cropRight", Integer.toString(wallpaper.cropHint.right));
-            out.attribute(null, "cropBottom", Integer.toString(wallpaper.cropHint.bottom));
-
-            if (wallpaper.padding.left != 0) {
-                out.attribute(null, "paddingLeft", Integer.toString(wallpaper.padding.left));
+            wallpaper = mWallpaperMap.get(userId);
+            if (wallpaper != null) {
+                writeWallpaperAttributes(out, "wp", wallpaper);
             }
-            if (wallpaper.padding.top != 0) {
-                out.attribute(null, "paddingTop", Integer.toString(wallpaper.padding.top));
+            wallpaper = mLockWallpaperMap.get(userId);
+            if (wallpaper != null) {
+                writeWallpaperAttributes(out, "kwp", wallpaper);
             }
-            if (wallpaper.padding.right != 0) {
-                out.attribute(null, "paddingRight", Integer.toString(wallpaper.padding.right));
-            }
-            if (wallpaper.padding.bottom != 0) {
-                out.attribute(null, "paddingBottom", Integer.toString(wallpaper.padding.bottom));
-            }
-
-            out.attribute(null, "name", wallpaper.name);
-            if (wallpaper.wallpaperComponent != null
-                    && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
-                out.attribute(null, "component",
-                        wallpaper.wallpaperComponent.flattenToShortString());
-            }
-            out.endTag(null, "wp");
 
             out.endDocument();
-            stream.flush();
-            FileUtils.sync(stream);
-            stream.close();
+
+            stream.flush(); // also flushes fstream
+            FileUtils.sync(fstream);
+            stream.close(); // also closes fstream
             journal.commit();
         } catch (IOException e) {
             IoUtils.closeQuietly(stream);
             journal.rollback();
         }
+    }
+
+    private void writeWallpaperAttributes(XmlSerializer out, String tag, WallpaperData wallpaper)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        out.startTag(null, tag);
+        out.attribute(null, "id", Integer.toString(wallpaper.wallpaperId));
+        out.attribute(null, "width", Integer.toString(wallpaper.width));
+        out.attribute(null, "height", Integer.toString(wallpaper.height));
+
+        out.attribute(null, "cropLeft", Integer.toString(wallpaper.cropHint.left));
+        out.attribute(null, "cropTop", Integer.toString(wallpaper.cropHint.top));
+        out.attribute(null, "cropRight", Integer.toString(wallpaper.cropHint.right));
+        out.attribute(null, "cropBottom", Integer.toString(wallpaper.cropHint.bottom));
+
+        if (wallpaper.padding.left != 0) {
+            out.attribute(null, "paddingLeft", Integer.toString(wallpaper.padding.left));
+        }
+        if (wallpaper.padding.top != 0) {
+            out.attribute(null, "paddingTop", Integer.toString(wallpaper.padding.top));
+        }
+        if (wallpaper.padding.right != 0) {
+            out.attribute(null, "paddingRight", Integer.toString(wallpaper.padding.right));
+        }
+        if (wallpaper.padding.bottom != 0) {
+            out.attribute(null, "paddingBottom", Integer.toString(wallpaper.padding.bottom));
+        }
+
+        out.attribute(null, "name", wallpaper.name);
+        if (wallpaper.wallpaperComponent != null
+                && !wallpaper.wallpaperComponent.equals(mImageWallpaper)) {
+            out.attribute(null, "component",
+                    wallpaper.wallpaperComponent.flattenToShortString());
+        }
+        out.endTag(null, tag);
     }
 
     private void migrateFromOld() {
@@ -1753,8 +1775,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         WallpaperData wallpaper = null;
         boolean success = false;
         synchronized (mLock) {
-            loadSettingsLocked(0);
-            wallpaper = mWallpaperMap.get(0);
+            loadSettingsLocked(UserHandle.USER_SYSTEM);
+            wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
             wallpaper.wallpaperId = makeWallpaperIdLocked();    // always bump id at restore
             if (wallpaper.nextWallpaperComponent != null
                     && !wallpaper.nextWallpaperComponent.equals(mImageWallpaper)) {
@@ -1788,11 +1810,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         if (!success) {
             Slog.e(TAG, "Failed to restore wallpaper: '" + wallpaper.name + "'");
             wallpaper.name = "";
-            getWallpaperDir(0).delete();
+            getWallpaperDir(UserHandle.USER_SYSTEM).delete();
         }
 
         synchronized (mLock) {
-            saveSettingsLocked(wallpaper);
+            saveSettingsLocked(UserHandle.USER_SYSTEM);
         }
     }
 
