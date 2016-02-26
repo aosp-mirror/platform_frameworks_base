@@ -34,6 +34,8 @@ import static com.android.server.am.ActivityManagerService.LOCK_SCREEN_SHOWN;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 
+import static com.android.server.am.ActivityRecord.STARTING_WINDOW_REMOVED;
+import static com.android.server.am.ActivityRecord.STARTING_WINDOW_SHOWN;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.MOVING;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -63,7 +65,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -1845,10 +1846,11 @@ final class ActivityStack {
                     continue;
                 }
 
-                if (r.state == ActivityState.INITIALIZING && r.mStartingWindowShown) {
+                if (r.state == ActivityState.INITIALIZING
+                        && r.mStartingWindowState == STARTING_WINDOW_SHOWN) {
                     if (DEBUG_VISIBILITY) Slog.w(TAG_VISIBILITY,
                             "Found orphaned starting window " + r);
-                    r.mStartingWindowShown = false;
+                    r.mStartingWindowState = STARTING_WINDOW_REMOVED;
                     mWindowManager.removeAppStartingWindow(r.appToken);
                 }
             }
@@ -2263,7 +2265,7 @@ final class ActivityStack {
                             mService.compatibilityInfoForPackageLocked(next.info.applicationInfo),
                             next.nonLocalizedLabel, next.labelRes, next.icon, next.logo,
                             next.windowFlags, null, true);
-                    next.mStartingWindowShown = true;
+                    next.mStartingWindowState = STARTING_WINDOW_SHOWN;
                 }
                 mStackSupervisor.startSpecificActivityLocked(next, true, false);
                 if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -2296,7 +2298,7 @@ final class ActivityStack {
                             next.nonLocalizedLabel,
                             next.labelRes, next.icon, next.logo, next.windowFlags,
                             null, true);
-                    next.mStartingWindowShown = true;
+                    next.mStartingWindowState = STARTING_WINDOW_SHOWN;
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Restarting: " + next);
             }
@@ -2529,7 +2531,7 @@ final class ActivityStack {
                                 r.info.applicationInfo), r.nonLocalizedLabel,
                         r.labelRes, r.icon, r.logo, r.windowFlags,
                         prev != null ? prev.appToken : null, showStartingIcon);
-                r.mStartingWindowShown = true;
+                r.mStartingWindowState = STARTING_WINDOW_SHOWN;
             }
         } else {
             // If this is the first activity, don't do any fancy animations,
