@@ -296,12 +296,9 @@ void BakedOpRenderer::prepareRender(const Rect* dirtyBounds, const ClipBase* cli
         }
     }
 
-    // dirty offscreenbuffer
-    if (dirtyBounds && mRenderTarget.offscreenBuffer) {
-        // register layer damage to draw-back region
-        android::Rect dirty(dirtyBounds->left, dirtyBounds->top,
-                dirtyBounds->right, dirtyBounds->bottom);
-        mRenderTarget.offscreenBuffer->region.orSelf(dirty);
+    if (dirtyBounds) {
+        // dirty offscreenbuffer if present
+        dirtyRenderTarget(*dirtyBounds);
     }
 }
 
@@ -329,29 +326,9 @@ void BakedOpRenderer::renderFunctor(const FunctorOp& op, const BakedOpState& sta
     mRenderState.invokeFunctor(op.functor, DrawGlInfo::kModeDraw, &info);
 }
 
-#define VALIDATE_RECT_ARG(rect, arg) \
-        ((isnanf(rect.arg) || rect.arg < -10000 || rect.arg > 10000) ? (\
-            ALOGW("suspicious " #rect "." #arg "! %f", rect.arg),\
-            false) : true)
-
-#define VALIDATE_RECT(rect) \
-    VALIDATE_RECT_ARG(rect, bottom) & \
-    VALIDATE_RECT_ARG(rect, left) & \
-    VALIDATE_RECT_ARG(rect, top) & \
-    VALIDATE_RECT_ARG(rect, right)
-
 void BakedOpRenderer::dirtyRenderTarget(const Rect& uiDirty) {
     if (mRenderTarget.offscreenBuffer) {
-        bool valid = VALIDATE_RECT(uiDirty);
-        android::Rect dirty;
-        if (valid) {
-            dirty = android::Rect(uiDirty.left, uiDirty.top, uiDirty.right, uiDirty.bottom);
-        } else {
-            dirty = android::Rect(
-                    mRenderTarget.offscreenBuffer->viewportWidth,
-                    mRenderTarget.offscreenBuffer->viewportHeight);
-        }
-        mRenderTarget.offscreenBuffer->region.orSelf(dirty);
+        mRenderTarget.offscreenBuffer->dirty(uiDirty);
     }
 }
 
