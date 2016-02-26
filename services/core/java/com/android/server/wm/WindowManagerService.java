@@ -20,6 +20,7 @@ import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -362,6 +363,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowManagerPolicy mPolicy = new PhoneWindowManager();
 
     final IActivityManager mActivityManager;
+    final ActivityManagerInternal mAmInternal;
 
     final AppOpsManager mAppOps;
 
@@ -902,6 +904,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         mActivityManager = ActivityManagerNative.getDefault();
+        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
                 new AppOpsManager.OnOpChangedInternalListener() {
@@ -7606,6 +7609,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int WINDOW_REPLACEMENT_TIMEOUT = 46;
 
+        public static final int NOTIFY_APP_TRANSITION_STARTING = 47;
+        public static final int NOTIFY_STARTING_WINDOW_DRAWN = 48;
+
         /**
          * Used to denote that an integer field in a message will not be used.
          */
@@ -8202,6 +8208,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         token.clearTimedoutReplacesLocked();
                     }
+                }
+                case NOTIFY_APP_TRANSITION_STARTING: {
+                    mAmInternal.notifyAppTransitionStarting(msg.arg1);
+                }
+                break;
+                case NOTIFY_STARTING_WINDOW_DRAWN: {
+                    mAmInternal.notifyStartingWindowDrawn();
                 }
                 break;
             }
