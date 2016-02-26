@@ -20,8 +20,8 @@
 #include <cutils/process_name.h>
 #include <cutils/properties.h>
 #include <cutils/trace.h>
-#include <nativeloader/native_loader.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <nativeloader/native_loader.h>
 #include <private/android_filesystem_config.h>  // for AID_SYSTEM
 
 namespace android {
