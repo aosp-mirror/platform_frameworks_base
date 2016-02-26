@@ -16,16 +16,21 @@
 
 package com.android.systemui.recents.events.activity;
 
+import android.graphics.Rect;
+
 import com.android.systemui.recents.events.EventBus;
 
 /**
- * Fires when the user invoked the gesture to dock the top/left task.
+ * Fires when the user invoked the gesture to dock the top/left task after we called into window
+ * manager and before we start recents.
  */
-public class DockingTopTaskEvent extends EventBus.Event {
+public class DockedTopTaskEvent extends EventBus.Event {
 
     public int dragMode;
+    public Rect initialRect;
 
-    public DockingTopTaskEvent(int dragMode) {
+    public DockedTopTaskEvent(int dragMode, Rect initialRect) {
         this.dragMode = dragMode;
+        this.initialRect = initialRect;
     }
 }

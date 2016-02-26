@@ -53,7 +53,7 @@ import com.android.internal.policy.DockedDividerUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.activity.DockingTopTaskEvent;
+import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.UndockingTaskEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
@@ -123,6 +123,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private final Rect mDockedInsetRect = new Rect();
     private final Rect mOtherInsetRect = new Rect();
     private final Rect mLastResizeRect = new Rect();
+    private final Rect mDisplayRect = new Rect();
     private final WindowManagerProxy mWindowManagerProxy = WindowManagerProxy.getInstance();
     private DividerWindowManager mWindowManager;
     private VelocityTracker mVelocityTracker;
@@ -133,7 +134,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private boolean mAnimateAfterRecentsDrawn;
     private boolean mGrowAfterRecentsDrawn;
     private boolean mGrowRecents;
-    private Animator mCurrentAnimator;
+    private ValueAnimator mCurrentAnimator;
+    private boolean mEntranceAnimationRunning;
 
     private final AccessibilityDelegate mHandleDelegate = new AccessibilityDelegate() {
         @Override
@@ -411,6 +413,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 mWindowManagerProxy.setResizing(false);
                 mDockSide = WindowManager.DOCKED_INVALID;
                 mCurrentAnimator = null;
+                mEntranceAnimationRunning = false;
             }
         });
         mCurrentAnimator = anim;
@@ -594,7 +597,18 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
 
         mLastResizeRect.set(mDockedRect);
-        if (taskPosition != TASK_POSITION_SAME) {
+        if (mEntranceAnimationRunning && taskPosition != TASK_POSITION_SAME) {
+            if (mCurrentAnimator != null) {
+                calculateBoundsForPosition(taskPosition, mDockSide, mDockedTaskRect);
+            } else {
+                calculateBoundsForPosition(isHorizontalDivision() ? mDisplayHeight : mDisplayWidth,
+                        mDockSide, mDockedTaskRect);
+            }
+            calculateBoundsForPosition(taskPosition, DockedDividerUtils.invertDockSide(mDockSide),
+                    mOtherTaskRect);
+            mWindowManagerProxy.resizeDockedStack(mDockedRect, mDockedTaskRect, null,
+                    mOtherTaskRect, null);
+        } else if (taskPosition != TASK_POSITION_SAME) {
             calculateBoundsForPosition(position, DockedDividerUtils.invertDockSide(mDockSide),
                     mOtherRect);
             int dockSideInverted = DockedDividerUtils.invertDockSide(mDockSide);
@@ -610,16 +624,17 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
             calculateBoundsForPosition(taskPositionDocked, mDockSide, mDockedTaskRect);
             calculateBoundsForPosition(taskPositionOther, dockSideInverted, mOtherTaskRect);
+            mDisplayRect.set(0, 0, mDisplayWidth, mDisplayHeight);
             alignTopLeft(mDockedRect, mDockedTaskRect);
             alignTopLeft(mOtherRect, mOtherTaskRect);
             mDockedInsetRect.set(mDockedTaskRect);
             mOtherInsetRect.set(mOtherTaskRect);
             if (dockSideTopLeft(mDockSide)) {
-                alignTopLeft(mDockedRect, mDockedInsetRect);
-                alignBottomRight(mOtherRect, mOtherInsetRect);
+                alignTopLeft(mDisplayRect, mDockedInsetRect);
+                alignBottomRight(mDisplayRect, mOtherInsetRect);
             } else {
-                alignBottomRight(mDockedRect, mDockedInsetRect);
-                alignTopLeft(mOtherRect, mOtherInsetRect);
+                alignBottomRight(mDisplayRect, mDockedInsetRect);
+                alignTopLeft(mDisplayRect, mOtherInsetRect);
             }
             applyDismissingParallax(mDockedTaskRect, mDockSide, taskSnapTarget, position,
                     taskPositionDocked);
@@ -638,6 +653,9 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     private float getDimFraction(int position, SnapTarget dismissTarget) {
+        if (mEntranceAnimationRunning) {
+            return 0f;
+        }
         float fraction = mSnapAlgorithm.calculateDismissingFraction(position);
         fraction = Math.max(0, Math.min(fraction, 1f));
         fraction = DIM_INTERPOLATOR.getInterpolation(fraction);
@@ -839,12 +857,18 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         }
     }
 
-    public final void onBusEvent(DockingTopTaskEvent dockingEvent) {
-        if (dockingEvent.dragMode == NavigationBarGestureHelper.DRAG_MODE_NONE) {
+    public final void onBusEvent(DockedTopTaskEvent event) {
+        if (event.dragMode == NavigationBarGestureHelper.DRAG_MODE_NONE) {
             mGrowAfterRecentsDrawn = false;
             mAnimateAfterRecentsDrawn = true;
             startDragging(false /* animate */, false /* touching */);
         }
+        updateDockSide();
+        int position = DockedDividerUtils.calculatePositionForBounds(event.initialRect,
+                mDockSide, mDividerSize);
+        mEntranceAnimationRunning = true;
+        resizeStack(position, mSnapAlgorithm.getMiddleTarget().position,
+                mSnapAlgorithm.getMiddleTarget());
     }
 
     public final void onBusEvent(RecentsDrawnEvent drawnEvent) {

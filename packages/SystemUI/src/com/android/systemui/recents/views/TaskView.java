@@ -147,6 +147,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     AnimateableViewBounds mViewBounds;
 
     private AnimatorSet mTransformAnimation;
+    private final TaskViewTransform mTargetAnimationTransform = new TaskViewTransform();
     private ArrayList<Animator> mTmpAnimators = new ArrayList<>();
 
     View mContent;
@@ -319,6 +320,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             // Create the animator
             mTransformAnimation = toAnimation.createAnimator(mTmpAnimators);
             mTransformAnimation.start();
+            mTargetAnimationTransform.copyFrom(toTransform);
         }
     }
 
@@ -335,6 +337,14 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         mActionButtonView.setScaleY(1f);
         mActionButtonView.setAlpha(0f);
         mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
+    }
+
+    /**
+     * @return whether we are animating towards {@param transform}
+     */
+    boolean isAnimatingTo(TaskViewTransform transform) {
+        return mTransformAnimation != null && mTransformAnimation.isStarted()
+                && mTargetAnimationTransform.isSame(transform);
     }
 
     /**

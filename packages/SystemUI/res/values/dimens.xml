@@ -307,6 +307,9 @@
     <!-- The padding between freeform workspace tasks -->
     <dimen name="recents_freeform_workspace_task_padding">8dp</dimen>
 
+    <!-- The offsets the tasks animate from when recents is launched while docking -->
+    <dimen name="recents_task_view_launched_while_docking_offset">144dp</dimen>
+
     <!-- Space reserved for the cards behind the top card in the bottom stack -->
     <dimen name="bottom_stack_peek_amount">12dp</dimen>
 
