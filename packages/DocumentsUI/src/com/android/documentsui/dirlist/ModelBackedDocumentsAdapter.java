@@ -24,6 +24,7 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
@@ -180,6 +181,7 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
         return hiddenItems;
     }
 
+    @VisibleForTesting
     @Override
     public void unhide(SparseArray<String> ids) {
         if (DEBUG) Log.d(TAG, "Unhiding ids: " + ids);
