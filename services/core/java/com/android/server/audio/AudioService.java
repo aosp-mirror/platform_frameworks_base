@@ -222,7 +222,6 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_UNMUTE_STREAM = 24;
     private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 25;
     private static final int MSG_INDICATE_SYSTEM_READY = 26;
-    private static final int MSG_PERSIST_MASTER_MONO = 27;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -827,10 +826,7 @@ public class AudioService extends IAudioService.Stub {
         }
 
         // Restore mono mode
-        final boolean masterMono = System.getIntForUser(
-                mContentResolver, System.MASTER_MONO,
-                0 /* default */, UserHandle.USER_CURRENT) == 1;
-        AudioSystem.setMasterMono(masterMono);
+        updateMasterMono(mContentResolver);
 
         // Restore ringer mode
         setRingerModeInt(getRingerModeInternal(), false);
@@ -1015,6 +1011,16 @@ public class AudioService extends IAudioService.Stub {
                 0);
     }
 
+    private void updateMasterMono(ContentResolver cr)
+    {
+        final boolean masterMono = System.getIntForUser(
+                cr, System.MASTER_MONO, 0 /* default */, UserHandle.USER_CURRENT) == 1;
+        if (DEBUG_VOL) {
+            Log.d(TAG, String.format("Master mono %b", masterMono));
+        }
+        AudioSystem.setMasterMono(masterMono);
+    }
+
     private void readPersistedSettings() {
         final ContentResolver cr = mContentResolver;
 
@@ -1091,13 +1097,7 @@ public class AudioService extends IAudioService.Stub {
         }
         AudioSystem.muteMicrophone(microphoneMute);
 
-        final boolean masterMono = System.getIntForUser(
-                cr, System.MASTER_MONO, 0 /* default */, UserHandle.USER_CURRENT) == 1;
-        if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Master mono %b, user=%d", masterMono, currentUser));
-        }
-        AudioSystem.setMasterMono(masterMono);
-        broadcastMasterMonoStatus(masterMono);
+        updateMasterMono(cr);
 
         // Each stream will read its own persisted settings
 
@@ -1853,52 +1853,6 @@ public class AudioService extends IAudioService.Stub {
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId) {
         setMasterMuteInternal(mute, flags, callingPackage, Binder.getCallingUid(),
                 userId);
-    }
-
-    /** @hide */
-    public boolean isMasterMono() {
-        return AudioSystem.getMasterMono();
-    }
-
-    /** @hide */
-    public void setMasterMono(boolean mono, String callingPackage, int userId) {
-        int callingUid = Binder.getCallingUid();
-        // If we are being called by the system check for user we are going to change
-        // so we handle user restrictions correctly.
-        if (callingUid == android.os.Process.SYSTEM_UID) {
-            callingUid = UserHandle.getUid(userId, UserHandle.getAppId(callingUid));
-        }
-
-        if (userId != UserHandle.getCallingUserId() &&
-                mContext.checkCallingOrSelfPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        if (DEBUG_VOL) {
-            Log.d(TAG, String.format("Master mono %b, user=%d", mono, userId));
-        }
-
-        if (getCurrentUserId() == userId) {
-            if (mono != AudioSystem.getMasterMono()) {
-                AudioSystem.setMasterMono(mono);
-                // Post a persist master mono msg
-                sendMsg(mAudioHandler, MSG_PERSIST_MASTER_MONO, SENDMSG_REPLACE, mono ? 1
-                        : 0 /* value */, userId, null /* obj */, 0 /* delay */);
-                // notify apps and settings
-                broadcastMasterMonoStatus(mono);
-            }
-        } else {
-            // Post a persist master mono msg
-            sendMsg(mAudioHandler, MSG_PERSIST_MASTER_MONO, SENDMSG_REPLACE, mono ? 1
-                    : 0 /* value */, userId, null /* obj */, 0 /* delay */);
-        }
-    }
-
-    private void broadcastMasterMonoStatus(boolean mono) {
-        Intent intent = new Intent(AudioManager.MASTER_MONO_CHANGED_ACTION);
-        intent.putExtra(AudioManager.EXTRA_MASTER_MONO, mono);
-        sendBroadcastToAll(intent);
     }
 
     /** @see AudioManager#getStreamVolume(int) */
@@ -4641,13 +4595,6 @@ public class AudioService extends IAudioService.Stub {
                 case MSG_DYN_POLICY_MIX_STATE_UPDATE:
                     onDynPolicyMixStateUpdate((String) msg.obj, msg.arg1);
                     break;
-
-                case MSG_PERSIST_MASTER_MONO:
-                    Settings.System.putIntForUser(mContentResolver,
-                                                 Settings.System.MASTER_MONO,
-                                                 msg.arg1 /* value */,
-                                                 msg.arg2 /* userHandle */);
-                    break;
             }
         }
     }
@@ -4660,6 +4607,8 @@ public class AudioService extends IAudioService.Stub {
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.MASTER_MONO), false, this);
         }
 
         @Override
@@ -4678,6 +4627,7 @@ public class AudioService extends IAudioService.Stub {
                     setRingerModeInt(getRingerModeInternal(), false);
                 }
                 readDockAudioSettings(mContentResolver);
+                updateMasterMono(mContentResolver);
             }
         }
     }
