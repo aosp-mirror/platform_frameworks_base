@@ -662,11 +662,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private int mDeviceProvisionedState = DEVICE_PROVISIONED_UNKNOWN;
 
-    /*
+    /**
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
+     * @hide
      */
-    static {
+    public static void preloadFontCache() {
         Paint p = new Paint();
         p.setAntiAlias(true);
         // We don't care about the result, just the side-effect of measuring.
