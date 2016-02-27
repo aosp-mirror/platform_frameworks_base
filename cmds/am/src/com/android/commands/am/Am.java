@@ -1216,6 +1216,7 @@ public class Am extends BaseCommand {
 
     class MyActivityController extends IActivityController.Stub {
         final String mGdbPort;
+        final boolean mMonkey;
 
         static final int STATE_NORMAL = 0;
         static final int STATE_CRASHED = 1;
@@ -1242,8 +1243,9 @@ public class Am extends BaseCommand {
         Thread mGdbThread;
         boolean mGotGdbPrint;
 
-        MyActivityController(String gdbPort) {
+        MyActivityController(String gdbPort, boolean monkey) {
             mGdbPort = gdbPort;
+            mMonkey = monkey;
         }
 
         @Override
@@ -1443,7 +1445,7 @@ public class Am extends BaseCommand {
             try {
                 printMessageForState();
 
-                mAm.setActivityController(this);
+                mAm.setActivityController(this, mMonkey);
                 mState = STATE_NORMAL;
 
                 InputStreamReader converter = new InputStreamReader(System.in);
@@ -1498,7 +1500,7 @@ public class Am extends BaseCommand {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                mAm.setActivityController(null);
+                mAm.setActivityController(null, mMonkey);
             }
         }
     }
@@ -1506,16 +1508,19 @@ public class Am extends BaseCommand {
     private void runMonitor() throws Exception {
         String opt;
         String gdbPort = null;
+        boolean monkey = false;
         while ((opt=nextOption()) != null) {
             if (opt.equals("--gdb")) {
                 gdbPort = nextArgRequired();
+            } else if (opt.equals("-m")) {
+                monkey = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;
             }
         }
 
-        MyActivityController controller = new MyActivityController(gdbPort);
+        MyActivityController controller = new MyActivityController(gdbPort, monkey);
         controller.run();
     }
 

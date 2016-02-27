@@ -1297,6 +1297,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mSupportsPictureInPicture;
     Rect mDefaultPinnedStackBounds;
     IActivityController mController = null;
+    boolean mControllerIsAMonkey = false;
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
     String mProfileFile;
@@ -11423,11 +11424,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void setActivityController(IActivityController controller) {
+    public void setActivityController(IActivityController controller, boolean imAMonkey) {
         enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "setActivityController()");
         synchronized (this) {
             mController = controller;
+            mControllerIsAMonkey = imAMonkey;
             Watchdog.getInstance().setActivityController(controller);
         }
     }
@@ -11454,7 +11456,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public boolean isUserAMonkey() {
         synchronized (this) {
             // If there is a controller also implies the user is a monkey.
-            return (mUserIsMonkey || mController != null);
+            return (mUserIsMonkey || (mController != null && mControllerIsAMonkey));
         }
     }
 
@@ -14123,10 +14125,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (dumpPackage == null) {
-            if (mAlwaysFinishActivities || mLenientBackgroundCheck || mController != null) {
+            if (mAlwaysFinishActivities || mLenientBackgroundCheck) {
                 pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
-                        + " mLenientBackgroundCheck=" + mLenientBackgroundCheck
-                        + " mController=" + mController);
+                        + " mLenientBackgroundCheck=" + mLenientBackgroundCheck);
+            }
+            if (mController != null) {
+                pw.println("  mController=" + mController
+                        + " mControllerIsAMonkey=" + mControllerIsAMonkey);
             }
             if (dumpAll) {
                 pw.println("  Total persistent processes: " + numPers);

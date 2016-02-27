@@ -1527,7 +1527,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             data.enforceInterface(IActivityManager.descriptor);
             IActivityController watcher = IActivityController.Stub.asInterface(
                     data.readStrongBinder());
-            setActivityController(watcher);
+            boolean imAMonkey = data.readInt() != 0;
+            setActivityController(watcher, imAMonkey);
             reply.writeNoException();
             return true;
         }
@@ -4860,12 +4861,14 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void setActivityController(IActivityController watcher) throws RemoteException
+    public void setActivityController(IActivityController watcher, boolean imAMonkey)
+            throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(watcher != null ? watcher.asBinder() : null);
+        data.writeInt(imAMonkey ? 1 : 0);
         mRemote.transact(SET_ACTIVITY_CONTROLLER_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
