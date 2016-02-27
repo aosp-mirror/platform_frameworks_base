@@ -42,6 +42,7 @@ import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -754,9 +755,16 @@ public abstract class NotificationListenerService extends Service {
     private void maybePopulateRemoteViews(Notification notification) {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N) {
             Builder builder = Builder.recoverBuilder(getContext(), notification);
-            notification.contentView = builder.createContentView();
-            notification.bigContentView = builder.createBigContentView();
-            notification.headsUpContentView = builder.createHeadsUpContentView();
+
+            // Some styles wrap Notification's contentView, bigContentView and headsUpContentView.
+            // First inflate them all, only then set them to avoid recursive wrapping.
+            RemoteViews content = builder.createContentView();
+            RemoteViews big = builder.createBigContentView();
+            RemoteViews headsUp = builder.createHeadsUpContentView();
+
+            notification.contentView = content;
+            notification.bigContentView = big;
+            notification.headsUpContentView = headsUp;
         }
     }
 
