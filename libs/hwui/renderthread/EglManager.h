@@ -70,6 +70,10 @@ public:
     bool makeCurrent(EGLSurface surface, EGLint* errOut = nullptr);
     Frame beginFrame(EGLSurface surface);
     void damageFrame(const Frame& frame, const SkRect& dirty);
+    // If this returns true it is mandatory that swapBuffers is called
+    // if damageFrame is called without subsequent calls to damageFrame().
+    // See EGL_KHR_partial_update for more information
+    bool damageRequiresSwap();
     bool swapBuffers(const Frame& frame, const SkRect& screenDirty);
 
     // Returns true iff the surface is now preserving buffers.

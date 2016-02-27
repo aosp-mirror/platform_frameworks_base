@@ -476,7 +476,7 @@ void CanvasContext::draw() {
     // metrics the frame was swapped at this point
     mCurrentFrameInfo->markSwapBuffers();
 
-    if (drew) {
+    if (drew || mEglManager.damageRequiresSwap()) {
         if (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty))) {
             setSurface(nullptr);
         }
