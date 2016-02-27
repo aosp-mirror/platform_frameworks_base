@@ -423,9 +423,6 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
     private float mMax;
     private int mEllipsizedWidth, mEllipsizedStart, mEllipsizedCount;
 
-    private static final TextPaint sTemp =
-                                new TextPaint();
-
     public static class Metrics extends Paint.FontMetricsInt {
         public int width;
 
