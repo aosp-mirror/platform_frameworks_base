@@ -880,7 +880,7 @@
     <string name="capital_on" msgid="1544682755514494298">"I"</string>
     <string name="capital_off" msgid="6815870386972805832">"O"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Ilovani tanlang"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"“%1$s” ilovasi yordamida bajarish"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"“%1$s” bilan ochish"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Ochish…"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"“%1$s” yordamida ochish"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
@@ -896,8 +896,8 @@
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB qurilma uchun ilovani tanlang"</string>
     <string name="noApplications" msgid="2991814273936504689">"Hech qaysi ilova ushbu amalni bajara olmaydi."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <string name="aerr_application" msgid="932628488013092776">"Baxtga qarshi, <xliff:g id="APPLICATION">%1$s</xliff:g> to‘xtatildi."</string>
-    <string name="aerr_process" msgid="4507058997035697579">"Baxtga qarshi, <xliff:g id="PROCESS">%1$s</xliff:g> jarayoni to‘xtatildi."</string>
+    <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g> ilovasida xatolik yuz berdi."</string>
+    <string name="aerr_process" msgid="4507058997035697579">"<xliff:g id="PROCESS">%1$s</xliff:g> ilovasida xatolik yuz berdi."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> harakati javob bermayapti.\n\nUni yopishni xohlaysizmi?"</string>
