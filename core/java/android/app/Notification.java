@@ -21,7 +21,6 @@ import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -44,7 +43,12 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.TextAppearanceSpan;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -65,7 +69,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -1651,8 +1654,34 @@ public class Notification implements Parcelable
                     + " instance is a custom Parcelable and not allowed in Notification");
             return cs.toString();
         }
+        return removeTextSizeSpans(cs);
+    }
 
-        return cs;
+    private static CharSequence removeTextSizeSpans(CharSequence charSequence) {
+        if (charSequence instanceof Spanned) {
+            Spanned ss = (Spanned) charSequence;
+            Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+            SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+            for (Object span : spans) {
+                Object resultSpan = span;
+                if (span instanceof TextAppearanceSpan) {
+                    TextAppearanceSpan originalSpan = (TextAppearanceSpan) span;
+                    resultSpan = new TextAppearanceSpan(
+                            originalSpan.getFamily(),
+                            originalSpan.getTextStyle(),
+                            -1,
+                            originalSpan.getTextColor(),
+                            originalSpan.getLinkTextColor());
+                } else if (span instanceof RelativeSizeSpan
+                        || span instanceof AbsoluteSizeSpan) {
+                    continue;
+                }
+                builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                        ss.getSpanFlags(span));
+            }
+            return builder;
+        }
+        return charSequence;
     }
 
     public int describeContents() {
