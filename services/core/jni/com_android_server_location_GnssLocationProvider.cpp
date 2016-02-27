@@ -140,7 +140,7 @@ static void sv_status_callback(GpsSvStatus* sv_status)
             ALOGD("Unknown constellation type with Svid = %d.", info.svid);
             info.constellation = GNSS_CONSTELLATION_UNKNOWN;
         }
-        info.snr = sv_status->sv_list[i].snr;
+        info.c_n0_dbhz = sv_status->sv_list[i].snr;
         info.elevation = sv_status->sv_list[i].elevation;
         info.azimuth = sv_status->sv_list[i].azimuth;
         info.flags = GNSS_SV_FLAGS_NONE;
@@ -698,12 +698,12 @@ static void android_location_GnssLocationProvider_delete_aiding_data(JNIEnv* /* 
 }
 
 static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jobject /* obj */,
-        jintArray svidWithFlagArray, jfloatArray snrArray, jfloatArray elevArray,
+        jintArray svidWithFlagArray, jfloatArray cn0Array, jfloatArray elevArray,
         jfloatArray azumArray)
 {
     // this should only be called from within a call to reportSvStatus
     jint* svidWithFlags = env->GetIntArrayElements(svidWithFlagArray, 0);
-    jfloat* snrs = env->GetFloatArrayElements(snrArray, 0);
+    jfloat* cn0s = env->GetFloatArrayElements(cn0Array, 0);
     jfloat* elev = env->GetFloatArrayElements(elevArray, 0);
     jfloat* azim = env->GetFloatArrayElements(azumArray, 0);
 
@@ -713,13 +713,13 @@ static jint android_location_GnssLocationProvider_read_sv_status(JNIEnv* env, jo
         svidWithFlags[i] = (info.svid << SVID_SHIFT_WIDTH) |
             (info.constellation << CONSTELLATION_TYPE_SHIFT_WIDTH) |
             info.flags;
-        snrs[i] = info.snr;
+        cn0s[i] = info.c_n0_dbhz;
         elev[i] = info.elevation;
         azim[i] = info.azimuth;
     }
 
     env->ReleaseIntArrayElements(svidWithFlagArray, svidWithFlags, 0);
-    env->ReleaseFloatArrayElements(snrArray, snrs, 0);
+    env->ReleaseFloatArrayElements(cn0Array, cn0s, 0);
     env->ReleaseFloatArrayElements(elevArray, elev, 0);
     env->ReleaseFloatArrayElements(azumArray, azim, 0);
     return (jint) sGnssSvListSize;
@@ -1095,7 +1095,9 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
     JavaObject object(env, "android/location/GnssClock");
     GpsClockFlags flags = clock->flags;
 
-    SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND, LeapSecond, clock->leap_second);
+    SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND,
+           LeapSecond,
+           static_cast<int32_t>(clock->leap_second));
 
     // GnssClock only supports the more effective HW_CLOCK type, so type
     // handling and documentation complexity has been removed.  To convert the
@@ -1122,18 +1124,18 @@ static jobject translate_gps_clock(JNIEnv* env, GpsClock* clock) {
         break;
     }
 
-    SET(TimeInNs, clock->time_ns);
+    SET(TimeNanos, clock->time_ns);
     SET_IF(GNSS_CLOCK_HAS_TIME_UNCERTAINTY,
-           TimeUncertaintyInNs,
+           TimeUncertaintyNanos,
            clock->time_uncertainty_ns);
-    SET_IF(GNSS_CLOCK_HAS_FULL_BIAS, FullBiasInNs, clock->full_bias_ns);
-    SET_IF(GNSS_CLOCK_HAS_BIAS, BiasInNs, clock->bias_ns);
+    SET_IF(GNSS_CLOCK_HAS_FULL_BIAS, FullBiasNanos, clock->full_bias_ns);
+    SET_IF(GNSS_CLOCK_HAS_BIAS, BiasNanos, clock->bias_ns);
     SET_IF(GNSS_CLOCK_HAS_BIAS_UNCERTAINTY,
-           BiasUncertaintyInNs,
+           BiasUncertaintyNanos,
            clock->bias_uncertainty_ns);
-    SET_IF(GNSS_CLOCK_HAS_DRIFT, DriftInNsPerSec, clock->drift_nsps);
+    SET_IF(GNSS_CLOCK_HAS_DRIFT, DriftNanosPerSecond, clock->drift_nsps);
     SET_IF(GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY,
-           DriftUncertaintyInNsPerSec,
+           DriftUncertaintyNanosPerSecond,
            clock->drift_uncertainty_nsps);
 
     return object.get();
@@ -1143,20 +1145,21 @@ static jobject translate_gnss_clock(JNIEnv* env, GnssClock* clock) {
     JavaObject object(env, "android/location/GnssClock");
     GpsClockFlags flags = clock->flags;
 
-    SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND, LeapSecond, clock->leap_second);
-    SET(Type, static_cast<uint8_t>(GPS_CLOCK_TYPE_LOCAL_HW_TIME));
-    SET(TimeInNs, clock->time_ns);
+    SET_IF(GNSS_CLOCK_HAS_LEAP_SECOND,
+           LeapSecond,
+           static_cast<int32_t>(clock->leap_second));
+    SET(TimeNanos, clock->time_ns);
     SET_IF(GNSS_CLOCK_HAS_TIME_UNCERTAINTY,
-           TimeUncertaintyInNs,
+           TimeUncertaintyNanos,
            clock->time_uncertainty_ns);
-    SET_IF(GNSS_CLOCK_HAS_FULL_BIAS, FullBiasInNs, clock->full_bias_ns);
-    SET_IF(GNSS_CLOCK_HAS_BIAS, BiasInNs, clock->bias_ns);
+    SET_IF(GNSS_CLOCK_HAS_FULL_BIAS, FullBiasNanos, clock->full_bias_ns);
+    SET_IF(GNSS_CLOCK_HAS_BIAS, BiasNanos, clock->bias_ns);
     SET_IF(GNSS_CLOCK_HAS_BIAS_UNCERTAINTY,
-           BiasUncertaintyInNs,
+           BiasUncertaintyNanos,
            clock->bias_uncertainty_ns);
-    SET_IF(GNSS_CLOCK_HAS_DRIFT, DriftInNsPerSec, clock->drift_nsps);
+    SET_IF(GNSS_CLOCK_HAS_DRIFT, DriftNanosPerSecond, clock->drift_nsps);
     SET_IF(GNSS_CLOCK_HAS_DRIFT_UNCERTAINTY,
-           DriftUncertaintyInNsPerSec,
+           DriftUncertaintyNanosPerSecond,
            clock->drift_uncertainty_nsps);
 
     SET(HardwareClockDiscontinuityCount, clock->hw_clock_discontinuity_count);
@@ -1168,41 +1171,30 @@ static jobject translate_gps_measurement(JNIEnv* env,
                                          GpsMeasurement* measurement) {
     JavaObject object(env, "android/location/GnssMeasurement");
     GpsMeasurementFlags flags = measurement->flags;
-    SET(Svid, static_cast<int16_t>(measurement->prn));
+    SET(Svid, static_cast<int32_t>(measurement->prn));
     if (measurement->prn >= 1 || measurement->prn <= 32) {
-        SET(ConstellationType, static_cast<uint8_t>(GNSS_CONSTELLATION_GPS));
+        SET(ConstellationType, static_cast<int32_t>(GNSS_CONSTELLATION_GPS));
     } else {
         ALOGD("Unknown constellation type with Svid = %d.", measurement->prn);
         SET(ConstellationType,
-            static_cast<uint8_t>(GNSS_CONSTELLATION_UNKNOWN));
+            static_cast<int32_t>(GNSS_CONSTELLATION_UNKNOWN));
     }
-    SET(TimeOffsetInNs, measurement->time_offset_ns);
-    SET(State, measurement->state);
-    SET(ReceivedSvTimeInNs, measurement->received_gps_tow_ns);
-    SET(ReceivedSvTimeUncertaintyInNs,
+    SET(TimeOffsetNanos, measurement->time_offset_ns);
+    SET(State, static_cast<int32_t>(measurement->state));
+    SET(ReceivedSvTimeNanos, measurement->received_gps_tow_ns);
+    SET(ReceivedSvTimeUncertaintyNanos,
         measurement->received_gps_tow_uncertainty_ns);
-    SET(Cn0InDbHz, measurement->c_n0_dbhz);
-    SET(PseudorangeRateInMetersPerSec, measurement->pseudorange_rate_mps);
-    SET(PseudorangeRateUncertaintyInMetersPerSec,
+    SET(Cn0DbHz, measurement->c_n0_dbhz);
+    SET(PseudorangeRateMetersPerSecond, measurement->pseudorange_rate_mps);
+    SET(PseudorangeRateUncertaintyMetersPerSecond,
         measurement->pseudorange_rate_uncertainty_mps);
-    SET(AccumulatedDeltaRangeState, measurement->accumulated_delta_range_state);
-    SET(AccumulatedDeltaRangeInMeters, measurement->accumulated_delta_range_m);
-    SET(AccumulatedDeltaRangeUncertaintyInMeters,
+    SET(AccumulatedDeltaRangeState,
+        static_cast<int32_t>(measurement->accumulated_delta_range_state));
+    SET(AccumulatedDeltaRangeMeters, measurement->accumulated_delta_range_m);
+    SET(AccumulatedDeltaRangeUncertaintyMeters,
         measurement->accumulated_delta_range_uncertainty_m);
-    SET_IF(GNSS_MEASUREMENT_HAS_PSEUDORANGE,
-           PseudorangeInMeters,
-           measurement->pseudorange_m);
-    SET_IF(GNSS_MEASUREMENT_HAS_PSEUDORANGE_UNCERTAINTY,
-           PseudorangeUncertaintyInMeters,
-           measurement->pseudorange_uncertainty_m);
-    SET_IF(GNSS_MEASUREMENT_HAS_CODE_PHASE,
-           CodePhaseInChips,
-           measurement->code_phase_chips);
-    SET_IF(GNSS_MEASUREMENT_HAS_CODE_PHASE_UNCERTAINTY,
-           CodePhaseUncertaintyInChips,
-           measurement->code_phase_uncertainty_chips);
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY,
-           CarrierFrequencyInHz,
+           CarrierFrequencyHz,
            measurement->carrier_frequency_hz);
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_CYCLES,
            CarrierCycles,
@@ -1213,33 +1205,8 @@ static jobject translate_gps_measurement(JNIEnv* env,
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY,
            CarrierPhaseUncertainty,
            measurement->carrier_phase_uncertainty);
-    SET(LossOfLock, measurement->loss_of_lock);
-    SET_IF(GNSS_MEASUREMENT_HAS_BIT_NUMBER, BitNumber, measurement->bit_number);
-    SET_IF(GNSS_MEASUREMENT_HAS_TIME_FROM_LAST_BIT,
-           TimeFromLastBitInMs,
-           measurement->time_from_last_bit_ms);
-    SET_IF(GNSS_MEASUREMENT_HAS_DOPPLER_SHIFT,
-           DopplerShiftInHz,
-           measurement->doppler_shift_hz);
-    SET_IF(GNSS_MEASUREMENT_HAS_DOPPLER_SHIFT_UNCERTAINTY,
-           DopplerShiftUncertaintyInHz,
-           measurement->doppler_shift_uncertainty_hz);
     SET(MultipathIndicator, measurement->multipath_indicator);
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
-    SET_IF(GNSS_MEASUREMENT_HAS_ELEVATION,
-           ElevationInDeg,
-           measurement->elevation_deg);
-    SET_IF(GNSS_MEASUREMENT_HAS_ELEVATION_UNCERTAINTY,
-           ElevationUncertaintyInDeg,
-           measurement->elevation_uncertainty_deg);
-    SET_IF(GNSS_MEASUREMENT_HAS_AZIMUTH,
-           AzimuthInDeg,
-           measurement->azimuth_deg);
-    SET_IF(GNSS_MEASUREMENT_HAS_AZIMUTH_UNCERTAINTY,
-           AzimuthUncertaintyInDeg,
-           measurement->azimuth_uncertainty_deg);
-    SET(UsedInFix,
-        (flags & GNSS_MEASUREMENT_HAS_USED_IN_FIX) && measurement->used_in_fix);
 
     return object.get();
 }
@@ -1250,34 +1217,23 @@ static jobject translate_gnss_measurement(JNIEnv* env,
     GpsMeasurementFlags flags = measurement->flags;
 
     SET(Svid, measurement->svid);
-    SET(ConstellationType, measurement->constellation);
-    SET(TimeOffsetInNs, measurement->time_offset_ns);
-    SET(State, measurement->state);
-    SET(ReceivedSvTimeInNs, measurement->received_sv_time_in_ns);
-    SET(ReceivedSvTimeUncertaintyInNs,
+    SET(ConstellationType, static_cast<int32_t>(measurement->constellation));
+    SET(TimeOffsetNanos, measurement->time_offset_ns);
+    SET(State, static_cast<int32_t>(measurement->state));
+    SET(ReceivedSvTimeNanos, measurement->received_sv_time_in_ns);
+    SET(ReceivedSvTimeUncertaintyNanos,
         measurement->received_sv_time_uncertainty_in_ns);
-    SET(Cn0InDbHz, measurement->c_n0_dbhz);
-    SET(PseudorangeRateInMetersPerSec, measurement->pseudorange_rate_mps);
-    SET(PseudorangeRateUncertaintyInMetersPerSec,
+    SET(Cn0DbHz, measurement->c_n0_dbhz);
+    SET(PseudorangeRateMetersPerSecond, measurement->pseudorange_rate_mps);
+    SET(PseudorangeRateUncertaintyMetersPerSecond,
         measurement->pseudorange_rate_uncertainty_mps);
-    SET(AccumulatedDeltaRangeState, measurement->accumulated_delta_range_state);
-    SET(AccumulatedDeltaRangeInMeters, measurement->accumulated_delta_range_m);
-    SET(AccumulatedDeltaRangeUncertaintyInMeters,
+    SET(AccumulatedDeltaRangeState,
+        static_cast<int32_t>(measurement->accumulated_delta_range_state));
+    SET(AccumulatedDeltaRangeMeters, measurement->accumulated_delta_range_m);
+    SET(AccumulatedDeltaRangeUncertaintyMeters,
         measurement->accumulated_delta_range_uncertainty_m);
-    SET_IF(GNSS_MEASUREMENT_HAS_PSEUDORANGE,
-           PseudorangeInMeters,
-           measurement->pseudorange_m);
-    SET_IF(GNSS_MEASUREMENT_HAS_PSEUDORANGE_UNCERTAINTY,
-           PseudorangeUncertaintyInMeters,
-           measurement->pseudorange_uncertainty_m);
-    SET_IF(GNSS_MEASUREMENT_HAS_CODE_PHASE,
-           CodePhaseInChips,
-           measurement->code_phase_chips);
-    SET_IF(GNSS_MEASUREMENT_HAS_CODE_PHASE_UNCERTAINTY,
-           CodePhaseUncertaintyInChips,
-           measurement->code_phase_uncertainty_chips);
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_FREQUENCY,
-           CarrierFrequencyInHz,
+           CarrierFrequencyHz,
            measurement->carrier_frequency_hz);
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_CYCLES,
            CarrierCycles,
@@ -1288,32 +1244,8 @@ static jobject translate_gnss_measurement(JNIEnv* env,
     SET_IF(GNSS_MEASUREMENT_HAS_CARRIER_PHASE_UNCERTAINTY,
            CarrierPhaseUncertainty,
            measurement->carrier_phase_uncertainty);
-    SET_IF(GNSS_MEASUREMENT_HAS_BIT_NUMBER, BitNumber, measurement->bit_number);
-    SET_IF(GNSS_MEASUREMENT_HAS_TIME_FROM_LAST_BIT,
-           TimeFromLastBitInMs,
-           measurement->time_from_last_bit_ms);
-    SET_IF(GNSS_MEASUREMENT_HAS_DOPPLER_SHIFT,
-           DopplerShiftInHz,
-           measurement->doppler_shift_hz);
-    SET_IF(GNSS_MEASUREMENT_HAS_DOPPLER_SHIFT_UNCERTAINTY,
-           DopplerShiftUncertaintyInHz,
-           measurement->doppler_shift_uncertainty_hz);
     SET(MultipathIndicator, measurement->multipath_indicator);
     SET_IF(GNSS_MEASUREMENT_HAS_SNR, SnrInDb, measurement->snr_db);
-    SET_IF(GNSS_MEASUREMENT_HAS_ELEVATION,
-           ElevationInDeg,
-           measurement->elevation_deg);
-    SET_IF(GNSS_MEASUREMENT_HAS_ELEVATION_UNCERTAINTY,
-           ElevationUncertaintyInDeg,
-           measurement->elevation_uncertainty_deg);
-    SET_IF(GNSS_MEASUREMENT_HAS_AZIMUTH,
-           AzimuthInDeg,
-           measurement->azimuth_deg);
-    SET_IF(GNSS_MEASUREMENT_HAS_AZIMUTH_UNCERTAINTY,
-           AzimuthUncertaintyInDeg,
-           measurement->azimuth_uncertainty_deg);
-    SET(UsedInFix,
-        (flags & GNSS_MEASUREMENT_HAS_USED_IN_FIX) && measurement->used_in_fix);
 
     return object.get();
 }
@@ -1493,21 +1425,22 @@ static jobject translate_gps_navigation_message(JNIEnv* env, GpsNavigationMessag
         return NULL;
     }
     JavaObject object(env, "android/location/GnssNavigationMessage");
-    SET(Svid, static_cast<int16_t>(message->prn));
+    SET(Svid, static_cast<int32_t>(message->prn));
     if (message->prn >=1 && message->prn <= 32) {
-        SET(ConstellationType, static_cast<uint8_t>(GNSS_CONSTELLATION_GPS));
+        SET(ConstellationType, static_cast<int32_t>(GNSS_CONSTELLATION_GPS));
         // Legacy driver doesn't set the higher byte to constellation type
         // correctly. Set the higher byte to 'GPS'.
-        SET(Type, static_cast<int16_t>(message->type | 0x0100));
+        SET(Type, static_cast<int32_t>(message->type | 0x0100));
     } else {
         ALOGD("Unknown constellation type with Svid = %d.", message->prn);
         SET(ConstellationType,
-            static_cast<uint8_t>(GNSS_CONSTELLATION_UNKNOWN));
-        SET(Type, static_cast<int16_t>(GNSS_NAVIGATION_MESSAGE_TYPE_UNKNOWN));
+            static_cast<int32_t>(GNSS_CONSTELLATION_UNKNOWN));
+        SET(Type, static_cast<int32_t>(GNSS_NAVIGATION_MESSAGE_TYPE_UNKNOWN));
     }
-    SET(MessageId, message->message_id);
-    SET(SubmessageId, message->submessage_id);
+    SET(MessageId, static_cast<int32_t>(message->message_id));
+    SET(SubmessageId, static_cast<int32_t>(message->submessage_id));
     object.callSetter("setData", data, dataLength);
+    SET(Status, static_cast<int32_t>(message->status));
     return object.get();
 }
 
@@ -1520,11 +1453,12 @@ static jobject translate_gnss_navigation_message(
         return NULL;
     }
     JavaObject object(env, "android/location/GnssNavigationMessage");
-    SET(Type, message->type);
-    SET(Svid, message->svid);
-    SET(MessageId, message->message_id);
-    SET(SubmessageId, message->submessage_id);
+    SET(Type, static_cast<int32_t>(message->type));
+    SET(Svid, static_cast<int32_t>(message->svid));
+    SET(MessageId, static_cast<int32_t>(message->message_id));
+    SET(SubmessageId, static_cast<int32_t>(message->submessage_id));
     object.callSetter("setData", data, dataLength);
+    SET(Status, static_cast<int32_t>(message->status));
     return object.get();
 }
 

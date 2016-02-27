@@ -73,7 +73,8 @@ public abstract class GnssNavigationMessageProvider
                 status = GnssNavigationMessageEvent.STATUS_NOT_SUPPORTED;
                 break;
             case RESULT_GPS_LOCATION_DISABLED:
-                status = GnssNavigationMessageEvent.STATUS_GPS_LOCATION_DISABLED;
+                status = GnssNavigationMessageEvent
+                        .STATUS_GNSS_LOCATION_DISABLED;
                 break;
             case RESULT_UNKNOWN:
                 return null;

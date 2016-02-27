@@ -72,7 +72,7 @@ public abstract class GnssMeasurementsProvider
                 status = GnssMeasurementsEvent.STATUS_NOT_SUPPORTED;
                 break;
             case RESULT_GPS_LOCATION_DISABLED:
-                status = GnssMeasurementsEvent.STATUS_GPS_LOCATION_DISABLED;
+                status = GnssMeasurementsEvent.STATUS_GNSS_LOCATION_DISABLED;
                 break;
             case RESULT_UNKNOWN:
                 return null;

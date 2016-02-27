@@ -33,46 +33,46 @@ import java.util.Collections;
  * Events are delivered to registered instances of {@link Callback}.
  */
 public final class GnssMeasurementsEvent implements Parcelable {
-    /** The status of GPS measurements event. */
+    /** The status of GNSS measurements event. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GPS_LOCATION_DISABLED})
+    @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_GNSS_LOCATION_DISABLED})
     public @interface GnssMeasurementsStatus {}
 
     /**
-     * The system does not support tracking of GPS Measurements. This status will not change in the
+     * The system does not support tracking of GNSS Measurements. This status will not change in the
      * future.
      */
     public static final int STATUS_NOT_SUPPORTED = 0;
 
     /**
-     * GPS Measurements are successfully being tracked, it will receive updates once they are
+     * GNSS Measurements are successfully being tracked, it will receive updates once they are
      * available.
      */
     public static final int STATUS_READY = 1;
 
     /**
-     * GPS provider or Location is disabled, updates will not be received until they are enabled.
+     * GNSS provider or Location is disabled, updates will not be received until they are enabled.
      */
-    public static final int STATUS_GPS_LOCATION_DISABLED = 2;
+    public static final int STATUS_GNSS_LOCATION_DISABLED = 2;
 
     private final GnssClock mClock;
     private final Collection<GnssMeasurement> mReadOnlyMeasurements;
 
     /**
-     * Used for receiving GPS satellite measurements from the GPS engine.
+     * Used for receiving GNSS satellite measurements from the GNSS engine.
      * Each measurement contains raw and computed data identifying a satellite.
      * You can implement this interface and call
-     * {@link LocationManager#registerGnssMeasurementCallback}.
+     * {@link LocationManager#registerGnssMeasurementsCallback}.
      */
     public static abstract class Callback {
 
         /**
-         * Returns the latest collected GPS Measurements.
+         * Reports the latest collected GNSS Measurements.
          */
         public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {}
 
         /**
-         * Returns the latest status of the GPS Measurements sub-system.
+         * Reports the latest status of the GNSS Measurements sub-system.
          */
         public void onStatusChanged(@GnssMeasurementsStatus int status) {}
     }

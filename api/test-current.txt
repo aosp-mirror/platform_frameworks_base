@@ -19173,168 +19173,110 @@ package android.location {
 
   public final class GnssClock implements android.os.Parcelable {
     method public int describeContents();
-    method public double getBiasInNs();
-    method public double getBiasUncertaintyInNs();
-    method public double getDriftInNsPerSec();
-    method public double getDriftUncertaintyInNsPerSec();
-    method public long getFullBiasInNs();
+    method public double getBiasNanos();
+    method public double getBiasUncertaintyNanos();
+    method public double getDriftNanosPerSecond();
+    method public double getDriftUncertaintyNanosPerSecond();
+    method public long getFullBiasNanos();
     method public int getHardwareClockDiscontinuityCount();
-    method public short getLeapSecond();
-    method public long getTimeInNs();
-    method public double getTimeUncertaintyInNs();
-    method public boolean hasBiasInNs();
-    method public boolean hasBiasUncertaintyInNs();
-    method public boolean hasDriftInNsPerSec();
-    method public boolean hasDriftUncertaintyInNsPerSec();
-    method public boolean hasFullBiasInNs();
+    method public int getLeapSecond();
+    method public long getTimeNanos();
+    method public double getTimeUncertaintyNanos();
+    method public boolean hasBiasNanos();
+    method public boolean hasBiasUncertaintyNanos();
+    method public boolean hasDriftNanosPerSecond();
+    method public boolean hasDriftUncertaintyNanosPerSecond();
+    method public boolean hasFullBiasNanos();
     method public boolean hasLeapSecond();
-    method public boolean hasTimeUncertaintyInNs();
+    method public boolean hasTimeUncertaintyNanos();
     method public void reset();
-    method public void resetBiasInNs();
-    method public void resetBiasUncertaintyInNs();
-    method public void resetDriftInNsPerSec();
-    method public void resetDriftUncertaintyInNsPerSec();
-    method public void resetFullBiasInNs();
+    method public void resetBiasNanos();
+    method public void resetBiasUncertaintyNanos();
+    method public void resetDriftNanosPerSecond();
+    method public void resetDriftUncertaintyNanosPerSecond();
+    method public void resetFullBiasNanos();
     method public void resetLeapSecond();
-    method public void resetTimeUncertaintyInNs();
+    method public void resetTimeUncertaintyNanos();
     method public void set(android.location.GnssClock);
-    method public void setBiasInNs(double);
-    method public void setBiasUncertaintyInNs(double);
-    method public void setDriftInNsPerSec(double);
-    method public void setDriftUncertaintyInNsPerSec(double);
-    method public void setFullBiasInNs(long);
+    method public void setBiasNanos(double);
+    method public void setBiasUncertaintyNanos(double);
+    method public void setDriftNanosPerSecond(double);
+    method public void setDriftUncertaintyNanosPerSecond(double);
+    method public void setFullBiasNanos(long);
     method public void setHardwareClockDiscontinuityCount(int);
-    method public void setLeapSecond(short);
-    method public void setTimeInNs(long);
-    method public void setTimeUncertaintyInNs(double);
+    method public void setLeapSecond(int);
+    method public void setTimeNanos(long);
+    method public void setTimeUncertaintyNanos(double);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssClock> CREATOR;
   }
 
   public final class GnssMeasurement implements android.os.Parcelable {
     method public int describeContents();
-    method public double getAccumulatedDeltaRangeInMeters();
-    method public short getAccumulatedDeltaRangeState();
-    method public double getAccumulatedDeltaRangeUncertaintyInMeters();
-    method public double getAzimuthInDeg();
-    method public double getAzimuthUncertaintyInDeg();
-    method public int getBitNumber();
+    method public double getAccumulatedDeltaRangeMeters();
+    method public int getAccumulatedDeltaRangeState();
+    method public double getAccumulatedDeltaRangeUncertaintyMeters();
     method public long getCarrierCycles();
-    method public float getCarrierFrequencyInHz();
+    method public float getCarrierFrequencyHz();
     method public double getCarrierPhase();
     method public double getCarrierPhaseUncertainty();
-    method public double getCn0InDbHz();
-    method public double getCodePhaseInChips();
-    method public double getCodePhaseUncertaintyInChips();
-    method public byte getConstellationType();
-    method public double getDopplerShiftInHz();
-    method public double getDopplerShiftUncertaintyInHz();
-    method public double getElevationInDeg();
-    method public double getElevationUncertaintyInDeg();
-    method public byte getLossOfLock();
-    method public byte getMultipathIndicator();
-    method public double getPseudorangeInMeters();
-    method public double getPseudorangeRateInMetersPerSec();
-    method public double getPseudorangeRateUncertaintyInMetersPerSec();
-    method public double getPseudorangeUncertaintyInMeters();
-    method public long getReceivedSvTimeInNs();
-    method public long getReceivedSvTimeUncertaintyInNs();
+    method public double getCn0DbHz();
+    method public int getConstellationType();
+    method public int getMultipathIndicator();
+    method public double getPseudorangeRateMetersPerSecond();
+    method public double getPseudorangeRateUncertaintyMetersPerSecond();
+    method public long getReceivedSvTimeNanos();
+    method public long getReceivedSvTimeUncertaintyNanos();
     method public double getSnrInDb();
-    method public short getState();
-    method public short getSvid();
-    method public short getTimeFromLastBitInMs();
-    method public double getTimeOffsetInNs();
-    method public boolean hasAzimuthInDeg();
-    method public boolean hasAzimuthUncertaintyInDeg();
-    method public boolean hasBitNumber();
+    method public int getState();
+    method public int getSvid();
+    method public double getTimeOffsetNanos();
     method public boolean hasCarrierCycles();
-    method public boolean hasCarrierFrequencyInHz();
+    method public boolean hasCarrierFrequencyHz();
     method public boolean hasCarrierPhase();
     method public boolean hasCarrierPhaseUncertainty();
-    method public boolean hasCodePhaseInChips();
-    method public boolean hasCodePhaseUncertaintyInChips();
-    method public boolean hasDopplerShiftInHz();
-    method public boolean hasDopplerShiftUncertaintyInHz();
-    method public boolean hasElevationInDeg();
-    method public boolean hasElevationUncertaintyInDeg();
-    method public boolean hasPseudorangeInMeters();
-    method public boolean hasPseudorangeUncertaintyInMeters();
     method public boolean hasSnrInDb();
-    method public boolean hasTimeFromLastBitInMs();
     method public boolean isPseudorangeRateCorrected();
-    method public boolean isUsedInFix();
     method public void reset();
-    method public void resetAzimuthInDeg();
-    method public void resetAzimuthUncertaintyInDeg();
-    method public void resetBitNumber();
     method public void resetCarrierCycles();
-    method public void resetCarrierFrequencyInHz();
+    method public void resetCarrierFrequencyHz();
     method public void resetCarrierPhase();
     method public void resetCarrierPhaseUncertainty();
-    method public void resetCodePhaseInChips();
-    method public void resetCodePhaseUncertaintyInChips();
-    method public void resetDopplerShiftInHz();
-    method public void resetDopplerShiftUncertaintyInHz();
-    method public void resetElevationInDeg();
-    method public void resetElevationUncertaintyInDeg();
-    method public void resetPseudorangeInMeters();
-    method public void resetPseudorangeUncertaintyInMeters();
     method public void resetSnrInDb();
-    method public void resetTimeFromLastBitInMs();
     method public void set(android.location.GnssMeasurement);
-    method public void setAccumulatedDeltaRangeInMeters(double);
-    method public void setAccumulatedDeltaRangeState(short);
-    method public void setAccumulatedDeltaRangeUncertaintyInMeters(double);
-    method public void setAzimuthInDeg(double);
-    method public void setAzimuthUncertaintyInDeg(double);
-    method public void setBitNumber(int);
+    method public void setAccumulatedDeltaRangeMeters(double);
+    method public void setAccumulatedDeltaRangeState(int);
+    method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
     method public void setCarrierCycles(long);
-    method public void setCarrierFrequencyInHz(float);
+    method public void setCarrierFrequencyHz(float);
     method public void setCarrierPhase(double);
     method public void setCarrierPhaseUncertainty(double);
-    method public void setCn0InDbHz(double);
-    method public void setCodePhaseInChips(double);
-    method public void setCodePhaseUncertaintyInChips(double);
-    method public void setConstellationType(byte);
-    method public void setDopplerShiftInHz(double);
-    method public void setDopplerShiftUncertaintyInHz(double);
-    method public void setElevationInDeg(double);
-    method public void setElevationUncertaintyInDeg(double);
-    method public void setLossOfLock(byte);
-    method public void setMultipathIndicator(byte);
-    method public void setPseudorangeInMeters(double);
-    method public void setPseudorangeRateInMetersPerSec(double);
-    method public void setPseudorangeRateUncertaintyInMetersPerSec(double);
-    method public void setPseudorangeUncertaintyInMeters(double);
-    method public void setReceivedSvTimeInNs(long);
-    method public void setReceivedSvTimeUncertaintyInNs(long);
+    method public void setCn0DbHz(double);
+    method public void setConstellationType(int);
+    method public void setMultipathIndicator(int);
+    method public void setPseudorangeRateMetersPerSecond(double);
+    method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
+    method public void setReceivedSvTimeNanos(long);
+    method public void setReceivedSvTimeUncertaintyNanos(long);
     method public void setSnrInDb(double);
-    method public void setState(short);
-    method public void setSvid(short);
-    method public void setTimeFromLastBitInMs(short);
-    method public void setTimeOffsetInNs(double);
-    method public void setUsedInFix(boolean);
+    method public void setState(int);
+    method public void setSvid(int);
+    method public void setTimeOffsetNanos(double);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final short ADR_STATE_CYCLE_SLIP = 4; // 0x4
-    field public static final short ADR_STATE_RESET = 2; // 0x2
-    field public static final short ADR_STATE_UNKNOWN = 0; // 0x0
-    field public static final short ADR_STATE_VALID = 1; // 0x1
+    field public static final int ADR_STATE_CYCLE_SLIP = 4; // 0x4
+    field public static final int ADR_STATE_RESET = 2; // 0x2
+    field public static final int ADR_STATE_UNKNOWN = 0; // 0x0
+    field public static final int ADR_STATE_VALID = 1; // 0x1
     field public static final android.os.Parcelable.Creator<android.location.GnssMeasurement> CREATOR;
-    field public static final byte LOSS_OF_LOCK_CYCLE_SLIP = 2; // 0x2
-    field public static final byte LOSS_OF_LOCK_OK = 1; // 0x1
-    field public static final byte LOSS_OF_LOCK_UNKNOWN = 0; // 0x0
-    field public static final byte MULTIPATH_INDICATOR_DETECTED = 1; // 0x1
-    field public static final byte MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
-    field public static final byte MULTIPATH_INDICATOR_UNKNOWN = 0; // 0x0
-    field public static final short STATE_BIT_SYNC = 2; // 0x2
-    field public static final short STATE_CODE_LOCK = 1; // 0x1
-    field public static final short STATE_MSEC_AMBIGUOUS = 16; // 0x10
-    field public static final short STATE_SUBFRAME_SYNC = 4; // 0x4
-    field public static final short STATE_TOW_DECODED = 8; // 0x8
-    field public static final short STATE_UNKNOWN = 0; // 0x0
-  }
-
-  public static abstract class GnssMeasurement.LossOfLockStatus implements java.lang.annotation.Annotation {
+    field public static final int MULTIPATH_INDICATOR_DETECTED = 1; // 0x1
+    field public static final int MULTIPATH_INDICATOR_NOT_USED = 2; // 0x2
+    field public static final int MULTIPATH_INDICATOR_UNKNOWN = 0; // 0x0
+    field public static final int STATE_BIT_SYNC = 2; // 0x2
+    field public static final int STATE_CODE_LOCK = 1; // 0x1
+    field public static final int STATE_MSEC_AMBIGUOUS = 16; // 0x10
+    field public static final int STATE_SUBFRAME_SYNC = 4; // 0x4
+    field public static final int STATE_TOW_DECODED = 8; // 0x8
+    field public static final int STATE_UNKNOWN = 0; // 0x0
   }
 
   public static abstract class GnssMeasurement.MultipathIndicator implements java.lang.annotation.Annotation {
@@ -19347,7 +19289,7 @@ package android.location {
     method public java.util.Collection<android.location.GnssMeasurement> getMeasurements();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssMeasurementsEvent> CREATOR;
-    field public static final int STATUS_GPS_LOCATION_DISABLED = 2; // 0x2
+    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
     field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
     field public static final int STATUS_READY = 1; // 0x1
   }
@@ -19364,34 +19306,34 @@ package android.location {
   public final class GnssNavigationMessage implements android.os.Parcelable {
     method public int describeContents();
     method public byte[] getData();
-    method public short getMessageId();
-    method public short getStatus();
-    method public short getSubmessageId();
-    method public short getSvid();
-    method public short getType();
+    method public int getMessageId();
+    method public int getStatus();
+    method public int getSubmessageId();
+    method public int getSvid();
+    method public int getType();
     method public void reset();
     method public void set(android.location.GnssNavigationMessage);
     method public void setData(byte[]);
-    method public void setMessageId(short);
-    method public void setStatus(short);
-    method public void setSubmessageId(short);
-    method public void setSvid(short);
-    method public void setType(short);
+    method public void setMessageId(int);
+    method public void setStatus(int);
+    method public void setSubmessageId(int);
+    method public void setSvid(int);
+    method public void setType(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessage> CREATOR;
-    field public static final short MESSAGE_TYPE_BDS_D1 = 1281; // 0x501
-    field public static final short MESSAGE_TYPE_BDS_D2 = 1282; // 0x502
-    field public static final short MESSAGE_TYPE_GAL_F = 1538; // 0x602
-    field public static final short MESSAGE_TYPE_GAL_I = 1537; // 0x601
-    field public static final short MESSAGE_TYPE_GLO_L1CA = 769; // 0x301
-    field public static final short MESSAGE_TYPE_GPS_CNAV2 = 260; // 0x104
-    field public static final short MESSAGE_TYPE_GPS_L1CA = 257; // 0x101
-    field public static final short MESSAGE_TYPE_GPS_L2CNAV = 258; // 0x102
-    field public static final short MESSAGE_TYPE_GPS_L5CNAV = 259; // 0x103
-    field public static final short MESSAGE_TYPE_UNKNOWN = 0; // 0x0
-    field public static final short STATUS_PARITY_PASSED = 1; // 0x1
-    field public static final short STATUS_PARITY_REBUILT = 2; // 0x2
-    field public static final short STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_PARITY_PASSED = 1; // 0x1
+    field public static final int STATUS_PARITY_REBUILT = 2; // 0x2
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int TYPE_BDS_D1 = 1281; // 0x501
+    field public static final int TYPE_BDS_D2 = 1282; // 0x502
+    field public static final int TYPE_GAL_F = 1538; // 0x602
+    field public static final int TYPE_GAL_I = 1537; // 0x601
+    field public static final int TYPE_GLO_L1CA = 769; // 0x301
+    field public static final int TYPE_GPS_CNAV2 = 260; // 0x104
+    field public static final int TYPE_GPS_L1CA = 257; // 0x101
+    field public static final int TYPE_GPS_L2CNAV = 258; // 0x102
+    field public static final int TYPE_GPS_L5CNAV = 259; // 0x103
+    field public static final int TYPE_UNKNOWN = 0; // 0x0
   }
 
   public static abstract class GnssNavigationMessage.GnssNavigationMessageType implements java.lang.annotation.Annotation {
@@ -19403,7 +19345,7 @@ package android.location {
     method public android.location.GnssNavigationMessage getNavigationMessage();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.location.GnssNavigationMessageEvent> CREATOR;
-    field public static final int STATUS_GPS_LOCATION_DISABLED = 2; // 0x2
+    field public static final int STATUS_GNSS_LOCATION_DISABLED = 2; // 0x2
     field public static final int STATUS_NOT_SUPPORTED = 0; // 0x0
     field public static final int STATUS_READY = 1; // 0x1
   }
@@ -19422,22 +19364,22 @@ package android.location {
   }
 
   public final class GnssStatus {
-    method public float getAzimuth(int);
-    method public byte getConstellationType(int);
-    method public float getElevation(int);
+    method public float getAzimuthDegrees(int);
+    method public float getCn0DbHz(int);
+    method public int getConstellationType(int);
+    method public float getElevationDegrees(int);
     method public int getNumSatellites();
-    method public float getSnr(int);
     method public int getSvid(int);
     method public boolean hasAlmanac(int);
     method public boolean hasEphemeris(int);
     method public boolean usedInFix(int);
-    field public static final byte CONSTELLATION_BEIDOU = 5; // 0x5
-    field public static final byte CONSTELLATION_GALILEO = 6; // 0x6
-    field public static final byte CONSTELLATION_GLONASS = 3; // 0x3
-    field public static final byte CONSTELLATION_GPS = 1; // 0x1
-    field public static final byte CONSTELLATION_QZSS = 4; // 0x4
-    field public static final byte CONSTELLATION_SBAS = 2; // 0x2
-    field public static final byte CONSTELLATION_UNKNOWN = 0; // 0x0
+    field public static final int CONSTELLATION_BEIDOU = 5; // 0x5
+    field public static final int CONSTELLATION_GALILEO = 6; // 0x6
+    field public static final int CONSTELLATION_GLONASS = 3; // 0x3
+    field public static final int CONSTELLATION_GPS = 1; // 0x1
+    field public static final int CONSTELLATION_QZSS = 4; // 0x4
+    field public static final int CONSTELLATION_SBAS = 2; // 0x2
+    field public static final int CONSTELLATION_UNKNOWN = 0; // 0x0
   }
 
   public static abstract class GnssStatus.ConstellationType implements java.lang.annotation.Annotation {
@@ -19553,8 +19495,8 @@ package android.location {
     method public java.util.List<java.lang.String> getProviders(boolean);
     method public java.util.List<java.lang.String> getProviders(android.location.Criteria, boolean);
     method public boolean isProviderEnabled(java.lang.String);
-    method public boolean registerGnssMeasurementCallback(android.location.GnssMeasurementsEvent.Callback);
-    method public boolean registerGnssMeasurementCallback(android.location.GnssMeasurementsEvent.Callback, android.os.Handler);
+    method public boolean registerGnssMeasurementsCallback(android.location.GnssMeasurementsEvent.Callback);
+    method public boolean registerGnssMeasurementsCallback(android.location.GnssMeasurementsEvent.Callback, android.os.Handler);
     method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
     method public boolean registerGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback, android.os.Handler);
     method public boolean registerGnssStatusCallback(android.location.GnssStatusCallback);
@@ -19579,7 +19521,7 @@ package android.location {
     method public void setTestProviderEnabled(java.lang.String, boolean);
     method public void setTestProviderLocation(java.lang.String, android.location.Location);
     method public void setTestProviderStatus(java.lang.String, int, android.os.Bundle, long);
-    method public void unregisterGnssMeasurementCallback(android.location.GnssMeasurementsEvent.Callback);
+    method public void unregisterGnssMeasurementsCallback(android.location.GnssMeasurementsEvent.Callback);
     method public void unregisterGnssNavigationMessageCallback(android.location.GnssNavigationMessageEvent.Callback);
     method public void unregisterGnssStatusCallback(android.location.GnssStatusCallback);
     field public static final java.lang.String GPS_PROVIDER = "gps";
@@ -34557,7 +34499,7 @@ package android.service.notification {
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap);
     method public final void requestInterruptionFilter(int);
     method public final void requestListenerHints(int);
-    method public static final void requestRebind(android.content.ComponentName) throws android.os.RemoteException;
+    method public static void requestRebind(android.content.ComponentName) throws android.os.RemoteException;
     method public final void requestUnbind() throws android.os.RemoteException;
     method public final void setNotificationsShown(java.lang.String[]);
     field public static final java.lang.String CATEGORY_VR_NOTIFICATIONS = "android.intent.category.vr.notifications";

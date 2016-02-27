@@ -26,26 +26,26 @@ import android.os.Parcelable;
 public final class GnssClock implements Parcelable {
     // The following enumerations must be in sync with the values declared in gps.h
 
-    private static final short HAS_NO_FLAGS = 0;
-    private static final short HAS_LEAP_SECOND = (1<<0);
-    private static final short HAS_TIME_UNCERTAINTY = (1<<1);
-    private static final short HAS_FULL_BIAS = (1<<2);
-    private static final short HAS_BIAS = (1<<3);
-    private static final short HAS_BIAS_UNCERTAINTY = (1<<4);
-    private static final short HAS_DRIFT = (1<<5);
-    private static final short HAS_DRIFT_UNCERTAINTY = (1<<6);
+    private static final int HAS_NO_FLAGS = 0;
+    private static final int HAS_LEAP_SECOND = (1<<0);
+    private static final int HAS_TIME_UNCERTAINTY = (1<<1);
+    private static final int HAS_FULL_BIAS = (1<<2);
+    private static final int HAS_BIAS = (1<<3);
+    private static final int HAS_BIAS_UNCERTAINTY = (1<<4);
+    private static final int HAS_DRIFT = (1<<5);
+    private static final int HAS_DRIFT_UNCERTAINTY = (1<<6);
 
     // End enumerations in sync with gps.h
 
-    private short mFlags;
-    private short mLeapSecond;
-    private long mTimeInNs;
-    private double mTimeUncertaintyInNs;
-    private long mFullBiasInNs;
-    private double mBiasInNs;
-    private double mBiasUncertaintyInNs;
-    private double mDriftInNsPerSec;
-    private double mDriftUncertaintyInNsPerSec;
+    private int mFlags;
+    private int mLeapSecond;
+    private long mTimeNanos;
+    private double mTimeUncertaintyNanos;
+    private long mFullBiasNanos;
+    private double mBiasNanos;
+    private double mBiasUncertaintyNanos;
+    private double mDriftNanosPerSecond;
+    private double mDriftUncertaintyNanosPerSecond;
     private int mHardwareClockDiscontinuityCount;
 
     GnssClock() {
@@ -58,13 +58,13 @@ public final class GnssClock implements Parcelable {
     public void set(GnssClock clock) {
         mFlags = clock.mFlags;
         mLeapSecond = clock.mLeapSecond;
-        mTimeInNs = clock.mTimeInNs;
-        mTimeUncertaintyInNs = clock.mTimeUncertaintyInNs;
-        mFullBiasInNs = clock.mFullBiasInNs;
-        mBiasInNs = clock.mBiasInNs;
-        mBiasUncertaintyInNs = clock.mBiasUncertaintyInNs;
-        mDriftInNsPerSec = clock.mDriftInNsPerSec;
-        mDriftUncertaintyInNsPerSec = clock.mDriftUncertaintyInNsPerSec;
+        mTimeNanos = clock.mTimeNanos;
+        mTimeUncertaintyNanos = clock.mTimeUncertaintyNanos;
+        mFullBiasNanos = clock.mFullBiasNanos;
+        mBiasNanos = clock.mBiasNanos;
+        mBiasUncertaintyNanos = clock.mBiasUncertaintyNanos;
+        mDriftNanosPerSecond = clock.mDriftNanosPerSecond;
+        mDriftUncertaintyNanosPerSecond = clock.mDriftUncertaintyNanosPerSecond;
         mHardwareClockDiscontinuityCount = clock.mHardwareClockDiscontinuityCount;
     }
 
@@ -89,14 +89,14 @@ public final class GnssClock implements Parcelable {
      *
      * The value is only available if {@link #hasLeapSecond()} is true.
      */
-    public short getLeapSecond() {
+    public int getLeapSecond() {
         return mLeapSecond;
     }
 
     /**
      * Sets the leap second associated with the clock's time.
      */
-    public void setLeapSecond(short leapSecond) {
+    public void setLeapSecond(int leapSecond) {
         setFlag(HAS_LEAP_SECOND);
         mLeapSecond = leapSecond;
     }
@@ -106,7 +106,7 @@ public final class GnssClock implements Parcelable {
      */
     public void resetLeapSecond() {
         resetFlag(HAS_LEAP_SECOND);
-        mLeapSecond = Short.MIN_VALUE;
+        mLeapSecond = Integer.MIN_VALUE;
     }
 
     /**
@@ -114,30 +114,30 @@ public final class GnssClock implements Parcelable {
      *
      * For 'local hardware clock' this value is expected to be monotonically increasing during the
      * reporting session. The real GPS time can be derived by compensating
-     * {@link #getFullBiasInNs()} (when it is available) from this value.
+     * {@link #getFullBiasNanos()} (when it is available) from this value.
      *
      * For 'GPS time' this value is expected to be the best estimation of current GPS time that GPS
-     * receiver can achieve. {@link #getTimeUncertaintyInNs()} should be available when GPS time is
+     * receiver can achieve. {@link #getTimeUncertaintyNanos()} should be available when GPS time is
      * specified.
      *
-     * Sub-nanosecond accuracy can be provided by means of {@link #getBiasInNs()}.
-     * The reported time includes {@link #getTimeUncertaintyInNs()}.
+     * Sub-nanosecond accuracy can be provided by means of {@link #getBiasNanos()}.
+     * The reported time includes {@link #getTimeUncertaintyNanos()}.
      */
-    public long getTimeInNs() {
-        return mTimeInNs;
+    public long getTimeNanos() {
+        return mTimeNanos;
     }
 
     /**
-     * Sets the GPS receiver internal clock in nanoseconds.
+     * Sets the GNSS receiver internal clock in nanoseconds.
      */
-    public void setTimeInNs(long timeInNs) {
-        mTimeInNs = timeInNs;
+    public void setTimeNanos(long timeNanos) {
+        mTimeNanos = timeNanos;
     }
 
     /**
-     * Returns true if {@link #getTimeUncertaintyInNs()} is available, false otherwise.
+     * Returns true if {@link #getTimeUncertaintyNanos()} is available, false otherwise.
      */
-    public boolean hasTimeUncertaintyInNs() {
+    public boolean hasTimeUncertaintyNanos() {
         return isFlagSet(HAS_TIME_UNCERTAINTY);
     }
 
@@ -145,189 +145,189 @@ public final class GnssClock implements Parcelable {
      * Gets the clock's time Uncertainty (1-Sigma) in nanoseconds.
      * The uncertainty is represented as an absolute (single sided) value.
      *
-     * The value is only available if {@link #hasTimeUncertaintyInNs()} is true.
+     * The value is only available if {@link #hasTimeUncertaintyNanos()} is true.
      */
-    public double getTimeUncertaintyInNs() {
-        return mTimeUncertaintyInNs;
+    public double getTimeUncertaintyNanos() {
+        return mTimeUncertaintyNanos;
     }
 
     /**
      * Sets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
      */
-    public void setTimeUncertaintyInNs(double timeUncertaintyInNs) {
+    public void setTimeUncertaintyNanos(double timeUncertaintyNanos) {
         setFlag(HAS_TIME_UNCERTAINTY);
-        mTimeUncertaintyInNs = timeUncertaintyInNs;
+        mTimeUncertaintyNanos = timeUncertaintyNanos;
     }
 
     /**
      * Resets the clock's Time Uncertainty (1-Sigma) in nanoseconds.
      */
-    public void resetTimeUncertaintyInNs() {
+    public void resetTimeUncertaintyNanos() {
         resetFlag(HAS_TIME_UNCERTAINTY);
-        mTimeUncertaintyInNs = Double.NaN;
+        mTimeUncertaintyNanos = Double.NaN;
     }
 
     /**
-     * Returns true if {@link #getFullBiasInNs()} is available, false otherwise.
+     * Returns true if {@link #getFullBiasNanos()} is available, false otherwise.
      */
-    public boolean hasFullBiasInNs() {
+    public boolean hasFullBiasNanos() {
         return isFlagSet(HAS_FULL_BIAS);
     }
 
     /**
-     * Gets the difference between hardware clock ({@link #getTimeInNs()}) inside GPS receiver and
+     * Gets the difference between hardware clock ({@link #getTimeNanos()}) inside GPS receiver and
      * the true GPS time since 0000Z, January 6, 1980, in nanoseconds.
      *
      * This value is available if the receiver has estimated GPS time. If the computed time is for a
      * non-GPS constellation, the time offset of that constellation to GPS has to be applied to fill
-     * this value. The value contains the 'bias uncertainty' {@link #getBiasUncertaintyInNs()} in
+     * this value. The value contains the 'bias uncertainty' {@link #getBiasUncertaintyNanos()} in
      * it, and it should be used for quality check. The value is only available if
-     * {@link #hasFullBiasInNs()} is true.
+     * {@link #hasFullBiasNanos()} is true.
      *
      * The sign of the value is defined by the following equation:
      *      local estimate of GPS time = time_ns + (full_bias_ns + bias_ns)
      */
-    public long getFullBiasInNs() {
-        return mFullBiasInNs;
+    public long getFullBiasNanos() {
+        return mFullBiasNanos;
     }
 
     /**
      * Sets the full bias in nanoseconds.
      */
-    public void setFullBiasInNs(long value) {
+    public void setFullBiasNanos(long value) {
         setFlag(HAS_FULL_BIAS);
-        mFullBiasInNs = value;
+        mFullBiasNanos = value;
     }
 
     /**
      * Resets the full bias in nanoseconds.
      */
-    public void resetFullBiasInNs() {
+    public void resetFullBiasNanos() {
         resetFlag(HAS_FULL_BIAS);
-        mFullBiasInNs = Long.MIN_VALUE;
+        mFullBiasNanos = Long.MIN_VALUE;
     }
 
     /**
-     * Returns true if {@link #getBiasInNs()} is available, false otherwise.
+     * Returns true if {@link #getBiasNanos()} is available, false otherwise.
      */
-    public boolean hasBiasInNs() {
+    public boolean hasBiasNanos() {
         return isFlagSet(HAS_BIAS);
     }
 
     /**
      * Gets the clock's sub-nanosecond bias.
-     * The reported bias includes {@link #getBiasUncertaintyInNs()}.
+     * The reported bias includes {@link #getBiasUncertaintyNanos()}.
      *
-     * The value is only available if {@link #hasBiasInNs()} is true.
+     * The value is only available if {@link #hasBiasNanos()} is true.
      */
-    public double getBiasInNs() {
-        return mBiasInNs;
+    public double getBiasNanos() {
+        return mBiasNanos;
     }
 
     /**
      * Sets the sub-nanosecond bias.
      */
-    public void setBiasInNs(double biasInNs) {
+    public void setBiasNanos(double biasNanos) {
         setFlag(HAS_BIAS);
-        mBiasInNs = biasInNs;
+        mBiasNanos = biasNanos;
     }
 
     /**
      * Resets the clock's Bias in nanoseconds.
      */
-    public void resetBiasInNs() {
+    public void resetBiasNanos() {
         resetFlag(HAS_BIAS);
-        mBiasInNs = Double.NaN;
+        mBiasNanos = Double.NaN;
     }
 
     /**
-     * Returns true if {@link #getBiasUncertaintyInNs()} is available, false otherwise.
+     * Returns true if {@link #getBiasUncertaintyNanos()} is available, false otherwise.
      */
-    public boolean hasBiasUncertaintyInNs() {
+    public boolean hasBiasUncertaintyNanos() {
         return isFlagSet(HAS_BIAS_UNCERTAINTY);
     }
 
     /**
      * Gets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
      *
-     * The value is only available if {@link #hasBiasUncertaintyInNs()} is true.
+     * The value is only available if {@link #hasBiasUncertaintyNanos()} is true.
      */
-    public double getBiasUncertaintyInNs() {
-        return mBiasUncertaintyInNs;
+    public double getBiasUncertaintyNanos() {
+        return mBiasUncertaintyNanos;
     }
 
     /**
      * Sets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
      */
-    public void setBiasUncertaintyInNs(double biasUncertaintyInNs) {
+    public void setBiasUncertaintyNanos(double biasUncertaintyNanos) {
         setFlag(HAS_BIAS_UNCERTAINTY);
-        mBiasUncertaintyInNs = biasUncertaintyInNs;
+        mBiasUncertaintyNanos = biasUncertaintyNanos;
     }
 
     /**
      * Resets the clock's Bias Uncertainty (1-Sigma) in nanoseconds.
      */
-    public void resetBiasUncertaintyInNs() {
+    public void resetBiasUncertaintyNanos() {
         resetFlag(HAS_BIAS_UNCERTAINTY);
-        mBiasUncertaintyInNs = Double.NaN;
+        mBiasUncertaintyNanos = Double.NaN;
     }
 
     /**
-     * Returns true if {@link #getDriftInNsPerSec()} is available, false otherwise.
+     * Returns true if {@link #getDriftNanosPerSecond()} is available, false otherwise.
      */
-    public boolean hasDriftInNsPerSec() {
+    public boolean hasDriftNanosPerSecond() {
         return isFlagSet(HAS_DRIFT);
     }
 
     /**
      * Gets the clock's Drift in nanoseconds per second.
      * A positive value indicates that the frequency is higher than the nominal frequency.
-     * The reported drift includes {@link #getDriftUncertaintyInNsPerSec()}.
+     * The reported drift includes {@link #getDriftUncertaintyNanosPerSecond()}.
      *
-     * The value is only available if {@link #hasDriftInNsPerSec()} is true.
+     * The value is only available if {@link #hasDriftNanosPerSecond()} is true.
      */
-    public double getDriftInNsPerSec() {
-        return mDriftInNsPerSec;
+    public double getDriftNanosPerSecond() {
+        return mDriftNanosPerSecond;
     }
 
     /**
      * Sets the clock's Drift in nanoseconds per second.
      */
-    public void setDriftInNsPerSec(double driftInNsPerSec) {
+    public void setDriftNanosPerSecond(double driftNanosPerSecond) {
         setFlag(HAS_DRIFT);
-        mDriftInNsPerSec = driftInNsPerSec;
+        mDriftNanosPerSecond = driftNanosPerSecond;
     }
 
     /**
      * Resets the clock's Drift in nanoseconds per second.
      */
-    public void resetDriftInNsPerSec() {
+    public void resetDriftNanosPerSecond() {
         resetFlag(HAS_DRIFT);
-        mDriftInNsPerSec = Double.NaN;
+        mDriftNanosPerSecond = Double.NaN;
     }
 
     /**
-     * Returns true if {@link #getDriftUncertaintyInNsPerSec()} is available, false otherwise.
+     * Returns true if {@link #getDriftUncertaintyNanosPerSecond()} is available, false otherwise.
      */
-    public boolean hasDriftUncertaintyInNsPerSec() {
+    public boolean hasDriftUncertaintyNanosPerSecond() {
         return isFlagSet(HAS_DRIFT_UNCERTAINTY);
     }
 
     /**
      * Gets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      *
-     * The value is only available if {@link #hasDriftUncertaintyInNsPerSec()} is true.
+     * The value is only available if {@link #hasDriftUncertaintyNanosPerSecond()} is true.
      */
-    public double getDriftUncertaintyInNsPerSec() {
-        return mDriftUncertaintyInNsPerSec;
+    public double getDriftUncertaintyNanosPerSecond() {
+        return mDriftUncertaintyNanosPerSecond;
     }
 
     /**
      * Sets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      */
-    public void setDriftUncertaintyInNsPerSec(double driftUncertaintyInNsPerSec) {
+    public void setDriftUncertaintyNanosPerSecond(double driftUncertaintyNanosPerSecond) {
         setFlag(HAS_DRIFT_UNCERTAINTY);
-        mDriftUncertaintyInNsPerSec = driftUncertaintyInNsPerSec;
+        mDriftUncertaintyNanosPerSecond = driftUncertaintyNanosPerSecond;
     }
 
     /**
@@ -347,9 +347,9 @@ public final class GnssClock implements Parcelable {
     /**
      * Resets the clock's Drift Uncertainty (1-Sigma) in nanoseconds per second.
      */
-    public void resetDriftUncertaintyInNsPerSec() {
+    public void resetDriftUncertaintyNanosPerSecond() {
         resetFlag(HAS_DRIFT_UNCERTAINTY);
-        mDriftUncertaintyInNsPerSec = Double.NaN;
+        mDriftUncertaintyNanosPerSecond = Double.NaN;
     }
 
     public static final Creator<GnssClock> CREATOR = new Creator<GnssClock>() {
@@ -357,15 +357,15 @@ public final class GnssClock implements Parcelable {
         public GnssClock createFromParcel(Parcel parcel) {
             GnssClock gpsClock = new GnssClock();
 
-            gpsClock.mFlags = (short) parcel.readInt();
-            gpsClock.mLeapSecond = (short) parcel.readInt();
-            gpsClock.mTimeInNs = parcel.readLong();
-            gpsClock.mTimeUncertaintyInNs = parcel.readDouble();
-            gpsClock.mFullBiasInNs = parcel.readLong();
-            gpsClock.mBiasInNs = parcel.readDouble();
-            gpsClock.mBiasUncertaintyInNs = parcel.readDouble();
-            gpsClock.mDriftInNsPerSec = parcel.readDouble();
-            gpsClock.mDriftUncertaintyInNsPerSec = parcel.readDouble();
+            gpsClock.mFlags = parcel.readInt();
+            gpsClock.mLeapSecond = parcel.readInt();
+            gpsClock.mTimeNanos = parcel.readLong();
+            gpsClock.mTimeUncertaintyNanos = parcel.readDouble();
+            gpsClock.mFullBiasNanos = parcel.readLong();
+            gpsClock.mBiasNanos = parcel.readDouble();
+            gpsClock.mBiasUncertaintyNanos = parcel.readDouble();
+            gpsClock.mDriftNanosPerSecond = parcel.readDouble();
+            gpsClock.mDriftUncertaintyNanosPerSecond = parcel.readDouble();
             gpsClock.mHardwareClockDiscontinuityCount = parcel.readInt();
 
             return gpsClock;
@@ -381,13 +381,13 @@ public final class GnssClock implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mFlags);
         parcel.writeInt(mLeapSecond);
-        parcel.writeLong(mTimeInNs);
-        parcel.writeDouble(mTimeUncertaintyInNs);
-        parcel.writeLong(mFullBiasInNs);
-        parcel.writeDouble(mBiasInNs);
-        parcel.writeDouble(mBiasUncertaintyInNs);
-        parcel.writeDouble(mDriftInNsPerSec);
-        parcel.writeDouble(mDriftUncertaintyInNsPerSec);
+        parcel.writeLong(mTimeNanos);
+        parcel.writeDouble(mTimeUncertaintyNanos);
+        parcel.writeLong(mFullBiasNanos);
+        parcel.writeDouble(mBiasNanos);
+        parcel.writeDouble(mBiasUncertaintyNanos);
+        parcel.writeDouble(mDriftNanosPerSecond);
+        parcel.writeDouble(mDriftUncertaintyNanosPerSecond);
         parcel.writeInt(mHardwareClockDiscontinuityCount);
     }
 
@@ -406,29 +406,29 @@ public final class GnssClock implements Parcelable {
 
         builder.append(String.format(
                 formatWithUncertainty,
-                "TimeInNs",
-                mTimeInNs,
-                "TimeUncertaintyInNs",
-                hasTimeUncertaintyInNs() ? mTimeUncertaintyInNs : null));
+                "TimeNanos",
+                mTimeNanos,
+                "TimeUncertaintyNanos",
+                hasTimeUncertaintyNanos() ? mTimeUncertaintyNanos : null));
 
         builder.append(String.format(
                 format,
-                "FullBiasInNs",
-                hasFullBiasInNs() ? mFullBiasInNs : null));
+                "FullBiasNanos",
+                hasFullBiasNanos() ? mFullBiasNanos : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
-                "BiasInNs",
-                hasBiasInNs() ? mBiasInNs : null,
-                "BiasUncertaintyInNs",
-                hasBiasUncertaintyInNs() ? mBiasUncertaintyInNs : null));
+                "BiasNanos",
+                hasBiasNanos() ? mBiasNanos : null,
+                "BiasUncertaintyNanos",
+                hasBiasUncertaintyNanos() ? mBiasUncertaintyNanos : null));
 
         builder.append(String.format(
                 formatWithUncertainty,
-                "DriftInNsPerSec",
-                hasDriftInNsPerSec() ? mDriftInNsPerSec : null,
-                "DriftUncertaintyInNsPerSec",
-                hasDriftUncertaintyInNsPerSec() ? mDriftUncertaintyInNsPerSec : null));
+                "DriftNanosPerSecond",
+                hasDriftNanosPerSecond() ? mDriftNanosPerSecond : null,
+                "DriftUncertaintyNanosPerSecond",
+                hasDriftUncertaintyNanosPerSecond() ? mDriftUncertaintyNanosPerSecond : null));
 
         return builder.toString();
     }
@@ -436,25 +436,25 @@ public final class GnssClock implements Parcelable {
     private void initialize() {
         mFlags = HAS_NO_FLAGS;
         resetLeapSecond();
-        setTimeInNs(Long.MIN_VALUE);
-        resetTimeUncertaintyInNs();
-        resetFullBiasInNs();
-        resetBiasInNs();
-        resetBiasUncertaintyInNs();
-        resetDriftInNsPerSec();
-        resetDriftUncertaintyInNsPerSec();
+        setTimeNanos(Long.MIN_VALUE);
+        resetTimeUncertaintyNanos();
+        resetFullBiasNanos();
+        resetBiasNanos();
+        resetBiasUncertaintyNanos();
+        resetDriftNanosPerSecond();
+        resetDriftUncertaintyNanosPerSecond();
         setHardwareClockDiscontinuityCount(Integer.MIN_VALUE);
     }
 
-    private void setFlag(short flag) {
+    private void setFlag(int flag) {
         mFlags |= flag;
     }
 
-    private void resetFlag(short flag) {
+    private void resetFlag(int flag) {
         mFlags &= ~flag;
     }
 
-    private boolean isFlagSet(short flag) {
+    private boolean isFlagSet(int flag) {
         return (mFlags & flag) == flag;
     }
 }

@@ -1554,9 +1554,9 @@ public class LocationManager {
 
         @Override
         public void onSvStatusChanged(int svCount, int[] prnWithFlags,
-                float[] snrs, float[] elevations, float[] azimuths) {
+                float[] cn0s, float[] elevations, float[] azimuths) {
             if (mGnssCallback != null) {
-                mGnssStatus = new GnssStatus(svCount, prnWithFlags, snrs, elevations, azimuths);
+                mGnssStatus = new GnssStatus(svCount, prnWithFlags, cn0s, elevations, azimuths);
 
                 Message msg = Message.obtain();
                 msg.what = GpsStatus.GPS_EVENT_SATELLITE_STATUS;
@@ -1805,7 +1805,7 @@ public class LocationManager {
 
     /**
      * No-op method to keep backward-compatibility.
-     * Don't use it. Use {@link #registerGnssMeasurementCallback} instead.
+     * Don't use it. Use {@link #registerGnssMeasurementsCallback} instead.
      * @hide
      * @deprecated
      */
@@ -1822,8 +1822,8 @@ public class LocationManager {
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean registerGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback) {
-        return registerGnssMeasurementCallback(callback, null);
+    public boolean registerGnssMeasurementsCallback(GnssMeasurementsEvent.Callback callback) {
+        return registerGnssMeasurementsCallback(callback, null);
     }
 
     /**
@@ -1834,14 +1834,14 @@ public class LocationManager {
      * @return {@code true} if the callback was added successfully, {@code false} otherwise.
      */
     @RequiresPermission(ACCESS_FINE_LOCATION)
-    public boolean registerGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback,
+    public boolean registerGnssMeasurementsCallback(GnssMeasurementsEvent.Callback callback,
             Handler handler) {
         return mGnssMeasurementCallbackTransport.add(callback, handler);
     }
 
     /**
      * No-op method to keep backward-compatibility.
-     * Don't use it. Use {@link #unregisterGnssMeasurementCallback} instead.
+     * Don't use it. Use {@link #unregisterGnssMeasurementsCallback} instead.
      * @hide
      * @deprecated
      */
@@ -1855,7 +1855,7 @@ public class LocationManager {
      *
      * @param callback a {@link GnssMeasurementsEvent.Callback} object to remove.
      */
-    public void unregisterGnssMeasurementCallback(GnssMeasurementsEvent.Callback callback) {
+    public void unregisterGnssMeasurementsCallback(GnssMeasurementsEvent.Callback callback) {
         mGnssMeasurementCallbackTransport.remove(callback);
     }
 

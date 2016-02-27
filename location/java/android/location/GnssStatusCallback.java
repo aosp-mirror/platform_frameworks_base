@@ -32,9 +32,9 @@ public abstract class GnssStatusCallback {
 
     /**
      * Called when the GNSS system has received its first fix since starting.
-     * @param ttff the time from start to first fix.
+     * @param ttffMillis the time from start to first fix in milliseconds.
      */
-    public void onFirstFix(int ttff) {}
+    public void onFirstFix(int ttffMillis) {}
 
     /**
      * Called periodically to report GNSS satellite status.
