@@ -90,7 +90,8 @@ public class RootsCache {
                 // Special root for recents
                 derivedIcon = R.drawable.ic_root_recent;
                 derivedType = RootInfo.TYPE_RECENTS;
-                flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD;
+                flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD
+                        | Root.FLAG_SUPPORTS_CREATE;
                 title = mContext.getString(R.string.root_recent);
                 availableBytes = -1;
             }};
@@ -122,7 +123,9 @@ public class RootsCache {
             checkState(mRecentsRoot.rootId == null);
             checkState(mRecentsRoot.derivedIcon == R.drawable.ic_root_recent);
             checkState(mRecentsRoot.derivedType == RootInfo.TYPE_RECENTS);
-            checkState(mRecentsRoot.flags == (Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_IS_CHILD));
+            checkState(mRecentsRoot.flags == (Root.FLAG_LOCAL_ONLY
+                    | Root.FLAG_SUPPORTS_IS_CHILD
+                    | Root.FLAG_SUPPORTS_CREATE));
             checkState(mRecentsRoot.title == mContext.getString(R.string.root_recent));
             checkState(mRecentsRoot.availableBytes == -1);
         }
