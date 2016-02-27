@@ -101,6 +101,10 @@ public class SystemConfig {
     // background while in power save mode, as read from the configuration files.
     final ArraySet<String> mAllowInPowerSave = new ArraySet<>();
 
+    // These are the packages that are white-listed to be able to run in the
+    // background while in data-usage save mode, as read from the configuration files.
+    final ArraySet<String> mAllowInDataUsageSave = new ArraySet<>();
+
     // These are the app package names that should not allow IME switching.
     final ArraySet<String> mFixedImeApps = new ArraySet<>();
 
@@ -149,6 +153,10 @@ public class SystemConfig {
 
     public ArraySet<String> getAllowInPowerSave() {
         return mAllowInPowerSave;
+    }
+
+    public ArraySet<String> getAllowInDataUsageSave() {
+        return mAllowInDataUsageSave;
     }
 
     public ArraySet<String> getFixedImeApps() {
@@ -388,6 +396,17 @@ public class SystemConfig {
                                 + parser.getPositionDescription());
                     } else {
                         mAllowInPowerSave.add(pkgname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+
+                } else if ("allow-in-data-usage-save".equals(name) && allowAll) {
+                    String pkgname = parser.getAttributeValue(null, "package");
+                    if (pkgname == null) {
+                        Slog.w(TAG, "<allow-in-data-usage-save> without package in " + permFile
+                                + " at " + parser.getPositionDescription());
+                    } else {
+                        mAllowInDataUsageSave.add(pkgname);
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;

@@ -28,6 +28,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
+
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
@@ -165,6 +166,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.google.android.collect.Lists;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -221,6 +223,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG_APP_POLICY = "app-policy";
     private static final String TAG_WHITELIST = "whitelist";
     private static final String TAG_RESTRICT_BACKGROUND = "restrict-background";
+    private static final String TAG_REVOKED_RESTRICT_BACKGROUND = "revoked-restrict-background";
 
     private static final String ATTR_VERSION = "version";
     private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
@@ -315,6 +318,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * UIDs that have been white-listed to avoid restricted background.
      */
     private final SparseBooleanArray mRestrictBackgroundWhitelistUids = new SparseBooleanArray();
+
+    /**
+     * UIDs that have been initially white-listed by system to avoid restricted background.
+     */
+    private final SparseBooleanArray mDefaultRestrictBackgroundWhitelistUids =
+            new SparseBooleanArray();
+
+    /**
+     * UIDs that have been initially white-listed by system to avoid restricted background,
+     * but later revoked by user.
+     */
+    private final SparseBooleanArray mRestrictBackgroundWhitelistRevokedUids =
+            new SparseBooleanArray();
 
     /** Set of ifaces that are metered. */
     private ArraySet<String> mMeteredIfaces = new ArraySet<>();
@@ -412,6 +428,53 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    /**
+     * Whitelists pre-defined apps for restrict background, but only if the user didn't already
+     * revoke the whitelist.
+     *
+     * @return whether any uid has been added to {@link #mRestrictBackgroundWhitelistUids}.
+     */
+    boolean addDefaultRestrictBackgroundWhitelistUids() {
+        final SystemConfig sysConfig = SystemConfig.getInstance();
+        final PackageManager pm = mContext.getPackageManager();
+        final List<UserInfo> users = mUserManager.getUsers();
+        final int numberUsers = users.size();
+
+        final ArraySet<String> allowDataUsage = sysConfig.getAllowInDataUsageSave();
+        boolean changed = false;
+        for (int i = 0; i < allowDataUsage.size(); i++) {
+            final String pkg = allowDataUsage.valueAt(i);
+            if (LOGD)
+                Slog.d(TAG, "checking restricted background whitelisting for package " + pkg);
+            final ApplicationInfo app;
+            try {
+                app = pm.getApplicationInfo(pkg, PackageManager.MATCH_SYSTEM_ONLY);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Should not happen
+                Slog.wtf(TAG, "No ApplicationInfo for package " + pkg);
+                continue;
+            }
+            if (!app.isPrivilegedApp()) {
+                Slog.w(TAG, "getAllowInDataUsageSave() returned non-privileged app: " + pkg);
+                continue;
+            }
+            for (int j = 0; j < numberUsers; j++) {
+                final UserInfo user = users.get(i);
+                final int uid = UserHandle.getUid(user.id, app.uid);
+                mDefaultRestrictBackgroundWhitelistUids.append(uid, true);
+                if (LOGD) Slog.d(TAG, "revoked whistelist status for uid " + uid + ": "
+                        + mRestrictBackgroundWhitelistRevokedUids.get(uid));
+                if (!mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+                    Slog.i(TAG, "adding default package " + pkg + " (uid " + uid + " for user "
+                            + user.id + ") to restrict background whitelist");
+                    mRestrictBackgroundWhitelistUids.append(uid, true);
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
     void updatePowerSaveTempWhitelistLocked() {
         try {
             // Clear the states of the current whitelist
@@ -472,6 +535,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // read policy from disk
             readPolicyLocked();
+
+            if (addDefaultRestrictBackgroundWhitelistUids()) {
+                writePolicyLocked();
+            }
 
             updateRulesForGlobalChangeLocked(false);
             updateNotificationsLocked();
@@ -1421,6 +1488,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     } else if (TAG_RESTRICT_BACKGROUND.equals(tag) && insideWhitelist) {
                         final int uid = readIntAttribute(in, ATTR_UID);
                         mRestrictBackgroundWhitelistUids.put(uid, true);
+                    } else if (TAG_REVOKED_RESTRICT_BACKGROUND.equals(tag) && insideWhitelist) {
+                        final int uid = readIntAttribute(in, ATTR_UID);
+                        mRestrictBackgroundWhitelistRevokedUids.put(uid, true);
                     }
                 } else if (type == END_TAG) {
                     if (TAG_WHITELIST.equals(tag)) {
@@ -1519,12 +1589,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startTag(null, TAG_WHITELIST);
 
             // restrict background whitelist
-            final int size = mRestrictBackgroundWhitelistUids.size();
+            int size = mRestrictBackgroundWhitelistUids.size();
             for (int i = 0; i < size; i++) {
                 final int uid = mRestrictBackgroundWhitelistUids.keyAt(i);
                 out.startTag(null, TAG_RESTRICT_BACKGROUND);
                 writeIntAttribute(out, ATTR_UID, uid);
                 out.endTag(null, TAG_RESTRICT_BACKGROUND);
+            }
+
+            // revoked restrict background whitelist
+            size = mRestrictBackgroundWhitelistRevokedUids.size();
+            for (int i = 0; i < size; i++) {
+                final int uid = mRestrictBackgroundWhitelistRevokedUids.keyAt(i);
+                out.startTag(null, TAG_REVOKED_RESTRICT_BACKGROUND);
+                writeIntAttribute(out, ATTR_UID, uid);
+                out.endTag(null, TAG_REVOKED_RESTRICT_BACKGROUND);
             }
 
             out.endTag(null, TAG_WHITELIST);
@@ -1844,6 +1923,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             Slog.i(TAG, "adding uid " + uid + " to restrict background whitelist");
             mRestrictBackgroundWhitelistUids.append(uid, true);
+            if (mDefaultRestrictBackgroundWhitelistUids.get(uid)
+                    && mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+                if (LOGD) Slog.d(TAG, "Removing uid " + uid
+                        + " from revoked restrict background whitelist");
+                mRestrictBackgroundWhitelistRevokedUids.delete(uid);
+            }
             changed = mRestrictBackground && !oldStatus;
             if (changed && hasInternetPermissions(uid)) {
                 setUidNetworkRules(uid, false);
@@ -1879,6 +1964,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         Slog.i(TAG, "removing uid " + uid + " from restrict background whitelist");
         final boolean changed = mRestrictBackground && oldStatus;
         mRestrictBackgroundWhitelistUids.delete(uid);
+        if (mDefaultRestrictBackgroundWhitelistUids.get(uid)
+                && !mRestrictBackgroundWhitelistRevokedUids.get(uid)) {
+            if (LOGD) Slog.d(TAG, "Adding uid " + uid
+                    + " to revoked restrict background whitelist");
+            mRestrictBackgroundWhitelistRevokedUids.append(uid, true);
+        }
         if (updateNow) {
             if (changed && hasInternetPermissions(uid)) {
                 setUidNetworkRules(uid, true);
@@ -2120,6 +2211,30 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < size; i++) {
                     fout.print("UID=");
                     fout.print(mRestrictBackgroundWhitelistUids.keyAt(i));
+                    fout.println();
+                }
+                fout.decreaseIndent();
+            }
+
+            size = mDefaultRestrictBackgroundWhitelistUids.size();
+            if (size > 0) {
+                fout.println("Default restrict background whitelist uids:");
+                fout.increaseIndent();
+                for (int i = 0; i < size; i++) {
+                    fout.print("UID=");
+                    fout.print(mDefaultRestrictBackgroundWhitelistUids.keyAt(i));
+                    fout.println();
+                }
+                fout.decreaseIndent();
+            }
+
+            size = mRestrictBackgroundWhitelistRevokedUids.size();
+            if (size > 0) {
+                fout.println("Default restrict background whitelist uids revoked by users:");
+                fout.increaseIndent();
+                for (int i = 0; i < size; i++) {
+                    fout.print("UID=");
+                    fout.print(mRestrictBackgroundWhitelistRevokedUids.keyAt(i));
                     fout.println();
                 }
                 fout.decreaseIndent();
