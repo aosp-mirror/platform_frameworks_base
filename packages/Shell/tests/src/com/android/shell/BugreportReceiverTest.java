@@ -400,8 +400,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         DetailsUi detailsUi = new DetailsUi(mUiBot, ID);
         detailsUi.assertName(NAME);
-        detailsUi.assertTitle(mContext.getString(R.string.bugreport_info_title));
-        detailsUi.assertDescription(mContext.getString(R.string.bugreport_info_description));
+        detailsUi.assertTitle("");
+        detailsUi.assertDescription("");
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.titleField.setText(TITLE);
         detailsUi.descField.setText(DESCRIPTION);
@@ -415,8 +415,8 @@ public class BugreportReceiverTest extends InstrumentationTestCase {
 
         detailsUi = new DetailsUi(mUiBot, ID2);
         detailsUi.assertName(NAME2);
-        detailsUi.assertTitle(mContext.getString(R.string.bugreport_info_title));
-        detailsUi.assertDescription(mContext.getString(R.string.bugreport_info_description));
+        detailsUi.assertTitle("");
+        detailsUi.assertDescription("");
         detailsUi.nameField.setText(NEW_NAME2);
         detailsUi.titleField.setText(TITLE2);
         detailsUi.descField.setText(DESCRIPTION2);

@@ -59,13 +59,16 @@
     <!--  Title of the dialog asking for user-defined bug report details like name, title, and description. -->
     <string name="bugreport_info_dialog_title">Bug report <xliff:g id="id">#%d</xliff:g> details</string>
 
-    <!-- Text of the hint asking for the bug report name, which when set will define a suffix in the
+    <!-- Text of the label identifying the bug report name, which when set will define a suffix in the
          bug report file names. [CHAR LIMIT=30] -->
     <string name="bugreport_info_name">Filename</string>
-    <!-- Text of hint asking for the bug report title, which when set will define the
+    <!-- Text of the label identifying the bug report title, which when set will define the
          Subject of the email message. [CHAR LIMIT=60] -->
-    <string name="bugreport_info_title">Title</string>
-    <!-- Text of hint asking for the bug report description, which when set will describe
+    <string name="bugreport_info_title">Bug title</string>
+    <!-- Text of the label identifying the bug report description, which when set will describe
          what the bug report is about. [CHAR LIMIT=NONE] -->
-    <string name="bugreport_info_description">Detailed description</string>
+    <string name="bugreport_info_description">Bug summary</string>
+
+    <!-- Label of button that save bugreport details.  -->
+    <string name="save">Save</string>
 </resources>

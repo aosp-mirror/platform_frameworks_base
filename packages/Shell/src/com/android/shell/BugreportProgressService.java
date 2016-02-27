@@ -601,7 +601,8 @@ public class BugreportProgressService extends Service {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
             // non-interactive mode (where the bugerport will be shared upon completion).
-            Log.d(TAG, "launchBugreportInfoDialog(" + id + "): cancel notification");
+            Log.w(TAG, "launchBugreportInfoDialog(): canceling notification because id " + id
+                    + " was not found");
             // TODO: add test case to make sure notification is canceled.
             NotificationManager.from(mContext).cancel(TAG, id);
             return;
@@ -627,7 +628,8 @@ public class BugreportProgressService extends Service {
             // Most likely am killed Shell before user tapped the notification. Since system might
             // be too busy anwyays, it's better to ignore the notification and switch back to the
             // non-interactive mode (where the bugerport will be shared upon completion).
-            Log.d(TAG, "takeScreenshot(" + id + ", " + delayed + "): cancel notification");
+            Log.w(TAG, "takeScreenshot(): canceling notification because id " + id
+                    + " was not found");
             // TODO: add test case to make sure notification is canceled.
             NotificationManager.from(mContext).cancel(TAG, id);
             return;
@@ -1268,6 +1270,9 @@ public class BugreportProgressService extends Service {
                         if (hasFocus) {
                             return;
                         }
+                        // Select-all is useful just initially, since the date-based filename is
+                        // full of hyphens.
+                        mInfoName.setSelectAllOnFocus(false);
                         sanitizeName();
                     }
                 });
@@ -1276,7 +1281,7 @@ public class BugreportProgressService extends Service {
                         .setView(view)
                         .setTitle(dialogTitle)
                         .setCancelable(false)
-                        .setPositiveButton(context.getString(com.android.internal.R.string.ok),
+                        .setPositiveButton(context.getString(R.string.save),
                                 null)
                         .setNegativeButton(context.getString(com.android.internal.R.string.cancel),
                                 new DialogInterface.OnClickListener()

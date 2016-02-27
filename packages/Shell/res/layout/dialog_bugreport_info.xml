@@ -16,28 +16,44 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
+    android:paddingTop="15dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
+    <TextView
+        android:inputType="textNoSuggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bugreport_info_name"/>
     <EditText
         android:id="@+id/name"
         android:maxLength="30"
         android:singleLine="true"
+        android:selectAllOnFocus="true"
         android:inputType="textNoSuggestions"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/bugreport_info_name"/>
+        android:text="@string/bugreport_info_title"/>
     <EditText
         android:id="@+id/title"
         android:maxLength="80"
         android:singleLine="true"
+        android:inputType="textAutoCorrect|textCapSentences"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/bugreport_info_title"/>
+        android:editable="false"
+        android:text="@string/bugreport_info_description"/>
     <EditText
         android:id="@+id/description"
         android:singleLine="false"
-        android:inputType="textMultiLine"
+        android:inputType="textMultiLine|textAutoCorrect|textCapSentences"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/bugreport_info_description"/>
+        android:layout_height="wrap_content"/>
 </LinearLayout>
