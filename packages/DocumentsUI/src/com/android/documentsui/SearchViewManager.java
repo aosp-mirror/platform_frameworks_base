@@ -145,8 +145,6 @@ final class SearchViewManager implements
 
     private void onSearchExpanded() {
         mSearchExpanded = true;
-        mView.setBackgroundColor(
-                mView.getResources().getColor(R.color.menu_search_background, null));
     }
 
     boolean isSearching() {
@@ -178,9 +176,6 @@ final class SearchViewManager implements
             mIgnoreNextClose = false;
             return false;
         }
-
-        mView.setBackgroundColor(
-                mView.getResources().getColor(android.R.color.transparent, null));
 
         // Refresh the directory if a search was done
         if (mCurrentSearch != null) {
