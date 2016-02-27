@@ -46,7 +46,7 @@ import java.util.List;
  * is an example of a trigger sensor.
  * </p>
  * <pre class="prettyprint">
- * public class SensorActivity extends Activity, implements SensorEventListener {
+ * public class SensorActivity extends Activity implements SensorEventListener {
  *     private final SensorManager mSensorManager;
  *     private final Sensor mAccelerometer;
  *
