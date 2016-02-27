@@ -1223,6 +1223,11 @@ class WindowStateAnimator {
             return;
         }
 
+        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
+        if (w == winShowWhenLocked) {
+            return;
+        }
+
         final TaskStack stack = task.mStack;
         stack.getDimBounds(mTmpStackBounds);
         // When we resize we use the big surface approach, which means we can't trust the
