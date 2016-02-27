@@ -349,8 +349,8 @@
     <string name="user_add_user_title" msgid="4553596395824132638">"Yangi foyd-chi qo‘shilsinmi?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Yangi foydalanuvchi qo‘shilgach, o‘sha shaxs o‘z hududini sozlashi lozim bo‘ladi.\n\nHar qanday foydalanuvchi ilovalarni barcha foydalanuvchilar uchun yangilashi mumkin."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Quvvat tejash rejimi yoqildi"</string>
-    <string name="battery_saver_notification_text" msgid="820318788126672692">"Unumdorlikni pasaytiradi va fonda int-dan foyd-ni cheklaydi"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Quvvat tejash funksiyasini o‘chiring"</string>
+    <string name="battery_saver_notification_text" msgid="820318788126672692">"Unumdorlik pasayadi va fonda internetdan foydalanish cheklanadi"</string>
+    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Quvvat tejash rejimidan chiqish"</string>
     <string name="notification_hidden_text" msgid="1135169301897151909">"Kontent yashirildi"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilovasi qurilma ekranidagi har qanday tasvirni ko‘rishni boshlaydi."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Boshqa ko‘rsatilmasin"</string>
