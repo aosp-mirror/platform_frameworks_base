@@ -28476,6 +28476,10 @@ package android.os {
     ctor public DeadObjectException(java.lang.String);
   }
 
+  public class DeadSystemException extends android.os.DeadObjectException {
+    ctor public DeadSystemException();
+  }
+
   public final class Debug {
     method public static deprecated void changeDebugPort(int);
     method public static void dumpHprofData(java.lang.String) throws java.io.IOException;

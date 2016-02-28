@@ -307,7 +307,7 @@ public class LocationManager {
             try {
                 mService.locationCallbackFinished(this);
             } catch (RemoteException e) {
-                Log.e(TAG, "locationCallbackFinished: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -341,9 +341,8 @@ public class LocationManager {
         try {
             return mService.getAllProviders();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -357,9 +356,8 @@ public class LocationManager {
         try {
             return mService.getProviders(null, enabledOnly);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -382,9 +380,8 @@ public class LocationManager {
             }
             return createProvider(name, properties);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -402,9 +399,8 @@ public class LocationManager {
         try {
             return mService.getProviders(criteria, enabledOnly);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -434,9 +430,8 @@ public class LocationManager {
         try {
             return mService.getBestProvider(criteria, enabledOnly);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -885,7 +880,7 @@ public class LocationManager {
         try {
             mService.requestLocationUpdates(request, transport, intent, packageName);
        } catch (RemoteException e) {
-           Log.e(TAG, "RemoteException", e);
+           throw e.rethrowFromSystemServer();
        }
     }
 
@@ -911,7 +906,7 @@ public class LocationManager {
         try {
             mService.removeUpdates(transport, null, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -930,7 +925,7 @@ public class LocationManager {
         try {
             mService.removeUpdates(null, intent, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -992,7 +987,7 @@ public class LocationManager {
         try {
             mService.requestGeofence(request, fence, intent, mContext.getPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1040,7 +1035,7 @@ public class LocationManager {
         try {
             mService.requestGeofence(request, fence, intent, mContext.getPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1067,7 +1062,7 @@ public class LocationManager {
         try {
             mService.removeGeofence(null, intent, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1095,7 +1090,7 @@ public class LocationManager {
         try {
             mService.removeGeofence(fence, intent, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1117,7 +1112,7 @@ public class LocationManager {
         try {
             mService.removeGeofence(null, intent, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1148,8 +1143,7 @@ public class LocationManager {
         try {
             return mService.isProviderEnabled(provider);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1173,8 +1167,7 @@ public class LocationManager {
         try {
             return mService.getLastLocation(null, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1205,8 +1198,7 @@ public class LocationManager {
         try {
             return mService.getLastLocation(request, packageName);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1237,7 +1229,7 @@ public class LocationManager {
         try {
             mService.addTestProvider(name, properties, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1255,7 +1247,7 @@ public class LocationManager {
         try {
             mService.removeTestProvider(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1292,7 +1284,7 @@ public class LocationManager {
         try {
             mService.setTestProviderLocation(provider, loc, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1310,7 +1302,7 @@ public class LocationManager {
         try {
             mService.clearTestProviderLocation(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1330,7 +1322,7 @@ public class LocationManager {
         try {
             mService.setTestProviderEnabled(provider, enabled, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1348,7 +1340,7 @@ public class LocationManager {
         try {
             mService.clearTestProviderEnabled(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1371,7 +1363,7 @@ public class LocationManager {
             mService.setTestProviderStatus(provider, status, extras, updateTime,
                     mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1389,7 +1381,7 @@ public class LocationManager {
         try {
             mService.clearTestProviderStatus(provider, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1615,8 +1607,7 @@ public class LocationManager {
                 mGpsStatusListeners.put(listener, transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in registerGpsStatusListener: ", e);
-            result = false;
+            throw e.rethrowFromSystemServer();
         }
 
         return result;
@@ -1635,7 +1626,7 @@ public class LocationManager {
                 mService.unregisterGnssStatusCallback(transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1679,8 +1670,7 @@ public class LocationManager {
                 mGnssStatusListeners.put(callback, transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in registerGnssStatusCallback: ", e);
-            result = false;
+            throw e.rethrowFromSystemServer();
         }
 
         return result;
@@ -1698,7 +1688,7 @@ public class LocationManager {
                 mService.unregisterGnssStatusCallback(transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterGnssStatusCallback: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1728,8 +1718,7 @@ public class LocationManager {
                 mGpsNmeaListeners.put(listener, transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in registerGpsStatusListener: ", e);
-            result = false;
+            throw e.rethrowFromSystemServer();
         }
 
         return result;
@@ -1748,7 +1737,7 @@ public class LocationManager {
                 mService.unregisterGnssStatusCallback(transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterGpsStatusListener: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1792,8 +1781,7 @@ public class LocationManager {
                 mGnssNmeaListeners.put(listener, transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in registerGnssStatusCallback: ", e);
-            result = false;
+            throw e.rethrowFromSystemServer();
         }
 
         return result;
@@ -1811,7 +1799,7 @@ public class LocationManager {
                 mService.unregisterGnssStatusCallback(transport);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterGnssStatusCallback: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1963,8 +1951,7 @@ public class LocationManager {
         try {
             return mService.getGnssYearOfHardware();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getGnssSystemInfo: ", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1983,8 +1970,7 @@ public class LocationManager {
         try {
             return mService.sendExtraCommand(provider, command, extras);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in sendExtraCommand: ", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1998,8 +1984,7 @@ public class LocationManager {
         try {
             return mService.sendNiResponse(notifId, userResponse);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in sendNiResponse: ", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 

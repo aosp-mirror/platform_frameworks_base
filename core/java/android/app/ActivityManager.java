@@ -716,7 +716,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getFrontActivityScreenCompatMode();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -725,7 +725,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setFrontActivityScreenCompatMode(mode);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -734,7 +734,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getPackageScreenCompatMode(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -743,7 +743,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setPackageScreenCompatMode(packageName, mode);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -752,7 +752,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getPackageAskScreenCompat(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -761,7 +761,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setPackageAskScreenCompat(packageName, ask);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1046,7 +1046,7 @@ public class ActivityManager {
                     return ActivityManagerNative.getDefault().getTaskDescriptionIcon(iconFilename,
                             userId);
                 } catch (RemoteException e) {
-                    throw e.rethrowAsRuntimeException();
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return null;
@@ -1427,7 +1427,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
                     flags, UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1452,7 +1452,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getRecentTasks(maxNum,
                     flags, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1587,7 +1587,7 @@ public class ActivityManager {
         try {
             appTasks = ActivityManagerNative.getDefault().getAppTasks(mContext.getPackageName());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
         int numAppTasks = appTasks.size();
         for (int i = 0; i < numAppTasks; i++) {
@@ -1612,7 +1612,7 @@ public class ActivityManager {
             try {
                 mAppTaskThumbnailSize = ActivityManagerNative.getDefault().getAppTaskThumbnailSize();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1678,7 +1678,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().addAppTask(activity.getActivityToken(),
                     intent, description, thumbnail);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1720,7 +1720,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getTasks(maxNum, 0);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1736,7 +1736,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().removeTask(taskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1895,7 +1895,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getTaskThumbnail(id);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1904,7 +1904,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().isInHomeStack(taskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1953,7 +1953,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().moveTaskToFront(taskId, flags, options);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2139,7 +2139,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault()
                     .getServices(maxNum, 0);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2154,7 +2154,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault()
                     .getRunningServiceControlPanel(service);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2258,7 +2258,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().getMemoryInfo(outInfo);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2377,7 +2377,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().clearApplicationUserData(packageName,
                     observer, UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2411,7 +2411,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().getGrantedUriPermissions(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2429,7 +2429,7 @@ public class ActivityManager {
             ActivityManagerNative.getDefault().clearGrantedUriPermissions(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2549,7 +2549,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getProcessesInErrorState();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2863,7 +2863,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getRunningExternalApplications();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2880,7 +2880,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().setProcessMemoryTrimLevel(process, userId,
                     level);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2898,7 +2898,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getRunningAppProcesses();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2917,7 +2917,7 @@ public class ActivityManager {
                     mContext.getOpPackageName());
             return RunningAppProcessInfo.procStateToImportance(procState);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2936,7 +2936,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().getMyMemoryState(outState);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2955,7 +2955,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getProcessMemoryInfo(pids);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2989,7 +2989,7 @@ public class ActivityManager {
             ActivityManagerNative.getDefault().killBackgroundProcesses(packageName,
                     UserHandle.myUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3006,7 +3006,7 @@ public class ActivityManager {
             ActivityManagerNative.getDefault().killUid(UserHandle.getAppId(uid),
                     UserHandle.getUserId(uid), reason);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3033,7 +3033,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().forceStopPackage(packageName, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3052,7 +3052,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getDeviceConfigurationInfo();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3142,7 +3142,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().isUserAMonkey();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3218,7 +3218,7 @@ public class ActivityManager {
             return AppGlobals.getPackageManager()
                     .checkUidPermission(permission, uid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3228,7 +3228,7 @@ public class ActivityManager {
             return AppGlobals.getPackageManager()
                     .checkUidPermission(permission, uid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3265,7 +3265,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().handleIncomingUser(callingPid,
                     callingUid, userId, allowAll, requireFull, name, callerPackage);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3280,7 +3280,7 @@ public class ActivityManager {
             ui = ActivityManagerNative.getDefault().getCurrentUser();
             return ui != null ? ui.id : 0;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3292,7 +3292,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().switchUser(userid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3316,7 +3316,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().isUserRunning(userId, 0);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3326,7 +3326,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().isUserRunning(userId,
                     ActivityManager.FLAG_AND_LOCKED);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3336,7 +3336,7 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().isUserRunning(userId,
                     ActivityManager.FLAG_AND_UNLOCKED);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3421,7 +3421,7 @@ public class ActivityManager {
             ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, pssSize,
                     mContext.getPackageName());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3440,7 +3440,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().setDumpHeapDebugLimit(null, 0, 0, null);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3451,7 +3451,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().startLockTaskMode(taskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3462,7 +3462,7 @@ public class ActivityManager {
         try {
             ActivityManagerNative.getDefault().stopLockTaskMode();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3489,7 +3489,7 @@ public class ActivityManager {
         try {
             return ActivityManagerNative.getDefault().getLockTaskModeState();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3512,7 +3512,7 @@ public class ActivityManager {
             try {
                 mAppTaskImpl.finishAndRemoveTask();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -3525,7 +3525,7 @@ public class ActivityManager {
             try {
                 return mAppTaskImpl.getTaskInfo();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -3539,7 +3539,7 @@ public class ActivityManager {
             try {
                 mAppTaskImpl.moveToFront();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -3581,7 +3581,7 @@ public class ActivityManager {
             try {
                 mAppTaskImpl.setExcludeFromRecents(exclude);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
     }

@@ -12708,7 +12708,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0,
                             UserHandle.USER_SYSTEM);
                 } catch (RemoteException e) {
-                    e.rethrowAsRuntimeException();
+                    throw e.rethrowAsRuntimeException();
                 }
             }
             startHomeActivityLocked(currentUserId, "systemReady");

@@ -1517,7 +1517,11 @@ public final class StrictMode {
                         violationMaskSubset,
                         info);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
+                    if (e instanceof DeadObjectException) {
+                        // System process is dead; ignore
+                    } else {
+                        Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
+                    }
                 } finally {
                     // Restore the policy.
                     setThreadPolicyMask(savedPolicyMask);
@@ -1569,7 +1573,11 @@ public final class StrictMode {
                             info);
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException handling StrictMode violation", e);
+                    if (e instanceof DeadObjectException) {
+                        // System process is dead; ignore
+                    } else {
+                        Log.e(TAG, "RemoteException handling StrictMode violation", e);
+                    }
                 }
                 int outstanding = sDropboxCallsInFlight.decrementAndGet();
                 if (LOG_V) Log.d(TAG, "Dropbox complete; in-flight=" + outstanding);
@@ -1897,7 +1905,11 @@ public final class StrictMode {
                     violationMaskSubset,
                     info);
             } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
+                if (e instanceof DeadObjectException) {
+                    // System process is dead; ignore
+                } else {
+                    Log.e(TAG, "RemoteException trying to handle StrictMode violation", e);
+                }
             } finally {
                 // Restore the policy.
                 setThreadPolicyMask(savedPolicyMask);

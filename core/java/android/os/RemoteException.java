@@ -15,6 +15,7 @@
  */
 
 package android.os;
+
 import android.util.AndroidException;
 
 /**
@@ -32,5 +33,26 @@ public class RemoteException extends AndroidException {
     /** {@hide} */
     public RuntimeException rethrowAsRuntimeException() {
         throw new RuntimeException(this);
+    }
+
+    /**
+     * Rethrow this exception when we know it came from the system server. This
+     * gives us an opportunity to throw a nice clean
+     * {@link DeadSystemException} signal to avoid spamming logs with
+     * misleading stack traces.
+     * <p>
+     * Apps making calls into the system server may end up persisting internal
+     * state or making security decisions based on the perceived success or
+     * failure of a call, or any default values returned. For this reason, we
+     * want to strongly throw when there was trouble with the transaction.
+     *
+     * @hide
+     */
+    public RuntimeException rethrowFromSystemServer() {
+        if (this instanceof DeadObjectException) {
+            throw new RuntimeException(new DeadSystemException());
+        } else {
+            throw new RuntimeException(this);
+        }
     }
 }
