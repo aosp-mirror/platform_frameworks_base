@@ -69,6 +69,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     static Object[] mTwiceBaseCache;
     static int mTwiceBaseCacheSize;
 
+    final boolean mIdentityHashCode;
     int[] mHashes;
     Object[] mArray;
     int mSize;
@@ -222,15 +223,19 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * will grow once items are added to it.
      */
     public ArraySet() {
-        mHashes = EmptyArray.INT;
-        mArray = EmptyArray.OBJECT;
-        mSize = 0;
+        this(0, false);
     }
 
     /**
      * Create a new ArraySet with a given initial capacity.
      */
     public ArraySet(int capacity) {
+        this(capacity, false);
+    }
+
+    /** {@hide} */
+    public ArraySet(int capacity, boolean identityHashCode) {
+        mIdentityHashCode = identityHashCode;
         if (capacity == 0) {
             mHashes = EmptyArray.INT;
             mArray = EmptyArray.OBJECT;
@@ -306,7 +311,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * @return Returns the index of the value if it exists, else a negative integer.
      */
     public int indexOf(Object key) {
-        return key == null ? indexOfNull() : indexOf(key, key.hashCode());
+        return key == null ? indexOfNull()
+                : indexOf(key, mIdentityHashCode ? System.identityHashCode(key) : key.hashCode());
     }
 
     /**
@@ -343,7 +349,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             hash = 0;
             index = indexOfNull();
         } else {
-            hash = value.hashCode();
+            hash = mIdentityHashCode ? System.identityHashCode(value) : value.hashCode();
             index = indexOf(value, hash);
         }
         if (index >= 0) {
