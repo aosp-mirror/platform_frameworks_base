@@ -14747,7 +14747,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
 
-            if (ps.pkg.parentPackage != null && (!isSystemApp(ps)
+            if (ps.pkg != null && ps.pkg.parentPackage != null && (!isSystemApp(ps)
                     || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
