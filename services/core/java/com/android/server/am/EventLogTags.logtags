@@ -54,9 +54,9 @@ option java_package com.android.server.am
 # An activity has been relaunched:
 30020 am_relaunch_activity (User|1|5),(Token|1|5),(Task ID|1|5),(Component Name|3)
 # The activity's onPause has been called.
-30021 am_on_paused_called (User|1|5),(Component Name|3)
+30021 am_on_paused_called (User|1|5),(Component Name|3),(Reason|3)
 # The activity's onResume has been called.
-30022 am_on_resume_called (User|1|5),(Component Name|3)
+30022 am_on_resume_called (User|1|5),(Component Name|3),(Reason|3)
 # Kill a process to reclaim memory.
 30023 am_kill (User|1|5),(PID|1|5),(Process Name|3),(OomAdj|1|5),(Reason|3)
 # Discard an undelivered serialized broadcast (timeout/ANR/crash)
@@ -103,3 +103,8 @@ option java_package com.android.server.am
 30046 am_meminfo (Cached|2|2),(Free|2|2),(Zram|2|2),(Kernel|2|2),(Native|2|2)
 # Report collection of memory used by a process
 30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2)
+
+# Attempting to stop an activity
+30048 am_stop_activity (User|1|5),(Token|1|5),(Component Name|3)
+# The activity's onStop has been called.
+30049 am_on_stop_called (User|1|5),(Component Name|3),(Reason|3)

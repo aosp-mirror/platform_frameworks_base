@@ -3005,6 +3005,8 @@ final class ActivityStack {
                 if (!r.visible) {
                     mWindowManager.setAppVisibility(r.appToken, false);
                 }
+                EventLogTags.writeAmStopActivity(
+                        r.userId, System.identityHashCode(r), r.shortComponentName);
                 r.app.thread.scheduleStopActivity(r.appToken, r.visible, r.configChangeFlags);
                 if (mService.isSleepingOrShuttingDown()) {
                     r.setSleeping(true);
