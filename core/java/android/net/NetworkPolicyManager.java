@@ -106,6 +106,7 @@ public class NetworkPolicyManager {
         try {
             mService.setUidPolicy(uid, policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -118,6 +119,7 @@ public class NetworkPolicyManager {
         try {
             mService.addUidPolicy(uid, policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -130,6 +132,7 @@ public class NetworkPolicyManager {
         try {
             mService.removeUidPolicy(uid, policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -137,7 +140,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getUidPolicy(uid);
         } catch (RemoteException e) {
-            return POLICY_NONE;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -145,7 +148,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getUidsWithPolicy(policy);
         } catch (RemoteException e) {
-            return new int[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -153,6 +156,7 @@ public class NetworkPolicyManager {
         try {
             mService.registerListener(listener);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -160,6 +164,7 @@ public class NetworkPolicyManager {
         try {
             mService.unregisterListener(listener);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -167,6 +172,7 @@ public class NetworkPolicyManager {
         try {
             mService.setNetworkPolicies(policies);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -174,7 +180,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getNetworkPolicies(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -182,6 +188,7 @@ public class NetworkPolicyManager {
         try {
             mService.setRestrictBackground(restrictBackground);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -189,7 +196,7 @@ public class NetworkPolicyManager {
         try {
             return mService.getRestrictBackground();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -202,6 +209,7 @@ public class NetworkPolicyManager {
         try {
             mService.factoryReset(subscriber);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

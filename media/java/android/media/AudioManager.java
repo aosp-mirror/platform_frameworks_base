@@ -809,7 +809,7 @@ public class AudioManager {
             service.adjustStreamVolume(streamType, direction, flags,
                     getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in adjustStreamVolume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -877,7 +877,7 @@ public class AudioManager {
             service.setMasterMute(mute, flags, getContext().getOpPackageName(),
                     UserHandle.getCallingUserId());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMasterMute", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -893,8 +893,7 @@ public class AudioManager {
         try {
             return service.getRingerModeExternal();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getRingerMode", e);
-            return RINGER_MODE_NORMAL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -914,8 +913,7 @@ public class AudioManager {
         try {
             return service.isValidRingerMode(ringerMode);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isValidRingerMode", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -931,8 +929,7 @@ public class AudioManager {
         try {
             return service.getStreamMaxVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getStreamMaxVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -949,8 +946,7 @@ public class AudioManager {
         try {
             return service.getStreamMinVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getStreamMinVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -967,8 +963,7 @@ public class AudioManager {
         try {
             return service.getStreamVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getStreamVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -982,8 +977,7 @@ public class AudioManager {
         try {
             return service.getLastAudibleStreamVolume(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getLastAudibleStreamVolume", e);
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -998,8 +992,7 @@ public class AudioManager {
         try {
             return service.getUiSoundsStreamType();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getUiSoundsStreamType", e);
-            return STREAM_RING;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1024,7 +1017,7 @@ public class AudioManager {
         try {
             service.setRingerModeExternal(ringerMode, getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setRingerMode", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1045,7 +1038,7 @@ public class AudioManager {
         try {
             service.setStreamVolume(streamType, index, flags, getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setStreamVolume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1122,8 +1115,7 @@ public class AudioManager {
         try {
             return service.isStreamMute(streamType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isStreamMute", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1137,8 +1129,7 @@ public class AudioManager {
         try {
             return service.isMasterMute();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isMasterMute", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1154,7 +1145,7 @@ public class AudioManager {
         try {
             service.forceVolumeControlStream(streamType, mICallBack);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in forceVolumeControlStream", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1182,8 +1173,7 @@ public class AudioManager {
         try {
             return service.shouldVibrate(vibrateType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in shouldVibrate", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1209,8 +1199,7 @@ public class AudioManager {
         try {
             return service.getVibrateSetting(vibrateType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getVibrateSetting", e);
-            return VIBRATE_SETTING_OFF;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1237,7 +1226,7 @@ public class AudioManager {
         try {
             service.setVibrateSetting(vibrateType, vibrateSetting);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setVibrateSetting", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1255,7 +1244,7 @@ public class AudioManager {
         try {
             service.setSpeakerphoneOn(on);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setSpeakerphoneOn", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1269,8 +1258,7 @@ public class AudioManager {
         try {
             return service.isSpeakerphoneOn();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isSpeakerphoneOn", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
      }
 
@@ -1411,7 +1399,7 @@ public class AudioManager {
             service.startBluetoothSco(mICallBack,
                     getContext().getApplicationInfo().targetSdkVersion);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in startBluetoothSco", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1435,7 +1423,7 @@ public class AudioManager {
         try {
             service.startBluetoothScoVirtualCall(mICallBack);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in startBluetoothScoVirtualCall", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1454,7 +1442,7 @@ public class AudioManager {
         try {
             service.stopBluetoothSco(mICallBack);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in stopBluetoothSco", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1472,7 +1460,7 @@ public class AudioManager {
         try {
             service.setBluetoothScoOn(on);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setBluetoothScoOn", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1487,8 +1475,7 @@ public class AudioManager {
         try {
             return service.isBluetoothScoOn();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isBluetoothScoOn", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1560,7 +1547,7 @@ public class AudioManager {
             service.setMicrophoneMute(on, getContext().getOpPackageName(),
                     UserHandle.getCallingUserId());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMicrophoneMute", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1593,7 +1580,7 @@ public class AudioManager {
         try {
             service.setMode(mode, mICallBack, mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMode", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1609,8 +1596,7 @@ public class AudioManager {
         try {
             return service.getMode();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getMode", e);
-            return MODE_INVALID;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1747,8 +1733,7 @@ public class AudioManager {
         try {
             return service.getCurrentAudioFocus() == AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in isAudioFocusExclusive()", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1914,7 +1899,7 @@ public class AudioManager {
         try {
             service.playSoundEffect(effectType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in playSoundEffect"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1949,7 +1934,7 @@ public class AudioManager {
         try {
             service.playSoundEffect(effectType);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in playSoundEffect"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1981,7 +1966,7 @@ public class AudioManager {
         try {
             service.playSoundEffectVolume(effectType, volume);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in playSoundEffect"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2003,7 +1988,7 @@ public class AudioManager {
         try {
             service.loadSoundEffects();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in loadSoundEffects"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2017,7 +2002,7 @@ public class AudioManager {
         try {
             service.unloadSoundEffects();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unloadSoundEffects"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2428,7 +2413,7 @@ public class AudioManager {
                     getContext().getOpPackageName() /* package name */, flags,
                     ap != null ? ap.cb() : null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocus() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
         return status;
     }
@@ -2454,7 +2439,7 @@ public class AudioManager {
                     AUDIOFOCUS_FLAG_LOCK,
                     null /* policy token */);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2470,7 +2455,7 @@ public class AudioManager {
             service.abandonAudioFocus(null, AudioSystem.IN_VOICE_COMM_FOCUS_ID,
                     null /*AudioAttributes, legacy behavior*/);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2499,7 +2484,7 @@ public class AudioManager {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
                     getIdForAudioFocusListener(l), aa);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService:", e);
+            throw e.rethrowFromSystemServer();
         }
         return status;
     }
@@ -2713,8 +2698,7 @@ public class AudioManager {
             }
             // successful registration
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in registerAudioPolicyAsync()", e);
-            return ERROR;
+            throw e.rethrowFromSystemServer();
         }
         return SUCCESS;
     }
@@ -2733,7 +2717,7 @@ public class AudioManager {
             service.unregisterAudioPolicyAsync(policy.cb());
             policy.setRegistration(null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2793,7 +2777,7 @@ public class AudioManager {
                     try {
                         service.registerRecordingCallback(mRecCb);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "Dead object in registerRecordingCallback", e);
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             } else {
@@ -2825,7 +2809,7 @@ public class AudioManager {
                     try {
                         service.unregisterRecordingCallback(mRecCb);
                     } catch (RemoteException e) {
-                        Log.e(TAG, "Dead object in unregisterRecordingCallback", e);
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             } else {
@@ -2845,8 +2829,7 @@ public class AudioManager {
         try {
             return service.getActiveRecordConfigurations();
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to retrieve active record configurations", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2929,7 +2912,7 @@ public class AudioManager {
         try {
             service.reloadAudioSettings();
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in reloadAudioSettings"+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2944,7 +2927,7 @@ public class AudioManager {
         try {
             service.avrcpSupportsAbsoluteVolume(address, support);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in avrcpSupportsAbsoluteVolume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3238,7 +3221,7 @@ public class AudioManager {
             service.setWiredDeviceConnectionState(type, state, address, name,
                     mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setWiredDeviceConnectionState "+e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3260,7 +3243,7 @@ public class AudioManager {
         try {
             delay = service.setBluetoothA2dpDeviceConnectionState(device, state, profile);
         } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setBluetoothA2dpDeviceConnectionState "+e);
+            throw e.rethrowFromSystemServer();
         }
         return delay;
     }
@@ -3270,7 +3253,7 @@ public class AudioManager {
         try {
             return getService().getRingtonePlayer();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3365,7 +3348,7 @@ public class AudioManager {
         try {
             getService().setVolumeController(controller);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error setting volume controller", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3379,7 +3362,7 @@ public class AudioManager {
         try {
             getService().notifyVolumeControllerVisible(controller, visible);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error notifying about volume controller visibility", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3391,8 +3374,7 @@ public class AudioManager {
         try {
             return getService().isStreamAffectedByRingerMode(streamType);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling isStreamAffectedByRingerMode", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3404,8 +3386,7 @@ public class AudioManager {
         try {
             return getService().isStreamAffectedByMute(streamType);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling isStreamAffectedByMute", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3417,7 +3398,7 @@ public class AudioManager {
         try {
             getService().disableSafeMediaVolume(mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Error disabling safe media volume", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3429,7 +3410,7 @@ public class AudioManager {
         try {
             getService().setRingerModeInternal(ringerMode, getContext().getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling setRingerModeInternal", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3441,8 +3422,7 @@ public class AudioManager {
         try {
             return getService().getRingerModeInternal();
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling getRingerModeInternal", e);
-            return RINGER_MODE_NORMAL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3454,7 +3434,7 @@ public class AudioManager {
         try {
             getService().setVolumePolicy(policy);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error calling setVolumePolicy", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3469,8 +3449,7 @@ public class AudioManager {
         try {
             return getService().setHdmiSystemAudioSupported(on);
         } catch (RemoteException e) {
-            Log.w(TAG, "Error setting system audio mode", e);
-            return AudioSystem.DEVICE_NONE;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3484,8 +3463,7 @@ public class AudioManager {
         try {
             return getService().isHdmiSystemAudioSupported();
         } catch (RemoteException e) {
-            Log.w(TAG, "Error querying system audio mode", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 

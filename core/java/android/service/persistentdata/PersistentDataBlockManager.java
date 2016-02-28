@@ -85,8 +85,7 @@ public class PersistentDataBlockManager {
         try {
             return sService.write(data);
         } catch (RemoteException e) {
-            onError("writing data");
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -97,8 +96,7 @@ public class PersistentDataBlockManager {
         try {
             return sService.read();
         } catch (RemoteException e) {
-            onError("reading data");
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -111,8 +109,7 @@ public class PersistentDataBlockManager {
         try {
             return sService.getDataBlockSize();
         } catch (RemoteException e) {
-            onError("getting data block size");
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -125,8 +122,7 @@ public class PersistentDataBlockManager {
         try {
             return sService.getMaximumDataBlockSize();
         } catch (RemoteException e) {
-            onError("getting maximum data block size");
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -138,7 +134,7 @@ public class PersistentDataBlockManager {
         try {
             sService.wipe();
         } catch (RemoteException e) {
-            onError("wiping persistent partition");
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -149,7 +145,7 @@ public class PersistentDataBlockManager {
         try {
             sService.setOemUnlockEnabled(enabled);
         } catch (RemoteException e) {
-            onError("setting OEM unlock enabled to " + enabled);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -160,8 +156,7 @@ public class PersistentDataBlockManager {
         try {
             return sService.getOemUnlockEnabled();
         } catch (RemoteException e) {
-            onError("getting OEM unlock enabled bit");
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -178,12 +173,7 @@ public class PersistentDataBlockManager {
         try {
             return sService.getFlashLockState();
         } catch (RemoteException e) {
-            onError("getting flash lock state");
-            return FLASH_LOCK_UNKNOWN;
+            throw e.rethrowFromSystemServer();
         }
-    }
-
-    private void onError(String msg) {
-        Slog.v(TAG, "Remote exception while " + msg);
     }
 }

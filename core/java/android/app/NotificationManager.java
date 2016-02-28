@@ -264,6 +264,7 @@ public class NotificationManager
                 Log.w(TAG, "notify: id corrupted: sent " + id + ", got back " + idOut[0]);
             }
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -304,6 +305,7 @@ public class NotificationManager
         try {
             service.cancelNotificationWithTag(pkg, tag, id, user.getIdentifier());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -319,6 +321,7 @@ public class NotificationManager
         try {
             service.cancelAllNotifications(pkg, UserHandle.myUserId());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -330,7 +333,7 @@ public class NotificationManager
         try {
             return service.getEffectsSuppressor();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -342,7 +345,7 @@ public class NotificationManager
         try {
             return service.matchesCallFilter(extras);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -354,7 +357,7 @@ public class NotificationManager
         try {
             return service.isSystemConditionProviderEnabled(path);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -366,6 +369,7 @@ public class NotificationManager
         try {
             service.setZenMode(mode, conditionId, reason);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -377,8 +381,8 @@ public class NotificationManager
         try {
             return service.getZenMode();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return Global.ZEN_MODE_OFF;
     }
 
     /**
@@ -389,8 +393,8 @@ public class NotificationManager
         try {
             return service.getZenModeConfig();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -401,8 +405,8 @@ public class NotificationManager
         try {
             return service.getRuleInstanceCount(owner);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return 0;
     }
 
     /**
@@ -417,8 +421,8 @@ public class NotificationManager
         try {
             return service.getAutomaticZenRules();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -437,8 +441,8 @@ public class NotificationManager
         try {
             return service.getAutomaticZenRule(id);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -457,8 +461,8 @@ public class NotificationManager
         try {
             return service.addAutomaticZenRule(automaticZenRule);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -478,8 +482,8 @@ public class NotificationManager
         try {
             return service.updateAutomaticZenRule(automaticZenRule);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -499,8 +503,8 @@ public class NotificationManager
         try {
             return service.removeAutomaticZenRule(id);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -513,8 +517,8 @@ public class NotificationManager
         try {
             return service.removeAutomaticZenRules(packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -525,8 +529,8 @@ public class NotificationManager
         try {
             return service.getPackageImportance(mContext.getPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return NotificationListenerService.Ranking.IMPORTANCE_UNSPECIFIED;
     }
 
     /**
@@ -537,8 +541,8 @@ public class NotificationManager
         try {
             return service.areNotificationsEnabled(mContext.getPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -560,8 +564,8 @@ public class NotificationManager
         try {
             return service.isNotificationPolicyAccessGranted(mContext.getOpPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /** @hide */
@@ -570,8 +574,8 @@ public class NotificationManager
         try {
             return service.isNotificationPolicyAccessGrantedForPackage(pkg);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -586,8 +590,8 @@ public class NotificationManager
         try {
             return service.getNotificationPolicy(mContext.getOpPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -605,6 +609,7 @@ public class NotificationManager
         try {
             service.setNotificationPolicy(mContext.getOpPackageName(), policy);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -614,6 +619,7 @@ public class NotificationManager
         try {
             service.setNotificationPolicyAccessGranted(pkg, granted);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -630,8 +636,9 @@ public class NotificationManager
                 return rt;
             }
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return new ArraySet<String>();
+        return new ArraySet<>();
     }
 
     private Context mContext;

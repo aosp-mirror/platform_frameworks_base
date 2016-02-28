@@ -302,8 +302,7 @@ public class UsbManager {
             }
             return result;
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getDeviceList", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -347,8 +346,7 @@ public class UsbManager {
                 return new UsbAccessory[] { accessory };
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getAccessoryList", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -362,8 +360,7 @@ public class UsbManager {
         try {
             return mService.openAccessory(accessory);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in openAccessory", e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -380,8 +377,7 @@ public class UsbManager {
         try {
             return mService.hasDevicePermission(device);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in hasPermission", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -398,8 +394,7 @@ public class UsbManager {
         try {
             return mService.hasAccessoryPermission(accessory);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in hasPermission", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -425,7 +420,7 @@ public class UsbManager {
         try {
             mService.requestDevicePermission(device, mContext.getPackageName(), pi);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in requestPermission", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -451,7 +446,7 @@ public class UsbManager {
         try {
             mService.requestAccessoryPermission(accessory, mContext.getPackageName(), pi);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in requestPermission", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -466,7 +461,7 @@ public class UsbManager {
         try {
             mService.grantDevicePermission(device, Process.myUid());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in grantPermission", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -486,8 +481,7 @@ public class UsbManager {
         try {
             return mService.isFunctionEnabled(function);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setCurrentFunction", e);
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -517,7 +511,7 @@ public class UsbManager {
         try {
             mService.setCurrentFunction(function);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setCurrentFunction", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -533,7 +527,7 @@ public class UsbManager {
         try {
             mService.setUsbDataUnlocked(unlocked);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setUsbDataUnlocked", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -554,9 +548,8 @@ public class UsbManager {
         try {
             return mService.getPorts();
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getPorts", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -573,9 +566,8 @@ public class UsbManager {
         try {
             return mService.getPortStatus(port.getId());
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in getPortStatus", e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -604,7 +596,7 @@ public class UsbManager {
         try {
             mService.setPortRoles(port.getId(), powerRole, dataRole);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setPortRole", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 

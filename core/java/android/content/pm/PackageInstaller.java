@@ -301,7 +301,7 @@ public class PackageInstaller {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -321,7 +321,7 @@ public class PackageInstaller {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -337,7 +337,7 @@ public class PackageInstaller {
         try {
             mInstaller.updateSessionAppIcon(sessionId, appIcon);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -353,7 +353,7 @@ public class PackageInstaller {
             final String val = (appLabel != null) ? appLabel.toString() : null;
             mInstaller.updateSessionAppLabel(sessionId, val);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -370,7 +370,7 @@ public class PackageInstaller {
         try {
             mInstaller.abandonSession(sessionId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -385,7 +385,7 @@ public class PackageInstaller {
         try {
             return mInstaller.getSessionInfo(sessionId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -403,7 +403,7 @@ public class PackageInstaller {
         try {
             return mInstaller.getAllSessions(mUserId).getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -414,7 +414,7 @@ public class PackageInstaller {
         try {
             return mInstaller.getMySessions(mInstallerPackageName, mUserId).getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -427,7 +427,7 @@ public class PackageInstaller {
         try {
             mInstaller.uninstall(packageName, mInstallerPackageName, 0, statusReceiver, mUserId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -436,7 +436,7 @@ public class PackageInstaller {
         try {
             mInstaller.setPermissionsResult(sessionId, accepted);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -611,7 +611,7 @@ public class PackageInstaller {
             try {
                 mInstaller.registerCallback(delegate, mUserId);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
             mDelegates.add(delegate);
         }
@@ -634,7 +634,7 @@ public class PackageInstaller {
                     try {
                         mInstaller.unregisterCallback(delegate);
                     } catch (RemoteException e) {
-                        throw e.rethrowAsRuntimeException();
+                        throw e.rethrowFromSystemServer();
                     }
                     i.remove();
                 }
@@ -681,7 +681,7 @@ public class PackageInstaller {
             try {
                 mSession.setClientProgress(progress);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -690,7 +690,7 @@ public class PackageInstaller {
             try {
                 mSession.addClientProgress(progress);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -734,7 +734,7 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -767,7 +767,7 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -790,7 +790,7 @@ public class PackageInstaller {
                 ExceptionUtils.maybeUnwrapIOException(e);
                 throw e;
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -810,7 +810,7 @@ public class PackageInstaller {
             try {
                 mSession.commit(statusReceiver);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -823,7 +823,7 @@ public class PackageInstaller {
             try {
                 mSession.close();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -837,7 +837,7 @@ public class PackageInstaller {
             try {
                 mSession.abandon();
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
     }

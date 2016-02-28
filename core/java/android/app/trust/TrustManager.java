@@ -16,8 +16,6 @@
 
 package android.app.trust;
 
-import com.android.internal.widget.LockPatternUtils;
-
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.os.Handler;
@@ -26,7 +24,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.Log;
+
+import com.android.internal.widget.LockPatternUtils;
 
 /**
  * See {@link com.android.server.trust.TrustManagerService}
@@ -62,7 +61,7 @@ public class TrustManager {
         try {
             mService.setDeviceLockedForUser(userId, locked);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -77,7 +76,7 @@ public class TrustManager {
         try {
             mService.reportUnlockAttempt(successful, userId);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -90,7 +89,7 @@ public class TrustManager {
         try {
             mService.reportEnabledTrustAgentsChanged(userId);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -103,7 +102,7 @@ public class TrustManager {
         try {
             mService.reportKeyguardShowingChanged();
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -134,7 +133,7 @@ public class TrustManager {
             mService.registerTrustListener(iTrustListener);
             mTrustListeners.put(trustListener, iTrustListener);
         } catch (RemoteException e) {
-            onError(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -149,7 +148,7 @@ public class TrustManager {
             try {
                 mService.unregisterTrustListener(iTrustListener);
             } catch (RemoteException e) {
-                onError(e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -163,14 +162,8 @@ public class TrustManager {
         try {
             return mService.isTrustUsuallyManaged(userId);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
-    }
-
-
-
-    private void onError(Exception e) {
-        Log.e(TAG, "Error while calling TrustManagerService", e);
     }
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
