@@ -267,7 +267,11 @@ public class DropBoxManager {
      * @param data value to store
      */
     public void addText(String tag, String data) {
-        try { mService.add(new Entry(tag, 0, data)); } catch (RemoteException e) {}
+        try {
+            mService.add(new Entry(tag, 0, data));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -279,7 +283,11 @@ public class DropBoxManager {
      */
     public void addData(String tag, byte[] data, int flags) {
         if (data == null) throw new NullPointerException("data == null");
-        try { mService.add(new Entry(tag, 0, data, flags)); } catch (RemoteException e) {}
+        try {
+            mService.add(new Entry(tag, 0, data, flags));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -297,7 +305,7 @@ public class DropBoxManager {
         try {
             mService.add(entry);
         } catch (RemoteException e) {
-            // ignore
+            throw e.rethrowFromSystemServer();
         } finally {
             entry.close();
         }
@@ -312,7 +320,11 @@ public class DropBoxManager {
      * @return whether events with that tag would be accepted
      */
     public boolean isTagEnabled(String tag) {
-        try { return mService.isTagEnabled(tag); } catch (RemoteException e) { return false; }
+        try {
+            return mService.isTagEnabled(tag);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -325,7 +337,11 @@ public class DropBoxManager {
      * @return the next entry, or null if there are no more entries
      */
     public Entry getNextEntry(String tag, long msec) {
-        try { return mService.getNextEntry(tag, msec); } catch (RemoteException e) { return null; }
+        try {
+            return mService.getNextEntry(tag, msec);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     // TODO: It may be useful to have some sort of notification mechanism

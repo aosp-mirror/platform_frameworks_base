@@ -143,7 +143,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return pi;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(packageName);
@@ -154,7 +154,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.currentToCanonicalPackageNames(names);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -163,7 +163,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.canonicalToCurrentPackageNames(names);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -227,7 +227,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return gids;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(packageName);
@@ -252,7 +252,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return uid;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(packageName);
@@ -267,7 +267,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return pi;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(name);
@@ -282,7 +282,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return pi;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(group);
@@ -297,7 +297,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return pgi;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(name);
@@ -308,7 +308,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getAllPermissionGroups(flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -330,7 +330,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return maybeAdjustApplicationInfo(ai);
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(packageName);
@@ -370,7 +370,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return ai;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(className.toString());
@@ -385,7 +385,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return ai;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(className.toString());
@@ -400,7 +400,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return si;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(className.toString());
@@ -415,7 +415,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return pi;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(className.toString());
@@ -426,7 +426,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getSystemSharedLibraryNames();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -436,7 +436,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getServicesSystemSharedLibraryPackageName();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -445,7 +445,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getSystemAvailableFeatures();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -459,7 +459,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.hasSystemFeature(name, version);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -468,7 +468,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.checkPermission(permName, pkgName, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -477,7 +477,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.isPermissionRevokedByPolicy(permName, pkgName, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -491,7 +491,7 @@ public class ApplicationPackageManager extends PackageManager {
                 try {
                     mPermissionsControllerPackageName = mPM.getPermissionControllerPackageName();
                 } catch (RemoteException e) {
-                    throw e.rethrowAsRuntimeException();
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return mPermissionsControllerPackageName;
@@ -503,7 +503,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.addPermission(info);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -512,7 +512,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.addPermissionAsync(info);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -521,7 +521,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.removePermission(name);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -531,7 +531,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.grantRuntimePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -541,7 +541,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.revokeRuntimePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -550,7 +550,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getPermissionFlags(permissionName, packageName, user.getIdentifier());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -561,7 +561,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.updatePermissionFlags(permissionName, packageName, flagMask,
                     flagValues, user.getIdentifier());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -571,7 +571,7 @@ public class ApplicationPackageManager extends PackageManager {
             return mPM.shouldShowRequestPermissionRationale(permission,
                     mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -580,7 +580,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.checkSignatures(pkg1, pkg2);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -589,7 +589,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.checkUidSignatures(uid1, uid2);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -598,7 +598,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getPackagesForUid(uid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -607,7 +607,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getNameForUid(uid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -620,7 +620,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return uid;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
         throw new NameNotFoundException("No shared userid for user:"+sharedUserName);
     }
@@ -638,7 +638,7 @@ public class ApplicationPackageManager extends PackageManager {
             ParceledListSlice<PackageInfo> slice = mPM.getInstalledPackages(flags, userId);
             return slice.getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -652,7 +652,7 @@ public class ApplicationPackageManager extends PackageManager {
                     permissions, flags, userId);
             return slice.getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -664,7 +664,7 @@ public class ApplicationPackageManager extends PackageManager {
             ParceledListSlice<ApplicationInfo> slice = mPM.getInstalledApplications(flags, userId);
             return slice.getList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -680,7 +680,7 @@ public class ApplicationPackageManager extends PackageManager {
             }
             return Collections.emptyList();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -695,7 +695,7 @@ public class ApplicationPackageManager extends PackageManager {
             }
             return null;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -705,7 +705,7 @@ public class ApplicationPackageManager extends PackageManager {
             return mPM.isEphemeralApplication(
                     mContext.getPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -727,7 +727,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return EmptyArray.BYTE;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -737,7 +737,7 @@ public class ApplicationPackageManager extends PackageManager {
             return mPM.setEphemeralApplicationCookie(
                     mContext.getPackageName(), cookie, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -755,7 +755,7 @@ public class ApplicationPackageManager extends PackageManager {
                 flags,
                 userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -776,7 +776,7 @@ public class ApplicationPackageManager extends PackageManager {
                 flags,
                 userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -808,7 +808,7 @@ public class ApplicationPackageManager extends PackageManager {
                                                   specificTypes, intent, intent.resolveTypeIfNeeded(resolver),
                                                   flags, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -824,7 +824,7 @@ public class ApplicationPackageManager extends PackageManager {
                 flags,
                 userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -842,7 +842,7 @@ public class ApplicationPackageManager extends PackageManager {
                 flags,
                 mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -855,7 +855,7 @@ public class ApplicationPackageManager extends PackageManager {
                 flags,
                 userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -871,7 +871,7 @@ public class ApplicationPackageManager extends PackageManager {
             return mPM.queryIntentContentProviders(intent,
                     intent.resolveTypeIfNeeded(mContext.getContentResolver()), flags, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -891,7 +891,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.resolveContentProvider(name, flags, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -903,7 +903,7 @@ public class ApplicationPackageManager extends PackageManager {
                     = mPM.queryContentProviders(processName, uid, flags);
             return slice != null ? slice.getList() : null;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -918,7 +918,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return ii;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         throw new NameNotFoundException(className.toString());
@@ -930,7 +930,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.queryInstrumentation(targetPackage, flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1197,7 +1197,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return getResourcesForApplication(ai);
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
         throw new NameNotFoundException("Package " + appPackageName + " doesn't exist");
     }
@@ -1212,7 +1212,7 @@ public class ApplicationPackageManager extends PackageManager {
             }
             return mCachedSafeMode != 0;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1228,7 +1228,7 @@ public class ApplicationPackageManager extends PackageManager {
                 mPM.addOnPermissionsChangeListener(delegate);
                 mPermissionListeners.put(listener, delegate);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1242,7 +1242,7 @@ public class ApplicationPackageManager extends PackageManager {
                     mPM.removeOnPermissionsChangeListener(delegate);
                     mPermissionListeners.remove(listener);
                 } catch (RemoteException e) {
-                    throw e.rethrowAsRuntimeException();
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
@@ -1544,7 +1544,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.installPackageAsUser(originPath, observer.getBinder(), flags, installerPackageName,
                     verificationParams, null, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1563,7 +1563,7 @@ public class ApplicationPackageManager extends PackageManager {
             }
             return res;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1572,7 +1572,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.verifyPendingInstall(id, response);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1582,7 +1582,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.extendVerificationTimeout(id, verificationCodeAtTimeout, millisecondsToDelay);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1591,7 +1591,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.verifyIntentFilter(id, verificationCode, outFailedDomains);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1600,7 +1600,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getIntentVerificationStatus(packageName, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1609,7 +1609,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.updateIntentVerificationStatus(packageName, status, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1618,7 +1618,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getIntentFilterVerifications(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1627,7 +1627,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getAllIntentFilters(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1636,7 +1636,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getDefaultBrowserPackageName(userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1645,7 +1645,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.setDefaultBrowserPackageName(packageName, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1655,7 +1655,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.setInstallerPackageName(targetPackage, installerPackageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1664,7 +1664,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getInstallerPackageName(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1673,7 +1673,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getMoveStatus(moveId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1685,7 +1685,7 @@ public class ApplicationPackageManager extends PackageManager {
             try {
                 mPM.registerMoveCallback(delegate);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
             mDelegates.add(delegate);
         }
@@ -1700,7 +1700,7 @@ public class ApplicationPackageManager extends PackageManager {
                     try {
                         mPM.unregisterMoveCallback(delegate);
                     } catch (RemoteException e) {
-                        throw e.rethrowAsRuntimeException();
+                        throw e.rethrowFromSystemServer();
                     }
                     i.remove();
                 }
@@ -1722,7 +1722,7 @@ public class ApplicationPackageManager extends PackageManager {
 
             return mPM.movePackage(packageName, volumeUuid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1788,7 +1788,7 @@ public class ApplicationPackageManager extends PackageManager {
                 return false;
             }
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
 
         // Otherwise we can move to any private volume
@@ -1809,7 +1809,7 @@ public class ApplicationPackageManager extends PackageManager {
 
             return mPM.movePrimaryStorage(volumeUuid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1866,7 +1866,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.deletePackageAsUser(packageName, observer, userId, flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1876,7 +1876,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.clearApplicationUserData(packageName, observer, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
     @Override
@@ -1885,7 +1885,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.deleteApplicationCacheFiles(packageName, observer);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1895,7 +1895,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.freeStorageAndNotify(volumeUuid, idealStorageSize, observer);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1904,7 +1904,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.freeStorage(volumeUuid, freeStorageSize, pi);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1914,7 +1914,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.setPackagesSuspendedAsUser(packageNames, suspended, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1923,7 +1923,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.isPackageSuspendedForUser(packageName, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1933,7 +1933,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.getPackageSizeInfo(packageName, userHandle, observer);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
     @Override
@@ -1941,7 +1941,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.addPackageToPreferred(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1950,7 +1950,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.removePackageFromPreferred(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1959,7 +1959,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getPreferredPackages(flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1969,7 +1969,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.addPreferredActivity(filter, match, set, activity, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1979,7 +1979,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.addPreferredActivity(filter, match, set, activity, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1989,7 +1989,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.replacePreferredActivity(filter, match, set, activity, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2000,7 +2000,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.replacePreferredActivity(filter, match, set, activity, userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2009,7 +2009,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.clearPackagePreferredActivities(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2019,7 +2019,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getPreferredActivities(outFilters, outActivities, packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2028,7 +2028,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getHomeActivities(outActivities);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2038,7 +2038,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.setComponentEnabledSetting(componentName, newState, flags, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2047,7 +2047,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getComponentEnabledSetting(componentName, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2058,7 +2058,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.setApplicationEnabledSetting(packageName, newState, flags,
                     mContext.getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2067,7 +2067,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getApplicationEnabledSetting(packageName, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2078,7 +2078,7 @@ public class ApplicationPackageManager extends PackageManager {
             return mPM.setApplicationHiddenSettingAsUser(packageName, hidden,
                     user.getIdentifier());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2087,7 +2087,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getApplicationHiddenSettingAsUser(packageName, user.getIdentifier());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2099,7 +2099,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getKeySetByAlias(packageName, alias);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2110,7 +2110,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getSigningKeySet(packageName);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2122,7 +2122,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.isPackageSignedByKeySet(packageName, ks);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2134,7 +2134,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.isPackageSignedByKeySetExactly(packageName, ks);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2146,7 +2146,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.getVerifierDeviceIdentity();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2158,7 +2158,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.isUpgrade();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2170,7 +2170,7 @@ public class ApplicationPackageManager extends PackageManager {
                     mInstaller = new PackageInstaller(mContext, this, mPM.getPackageInstaller(),
                             mContext.getPackageName(), mContext.getUserId());
                 } catch (RemoteException e) {
-                    throw e.rethrowAsRuntimeException();
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return mInstaller;
@@ -2182,7 +2182,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             return mPM.isPackageAvailable(packageName, mContext.getUserId());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2196,7 +2196,7 @@ public class ApplicationPackageManager extends PackageManager {
             mPM.addCrossProfileIntentFilter(filter, mContext.getOpPackageName(),
                     sourceUserId, targetUserId, flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2208,7 +2208,7 @@ public class ApplicationPackageManager extends PackageManager {
         try {
             mPM.clearCrossProfileIntentFilters(sourceUserId, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 

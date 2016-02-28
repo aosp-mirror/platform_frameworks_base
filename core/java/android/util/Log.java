@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.os.DeadSystemException;
+
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LineBreakBufferedWriter;
@@ -403,6 +405,11 @@ public final class Log {
             Throwable t = tr;
             while (t != null) {
                 if (t instanceof UnknownHostException) {
+                    break;
+                }
+                if (t instanceof DeadSystemException) {
+                    lbbw.println("DeadSystemException: The system died; "
+                            + "earlier logs will point to the root cause");
                     break;
                 }
                 t = t.getCause();

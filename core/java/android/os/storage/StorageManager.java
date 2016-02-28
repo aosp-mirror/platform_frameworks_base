@@ -332,7 +332,7 @@ public class StorageManager {
             try {
                 mMountService.registerListener(delegate);
             } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
+                throw e.rethrowFromSystemServer();
             }
             mDelegates.add(delegate);
         }
@@ -353,7 +353,7 @@ public class StorageManager {
                     try {
                         mMountService.unregisterListener(delegate);
                     } catch (RemoteException e) {
-                        throw e.rethrowAsRuntimeException();
+                        throw e.rethrowFromSystemServer();
                     }
                     i.remove();
                 }
@@ -434,10 +434,8 @@ public class StorageManager {
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to resolve path: " + rawPath, e);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to mount OBB", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
@@ -469,10 +467,8 @@ public class StorageManager {
             mMountService.unmountObb(rawPath, force, mObbActionListener, nonce);
             return true;
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to mount OBB", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
@@ -487,10 +483,8 @@ public class StorageManager {
         try {
             return mMountService.isObbMounted(rawPath);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to check if OBB is mounted", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return false;
     }
 
     /**
@@ -508,10 +502,8 @@ public class StorageManager {
         try {
             return mMountService.getMountedObbPath(rawPath);
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to find mounted path for OBB", e);
+            throw e.rethrowFromSystemServer();
         }
-
-        return null;
     }
 
     /** {@hide} */
@@ -519,7 +511,7 @@ public class StorageManager {
         try {
             return Arrays.asList(mMountService.getDisks());
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -605,7 +597,7 @@ public class StorageManager {
         try {
             return Arrays.asList(mMountService.getVolumes(0));
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -620,7 +612,7 @@ public class StorageManager {
             }
             return res;
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -629,7 +621,7 @@ public class StorageManager {
         try {
             return Arrays.asList(mMountService.getVolumeRecords(0));
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -672,7 +664,7 @@ public class StorageManager {
         try {
             mMountService.mount(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -681,7 +673,7 @@ public class StorageManager {
         try {
             mMountService.unmount(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -690,7 +682,7 @@ public class StorageManager {
         try {
             mMountService.format(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -699,7 +691,7 @@ public class StorageManager {
         try {
             return mMountService.benchmark(volId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -708,7 +700,7 @@ public class StorageManager {
         try {
             mMountService.partitionPublic(diskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -717,7 +709,7 @@ public class StorageManager {
         try {
             mMountService.partitionPrivate(diskId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -726,7 +718,7 @@ public class StorageManager {
         try {
             mMountService.partitionMixed(diskId, ratio);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -759,7 +751,7 @@ public class StorageManager {
         try {
             mMountService.setVolumeNickname(fsUuid, nickname);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -769,7 +761,7 @@ public class StorageManager {
             mMountService.setVolumeUserFlags(fsUuid, inited ? VolumeRecord.USER_FLAG_INITED : 0,
                     VolumeRecord.USER_FLAG_INITED);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -779,7 +771,7 @@ public class StorageManager {
             mMountService.setVolumeUserFlags(fsUuid, snoozed ? VolumeRecord.USER_FLAG_SNOOZED : 0,
                     VolumeRecord.USER_FLAG_SNOOZED);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -788,7 +780,7 @@ public class StorageManager {
         try {
             mMountService.forgetVolume(fsUuid);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -802,7 +794,7 @@ public class StorageManager {
         try {
             return mMountService.getPrimaryStorageUuid();
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -816,7 +808,7 @@ public class StorageManager {
         try {
             mMountService.setPrimaryStorageUuid(volumeUuid, callback);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -900,7 +892,7 @@ public class StorageManager {
             }
             return mountService.getVolumeList(uid, packageName, flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -984,7 +976,7 @@ public class StorageManager {
         try {
             mMountService.createUserKey(userId, serialNumber, ephemeral);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -993,7 +985,7 @@ public class StorageManager {
         try {
             mMountService.destroyUserKey(userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1002,7 +994,7 @@ public class StorageManager {
         try {
             mMountService.unlockUserKey(userId, serialNumber, token, secret);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1011,7 +1003,7 @@ public class StorageManager {
         try {
             mMountService.lockUserKey(userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1020,7 +1012,7 @@ public class StorageManager {
         try {
             mMountService.prepareUserStorage(volumeUuid, userId, serialNumber, flags);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1029,7 +1021,7 @@ public class StorageManager {
         try {
             return mMountService.isUserKeyUnlocked(userId);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1064,7 +1056,8 @@ public class StorageManager {
                     }
                 }
             }
-        } catch (RemoteException ignored) {
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
         return path;
     }
@@ -1074,7 +1067,7 @@ public class StorageManager {
         try {
             return mMountService.mountAppFuse(name);
         } catch (RemoteException e) {
-            throw e.rethrowAsRuntimeException();
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -1236,8 +1236,8 @@ public class AppOpsManager {
         try {
             return mService.getPackagesForOps(ops);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -1252,8 +1252,8 @@ public class AppOpsManager {
         try {
             return mService.getOpsForPackage(uid, packageName, ops);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /** @hide */
@@ -1261,6 +1261,7 @@ public class AppOpsManager {
         try {
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1269,6 +1270,7 @@ public class AppOpsManager {
         try {
             mService.setUserRestriction(code, restricted, token, mContext.getUserId());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1277,6 +1279,7 @@ public class AppOpsManager {
         try {
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1297,6 +1300,7 @@ public class AppOpsManager {
             final int uid = Binder.getCallingUid();
             mService.setAudioRestriction(code, usage, uid, mode, exceptionPackages);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1305,6 +1309,7 @@ public class AppOpsManager {
         try {
             mService.resetAllModes(UserHandle.myUserId(), null);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1361,6 +1366,7 @@ public class AppOpsManager {
             try {
                 mService.startWatchingMode(op, packageName, cb);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1376,6 +1382,7 @@ public class AppOpsManager {
                 try {
                     mService.stopWatchingMode(cb);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
         }
@@ -1540,8 +1547,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1553,8 +1560,8 @@ public class AppOpsManager {
         try {
             return mService.checkOperation(op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /**
@@ -1570,7 +1577,7 @@ public class AppOpsManager {
                         "Package " + packageName + " does not belong to " + uid);
             }
         } catch (RemoteException e) {
-            throw new SecurityException("Unable to verify package ownership", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1586,8 +1593,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1599,8 +1606,8 @@ public class AppOpsManager {
         try {
             return mService.checkAudioOperation(op, stream, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /**
@@ -1626,8 +1633,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1669,8 +1676,8 @@ public class AppOpsManager {
             return mService.noteProxyOperation(op, mContext.getOpPackageName(),
                     Binder.getCallingUid(), proxiedPackageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /**
@@ -1682,8 +1689,8 @@ public class AppOpsManager {
         try {
             return mService.noteOperation(op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /** @hide */
@@ -1700,7 +1707,7 @@ public class AppOpsManager {
             try {
                 sToken = service.getToken(new Binder());
             } catch (RemoteException e) {
-                // System is dead, whatevs.
+                throw e.rethrowFromSystemServer();
             }
             return sToken;
         }
@@ -1731,8 +1738,8 @@ public class AppOpsManager {
             }
             return mode;
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_IGNORED;
     }
 
     /**
@@ -1744,8 +1751,8 @@ public class AppOpsManager {
         try {
             return mService.startOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return MODE_ERRORED;
     }
 
     /** @hide */
@@ -1764,6 +1771,7 @@ public class AppOpsManager {
         try {
             mService.finishOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -813,7 +813,7 @@ class ContextImpl extends Context {
                 null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, options,
                 user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -878,7 +878,7 @@ class ContextImpl extends Context {
             }
             Instrumentation.checkStartActivityResult(result, null);
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -893,7 +893,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, false,
                     getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -910,7 +910,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     null, false, false, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -925,7 +925,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     null, false, false, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -942,7 +942,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     options, false, false, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -959,7 +959,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermissions, appOp, null, false, false,
                     getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -976,7 +976,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermissions, AppOpsManager.OP_NONE,
                     null, true, false, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1039,7 +1039,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, receiverPermissions, appOp,
                     options, true, false, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1052,7 +1052,7 @@ class ContextImpl extends Context {
                     intent, resolvedType, null, Activity.RESULT_OK, null, null, null,
                     AppOpsManager.OP_NONE, null, false, false, user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1075,7 +1075,7 @@ class ContextImpl extends Context {
                     Activity.RESULT_OK, null, null, receiverPermissions, appOp, null, false, false,
                     user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1126,7 +1126,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, receiverPermissions,
                     appOp, options, true, false, user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1142,7 +1142,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, true,
                 getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1178,7 +1178,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, null,
                     AppOpsManager.OP_NONE, null, true, true, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1195,7 +1195,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, getUserId());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1210,7 +1210,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, null, false, true,
                     user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1225,7 +1225,7 @@ class ContextImpl extends Context {
                 Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, options, false, true,
                 user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1260,7 +1260,7 @@ class ContextImpl extends Context {
                 initialCode, initialData, initialExtras, null,
                     AppOpsManager.OP_NONE, null, true, true, user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1277,7 +1277,7 @@ class ContextImpl extends Context {
             ActivityManagerNative.getDefault().unbroadcastIntent(
                     mMainThread.getApplicationThread(), intent, user.getIdentifier());
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1325,7 +1325,7 @@ class ContextImpl extends Context {
                     mMainThread.getApplicationThread(), mBasePackageName,
                     rd, filter, broadcastPermission, userId);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1337,6 +1337,7 @@ class ContextImpl extends Context {
             try {
                 ActivityManagerNative.getDefault().unregisterReceiver(rd);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         } else {
             throw new RuntimeException("Not supported in system context");
@@ -1393,7 +1394,7 @@ class ContextImpl extends Context {
             }
             return cn;
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1415,7 +1416,7 @@ class ContextImpl extends Context {
             }
             return res != 0;
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1474,7 +1475,7 @@ class ContextImpl extends Context {
             }
             return res != 0;
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1489,6 +1490,7 @@ class ContextImpl extends Context {
             try {
                 ActivityManagerNative.getDefault().unbindService(sd);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         } else {
             throw new RuntimeException("Not supported in system context");
@@ -1506,7 +1508,7 @@ class ContextImpl extends Context {
                     className, profileFile, 0, arguments, null, null, getUserId(),
                     null /* ABI override */);
         } catch (RemoteException e) {
-            throw new RuntimeException("Failure from system", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1530,7 +1532,7 @@ class ContextImpl extends Context {
             return ActivityManagerNative.getDefault().checkPermission(
                     permission, pid, uid);
         } catch (RemoteException e) {
-            return PackageManager.PERMISSION_DENIED;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1545,7 +1547,7 @@ class ContextImpl extends Context {
             return ActivityManagerNative.getDefault().checkPermissionWithToken(
                     permission, pid, uid, callerToken);
         } catch (RemoteException e) {
-            return PackageManager.PERMISSION_DENIED;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1631,6 +1633,7 @@ class ContextImpl extends Context {
                     mMainThread.getApplicationThread(), toPackage,
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1641,6 +1644,7 @@ class ContextImpl extends Context {
                     mMainThread.getApplicationThread(),
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, resolveUserId(uri));
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1651,7 +1655,7 @@ class ContextImpl extends Context {
                     ContentProvider.getUriWithoutUserId(uri), pid, uid, modeFlags,
                     resolveUserId(uri), null);
         } catch (RemoteException e) {
-            return PackageManager.PERMISSION_DENIED;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1663,7 +1667,7 @@ class ContextImpl extends Context {
                     ContentProvider.getUriWithoutUserId(uri), pid, uid, modeFlags,
                     resolveUserId(uri), callerToken);
         } catch (RemoteException e) {
-            return PackageManager.PERMISSION_DENIED;
+            throw e.rethrowFromSystemServer();
         }
     }
 
