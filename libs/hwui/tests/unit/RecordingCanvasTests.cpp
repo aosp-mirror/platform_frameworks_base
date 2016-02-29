@@ -58,6 +58,17 @@ TEST(RecordingCanvas, clipRect) {
             << "Clip should be serialized once";
 }
 
+TEST(RecordingCanvas, emptyClipRect) {
+    auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
+        canvas.save(SaveFlags::MatrixClip);
+        canvas.clipRect(0, 0, 100, 100, SkRegion::kIntersect_Op);
+        canvas.clipRect(100, 100, 200, 200, SkRegion::kIntersect_Op);
+        canvas.drawRect(0, 0, 50, 50, SkPaint()); // rejected at record time
+        canvas.restore();
+    });
+    ASSERT_EQ(0u, dl->getOps().size()) << "Must be zero ops. Rect should be rejected.";
+}
+
 TEST(RecordingCanvas, drawArc) {
     auto dl = TestUtils::createDisplayList<RecordingCanvas>(200, 200, [](RecordingCanvas& canvas) {
         canvas.drawArc(0, 0, 200, 200, 0, 180, true, SkPaint());
