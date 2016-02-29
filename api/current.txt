@@ -26863,7 +26863,8 @@ package android.opengl {
     method public static void glGetSynciv(long, int, int, int[], int, int[], int);
     method public static void glGetSynciv(long, int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static void glGetTransformFeedbackVarying(int, int, int, int[], int, int[], int, int[], int, byte[], int);
-    method public static void glGetTransformFeedbackVarying(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, byte);
+    method public static deprecated void glGetTransformFeedbackVarying(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, byte);
+    method public static void glGetTransformFeedbackVarying(int, int, int, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.IntBuffer, java.nio.ByteBuffer);
     method public static java.lang.String glGetTransformFeedbackVarying(int, int, int[], int, int[], int);
     method public static java.lang.String glGetTransformFeedbackVarying(int, int, java.nio.IntBuffer, java.nio.IntBuffer);
     method public static int glGetUniformBlockIndex(int, java.lang.String);
