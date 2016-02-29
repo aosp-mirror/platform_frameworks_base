@@ -19,6 +19,7 @@
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:visibility="invisible"
     >
 
     <com.android.systemui.statusbar.AlphaOptimizedImageView
@@ -31,7 +32,6 @@
         android:paddingBottom="@dimen/notification_gear_padding"
         android:src="@drawable/ic_settings"
         android:tint="@color/notification_gear_color"
-        android:visibility="invisible"
         android:alpha="0"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         />
