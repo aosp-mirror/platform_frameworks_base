@@ -368,7 +368,7 @@ void BakedOpDispatcher::onArcOp(BakedOpRenderer& renderer, const ArcOp& op, cons
                 op.startAngle, op.sweepAngle, op.useCenter, op.paint);
         const AutoTexture holder(texture);
         if (CC_LIKELY(holder.texture)) {
-            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.right,
+            renderPathTexture(renderer, state, op.unmappedBounds.left, op.unmappedBounds.top,
                     *texture, *(op.paint));
         }
     } else {
