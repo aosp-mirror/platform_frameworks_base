@@ -6217,6 +6217,8 @@ public class Activity extends ContextThemeWrapper
      * high-performance stereoscopic rendering.</p>
      *
      * @param enabled {@code true} to enable this mode.
+     *
+     * @hide
      */
     public void setVrMode(boolean enabled) {
         try {
