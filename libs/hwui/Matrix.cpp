@@ -438,7 +438,7 @@ void Matrix4::mapPoint(float& x, float& y) const {
 }
 
 void Matrix4::mapRect(Rect& r) const {
-    if (isIdentity()) return;
+    if (isIdentity() || r.isEmpty()) return;
 
     if (isSimple()) {
         MUL_ADD_STORE(r.left, data[kScaleX], data[kTranslateX]);
