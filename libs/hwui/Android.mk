@@ -242,6 +242,7 @@ LOCAL_SRC_FILES += \
     tests/unit/GpuMemoryTrackerTests.cpp \
     tests/unit/LayerUpdateQueueTests.cpp \
     tests/unit/LinearAllocatorTests.cpp \
+    tests/unit/MatrixTests.cpp \
     tests/unit/OffscreenBufferPoolTests.cpp \
     tests/unit/SkiaBehaviorTests.cpp \
     tests/unit/StringUtilsTests.cpp \

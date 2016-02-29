@@ -228,6 +228,7 @@ TEST(ClipArea, serializeIntersectedClip) {
 
         ClipRegion recordedClip;
         recordedClip.region.setPath(ovalPath, SkRegion(SkIRect::MakeWH(200, 200)));
+        recordedClip.rect = Rect(200, 200);
 
         Matrix4 translate10x20;
         translate10x20.loadTranslate(10, 20, 0);
