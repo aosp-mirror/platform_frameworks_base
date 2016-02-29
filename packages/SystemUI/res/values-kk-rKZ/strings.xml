@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот сақталды."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Скриншотты көру үшін түрту."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот жасалмады."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Шектеулі жад кеңістігіне байланысты скриншот түсіру мүмкін емес немесе бұған қолданба немесе ұйым рұқсат етпейді."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Жадтағы шектеулі бос орынға байланысты скриншотты сақтау мүмкін емес."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Қолданба немесе ұйым скриншоттар түсіруге рұқсат етпейді."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB файлын жіберу опциялары"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа ойнатқыш (MTP) ретінде қосыңыз"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Камера ретінде (PTP) қосыңыз"</string>
@@ -206,6 +207,8 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Көбірек уақыт."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Азырақ уақыт."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Қол шам өшірулі."</string>
+    <!-- no translation found for accessibility_quick_settings_flashlight_unavailable (8012811023312280810) -->
+    <skip />
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Қол шам қосулы."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Қол шам өшірілді."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Қол шам қосылды."</string>
@@ -305,6 +308,8 @@
     <skip />
     <string name="recents_history_button_label" msgid="5153358867807604821">"Тарих"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Тазалау"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Бұл қолданба көп терезені қолдамайды"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Қолданба көп терезені қолдамайды"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Бөлінген көлденең"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Бөлінген тік"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Бөлінген теңшелетін"</string>
@@ -452,18 +457,34 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth функциясын қосу керек пе?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Пернетақтаны планшетке қосу үшін алдымен Bluetooth функциясын қосу керек."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Қосу"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> хабарландыруға қолдану"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Осы қолданбаның барлық хабарландыруларына қолдану"</string>
+    <!-- no translation found for show_silently (6841966539811264192) -->
+    <skip />
+    <!-- no translation found for block (2734508760962682611) -->
+    <skip />
+    <!-- no translation found for do_not_silence (6878060322594892441) -->
+    <skip />
+    <!-- no translation found for do_not_silence_block (4070647971382232311) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings (8103289238676424226) -->
+    <skip />
     <string name="blocked_importance" msgid="5198578988978234161">"Бөгелген"</string>
+    <!-- no translation found for min_importance (1901894910809414782) -->
+    <skip />
     <string name="low_importance" msgid="4109929986107147930">"Төмен маңыздылық"</string>
     <string name="default_importance" msgid="8192107689995742653">"Қалыпты маңыздылық"</string>
     <string name="high_importance" msgid="1527066195614050263">"Жоғары маңыздылық"</string>
     <string name="max_importance" msgid="5089005872719563894">"Шұғыл маңыздылық"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Осы хабарландыруларды ешқашан көрсетпеу"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Хабарландырулар тізімнің төменгі жағында үнсіз көрсету"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Осы хабарландыруларды үнсіз көрсету"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Хабарландыруларды тізімінің жоғарғы жағында көрсету және дыбыс шығару"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Экранға бекіту және дыбыс шығару"</string>
+    <!-- no translation found for notification_importance_min (1938190340516905748) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (3657252049508213048) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (4466466472622442175) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (2135428926525093825) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (5806278962376556491) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Түс және сыртқы түрі"</string>
@@ -477,7 +498,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android ОЖ үшін күңгірт тақырыпты пайдалану"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Реңкті реттеу"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Жарықтықты реттеу"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Күңгірт тақырып Android операциялық жүйесінің әдетте ашық тақырыпта көрсетілетін негізгі аумақтарына қолданылады, мысалы, \"Параметрлер\" тармағына және хабарландыруларға."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Күңгірт тақырып Android операциялық жүйесінің әдетте ашық тақырыпта көрсетілетін негізгі аумақтарына қолданылады, мысалы, \"Параметрлер\" тармағына."</string>
     <string name="color_apply" msgid="9212602012641034283">"Қолдану"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Параметрлерді растау"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Кейбір түс параметрлері бұл құрылғыны пайдалану мүмкін емес етуі мүмкін. Бұл түс параметрлерін растау үшін OK түймесін басыңыз, әйтпесе параметрлер 10 секундтан кейін ысырылады."</string>
@@ -536,4 +557,11 @@
     <item msgid="2139628951880142927">"Зарядтау кезінде пайызды көрсету (әдепкі)"</item>
     <item msgid="3327323682209964956">"Бұл белгішені көрсетпеу"</item>
   </string-array>
+    <!-- no translation found for other (4060683095962566764) -->
+    <skip />
+    <string name="accessibility_divider" msgid="5903423481953635044">"Бөлінген экран бөлгіші"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Төмен қарай жылжыту"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Жоғары қарай жылжыту"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Солға жылжыту"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Оңға жылжыту"</string>
 </resources>

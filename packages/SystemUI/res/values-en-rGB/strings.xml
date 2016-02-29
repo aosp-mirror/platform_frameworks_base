@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot captured."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Touch to view your screenshot."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Couldn\'t capture screenshot."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Can\'t take screenshot due to limited storage space, or it isn\'t allowed by the app or your organisation."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Can\'t save screenshot due to limited storage space."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Taking screenshots is not allowed by the app or your organisation."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB file transfer options"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Mount as a media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Mount as a camera (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"More time."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Less time."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Torch off."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Torch unavailable."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Torch on."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Torch turned off."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Torch turned on."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> is disabled in safe-mode."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"History"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Clear"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"This app does not support multi-window"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"App does not support multi-window"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Split Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Split Vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Split Customised"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Turn on Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"To connect your keyboard with your tablet, you first have to turn on Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Turn on"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Apply to <xliff:g id="TOPIC_NAME">%1$s</xliff:g> notifications"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Apply to all notifications from this app"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Show notifications silently"</string>
+    <string name="block" msgid="2734508760962682611">"Block all notifications"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Don\'t silence"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Don\'t silence or block"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Show full importance settings"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Blocked"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Min importance"</string>
     <string name="low_importance" msgid="4109929986107147930">"Low importance"</string>
     <string name="default_importance" msgid="8192107689995742653">"Normal importance"</string>
     <string name="high_importance" msgid="1527066195614050263">"High importance"</string>
     <string name="max_importance" msgid="5089005872719563894">"Urgent importance"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Never show these notifications"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Silently show at the bottom of the notification list"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Silently show these notifications"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Show at the top of the notifications list and make sound"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Peek onto the screen and make sound"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Silently show at the bottom of the notification list"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Silently show these notifications"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Allow these notifications to make sounds"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Peek on to the screen and allow sound"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Show at the top of the notifications list, peek on to the screen and allow sound"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"More settings"</string>
     <string name="notification_done" msgid="5279426047273930175">"Finished"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Colour and appearance"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Use dark theme for Android OS"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Adjust tint"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Adjust brightness"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"The dark theme is applied to core areas of Android OS that are normally displayed in a light theme, such as Settings and notifications."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"The dark theme is applied to core areas of Android OS that are normally displayed in a light theme, such as Settings."</string>
     <string name="color_apply" msgid="9212602012641034283">"Apply"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirm Settings"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Some colour settings can make this device unusable. Click OK to confirm these colour settings, otherwise these settings will reset after 10 seconds."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"Show percentage when charging (default)"</item>
     <item msgid="3327323682209964956">"Don\'t show this icon"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Other"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Split screen divider"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Move down"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Move up"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Move to the left"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Move to the right"</string>
 </resources>

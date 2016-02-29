@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्‍क्रीनशॉट कैप्‍चर किया गया."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"अपना स्‍क्रीनशॉट देखने के लिए स्‍पर्श करें."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट को कैप्चर नहीं किया जा सका."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"सीमित मेमोरी स्थान के कारण स्क्रीनशॉट नहीं ले सकते, या ऐप्स या आपके संगठन द्वारा ऐसा अनुमत नहीं है."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"सीमित मेमोरी स्थान के कारण स्क्रीनशॉट सहेजा नहीं जा सकता."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"आपके ऐप्लिकेशन या आपके संगठन द्वारा स्क्रीनशॉट लेने की अनुमति नहीं है."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेयर के रूप में माउंट करें (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"कैमरे के रूप में माउंट करें (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"अधिक समय."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"कम समय."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"फ़्लैशलाइट बंद है."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"फ़्लैशलाइट उपलब्ध नहीं है."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"फ़्लैशलाइट चालू है."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"फ़्लैशलाइट को बंद किया गया."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"फ़्लैशलाइट को चालू किया गया."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में अक्षम किया गया."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"इतिहास"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"साफ़ करें"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"यह ऐप्लिकेशन एकाधिक विंडो का समर्थन नहीं करता है"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"ऐप्लिकेशन एकाधिक विंडो का समर्थन नहीं करता है"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"लम्बवत रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"कस्‍टम रूप से विभाजित करें"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटूथ चालू करें?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"अपने कीबोर्ड को अपने टैबलेट से कनेक्ट करने के लिए, आपको पहले ब्लूटूथ चालू करना होगा."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"चालू करें"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> नोटिफिकेशन पर लागू करें"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"इस ऐप के सभी नोटिफिकेशन पर लागू करें"</string>
+    <string name="show_silently" msgid="6841966539811264192">"नोटिफिकेशन मौन रूप से दिखाएं"</string>
+    <string name="block" msgid="2734508760962682611">"सभी नोटिफिकेशन अवरुद्ध करें"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"मौन ना करें"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"मौन या अवरुद्ध ना करें"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"पूर्ण महत्व वाली सेटिंग दिखाएं"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"अवरोधित"</string>
+    <string name="min_importance" msgid="1901894910809414782">"न्यूनतम महत्व"</string>
     <string name="low_importance" msgid="4109929986107147930">"निम्न महत्व"</string>
     <string name="default_importance" msgid="8192107689995742653">"सामान्य महत्व"</string>
     <string name="high_importance" msgid="1527066195614050263">"उच्च महत्व"</string>
     <string name="max_importance" msgid="5089005872719563894">"तत्काल महत्व"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"ये नोटिफिकेशन कभी ना दिखाएं"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"नोटिफिकेशन सूची में सबसे नीचे मौन रूप से दिखाएं"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"ये नोटिफिकेशन मौन रूप से दिखाएं"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"नोटिफिकेशन सूची में सबसे ऊपर दिखाएं और ध्वनि चलाएं"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"स्‍क्रीन पर एक झलक दिखाएं और ध्‍वनि चलाएं"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"नोटिफिकेशन सूची में सबसे नीचे मौन रूप से दिखाएं"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"ये नोटिफिकेशन मौन रूप से दिखाएं"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"इन नोटिफिकेशन को ध्वनि करने दें"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"स्क्रीन पर झलक दिखाएं और ध्वनि करें"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"नोटिफिकेशन सूची के शीर्ष पर दिखाएं, स्क्रीन पर झलक दिखाएं और ध्वनि करें"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"और सेटिंग"</string>
     <string name="notification_done" msgid="5279426047273930175">"हो गया"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"रंग और दिखावट"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS के लिए गहरी थीम का उपयोग करें"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"टिंट समायोजित करें"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"स्क्रीन की रोशनी समायोजित करें"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"गहरी थीम को Android OS के मुख्य क्षेत्रों पर लागू किया जाता है जिन्हें सामान्यतः सेटिंग और नोटिफिकेशन जैसी हल्की थीम में प्रदर्शित किया जाता है."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"गहरी थीम को Android OS के मुख्य क्षेत्रों पर लागू किया जाता है जिन्हें सामान्यतः सेटिंग जैसी हल्की थीम में प्रदर्शित किया जाता है."</string>
     <string name="color_apply" msgid="9212602012641034283">"लागू करें"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"से‍ेटिंग की पुष्टि करें"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"कुछ रंग सेटिंग इस डिवाइस को अनुपयोगी बना सकती हैं. इन रंग सेटिंग की पुष्टि करने के लिए ठीक क्लिक करें, अन्यथा 10 सेकंड के बाद ये सेटिंग रीसेट हो जाएंगी."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"चार्ज होते समय प्रतिशत दिखाएं (डिफ़ॉल्ट)"</item>
     <item msgid="3327323682209964956">"यह आइकन ना दिखाएं"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"अन्य"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"विभाजित स्क्रीन विभाजक"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"नीचे ले जाएं"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ऊपर ले जाएं"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"बाएं ले जाएं"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"दाएं ले जाएं"</string>
 </resources>

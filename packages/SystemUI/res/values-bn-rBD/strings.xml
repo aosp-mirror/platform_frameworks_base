@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"স্ক্রীনশট নেওয়া হযেছে৷"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"আপনার স্ক্রীনশট দেখতে স্পর্শ করুন৷"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"স্ক্রীনশট নেওয়া যায়নি৷"</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"সঞ্চয়স্থান সীমিত হওয়ার ফলে স্ক্রীনশট নেওয়া যাবে না, অথবা এটি অ্যাপ্লিকেশানটি অথবা আপনার প্রতিষ্ঠানের দ্বারা অনুমোদিত নয়৷"</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"সঞ্চয়স্থান সীমিত থাকায় স্ক্রীনশটটি সংরক্ষণ করা যাবে না৷"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"অ্যাপ্লিকেশান বা আপনার প্রতিষ্ঠান স্ক্রীনশটগুলি নেওয়া অনুমতি দেয়নি৷"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ফাইল স্থানান্তরের বিকল্পগুলি"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"একটি মিডিয়া প্লেয়ার হিসাবে মাউন্ট করুন (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"একটি ক্যামেরা হিসাবে মাউন্ট করুন (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"বেশি সময়।"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"কম সময়।"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ফ্ল্যাশলাইট বন্ধ আছে।"</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ফ্ল্যাশলাইট অনুপলব্ধ৷"</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ফ্ল্যাশলাইট চালু আছে।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ফ্ল্যাশলাইট বন্ধ হয়েছে।"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ফ্ল্যাশলাইট চালু হয়েছে।"</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"নিরাপদ মোডে <xliff:g id="APP">%s</xliff:g> অক্ষম করা হয়েছে৷"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ইতিহাস"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"সাফ করুন"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"এই অ্যাপ্লিকেশানটি মাল্টি-উইন্ডো সমর্থন করে না"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"অ্যাপ্লিকেশানগুলি মাল্টি-উইন্ডো সমর্থন করে না"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"অনুভূমিক স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উল্লম্ব স্প্লিট"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"কাস্টম স্প্লিট করুন"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth চালু করবেন?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"আপনার ট্যাবলেটের সাথে আপনার কীবোর্ড সংযুক্ত করতে, আপনাকে প্রথমে Bluetooth চালু করতে হবে।"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"চালু করুন"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> বিজ্ঞপ্তিগুলিতে প্রয়োগ করুন"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"এই অ্যাপ্লিকেশনের থেকে সব বিজ্ঞপ্তিতে প্রয়োগ করুন"</string>
+    <string name="show_silently" msgid="6841966539811264192">"নীরবভাবে বিজ্ঞপ্তিগুলি দেখায়"</string>
+    <string name="block" msgid="2734508760962682611">"সমস্ত বিজ্ঞপ্তি অবরুদ্ধ করুন"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"নীরব করবেন না"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"নীরব বা অবরুদ্ধ করবেন না"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"সম্পূর্ণ গুরুত্বপূর্ণ সেটিংস দেখায়"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"অবরুদ্ধ"</string>
+    <string name="min_importance" msgid="1901894910809414782">"ন্যূনতম গুরুত্ব"</string>
     <string name="low_importance" msgid="4109929986107147930">"কম গুরুত্ব"</string>
     <string name="default_importance" msgid="8192107689995742653">"সাধারণ গুরুত্ব"</string>
     <string name="high_importance" msgid="1527066195614050263">"বেশি গুরুত্ব"</string>
     <string name="max_importance" msgid="5089005872719563894">"জরুরি গুরুত্ব"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"এই বিজ্ঞপ্তিগুলি কখনোই দেখানো হবে না"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"বিজ্ঞপ্তি তালিকার নীচের অংশে নিঃশব্দে দেখানো হয়"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"নিঃশব্দে এই বিজ্ঞপ্তিগুলি দেখানো হয়"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"বিজ্ঞপ্তি তালিকার শীর্ষে দেখানো হয় এবং শব্দ করে"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"স্ক্রীনের উপরে দেখানো হয় এবং শব্দ করে"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"বিজ্ঞপ্তি তালিকার নীচের অংশে নিঃশব্দে দেখানো হয়"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"নিঃশব্দে এই বিজ্ঞপ্তিগুলি দেখানো হয়"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"এই বিজ্ঞপ্তিগুলিকে শব্দ করার মঞ্জুরি দেয়"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"স্ক্রীনের উপরে প্রদর্শিত এবং শব্দ করার মঞ্জুরি দেয়"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"বিজ্ঞপ্তি তালিকার শীর্ষে দেখানো হয় এবং স্ক্রীনের উপরে প্রদর্শিত এবং শব্দ করার মঞ্জুরি দেয়"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"আরো সেটিংস"</string>
     <string name="notification_done" msgid="5279426047273930175">"সম্পন্ন"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"রঙ এবং চেহারা"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS এর জন্য গাঢ় থিম ব্যবহার করুন"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"টিন্ট সমন্বয় করুন"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"উজ্জ্বলতা সমন্বয় করুন"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Android OS এর মূল অংশগুলিতে গাঢ় থিম প্রয়োগ করা হয়েছে যেটা সাধারণত একটি হালকা থিমে প্রদর্শিত হয়, যেমন সেটিংস এবং বিজ্ঞপ্তিগুলি৷"</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Android OS এর মূল অংশগুলিতে গাঢ় থিম প্রয়োগ করা হয়েছে যেটা সাধারণত একটি হালকা থিমে প্রদর্শিত হয়, যেমন সেটিংস৷"</string>
     <string name="color_apply" msgid="9212602012641034283">"প্রয়োগ করুন"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"সেটিংস নিশ্চিত করুন"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"কিছু রঙের সেটিংস এই ডিভাইসকে ব্যবহারের অযোগ্য করে দিতে পারে৷ এই রঙের সেটিংস নিশ্চিত করতে ওকে এ ক্লিক করুন, অন্যথায় ১০ সেকেন্ড পরে এই সেটিংস পুনরায় সেট হবে৷"</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"চার্জ করার সময় শতাংশ দেখান (ডিফল্ট)"</item>
     <item msgid="3327323682209964956">"এই আইকনটি দেখাবেন না"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"অন্যান্য"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"বিভক্ত-স্ক্রীন বিভাজক"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"নীচে সরান"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"উপরে সরান"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"বামে সরান"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ডানে সরান"</string>
 </resources>

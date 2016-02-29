@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"સ્ક્રીનશોટ કેપ્ચર કર્યો."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"તમારો સ્ક્રીનશોટ જોવા માટે ટચ કરો."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"સ્ક્રીનશોટ કેપ્ચર કરી શકાયો નથી."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"મર્યાદિત સંગ્રહ સ્થાનને કારણે સ્ક્રીનશોટ લઈ શકાતો નથી અથવા એપ્લિકેશન અથવા તમારા સંગઠન દ્વારા તેની મંજૂરી નથી."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"મર્યાદિત સંગ્રહ સ્થાનને કારણે સ્ક્રીનશોટ સાચવી શકાતો નથી."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશોટ્સ લેવાની મંજૂરી નથી."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"મીડિયા પ્લેયર તરીકે માઉન્ટ કરો (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"કૅમેરા તરીકે માઉન્ટ કરો (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"વધુ સમય."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"ઓછો સમય."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ફ્લેશલાઇટ બંધ."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ફ્લેશલાઇટ અનુપલબ્ધ."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ફ્લેશલાઇટ ચાલુ."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ફ્લેશલાઇટ બંધ કરી."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ફ્લેશલાઇટ ચાલુ કરી."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g> અક્ષમ કરેલ છે."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ઇતિહાસ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"સાફ કરો"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"આ ઍપ્લિકેશન મલ્ટિ-વિંડોનું સમર્થન કરતી નથી"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"ઍપ્લિકેશન મલ્ટિ-વિંડોનું સમર્થન કરતી નથી"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"આડું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ઊભું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"કસ્ટમ વિભક્ત કરો"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ચાલુ કરવુ છે?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"તમારા ટેબ્લેટ સાથે કીબોર્ડ કનેક્ટ કરવા માટે, તમારે પહેલાં Bluetooth ચાલુ કરવાની જરૂર પડશે."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ચાલુ કરો"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> સૂચનાઓ પર લાગુ કરો"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"આ ઍપ્લિકેશનની તમામ સૂચનાઓ પર લાગુ કરો"</string>
+    <string name="show_silently" msgid="6841966539811264192">"સૂચનાઓ ચુપચાપ બતાવો"</string>
+    <string name="block" msgid="2734508760962682611">"તમામ સૂચનાઓને અવરોધિત કરો"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"ચુપ કરશો નહીં"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"ચુપ કે અવરોધિત કરશો નહીં"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"પૂર્ણ મહત્વ સેટિંગ્સ બતાવો"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"અવરોધિત"</string>
+    <string name="min_importance" msgid="1901894910809414782">"ન્યૂનતમ મહત્વ"</string>
     <string name="low_importance" msgid="4109929986107147930">"નિમ્ન મહત્વની"</string>
     <string name="default_importance" msgid="8192107689995742653">"સામાન્ય મહત્વની"</string>
     <string name="high_importance" msgid="1527066195614050263">"ઉચ્ચ મહત્વની"</string>
     <string name="max_importance" msgid="5089005872719563894">"તાત્કાલિક મહત્વની"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"આ સૂચનાઓ ક્યારેય બતાવશો નહીં"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"સૂચનાની સૂચિની નીચે ચુપચાપ બતાવો"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"આ સૂચનાઓ ચુપચાપ બતાવો"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"સૂચનાઓની સૂચિની ટોચ પર બતાવો અને અવાજ કરો"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજ કરો"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"સૂચનાની સૂચિની નીચે ચુપચાપ બતાવો"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"આ સૂચનાઓ ચુપચાપ બતાવો"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"આ સૂચનાને અવાજ કરવાની મંજૂરી આપો"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજને મંજૂરી આપો"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"સૂચનાઓની સૂચિની ટોચ પર બતાવો, સ્ક્રીન પર ત્વરિત દ્રષ્ટિ કરો અને અવાજને મંજૂરી આપો"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"વધુ સેટિંગ્સ"</string>
     <string name="notification_done" msgid="5279426047273930175">"થઈ ગયું"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"રંગ અને દેખાવ"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS માટે ઘાટી થીમનો ઉપયોગ કરો"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"ટિંટ સમાયોજિત કરો"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"તેજ સમાયોજિત કરો"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"ઘાટી થીમને Android OS ના મુખ્ય ક્ષેત્રો પર લાગુ કરે છે જે સામાન્ય રીતે સેટિંગ્સ અને સૂચનાઓ જેવી લાઇટ થીમમાં પ્રદર્શિત કરવામાં આવે છે."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"ઘાટી થીમને Android OS ના મુખ્ય ક્ષેત્રો પર લાગુ કરે છે જે સામાન્ય રીતે સેટિંગ્સ જેવી લાઇટ થીમમાં પ્રદર્શિત કરવામાં આવે છે."</string>
     <string name="color_apply" msgid="9212602012641034283">"લાગુ કરો"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"સેટિંગ્સની પુષ્ટિ કરો"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"કેટલીક રંગ સેટિંગ્સ આ ઉપકરણને બિનઉપયોગી બનાવી શકે છે. આ રંગ સેટિંગ્સની પુષ્ટિ કરવા માટે ઑકે ક્લિક કરો, અન્યથા 10 સેકંડ પછી આ સેટિંગ્સ ફરીથી સેટ થશે."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"ચાર્જ થાય ત્યારે ટકાવારી બતાવો (ડિફોલ્ટ)"</item>
     <item msgid="3327323682209964956">"આ આઇકન બતાવશો નહીં"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"અન્ય"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"સ્પ્લિટ-સ્ક્રીન વિભાજક"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"નીચે ખસેડો"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ઉપર ખસેડો"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ડાબે ખસેડો"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"જમણે ખસેડો"</string>
 </resources>

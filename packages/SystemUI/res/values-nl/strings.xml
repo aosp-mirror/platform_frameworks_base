@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot gemaakt."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak aan om je screenshot te bekijken."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot is niet gemaakt."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Kan geen screenshot maken wegens beperkte opslagruimte of omdat de app of je organisatie dit niet toestaat."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Kan screenshot niet opslaan vanwege beperkte opslagruimte."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Het maken van screenshots wordt niet toegestaan door de app of je organisatie."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opties voor USB-bestandsoverdracht"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Koppelen als mediaspeler (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Koppelen als camera (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Meer tijd."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Minder tijd."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Zaklamp uit."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Zaklamp niet beschikbaar."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Zaklamp aan."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Zaklamp uitgeschakeld."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Zaklamp ingeschakeld."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> is uitgeschakeld in de veilige modus"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Geschiedenis"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Wissen"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Deze app ondersteunt de modus voor meerdere vensters niet"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"App ondersteunt meerdere vensters niet"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontaal splitsen"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Verticaal splitsen"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Aangepast splitsen"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth inschakelen?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Als je je toetsenbord wilt verbinden met je tablet, moet je eerst Bluetooth inschakelen."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Inschakelen"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Toepassen op meldingen voor <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Toepassen op alle meldingen van deze app"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Meldingen zonder geluid weergeven"</string>
+    <string name="block" msgid="2734508760962682611">"Alle meldingen blokkeren"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Niet zonder geluid weergeven"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Niet zonder geluid weergeven of blokkeren"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Volledige instellingen voor belang weergeven"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Geblokkeerd"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Minimaal belang"</string>
     <string name="low_importance" msgid="4109929986107147930">"Klein belang"</string>
     <string name="default_importance" msgid="8192107689995742653">"Normaal belang"</string>
     <string name="high_importance" msgid="1527066195614050263">"Groot belang"</string>
     <string name="max_importance" msgid="5089005872719563894">"Urgent belang"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Deze meldingen nooit weergeven"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Onder aan de lijst met meldingen weergeven zonder geluid"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Deze meldingen zonder geluid weergeven"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Boven aan de lijst met meldingen weergeven en geluid laten horen"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Op het scherm weergeven en geluid laten horen"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Onder aan de lijst met meldingen weergeven zonder geluid"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Deze meldingen zonder geluid weergeven"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Toestaan dat deze meldingen geluid laten horen"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Op het scherm weergeven en geluid toestaan"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Boven aan de lijst met meldingen weergeven, op het scherm weergeven en geluid toestaan"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellingen"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gereed"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Kleur en uiterlijk"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Donker thema gebruiken voor Android OS"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Tint aanpassen"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Helderheid aanpassen"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Het donkere thema wordt toegepast op kerngedeelten van Android OS die normaal gesproken worden weergegeven met een licht thema, zoals Instellingen en meldingen."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Het donkere thema wordt toegepast op kerngedeelten van het Android-besturingssysteem die normaal gesproken worden weergegeven met een licht thema, zoals Instellingen."</string>
     <string name="color_apply" msgid="9212602012641034283">"Toepassen"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Instellingen bevestigen"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Bij sommige kleurinstellingen kan het apparaat onbruikbaar worden. Klik op OK om deze kleurinstellingen te bevestigen, anders worden deze instellingen na tien seconden gereset."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"Percentage weergeven tijdens opladen (standaard)"</item>
     <item msgid="3327323682209964956">"Dit pictogram niet weergeven"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Overig"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Scheiding voor gesplitst scherm"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Omlaag"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Omhoog"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Naar links"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Naar rechts"</string>
 </resources>
