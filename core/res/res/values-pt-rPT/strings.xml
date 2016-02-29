@@ -338,7 +338,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite à aplicação modificar o registo de chamadas do tablet, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o registo de chamadas."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Permite à aplicação modificar o registo de chamadas da sua TV, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o registo de chamadas."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite à aplicação modificar o registo de chamadas do telemóvel, incluindo os dados sobre as chamadas recebidas e efetuadas. As aplicações maliciosas podem utilizar esta funcionalidade para apagar ou modificar o seu registo de chamadas."</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"aceder a sensores corp. (como monit. do ritmo cardíaco)"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"aceder a sensores corporais (como monitores do ritmo cardíaco)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Permite que a aplicação aceda a dados de sensores que monitorizam a sua condição física, como o ritmo cardíaco."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ler eventos do calendário, para além de informações confidenciais"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite que a aplicação leia todos os eventos do calendário guardados no tablet, incluindo os de amigos ou colegas de trabalho. Pode permitir que a aplicação partilhe ou guarde dados do calendário, independentemente da confidencialidade ou sensibilidade."</string>
@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de soltar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir sequência de desbloqueio antes de soltar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir palavra-passe antes de soltar"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"A aplicação não é redimensionável. Desloque-a com dois dedos."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"A aplicação pode não funcionar com o ecrã dividido."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"A aplicação não é compatível com o ecrã dividido."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalado pelo administrador"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo administrador"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"É importante devido às pessoas envolvidas."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Pretende permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Pretende permitir que o <xliff:g id="APP">%1$s</xliff:g> crie um novo utilizador com <xliff:g id="ACCOUNT">%2$s</xliff:g> (já existe um utilizador com esta conta)?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Preferência de idioma"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Adicionar um idioma"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Preferência de região"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Intr. nome do idioma"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugeridos"</string>

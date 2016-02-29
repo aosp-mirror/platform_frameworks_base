@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Ask for PIN before unpinning"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Ask for unlock pattern before unpinning"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Ask for password before unpinning"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"App is not resizeable, scroll it with two fingers."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"App may not work with split-screen."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"App does not support split-screen."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installed by your administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Updated by your administrator"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"This is important because of the people involved."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Allow <xliff:g id="APP">%1$s</xliff:g> to create a new User with <xliff:g id="ACCOUNT">%2$s</xliff:g> (a User with this account already exists) ?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Language preference"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Add a language"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Region preference"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Type language name"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Suggested"</string>

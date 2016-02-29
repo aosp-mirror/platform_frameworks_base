@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev bruk av opplåsningsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Du kan ikke endre størrelse på appen – rull med to fingre."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Det kan hende at appen ikke fungerer med delt skjerm."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen støtter ikke delt skjerm."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installert av administratoren"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Oppdatert av administratoren"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Dette er viktig på grunn av folkene som er involvert."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Vil du la <xliff:g id="APP">%1$s</xliff:g> opprette en ny bruker med <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Det finnes allerede en bruker med denne kontoen.)"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Språkinnstilling"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Legg til et språk"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regionsinnstilling"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Skriv inn språknavn"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Foreslått"</string>

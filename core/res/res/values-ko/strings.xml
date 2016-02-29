@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"앱에서 크기 조절이 불가능합니다. 두 손가락을 사용해 스크롤하세요."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"앱이 분할 화면에서 작동하지 않을 수 있습니다."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"앱이 화면 분할을 지원하지 않습니다."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"관리자가 설치함"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"관리자에 의해 업데이트됨"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"관련된 사용자가 있으므로 중요합니다."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g>이(가) <xliff:g id="ACCOUNT">%2$s</xliff:g>(이 계정의 사용자가 이미 있음)(으)로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"언어 환경설정"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"언어 추가"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"지역 환경설정"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"언어 이름 입력"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"추천"</string>

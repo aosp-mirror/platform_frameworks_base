@@ -1477,7 +1477,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prasīt PIN kodu pirms atspraušanas"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pirms atspraušanas pieprasīt grafisko atslēgu"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pirms atspraušanas pieprasīt paroli"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Lietotnes lielumu nevar mainīt. Ritiniet to ar diviem pirkstiem."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Iespējams, lietotnē nedarbosies ekrāna sadalīšana."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Lietotnē netiek atbalstīta ekrāna sadalīšana."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalēja jūsu administrators"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Atjaunināja administrators"</string>
@@ -1560,7 +1560,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Tas ir svarīgi iesaistīto personu dēļ."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Vai atļaut lietotnei <xliff:g id="APP">%1$s</xliff:g> izveidot jaunu lietotāju, izmantojot e-pasta adresi <xliff:g id="ACCOUNT">%2$s</xliff:g> (lietotājs ar šādu kontu jau pastāv)?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Valodas preference"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Pievienot valodu"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Reģiona preference"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Ierakstiet valodas nosaukumu"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Ieteiktās"</string>

@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ပင်မဖြုတ်မီမှာ PIN ကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ပင်မဖြုတ်မီမှာ သော့ဖွင့် ရေးဆွဲမှုပုံစံကို မေးကြည့်ရန်"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"အက်ပ်ကို အရွယ်အစားချိန်၍မရပါ၊ လက်ချောင်းနှစ်ချောင်းဖြင့် အပေါ်အောက်ဆွဲပါ။"</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"မျက်နှာပြင် ခွဲခြမ်းပြသမှုဖြင့် အက်ပ်သည် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"အက်ပ်သည် မျက်နှာပြင်ခွဲပြရန် ပံ့ပိုးထားခြင်းမရှိပါ။"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"သင့် အက်ဒမင်မှ သွင်းယူထား၏"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"သင့်စီမံခန့်ခွဲသူမှ အဆင့်မြှင့်ထားပါသည်။"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ကို <xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ဖန်တီးခွင့်ပြုမလား။"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> ကို <xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ် ဖန်တီးခွင့်ပြုမလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်)။"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"ဘာသာစကားရွေးချယ်မှု"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ဒေသရွေးချယ်မှု"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ဘာသာစကားအမည် ထည့်ပါ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"အကြံပြုထားသော"</string>

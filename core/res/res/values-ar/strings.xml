@@ -1507,7 +1507,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"المطالبة برقم التعريف الشخصي قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"المطالبة بنقش إلغاء القفل قبل إزالة التثبيت"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"المطالبة بكلمة المرور قبل إزالة التثبيت"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"التطبيق غير قابل لتغيير الحجم، يمكنك تمريره بإصبعين."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"يمكن ألا يعمل التطبيق مع وضع تقسيم الشاشة."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"التطبيق لا يتيح تقسيم الشاشة."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"تم تثبيت الحزمة عن طريق المشرف"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"تم التحديث بواسطة المشرف"</string>
@@ -1617,7 +1617,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"هذه الرسالة مهمة نظرًا لأهمية الأشخاص المعنيين."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g>؟"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"هل تسمح لـ <xliff:g id="APP">%1$s</xliff:g> بإنشاء مستخدم جديد باستخدام <xliff:g id="ACCOUNT">%2$s</xliff:g> (يوجد مستخدم بهذا الحساب مسبقًا)؟"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"تفضيل اللغة"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"اكتب اسم اللغة"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"المقترحة"</string>
