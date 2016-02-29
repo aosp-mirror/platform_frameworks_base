@@ -4393,8 +4393,14 @@ public final class ViewRootImpl implements ViewParent,
     private boolean updatePointerIcon(MotionEvent event) {
         final float x = event.getX();
         final float y = event.getY();
+        if (mView == null) {
+            // E.g. click outside a popup to dismiss it
+            Slog.d(mTag, "updatePointerIcon called after view was removed");
+            return false;
+        }
         if (x < 0 || x >= mView.getWidth() || y < 0 || y >= mView.getHeight()) {
-            Slog.e(mTag, "updatePointerIcon called with position out of bounds");
+            // E.g. when moving window divider with mouse
+            Slog.d(mTag, "updatePointerIcon called with position out of bounds");
             return false;
         }
         final PointerIcon pointerIcon = mView.getPointerIcon(event, x, y);
