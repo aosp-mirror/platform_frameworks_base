@@ -36434,6 +36434,7 @@ package android.telecom {
   public class TelecomManager {
     method public void addNewIncomingCall(android.telecom.PhoneAccountHandle, android.os.Bundle);
     method public void cancelMissedCallsNotification();
+    method public android.content.Intent createManageBlockedNumbersIntent();
     method public android.net.Uri getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
     method public java.lang.String getDefaultDialerPackage();
