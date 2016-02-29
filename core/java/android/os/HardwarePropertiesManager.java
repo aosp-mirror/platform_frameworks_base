@@ -69,7 +69,6 @@ public class HardwarePropertiesManager {
      * @return an array of requested float device temperatures.
      *         Empty if platform doesn't provide the queried temperature.
      *
-     * @throws IllegalArgumentException if an incorrect temperature type is queried.
      * @throws SecurityException if a non profile or device owner tries to call this method.
     */
     public @NonNull float[] getDeviceTemperatures(@DeviceTemperatureType int type) {
@@ -84,7 +83,8 @@ public class HardwarePropertiesManager {
                 return new float[0];
             }
         default:
-            throw new IllegalArgumentException();
+            Log.w(TAG, "Unknown device temperature type.");
+            return new float[0];
         }
     }
 
