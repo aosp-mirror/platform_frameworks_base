@@ -68,6 +68,10 @@ private:
 
 jobject nullObjectReturn(const char msg[]);
 
+/** Check if the file descriptor is seekable.
+ */
+bool isSeekable(int descriptor);
+
 }; // namespace android
 
 #endif  // _ANDROID_GRAPHICS_UTILS_H_
