@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -363,7 +362,7 @@ public final class Metrics {
         if (operationType == FileOperationService.OPERATION_DELETE) {
             logHistogram(context, histogram, FILEOP_DELETE);
         } else {
-            checkArgument(dst != null);
+            assert(dst != null);
             @Provider int providerType =
                     isSystemProvider(dst.authority) ? PROVIDER_SYSTEM : PROVIDER_EXTERNAL;
             logHistogram(context, histogram, getOpCode(operationType, providerType));

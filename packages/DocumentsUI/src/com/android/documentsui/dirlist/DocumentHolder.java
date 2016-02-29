@@ -16,9 +16,6 @@
 
 package com.android.documentsui.dirlist;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkState;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Rect;
@@ -97,19 +94,20 @@ public abstract class DocumentHolder
     @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         // Event listener should always be set.
-        checkNotNull(mEventListener);
+        assert(mEventListener != null);
+
         return mEventListener.onKey(this,  keyCode,  event);
     }
 
     public void addEventListener(DocumentHolder.EventListener listener) {
         // Just handle one for now; switch to a list if necessary.
-        checkState(mEventListener == null);
+        assert(mEventListener == null);
         mEventListener = listener;
     }
 
     public void addOnKeyListener(View.OnKeyListener listener) {
         // Just handle one for now; switch to a list if necessary.
-        checkState(mKeyListener == null);
+        assert(mKeyListener == null);
         mKeyListener = listener;
     }
 

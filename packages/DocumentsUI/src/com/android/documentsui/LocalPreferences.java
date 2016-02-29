@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.State.MODE_UNKNOWN;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.content.Context;
 import android.preference.PreferenceManager;
@@ -59,7 +58,8 @@ public class LocalPreferences {
     }
 
     public static void setViewMode(Context context, RootInfo root, @ViewMode int viewMode) {
-        checkArgument(viewMode != MODE_UNKNOWN);
+        assert(viewMode != MODE_UNKNOWN);
+
         PreferenceManager.getDefaultSharedPreferences(context).edit()
                 .putInt(createKey(root), viewMode).apply();
     }

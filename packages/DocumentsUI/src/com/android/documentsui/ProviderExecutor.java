@@ -19,7 +19,6 @@ package com.android.documentsui;
 import android.os.AsyncTask;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -85,7 +84,7 @@ public class ProviderExecutor extends Thread implements Executor {
     private Executor mNonPreemptingExecutor = new Executor() {
         @Override
         public void execute(Runnable command) {
-            Preconditions.checkNotNull(command);
+            assert(command != null);
             mQueue.add(command);
         }
     };
@@ -93,7 +92,7 @@ public class ProviderExecutor extends Thread implements Executor {
     @Override
     public void execute(Runnable command) {
         preempt();
-        Preconditions.checkNotNull(command);
+        assert(command != null);
         mQueue.add(command);
     }
 

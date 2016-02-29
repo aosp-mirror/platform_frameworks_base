@@ -19,7 +19,6 @@ package com.android.documentsui;
 import static com.android.documentsui.services.FileOperationService.OPERATION_DELETE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_MOVE;
 import static com.android.documentsui.services.FileOperationService.OPERATION_UNKNOWN;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -101,7 +100,8 @@ public class PickFragment extends Fragment {
      */
     public void setPickTarget(
             int action, @OpType int copyOperationSubType, DocumentInfo pickTarget) {
-        checkArgument(copyOperationSubType != OPERATION_DELETE);
+        assert(copyOperationSubType != OPERATION_DELETE);
+
         mAction = action;
         mCopyOperationSubType = copyOperationSubType;
         mPickTarget = pickTarget;

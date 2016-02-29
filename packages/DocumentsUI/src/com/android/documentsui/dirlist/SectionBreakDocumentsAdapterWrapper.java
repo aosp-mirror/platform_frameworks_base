@@ -16,8 +16,6 @@
 
 package com.android.documentsui.dirlist;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.GridLayoutManager;
@@ -204,12 +202,12 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
         }
 
         public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
-            checkArgument(itemCount == 1);
+            assert(itemCount == 1);
             notifyItemRangeChanged(toViewPosition(positionStart), itemCount, payload);
         }
 
         public void onItemRangeInserted(int positionStart, int itemCount) {
-            checkArgument(itemCount == 1);
+            assert(itemCount == 1);
             if (positionStart < mBreakPosition) {
                 mBreakPosition++;
             }
@@ -217,7 +215,7 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
         }
 
         public void onItemRangeRemoved(int positionStart, int itemCount) {
-            checkArgument(itemCount == 1);
+            assert(itemCount == 1);
             if (positionStart < mBreakPosition) {
                 mBreakPosition--;
             }

@@ -21,11 +21,9 @@ import static com.android.documentsui.services.FileOperationService.OPERATION_MO
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.content.Context;
-import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
-import android.util.Log;
 
 import com.android.documentsui.R;
 import com.android.documentsui.model.DocumentInfo;
@@ -36,7 +34,6 @@ import java.util.List;
 // TODO: Stop extending CopyJob.
 final class MoveJob extends CopyJob {
 
-    private static final String TAG = "MoveJob";
     final DocumentInfo mSrcParent;
 
     /**
