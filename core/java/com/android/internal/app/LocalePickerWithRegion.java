@@ -50,7 +50,6 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     private Set<LocaleStore.LocaleInfo> mLocaleList;
     private LocaleStore.LocaleInfo mParentLocale;
     private boolean mTranslatedOnly = false;
-    private boolean mCountryMode = false;
 
     /**
      * Other classes can register to be notified when a locale was selected.
@@ -70,15 +69,14 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             boolean translatedOnly) {
         LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
         boolean shouldShowTheList = localePicker.setListener(context, listener, parent,
-                true /* country mode */, translatedOnly);
+                translatedOnly);
         return shouldShowTheList ? localePicker : null;
     }
 
     public static LocalePickerWithRegion createLanguagePicker(Context context,
             LocaleSelectedListener listener, boolean translatedOnly) {
         LocalePickerWithRegion localePicker = new LocalePickerWithRegion();
-        localePicker.setListener(context, listener, null,
-                false /* language mode */, translatedOnly);
+        localePicker.setListener(context, listener, /* parent */ null, translatedOnly);
         return localePicker;
     }
 
@@ -96,14 +94,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
      * "pretending" it was selected, and return false.</p>
      */
     private boolean setListener(Context context, LocaleSelectedListener listener,
-            LocaleStore.LocaleInfo parent, boolean countryMode, boolean translatedOnly) {
-        if (countryMode && (parent == null || parent.getLocale() == null)) {
-            // The list of countries is determined as all the countries where the parent language
-            // is used.
-            throw new IllegalArgumentException("The country selection list needs a parent.");
-        }
-
-        this.mCountryMode = countryMode;
+            LocaleStore.LocaleInfo parent, boolean translatedOnly) {
         this.mParentLocale = parent;
         this.mListener = listener;
         this.mTranslatedOnly = translatedOnly;
@@ -116,7 +107,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
             Collections.addAll(langTagsToIgnore, langTags);
         }
 
-        if (countryMode) {
+        if (parent != null) {
             mLocaleList = LocaleStore.getLevelLocales(context,
                     langTagsToIgnore, parent, translatedOnly);
             if (mLocaleList.size() <= 1) {
@@ -138,13 +129,11 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        final Locale sortingLocale = (mCountryMode && mParentLocale != null)
-                ? mParentLocale.getLocale()
-                : Locale.getDefault();
-
-        mAdapter = new SuggestedLocaleAdapter(mLocaleList, mCountryMode);
+        final boolean countryMode = mParentLocale != null;
+        final Locale sortingLocale = countryMode ? mParentLocale.getLocale() : Locale.getDefault();
+        mAdapter = new SuggestedLocaleAdapter(mLocaleList, countryMode);
         final LocaleHelper.LocaleInfoComparator comp =
-                new LocaleHelper.LocaleInfoComparator(sortingLocale);
+                new LocaleHelper.LocaleInfoComparator(sortingLocale, countryMode);
         mAdapter.sort(comp);
         setListAdapter(mAdapter);
     }
@@ -164,12 +153,8 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
     public void onResume() {
         super.onResume();
 
-        if (mCountryMode) {
-            if (mParentLocale == null) {
-                this.getActivity().setTitle(R.string.country_selection_title);
-            } else {
-                this.getActivity().setTitle(mParentLocale.getFullNameNative());
-            }
+        if (mParentLocale != null) {
+            this.getActivity().setTitle(mParentLocale.getFullNameNative());
         } else {
             this.getActivity().setTitle(R.string.language_selection_title);
         }
@@ -182,7 +167,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
         final LocaleStore.LocaleInfo locale =
                 (LocaleStore.LocaleInfo) getListAdapter().getItem(position);
 
-        if (mCountryMode || locale.getParent() != null) {
+        if (locale.getParent() != null) {
             if (mListener != null) {
                 mListener.onLocaleSelected(locale);
             }
@@ -205,7 +190,7 @@ public class LocalePickerWithRegion extends ListFragment implements SearchView.O
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (!mCountryMode) {
+        if (mParentLocale == null) {
             inflater.inflate(R.menu.language_selection_list, menu);
 
             MenuItem mSearchMenuItem = menu.findItem(R.id.locale_search_menu);
