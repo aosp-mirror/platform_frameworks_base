@@ -15150,6 +15150,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean dumpFullDetails = false;
         boolean dumpDalvik = false;
         boolean dumpSummaryOnly = false;
+        boolean dumpUnreachable = false;
         boolean oomOnly = false;
         boolean isCompact = false;
         boolean localOnly = false;
@@ -15178,6 +15179,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpSummaryOnly = true;
             } else if ("-S".equals(opt)) {
                 dumpSwapPss = true;
+            } else if ("--unreachable".equals(opt)) {
+                dumpUnreachable = true;
             } else if ("--oom".equals(opt)) {
                 oomOnly = true;
             } else if ("--local".equals(opt)) {
@@ -15339,7 +15342,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         try {
                             pw.flush();
                             thread.dumpMemInfo(fd, mi, isCheckinRequest, dumpFullDetails,
-                                    dumpDalvik, dumpSummaryOnly, innerArgs);
+                                    dumpDalvik, dumpSummaryOnly, dumpUnreachable, innerArgs);
                         } catch (RemoteException e) {
                             if (!isCheckinRequest) {
                                 pw.println("Got RemoteException!");
