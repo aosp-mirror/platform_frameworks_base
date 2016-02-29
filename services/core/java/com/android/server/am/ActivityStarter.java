@@ -1416,7 +1416,7 @@ class ActivityStarter {
                 }
                 intentActivity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
                         mStartActivity.launchedFromPackage);
-            } else if (!mStartActivity.intent.filterEquals(intentActivity.intent)) {
+            } else if (!intentActivity.task.isSameIntentResolution(mStartActivity)) {
                 // In this case we are launching the root activity of the task, but with a
                 // different intent. We should start a new instance on top.
                 mAddingToTask = true;
