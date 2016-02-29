@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"बोली दर"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"पिच"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"भाषा"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"सिस्‍टम भाषा का उपयोग करें"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"भाषा नहीं चुनी गई है"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"किसी अलग प्रक्रिया में WebView रेंडरर चलाएं."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView कार्यान्वयन"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView कार्यान्वयन सेट करें"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"चुना गया WebView कार्यान्वयन अक्षम है और उसे उपयोग करने के लिए सक्षम किया जाना आवश्यक है, क्या आप उसे सक्षम करना चाहते हैं?"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"चुना गया WebView कार्यान्वयन अमान्य है क्योंकि कार्यान्वयन विकल्पों की सूची पुरानी हो चुकी है. सूची को अब अपडेट किया जाना चाहिए."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"फ़ाइल एन्क्रिप्शन में रूपांतरित करें"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"रूपांतरित करें..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"फ़ाइल पहले से एन्क्रिप्ट की हुई है"</string>
