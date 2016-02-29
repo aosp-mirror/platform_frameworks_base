@@ -289,7 +289,9 @@ namespace {
                 if (err != NO_ERROR) {
                     return err;
                 }
-                print("", "entry", data32, "%s/%s", type.string(), name.string());
+                if (data32 != ResTable_type::NO_ENTRY) {
+                    print("", "entry", data32, "%s/%s", type.string(), name.string());
+                }
             }
         }
 
