@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"Deli z drugimi prek"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiranje datotek"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Premikanje datotek"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"Brisanje datotek"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Še <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Kopiranje <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke.</item>
@@ -125,4 +126,11 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Nekatere datoteke so bile pretvorjene"</string>
     <string name="allow" msgid="7225948811296386551">"Dovoli"</string>
     <string name="deny" msgid="2081879885755434506">"Zavrni"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"Ali želite izbrisati datoteke?"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="one">Ali res želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteko?</item>
+      <item quantity="two">Ali res želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteki?</item>
+      <item quantity="few">Ali res želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datoteke?</item>
+      <item quantity="other">Ali res želite izbrisati <xliff:g id="COUNT_1">%1$d</xliff:g> datotek?</item>
+    </plurals>
 </resources>

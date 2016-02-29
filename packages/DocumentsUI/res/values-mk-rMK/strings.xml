@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"Сподели преку"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Се копираат датотеки"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Датотеките се преместуваат"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"Се бришат датотеки"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"Уште <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Се копира <xliff:g id="COUNT_1">%1$d</xliff:g> датотека.</item>
@@ -111,4 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Некои датотеки беа конвертирани"</string>
     <string name="allow" msgid="7225948811296386551">"Дозволи"</string>
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"Избриши датотеки?"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="one">Дали сте сигурни дека сакате да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотека?</item>
+      <item quantity="other">Дали сте сигурни дека сакате да избришете <xliff:g id="COUNT_1">%1$d</xliff:g> датотеки?</item>
+    </plurals>
 </resources>

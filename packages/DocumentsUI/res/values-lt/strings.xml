@@ -67,6 +67,8 @@
     <string name="share_via" msgid="8966594246261344259">"Bendrinti naudojant"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopijuojami failai"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Perkeliami failai"</string>
+    <!-- no translation found for delete_notification_title (3329403967712437496) -->
+    <skip />
     <string name="copy_remaining" msgid="6283790937387975095">"Liko: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">Kopijuojamas <xliff:g id="COUNT_1">%1$d</xliff:g> failas.</item>
@@ -125,4 +127,7 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"Kai kurie failai buvo konvertuoti"</string>
     <string name="allow" msgid="7225948811296386551">"Leisti"</string>
     <string name="deny" msgid="2081879885755434506">"Atmesti"</string>
+    <!-- no translation found for delete_confirmation_title (1958369150786342998) -->
+    <skip />
+    <!-- no translation found for delete_confirmation_message (6608317554854868128) -->
 </resources>

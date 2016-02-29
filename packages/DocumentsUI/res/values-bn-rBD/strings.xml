@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"এর মাধ্যমে শেয়ার করুন"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ফাইলগুলি অনুলিপি করা হচ্ছে"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"ফাইলগুলি সরানো হচ্ছে"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"ফাইলগুলি মোছা হচ্ছে"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> বাকি"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল অনুলিপি করা হচ্ছে৷</item>
@@ -111,4 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"কিছু ফাইল রূপান্তরিত হয়েছে"</string>
     <string name="allow" msgid="7225948811296386551">"অনুমতি দিন"</string>
     <string name="deny" msgid="2081879885755434506">"আস্বীকার করুন"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"ফাইলগুলি মুছবেন?"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="one">আপনি কি <xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছার বিষয়ে নিশ্চিত?</item>
+      <item quantity="other">আপনি কি <xliff:g id="COUNT_1">%1$d</xliff:g>টি ফাইল মোছার বিষয়ে নিশ্চিত?</item>
+    </plurals>
 </resources>
