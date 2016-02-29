@@ -38,7 +38,6 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
-import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
@@ -46,7 +45,7 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
-        NextAlarmChangeCallback, OnClickListener, Listener {
+        NextAlarmChangeCallback, OnClickListener {
 
     private static final String TAG = "QuickStatusBarHeader";
 
@@ -157,7 +156,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mAnimator = new TouchAnimator.Builder()
                 .addFloat(mSettingsContainer, "translationY", -mGearTranslation, 0)
                 .addFloat(mMultiUserSwitch, "translationY", -mGearTranslation, 0)
-                .setListener(this)
                 .build();
         mSecondHalfAnimator = new TouchAnimator.Builder()
                 .addFloat(mSettingsButton, "rotation", -180, 0)
@@ -222,20 +220,6 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         updateAlarmVisibilities();
 
         mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
-    }
-
-    @Override
-    public void onAnimationAtStart() {
-    }
-
-    @Override
-    public void onAnimationAtEnd() {
-        mHeaderQsPanel.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void onAnimationStarted() {
-        mHeaderQsPanel.setVisibility(View.VISIBLE);
     }
 
     private void updateAlarmVisibilities() {

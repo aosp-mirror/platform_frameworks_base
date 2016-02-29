@@ -38,7 +38,7 @@ public class TouchAnimator {
     private final float mSpan;
     private final Interpolator mInterpolator;
     private final Listener mListener;
-    private float mLastT;
+    private float mLastT = -1;
 
     private TouchAnimator(Object[] targets, KeyframeSet[] keyframeSets,
             float startDelay, float endDelay, Interpolator interpolator, Listener listener) {
@@ -56,15 +56,16 @@ public class TouchAnimator {
         if (mInterpolator != null) {
             t = mInterpolator.getInterpolation(t);
         }
+        if (t == mLastT) {
+            return;
+        }
         if (mListener != null) {
-            if (mLastT == 0 || mLastT == 1) {
-                if (t != mLastT) {
-                    mListener.onAnimationStarted();
-                }
-            } else if (t == 1) {
+            if (t == 1) {
                 mListener.onAnimationAtEnd();
             } else if (t == 0) {
                 mListener.onAnimationAtStart();
+            } else if (mLastT <= 0 || mLastT == 1) {
+                mListener.onAnimationStarted();
             }
             mLastT = t;
         }
@@ -114,12 +115,12 @@ public class TouchAnimator {
         private Listener mListener;
 
         public Builder addFloat(Object target, String property, float... values) {
-            add(target, KeyframeSet.ofFloat(getProperty(target, property), values));
+            add(target, KeyframeSet.ofFloat(getProperty(target, property, float.class), values));
             return this;
         }
 
         public Builder addInt(Object target, String property, int... values) {
-            add(target, KeyframeSet.ofInt(getProperty(target, property), values));
+            add(target, KeyframeSet.ofInt(getProperty(target, property, int.class), values));
             return this;
         }
 
@@ -128,7 +129,7 @@ public class TouchAnimator {
             mValues.add(keyframeSet);
         }
 
-        private static Property getProperty(Object target, String property) {
+        private static Property getProperty(Object target, String property, Class<?> cls) {
             if (target instanceof View) {
                 switch (property) {
                     case "translationX":
@@ -151,7 +152,7 @@ public class TouchAnimator {
                         return View.SCALE_Y;
                 }
             }
-            return Property.of(target.getClass(), float.class, property);
+            return Property.of(target.getClass(), cls, property);
         }
 
         public Builder setStartDelay(float startDelay) {
