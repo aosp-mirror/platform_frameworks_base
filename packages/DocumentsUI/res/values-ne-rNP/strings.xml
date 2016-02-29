@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"माध्यमबाट साझेदारी गर्नुहोस्"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फाइलहरू प्रतिलिपि गर्दै:"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"फाइलहरू सार्दै"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"फाइलहरूलाई मेट्दै"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g>बाँकी"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other"> <xliff:g id="COUNT_1">%1$d</xliff:g>फाइलहरू प्रतिलिप गर्दै।</item>
@@ -111,4 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"केही फाइलहरू परिवर्तन गरिएका थिए"</string>
     <string name="allow" msgid="7225948811296386551">"अनुमति दिनुहोस्"</string>
     <string name="deny" msgid="2081879885755434506">"अस्वीकार गर्नुहोस्"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"फाइलहरूलाई मेट्ने हो?"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="other">तपाईँ निश्चित रूपमा <xliff:g id="COUNT_1">%1$d</xliff:g> फाइलहरूलाई मेट्न चाहनुहुन्छ?</item>
+      <item quantity="one">तपाईँ निश्चित रूपमा <xliff:g id="COUNT_0">%1$d</xliff:g> फाइललाई मेट्न चाहनुहुन्छ?</item>
+    </plurals>
 </resources>

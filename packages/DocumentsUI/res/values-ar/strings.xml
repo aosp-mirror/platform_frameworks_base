@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"مشاركة عبر"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"جارٍ نسخ الملفات"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"نقل الملفات"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"جارٍ حذف الملفات"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"المدة المتبقية: <xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="zero">جارٍ نسخ <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات.</item>
@@ -139,4 +140,13 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"تم تحويل بعض الملفات"</string>
     <string name="allow" msgid="7225948811296386551">"السماح"</string>
     <string name="deny" msgid="2081879885755434506">"رفض"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"هل تريد حذف الملفات؟"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="zero">هل تريد بالتأكيد حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملف؟</item>
+      <item quantity="two">هل تريد بالتأكيد حذف ملفين (<xliff:g id="COUNT_1">%1$d</xliff:g>)؟</item>
+      <item quantity="few">هل تريد بالتأكيد حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملفات؟</item>
+      <item quantity="many">هل تريد بالتأكيد حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملفًا؟</item>
+      <item quantity="other">هل تريد بالتأكيد حذف <xliff:g id="COUNT_1">%1$d</xliff:g> ملف؟</item>
+      <item quantity="one">هل تريد بالتأكيد حذف <xliff:g id="COUNT_0">%1$d</xliff:g> ملف؟</item>
+    </plurals>
 </resources>

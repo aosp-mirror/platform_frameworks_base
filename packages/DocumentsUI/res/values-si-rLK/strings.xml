@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"හරහා බෙදාගන්න"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ගොනු පිටපත් කරමින්"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"ගොනු ගෙන යාම"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"ගොනු මකමින්"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ඉතිරියි"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="one">ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g> ක් පිටපත් කරමින්.</item>
@@ -111,4 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"සමහර ගොනු පරිවර්තනය කරන ලදී"</string>
     <string name="allow" msgid="7225948811296386551">"අවසර දෙන්න"</string>
     <string name="deny" msgid="2081879885755434506">"ප්‍රතික්ෂේප කරන්න"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"ගොනු මකන්නද?"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="one">ඔබට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට අවශ්‍ය බව විශ්වාසද?</item>
+      <item quantity="other">ඔබට ගොනු <xliff:g id="COUNT_1">%1$d</xliff:g>ක් මැකීමට අවශ්‍ය බව විශ්වාසද?</item>
+    </plurals>
 </resources>
