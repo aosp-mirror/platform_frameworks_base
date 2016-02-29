@@ -959,7 +959,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }, false /* afterKeyguardGone */);
     }
 
-    private void bindGuts(ExpandableNotificationRow row) {
+    private void bindGuts(final ExpandableNotificationRow row) {
         row.inflateGuts();
         final StatusBarNotification sbn = row.getStatusBarNotification();
         PackageManager pmUser = getPackageManagerForUser(mContext, sbn.getUser().getIdentifier());
@@ -1003,7 +1003,17 @@ public abstract class BaseStatusBar extends SystemUI implements
             @Override
             public void onClick(View v) {
                 guts.saveImportance(sbn);
-                dismissPopups();
+
+                int[] rowLocation = new int[2];
+                int[] doneLocation = new int[2];
+                row.getLocationOnScreen(rowLocation);
+                v.getLocationOnScreen(doneLocation);
+
+                final int centerX = v.getWidth() / 2;
+                final int centerY = v.getHeight() / 2;
+                final int x = doneLocation[0] - rowLocation[0] + centerX;
+                final int y = doneLocation[1] - rowLocation[1] + centerY;
+                dismissPopups(x, y);
             }
         });
 
@@ -1049,7 +1059,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 // Post to ensure the the guts are properly laid out.
                 guts.post(new Runnable() {
                     public void run() {
-                        dismissPopups();
+                        dismissPopups(-1 /* x */, -1 /* y */, false /* resetGear */);
                         guts.setVisibility(View.VISIBLE);
                         final double horz = Math.max(guts.getWidth() - x, x);
                         final double vert = Math.max(guts.getHeight() - y, y);
@@ -1083,10 +1093,14 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void dismissPopups() {
-        dismissPopups(-1, -1);
+        dismissPopups(-1 /* x */, -1 /* y */, true /* resetGear */);
     }
 
     private void dismissPopups(int x, int y) {
+        dismissPopups(x, y, true /* resetGear */);
+    }
+
+    public void dismissPopups(int x, int y, boolean resetGear) {
         if (mNotificationGutsExposed != null) {
             final NotificationGuts v = mNotificationGutsExposed;
             mNotificationGutsExposed = null;
@@ -1114,8 +1128,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             v.setExposed(false);
             mStackScroller.onHeightChanged(null, true /* needsAnimation */);
         }
-
-        if (mNotificationGearDisplayed != null) {
+        if (resetGear && mNotificationGearDisplayed != null) {
             mNotificationGearDisplayed.resetTranslation();
             mNotificationGearDisplayed = null;
         }
