@@ -469,6 +469,19 @@ final class TaskRecord {
         setLockTaskAuth();
     }
 
+    /**
+     * Return true if the input activity has the same intent resolution as the intent this task
+     * record is based on (normally the root activity intent).
+     */
+    boolean isSameIntentResolution(ActivityRecord r) {
+        final Intent intent = new Intent(r.intent);
+        // Correct the activity intent for aliasing. The task record intent will always be based on
+        // the real activity that will be launched not the alias, so we need to use an intent with
+        // the component name pointing to the real activity not the alias in the activity record.
+        intent.setComponent(r.realActivity);
+        return this.intent.filterEquals(intent);
+    }
+
     void setTaskToReturnTo(int taskToReturnTo) {
         mTaskToReturnTo = (taskToReturnTo == RECENTS_ACTIVITY_TYPE)
                 ? HOME_ACTIVITY_TYPE : taskToReturnTo;
