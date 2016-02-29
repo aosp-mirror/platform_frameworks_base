@@ -77,11 +77,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
         mToolbar.setNavigationIcon(
-                getResources().getDrawable(R.drawable.ic_close_white, mContext.getTheme()));
+                getResources().getDrawable(value.resourceId, mContext.getTheme()));
         mToolbar.setNavigationOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                save();
                 hide((int) v.getX() + v.getWidth() / 2, (int) v.getY() + v.getHeight() / 2);
             }
         });
@@ -115,6 +114,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     public void hide(int x, int y) {
         if (isShown) {
             isShown = false;
+            save();
             mClipper.animateCircularClip(x, y, false, mCollapseAnimationListener);
         }
     }
