@@ -17,7 +17,6 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -58,7 +57,7 @@ final class GridDirectoryHolder extends DocumentHolder {
      * @param state Current display state.
      */
     public void bind(Cursor cursor, String modelId, State state) {
-        checkNotNull(cursor, "Cursor cannot be null.");
+        assert(cursor != null);
 
         this.modelId = modelId;
 

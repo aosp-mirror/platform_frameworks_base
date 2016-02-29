@@ -16,8 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.internal.util.Preconditions.checkArgument;
-
 import android.app.Activity;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -83,7 +81,7 @@ abstract class DrawerController implements DrawerListener {
                 DrawerLayout layout, View drawer, ActionBarDrawerToggle toggle,
                 Toolbar drawerToolbar) {
             mToolbar = drawerToolbar;
-            checkArgument(layout != null);
+            assert(layout != null);
 
             mLayout = layout;
             mDrawer = drawer;

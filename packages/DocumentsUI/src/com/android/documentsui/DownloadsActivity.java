@@ -16,10 +16,8 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -41,7 +39,6 @@ import com.android.documentsui.dirlist.DirectoryFragment;
 import com.android.documentsui.dirlist.Model;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
-import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -121,11 +118,11 @@ public class DownloadsActivity extends BaseActivity {
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
-        if (DEBUG) checkState(!mSearchManager.isSearching());
+        assert(!mSearchManager.isSearching());
 
         // If started in manage roots mode, there has to be a cwd (i.e. the root dir of the managed
         // root).
-        Preconditions.checkNotNull(cwd);
+        assert(cwd != null);
 
         // Normal boring directory
         DirectoryFragment.showDirectory(fm, root, cwd, anim);
@@ -133,7 +130,8 @@ public class DownloadsActivity extends BaseActivity {
 
     @Override
     public void onDocumentPicked(DocumentInfo doc, Model model) {
-        Preconditions.checkArgument(!doc.isDirectory());
+        assert(!doc.isDirectory());
+
         // First try managing the document; we expect manager to filter
         // based on authority, so we don't grant.
         final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);

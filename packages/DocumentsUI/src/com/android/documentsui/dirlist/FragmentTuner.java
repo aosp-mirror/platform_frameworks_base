@@ -22,7 +22,6 @@ import static com.android.documentsui.State.ACTION_GET_CONTENT;
 import static com.android.documentsui.State.ACTION_MANAGE;
 import static com.android.documentsui.State.ACTION_OPEN;
 import static com.android.documentsui.State.ACTION_OPEN_TREE;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.content.Context;
 import android.provider.DocumentsContract.Document;
@@ -172,7 +171,7 @@ public abstract class FragmentTuner {
         @Override
         public void updateActionMenu(
                 Menu menu, @ResultType int resultType, boolean canDelete, boolean canRename) {
-            checkArgument(resultType != DirectoryFragment.TYPE_RECENT_OPEN);
+            assert(resultType != DirectoryFragment.TYPE_RECENT_OPEN);
 
             MenuItem open = menu.findItem(R.id.menu_open);
             MenuItem delete = menu.findItem(R.id.menu_delete);

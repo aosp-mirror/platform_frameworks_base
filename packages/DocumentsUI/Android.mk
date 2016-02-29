@@ -30,6 +30,10 @@ LOCAL_AAPT_FLAGS := \
   --extra-packages android.support.design \
   --extra-packages android.support.v7.recyclerview
 
+LOCAL_JACK_FLAGS := \
+  -D jack.assert.policy=enable \
+  -D jack.optimization.inner-class.accessors=true
+
 LOCAL_PACKAGE_NAME := DocumentsUI
 LOCAL_CERTIFICATE := platform
 

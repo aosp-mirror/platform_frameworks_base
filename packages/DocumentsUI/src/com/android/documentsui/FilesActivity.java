@@ -19,8 +19,6 @@ package com.android.documentsui;
 import static com.android.documentsui.OperationDialogFragment.DIALOG_TYPE_UNKNOWN;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.dirlist.DirectoryFragment.ANIM_NONE;
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.app.Activity;
 import android.app.FragmentManager;
@@ -97,11 +95,11 @@ public class FilesActivity extends BaseActivity {
             // Launch URIs support sensible activity management, but don't specify a real
             // content target.
             if (DEBUG) Log.d(TAG, "Launching with non-empty stack.");
-            checkState(uri == null || uri.getAuthority() == null ||
+            assert(uri == null || uri.getAuthority() == null ||
                     LauncherActivity.isLaunchUri(uri));
             refreshCurrentRootAndDirectory(ANIM_NONE);
         } else if (intent.getAction() == Intent.ACTION_VIEW) {
-            checkArgument(uri != null);
+            assert(uri != null);
             new OpenUriForViewTask(this).executeOnExecutor(
                     ProviderExecutor.forAuthority(uri.getAuthority()), uri);
         } else if (DocumentsContract.isRootUri(this, uri)) {
@@ -143,7 +141,7 @@ public class FilesActivity extends BaseActivity {
         state.allowMultiple = true;
 
         // Options specific to the DocumentsActivity.
-        checkArgument(!intent.hasExtra(Intent.EXTRA_LOCAL_ONLY));
+        assert(!intent.hasExtra(Intent.EXTRA_LOCAL_ONLY));
 
         final DocumentStack stack = intent.getParcelableExtra(Shared.EXTRA_STACK);
         if (stack != null) {
@@ -212,7 +210,7 @@ public class FilesActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_create_dir:
-                checkState(canCreateDirectory());
+                assert(canCreateDirectory());
                 showCreateDirectoryDialog();
                 return true;
             case R.id.menu_new_window:
@@ -250,7 +248,7 @@ public class FilesActivity extends BaseActivity {
         final RootInfo root = getCurrentRoot();
         final DocumentInfo cwd = getCurrentDirectory();
 
-        if (DEBUG) checkState(!mSearchManager.isSearching());
+        assert(!mSearchManager.isSearching());
 
         if (cwd == null) {
             DirectoryFragment.showRecentsOpen(fm, anim);

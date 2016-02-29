@@ -17,7 +17,6 @@
 package com.android.documentsui.dirlist;
 
 import static com.android.documentsui.Shared.TAG;
-import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -36,9 +35,9 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.inputmethod.EditorInfo;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -205,7 +204,7 @@ public class RenameDocumentFragment extends DialogFragment {
 
         @Override
         protected DocumentInfo doInBackground(DocumentInfo... document) {
-            checkArgument(document.length == 1);
+            assert(document.length == 1);
             final ContentResolver resolver = mActivity.getContentResolver();
             ContentProviderClient client = null;
 

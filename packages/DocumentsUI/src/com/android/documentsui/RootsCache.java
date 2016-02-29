@@ -18,7 +18,6 @@ package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.Shared.TAG;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -41,7 +40,6 @@ import android.util.Log;
 
 import com.android.documentsui.model.RootInfo;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -118,17 +116,16 @@ public class RootsCache {
      */
     public void updateAsync() {
         // Verifying an assumption about the recents root being immutable.
-        if (DEBUG) {
-            checkState(mRecentsRoot.authority == null);
-            checkState(mRecentsRoot.rootId == null);
-            checkState(mRecentsRoot.derivedIcon == R.drawable.ic_root_recent);
-            checkState(mRecentsRoot.derivedType == RootInfo.TYPE_RECENTS);
-            checkState(mRecentsRoot.flags == (Root.FLAG_LOCAL_ONLY
-                    | Root.FLAG_SUPPORTS_IS_CHILD
-                    | Root.FLAG_SUPPORTS_CREATE));
-            checkState(mRecentsRoot.title == mContext.getString(R.string.root_recent));
-            checkState(mRecentsRoot.availableBytes == -1);
-        }
+        assert(mRecentsRoot.authority == null);
+        assert(mRecentsRoot.rootId == null);
+        assert(mRecentsRoot.derivedIcon == R.drawable.ic_root_recent);
+        assert(mRecentsRoot.derivedType == RootInfo.TYPE_RECENTS);
+        assert(mRecentsRoot.flags == (Root.FLAG_LOCAL_ONLY
+                | Root.FLAG_SUPPORTS_IS_CHILD
+                | Root.FLAG_SUPPORTS_CREATE));
+        assert(mRecentsRoot.title == mContext.getString(R.string.root_recent));
+        assert(mRecentsRoot.availableBytes == -1);
+
         new UpdateTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 

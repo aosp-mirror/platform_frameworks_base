@@ -19,9 +19,6 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.Shared.DEBUG;
 import static com.android.documentsui.dirlist.ModelBackedDocumentsAdapter.ITEM_TYPE_DIRECTORY;
 import static com.android.documentsui.dirlist.ModelBackedDocumentsAdapter.ITEM_TYPE_DOCUMENT;
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.IntDef;
 import android.graphics.Point;
@@ -134,8 +131,12 @@ public final class MultiSelectManager {
             @SelectionMode int mode,
             @Nullable Selection initialSelection) {
 
-        mEnvironment = checkNotNull(environment, "'environment' cannot be null.");
-        mAdapter = checkNotNull(adapter, "'adapter' cannot be null.");
+        assert(environment != null);
+        assert(adapter != null);
+
+        mEnvironment = environment;
+        mAdapter = adapter;
+
         mSingleSelect = mode == MODE_SINGLE;
         if (initialSelection != null) {
             mSelection.copyFrom(initialSelection);
@@ -168,8 +169,8 @@ public final class MultiSelectManager {
 
                     @Override
                     public void onItemRangeRemoved(int startPosition, int itemCount) {
-                        checkState(startPosition >= 0);
-                        checkState(itemCount > 0);
+                        assert(startPosition >= 0);
+                        assert(itemCount > 0);
 
                         mSelection.cancelProvisionalSelection();
                         // Remove any disappeared IDs from the selection.
@@ -356,7 +357,8 @@ public final class MultiSelectManager {
      * @param modelId
      */
     public void toggleSelection(String modelId) {
-        checkNotNull(modelId);
+        assert(modelId != null);
+
         boolean changed = false;
         if (mSelection.contains(modelId)) {
             changed = attemptDeselect(modelId);
@@ -389,7 +391,8 @@ public final class MultiSelectManager {
      * @param pos The new end position for the selection range.
      */
     void snapRangeSelection(int pos) {
-        checkNotNull(mRanger);
+        assert(mRanger != null);
+
         mRanger.snapSelection(pos);
         notifySelectionChanged();
     }
@@ -436,7 +439,7 @@ public final class MultiSelectManager {
      * @param selected New selection state.
      */
     private void updateRange(int begin, int end, boolean selected) {
-        checkState(end >= begin);
+        assert(end >= begin);
         for (int i = begin; i <= end; i++) {
             String id = mAdapter.getModelId(i);
             if (id == null) {
@@ -474,7 +477,7 @@ public final class MultiSelectManager {
      * @return True if the update was applied.
      */
     private boolean attemptDeselect(String id) {
-        checkArgument(id != null);
+        assert(id != null);
         if (notifyBeforeItemStateChange(id, false)) {
             mSelection.remove(id);
             notifyItemStateChanged(id, false);
@@ -491,7 +494,7 @@ public final class MultiSelectManager {
      * @return True if the update was applied.
      */
     private boolean attemptSelect(String id) {
-        checkArgument(id != null);
+        assert(id != null);
         boolean canSelect = notifyBeforeItemStateChange(id, true);
         if (!canSelect) {
             return false;
@@ -519,7 +522,7 @@ public final class MultiSelectManager {
      * (identified by {@code position}) changes.
      */
     private void notifyItemStateChanged(String id, boolean selected) {
-        checkArgument(id != null);
+        assert(id != null);
         int lastListener = mCallbacks.size() - 1;
         for (int i = lastListener; i > -1; i--) {
             mCallbacks.get(i).onItemStateChanged(id, selected);
@@ -555,8 +558,8 @@ public final class MultiSelectManager {
         }
 
         private void snapSelection(int position) {
-            checkState(mRanger != null);
-            checkArgument(position != RecyclerView.NO_POSITION);
+            assert(mRanger != null);
+            assert(position != RecyclerView.NO_POSITION);
 
             if (mEnd == UNDEFINED || mEnd == mBegin) {
                 // Reset mEnd so it can be established in establishRange.
@@ -568,7 +571,7 @@ public final class MultiSelectManager {
         }
 
         private void establishRange(int position) {
-            checkState(mRanger.mEnd == UNDEFINED);
+            assert(mRanger.mEnd == UNDEFINED);
 
             if (position == mBegin) {
                 mEnd = position;
@@ -584,8 +587,8 @@ public final class MultiSelectManager {
         }
 
         private void reviseRange(int position) {
-            checkState(mEnd != UNDEFINED);
-            checkState(mBegin != mEnd);
+            assert(mEnd != UNDEFINED);
+            assert(mBegin != mEnd);
 
             if (position == mEnd) {
                 if (DEBUG) Log.i(TAG, "Skipping no-op revision click on mEndRange.");
@@ -1185,7 +1188,7 @@ public final class MultiSelectManager {
          * @param input
          */
         private void processInputEvent(InputEvent input) {
-            checkArgument(input.isMouseEvent());
+            assert(input.isMouseEvent());
 
             if (shouldStop(input)) {
                 endBandSelect();
@@ -1199,7 +1202,6 @@ public final class MultiSelectManager {
             }
 
             mCurrentPosition = input.getOrigin();
-            mModel.resizeSelection(input.getOrigin());
             scrollViewIfNecessary();
             resizeBandSelectRectangle();
         }
@@ -1488,6 +1490,7 @@ public final class MultiSelectManager {
          *     top-left of the viewport would have a relative origin of (0, 0), even though its
          *     absolute point has a higher y-value.
          */
+        @VisibleForTesting
         void resizeSelection(Point relativePointer) {
             mPointer = mHelper.createAbsolutePoint(relativePointer);
             updateModel();
@@ -1615,7 +1618,7 @@ public final class MultiSelectManager {
         private void updateSelection(Rect rect) {
             int columnStart =
                     Collections.binarySearch(mColumnBounds, new Limits(rect.left, rect.left));
-            checkState(columnStart >= 0);
+            assert(columnStart >= 0);
             int columnEnd = columnStart;
 
             for (int i = columnStart; i < mColumnBounds.size()
