@@ -769,7 +769,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(disableContactsSearch));
                 out.endTag(null, TAG_DISABLE_CONTACTS_SEARCH);
             }
-            if (disableBluetoothContactSharing) {
+            if (!disableBluetoothContactSharing) {
                 out.startTag(null, TAG_DISABLE_BLUETOOTH_CONTACT_SHARING);
                 out.attribute(null, ATTR_VALUE,
                         Boolean.toString(disableBluetoothContactSharing));
