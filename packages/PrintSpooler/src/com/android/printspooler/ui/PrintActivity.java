@@ -731,7 +731,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         // The activity is a component name, therefore it is one or none.
         if (resolvedActivities.get(0).activityInfo.exported) {
-            intent.putExtra(PrintService.EXTRA_PRINT_JOB_INFO, mPrintJob);
+            PrintJobInfo.Builder printJobBuilder = new PrintJobInfo.Builder(mPrintJob);
+            printJobBuilder.setPages(mSelectedPages);
+
+            intent.putExtra(PrintService.EXTRA_PRINT_JOB_INFO, printJobBuilder.build());
             intent.putExtra(PrintService.EXTRA_PRINTER_INFO, printer);
             intent.putExtra(PrintService.EXTRA_PRINT_DOCUMENT_INFO,
                     mPrintedDocument.getDocumentInfo().info);
@@ -759,10 +762,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         // Take the advanced options without interpretation.
         mPrintJob.setAdvancedOptions(printJobInfo.getAdvancedOptions());
 
-        // Take copies without interpretation as the advanced print dialog
-        // cannot create a print job info with invalid copies.
-        mCopiesEditText.setText(String.valueOf(printJobInfo.getCopies()));
-        mPrintJob.setCopies(printJobInfo.getCopies());
+        if (printJobInfo.getCopies() < 1) {
+            Log.w(LOG_TAG, "Cannot apply return value from advanced options activity. Copies " +
+                    "must be 1 or more. Actual value is: " + printJobInfo.getCopies() + ". " +
+                    "Ignoring.");
+        } else {
+            mCopiesEditText.setText(String.valueOf(printJobInfo.getCopies()));
+            mPrintJob.setCopies(printJobInfo.getCopies());
+        }
 
         PrintAttributes currAttributes = mPrintJob.getAttributes();
         PrintAttributes newAttributes = printJobInfo.getAttributes();
@@ -771,7 +778,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             // Take the media size only if the current printer supports is.
             MediaSize oldMediaSize = currAttributes.getMediaSize();
             MediaSize newMediaSize = newAttributes.getMediaSize();
-            if (!oldMediaSize.equals(newMediaSize)) {
+            if (newMediaSize != null && !oldMediaSize.equals(newMediaSize)) {
                 final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
                 MediaSize newMediaSizePortrait = newAttributes.getMediaSize().asPortrait();
                 for (int i = 0; i < mediaSizeCount; i++) {
