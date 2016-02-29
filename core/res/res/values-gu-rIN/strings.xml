@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"અનપિન કરતાં પહેલાં PIN માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"અનપિન કરતા પહેલાં અનલૉક પેટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"ઍપ્લિકેશનનું કદ બદલવા યોગ્ય નથી, બે આંગળીઓ વડે તેને સ્ક્રોલ કરો."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"વિભાજિત-સ્ક્રીન સાથે ઍપ્લિકેશન કદાચ કામ ન કરે."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ઍપ્લિકેશન સ્ક્રીન-વિભાજનનું સમર્થન કરતી નથી."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટોલ કરેલ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ થયેલ"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"શામેલ થયેલ લોકોને કારણે આ મહત્વપૂર્ણ છે."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> ને <xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> સાથે <xliff:g id="APP">%1$s</xliff:g> ને એક નવા વપરાશકર્તાને બનાવવાની મંજૂરી આપીએ (આ એકાઉન્ટ સાથેના એક વપરાશકર્તા પહેલાંથી અસ્તિત્વમાં છે)?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"ભાષા પસંદગી"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"એક ભાષા ઉમેરો"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"પ્રદેશ પસંદગી"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ભાષાનું નામ ટાઇપ કરો"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"સૂચવેલા"</string>

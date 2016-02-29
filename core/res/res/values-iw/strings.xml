@@ -1487,7 +1487,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"‏בקש PIN לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"בקש קו ביטול נעילה לפני ביטול הצמדה"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"בקש סיסמה לפני ביטול הצמדה"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"אין אפשרות לשנות את גודל האפליקציה, גלול אותה בשתי אצבעות."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"ייתכן שהיישום לא יפעל עם מסך מפוצל."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"האפליקציה אינה תומכת במסך מפוצל."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"הותקנה על ידי מנהל המערכת שלך"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"עודכן על ידי מנהל המערכת שלך"</string>
@@ -1579,7 +1579,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"ההודעה חשובה בשל האנשים המעורבים."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"האם לאפשר ל-<xliff:g id="APP">%1$s</xliff:g> ליצור משתמש חדש לחשבון <xliff:g id="ACCOUNT">%2$s</xliff:g> (כבר קיים משתמש לחשבון הזה) ?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"העדפת שפה"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"הוספת שפה"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"העדפת אזור"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"הקלד שם שפה"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"הצעות"</string>

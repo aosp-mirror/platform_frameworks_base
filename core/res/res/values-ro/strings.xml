@@ -1477,7 +1477,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicită codul PIN înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicită modelul pentru deblocare înainte de a anula fixarea"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicită parola înainte de a anula fixarea"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Aplicația nu poate fi redimensionată. Derulați în ea cu două degete."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Este posibil ca aplicația să nu funcționeze cu ecranul împărțit."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplicația nu acceptă ecranul împărțit."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalat de administrator"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Actualizat de un administrator"</string>
@@ -1560,7 +1560,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Notificarea este importantă având în vedere persoanele implicate."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Permiteți ca <xliff:g id="APP">%1$s</xliff:g> să creeze un nou utilizator folosind <xliff:g id="ACCOUNT">%2$s</xliff:g>? (există deja un utilizator cu acest cont)"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Limba preferată"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Adăugați o limbă"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Regiunea preferată"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Numele limbii"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Sugerate"</string>

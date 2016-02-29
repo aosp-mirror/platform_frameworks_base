@@ -1477,7 +1477,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тражи PIN пре откачињања"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Тражи шаблон за откључавање пре откачињања"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тражи лозинку пре откачињања"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Величина апликације не може да се мења. Померајте је помоћу два прста."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Апликација можда неће функционисати са подељеним екраном."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Апликација не подржава подељени екран."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Инсталирао је ваш администратор"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Ажурирао је администратор"</string>
@@ -1560,7 +1560,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Ово је важно због људи који учествују."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Желите ли да дозволите апликацији <xliff:g id="APP">%1$s</xliff:g> да направи новог корисника за <xliff:g id="ACCOUNT">%2$s</xliff:g> (корисник са овим налогом већ постоји)?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Подешавање језика"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Додајте језик"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Подешавање региона"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Унесите назив језика"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Предложени"</string>
