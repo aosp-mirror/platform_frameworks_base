@@ -1052,6 +1052,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setHideSensitiveForIntrinsicHeight(boolean hideSensitive) {
         mHideSensitiveForIntrinsicHeight = hideSensitive;
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren =
+                    mChildrenContainer.getNotificationChildren();
+            for (int i = 0; i < notificationChildren.size(); i++) {
+                ExpandableNotificationRow child = notificationChildren.get(i);
+                child.setHideSensitiveForIntrinsicHeight(hideSensitive);
+            }
+        }
     }
 
     public void setHideSensitive(boolean hideSensitive, boolean animated, long delay,
