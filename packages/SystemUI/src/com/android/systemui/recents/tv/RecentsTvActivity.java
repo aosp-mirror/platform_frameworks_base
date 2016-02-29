@@ -99,6 +99,9 @@ public class RecentsTvActivity extends Activity implements OnPreDrawListener {
 
         @Override
         public void onPipResizeAboutToStart() { }
+
+        @Override
+        public void onMediaControllerChanged() { }
     };
 
     /**

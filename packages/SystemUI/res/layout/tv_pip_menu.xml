@@ -34,7 +34,7 @@
         android:gravity="center"
         android:clipChildren="false">
 
-        <ImageView android:id="@+id/full"
+        <ImageView android:id="@+id/full_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -53,17 +53,16 @@
             android:clipChildren="false" />
     </LinearLayout>
 
-    <LinearLayout
+    <LinearLayout android:id="@+id/play_pause"
         android:layout_width="34dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="3dp"
         android:layout_marginEnd="3dp"
         android:orientation="vertical"
         android:gravity="center"
-        android:visibility="gone"
         android:clipChildren="false">
 
-        <ImageView android:id="@+id/play_pause"
+        <ImageView android:id="@+id/play_pause_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
@@ -90,7 +89,7 @@
         android:gravity="center"
         android:clipChildren="false">
 
-        <ImageView android:id="@+id/close"
+        <ImageView android:id="@+id/close_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:focusable="true"
