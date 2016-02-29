@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"캡쳐화면 저장됨"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"캡쳐화면을 보려면 터치하세요."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"캡쳐화면을 캡쳐하지 못했습니다."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"저장 공간이 부족하거나 앱 또는 소속 조직에서 허용하지 않아 스크린샷을 찍을 수 없습니다."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"미디어 플레이어로 마운트(MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"카메라로 마운트(PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"시간 늘리기"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"시간 줄이기"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"손전등: 사용 중지"</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"손전등을 사용할 수 없습니다."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"손전등: 사용"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"손전등이 사용 중지되었습니다."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"손전등을 사용합니다."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>은(는) 안전 모드에서 사용 중지됩니다."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"기록"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"삭제"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"이 앱은 다중 창을 지원하지 않습니다."</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"앱이 다중 창을 지원하지 않습니다."</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"수평 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"수직 분할"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"맞춤 분할"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"블루투스를 켜시겠습니까?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"키보드를 태블릿에 연결하려면 먼저 블루투스를 켜야 합니다."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"사용"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> 알림에 적용"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"이 앱의 전체 알림에 적용"</string>
+    <string name="show_silently" msgid="6841966539811264192">"무음으로 알림 표시"</string>
+    <string name="block" msgid="2734508760962682611">"모든 알림 차단"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"무음 모드 사용 안함"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"무음 모드 또는 차단 사용 안함"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"전체 중요도 설정 표시"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"차단됨"</string>
+    <string name="min_importance" msgid="1901894910809414782">"중요도 최소"</string>
     <string name="low_importance" msgid="4109929986107147930">"중요도 낮음"</string>
     <string name="default_importance" msgid="8192107689995742653">"중요도 보통"</string>
     <string name="high_importance" msgid="1527066195614050263">"중요도 높음"</string>
     <string name="max_importance" msgid="5089005872719563894">"중요도 긴급"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"알림 다시 표시 안함"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"알림 목록 하단에 무음으로 표시"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"무음으로 알림 표시"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"알림 목록 상단에 표시하고 소리로 알림"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"화면에 표시하고 소리로 알림"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"알림 목록 맨 아래에 무음으로 표시"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"무음으로 알림 표시"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"알림을 소리로 알리도록 허용"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"화면에 표시하고 소리로 알림"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"알림 목록 맨 위에 표시, 화면에 표시하고 소리로 알림"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"설정 더보기"</string>
     <string name="notification_done" msgid="5279426047273930175">"완료"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"색상 및 모양"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS용 어두운 테마 사용"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"농담 효과 조정"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"밝기 조정"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"설정 및 알림 등 밝은 테마에서 일반적으로 표시되는 Android OS의 핵심 영역에 어두운 테마가 적용됩니다."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"설정 등 밝은 테마에서 일반적으로 표시되는 Android OS의 핵심 영역에 어두운 테마가 적용됩니다."</string>
     <string name="color_apply" msgid="9212602012641034283">"적용"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"설정 확인"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"일부 색상 설정으로 인해 이 기기를 사용하지 못할 수 있습니다. 확인을 클릭하여 이러한 색상 설정을 확인하지 않으면 10초 후에 설정이 초기화됩니다."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"충전할 때 퍼센트 표시(기본값)"</item>
     <item msgid="3327323682209964956">"이 아이콘 표시 안함"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"기타"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"화면 분할기"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"아래로 이동"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"위로 이동"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"왼쪽으로 이동"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"오른쪽으로 이동"</string>
 </resources>

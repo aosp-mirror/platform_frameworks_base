@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Picha ya skrini imenaswa."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Gusa ili kuona picha yako ya skrini."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Haikuweza kunasa picha ya skrini"</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Haiwezi kupiga picha ya skrini kwa sababu nafasi ya hifadhi haitoshi, au hairuhusiwi na programu yako au ya shirika."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Shirika au programu yako haikuruhusu upige picha za skrini."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezeshi cha midia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Muda zaidi."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Muda kidogo"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Tochi imezimwa."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Tochi haipatikani."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Tochi inawaka."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Tochi imezimwa."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Tochi imewashwa."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> imezimwa katika hali salama."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Historia"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Futa"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Programu hii haitumiki katika hali ya madirisha mengi"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Programu haitumiki katika hali ya madirisha mengi"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Gawanya Mlalo"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Gawanya Wima"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Maalum Iliyogawanywa"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Je, ungependa kuwasha Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Ili uunganishe Kibodi yako kwenye kompyuta yako kibao, lazima kwanza uwashe Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Washa"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Tumia katika arifa za <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Tumia katika arifa zote kutoka programu hii"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Onyesha arifa bila sauti"</string>
+    <string name="block" msgid="2734508760962682611">"Zuia arifa zote"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Usinyamazishe"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Usinyamazishe wala kuzuia"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Onyesha mipangilio kamili ya umuhimu"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Amezuiwa"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Umuhimu wa kiwango cha chini zaidi"</string>
     <string name="low_importance" msgid="4109929986107147930">"Umuhimu kiwango cha chini"</string>
     <string name="default_importance" msgid="8192107689995742653">"Umuhimu wa kiwango cha kawaida"</string>
     <string name="high_importance" msgid="1527066195614050263">"Umuhimu wa kiwango cha juu"</string>
     <string name="max_importance" msgid="5089005872719563894">"Umuhimu wa hali ya dharura"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Usionyeshe arifa hizi kamwe"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Onyesha katika sehemu ya chini ya orodha ya arifa bila sauti"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Onyesha arifa hizi bila sauti"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Onyesha katika sehemu ya juu ya orodha ya arifa na itoe sauti"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Weka onyesho la kuchungulia kwenye skrini na itoe sauti"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Onyesha katika sehemu ya chini ya orodha ya arifa bila sauti"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Onyesha arifa hizi bila sauti"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Ruhusu arifa hizi zitoe sauti"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Chungulia kwenye skrini na uruhusu sauti"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Onyesha katika sehemu ya juu ya orodha ya arifa, chungulia kwenye skrini na uruhusu sauti"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Mipangilio zaidi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Nimemaliza"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Rangi na mwonekano"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Tumia mandhari ya giza katika Mfumo wa Uendeshaji wa Android"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Rekebisha kivulivuli"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Rekebisha mwangaza"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Mandhari yenye giza yametumika katika maeneo muhimu ya Mfumo wa Uendeshaji wa Android ambayo kwa kawaida huonyeshwa katika mandhari yenye mwangaza, kama vile Mipangilio na arifa."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Mandhari yenye giza yametumika katika maeneo muhimu ya Mfumo wa Uendeshaji wa Android ambayo kwa kawaida huonyeshwa katika mandhari yenye mwangaza, kama vile Mipangilio."</string>
     <string name="color_apply" msgid="9212602012641034283">"Tumia"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Thibitisha mipangilio"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Baadhi ya mipangilio ya rangi inaweza kufanya kifaa hiki kisitumike. Bofya Sawa ili uthibitishe mipangilio hii ya rangi, vinginevyo, mipangilio hii itajiweka upya baada ya sekunde 10."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguo-msingi)"</item>
     <item msgid="3327323682209964956">"Usionyeshe aikoni hii"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Nyingine"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Kitenganishi cha skrini inayogawanywa"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Sogeza chini"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Sogeza juu"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Sogeza kushoto"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Sogeza kulia"</string>
 </resources>

@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Pamja e ekranit u kap."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Prek për të parë pamjen e ekranit tënd."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nuk mundi të kapte pamjen e ekranit."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Nuk pranon pamje ekrani për shkak të hapësirës së kufizuar ruajtëse, ose një gjë e tillë nuk lejohet nga aplikacioni apo organizata jote."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Pamja e ekranit nuk mund të ruhet për shkak të hapësirës ruajtëse të kufizuar."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Nxjerrja e pamjeve të ekranit nuk lejohet nga aplikacioni ose organizata jote."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsionet e transferimit të dosjeve të USB-së"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lidh si një lexues \"media\" (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montoje si kamerë (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Më shumë kohë."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Më pak kohë."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Elektriku është i çaktivizuar."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Blici është i padisponueshëm"</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Elektriku u aktivizua."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Elektriku u çaktivizua."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Elektriku është i aktivizuar."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> është i çaktivizuar në modalitetin e sigurt."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Historiku"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Pastro"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ky aplikacion nuk e mbështet modalitetin me shumë dritare"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikacioni nuk e mbështet modalitetin me shumë dritare"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Ndaje horizontalisht"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Ndaj vertikalisht"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Ndaj të personalizuarën"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Të aktivizohet \"bluetooth-i\"?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Për të lidhur tastierën me tabletin, në fillim duhet të aktivizosh \"bluetooth-in\"."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktivizo"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Zbatoje për njoftimet nga <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Zbatoje për të gjitha njoftimet nga ky aplikacion"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Shfaqi njoftimet në heshtje"</string>
+    <string name="block" msgid="2734508760962682611">"Blloko të gjitha njoftimet"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Mos e vendos në heshtje"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Mos e vendos në heshtje ose mos e blloko"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Shfaq cilësimet e plota të rëndësisë"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"I bllokuar"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Rëndësi minimale"</string>
     <string name="low_importance" msgid="4109929986107147930">"Rëndësi e ulët"</string>
     <string name="default_importance" msgid="8192107689995742653">"Rëndësi normale"</string>
     <string name="high_importance" msgid="1527066195614050263">"Rëndësi e lartë"</string>
     <string name="max_importance" msgid="5089005872719563894">"Rëndësi urgjente"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Mos i shfaq asnjëherë këto njoftime"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Shfaqi në heshtje në fund të listës së njoftimeve"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Shfaqi këto njoftime në heshtje"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Shfaqi në krye të listës së njoftimeve dhe lësho tingull"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Shfaq një vështrim të shpejtë në ekran dhe lësho tingull"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Shfaqi në heshtje në fund të listës së njoftimeve"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Shfaqi këto njoftime në heshtje"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Lejoji këto njoftime të nxjerrin tinguj"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Shfaq një vështrim të shpejtë në ekran dhe lësho një tingull"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Shfaqi në krye të listës së njoftimeve, shfaq vështrim të shpejtë në ekran dhe lësho një tingull"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Cilësime të tjera"</string>
     <string name="notification_done" msgid="5279426047273930175">"U krye"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Ngjyra dhe pamja"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Përdor temën e errët për Android OS"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Rregullo nuancën"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Rregullo ndriçimin"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Tema e errët është aplikuar në fushat kryesore të Android OS që shfaqen zakonisht në një temë të çelur, siç janë \"Cilësimet\" dhe njoftimet."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tema e errët zbatohet në zonat kryesore të Android OS që shfaqen zakonisht në një temë të çelur, siç janë \"Cilësimet\"."</string>
     <string name="color_apply" msgid="9212602012641034283">"Zbato"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Konfirmo cilësimet"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Disa cilësime ngjyrash mund ta bëjnë këtë pajisje të papërdorshme. Kliko OK për të konfirmuar këto cilësime ngjyrash, përndryshe këto cilësime do të rivendosen pas 10 sekondash."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"Shfaq përqindjen gjatë ngarkimit (e parazgjedhur)"</item>
     <item msgid="3327323682209964956">"Mos e shfaq këtë ikonë"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Të tjera"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Ndarësi i ekranit të ndarë"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Lëviz poshtë"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Lëviz lart"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Lëviz majtas"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Lëviz djathtas"</string>
 </resources>
