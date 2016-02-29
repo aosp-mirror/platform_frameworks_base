@@ -61,7 +61,8 @@ final class SearchViewManager implements
     }
 
     public void install(DocumentsToolbar actionBar) {
-        assert (mActionBar == null);
+        // assert(mActionBar == null);
+
         mActionBar = actionBar;
         mMenu = actionBar.getSearchMenu();
         mView = (SearchView) mMenu.getActionView();

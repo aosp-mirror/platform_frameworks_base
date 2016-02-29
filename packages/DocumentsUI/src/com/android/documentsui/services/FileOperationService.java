@@ -17,9 +17,6 @@
 package com.android.documentsui.services;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.internal.util.Preconditions.checkArgument;
-import static com.android.internal.util.Preconditions.checkNotNull;
-import static com.android.internal.util.Preconditions.checkState;
 
 import android.annotation.IntDef;
 import android.app.NotificationManager;
@@ -136,12 +133,12 @@ public class FileOperationService extends Service implements Job.Listener {
 
         String jobId = intent.getStringExtra(EXTRA_JOB_ID);
         @OpType int operationType = intent.getIntExtra(EXTRA_OPERATION, OPERATION_UNKNOWN);
-        checkArgument(jobId != null);
+        assert(jobId != null);
 
         if (intent.hasExtra(EXTRA_CANCEL)) {
             handleCancel(intent);
         } else {
-            checkArgument(operationType != OPERATION_UNKNOWN);
+            assert(operationType != OPERATION_UNKNOWN);
             handleOperation(intent, serviceId, jobId, operationType);
         }
 
@@ -173,9 +170,9 @@ public class FileOperationService extends Service implements Job.Listener {
             mWakeLock.acquire();
         }
 
-        checkState(job != null);
+        assert(job != null);
         int delay = intent.getIntExtra(EXTRA_DELAY, DEFAULT_DELAY);
-        checkArgument(delay <= MAX_DELAY);
+        assert(delay <= MAX_DELAY);
         if (DEBUG) Log.d(
                 TAG, "Scheduling job " + job.id + " to run in " + delay + " milliseconds.");
         ScheduledFuture<?> future = executor.schedule(job, delay, TimeUnit.MILLISECONDS);
@@ -188,8 +185,10 @@ public class FileOperationService extends Service implements Job.Listener {
      * @param intent The cancellation intent.
      */
     private void handleCancel(Intent intent) {
-        checkArgument(intent.hasExtra(EXTRA_CANCEL));
-        String jobId = checkNotNull(intent.getStringExtra(EXTRA_JOB_ID));
+        assert(intent.hasExtra(EXTRA_CANCEL));
+        assert(intent.getStringExtra(EXTRA_JOB_ID) != null);
+
+        String jobId = intent.getStringExtra(EXTRA_JOB_ID);
 
         if (DEBUG) Log.d(TAG, "handleCancel: " + jobId);
 
@@ -253,7 +252,8 @@ public class FileOperationService extends Service implements Job.Listener {
                 throw new UnsupportedOperationException();
         }
 
-        return checkNotNull(job);
+        assert(job != null);
+        return job;
     }
 
     @GuardedBy("mRunning")
@@ -261,7 +261,7 @@ public class FileOperationService extends Service implements Job.Listener {
         if (DEBUG) Log.d(TAG, "deleteJob: " + job.id);
 
         JobRecord record = mRunning.remove(job.id);
-        checkArgument(record != null);
+        assert(record != null);
         record.job.cleanup();
 
         if (mRunning.isEmpty()) {

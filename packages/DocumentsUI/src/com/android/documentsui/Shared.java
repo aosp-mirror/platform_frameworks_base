@@ -28,6 +28,10 @@ import java.util.List;
 /** @hide */
 public final class Shared {
 
+    public static final String TAG = "Documents";
+
+    public static final boolean DEBUG = true;
+
     /** Intent action name to pick a copy destination. */
     public static final String ACTION_PICK_COPY_DESTINATION =
             "com.android.documentsui.PICK_COPY_DESTINATION";
@@ -78,9 +82,6 @@ public final class Shared {
      * Extra flag used to store DirectoryFragment's ignore state of boolean type in the bundle.
      */
     public static final String EXTRA_IGNORE_STATE = "ignoreState";
-
-    public static final boolean DEBUG = true;
-    public static final String TAG = "Documents";
 
 
     /**

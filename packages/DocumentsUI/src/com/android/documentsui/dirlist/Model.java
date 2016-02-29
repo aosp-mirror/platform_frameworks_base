@@ -22,11 +22,9 @@ import static com.android.documentsui.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.State.SORT_ORDER_SIZE;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.support.annotation.Nullable;
@@ -381,9 +379,9 @@ public class Model {
         final List<DocumentInfo> docs =  new ArrayList<>(size);
         for (String modelId: items.getAll()) {
             final Cursor cursor = getItem(modelId);
-            checkNotNull(cursor, "Cursor cannot be null.");
-            final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(cursor);
-            docs.add(doc);
+            assert(cursor != null);
+
+            docs.add(DocumentInfo.fromDirectoryCursor(cursor));
         }
         return docs;
     }

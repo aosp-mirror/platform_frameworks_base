@@ -19,7 +19,6 @@ package com.android.documentsui.dirlist;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -79,9 +78,9 @@ final class ListDocumentHolder extends DocumentHolder {
      */
     @Override
     public void bind(Cursor cursor, String modelId, State state) {
-        this.modelId = modelId;
+        assert(cursor != null);
 
-        checkNotNull(cursor, "Cursor cannot be null.");
+        this.modelId = modelId;
 
         final String docAuthority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
         final String docId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
