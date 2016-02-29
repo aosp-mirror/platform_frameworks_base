@@ -555,6 +555,12 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file,
             SkFILEStream::kCallerPasses_Ownership));
 
+    // If there is no offset for the file descriptor, we use SkFILEStream directly.
+    if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
+        assert(isSeekable(dupDescriptor));
+        return doDecode(env, fileStream.release(), padding, bitmapFactoryOptions);
+    }
+
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
@@ -584,7 +590,7 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
 
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    return ::lseek64(descriptor, 0, SEEK_CUR) != -1 ? JNI_TRUE : JNI_FALSE;
+    return isSeekable(descriptor) ? JNI_TRUE : JNI_FALSE;
 }
 
 jobject decodeBitmap(JNIEnv* env, void* data, size_t size) {

@@ -116,3 +116,7 @@ jobject android::nullObjectReturn(const char msg[]) {
     }
     return NULL;
 }
+
+bool android::isSeekable(int descriptor) {
+    return ::lseek64(descriptor, 0, SEEK_CUR) != -1;
+}
