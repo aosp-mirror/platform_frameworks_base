@@ -2119,8 +2119,6 @@ public abstract class PackageManager {
      * The device implements a an optimized mode for virtual reality (VR) applications that handles
      * stereoscopic rendering of notifications, and may potentially also include optimizations to
      * reduce latency in the graphics, display, and sensor stacks.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_MODE = "android.software.vr.mode";
@@ -2134,8 +2132,6 @@ public abstract class PackageManager {
      * {@link #FEATURE_HIFI_SENSORS} with a low sensor latency, implements an optimized render path
      * to minimize latency to draw to the device's main display, and includes optimizations to
      * lower display persistence to an acceptable level.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_MODE_HIGH_PERFORMANCE
