@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"မှ ဝေမျှပါ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ဖိုင်များကူယူနေသည်"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"ဖိုင်များ ရွှေ့နေသည်"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"ဖိုင်များကို ဖျက်နေသည်"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> ကျန်ရှိသည်"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်များကို ကူးယူနေသည်။</item>
@@ -111,4 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"အချို့ဖိုင်များကို ပြောင်းလဲထားသည်"</string>
     <string name="allow" msgid="7225948811296386551">"ခွင့်ပြုသည်"</string>
     <string name="deny" msgid="2081879885755434506">"ငြင်းပယ်သည်"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"ဖိုင်များကို ဖျက်မလား။"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ဖိုင်များကိုဖျက်ရန် သေချာပါသလား။</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ဖိုင်ကိုဖျက်ရန် သေချာပါသလား။</item>
+    </plurals>
 </resources>

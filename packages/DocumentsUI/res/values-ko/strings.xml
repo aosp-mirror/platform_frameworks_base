@@ -67,6 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"공유 방법"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"파일 복사 중"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"파일 이동"</string>
+    <string name="delete_notification_title" msgid="3329403967712437496">"파일 삭제"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"<xliff:g id="DURATION">%s</xliff:g> 남음"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 복사합니다.</item>
@@ -111,4 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"일부 파일이 변환되었습니다."</string>
     <string name="allow" msgid="7225948811296386551">"허용"</string>
     <string name="deny" msgid="2081879885755434506">"거부"</string>
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"파일을 삭제하시겠습니까?"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="other">파일 <xliff:g id="COUNT_1">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
+      <item quantity="one">파일 <xliff:g id="COUNT_0">%1$d</xliff:g>개를 삭제하시겠습니까?</item>
+    </plurals>
 </resources>
