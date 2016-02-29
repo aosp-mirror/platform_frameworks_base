@@ -68,6 +68,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -119,6 +120,9 @@ public class Resources {
     private static final LongSparseArray<android.content.res.ConstantState<ComplexColor>>
             sPreloadedComplexColors = new LongSparseArray<>();
 
+    /** Size of the cyclical cache used to map XML files to blocks. */
+    private static final int XML_BLOCK_CACHE_SIZE = 4;
+
     // Pool of TypedArrays targeted to this Resources object.
     final SynchronizedPool<TypedArray> mTypedArrayPool = new SynchronizedPool<>(5);
 
@@ -154,8 +158,9 @@ public class Resources {
 
     // Cyclical cache used for recently-accessed XML files.
     private int mLastCachedXmlBlockIndex = -1;
-    private final String[] mCachedXmlBlockFiles = new String[4];
-    private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[4];
+    private final int[] mCachedXmlBlockCookies = new int[XML_BLOCK_CACHE_SIZE];
+    private final String[] mCachedXmlBlockFiles = new String[XML_BLOCK_CACHE_SIZE];
+    private final XmlBlock[] mCachedXmlBlocks = new XmlBlock[XML_BLOCK_CACHE_SIZE];
 
     final AssetManager mAssets;
     final ClassLoader mClassLoader;
@@ -2339,18 +2344,18 @@ public class Resources {
      * tools.
      */
     public final void flushLayoutCache() {
-        final String[] cachedXmlBlockFiles = mCachedXmlBlockFiles;
-        final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
-        synchronized (cachedXmlBlockFiles) {
-            final int num = cachedXmlBlockFiles.length;
-            for (int i = 0; i < num; i++) {
+        synchronized (mCachedXmlBlocks) {
+            Arrays.fill(mCachedXmlBlockCookies, 0);
+            Arrays.fill(mCachedXmlBlockFiles, null);
+
+            final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
+            for (int i = 0; i < XML_BLOCK_CACHE_SIZE; i++) {
                 final XmlBlock oldBlock = cachedXmlBlocks[i];
                 if (oldBlock != null) {
                     oldBlock.close();
                 }
-                cachedXmlBlockFiles[i] = null;
-                cachedXmlBlocks[i] = null;
             }
+            Arrays.fill(cachedXmlBlocks, null);
         }
     }
 
@@ -2852,13 +2857,14 @@ public class Resources {
             int assetCookie, @NonNull String type) throws NotFoundException {
         if (id != 0) {
             try {
-                final String[] cachedXmlBlockFiles = mCachedXmlBlockFiles;
-                final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
-                synchronized (cachedXmlBlockFiles) {
+                synchronized (mCachedXmlBlocks) {
+                    final int[] cachedXmlBlockCookies = mCachedXmlBlockCookies;
+                    final String[] cachedXmlBlockFiles = mCachedXmlBlockFiles;
+                    final XmlBlock[] cachedXmlBlocks = mCachedXmlBlocks;
                     // First see if this block is in our cache.
                     final int num = cachedXmlBlockFiles.length;
                     for (int i = 0; i < num; i++) {
-                        if (cachedXmlBlockFiles[i] != null
+                        if (cachedXmlBlockCookies[i] == assetCookie && cachedXmlBlockFiles[i] != null
                                 && cachedXmlBlockFiles[i].equals(file)) {
                             return cachedXmlBlocks[i].newParser();
                         }
@@ -2874,6 +2880,7 @@ public class Resources {
                         if (oldBlock != null) {
                             oldBlock.close();
                         }
+                        cachedXmlBlockCookies[pos] = assetCookie;
                         cachedXmlBlockFiles[pos] = file;
                         cachedXmlBlocks[pos] = block;
                         return block.newParser();
