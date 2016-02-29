@@ -3602,6 +3602,7 @@ package android.app {
     method public deprecated void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
+    method public void setVrMode(boolean);
     method public boolean shouldShowRequestPermissionRationale(java.lang.String);
     method public boolean shouldUpRecreateTask(android.content.Intent);
     method public boolean showAssist(android.os.Bundle);
@@ -9786,6 +9787,8 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_USB_ACCESSORY = "android.hardware.usb.accessory";
     field public static final java.lang.String FEATURE_USB_HOST = "android.hardware.usb.host";
     field public static final java.lang.String FEATURE_VERIFIED_BOOT = "android.software.verified_boot";
+    field public static final java.lang.String FEATURE_VR_MODE = "android.software.vr.mode";
+    field public static final java.lang.String FEATURE_VR_MODE_HIGH_PERFORMANCE = "android.hardware.vr.high_performance";
     field public static final java.lang.String FEATURE_VULKAN_HARDWARE_LEVEL = "android.hardware.vulkan.level";
     field public static final java.lang.String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
     field public static final java.lang.String FEATURE_WATCH = "android.hardware.type.watch";
@@ -34552,6 +34555,7 @@ package android.service.notification {
     method public static final void requestRebind(android.content.ComponentName) throws android.os.RemoteException;
     method public final void requestUnbind() throws android.os.RemoteException;
     method public final void setNotificationsShown(java.lang.String[]);
+    field public static final java.lang.String CATEGORY_VR_NOTIFICATIONS = "android.intent.category.vr.notifications";
     field public static final int HINT_HOST_DISABLE_EFFECTS = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_ALARMS = 4; // 0x4
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
