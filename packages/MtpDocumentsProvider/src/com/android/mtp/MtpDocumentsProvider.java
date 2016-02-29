@@ -220,7 +220,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                     // when writing is completed.
                     if (MtpDeviceRecord.isWritingSupported(device.operationsSupported)) {
                         return getPipeManager(identifier).writeDocument(
-                                getContext(), mMtpManager, identifier);
+                                getContext(), mMtpManager, identifier, device.operationsSupported);
                     } else {
                         throw new UnsupportedOperationException(
                                 "The device does not support writing operation.");
@@ -316,7 +316,8 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             final MtpObjectInfo infoWithHandle =
                     new MtpObjectInfo.Builder(info).setObjectHandle(objectHandle).build();
             final String documentId = mDatabase.putNewDocument(
-                    parentId.mDeviceId, parentDocumentId, infoWithHandle);
+                    parentId.mDeviceId, parentDocumentId, record.operationsSupported,
+                    infoWithHandle);
             getDocumentLoader(parentId).clearTask(parentId);
             notifyChildDocumentsChange(parentDocumentId);
             return documentId;
@@ -336,7 +337,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             }
             final MtpDeviceRecord device = mMtpManager.openDevice(deviceId);
             final DeviceToolkit toolkit =
-                    new DeviceToolkit(deviceId, mMtpManager, mResolver, mDatabase, device);
+                    new DeviceToolkit(mMtpManager, mResolver, mDatabase, device);
             mDeviceToolkits.put(deviceId, toolkit);
             mIntentSender.sendUpdateNotificationIntent();
             try {
@@ -499,11 +500,12 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         public final DocumentLoader mDocumentLoader;
         public final MtpDeviceRecord mDeviceRecord;
 
-        public DeviceToolkit(
-                int deviceId, MtpManager manager, ContentResolver resolver, MtpDatabase database,
-                MtpDeviceRecord record) {
+        public DeviceToolkit(MtpManager manager,
+                             ContentResolver resolver,
+                             MtpDatabase database,
+                             MtpDeviceRecord record) {
             mPipeManager = new PipeManager(database);
-            mDocumentLoader = new DocumentLoader(deviceId, manager, resolver, database);
+            mDocumentLoader = new DocumentLoader(record, manager, resolver, database);
             mDeviceRecord = record;
         }
     }
