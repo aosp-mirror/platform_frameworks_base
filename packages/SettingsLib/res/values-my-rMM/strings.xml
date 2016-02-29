@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"စကားပြောနှုန်း"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"စာတမ်းအားပြောဆိုသော အမြန်နှုန်း"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"အသံအနိမ့်အမြင့်"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"စက်ဖြင့်ထုတ်လုပ်ထားသည့် စကားသံကို အကျိုးသက်ရောက်မှုရှိပါမည်။"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ဘာသာစကား"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"စနစ်၏ ဘာသာစကားကို အသုံးပြုရန်"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"ဘာသာစကား မရွေးချယ်ထားပါ။"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"လုပ်ငန်းဖြစ်စဉ်တစ်ခုတည်းအတွက် ဝဘ်မြင်ကွင်း အဖြစ်ပြုလုပ်ခြင်းကို ဖွင့်ပါ။"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView အကောင်အထည်ဖော်မှု"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView အကောင်အထည်ဖော်မှု သတ်မှတ်ပါ"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ရွေးချယ်ထားသည့် WebView လုပ်ဆောင်ခြင်းကို ပိတ်ထားသည်ပြီး အသုံးပြုရန်အတွက် ဖွင့်ရမည်၊ ဖွင့်လိုပါသလား။"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"ရွေးချယ်ထားသည့် ဝဘ်မြင်ကွင်းထည့်သွင်းမှု မမှန်ကန်ပါ၊ အဘယ့်ကြောင့်ဆိုသော် ရွေးချယ်ရန် ထည့်သွင်းမှုစာရင်းသည် အသစ်မဖြစ်တော့သောကြောင့်ဖြစ်သည်။ စာရင်းကို ယခုအပ်ဒိတ် ဖြစ်နေလောက်ပါပြီ။"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"ဖိုင်လုံခြုံအောင်ပြုလုပ်ခြင်းသို့ ပြောင်းပါ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"ပြောင်းရန်…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ဖိုင်ကို လုံခြုံအောင်ပြုလုပ်ပြီးပါပြီ"</string>
