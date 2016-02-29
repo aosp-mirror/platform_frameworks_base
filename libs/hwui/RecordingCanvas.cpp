@@ -594,7 +594,14 @@ void RecordingCanvas::callDrawGLFunction(Functor* functor) {
 }
 
 size_t RecordingCanvas::addOp(RecordedOp* op) {
-    // TODO: validate if "addDrawOp" quickrejection logic is useful before adding
+    // skip op with empty clip
+    if (op->localClip && op->localClip->rect.isEmpty()) {
+        // NOTE: this rejection happens after op construction/content ref-ing, so content ref'd
+        // and held by renderthread isn't affected by clip rejection.
+        // Could rewind alloc here if desired, but callers would have to not touch op afterwards.
+        return -1;
+    }
+
     int insertIndex = mDisplayList->ops.size();
     mDisplayList->ops.push_back(op);
     if (mDeferredBarrierType != DeferredBarrierType::None) {

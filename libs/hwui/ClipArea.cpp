@@ -404,10 +404,16 @@ static bool cannotFitInRectangleList(const ClipArea& clipArea, const ClipBase* s
     return currentRectCount + recordedRectCount > RectangleList::kMaxTransformedRectangles;
 }
 
+static const ClipRect sEmptyClipRect(Rect(0, 0));
+
 const ClipBase* ClipArea::serializeIntersectedClip(LinearAllocator& allocator,
         const ClipBase* recordedClip, const Matrix4& recordedClipTransform) {
+
     // if no recordedClip passed, just serialize current state
     if (!recordedClip) return serializeClip(allocator);
+
+    // if either is empty, clip is empty
+    if (CC_UNLIKELY(recordedClip->rect.isEmpty())|| mClipRect.isEmpty()) return &sEmptyClipRect;
 
     if (!mLastResolutionResult
             || recordedClip != mLastResolutionClip
