@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"అన్‌పిన్ చేయడానికి ముందు పిన్‌ కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"అన్‌పిన్ చేయడానికి ముందు అన్‌లాక్ నమూనా కోసం అడుగు"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"అనువర్తన పరిమాణాన్ని మార్చడం సాధ్యపడదు, రెండు వేళ్లతో దీన్ని స్క్రోల్ చేయండి."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"స్క్రీన్ విభజనతో అనువర్తనం పని చేయకపోవచ్చు."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"అనువర్తనంలో స్క్రీన్ విభజనకు మద్దతు లేదు."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"మీ నిర్వాహకుడు నవీకరించారు"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ని అనుమతించాలా?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"భాష ప్రాధాన్యత"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"భాషను జోడించండి"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ప్రాంతం ప్రాధాన్యత"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"భాష పేరును టైప్ చేయండి"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"సూచించినవి"</string>

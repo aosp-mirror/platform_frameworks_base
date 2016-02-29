@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kód kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Feloldási minta kérése a rögzítés feloldásához"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Jelszó kérése a rögzítés feloldásához"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Az alkalmazást nem lehet átméretezni – két ujjal görgessen."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Lehet, hogy az alkalmazás nem működik osztott képernyős nézetben."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Az alkalmazás nem támogatja az osztott képernyős nézetet."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"A rendszergazda telepítette"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Frissítette a rendszergazda"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Ez az üzenet a résztvevők miatt fontos."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Nyelvi beállítás"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Nyelv hozzáadása"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Régió beállítása"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adja meg a nyelvet"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Javasolt"</string>
@@ -1564,6 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Rögzítés"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Feloldás"</string>
     <string name="app_info" msgid="6856026610594615344">"Alkalmazásinformáció"</string>
-    <!-- no translation found for negative_duration (5688706061127375131) -->
-    <skip />
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

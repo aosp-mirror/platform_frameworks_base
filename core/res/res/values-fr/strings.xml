@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le code PIN avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Demander le schéma de déverrouillage avant d\'annuler l\'épinglage"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"Il est impossible de redimensionner l\'application. Faites-la défiler avec deux doigts."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Application incompatible avec l\'écran partagé."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Mis à jour par votre administrateur"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Ces notifications sont importantes en raison des participants."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à créer un profil utilisateur avec le compte <xliff:g id="ACCOUNT">%2$s</xliff:g> (un utilisateur associé à ce compte existe déjà) ?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"Préférences linguistiques"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Ajouter une langue"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Préférences régionales"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Saisissez la langue"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Recommandations"</string>
@@ -1564,6 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"Épingler"</string>
     <string name="unpin_target" msgid="3556545602439143442">"Retirer"</string>
     <string name="app_info" msgid="6856026610594615344">"Infos sur l\'appli"</string>
-    <!-- no translation found for negative_duration (5688706061127375131) -->
-    <skip />
+    <string name="negative_duration" msgid="5688706061127375131">"− <xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

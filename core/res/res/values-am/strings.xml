@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ከመንቀል በፊት ፒን ጠይቅ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ከመንቀል በፊት የማስከፈቻ ስርዓተ-ጥለት ጠይቅ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ከመንቀል በፊት የይለፍ ቃል ጠይቅ"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"የመተግበሪያው መጠን ሊቀየር የሚችል አይደለም፣ በሁለት ጣቶች ያሸብልሉት።"</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"መተግበሪያ ከተከፈለ ማያ ገጽ ጋር ላይሠራ ይችላል"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"መተግበሪያው የተከፈለ ማያ ገጽን አይደግፍም።"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"በእርስዎ አስተዳዳሪ ተጭኗል"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"በአስተዳዳሪዎ ተዘምኗል"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"ይሄ በሚሳተፉ ሰዎች ምክንያት አስፈላጊ ነው።"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> በ<xliff:g id="ACCOUNT">%2$s</xliff:g> አዲስ ተጠቃሚ እንዲፈጥር ይፈቀድለት?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> በ<xliff:g id="ACCOUNT">%2$s</xliff:g> አዲስ ተጠቃሚ እንዲፈጥር ይፈቀድለት (ይህ መለያ ያለው ተጠቃሚ አስቀድሞ አለ)?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"የቋንቋ ምርጫ"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"ቋንቋ ያክሉ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"የክልል ምርጫ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"የቋንቋ ስም ይተይቡ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"የተጠቆሙ"</string>

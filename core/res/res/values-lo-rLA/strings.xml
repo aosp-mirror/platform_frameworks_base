@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"​ຖາມ​ຫາ​ຮູບ​ແບບ​ປົດ​ລັອກ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"ບໍ່ສາມາດປັບຂະໜາດແອັບໄດ້, ໃຫ້ເລື່ອນມັນໂດຍໃຊ້ນິ້ວມືສອງນິ້ວ."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"ແອັບອາດໃຊ້ບໍ່ໄດ້ກັບການແບ່ງໜ້າຈໍ."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"ແອັບບໍ່ຮອງຮັບໜ້າຈໍແບບແຍກກັນ."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ຕິດ​ຕັ້ງ​ໃສ່​ແລ້ວ"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"ອັບ​ເດດ​ໂດຍ​ຜູ້​ຄວບ​ຄຸມ​ຂອງ​ທ່ານ​ແລ້ວ"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"ຂໍ້ຄວາມນີ້ສຳຄັນເນື່ອງຈາກບຸກຄົນທີ່ກ່ຽວຂ້ອງ."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ສຳລັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> ບໍ?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"ອະນຸຍາດໃຫ້ <xliff:g id="APP">%1$s</xliff:g> ສ້າງຜູ້ໃຊ້ໃໝ່ສຳລັບ <xliff:g id="ACCOUNT">%2$s</xliff:g> (ຜູ້ໃຊ້ສຳລັບບັນຊີນີ້ມີຢູ່ແລ້ວ) ບໍ?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"ການຕັ້ງຄ່າພາສາ"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"ເພີ່ມພາສາ"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"ການຕັ້ງຄ່າພາກພື້ນ"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"ພິມຊື່ພາສາ"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"ແນະນຳ"</string>

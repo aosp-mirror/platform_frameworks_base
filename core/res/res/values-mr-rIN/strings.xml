@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करण्‍यापूर्वी अनलॉक नमुन्यासाठी विचारा"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"अॅपचा आकार बदलण्यायोग्य नाही, दोन बोटांनी तो स्क्रोल करा."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"अॅप कदाचित विभाजित-स्क्रीनसह कार्य करू शकत नाही."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"अॅप स्क्रीन-विभाजनास समर्थन देत नाही."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"आपल्या प्रशासकाद्वारे स्थापित केले आहे"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"आपल्या प्रशासकाद्वारे अद्यतनित केले"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"सामील असलेल्या लोकांमुळे हे महत्वाचे आहे."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> सह नवीन वापरकर्ता तयार करण्याची (हे खाते असलेला वापरकर्ता आधीपासून विद्यमान आहे) <xliff:g id="APP">%1$s</xliff:g> ला अनुमती द्यायची?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"भाषा प्राधान्य"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"एक भाषा जोडा"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"प्रदेश प्राधान्य"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"भाषा नाव टाइप करा"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"सूचित केलेले"</string>
@@ -1564,6 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"पिन"</string>
     <string name="unpin_target" msgid="3556545602439143442">"अनपिन करा"</string>
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
-    <!-- no translation found for negative_duration (5688706061127375131) -->
-    <skip />
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

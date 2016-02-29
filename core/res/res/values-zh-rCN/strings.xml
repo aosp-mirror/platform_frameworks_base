@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消时要求绘制解锁图案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消时要求输入密码"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"无法调整该应用的大小，请用双指滚动该应用。"</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"应用可能无法在分屏模式下运行。"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"应用不支持分屏。"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"已由管理员安装"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"由您单位的管理员更新"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"这条通知涉及特定的人，因此被归为重要通知。"</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g>（目前已有用户使用此帐号）创建新用户吗？"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"语言偏好设置"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"添加语言"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"区域偏好设置"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"输入语言名称"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"建议语言"</string>
@@ -1564,6 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"固定"</string>
     <string name="unpin_target" msgid="3556545602439143442">"取消固定"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
-    <!-- no translation found for negative_duration (5688706061127375131) -->
-    <skip />
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>

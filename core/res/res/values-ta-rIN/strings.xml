@@ -1467,7 +1467,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"அகற்றும் முன் PINஐக் கேள்"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
-    <string name="dock_cropped_windows_text" msgid="6378424064779004428">"பயன்பாட்டின் அளவை மாற்ற முடியாது. இருவிரல்களைப் பயன்படுத்தி, அதை உருட்டவும்."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"திரைப் பிரிப்பில் பயன்பாடு வேலைசெய்யாமல் போகக்கூடும்."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"திரையைப் பிரிப்பதைப் பயன்பாடு ஆதரிக்கவில்லை."</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"நிர்வாகி நிறுவினார்"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"ஈடுபட்டுள்ளவர்களின் காரணமாக, இது முக்கியமானது."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="ACCOUNT">%2$s</xliff:g> மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (இந்தக் கணக்கில் ஏற்கனவே ஒரு பயனர் உள்ளார்) மூலம் புதிய பயனரை உருவாக்க <xliff:g id="APP">%1$s</xliff:g>ஐ அனுமதிக்கவா?"</string>
-    <string name="language_selection_title" msgid="7181332986330337171">"மொழி விருப்பம்"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"மொழியைச் சேர்"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"மண்டல விருப்பம்"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"மொழி பெயரை உள்ளிடுக"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"பரிந்துரைகள்"</string>
@@ -1564,6 +1564,5 @@
     <string name="pin_target" msgid="3052256031352291362">"பின் செய்"</string>
     <string name="unpin_target" msgid="3556545602439143442">"பின்னை அகற்று"</string>
     <string name="app_info" msgid="6856026610594615344">"பயன்பாட்டுத் தகவல்"</string>
-    <!-- no translation found for negative_duration (5688706061127375131) -->
-    <skip />
+    <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
 </resources>
