@@ -577,6 +577,16 @@ public class ActivityManager {
         }
 
         /**
+         * Return whether a stackId is a stack containing floating windows. Floating windows
+         * are laid out differently as they are allowed to extend past the display bounds
+         * without overscan insets.
+         */
+        public static boolean tasksAreFloating(int stackId) {
+            return stackId == FREEFORM_WORKSPACE_STACK_ID
+                || stackId == PINNED_STACK_ID;
+        }
+
+        /**
          * Returns true if animation specs should be constructed for app transition that moves
          * the task to the specified stack.
          */

@@ -635,7 +635,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         final Task task = getTask();
         final boolean fullscreenTask = task == null || task.isFullscreen();
-        final boolean freeformWorkspace = task != null && task.inFreeformWorkspace();
+        final boolean windowsAreFloating = task != null && task.isFloating();
 
         if (fullscreenTask || (isChildWindow()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME) != 0)) {
@@ -661,10 +661,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
             }
 
-            if (freeformWorkspace) {
-                // In free form mode we have only to set the rectangle if it wasn't set already. No
-                // need to intersect it with the (visible) "content frame" since it is allowed to
-                // be outside the visible desktop.
+            if (windowsAreFloating) {
+                // In floating modes (e.g. freeform, pinned) we have only to set the rectangle 
+                // if it wasn't set already. No need to intersect it with the (visible) 
+                // "content frame" since it is allowed to be outside the visible desktop.
                 if (mContainingFrame.isEmpty()) {
                     mContainingFrame.set(cf);
                 }
@@ -720,7 +720,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
-        if (freeformWorkspace && !mFrame.isEmpty()) {
+        if (windowsAreFloating && !mFrame.isEmpty()) {
             // Keep the frame out of the blocked system area, limit it in size to the content area
             // and make sure that there is always a minimum visible so that the user can drag it
             // into a usable area..
@@ -772,9 +772,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Math.min(mStableFrame.bottom, frame.bottom));
         }
 
-        if (!inFreeformWorkspace()) {
-            // Freeform windows can be positioned outside of the display frame, but that is not a
-            // reason to provide them with overscan insets.
+        if (!windowsAreFloating) {
+            // Windows from floating tasks (e.g. freeform, pinned) may be positioned outside
+            // of the display frame, but that is not a reason to provide them with overscan insets.
             mOverscanInsets.set(Math.max(mOverscanFrame.left - frame.left, 0),
                     Math.max(mOverscanFrame.top - frame.top, 0),
                     Math.max(frame.right - mOverscanFrame.right, 0),
@@ -2479,7 +2479,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int ph = mContainingFrame.height();
         final Task task = getTask();
         final boolean nonFullscreenTask = task != null && !task.isFullscreen();
-
+        final boolean fitToDisplay = task != null &&
+            !task.isFloating();
         float x, y;
         int w,h;
 
@@ -2536,7 +2537,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 (int) (y + mAttrs.verticalMargin * ph), mFrame);
 
         // Now make sure the window fits in the overall display frame.
-        Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
+        if (fitToDisplay) {
+            Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
+        }
     }
 
     boolean isChildWindow() {
