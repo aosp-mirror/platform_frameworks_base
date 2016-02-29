@@ -73,7 +73,6 @@ public final class MediaBrowser {
      * Used as an int extra field to denote the page number to subscribe.
      * The value of {@code EXTRA_PAGE} should be greater than or equal to 1.
      *
-     * @see android.service.media.MediaBrowserService.BrowserRoot
      * @see #EXTRA_PAGE_SIZE
      */
     public static final String EXTRA_PAGE = "android.media.browse.extra.PAGE";
@@ -82,7 +81,6 @@ public final class MediaBrowser {
      * Used as an int extra field to denote the number of media items in a page.
      * The value of {@code EXTRA_PAGE_SIZE} should be greater than or equal to 1.
      *
-     * @see android.service.media.MediaBrowserService.BrowserRoot
      * @see #EXTRA_PAGE
      */
     public static final String EXTRA_PAGE_SIZE = "android.media.browse.extra.PAGE_SIZE";
@@ -865,7 +863,7 @@ public final class MediaBrowser {
          *
          * @param parentId The media id of the parent media item.
          * @param children The children which were loaded, or null if the id is invalid.
-         * @param options A bundle of service-specific arguments to send to the media
+         * @param options A bundle of service-specific arguments sent to the media
          *            browse service. The contents of this bundle may affect the
          *            information returned when browsing.
          */
