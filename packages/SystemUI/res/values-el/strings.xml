@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Λήφθηκε το στιγμιότυπο οθόνης ."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Αγγίξτε για να δείτε το στιγμιότυπο οθόνης σας"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Αδύνατη η αποθήκευση του στιγμιότυπου οθόνης."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Αδύνατη λήψη στιγμ. οθόνης λόγω περιορισμένου αποθ.χώρου ή αποκλεισμού από εφαρμογή ή οργανισμό."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Δεν είναι δυνατή η αποθήκευση του στιγμιότυπου οθόνης λόγω περιορισμένου χώρου αποθήκευσης."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Η λήψη στιγμιοτύπων οθόνης δεν επιτρέπεται από την εφαρμογή ή από τον οργανισμό σας."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Επιλογές μεταφοράς αρχείων μέσω USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Προσάρτηση ως μονάδας αναπαραγωγής μέσων (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Προσάρτηση ως κάμερας (PTP)"</string>
@@ -206,6 +207,8 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Περισσότερη ώρα."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Λιγότερη ώρα."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Ανενεργός φακός."</string>
+    <!-- no translation found for accessibility_quick_settings_flashlight_unavailable (8012811023312280810) -->
+    <skip />
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Ενεργός φακός."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Ο φακός απενεργοποιήθηκε."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Ο φακός ενεργοποιήθηκε."</string>
@@ -304,6 +307,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> έχει απενεργοποιηθεί στην ασφαλή λειτουργία."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Ιστορικό"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Εκκαθάριση"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Η εφαρμογή αυτή δεν υποστηρίζει τη λειτουργία πολλαπλών παραθύρων"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Η εφαρμογή δεν υποστηρίζει τη λειτουργία πολλαπλών παραθύρων"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Κάθετος διαχωρισμός"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Προσαρμοσμένος διαχωρισμός"</string>
@@ -451,18 +456,34 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Ενεργοποίηση Bluetooth;"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Για να συνδέσετε το πληκτρολόγιο με το tablet σας, θα πρέπει πρώτα να ενεργοποιήσετε το Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Ενεργοποίηση"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Να εφαρμοστεί στις ειδοποιήσεις <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Να εφαρμοστεί σε όλες τις ειδοποιήσεις από αυτήν την εφαρμογή"</string>
+    <!-- no translation found for show_silently (6841966539811264192) -->
+    <skip />
+    <!-- no translation found for block (2734508760962682611) -->
+    <skip />
+    <!-- no translation found for do_not_silence (6878060322594892441) -->
+    <skip />
+    <!-- no translation found for do_not_silence_block (4070647971382232311) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings (8103289238676424226) -->
+    <skip />
     <string name="blocked_importance" msgid="5198578988978234161">"Αποκλεισμένες"</string>
+    <!-- no translation found for min_importance (1901894910809414782) -->
+    <skip />
     <string name="low_importance" msgid="4109929986107147930">"Μικρής βαρύτητας"</string>
     <string name="default_importance" msgid="8192107689995742653">"Κανονικής βαρύτητας"</string>
     <string name="high_importance" msgid="1527066195614050263">"Μεγάλης βαρύτητας"</string>
     <string name="max_importance" msgid="5089005872719563894">"Επείγουσες"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Να μην εμφανίζονται ποτέ αυτές οι ειδοποιήσεις"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Να εμφανίζονται στο κάτω τμήμα της λίστας ειδοποιήσεων χωρίς τίτλο"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Να εμφανίζονται αυτές οι ειδοποιήσεις χωρίς ήχο"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Να εμφανίζονται στην κορυφή της λίστας ειδοποιήσεων με ήχο"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Να προβάλλονται στην οθόνη και να συνοδεύονται από κάποιον ήχο"</string>
+    <!-- no translation found for notification_importance_min (1938190340516905748) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (3657252049508213048) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (4466466472622442175) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (2135428926525093825) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (5806278962376556491) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Περισσότερες ρυθμίσεις"</string>
     <string name="notification_done" msgid="5279426047273930175">"Τέλος"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Χρώμα και εμφάνιση"</string>
@@ -476,7 +497,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Χρήση σκοτεινού θέματος για Android OS"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Ρύθμιση απόχρωσης"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Ρύθμιση φωτεινότητας"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Το σκούρο θέμα εφαρμόζεται σε βασικές περιοχές του λειτουργικού συστήματος Android οι οποίες συνήθως εμφανίζονται με φωτεινό θέμα, όπως οι Ρυθμίσεις και οι ειδοποιήσεις."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Το σκούρο θέμα εφαρμόζεται σε βασικές περιοχές του λειτουργικού συστήματος Android οι οποίες συνήθως εμφανίζονται με φωτεινό θέμα, όπως οι Ρυθμίσεις."</string>
     <string name="color_apply" msgid="9212602012641034283">"Εφαρμογή"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Επιβεβαίωση ρυθμίσεων"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Ορισμένες ρυθμίσεις χρωμάτων μπορεί να μην επιτρέπουν τη χρήση αυτής της συσκευής. Κάντε κλικ στην επιλογή OK για να επιβεβαιώσετε αυτές τις ρυθμίσεις χρωμάτων, διαφορετικά θα γίνει επαναφορά αυτών των ρυθμίσεων μετά από 10 δευτερόλεπτα."</string>
@@ -535,4 +556,11 @@
     <item msgid="2139628951880142927">"Να εμφανίζεται ποσοστό κατά τη φόρτιση (προεπιλογή)"</item>
     <item msgid="3327323682209964956">"Να μην εμφανίζεται αυτό το εικονίδιο"</item>
   </string-array>
+    <!-- no translation found for other (4060683095962566764) -->
+    <skip />
+    <string name="accessibility_divider" msgid="5903423481953635044">"Διαχωριστικό οθόνης"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Μετακίνηση προς τα κάτω"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Μετακίνηση προς τα επάνω"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Μετακίνηση αριστερά"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Μετακίνηση δεξιά"</string>
 </resources>

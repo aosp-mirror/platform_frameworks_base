@@ -74,7 +74,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Zaslon je snimljen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dodirnite za prikaz snimke zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Nije bilo moguće snimiti zaslon."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Zaslon nije snimljen zbog ograničene pohrane ili zato što to ne dopušta aplikacija ili vaša organizacija."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Zaslon nije snimljen zbog ograničenog prostora za pohranu."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Snimanje zaslona ne dopušta aplikacija ili vaša organizacija."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcije USB prijenosa datoteka"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Učitaj kao media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Učitaj kao fotoaparat (PTP)"</string>
@@ -207,6 +208,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Više vremena."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Manje vremena."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Svjetiljka isključena."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Svjetiljka nije dostupna."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Svjetiljka uključena."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Svjetiljka isključena."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Svjetiljka uključena."</string>
@@ -306,6 +308,8 @@
     <skip />
     <string name="recents_history_button_label" msgid="5153358867807604821">"Povijest"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Izbriši"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ta aplikacija ne podržava više prozora"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikacija ne podržava više prozora"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podijeli vodoravno"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podijeli okomito"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podijeli prilagođeno"</string>
@@ -453,18 +457,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želite li uključiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Da biste povezali tipkovnicu s tabletom, morate uključiti Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Uključi"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Primijeni na obavijesti za temu <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Primijeni na sve obavijesti ove aplikacije"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Prikaži obavijesti tiho"</string>
+    <string name="block" msgid="2734508760962682611">"Blokiraj sve obavijesti"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Ne utišavaj"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Ne utišavaj i ne blokiraj"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Prikaži potpune postavke važnosti"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Blokirano"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Najmanja važnost"</string>
     <string name="low_importance" msgid="4109929986107147930">"Mala važnost"</string>
     <string name="default_importance" msgid="8192107689995742653">"Uobičajena važnost"</string>
     <string name="high_importance" msgid="1527066195614050263">"Velika važnost"</string>
     <string name="max_importance" msgid="5089005872719563894">"Hitno"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Nikad ne prikazuj te obavijesti"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Prikaži tiho pri dnu popisa obavijesti"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Prikaži te obavijesti tiho"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Prikaži na vrhu popisa obavijesti i emitiraj zvučni signal"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Prikaži na zaslonu i emitiraj zvučni signal"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Prikaži tiho pri dnu popisa obavijesti"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Prikaži te obavijesti tiho"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Dopusti obavijestima da emitiraju zvučne signale"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Prikaži na zaslonu i dopusti zvuk"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Prikaži pri vrhu popisa obavijesti, prikaži na zaslonu i dopusti zvuk"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Više postavki"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gotovo"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Boja i izgled"</string>
@@ -478,7 +487,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Koristi tamnu temu za OS Android"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Prilagodi nijansu"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Prilagodi svjetlinu"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Tamna se tema primjenjuje na glavna područja OS-a Android koja se inače prikazuju u svijetloj temi, primjerice postavke i obavijesti."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tamna se tema primjenjuje na glavna područja OS-a Android, kao što su, primjerice, postavke, koja se inače prikazuju u svijetloj temi."</string>
     <string name="color_apply" msgid="9212602012641034283">"Primijeni"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Potvrdite postavke"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Neke postavke boja mogu učiniti uređaj neupotrebljivim. Kliknite U redu da biste potvrdili postavke boja jer će se u suprotnom poništiti za 10 sekundi."</string>
@@ -537,4 +546,10 @@
     <item msgid="2139628951880142927">"Prikazuj postotak tijekom punjenja (zadano)"</item>
     <item msgid="3327323682209964956">"Ne prikazuj tu ikonu"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Ostalo"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Razdjelnik podijeljenog zaslona"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Pomakni prema dolje"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Pomakni prema gore"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Pomakni ulijevo"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Pomakni udesno"</string>
 </resources>

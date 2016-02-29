@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"സ്‌ക്രീൻഷോട്ട് എടുത്തു."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"നിങ്ങളുടെ സ്‌ക്രീൻഷോട്ട് കാണാനായി സ്‌പർശിക്കുക."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിഞ്ഞില്ല."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"സംഭരണ ഇടം പരിമിതമായതിനാൽ സ്‌ക്രീൻഷോട്ട് എടുക്കാനാകില്ല, അല്ലെങ്കിൽ ഇത് അപ്ലിക്കേഷനോ നിങ്ങളുടെ ഓർഗനൈസേഷനോ അനുവദിക്കുന്നില്ല."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"സ്റ്റോറേജ് ഇടം പരിമിതമായതിനാൽ സ്ക്രീൻഷോട്ട് സംരക്ഷിക്കാൻ കഴിയില്ല."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"സ്ക്രീൻഷോട്ടുകൾ എടുക്കുന്നത് ആപ്പോ നിങ്ങളുടെ സ്ഥാപനമോ അനുവദിക്കുന്നില്ല."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ഫയൽ കൈമാറൽ ഓപ്‌ഷനുകൾ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ഒരു മീഡിയ പ്ലേയറായി (MTP) മൗണ്ടുചെയ്യുക"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ഒരു ക്യാമറയായി (PTP) മൗണ്ടുചെയ്യുക"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"കൂടുതൽ സമയം."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"സമയം കുറയ്‌ക്കുക."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ടോർച്ച് ഓഫാണ്."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ടോർച്ച് ലഭ്യമല്ല."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ടോർച്ച് ഓണാണ്."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ടോർച്ച് ഓഫാക്കി."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ടോർച്ച് ഓണാക്കി."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"സുരക്ഷിത മോഡിൽ <xliff:g id="APP">%s</xliff:g> പ്രവർത്തനരഹിതമാക്കിയിരിക്കുന്നു."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ചരിത്രം"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"മായ്‌ക്കുക"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"ഒന്നിലധികം വിൻഡോകളെ ഈ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"ഒന്നിലധികം വിൻഡോകളെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"തിരശ്ചീനമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ലംബമായി വേർതിരിക്കുക"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ഇഷ്‌ടാനുസൃതമായി വേർതിരിക്കുക"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth ഓണാക്കണോ?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"നിങ്ങളുടെ ടാബ്‌ലെറ്റുമായി കീബോർഡ് കണക്റ്റുചെയ്യുന്നതിന്, ആദ്യം Bluetooth ഓണാക്കേണ്ടതുണ്ട്."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ഓണാക്കുക"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> അറിയിപ്പുകളിലേക്ക് പ്രയോഗിക്കുക"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"ഈ ആപ്പിൽ നിന്നുള്ള എല്ലാ അറിയിപ്പുകളിലേക്കും പ്രയോഗിക്കുക"</string>
+    <string name="show_silently" msgid="6841966539811264192">"അറിയിപ്പുകൾ നിശ്ശബ്ദമായി കാണിക്കുക"</string>
+    <string name="block" msgid="2734508760962682611">"എല്ലാ അറിയിപ്പുകളും ബ്ലോക്കുചെയ്യുക"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"നിശബ്ദമാക്കരുത്"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"നിശബ്ദമാക്കുകയോ ബ്ലോക്കുചെയ്യുകയോ അരുത്"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"പൂർണ്ണ പ്രാധാന്യ ക്രമീകരണം കാണിക്കുക"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"ബ്ലോക്കുചെയ്തു"</string>
+    <string name="min_importance" msgid="1901894910809414782">"കുറഞ്ഞ പ്രാധാന്യം"</string>
     <string name="low_importance" msgid="4109929986107147930">"താഴ്ന്ന പ്രാധാന്യം"</string>
     <string name="default_importance" msgid="8192107689995742653">"സാധാരണ പ്രാധാന്യം"</string>
     <string name="high_importance" msgid="1527066195614050263">"ഉയർന്ന പ്രാധാന്യം"</string>
     <string name="max_importance" msgid="5089005872719563894">"അടിയന്തര പ്രാധാന്യം"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"ഈ അറിയിപ്പുകൾ ഒരിക്കലും കാണിക്കരുത്"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"അറിയിപ്പ് ലിസ്റ്റിന്റെ താഴെ ശബ്ദമുണ്ടാക്കാതെ കാണിക്കുക"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"ഈ അറിയിപ്പുകൾ നിശബ്ദമായി കാണിക്കുക"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"അറിയിപ്പ് ലിസ്റ്റിന്റെ ഏറ്റവും മുകളിൽ കാണിക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"സ്ക്രീനിൽ ദൃശ്യമാക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"അറിയിപ്പ് ലിസ്റ്റിന്റെ താഴെ ശബ്ദമുണ്ടാക്കാതെ കാണിക്കുക"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"ഈ അറിയിപ്പുകൾ നിശബ്ദമായി കാണിക്കുക"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"ശബ്ദമുണ്ടാക്കാൻ ഈ അറിയിപ്പുകളെ അനുവദിക്കുക"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"സ്ക്രീനിൽ ദൃശ്യമാക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"അറിയിപ്പ് ലിസ്റ്റിന്റെ ഏറ്റവും മുകളിൽ കാണിക്കുക, ശബ്ദമുണ്ടാക്കുക"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"കൂടുതൽ ക്രമീകരണം"</string>
     <string name="notification_done" msgid="5279426047273930175">"പൂർത്തിയായി"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"വർണ്ണവും രൂപഭാവവും"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS-നുള്ള ഇരുണ്ട തീം ഉപയോഗിക്കുക"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"ടിന്റ് ക്രമപ്പെടുത്തുക"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"തെളിച്ചം ക്രമപ്പെടുത്തുക"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"ക്രമീകരണവും അറിയിപ്പുകളും പോലെയുള്ള, ഒരു ലൈറ്റ് തീമിൽ സാധാരണ ഗതിയിൽ പ്രദർശിപ്പിക്കപ്പെടുന്ന Android OS-ന്റെ അടിസ്ഥാന ഇടങ്ങളിലേക്ക്, ഇരുണ്ട തീം പ്രയോഗിക്കുന്നു."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"ക്രമീകരണം പോലെയുള്ള, ഒരു ലൈറ്റ് തീമിൽ സാധാരണ ഗതിയിൽ പ്രദർശിപ്പിക്കപ്പെടുന്ന Android OS-ന്റെ അടിസ്ഥാന ഇടങ്ങളിലേക്ക്, ഇരുണ്ട തീം പ്രയോഗിക്കുന്നു."</string>
     <string name="color_apply" msgid="9212602012641034283">"ബാധകമാക്കുക"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ക്രമീകരണം സ്ഥിരീകരിക്കുക"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ചില വർണ്ണ ക്രമീകരണത്തിന് ഈ ഉപകരണത്തെ ഉപയോഗരഹിതമാക്കാനാകും. ഈ വർണ്ണ ക്രമീകരണം സ്ഥിരീകരിക്കുന്നതിന് ശരി എന്നതിൽ ക്ലിക്കുചെയ്യുക, അല്ലെങ്കിൽ 10 സെക്കൻഡിന് ശേഷം ഈ ക്രമീകരണം പുനഃക്രമീകരിക്കപ്പെടും."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"ചാർജ്ജുചെയ്യുമ്പോൾ ശതമാനം കാണിക്കുക (ഡിഫോൾട്ട്)"</item>
     <item msgid="3327323682209964956">"ഈ ഐക്കൺ കാണിക്കരുത്"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"മറ്റുള്ളവ"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"സ്പ്ലിറ്റ്-സ്ക്രീൻ ഡിവൈഡർ"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"താഴേക്ക് നീക്കുക"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"മുകളിലേക്ക് നീക്കുക"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ഇടത്തേക്ക് നീക്കുക"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"വലത്തേക്ക് നീക്കുക"</string>
 </resources>

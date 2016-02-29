@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"S\'ha fet una captura de pantalla."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Toca per veure la captura de pantalla."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"No s\'ha pogut fer una captura de pantalla."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"No es pot fer la captura perquè no hi ha prou espai, o l\'organització o l\'aplicació no ho permet."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"La captura de pantalla no es pot desar perquè no hi ha prou espai d\'emmagatzematge."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"L\'aplicació o l\'organització no permeten fer captures de pantalla."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcions transf. fitxers USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Munta com a reproductor multimèdia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Munta com a càmera (PTP)"</string>
@@ -206,6 +207,8 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Més temps"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Menys temps"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Llanterna desactivada"</string>
+    <!-- no translation found for accessibility_quick_settings_flashlight_unavailable (8012811023312280810) -->
+    <skip />
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Llanterna activada"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Llanterna desactivada."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Llanterna activada."</string>
@@ -304,6 +307,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"En mode segur, l\'aplicació <xliff:g id="APP">%s</xliff:g> està desactivada."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Historial"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Esborra"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Aquesta aplicació no admet el mode multifinestra"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"L\'aplicació no admet el mode multifinestra"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisió horitzontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisió vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisió personalitzada"</string>
@@ -451,18 +456,34 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vols activar el Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Per connectar el teclat amb la tauleta, primer has d\'activar el Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Activa"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Aplica a les notificacions sobre <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Aplica a totes les notificacions d\'aquesta aplicació"</string>
+    <!-- no translation found for show_silently (6841966539811264192) -->
+    <skip />
+    <!-- no translation found for block (2734508760962682611) -->
+    <skip />
+    <!-- no translation found for do_not_silence (6878060322594892441) -->
+    <skip />
+    <!-- no translation found for do_not_silence_block (4070647971382232311) -->
+    <skip />
+    <!-- no translation found for tuner_full_importance_settings (8103289238676424226) -->
+    <skip />
     <string name="blocked_importance" msgid="5198578988978234161">"Bloquejades"</string>
+    <!-- no translation found for min_importance (1901894910809414782) -->
+    <skip />
     <string name="low_importance" msgid="4109929986107147930">"Importància baixa"</string>
     <string name="default_importance" msgid="8192107689995742653">"Importància normal"</string>
     <string name="high_importance" msgid="1527066195614050263">"Importància alta"</string>
     <string name="max_importance" msgid="5089005872719563894">"Importància urgent"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"No mostris mai aquestes notificacions"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Mostra de manera silenciosa a la part inferior de la llista de notificacions"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Mostra aquestes notificacions de manera silenciosa"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Mostra a la part superior de la llista de notificacions i emet un so"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Mostra a la pantalla i emet un so"</string>
+    <!-- no translation found for notification_importance_min (1938190340516905748) -->
+    <skip />
+    <!-- no translation found for notification_importance_low (3657252049508213048) -->
+    <skip />
+    <!-- no translation found for notification_importance_default (4466466472622442175) -->
+    <skip />
+    <!-- no translation found for notification_importance_high (2135428926525093825) -->
+    <skip />
+    <!-- no translation found for notification_importance_max (5806278962376556491) -->
+    <skip />
     <string name="notification_more_settings" msgid="816306283396553571">"Més opcions"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fet"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Color i aparença"</string>
@@ -476,7 +497,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Fes servir un tema fosc per a Android OS"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Ajusta el color"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Ajusta la brillantor"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"El mode nocturn s\'aplica a les àrees clau d\'Android OS que normalment es mostren amb un tema clar, com ara la configuració i les notificacions."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"El tema fosc s\'aplica a les àrees clau d\'Android OS que normalment es mostren amb un tema clar, com ara Configuració."</string>
     <string name="color_apply" msgid="9212602012641034283">"Aplica"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Confirma la configuració"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Algunes opcions de configuració de color poden deixar el dispositiu inservible. Fes clic a D\'acord per confirmar la configuració de color; en cas contrari, la configuració es restablirà al cap de 10 segons."</string>
@@ -535,4 +556,11 @@
     <item msgid="2139628951880142927">"Mostra el percentatge quan es carregui (opció predeterminada)"</item>
     <item msgid="3327323682209964956">"No mostris aquesta icona"</item>
   </string-array>
+    <!-- no translation found for other (4060683095962566764) -->
+    <skip />
+    <string name="accessibility_divider" msgid="5903423481953635044">"Divisor de pantalles"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Mou avall"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Mou amunt"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Mou a l\'esquerra"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Mou a la dreta"</string>
 </resources>
