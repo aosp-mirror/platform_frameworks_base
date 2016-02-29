@@ -54,8 +54,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mQsContainer = container;
         mQuickQsPanel = quickPanel;
         mQsPanel = panel;
-        mQuickQsPanel.addOnLayoutChangeListener(this);
-        mQsPanel.addOnLayoutChangeListener(this);
+        container.addOnLayoutChangeListener(this);
         QSTileLayout tileLayout = mQsPanel.getTileLayout();
         if (tileLayout instanceof PagedTileLayout) {
             ((PagedTileLayout) tileLayout).setPageListener(this);
@@ -161,6 +160,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
     @Override
     public void onAnimationAtStart() {
+        mQuickQsPanel.setVisibility(View.VISIBLE);
     }
 
     @Override

@@ -19,6 +19,9 @@ import android.content.ComponentName;
 import android.os.Looper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.QSTileHost;
+import com.android.systemui.statusbar.policy.DataSaverController;
+import com.android.systemui.statusbar.policy.HotspotController;
+import com.android.systemui.statusbar.policy.NetworkController;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -34,7 +37,12 @@ public class TileServicesTests extends SysuiTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mManagers = new ArrayList<>();
-        QSTileHost host = new QSTileHost(mContext, null, null, null, null, null, null, null, null,
+        final NetworkController networkController = Mockito.mock(NetworkController.class);
+        Mockito.when(networkController.getDataSaverController()).thenReturn(
+                Mockito.mock(DataSaverController.class));
+        QSTileHost host = new QSTileHost(mContext, null, null, null, null,
+                networkController, null,
+                Mockito.mock(HotspotController.class), null,
                 null, null, null, null, null, null, null);
         mTileService = new TestTileServices(host, Looper.myLooper());
     }
