@@ -27,7 +27,6 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -159,13 +158,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
 
         TileInfo info = mTiles.get(position);
         holder.mTileView.onStateChanged(info.state);
-        holder.mTileView.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mItemTouchHelper.startDrag(holder);
-                return true;
-            }
-        });
     }
 
     public SpanSizeLookup getSizeLookup() {
@@ -179,6 +171,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             super(itemView);
             if (itemView instanceof FrameLayout) {
                 mTileView = (QSTileView) ((FrameLayout) itemView).getChildAt(0);
+                mTileView.setBackground(null);
             }
         }
 
