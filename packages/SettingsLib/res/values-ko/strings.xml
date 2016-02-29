@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"말하는 속도"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"텍스트를 읽어주는 속도"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"피치"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"합성 음성의 어조에 영향을 미침"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"언어"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"시스템 언어 사용"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"언어가 선택되지 않음"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"단독 프로세스 내에서 WebView 렌더러를 실행합니다."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 구현"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView 구현 설정"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"선택한 WebView 구현이 사용 중지되어 있습니다. 사용하려면 사용 설정해야 합니다. 사용 설정하시겠습니까?"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"구현 선택 목록이 비활성화되어 선택한 WebView 구현이 잘못되었습니다. 목록을 지금 업데이트해야 합니다."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"파일 암호화로 변환"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"변환..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"파일이 이미 암호화됨"</string>

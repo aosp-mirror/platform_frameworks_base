@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Hizketaren abiadura"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Testua zer abiaduran esaten den"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tonua"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Hizketa sintetizatuaren tonuari eragiten dio"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Hizkuntza"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Erabili sistemaren hizkuntza"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Ez da hizkuntza hautatu"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Exekutatu WebView errendatzaileak prozesu isolatu batean."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView implementation"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Set WebView implementation"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Desgaituta dago aukeratu den WebView inplementazioa. Erabili nahi izanez gero, gaitu egin behar duzu. Gaitu nahi al duzu?"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Aukeratutako WebView inplementazioak ez du balio inplementazioen aukeren zerrenda zaharkituta gelditu delako. Zerrenda eguneratu behar da."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Eman fitxategietan oinarritutako enkriptatzea"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Enkriptatu…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Fitxategietan oinarritutako enkriptatzea dauka dagoeneko"</string>
