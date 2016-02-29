@@ -116,7 +116,7 @@ public class SecurityLog {
     /**
      * A class representing a security event log entry.
      */
-    public static class SecurityEvent implements Parcelable {
+    public static final class SecurityEvent implements Parcelable {
         private Event mEvent;
 
         /** @hide */
