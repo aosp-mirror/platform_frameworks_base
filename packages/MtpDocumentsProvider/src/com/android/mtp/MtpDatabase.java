@@ -32,6 +32,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.media.MediaFile;
 import android.mtp.MtpConstants;
 import android.mtp.MtpObjectInfo;
+import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
@@ -40,8 +41,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Database for MTP objects.
@@ -606,7 +608,7 @@ class MtpDatabase {
      * @param deviceId Device to find documents.
      * @return Identifier of found document or null.
      */
-    public @Nullable Identifier getUnmappedDocumentsParent(int deviceId) {
+    @Nullable Identifier getUnmappedDocumentsParent(int deviceId) {
         final String fromClosure =
                 TABLE_DOCUMENTS + " AS child INNER JOIN " +
                 TABLE_DOCUMENTS + " AS parent ON " +
@@ -643,6 +645,65 @@ class MtpDatabase {
         }
     }
 
+    /**
+     * Removes metadata except for data used by outgoingPersistedUriPermissions.
+     */
+    void cleanDatabase(Uri[] outgoingPersistedUris) {
+        mDatabase.beginTransaction();
+        try {
+            final Set<String> ids = new HashSet<>();
+            for (final Uri uri : outgoingPersistedUris) {
+                String documentId = DocumentsContract.getDocumentId(uri);
+                while (documentId != null) {
+                    if (ids.contains(documentId)) {
+                        break;
+                    }
+                    ids.add(documentId);
+                    try (final Cursor cursor = mDatabase.query(
+                            TABLE_DOCUMENTS,
+                            strings(COLUMN_PARENT_DOCUMENT_ID),
+                            SELECTION_DOCUMENT_ID,
+                            strings(documentId),
+                            null,
+                            null,
+                            null)) {
+                        documentId = cursor.moveToNext() ? cursor.getString(0) : null;
+                    }
+                }
+            }
+            deleteDocumentsAndRoots(
+                    Document.COLUMN_DOCUMENT_ID + " NOT IN " + getIdList(ids), null);
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
+    int getLastBootCount() {
+        try (final Cursor cursor = mDatabase.query(
+                TABLE_LAST_BOOT_COUNT, strings(COLUMN_VALUE), null, null, null, null, null)) {
+            if (cursor.moveToNext()) {
+                return cursor.getInt(0);
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    void setLastBootCount(int value) {
+        Preconditions.checkArgumentNonnegative(value, "Boot count must not be negative.");
+        mDatabase.beginTransaction();
+        try {
+            final ContentValues values = new ContentValues();
+            values.put(COLUMN_VALUE, value);
+            mDatabase.delete(TABLE_LAST_BOOT_COUNT, null, null);
+            mDatabase.insert(TABLE_LAST_BOOT_COUNT, null, values);
+            mDatabase.setTransactionSuccessful();
+        } finally {
+            mDatabase.endTransaction();
+        }
+    }
+
     private static class OpenHelper extends SQLiteOpenHelper {
         public OpenHelper(Context context, int flags) {
             super(context,
@@ -655,12 +716,14 @@ class MtpDatabase {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(QUERY_CREATE_DOCUMENTS);
             db.execSQL(QUERY_CREATE_ROOT_EXTRA);
+            db.execSQL(QUERY_CREATE_LAST_BOOT_COUNT);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE " + TABLE_DOCUMENTS);
-            db.execSQL("DROP TABLE " + TABLE_ROOT_EXTRA);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_DOCUMENTS);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_ROOT_EXTRA);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_LAST_BOOT_COUNT);
             onCreate(db);
         }
     }
@@ -817,5 +880,17 @@ class MtpDatabase {
             results[i] = Objects.toString(args[i]);
         }
         return results;
+    }
+
+    private static String getIdList(Set<String> ids) {
+        String result = "(";
+        for (final String id : ids) {
+            if (result.length() > 1) {
+                result += ",";
+            }
+            result += id;
+        }
+        result += ")";
+        return result;
     }
 }
