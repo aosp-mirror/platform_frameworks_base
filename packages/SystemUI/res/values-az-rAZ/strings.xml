@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Skrinşot çəkildi."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Skrinşotunuza baxmaq üçün toxunun"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Skrinşot götürülə bilinmədi."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Yaddaş ehtiyatının az olması səbəbindən skrinşot çəkmək olmur və ya bunu etmək ya tətbiq, ya da şirkət tərəfindən qadağan olunub."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Yaddaş ehtiyatının az olması səbəbindən skrinşotu yadda saxlamaq olmur."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Tətbiq və ya təşkilatınız tərəfindən skrinşot çəkməyə icazə verilmir."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fayl transferi seçimləri"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Media pleyer (MTP) kimi montaj edin"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Kamera kimi birləşdir (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Daha çox vaxt."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Daha az vaxt."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Fənər deaktiv."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Fənər əlçatan deyil."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Fənər aktiv."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Fənər deaktivdir."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Fənər aktivdir."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> güvənli rejimdə deaktiv edildi."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Tarixçə"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Təmizləyin"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Bu tətbiq çoxsaylı pəncərəni dəstəkləmir"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Bu tətbiq çoxsaylı pəncərəni dəstəkləyir"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Üfüqi Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Şaquli Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Fərdi Böl"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Bluetooth aktivləşsin?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Tabletinizlə klaviaturaya bağlanmaq üçün ilk olaraq Bluetooth\'u aktivləşdirməlisiniz."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Aktivləşdirin"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> bildirişlərinə müraciət edin"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Bu tətbiqdən olan bütün bildirişlərə müraciət edin"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Bildirişləri səssiz göstərin"</string>
+    <string name="block" msgid="2734508760962682611">"Bütün bildirişləri blok edin"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Səssiz etməyin"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Səssiz və ya blok etməyin"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Tam əhəmiyyətlilik ayarlarını göstərin"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Bloklanmış"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Minimum əhəmiyyətli"</string>
     <string name="low_importance" msgid="4109929986107147930">"Az əhəmiyyətli"</string>
     <string name="default_importance" msgid="8192107689995742653">"Normal əhəmiyyətli"</string>
     <string name="high_importance" msgid="1527066195614050263">"Çox əhəmiyyətli"</string>
     <string name="max_importance" msgid="5089005872719563894">"Təcili əhəmiyyətli"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Bu bildirişləri heç vaxt göstərməyin"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Bildirişlər siyahısının aşağısında səssiz göstərin"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Bu bildişləri səssiz göstərin"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Bildirişlər siyahısında yuxarıda göstərin və səsli edin"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Ekranda nəzər salın və səsli edin"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Bildirişlər siyahısının aşağısında səssiz göstərin"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Bu bildişləri səssiz göstərin"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Bu bildirişi səsli edin"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Ekranda nəzər salın və səsə icazə verin"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Bildirişlər siyahısında yuxarıda göstərin, ekrana nəzər salın və səsə icazə verin"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Daha çox ayar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hazırdır"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Rəng və görünüş"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS üçün tünd tema istifadə edin"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Çaları nizamlayın"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Parlaqlığı nizamlayın"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Tünd tema Android OS sisteminin adətən işıqlı tema göstərilən Ayarlar və bildirişlər kimi əsas sahələri üçün tətbiq edilir."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Tünd tema Android OS sisteminin adətən işıqlı tema göstərilən Ayarlar kimi əsas sahələri üçün tətbiq edilir."</string>
     <string name="color_apply" msgid="9212602012641034283">"Tətbiq edin"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Ayarları təsdiq edin"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Bəzi renk ayarları bu cihazı yararsız edə bilər. Bu rənk ayarlarını təsdiq etmək üçün OK basın, əks halda bu ayarlar 10 saniyə sonra sıfırlanacaq."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"Enerji dolan zaman faizi göstərin (defolt)"</item>
     <item msgid="3327323682209964956">"Bu piktoqramı göstərməyin"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Digər"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Bölünmüş ekran ayırıcısı"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Aşağıya keçin"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Yuxarıya keçin"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Sola köçürün"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Sağa köçürün"</string>
 </resources>

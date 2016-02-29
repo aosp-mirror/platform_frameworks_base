@@ -75,7 +75,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Posnetek zaslona je shranjen."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"Dotaknite se, če si želite ogledati posnetek zaslona."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Posnetka zaslona ni bilo mogoče shraniti."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"Izdelava posnetka zaslona ni mogoča zaradi omejenega prostora za shranjevanje ali pa tega ne dovoli aplikacija ali vaša organizacija."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Shranjevanje posnetka zaslona ni mogoče zaradi omejenega prostora za shranjevanje."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Aplikacija ali organizacija ne dovoljuje posnetkov zaslona."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosa datotek prek USB-ja"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Vpni kot predvajalnik (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Vpni kot fotoaparat (PTP)"</string>
@@ -208,6 +209,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Daljši čas."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Krajši čas."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Svetilka je izklopljena."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Svetilka ni na voljo."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Svetilka je vklopljena."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Svetilka je izklopljena."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Svetilka je vklopljena."</string>
@@ -306,6 +308,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacija <xliff:g id="APP">%s</xliff:g> je v varnem načinu onemogočena."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"Zgodovina"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"Izbriši"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"Ta aplikacija ne podpira načina z več okni"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"Aplikacija ne podpira načina z več okni"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Razdeli vodoravno"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Razdeli navpično"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Razdeli po meri"</string>
@@ -453,18 +457,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Želite vklopiti Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Če želite povezati tipkovnico in tablični računalnik, vklopite Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Vklop"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"Uporabi za obvestila za temo <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"Uporabi za vsa obvestila za to aplikacijo"</string>
+    <string name="show_silently" msgid="6841966539811264192">"Prikaži obvestila brez zvoka"</string>
+    <string name="block" msgid="2734508760962682611">"Blokiraj vsa obvestila"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Ne utišaj"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Ne utišaj ali blokiraj"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Prikaz celotnih nastavitev za pomembnost"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Blokirano"</string>
+    <string name="min_importance" msgid="1901894910809414782">"Najmanjša pomembnost"</string>
     <string name="low_importance" msgid="4109929986107147930">"Nizka pomembnost"</string>
     <string name="default_importance" msgid="8192107689995742653">"Običajna pomembnost"</string>
     <string name="high_importance" msgid="1527066195614050263">"Visoka pomembnost"</string>
     <string name="max_importance" msgid="5089005872719563894">"Nujna pomembnost"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Nikoli ne prikaži teh obvestil"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"Prikaži na dnu seznama obvestil brez zvoka"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"Prikaži ta obvestila brez zvoka"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"Prikaži na vrhu seznama obvestil in predvajaj zvok"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"Za hip pokaži predogled na zaslonu in predvajaj zvok"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"Prikaži na dnu seznama obvestil brez zvoka"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Prikaži ta obvestila brez zvoka"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Dovoli zvoke za ta obvestila"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Za hip pokaži predogled na zaslonu in dovoli zvok"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Prikaži na vrhu seznama obvestil, za hip pokaži predogled na zaslonu in dovoli zvok"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Več nastavitev"</string>
     <string name="notification_done" msgid="5279426047273930175">"Dokončano"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Barva in videz"</string>
@@ -478,7 +487,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Uporaba temne teme za sistem Android"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"Prilagodi odtenek"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"Prilagodi svetlost"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"Za osrednja področja sistema Android, ki so običajno prikazana v svetli temi, na primer nastavitve in obvestila, je uporabljena temna tema."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"Za osrednja področja sistema Android, ki so običajno prikazana v svetli temi, na primer nastavitve, je uporabljena temna tema."</string>
     <string name="color_apply" msgid="9212602012641034283">"Uporabi"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"Potrditev nastavitev"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"Zaradi nekaterih barvnih nastavitev lahko postane ta naprava neuporabna. Kliknite »V redu«, če želite potrditi te barvne nastavitve. V nasprotnem primeru se bodo čez 10 sekund ponastavile na prvotno vrednost."</string>
@@ -491,7 +500,7 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"Nedavni"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"Nazaj"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"Prikaži s kontrolniki glasnosti"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"ne moti"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"Ne moti"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"Bližnjica z gumboma za glasnost"</string>
     <string name="volume_up_silent" msgid="7141255269783588286">"Zapustitev načina »ne moti« pri povečanju glasnosti"</string>
     <string name="battery" msgid="7498329822413202973">"Akumulator"</string>
@@ -537,4 +546,10 @@
     <item msgid="2139628951880142927">"Prikaži odstotek med polnjenjem (privzeto)"</item>
     <item msgid="3327323682209964956">"Ne prikaži te ikone"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"Drugo"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Razdelilnik zaslonov"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Premakni navzdol"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Premakni navzgor"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"Premakni levo"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"Premakni desno"</string>
 </resources>

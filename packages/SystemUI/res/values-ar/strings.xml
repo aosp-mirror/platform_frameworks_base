@@ -77,7 +77,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"المس لعرض لقطة الشاشة."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"يتعذر التقاط لقطة شاشة نظرًا لأن مساحة التخزين المتاحة محدودة، أو نظرًا لعدم سماح التطبيق أو المؤسسة بذلك."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"يتعذر حفظ لقطة الشاشة نظرًا لأن مساحة التخزين المتاحة محدودة."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"غير مسموح بالتقاط لقطات شاشة نظرًا لإذن يتعلق بالتطبيق أو بالمؤسسة."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تحميل كمشغل وسائط (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"‏تحميل ككاميرا (PTP)"</string>
@@ -210,6 +211,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"وقت أكثر."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"وقت أقل."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"إيقاف الفلاش."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"تطبيق المصباح اليدوي غير متاح."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"تشغيل الفلاش."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"تم إيقاف الفلاش."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"تم تشغيل الفلاش."</string>
@@ -308,6 +310,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"تم تعطيل <xliff:g id="APP">%s</xliff:g> في الوضع الآمن."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"السجلّ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"محو"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"لا يتيح هذا التطبيق النوافذ المتعددة."</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"لا يتيح التطبيق النوافذ المتعددة."</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"تقسيم أفقي"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"تقسيم رأسي"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"تقسيم مخصص"</string>
@@ -455,18 +459,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"تشغيل البلوتوث؟"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"لتوصيل لوحة المفاتيح بالجهاز اللوحي، يلزمك تشغيل بلوتوث أولاً."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"تشغيل"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"التطبيق على إشعارات <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"التطبيق في جميع الإشعارات من هذا التطبيق"</string>
+    <string name="show_silently" msgid="6841966539811264192">"عرض الإشعارات بدون تنبيه صوتي"</string>
+    <string name="block" msgid="2734508760962682611">"حظر كل الإشعارات"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"عدم كتم التنبيه الصوتي"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"عدم كتم التنبيه الصوتي أو حظر الإشعار"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"عرض الإعدادات الكاملة لمدى الأهمية"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"تم الحظر"</string>
+    <string name="min_importance" msgid="1901894910809414782">"الأقل أهمية"</string>
     <string name="low_importance" msgid="4109929986107147930">"أهمية منخفضة"</string>
     <string name="default_importance" msgid="8192107689995742653">"أهمية عادية"</string>
     <string name="high_importance" msgid="1527066195614050263">"أهمية عالية"</string>
     <string name="max_importance" msgid="5089005872719563894">"أهمية ملحَّة"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"عدم عرض هذه الإشعارات"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"العرض أسفل قائمة الإشعارات بدون تنبيه صوتي"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"عرض هذه الإشعارات بدون تنبيه صوتي"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"العرض أعلى قائمة الإشعارات مع تنبيه صوتي"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"الظهور سريعًا على الشاشة مع تنبيه صوتي"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"عرض الإشعار بأسفل قائمة الإشعارات بدون تنبيه صوتي"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"عرض هذه الإشعارات بدون تنبيه صوتي"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"السماح لهذه الإشعارات بإصدار تنبيهات صوتية"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"يتم عرض الإشعار بسرعة على الشاشة مع السماح بإصدار تنبيه صوتي"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"عرض هذا الإشعار بأعلى قائمة الإشعارات وعرضه بسرعة على الشاشة مع السماح بإصدار تنبيه صوتي"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"المزيد من الإعدادات"</string>
     <string name="notification_done" msgid="5279426047273930175">"تم"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"اللون والمظهر"</string>
@@ -480,7 +489,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"‏استخدام مظهر معتم لنظام التشغيل Android"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"ضبط التلوين الخفيف"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"ضبط السطوع"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"‏يتم تطبيق المظهر المعتم على المناطق الأساسية في نظام التشغيل Android والتي يتم عرضها عادة في مظهر مضيء، مثل الإعدادات والإشعارات."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"‏يتم تطبيق المظهر المعتم على المناطق الأساسية في نظام التشغيل Android والتي يتم عرضها عادة في مظهر مضيء، مثل الإعدادات."</string>
     <string name="color_apply" msgid="9212602012641034283">"تطبيق"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"تأكيد الإعدادات"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"يمكن أن تتسبب بعض إعدادات الألوان في تعطيل إمكانية استخدام الجهاز. يمكنك النقر على \"موافق\" لتأكيد إعدادات الألوان هذه، وإلا فستتم إعادة تعيين هذه الإعدادات بعد 10 ثوانٍ."</string>
@@ -539,4 +548,10 @@
     <item msgid="2139628951880142927">"عرض النسبة المئوية عند الشحن (افتراضي)"</item>
     <item msgid="3327323682209964956">"عدم عرض هذا الرمز"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"غير ذلك"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"أداة تقسيم الشاشة"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"نقل لأسفل"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"نقل لأعلى"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"نقل لليسار"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"نقل لليمين"</string>
 </resources>

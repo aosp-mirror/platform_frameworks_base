@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ប៉ះ ​ដើម្បី​មើល​រូបថត​អេក្រង់​របស់​អ្នក​។"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"មិនអាចថតអេក្រង់ដោយសារតែទំហំផ្ទុកមានដែនកំណត់ ឬវាមិនត្រូវបានអនុញ្ញាត​ដោយកម្មវិធី ឬ​ស្ថាប័ន​របស់​អ្នក។"</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"មិនអាចរក្សាទុករូបថតអេក្រង់បានទេដោយសារទំហំផ្ទុកមានកម្រិត។"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ការថតរូបអេក្រង់មិនត្រូវបានអនុញ្ញាតដោយកម្មវិធីនេះ ឬស្ថាប័នរបស់អ្នក។"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ជម្រើស​ផ្ទេរ​ឯកសារ​តាម​យូអេសប៊ី"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ភ្ជាប់​ជា​កម្មវិធី​ចាក់​មេឌៀ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ភ្ជាប់​ជា​ម៉ាស៊ីន​ថត (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ច្រើនជាង"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"តិច​ជាង"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"បិទ​ពិល។"</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ពិលមិនអាចប្រើបានទេ"</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"បើក​ពិល។"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"បាន​បិទ​ពិល។"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"បាន​បើក​ពិល។"</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ត្រូវបានបិទដំណើរការក្នុងរបៀបសុវត្ថិភាព"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ប្រវត្តិ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"សម្អាត"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"កម្មវិធីនេះមិនគាំទ្រផ្ទាំងវិដូច្រើនទេ"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"កម្មវិធីមិនគាំទ្រផ្ទាំងវិដូច្រើនទេ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"បំបែកផ្តេក"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"បំបែកបញ្ឈរ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"បំបែកផ្ទាល់ខ្លួន"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"បើកប៊្លូធូសឬ?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ដើម្បីភ្ជាប់ក្តារចុចរបស់អ្នកជាមួយនឹងថេប្លេតរបស់អ្នក អ្នកត្រូវតែបើកប៊្លូធូសជាមុនសិន។"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"បើក"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"អនុវត្តចំពោះការជូនដំណឹង <xliff:g id="TOPIC_NAME">%1$s</xliff:g>"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"អនុវត្តចំពោះការជូនដំណឹងទាំងអស់ពីកម្មវិធីនេះ"</string>
+    <string name="show_silently" msgid="6841966539811264192">"បង្ហាញការជូនដំណឹងស្ងាត់ៗ"</string>
+    <string name="block" msgid="2734508760962682611">"រារាំងការជូនដំណឹងទាំងអស់"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"កុំបិទសំឡេង"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"កុំបិទសំឡេង ឬរារាំង"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"បង្ហាញការកំណត់កម្រិតភាពសំខាន់ពេញលេញ"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"បានរារាំង"</string>
+    <string name="min_importance" msgid="1901894910809414782">"កម្រិតសំខាន់អប្បបរមា"</string>
     <string name="low_importance" msgid="4109929986107147930">"មិនសូវសំខាន់"</string>
     <string name="default_importance" msgid="8192107689995742653">"សំខាន់មធ្យម"</string>
     <string name="high_importance" msgid="1527066195614050263">"សំខាន់ខ្លាំង"</string>
     <string name="max_importance" msgid="5089005872719563894">"សំខាន់ជាបន្ទាន់"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"កុំបង្ហាញការជូនដំណឹងទាំងនេះ"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"បង្ហាញស្ងាត់ៗនៅផ្នែកខាងក្រោមបញ្ជីនៃការជូនដំណឹង"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"បង្ហាញការជូនដំណឹងទាំងនេះស្ងាត់ៗ"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"បង្ហាញនៅផ្នែកខាងលើបញ្ជីនៃការជូនដំណឹង និងបន្លឺសំឡេង"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"លោតបង្ហាញនៅលើអេក្រង់ និងបន្លឺសំឡេង"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"បង្ហាញស្ងាត់ៗនៅផ្នែកខាងក្រោមបញ្ជីនៃការជូនដំណឹង"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"បង្ហាញការជូនដំណឹងទាំងនេះស្ងាត់ៗ"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"អនុញ្ញាតឲ្យការជូនដំណឹងទាំងនេះបន្លឺសំឡេង"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"លោតបង្ហាញនៅលើអេក្រង់ និងអនុញ្ញាតឲ្យបន្លឺសំឡេង"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"បង្ហាញនៅផ្នែកខាងលើបញ្ជីនៃការជូនដំណឹង លោតបង្ហាញនៅលើអេក្រង់ និងអនុញ្ញាតឲ្យបន្លឺសំឡេង"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ការកំណត់ច្រើនទៀត"</string>
     <string name="notification_done" msgid="5279426047273930175">"រួចរាល់"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"ពណ៌ និងរូបរាង"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"ប្រើធីមងងឹតសម្រាប់ប្រព័ន្ធប្រតិបត្តិការ Android"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"កែសម្រួលពណ៌ព្រឿងៗ"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"កែសម្រួលពន្លឺ"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"ធីមងងឹតត្រូវបានប្រើសម្រាប់ចំណុចស្នូលនៃប្រព័ន្ធប្រតិបត្តិការ Android ដែលជាទូទៅត្រូវបានបង្ហាញជាធីមដែលភ្លឺ ដូចជាការកំណត់ និងការជូនដំណឹង។"</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"ធីមងងឹតត្រូវបានប្រើសម្រាប់ចំណុចស្នូលនៃប្រព័ន្ធប្រតិបត្តិការ Android ដែលជាទូទៅត្រូវបានបង្ហាញជាធីមភ្លឺ ដូចជាការកំណត់ជាដើម។"</string>
     <string name="color_apply" msgid="9212602012641034283">"អនុវត្ត"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"បញ្ជាក់ការកំណត់"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ការកំណត់ពណ៌មួយចំនួនអាចធ្វើឲ្យឧបករណ៍នេះមិនអាចប្រើបាន។ សូមចុច យល់ព្រម ដើម្បីបញ្ជាក់ការកំណត់ពណ៌ទាំងនេះ បើមិនដូច្នេះទេការកំណត់ទាំងនេះនឹងកំណត់ឡើងវិញក្នុងរយៈពេល 10 វិនាទីបន្ទាប់។"</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"បង្ហាញភាគរយនៅពេលសាកថ្ម (លំនាំដើម)"</item>
     <item msgid="3327323682209964956">"កុំបង្ហាញរូបតំណាងនេះ"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"ផ្សេងៗ"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"កម្មវិធីចែកអេក្រង់បំបែក"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"ផ្លាស់ទីចុះក្រោម"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ផ្លាស់ទីឡើងលើ"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ផ្លាស់ទីទៅឆ្វេង"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ផ្លាស់ទីទៅស្តាំ"</string>
 </resources>

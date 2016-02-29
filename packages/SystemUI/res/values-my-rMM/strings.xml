@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ဖန်သားပြင်ဓါတ်ပုံရိုက်ခြင်းအား ဖမ်းယူပြီး"</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"သင့်ဖန်သားပြင်ဓါတ်ပုံရိုက်ခြင်းအား ကြည့်ရှုရန် ထိပါ"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ဖန်သားပြင်ဓါတ်ပုံရိုက်ခြင်းအား မဖမ်းစီးနိုင်ပါ"</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"မျက်နှာပြင်လျှပ်တပြက်ပုံကို မရုက်နိုင်ခဲ့ပါ၊ သိုလှောင်မှု နေရာ အကန့်အသတ် ရှိနေ၍ သို့မဟုတ် app သို့မဟုတ် သင်၏ အဖွဲ့အစည်းက ခွင့်မပြု၍ ဖြစ်နိုင်သည်။"</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"သိုလှောင်ခန်းနေရာ အကန့်အသတ်ရှိသောကြောင့် ဖန်သားပြင်ဓာတ်ပုံကို သိမ်းဆည်း၍မရပါ။"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ဖန်သားပြင်ဓာတ်ပုံရိုက်ကူးခြင်းကို အက်ပ်မှ သို့မဟုတ် သင့်အဖွဲ့အစည်းမှ ခွင့်မပြုပါ။"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ဖိုင်ပြောင်း ရွေးမှုများ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"မီဒီယာပလေရာအနေဖြင့် တပ်ဆင်ရန် (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ကင်မရာအနေဖြင့် တပ်ဆင်ရန် (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"အချိန် တိုး"</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"အချိန် လျှော့"</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ဖလက်ရှမီး ပိတ်ထား"</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ဓာတ်မီးမရသေးပါ။"</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ဖလက်ရှမီး ဖွင့်ထား။"</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ဖလက်ရှမီး ပိတ်ထားသည်။"</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ဖလက်ရှမီး ဖွင့်ထားသည်။"</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ကို ဘေးကင်းလုံခြုံသည့်မုဒ်တွင် ပိတ်ထားပါသည်။"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"မှတ်တမ်း"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ရှင်းလင်းပါ"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"ဤအက်ပ်သည် ဝင်းဒိုးများစွာတွင်ဖွင့်ရန် မပံ့ပိုးထားပါ"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"အက်ပ်သည် ဝင်းဒိုးများစွာတွင်ဖွင့်ရန် မပံ့ပိုးထားပါ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ဒေါင်လိုက်ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"စိတ်ကြိုက် ပိုင်းမည်"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ဘလူးတုသ် ဖွင့်ရမလား။"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ကီးဘုတ်ကို တပ်ဘလက်နှင့် ချိတ်ဆက်ရန်၊ ပမထဦးစွာ ဘလူးတုသ်ကို ဖွင့်ပါ။"</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ဖွင့်ပါ"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"သတိပေးချက် <xliff:g id="TOPIC_NAME">%1$s</xliff:g> ခုသို့သက်ရောက်စေပါ"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"ဤအက်ပ်မှ သတိပေးချက်များအားလုံးသို့ သက်ရောက်စေပါ"</string>
+    <string name="show_silently" msgid="6841966539811264192">"သတိပေးချက်များကို တိတ်ဆိတ်စွာပြပါ"</string>
+    <string name="block" msgid="2734508760962682611">"သတိပေးချက်များအားလုံးကို ပိတ်ဆို့ပါ"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"အသံ မတိတ်ပါနှင့်"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"အသံ မတိတ်ပါနှင့် သို့မဟုတ် မပိတ်ဆို့ပါနှင့်"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"အပြည့်အဝအရေးပါသည့် ဆက်တင်များကိုပြပါ"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"ပိတ်ဆို့ထားသည်"</string>
+    <string name="min_importance" msgid="1901894910809414782">"အနည်းဆုံး အရေးပါမှု"</string>
     <string name="low_importance" msgid="4109929986107147930">"အနည်းငယ်သာ အရေးပါသည်"</string>
     <string name="default_importance" msgid="8192107689995742653">"သာမန်သာ အရေးပါသည်"</string>
     <string name="high_importance" msgid="1527066195614050263">"အလွန်အရေးပါသည်"</string>
     <string name="max_importance" msgid="5089005872719563894">"အရေးတကြီး အရေးပါသည်"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"ဤသတိပေးချက်များကို ဘယ်တော့မှမပြပါနှင့်"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"သတိပေးချက်စာရင်း၏ အောက်ဆုံးတွင် တိတ်တဆိတ်ပြပါ"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"ဤသတိပေးချက်များကို တိတ်တဆိတ်ပြပါ"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"သတိပေးချက်စာရင်းများ၏ ထိပ်တွင်ပြကာ အသံဖွင့်ပါ"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"မျက်နှာပြင်ပေါ်သို့ ဖော်ပြကာ အသံဖွင့်ပါ"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"သတိပေးချက်စာရင်း၏ အောက်ဆုံးတွင် တိတ်ဆိတ်စွာပြပါ"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"ဤသတိပေးချက်များကို တိတ်ဆိတ်စွာပြပါ"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"ဤသတိပေးချက်များကို အသံထွက်ခွင့်ပြုပါ"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"ဖန်သားပြင်ပေါ်တွင် ပေါ်စေပြီး အသံထွက်ခွင့်ပြုပါ"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"သတိပေးချက်စာရင်း၏ ထိပ်ဆုံးတွင်ပြပြီး ဖန်သားပြင်ပေါ်တွင် ပေါ်စေကာ အသံထွက်ခွင့်ပြုပါ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"နောက်ထပ် ဆက်တင်များ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ပြီးပါပြီ"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"အရောင်နှင့် အပြင်အဆင်"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS အတွက်အရောင်ရင့်အပြင်အဆင်ကို သုံးပါ"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"အရောင်မွဲမှုကို ချိန်ပါ"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"အလင်းအမှောင်ချိန်ပါ"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"အရောင်ရင့်အပြင်အဆင်သည် ဆက်တင်များနှင့် သတိပေးချက်များကဲ့သို့ ပုံမှန်အားဖြင့် အရောင်ဖျော့အပြင်အဆင်အဖြစ်ရှိသည့် Android OS ၏အဓိကနေရာများကို ပြောင်းလဲပေးပါသည်။"</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"အရောင်ရင့်အပြင်အဆင်သည် ဆက်တင်များကဲ့သို့ ပုံမှန်အားဖြင့် အရောင်ဖျော့အပြင်အဆင်အဖြစ်ရှိသည့် Android OS ၏အဓိကနေရာများကို ပြောင်းလဲပေးပါသည်။"</string>
     <string name="color_apply" msgid="9212602012641034283">"အသုံးပြုပါ"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ဆက်တင်များကို အတည်ပြုပါ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"အချို့သော အရောင်ဆက်တက်များက ဤကိရိယာကို သုံးမရအောင် လုပ်ပစ်နိုင်ပါသည်။ ဤအရောင် ဆက်တင်များကို အတည်ပြုရန် အိုကေကို နှိပ်ပါ၊ သို့မဟုတ် ဤဆက်တင်များကို ၁၀ စက္ကန့် အကြာတွင် ပြန်ညှိလိုက်ပါမည်။"</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"အားသွင်းနေစဉ်တွင် ရာခိုင်နှုန်းကိုပြပါ (ပုံသေ)"</item>
     <item msgid="3327323682209964956">"ဤသင်္ကေတပုံကို မပြပါနှင့်"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"အခြား"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"မျက်နှာပြင်ခွဲခြမ်းခြင်း ပိုင်းခြားပေးသည့်စနစ်"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"အောက်သို့ရွှေ့ပါ"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"အပေါ်သို့ရွှေ့ပါ"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ဘယ်ဘက်သို့ရွှေ့ပါ"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ညာဘက်သို့ရွှေ့ပါ"</string>
 </resources>

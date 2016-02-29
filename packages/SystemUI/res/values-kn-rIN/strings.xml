@@ -73,7 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ವೀಕ್ಷಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
-    <string name="screenshot_failed_text" msgid="1260203058661337274">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳ, ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ನಿಮ್ಮ ಸಂಸ್ಥೆಯಿಂದ ಅನುಮತಿಯಿಲ್ಲದಿರುವ ಕಾರಣ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆಯಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳುವುದನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ನಿಮ್ಮ ಸಂಸ್ಥೆ ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ಫೈಲ್ ವರ್ಗಾವಣೆ ಆಯ್ಕೆಗಳು"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ಮೀಡಿಯಾ ಪ್ಲೇಯರ್ ರೂಪದಲ್ಲಿ ಅಳವಡಿಸಿ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ಕ್ಯಾಮರಾ ರೂಪದಲ್ಲಿ ಅಳವಡಿಸಿ (PTP)"</string>
@@ -206,6 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"ಹೆಚ್ಚು ಸಮಯ."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"ಕಡಿಮೆ ಸಮಯ."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"ಫ್ಲ್ಯಾಶ್‌ಲೈಟ್ ಆಫ್ ಆಗಿದೆ."</string>
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"ಫ್ಲ್ಯಾಶ್‌ಲೈಟ್ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"ಫ್ಲ್ಯಾಶ್‌ಲೈಟ್ ಆನ್ ಆಗಿದೆ."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"ಫ್ಲ್ಯಾಶ್‌ಲೈಟ್ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"ಫ್ಲ್ಯಾಶ್‌ಲೈಟ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
@@ -304,6 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ಅನ್ನು ಸುರಕ್ಷಿತ ಮೋಡ್‌ನಲ್ಲಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"ಇತಿಹಾಸ"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ತೆರವುಗೊಳಿಸು"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಬಹು-ವಿಂಡೊಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"ಅಪ್ಲಿಕೇಶನ್ ಬಹು-ವಿಂಡೊಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ಅಡ್ಡಲಾಗಿ ವಿಭಜಿಸಿದ"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ಲಂಬವಾಗಿ ವಿಭಜಿಸಿದ"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"ಕಸ್ಟಮ್ ವಿಭಜಿಸಿದ"</string>
@@ -451,18 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡುವುದೇ?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಅನ್ನು ಟ್ಯಾಬ್ಲೆಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು, ನೀವು ಮೊದಲು ಬ್ಲೂಟೂತ್ ಆನ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"ಆನ್ ಮಾಡು"</string>
-    <string name="apply_to_topic" msgid="3641403489318659666">"<xliff:g id="TOPIC_NAME">%1$s</xliff:g> ಅಧಿಸೂಚನೆಗಳಿಗೆ ಅನ್ವಯಿಸಿ"</string>
-    <string name="apply_to_app" msgid="363016783939815960">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳಿಗೆ ಅನ್ವಯಿಸಿ"</string>
+    <string name="show_silently" msgid="6841966539811264192">"ಸ್ಥಬ್ಧವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
+    <string name="block" msgid="2734508760962682611">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"ಮೌನವಾಗಿಸಬೇಡಿ"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"ಸ್ಥಬ್ದ ಅಥವಾ ನಿರ್ಬಂಧಿಸಬೇಡಿ"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"ಪೂರ್ಣ ಪ್ರಾಮುಖ್ಯತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
+    <string name="min_importance" msgid="1901894910809414782">"ಕನಿಷ್ಟ ಪ್ರಾಮುಖ್ಯತೆ"</string>
     <string name="low_importance" msgid="4109929986107147930">"ಕಡಿಮೆ ಪ್ರಾಮುಖ್ಯತೆ"</string>
     <string name="default_importance" msgid="8192107689995742653">"ಸಾಮಾನ್ಯ ಪ್ರಾಮುಖ್ಯತೆ"</string>
     <string name="high_importance" msgid="1527066195614050263">"ಉನ್ನತ ಪ್ರಾಮುಖ್ಯತೆ"</string>
     <string name="max_importance" msgid="5089005872719563894">"ತುರ್ತು ಪ್ರಾಮುಖ್ಯತೆ"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಎಂದಿಗೂ ತೋರಿಸಬೇಡ"</string>
-    <string name="notification_importance_low" msgid="4383563267370859725">"ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
-    <string name="notification_importance_default" msgid="4926529615920610817">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
-    <string name="notification_importance_high" msgid="3222680136612408223">"ಅಧಿಸೂಚನೆಗಳ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸು ಮತ್ತು ಧ್ವನಿ ಮಾಡು"</string>
-    <string name="notification_importance_max" msgid="5236987171904756134">"ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಧ್ವನಿ ಮಾಡು"</string>
+    <string name="notification_importance_min" msgid="1938190340516905748">"ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯ ಕೆಳಭಾಗದಲ್ಲಿ ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸ್ಥಬ್ಧವಾಗಿ ತೋರಿಸು"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"ಈ ಅಧಿಸೂಚನೆಯು ಧ್ವನಿಗಳನ್ನು ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಧ್ವನಿ ಅನುಮತಿಸಿ ಮತ್ತು ಧ್ವನಿ ಅನುಮತಿಸಿ"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"ಅಧಿಸೂಚನೆಗಳ ಪಟ್ಟಿಯ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸು, ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ಧ್ವನಿ ಅನುಮತಿಸಿ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_done" msgid="5279426047273930175">"ಮುಗಿದಿದೆ"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"ಬಣ್ಣ ಮತ್ತು ಗೋಚರತೆ"</string>
@@ -476,7 +485,7 @@
     <string name="use_dark_theme" msgid="2900938704964299312">"Android OS ಗೆ ಕಪ್ಪು ಥೀಮ್‌ ಬಳಸಿ"</string>
     <string name="adjust_tint" msgid="3398569573231409878">"ಟಿಂಟ್‌ ಸರಿಹೊಂದಿಸು"</string>
     <string name="adjust_brightness" msgid="980039329808178246">"ಪ್ರಖರತೆಯನ್ನು ಸರಿಹೊಂದಿಸು"</string>
-    <string name="night_mode_disclaimer" msgid="3297928749219711334">"ಕಪ್ಪು ಥೀಮ್‌ ಅನ್ನು Android OS ನ ಕೋರ್‌ ಪ್ರದೇಶಗಳಿಗೆ ಅನ್ವಯಿಸಲಾಗಿರುತ್ತದೆ. ಇದನ್ನು ಸೆಟ್ಟಿಂಗ್‌‌ಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳಂತಹ ತಿಳಿಯಾದ ಥೀಮ್‌ನಲ್ಲಿ ಸಾಮಾನ್ಯವಾಗಿ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ."</string>
+    <string name="night_mode_disclaimer" msgid="598914896926759578">"ಕಪ್ಪು ಥೀಮ್‌ ಅನ್ನು Android OS ನ ಕೋರ್‌ ಪ್ರದೇಶಗಳಿಗೆ ಅನ್ವಯಿಸಲಾಗಿರುತ್ತದೆ. ಇದನ್ನು ಸೆಟ್ಟಿಂಗ್‌‌ಗಳಂತಹ ತಿಳಿಯಾದ ಥೀಮ್‌ನಲ್ಲಿ ಸಾಮಾನ್ಯವಾಗಿ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ."</string>
     <string name="color_apply" msgid="9212602012641034283">"ಅನ್ವಯಿಸು"</string>
     <string name="color_revert_title" msgid="4746666545480534663">"ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಖಚಿತಪಡಿಸಿ"</string>
     <string name="color_revert_message" msgid="9116001069397996691">"ಕೆಲವು ಬಣ್ಣ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಈ ಸಾಧನವನ್ನು ಅನುಪಯುಕ್ತಗೊಳಿಸಬಹುದು. ಈ ಬಣ್ಣ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಖಚಿತಪಡಿಸಲು ಸರಿ ಕ್ಲಿಕ್ ಮಾಡಿ, ಇಲ್ಲವಾದರೆ ಈ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು 10 ಸೆಕೆಂಡುಗಳ ನಂತರ ಮರುಹೊಂದಿಸಿ."</string>
@@ -535,4 +544,10 @@
     <item msgid="2139628951880142927">"ಚಾರ್ಜ್‌ ಮಾಡುವಾಗ ಪ್ರತಿಶತವನ್ನು ತೋರಿಸು (ಡಿಫಾಲ್ಟ್‌)"</item>
     <item msgid="3327323682209964956">"ಈ ಐಕಾನ್ ತೋರಿಸಬೇಡ"</item>
   </string-array>
+    <string name="other" msgid="4060683095962566764">"ಇತರ"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"ಸ್ಪ್ಲಿಟ್-ಪರದೆ ಡಿವೈಡರ್"</string>
+    <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"ಕೆಳಗೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"ಮೇಲೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ಎಡಕ್ಕೆ ಸರಿಸಿ"</string>
+    <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ಬಲಕ್ಕೆ ಸರಿಸಿ"</string>
 </resources>
