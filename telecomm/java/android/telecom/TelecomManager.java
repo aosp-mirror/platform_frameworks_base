@@ -1426,6 +1426,7 @@ public class TelecomManager {
      * {@link android.provider.BlockedNumberContract#canCurrentUserBlockNumbers(Context)} returns
      * {@code true} for the current user.
      */
+    // TODO: Delete this.
     public void launchManageBlockedNumbersActivity() {
         ITelecomService service = getTelecomService();
         if (service != null) {
@@ -1435,6 +1436,26 @@ public class TelecomManager {
                 Log.e(TAG, "Error calling ITelecomService#manageBlockedNumbers", e);
             }
         }
+    }
+
+    /**
+     * Creates the {@link Intent} which can be used with {@link Context#startActivity(Intent)} to
+     * launch the activity to manage blocked numbers.
+     * <p> This method displays the UI to manage blocked numbers only if
+     * {@link android.provider.BlockedNumberContract#canCurrentUserBlockNumbers(Context)} returns
+     * {@code true} for the current user.
+     */
+    public Intent createManageBlockedNumbersIntent() {
+        ITelecomService service = getTelecomService();
+        Intent result = null;
+        if (service != null) {
+            try {
+                result = service.createManageBlockedNumbersIntent();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecomService#createManageBlockedNumbersIntent", e);
+            }
+        }
+        return result;
     }
 
     private ITelecomService getTelecomService() {
