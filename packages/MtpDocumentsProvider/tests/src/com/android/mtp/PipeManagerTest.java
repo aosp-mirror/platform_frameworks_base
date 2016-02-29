@@ -67,7 +67,9 @@ public class PipeManagerTest extends AndroidTestCase {
         final MtpObjectInfo info =
                 new MtpObjectInfo.Builder().setObjectHandle(1).setName("note.txt").build();
         mDatabase.getMapper().startAddingDocuments("2");
-        mDatabase.getMapper().putChildDocuments(0, "2", new MtpObjectInfo[] { info });
+        mDatabase.getMapper().putChildDocuments(
+                0, "2", TestUtil.OPERATIONS_SUPPORTED,
+                new MtpObjectInfo[] { info });
         mDatabase.getMapper().stopAddingDocuments("2");
         // Create a placeholder file which should be replaced by a real file later.
         mtpManager.setObjectInfo(0, info);
@@ -76,7 +78,8 @@ public class PipeManagerTest extends AndroidTestCase {
         final ParcelFileDescriptor descriptor = mPipeManager.writeDocument(
                 getContext(),
                 mtpManager,
-                new Identifier(0, 0, 1, "2", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT));
+                new Identifier(0, 0, 1, "2", MtpDatabaseConstants.DOCUMENT_TYPE_OBJECT),
+                TestUtil.OPERATIONS_SUPPORTED);
         final ParcelFileDescriptor.AutoCloseOutputStream outputStream =
                 new ParcelFileDescriptor.AutoCloseOutputStream(descriptor);
         outputStream.write(HELLO_BYTES, 0, HELLO_BYTES.length);

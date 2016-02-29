@@ -55,7 +55,13 @@ public class DocumentLoaderTest extends AndroidTestCase {
 
         mManager = new BlockableTestMtpManager(getContext());
         mResolver = new TestContentResolver();
-        mLoader = new DocumentLoader(0, mManager, mResolver, mDatabase);
+        mLoader = new DocumentLoader(
+                new MtpDeviceRecord(
+                        0, "Device", "Key", true, new MtpRoot[0],
+                        TestUtil.OPERATIONS_SUPPORTED, new int[0]),
+                mManager,
+                mResolver,
+                mDatabase);
     }
 
     @Override
