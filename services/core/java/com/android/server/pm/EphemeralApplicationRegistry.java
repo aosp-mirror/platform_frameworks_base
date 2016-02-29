@@ -210,6 +210,9 @@ class EphemeralApplicationRegistry {
     }
 
     public void onPackageUninstalledLPw(PackageParser.Package pkg) {
+        if (pkg == null) {
+            return;
+        }
         PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps == null) {
             return;

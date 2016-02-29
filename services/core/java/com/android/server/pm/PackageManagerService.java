@@ -13303,18 +13303,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    private void removeNativeBinariesLI(PackageParser.Package pkg) {
+    private void removeNativeBinariesLI(PackageSetting ps) {
         // Remove the lib path for the parent package
-        PackageSetting ps = (PackageSetting) pkg.mExtras;
         if (ps != null) {
             NativeLibraryHelper.removeNativeBinariesLI(ps.legacyNativeLibraryPathString);
-        }
-        // Remove the lib path for the child packages
-        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
-        for (int i = 0; i < childCount; i++) {
-            ps = (PackageSetting) pkg.childPackages.get(i).mExtras;
-            if (ps != null) {
-                NativeLibraryHelper.removeNativeBinariesLI(ps.legacyNativeLibraryPathString);
+            // Remove the lib path for the child packages
+            final int childCount = (ps.childPackageNames != null) ? ps.childPackageNames.size() : 0;
+            for (int i = 0; i < childCount; i++) {
+                PackageSetting childPs = null;
+                synchronized (mPackages) {
+                    childPs = mSettings.peekPackageLPr(ps.childPackageNames.get(i));
+                }
+                if (childPs != null) {
+                    NativeLibraryHelper.removeNativeBinariesLI(childPs
+                            .legacyNativeLibraryPathString);
+                }
             }
         }
     }
@@ -14437,7 +14440,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     private boolean deleteSystemPackageLI(PackageParser.Package deletedPkg,
             PackageSetting deletedPs, int[] allUserHandles, int flags, PackageRemovedInfo outInfo,
             boolean writeSettings) {
-        if (deletedPkg.parentPackage != null) {
+        if (deletedPs.parentPackageName != null) {
             Slog.w(TAG, "Attempt to delete child system package " + deletedPkg.packageName);
             return false;
         }
@@ -14450,7 +14453,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // the system pkg from system partition
         // reader
         synchronized (mPackages) {
-            disabledPs = mSettings.getDisabledSystemPkgLPr(deletedPkg.packageName);
+            disabledPs = mSettings.getDisabledSystemPkgLPr(deletedPs.name);
         }
 
         if (DEBUG_REMOVE) Slog.d(TAG, "deleteSystemPackageLI: newPs=" + deletedPkg.packageName
@@ -14476,10 +14479,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Delete the updated package
         outInfo.isRemovedPackageSystemUpdate = true;
         if (outInfo.removedChildPackages != null) {
-            final int childCount = (deletedPkg.childPackages != null)
-                    ? deletedPkg.childPackages.size() : 0;
+            final int childCount = (deletedPs.childPackageNames != null)
+                    ? deletedPs.childPackageNames.size() : 0;
             for (int i = 0; i < childCount; i++) {
-                String childPackageName = deletedPkg.childPackages.get(i).packageName;
+                String childPackageName = deletedPs.childPackageNames.get(i);
                 if (disabledPs.childPackageNames != null && disabledPs.childPackageNames
                         .contains(childPackageName)) {
                     PackageRemovedInfo childInfo = outInfo.removedChildPackages.get(
@@ -14499,7 +14502,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             flags |= PackageManager.DELETE_KEEP_DATA;
         }
 
-        boolean ret = deleteInstalledPackageLI(deletedPkg, true, flags, allUserHandles,
+        boolean ret = deleteInstalledPackageLI(deletedPs, true, flags, allUserHandles,
                 outInfo, writeSettings, disabledPs.pkg);
         if (!ret) {
             return false;
@@ -14510,7 +14513,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Reinstate the old system package
             enableSystemPackageLPw(disabledPs.pkg);
             // Remove any native libraries from the upgraded package.
-            removeNativeBinariesLI(deletedPkg);
+            removeNativeBinariesLI(deletedPs);
         }
 
         // Install the system package
@@ -14567,29 +14570,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private boolean deleteInstalledPackageLI(PackageParser.Package pkg,
+    private boolean deleteInstalledPackageLI(PackageSetting ps,
             boolean deleteCodeAndResources, int flags, int[] allUserHandles,
             PackageRemovedInfo outInfo, boolean writeSettings,
             PackageParser.Package replacingPackage) {
-        PackageSetting ps = null;
-
         synchronized (mPackages) {
-            pkg = mPackages.get(pkg.packageName);
-            if (pkg == null) {
-                return false;
-            }
-
-            ps = mSettings.mPackages.get(pkg.packageName);
-            if (ps == null) {
-                return false;
-            }
-
             if (outInfo != null) {
                 outInfo.uid = ps.appId;
             }
 
             if (outInfo != null && outInfo.removedChildPackages != null) {
-                final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+                final int childCount = (ps.childPackageNames != null)
+                        ? ps.childPackageNames.size() : 0;
                 for (int i = 0; i < childCount; i++) {
                     String childPackageName = ps.childPackageNames.get(i);
                     PackageSetting childPs = mSettings.mPackages.get(childPackageName);
@@ -14609,11 +14601,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         removePackageDataLI(ps, allUserHandles, outInfo, flags, writeSettings);
 
         // Delete the child packages data
-        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        final int childCount = (ps.childPackageNames != null) ? ps.childPackageNames.size() : 0;
         for (int i = 0; i < childCount; i++) {
             PackageSetting childPs;
             synchronized (mPackages) {
-                childPs = mSettings.peekPackageLPr(pkg.childPackages.get(i).packageName);
+                childPs = mSettings.peekPackageLPr(ps.childPackageNames.get(i));
             }
             if (childPs != null) {
                 PackageRemovedInfo childOutInfo = (outInfo != null
@@ -14629,7 +14621,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         // Delete application code and resources only for parent packages
-        if (ps.pkg.parentPackage == null) {
+        if (ps.parentPackageName == null) {
             if (deleteCodeAndResources && (outInfo != null)) {
                 outInfo.args = createInstallArgsForExisting(packageFlagsToInstallFlags(ps),
                         ps.codePathString, ps.resourcePathString, getAppDexInstructionSets(ps));
@@ -14720,7 +14712,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
 
-            if (ps.pkg != null && ps.pkg.parentPackage != null && (!isSystemApp(ps)
+            if (ps.parentPackageName != null && (!isSystemApp(ps)
                     || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
@@ -14808,7 +14800,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing non-system package: " + ps.name);
             // Kill application pre-emptively especially for apps on sd.
             killApplication(packageName, ps.appId, "uninstall pkg");
-            ret = deleteInstalledPackageLI(ps.pkg, deleteCodeAndResources, flags, allUserHandles,
+            ret = deleteInstalledPackageLI(ps, deleteCodeAndResources, flags, allUserHandles,
                     outInfo, writeSettings, replacingPackage);
         }
 
