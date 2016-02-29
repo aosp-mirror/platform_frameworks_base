@@ -656,7 +656,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 mGuts = (NotificationGuts) inflated;
                 mGuts.setClipTopAmount(getClipTopAmount());
                 mGuts.setActualHeight(getActualHeight());
-                mTranslateableViews.add(mGuts);
                 mGutsStub = null;
             }
         });
@@ -1175,6 +1174,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         super.setActualHeight(height, notifyListeners);
+        if (mGuts != null && mGuts.areGutsExposed()) {
+            mGuts.setActualHeight(height);
+            return;
+        }
         int contentHeight = Math.max(getMinHeight(), height);
         mPrivateLayout.setContentHeight(contentHeight);
         mPublicLayout.setContentHeight(contentHeight);
@@ -1184,7 +1187,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mGuts != null) {
             mGuts.setActualHeight(height);
         }
-        invalidate();
     }
 
     @Override
