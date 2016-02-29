@@ -37,6 +37,7 @@ final class TestUtil {
             MtpConstants.OPERATION_GET_PARTIAL_OBJECT,
             MtpConstants.OPERATION_SEND_OBJECT,
             MtpConstants.OPERATION_SEND_OBJECT_INFO,
+            MtpConstants.OPERATION_DELETE_OBJECT,
     };
 
     /**

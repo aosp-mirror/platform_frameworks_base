@@ -47,16 +47,16 @@ class DocumentLoader implements AutoCloseable {
     static final int NUM_LOADING_ENTRIES = 20;
     static final int NOTIFY_PERIOD_MS = 500;
 
-    private final int mDeviceId;
+    private final MtpDeviceRecord mDevice;
     private final MtpManager mMtpManager;
     private final ContentResolver mResolver;
     private final MtpDatabase mDatabase;
     private final TaskList mTaskList = new TaskList();
     private Thread mBackgroundThread;
 
-    DocumentLoader(int deviceId, MtpManager mtpManager, ContentResolver resolver,
+    DocumentLoader(MtpDeviceRecord device, MtpManager mtpManager, ContentResolver resolver,
                    MtpDatabase database) {
-        mDeviceId = deviceId;
+        mDevice = device;
         mMtpManager = mtpManager;
         mResolver = resolver;
         mDatabase = database;
@@ -69,7 +69,7 @@ class DocumentLoader implements AutoCloseable {
      */
     synchronized Cursor queryChildDocuments(String[] columnNames, Identifier parent)
             throws IOException {
-        Preconditions.checkArgument(parent.mDeviceId == mDeviceId);
+        Preconditions.checkArgument(parent.mDeviceId == mDevice.deviceId);
         LoaderTask task = mTaskList.findTask(parent);
         if (task == null) {
             if (parent.mDocumentId == null) {
@@ -81,7 +81,7 @@ class DocumentLoader implements AutoCloseable {
             // 3. startAddingChildDocuemnts.
             // 4. stopAddingChildDocuments - It removes the new document added at the step 2,
             //     because it is not updated between start/stopAddingChildDocuments.
-            task = LoaderTask.create(mDatabase, mMtpManager, parent);
+            task = LoaderTask.create(mDatabase, mMtpManager, mDevice.operationsSupported, parent);
             task.fillDocuments(loadDocuments(
                     mMtpManager,
                     parent.mDeviceId,
@@ -123,7 +123,7 @@ class DocumentLoader implements AutoCloseable {
             return task;
         }
 
-        final Identifier identifier = mDatabase.getUnmappedDocumentsParent(mDeviceId);
+        final Identifier identifier = mDatabase.getUnmappedDocumentsParent(mDevice.deviceId);
         if (identifier != null) {
             final LoaderTask existingTask = mTaskList.findTask(identifier);
             if (existingTask != null) {
@@ -131,7 +131,8 @@ class DocumentLoader implements AutoCloseable {
                 mTaskList.remove(existingTask);
             }
             try {
-                final LoaderTask newTask = LoaderTask.create(mDatabase, mMtpManager, identifier);
+                final LoaderTask newTask = LoaderTask.create(
+                        mDatabase, mMtpManager, mDevice.operationsSupported, identifier);
                 mTaskList.addFirst(newTask);
                 return newTask;
             } catch (IOException exception) {
@@ -275,14 +276,17 @@ class DocumentLoader implements AutoCloseable {
         static final int STATE_ERROR = 2;
 
         final MtpDatabase mDatabase;
+        int[] mOperationsSupported;
         final Identifier mIdentifier;
         final int[] mObjectHandles;
         Date mLastNotified;
         int mNumLoaded;
         Exception mError;
 
-        LoaderTask(MtpDatabase database, Identifier identifier, int[] objectHandles) {
+        LoaderTask(MtpDatabase database, int[] operationsSupported, Identifier identifier,
+                int[] objectHandles) {
             mDatabase = database;
+            mOperationsSupported = operationsSupported;
             mIdentifier = identifier;
             mObjectHandles = objectHandles;
             mNumLoaded = 0;
@@ -355,7 +359,8 @@ class DocumentLoader implements AutoCloseable {
                     mDatabase.getMapper().startAddingDocuments(mIdentifier.mDocumentId);
                 }
                 mDatabase.getMapper().putChildDocuments(
-                        mIdentifier.mDeviceId, mIdentifier.mDocumentId, objectInfoList);
+                        mIdentifier.mDeviceId, mIdentifier.mDocumentId, mOperationsSupported,
+                        objectInfoList);
                 mNumLoaded += objectInfoList.length;
                 if (getState() != STATE_LOADING) {
                     mDatabase.getMapper().stopAddingDocuments(mIdentifier.mDocumentId);
@@ -394,7 +399,8 @@ class DocumentLoader implements AutoCloseable {
         /**
          * Creates a LoaderTask that loads children of the given document.
          */
-        static LoaderTask create(MtpDatabase database, MtpManager manager, Identifier parent)
+        static LoaderTask create(MtpDatabase database, MtpManager manager,
+                int[] operationsSupported, Identifier parent)
                 throws IOException {
             int parentHandle = parent.mObjectHandle;
             // Need to pass the special value MtpManager.OBJECT_HANDLE_ROOT_CHILDREN to
@@ -402,7 +408,7 @@ class DocumentLoader implements AutoCloseable {
             if (parent.mDocumentType == MtpDatabaseConstants.DOCUMENT_TYPE_STORAGE) {
                 parentHandle = MtpManager.OBJECT_HANDLE_ROOT_CHILDREN;
             }
-            return new LoaderTask(database, parent, manager.getObjectHandles(
+            return new LoaderTask(database, operationsSupported, parent, manager.getObjectHandles(
                     parent.mDeviceId, parent.mStorageId, parentHandle));
         }
     }

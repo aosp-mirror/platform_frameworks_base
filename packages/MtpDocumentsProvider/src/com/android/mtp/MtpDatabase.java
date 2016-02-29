@@ -372,9 +372,10 @@ class MtpDatabase {
      * @param info
      * @return Document ID of added document.
      */
-    String putNewDocument(int deviceId, String parentDocumentId, MtpObjectInfo info) {
+    String putNewDocument(
+            int deviceId, String parentDocumentId, int[] operationsSupported, MtpObjectInfo info) {
         final ContentValues values = new ContentValues();
-        getObjectDocumentValues(values, deviceId, parentDocumentId, info);
+        getObjectDocumentValues(values, deviceId, parentDocumentId, operationsSupported, info);
         mDatabase.beginTransaction();
         try {
             final long id = mDatabase.insert(TABLE_DOCUMENTS, null, values);
@@ -582,9 +583,10 @@ class MtpDatabase {
         }
     }
 
-    void updateObject(String documentId, int deviceId, String parentId, MtpObjectInfo info) {
+    void updateObject(String documentId, int deviceId, String parentId, int[] operationsSupported,
+                      MtpObjectInfo info) {
         final ContentValues values = new ContentValues();
-        getObjectDocumentValues(values, deviceId, parentId, info);
+        getObjectDocumentValues(values, deviceId, parentId, operationsSupported, info);
 
         mDatabase.beginTransaction();
         try {
@@ -738,20 +740,10 @@ class MtpDatabase {
      * @param info MTP object info.
      */
     static void getObjectDocumentValues(
-            ContentValues values, int deviceId, String parentId, MtpObjectInfo info) {
+            ContentValues values, int deviceId, String parentId, int[] operationsSupported,
+            MtpObjectInfo info) {
         values.clear();
         final String mimeType = getMimeType(info);
-        int flag = 0;
-        if (info.getProtectionStatus() == 0) {
-            flag |= Document.FLAG_SUPPORTS_DELETE |
-                    Document.FLAG_SUPPORTS_WRITE;
-            if (mimeType == Document.MIME_TYPE_DIR) {
-                flag |= Document.FLAG_DIR_SUPPORTS_CREATE;
-            }
-        }
-        if (info.getThumbCompressedSize() > 0) {
-            flag |= Document.FLAG_SUPPORTS_THUMBNAIL;
-        }
         values.put(COLUMN_DEVICE_ID, deviceId);
         values.put(COLUMN_STORAGE_ID, info.getStorageId());
         values.put(COLUMN_OBJECT_HANDLE, info.getObjectHandle());
@@ -765,8 +757,10 @@ class MtpDatabase {
                 Document.COLUMN_LAST_MODIFIED,
                 info.getDateModified() != 0 ? info.getDateModified() : null);
         values.putNull(Document.COLUMN_ICON);
-        values.put(Document.COLUMN_FLAGS, flag);
-        values.put(Document.COLUMN_SIZE, info.getCompressedSize());
+        values.put(Document.COLUMN_FLAGS, getDocumentFlags(
+                operationsSupported, mimeType, info.getThumbCompressedSizeLong(),
+                info.getProtectionStatus()));
+        values.put(Document.COLUMN_SIZE, info.getCompressedSizeLong());
     }
 
     private static String getMimeType(MtpObjectInfo info) {
@@ -791,6 +785,30 @@ class MtpDatabase {
             rootFlag |= Root.FLAG_SUPPORTS_CREATE;
         }
         return rootFlag;
+    }
+
+    private static int getDocumentFlags(
+            int[] operationsSupported, String mimeType, long thumbnailSize, int protectionState) {
+        int flag = 0;
+        if (MtpDeviceRecord.isWritingSupported(operationsSupported) &&
+                protectionState == MtpConstants.PROTECTION_STATUS_NONE) {
+            flag |= Document.FLAG_SUPPORTS_WRITE;
+        }
+        if (MtpDeviceRecord.isSupported(
+                operationsSupported, MtpConstants.OPERATION_DELETE_OBJECT) &&
+                (protectionState == MtpConstants.PROTECTION_STATUS_NONE ||
+                 protectionState == MtpConstants.PROTECTION_STATUS_NON_TRANSFERABLE_DATA)) {
+            flag |= Document.FLAG_SUPPORTS_DELETE;
+        }
+        if (mimeType.equals(Document.MIME_TYPE_DIR) &&
+                MtpDeviceRecord.isWritingSupported(operationsSupported) &&
+                protectionState == MtpConstants.PROTECTION_STATUS_NONE) {
+            flag |= Document.FLAG_DIR_SUPPORTS_CREATE;
+        }
+        if (thumbnailSize > 0) {
+            flag |= Document.FLAG_SUPPORTS_THUMBNAIL;
+        }
+        return flag;
     }
 
     static String[] strings(Object... args) {
