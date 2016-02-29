@@ -16,7 +16,7 @@
 LOCAL_PATH := $(my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_JAVACFLAGS := -source 6 -target 6
+LOCAL_JAVA_LANGUAGE_VERSION := 1.8
 
 #
 # Define rules to build temp_layoutlib.jar, which contains a subset of
