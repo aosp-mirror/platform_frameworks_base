@@ -33,7 +33,7 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         /**
          * Called when the gear behind a notification is touched.
          */
-        public void onGearTouched(ExpandableNotificationRow row);
+        public void onGearTouched(ExpandableNotificationRow row, int x, int y);
     }
 
     private ExpandableNotificationRow mParent;
@@ -45,6 +45,8 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     private boolean mSettingsFadedIn = false;
     private boolean mAnimating = false;
     private boolean mOnLeft = true;
+    private int[] mGearLocation = new int[2];
+    private int[] mParentLocation = new int[2];
 
     public NotificationSettingsIconRow(Context context) {
         this(context, null);
@@ -74,6 +76,12 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
         resetState();
     }
 
+    public void resetState() {
+        setGearAlpha(0f);
+        mAnimating = false;
+        setIconLocation(true /* on left */);
+    }
+
     public void setGearListener(SettingsIconRowListener listener) {
         mListener = listener;
     }
@@ -84,12 +92,6 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
 
     public ExpandableNotificationRow getNotificationParent() {
         return mParent;
-    }
-
-    public void resetState() {
-        setGearAlpha(0f);
-        mAnimating = false;
-        setIconLocation(true /* on left */);
     }
 
     private void setGearAlpha(float alpha) {
@@ -200,7 +202,16 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     public void onClick(View v) {
         if (v.getId() == R.id.gear_icon) {
             if (mListener != null) {
-                mListener.onGearTouched(mParent);
+                mGearIcon.getLocationOnScreen(mGearLocation);
+                mParent.getLocationOnScreen(mParentLocation);
+
+                final int centerX = (int) (mHorizSpaceForGear / 2);
+                // Top / bottom padding are not equal, need to subtract them to get center of gear.
+                final int centerY = (int) (mGearIcon.getHeight() - mGearIcon.getPaddingTop()
+                        - mGearIcon.getPaddingBottom()) / 2 + mGearIcon.getPaddingTop();
+                final int x = mGearLocation[0] - mParentLocation[0] + centerX;
+                final int y = mGearLocation[1] - mParentLocation[1] + centerY;
+                mListener.onGearTouched(mParent, x, y);
             }
         } else {
             // Do nothing when the background is touched.
