@@ -2449,33 +2449,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             reconcileAppsData(StorageManager.UUID_PRIVATE_INTERNAL, UserHandle.USER_SYSTEM,
                     storageFlags);
 
-            if (!StorageManager.isFileBasedEncryptionEnabled()
-                    && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
-                // When upgrading a non-FBE device, we might need to shuffle
-                // around the default storage location of system apps
-                final List<UserInfo> users = sUserManager.getUsers(true);
-                for (PackageSetting ps : mSettings.mPackages.values()) {
-                    if (ps.pkg == null || !ps.isSystem()) continue;
-                    final int storageTarget = ps.pkg.applicationInfo.isForceDeviceEncrypted()
-                            ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
-                    for (UserInfo user : users) {
-                        if (ps.getInstalled(user.id)) {
-                            try {
-                                mInstaller.migrateAppData(StorageManager.UUID_PRIVATE_INTERNAL,
-                                        ps.name, user.id, storageTarget);
-                            } catch (InstallerException e) {
-                                logCriticalInfo(Log.WARN,
-                                        "Failed to migrate " + ps.name + ": " + e.getMessage());
-                            }
-                            // We may have just shuffled around app data
-                            // directories, so prepare it one more time
-                            prepareAppData(StorageManager.UUID_PRIVATE_INTERNAL, user.id,
-                                    storageFlags, ps.pkg, false);
-                        }
-                    }
-                }
-            }
-
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
             if (mIsUpgrade && !onlyCore) {
@@ -18021,6 +17994,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
 
             if (ps.getInstalled(userId)) {
                 prepareAppData(volumeUuid, userId, flags, ps.pkg, restoreconNeeded);
+
+                if (maybeMigrateAppData(volumeUuid, userId, ps.pkg)) {
+                    // We may have just shuffled around app data directories, so
+                    // prepare them one more time
+                    prepareAppData(volumeUuid, userId, flags, ps.pkg, restoreconNeeded);
+                }
+
                 preparedCount++;
             }
         }
@@ -18145,6 +18125,30 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * For system apps on non-FBE devices, this method migrates any existing
+     * CE/DE data to match the {@code forceDeviceEncrypted} flag requested by
+     * the app.
+     */
+    private boolean maybeMigrateAppData(String volumeUuid, int userId, PackageParser.Package pkg) {
+        if (pkg.isSystemApp() && !StorageManager.isFileBasedEncryptionEnabled()
+                && PackageManager.APPLY_FORCE_DEVICE_ENCRYPTED) {
+            final int storageTarget = pkg.applicationInfo.isForceDeviceEncrypted()
+                    ? StorageManager.FLAG_STORAGE_DE : StorageManager.FLAG_STORAGE_CE;
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.migrateAppData(volumeUuid, pkg.packageName, userId, storageTarget);
+                } catch (InstallerException e) {
+                    logCriticalInfo(Log.WARN,
+                            "Failed to migrate " + pkg.packageName + ": " + e.getMessage());
+                }
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 
