@@ -2540,6 +2540,14 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (fitToDisplay) {
             Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
         }
+
+        // We need to make sure we update the CompatFrame as it is used for
+        // cropping decisions, etc, on systems where we lack a decor layer.
+        mCompatFrame.set(mFrame);
+        if (mEnforceSizeCompat) {
+            // See comparable block in computeFrameLw.
+            mCompatFrame.scale(mInvGlobalScale);
+        }
     }
 
     boolean isChildWindow() {
