@@ -17,6 +17,7 @@
 package com.android.internal.telecom;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.telecom.ParcelableCallAnalytics;
 import android.telecom.PhoneAccountHandle;
 import android.net.Uri;
@@ -247,5 +248,11 @@ interface ITelecomService {
     /**
     * @see TelecomServiceImpl#launchManageBlockedNumbersActivity
     **/
+    // TODO: Delete this.
     void launchManageBlockedNumbersActivity(in String callingPackageName);
+
+    /**
+    * @see TelecomServiceImpl#createManageBlockedNumbersIntent
+    **/
+    Intent createManageBlockedNumbersIntent();
 }
