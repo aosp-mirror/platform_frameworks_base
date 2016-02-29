@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"អត្រា​និយាយ"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"ល្បឿន​ពេល​អាន​​អត្ថបទ"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ឡើង​-ចុះ"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"ប៉ះពាល់ដល់សំឡេងនៃការនិយាយដែលបានបម្លែង"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"ភាសា"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"ប្រើ​ភាសា​ប្រព័ន្ធ"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"មិន​បាន​ជ្រើស​ភាសា"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"ដំណើរការកម្មវិធីបំលែង WebView ក្នុងដំណើរការដាច់ដោយឡែក"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ការប្រតិបត្តិ WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"កំណត់ការប្រតិបត្តិ WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"ការប្រតិបត្តិការ WebView ដែលបានជ្រើសត្រូវបានបិទដំណើរការ ប៉ុន្តែអ្នកត្រូវបើកដំណើរការវាដើម្បីប្រើ តើអ្នកចង់បើកដំណើរការវាដែរឬទេ?"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"ការអនុវត្ត WebView ដែលបានជ្រើសមិនត្រូវត្រឹមត្រូវទេ ដោយសារតែបញ្ជីជម្រើសនៃការអនុវត្តន៍ចាស់ហើយ។ គួរតែអាប់ដេតបញ្ជីនោះ។"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"បម្លែងទៅជាការអ៊ីនគ្រីបឯកសារ"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"បម្លែង…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"បានអ៊ីនគ្រីបឯកសាររួចហើយ"</string>

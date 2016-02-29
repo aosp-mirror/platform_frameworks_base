@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"اسپیچ کی شرح"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"متن بولے جانے کی رفتار"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"پچ"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"تصنعی اسپیچ کی ٹون کو متاثر کرتا ہے"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"زبان"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"سسٹم کی زبان استعمال کریں"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"زبان منتخب نہیں کی گئی"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"‏WebView رینڈررز کو ایک علیحدہ پراسیس میں چلائیں۔"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"‏WebView کا نفاذ"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"‏WebView کا نفاذ سیٹ کریں"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"‏منتخب کردہ WebView کا نفاذ غیر فعال ہے اور استعمال کرنے کیلئے اسے فعال ہونا چاہئیے، کیا آپ اسے فعال کرنا چاہتے ہیں؟"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"‏WebView کا منتخب کردہ نفاذ غلط ہے کیونکہ نفاذ کے انتخابات کی فہرست باسی ہو گئی ہے۔ اب فہرست کو اپ ڈیٹ ہونا چاہئیے۔"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"فائل مرموز کاری میں بدلیں"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"بدلیں…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"فائل پہلے ہی مرموز شدہ ہے"</string>

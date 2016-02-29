@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Ταχύτητα λόγου"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Ταχύτητα με την οποία εκφωνείται το κείμενο"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Τόνος"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Επηρεάζει τον τόνο της σύνθεσης ομιλίας"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Γλώσσα"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Χρήση γλώσσας συστήματος"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Δεν έχει επιλεγεί γλώσσα"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Εκτέλεση λειτ.απόδοσης WebView σε μια απομονωμένη διεργασία."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Υλοποίηση WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Ορισμός υλοποίησης WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Η επιλεγμένη ενσωμάτωση WebView είναι απενεργοποιημένη και θα πρέπει να ενεργοποιηθεί για να χρησιμοποιηθεί. Θέλετε να την ενεργοποιήσετε;"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Η επιλεγμένη υλοποίηση WebView δεν είναι έγκυρη επειδή η λίστα των επιλογών υλοποίησης δεν είναι ενημερωμένη. Η λίστα θα πρέπει να ενημερωθεί."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Μετατροπή σε κρυπτογράφηση αρχείου"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Μετατροπή…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Με κρυπτογράφηση αρχείου"</string>

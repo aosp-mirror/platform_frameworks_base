@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"语速"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"文字转换成语音后的播放速度"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"音高"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"会影响合成语音的音调"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"语言"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"使用系统语言"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"未选择语言"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"在独立进程中运行 WebView 渲染程序。"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 实现"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"设置 WebView 实现"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"所选的 WebView 实现已停用，您必须先启用 WebView 实现才能加以使用。要启用该 WebView 实现吗？"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"所选的 WebView 实现无效，因为相关的实现选项列表已过时。请立即更新这份列表。"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"转换为文件加密"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"转换…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"文件已加密"</string>
@@ -311,7 +310,7 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"未在充电"</string>
     <string name="battery_info_status_not_charging" msgid="2820070506621483576">"未在充电"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"电量充足"</string>
-    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"已由管理员控制"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"由管理员控制"</string>
     <string name="home" msgid="8263346537524314127">"主屏幕"</string>
     <string name="charge_length_format" msgid="8978516217024434156">"<xliff:g id="ID_1">%1$s</xliff:g>前"</string>
     <string name="remaining_length_format" msgid="7886337596669190587">"还剩 <xliff:g id="ID_1">%1$s</xliff:g>"</string>

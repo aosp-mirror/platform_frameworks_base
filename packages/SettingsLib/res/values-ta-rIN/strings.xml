@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"பேசப்படும் உரையின் வேகம்"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ஒலித்திறன்"</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"தொகுக்கப்பட்ட உரையின் டோன் பாதிக்கப்படும்"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"மொழி"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"முறைமையின் மொழியைப் பயன்படுத்து"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"மொழி தேர்ந்தெடுக்கப்படவில்லை"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"தனிப்படுத்தப்பட்ட செயல்முறையில் WebView ரெண்டரர்களை இயக்கு."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView செயல்படுத்தல்"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"WebView செயல்படுத்தலை அமை"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"தேர்வுசெய்த WebView செயல்படுத்தல் முடக்கப்பட்டுள்ளது, பயன்படுத்த வேண்டுமெனில் அதைக் கண்டிப்பாக இயக்க வேண்டும். இயக்க விரும்புகிறீர்களா?"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"தேர்வுசெய்த WebView செயல்படுத்தல் தவறானது. ஏனெனில் செயல்படுத்தல் விருப்பங்கள் பட்டியல் காலாவதியாகியுள்ளது. பட்டியலை இப்போது புதுப்பிக்க வேண்டும்."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"கோப்பு முறைமையாக்கத்திற்கு மாற்று"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"மாற்று…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"ஏற்கனவே கோப்பு முறைமையாக்கப்பட்டது"</string>

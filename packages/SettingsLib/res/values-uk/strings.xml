@@ -102,8 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Темп мовлення"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Швидкість відтворення тексту"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Вис. зв."</string>
-    <!-- no translation found for tts_default_pitch_summary (1944885882882650009) -->
-    <skip />
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Впливає на тон синтезованого мовлення"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Мова"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Використовувати мову системи"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Мову не вибрано"</string>
@@ -279,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Запустити засоби обробки відео WebView окремим процесом."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Застосування WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Налаштувати застосування WebView"</string>
-    <string name="select_webview_provider_confirmation_text" msgid="6671472080671066972">"Вибране застосування WebView вимкнено. Увімкнути його?"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"Недійсне застосування WebView, оскільки список вибору застосувань застарів. Тепер список оновлено."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Конвертувати в зашифрований файл"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Конвертація…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Уже конвертовано в зашифрований файл"</string>
