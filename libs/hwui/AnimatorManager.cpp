@@ -95,11 +95,11 @@ void AnimatorManager::onAnimatorTargetChanged(BaseRenderNodeAnimator* animator) 
 
 class AnimateFunctor {
 public:
-    AnimateFunctor(TreeInfo& info, AnimationContext& context)
-            : dirtyMask(0), mInfo(info), mContext(context) {}
+    AnimateFunctor(TreeInfo& info, AnimationContext& context, uint32_t* outDirtyMask)
+            : mInfo(info), mContext(context), mDirtyMask(outDirtyMask) {}
 
     bool operator() (sp<BaseRenderNodeAnimator>& animator) {
-        dirtyMask |= animator->dirtyMask();
+        *mDirtyMask |= animator->dirtyMask();
         bool remove = animator->animate(mContext);
         if (remove) {
             animator->detach();
@@ -114,11 +114,10 @@ public:
         return remove;
     }
 
-    uint32_t dirtyMask;
-
 private:
     TreeInfo& mInfo;
     AnimationContext& mContext;
+    uint32_t* mDirtyMask;
 };
 
 uint32_t AnimatorManager::animate(TreeInfo& info) {
@@ -143,12 +142,13 @@ void AnimatorManager::animateNoDamage(TreeInfo& info) {
 }
 
 uint32_t AnimatorManager::animateCommon(TreeInfo& info) {
-    AnimateFunctor functor(info, mAnimationHandle->context());
+    uint32_t dirtyMask;
+    AnimateFunctor functor(info, mAnimationHandle->context(), &dirtyMask);
     auto newEnd = std::remove_if(mAnimators.begin(), mAnimators.end(), functor);
     mAnimators.erase(newEnd, mAnimators.end());
     mAnimationHandle->notifyAnimationsRan();
     mParent.mProperties.updateMatrix();
-    return functor.dirtyMask;
+    return dirtyMask;
 }
 
 static void endStagingAnimator(sp<BaseRenderNodeAnimator>& animator) {
