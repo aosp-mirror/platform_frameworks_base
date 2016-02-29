@@ -31,7 +31,7 @@
     <color name="batterymeter_bolt_color">#FFFFFFFF</color>
     <color name="qs_batterymeter_frame_color">#FF404040</color>
     <color name="system_primary_color">#ff263238</color><!-- blue grey 900 -->
-    <color name="system_secondary_color">#ff384248</color>
+    <color name="system_secondary_color">#ff37474F</color><!-- blue grey 800 -->
     <color name="system_accent_color">#ff80CBC4</color><!-- deep teal 200 -->
     <color name="system_warning_color">#fff4511e</color><!-- deep orange 600 -->
     <color name="qs_text">#FFFFFFFF</color>
