@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.telephony.SubscriptionInfo;
 import android.util.ArraySet;
@@ -636,6 +637,9 @@ public class SignalClusterView
 
             if (drawable instanceof Animatable) {
                 Animatable ad = (Animatable) drawable;
+                if (ad instanceof AnimatedVectorDrawable) {
+                    ((AnimatedVectorDrawable) ad).forceAnimationOnUI();
+                }
                 if (!ad.isRunning()) {
                     ad.start();
                 }
