@@ -1547,18 +1547,30 @@ public class MediaRouter {
 
         private Object mTag;
 
+        /** @hide */
+        @IntDef({PLAYBACK_TYPE_LOCAL, PLAYBACK_TYPE_REMOTE})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PlaybackType {}
+
         /**
          * The default playback type, "local", indicating the presentation of the media is happening
          * on the same device (e&#46;g&#46; a phone, a tablet) as where it is controlled from.
          * @see #getPlaybackType()
          */
         public final static int PLAYBACK_TYPE_LOCAL = 0;
+
         /**
          * A playback type indicating the presentation of the media is happening on
          * a different device (i&#46;e&#46; the remote device) than where it is controlled from.
          * @see #getPlaybackType()
          */
         public final static int PLAYBACK_TYPE_REMOTE = 1;
+
+        /** @hide */
+         @IntDef({PLAYBACK_VOLUME_FIXED,PLAYBACK_VOLUME_VARIABLE})
+         @Retention(RetentionPolicy.SOURCE)
+         private @interface PlaybackVolume {}
+
         /**
          * Playback information indicating the playback volume is fixed, i&#46;e&#46; it cannot be
          * controlled from this object. An example of fixed playback volume is a remote player,
@@ -1783,6 +1795,7 @@ public class MediaRouter {
          * @return the type of playback associated with this route
          * @see UserRouteInfo#setPlaybackType(int)
          */
+        @PlaybackType
         public int getPlaybackType() {
             return mPlaybackType;
         }
@@ -1874,6 +1887,7 @@ public class MediaRouter {
          * @return how volume is handling on the route
          * @see UserRouteInfo#setVolumeHandling(int)
          */
+        @PlaybackVolume
         public int getVolumeHandling() {
             return mVolumeHandling;
         }
@@ -2164,7 +2178,7 @@ public class MediaRouter {
          *    ({@link RouteInfo#PLAYBACK_TYPE_REMOTE}).
          * @param type
          */
-        public void setPlaybackType(int type) {
+        public void setPlaybackType(@RouteInfo.PlaybackType int type) {
             if (mPlaybackType != type) {
                 mPlaybackType = type;
                 configureSessionVolume();
@@ -2177,7 +2191,7 @@ public class MediaRouter {
          * ({@link RouteInfo#PLAYBACK_VOLUME_VARIABLE}).
          * @param volumeHandling
          */
-        public void setVolumeHandling(int volumeHandling) {
+        public void setVolumeHandling(@RouteInfo.PlaybackVolume int volumeHandling) {
             if (mVolumeHandling != volumeHandling) {
                 mVolumeHandling = volumeHandling;
                 configureSessionVolume();
@@ -2268,7 +2282,8 @@ public class MediaRouter {
                 return;
             }
             if (mPlaybackType == RemoteControlClient.PLAYBACK_TYPE_REMOTE) {
-                int volumeControl = VolumeProvider.VOLUME_CONTROL_FIXED;
+                @VolumeProvider.ControlType int volumeControl =
+                        VolumeProvider.VOLUME_CONTROL_FIXED;
                 switch (mVolumeHandling) {
                     case RemoteControlClient.PLAYBACK_VOLUME_VARIABLE:
                         volumeControl = VolumeProvider.VOLUME_CONTROL_ABSOLUTE;
@@ -2294,7 +2309,8 @@ public class MediaRouter {
 
         class SessionVolumeProvider extends VolumeProvider {
 
-            public SessionVolumeProvider(int volumeControl, int maxVolume, int currentVolume) {
+            public SessionVolumeProvider(@VolumeProvider.ControlType int volumeControl,
+                    int maxVolume, int currentVolume) {
                 super(volumeControl, maxVolume, currentVolume);
             }
 
