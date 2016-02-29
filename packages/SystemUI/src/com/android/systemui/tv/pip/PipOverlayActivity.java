@@ -103,4 +103,8 @@ public class PipOverlayActivity extends Activity implements PipManager.Listener 
         mPipManager.suspendPipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_OVERLAY_ACTIVITY_FINISH);
     }
+
+    @Override
+    public void onMediaControllerChanged() {
+    }
 }
