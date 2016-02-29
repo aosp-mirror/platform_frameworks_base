@@ -75,6 +75,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.security.NetworkSecurityPolicy;
@@ -3677,6 +3678,12 @@ public final class ActivityThread {
                 ActivityManagerNative.getDefault().activityStopped(
                     activity.token, state, persistentState, description);
             } catch (RemoteException ex) {
+                if (ex instanceof TransactionTooLargeException
+                        && "com.google.android.gms".equals(activity.packageInfo.getPackageName())) {
+                    Log.d(TAG, "STAHP SENDING SO MUCH DATA KTHX: " + ex);
+                    return;
+                }
+
                 throw ex.rethrowFromSystemServer();
             }
         }

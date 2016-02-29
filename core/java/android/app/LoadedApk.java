@@ -225,6 +225,10 @@ public final class LoadedApk {
         return mApplicationInfo;
     }
 
+    public int getTargetSdkVersion() {
+        return mApplicationInfo.targetSdkVersion;
+    }
+
     public boolean isSecurityViolation() {
         return mSecurityViolation;
     }
