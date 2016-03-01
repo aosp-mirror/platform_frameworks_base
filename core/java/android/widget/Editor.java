@@ -351,9 +351,14 @@ public class Editor {
     }
 
     void replace() {
+        if (mSuggestionsPopupWindow == null) {
+            mSuggestionsPopupWindow = new SuggestionsPopupWindow();
+        }
+        hideCursorAndSpanControllers();
+        mSuggestionsPopupWindow.show();
+
         int middle = (mTextView.getSelectionStart() + mTextView.getSelectionEnd()) / 2;
         Selection.setSelection((Spannable) mTextView.getText(), middle);
-        showSuggestions();
     }
 
     void onAttachedToWindow() {
@@ -2086,7 +2091,7 @@ public class Editor {
 
                     mShowSuggestionRunnable = new Runnable() {
                         public void run() {
-                            showSuggestions();
+                            replace();
                         }
                     };
                     // removeCallbacks is performed on every touch
@@ -2225,15 +2230,6 @@ public class Editor {
         }
 
         mCorrectionHighlighter.highlight(info);
-    }
-
-    void showSuggestions() {
-        if (mSuggestionsPopupWindow == null) {
-            mSuggestionsPopupWindow = new SuggestionsPopupWindow();
-        }
-        hideCursorAndSpanControllers();
-        stopTextActionMode();
-        mSuggestionsPopupWindow.show();
     }
 
     void onScrollChanged() {
@@ -3420,7 +3416,7 @@ public class Editor {
 
         @Override
         protected int getTextOffset() {
-            return mTextView.getSelectionStart();
+            return (mTextView.getSelectionStart() + mTextView.getSelectionStart()) / 2;
         }
 
         @Override
