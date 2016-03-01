@@ -1525,7 +1525,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             throw new IllegalStateException("Must be called from main thread of fragment host");
         }
 
-        if (allowStateLoss) {
+        if (!allowStateLoss) {
             checkStateLoss();
         }
 
