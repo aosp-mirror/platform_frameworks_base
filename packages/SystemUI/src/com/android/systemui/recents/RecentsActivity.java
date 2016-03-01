@@ -636,7 +636,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             // Focus the next task
             EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
 
-            MetricsLogger.action(this, MetricsEvent.OVERVIEW_PAGE);
+            MetricsLogger.action(this, MetricsEvent.ACTION_OVERVIEW_PAGE);
         }
     }
 
