@@ -45,10 +45,12 @@ import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.Protocol;
+import com.android.internal.util.MessageUtils;
 
 import libcore.net.event.NetworkEventDispatcher;
 
@@ -78,6 +80,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConnectivityManager {
     private static final String TAG = "ConnectivityManager";
+
+    private static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
+            new Class[]{ConnectivityManager.class}, new String[]{"CALLBACK_"});
+
+    private static final String whatToString(int what) {
+        return sMagicDecoderRing.get(what, Integer.toString(what));
+    }
 
     /**
      * A change in network connectivity has occurred. A default connection has either
@@ -2563,9 +2572,11 @@ public class ConnectivityManager {
 
         @Override
         public void handleMessage(Message message) {
-            if (DBG) Log.d(TAG, "CM callback handler got msg " + message.what);
             NetworkRequest request = (NetworkRequest) getObject(message, NetworkRequest.class);
             Network network = (Network) getObject(message, Network.class);
+            if (DBG) {
+                Log.d(TAG, whatToString(message.what) + " for network " + network);
+            }
             switch (message.what) {
                 case CALLBACK_PRECHECK: {
                     NetworkCallback callback = getCallback(request, "PRECHECK");
