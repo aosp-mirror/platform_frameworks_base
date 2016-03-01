@@ -2231,6 +2231,7 @@ public final class MediaCodecInfo {
                     switch (profileLevel.profile) {
                         case CodecProfileLevel.HEVCProfileMain:
                         case CodecProfileLevel.HEVCProfileMain10:
+                        case CodecProfileLevel.HEVCProfileMain10HDR10:
                             break;
                         default:
                             Log.w(TAG, "Unrecognized profile "
@@ -2632,8 +2633,9 @@ public final class MediaCodecInfo {
         public static final int VP9Level62 = 0x1000;
 
         // from OMX_VIDEO_HEVCPROFILETYPE
-        public static final int HEVCProfileMain   = 0x01;
-        public static final int HEVCProfileMain10 = 0x02;
+        public static final int HEVCProfileMain        = 0x01;
+        public static final int HEVCProfileMain10      = 0x02;
+        public static final int HEVCProfileMain10HDR10 = 0x1000;
 
         // from OMX_VIDEO_HEVCLEVELTYPE
         public static final int HEVCMainTierLevel1  = 0x1;
