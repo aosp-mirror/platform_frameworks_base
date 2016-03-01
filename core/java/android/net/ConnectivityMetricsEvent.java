@@ -16,12 +16,11 @@
 
 package android.net;
 
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-@SystemApi
-public class ConnectivityMetricsEvent implements Parcelable {
+/** {@hide} */
+public final class ConnectivityMetricsEvent implements Parcelable {
 
     /**  The time when this event was collected, as returned by System.currentTimeMillis(). */
     final public long timestamp;

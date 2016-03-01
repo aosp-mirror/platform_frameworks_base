@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Rule instance information for zen mode.
  */
-public class AutomaticZenRule implements Parcelable {
+public final class AutomaticZenRule implements Parcelable {
 
     private boolean enabled = false;
     private String name;
