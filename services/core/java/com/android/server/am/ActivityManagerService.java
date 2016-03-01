@@ -6287,9 +6287,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             // If the app is being launched for restore or full backup, set it up specially
             boolean isRestrictedBackupMode = false;
             if (mBackupTarget != null && mBackupAppName.equals(processName)) {
-                isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
-                        || (mBackupTarget.backupMode == BackupRecord.RESTORE_FULL)
-                        || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
+                isRestrictedBackupMode = mBackupTarget.appInfo.uid >= Process.FIRST_APPLICATION_UID
+                        && ((mBackupTarget.backupMode == BackupRecord.RESTORE)
+                                || (mBackupTarget.backupMode == BackupRecord.RESTORE_FULL)
+                                || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL));
             }
 
             notifyPackageUse(app.instrumentationInfo != null
