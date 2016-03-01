@@ -29,6 +29,7 @@ import android.text.format.Formatter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.documentsui.R;
@@ -38,9 +39,10 @@ import com.android.documentsui.State;
 
 final class ListDocumentHolder extends DocumentHolder {
     final TextView mTitle;
-    final TextView mSummary;
+    final LinearLayout mDetails;  // Container of date/size/summary
     final TextView mDate;
     final TextView mSize;
+    final TextView mSummary;
     final ImageView mIconMime;
     final ImageView mIconThumb;
     final ImageView mIconCheck;
@@ -50,9 +52,10 @@ final class ListDocumentHolder extends DocumentHolder {
         super(context, parent, R.layout.item_doc_list);
 
         mTitle = (TextView) itemView.findViewById(android.R.id.title);
-        mSummary = (TextView) itemView.findViewById(android.R.id.summary);
+        mDetails = (LinearLayout) itemView.findViewById(R.id.line2);
         mDate = (TextView) itemView.findViewById(R.id.date);
         mSize = (TextView) itemView.findViewById(R.id.size);
+        mSummary = (TextView) itemView.findViewById(android.R.id.summary);
         mIconMime = (ImageView) itemView.findViewById(R.id.icon_mime);
         mIconThumb = (ImageView) itemView.findViewById(R.id.icon_thumb);
         mIconCheck = (ImageView) itemView.findViewById(R.id.icon_check);
@@ -91,6 +94,7 @@ final class ListDocumentHolder extends DocumentHolder {
         final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
         final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
         final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
+        final boolean isDirectory = Document.MIME_TYPE_DIR.equals(docMimeType);
 
         mIconHelper.stopLoading(mIconThumb);
 
@@ -105,24 +109,36 @@ final class ListDocumentHolder extends DocumentHolder {
         mTitle.setText(docDisplayName, TextView.BufferType.SPANNABLE);
         mTitle.setVisibility(View.VISIBLE);
 
-        if (docSummary != null) {
-            mSummary.setText(docSummary);
-            mSummary.setVisibility(View.VISIBLE);
-        } else {
-            mSummary.setVisibility(View.INVISIBLE);
-        }
 
-        if (docLastModified == -1) {
-            mDate.setText(null);
+        // Note, we don't show any details for any directory...ever.
+        if (isDirectory) {
+            mDetails.setVisibility(View.GONE);
         } else {
-            mDate.setText(Shared.formatTime(mContext, docLastModified));
-        }
+            boolean hasDetails = false;
+            if (docSummary != null) {
+                hasDetails = true;
+                mSummary.setText(docSummary);
+                mSummary.setVisibility(View.VISIBLE);
+            } else {
+                mSummary.setVisibility(View.INVISIBLE);
+            }
 
-        if (!state.showSize || Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
-            mSize.setVisibility(View.GONE);
-        } else {
-            mSize.setVisibility(View.VISIBLE);
-            mSize.setText(Formatter.formatFileSize(mContext, docSize));
+            if (docLastModified == -1) {
+                hasDetails = true;
+                mDate.setText(null);
+            } else {
+                mDate.setText(Shared.formatTime(mContext, docLastModified));
+            }
+
+            if (!state.showSize || docSize == -1) {
+                hasDetails = true;
+                mSize.setVisibility(View.GONE);
+                mDetails.setVisibility(View.GONE);
+            } else {
+                mSize.setVisibility(View.VISIBLE);
+                mSize.setText(Formatter.formatFileSize(mContext, docSize));
+            }
+            mDetails.setVisibility(hasDetails ? View.VISIBLE : View.GONE);
         }
     }
 
