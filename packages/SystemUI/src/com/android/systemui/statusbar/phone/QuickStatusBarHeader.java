@@ -35,13 +35,13 @@ import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSAnimator;
 import com.android.systemui.qs.QSPanel;
-import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.TouchAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import com.android.systemui.statusbar.policy.UserInfoController;
+import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener;
 import com.android.systemui.tuner.TunerService;
 
 public class QuickStatusBarHeader extends BaseStatusBarHeader implements
@@ -90,6 +90,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     private TouchAnimator mAlarmTranslation;
     private TouchAnimator mSettingsAlpha;
     private float mExpansionAmount;
+    private QSTileHost mHost;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -222,6 +223,14 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
         mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        setListening(false);
+        mHost.getUserInfoController().remListener(mUserListener);
+        mHost.getNetworkController().removeEmergencyListener(this);
+        super.onDetachedFromWindow();
+    }
+
     private void updateAlarmVisibilities() {
         mAlarmStatus.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
         mAlarmStatusCollapsed.setVisibility(mAlarmShowing ? View.VISIBLE : View.INVISIBLE);
@@ -284,17 +293,19 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
     }
 
     public void setupHost(final QSTileHost host) {
+        mHost = host;
         host.setHeaderView(this);
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
-        mHeaderQsPanel.setHost(host);
         mHeaderQsPanel.setMaxTiles(5);
-        mHeaderQsPanel.setTiles(host.getTiles());
-        host.addCallback(new QSTile.Host.Callback() {
-            @Override
-            public void onTilesChanged() {
-                mHeaderQsPanel.setTiles(host.getTiles());
-            }
-        });
+        mHeaderQsPanel.setHost(host);
+        setUserInfoController(host.getUserInfoController());
+        setBatteryController(host.getBatteryController());
+        setNextAlarmController(host.getNextAlarmController());
+
+        final boolean isAPhone = mHost.getNetworkController().hasVoiceCallingFeature();
+        if (isAPhone) {
+            mHost.getNetworkController().addEmergencyListener(this);
+        }
     }
 
     @Override
@@ -340,12 +351,7 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
 
     @Override
     public void setUserInfoController(UserInfoController userInfoController) {
-        userInfoController.addListener(new UserInfoController.OnUserInfoChangedListener() {
-            @Override
-            public void onUserInfoChanged(String name, Drawable picture) {
-                mMultiUserAvatar.setImageDrawable(picture);
-            }
-        });
+        userInfoController.addListener(mUserListener);
     }
 
     @Override
@@ -358,4 +364,11 @@ public class QuickStatusBarHeader extends BaseStatusBarHeader implements
             }
         }
     }
+
+    private final OnUserInfoChangedListener mUserListener = new OnUserInfoChangedListener() {
+        @Override
+        public void onUserInfoChanged(String name, Drawable picture) {
+            mMultiUserAvatar.setImageDrawable(picture);
+        }
+    };
 }

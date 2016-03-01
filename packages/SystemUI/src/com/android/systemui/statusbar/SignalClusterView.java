@@ -227,6 +227,8 @@ public class SignalClusterView
     protected void onDetachedFromWindow() {
         mMobileSignalGroup.removeAllViews();
         TunerService.get(mContext).removeTunable(this);
+        mSC.removeCallback(this);
+        mNC.removeSignalCallback(this);
 
         super.onDetachedFromWindow();
     }

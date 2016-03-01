@@ -390,6 +390,7 @@ public abstract class QSTile<TState extends State> implements Listenable {
         Context getContext();
         Collection<QSTile<?>> getTiles();
         void addCallback(Callback callback);
+        void removeCallback(Callback callback);
         BluetoothController getBluetoothController();
         LocationController getLocationController();
         RotationLockController getRotationLockController();

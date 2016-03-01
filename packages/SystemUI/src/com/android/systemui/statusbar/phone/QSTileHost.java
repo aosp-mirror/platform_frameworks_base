@@ -57,6 +57,7 @@ import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CastController;
+import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.NightModeController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -111,16 +112,18 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     private final NightModeController mNightModeController;
     private final AutoTileManager mAutoTiles;
     private final ManagedProfileController mProfileController;
+    private final NextAlarmController mNextAlarmController;
     private View mHeader;
 
     public QSTileHost(Context context, PhoneStatusBar statusBar,
-                      BluetoothController bluetooth, LocationController location,
-                      RotationLockController rotation, NetworkController network,
-                      ZenModeController zen, HotspotController hotspot,
-                      CastController cast, FlashlightController flashlight,
-                      UserSwitcherController userSwitcher, UserInfoController userInfo,
-                      KeyguardMonitor keyguard, SecurityController security,
-                      BatteryController battery, StatusBarIconController iconController) {
+            BluetoothController bluetooth, LocationController location,
+            RotationLockController rotation, NetworkController network,
+            ZenModeController zen, HotspotController hotspot,
+            CastController cast, FlashlightController flashlight,
+            UserSwitcherController userSwitcher, UserInfoController userInfo,
+            KeyguardMonitor keyguard, SecurityController security,
+            BatteryController battery, StatusBarIconController iconController,
+            NextAlarmController nextAlarmController) {
         mContext = context;
         mStatusBar = statusBar;
         mBluetooth = bluetooth;
@@ -137,6 +140,7 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         mSecurity = security;
         mBattery = battery;
         mIconController = iconController;
+        mNextAlarmController = nextAlarmController;
         mNightModeController = new NightModeController(mContext, true);
         mProfileController = new ManagedProfileController(this);
 
@@ -150,6 +154,10 @@ public final class QSTileHost implements QSTile.Host, Tunable {
         TunerService.get(mContext).addTunable(this, TILES_SETTING);
         // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
         mAutoTiles = new AutoTileManager(context, this);
+    }
+
+    public NextAlarmController getNextAlarmController() {
+        return mNextAlarmController;
     }
 
     public void setHeaderView(View view) {
@@ -168,6 +176,11 @@ public final class QSTileHost implements QSTile.Host, Tunable {
     @Override
     public void addCallback(Callback callback) {
         mCallbacks.add(callback);
+    }
+
+    @Override
+    public void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
     }
 
     @Override

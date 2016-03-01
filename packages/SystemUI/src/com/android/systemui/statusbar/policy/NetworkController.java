@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.SubscriptionInfo;
-
 import com.android.settingslib.net.DataUsageController;
 import com.android.settingslib.wifi.AccessPoint;
 
@@ -36,6 +35,11 @@ public interface NetworkController {
     DataUsageController getMobileDataController();
     DataSaverController getDataSaverController();
 
+    boolean hasVoiceCallingFeature();
+
+    void addEmergencyListener(EmergencyListener listener);
+    void removeEmergencyListener(EmergencyListener listener);
+
     public interface SignalCallback {
         void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
                 boolean activityIn, boolean activityOut, String description);
@@ -51,6 +55,10 @@ public interface NetworkController {
         void setIsAirplaneMode(IconState icon);
 
         void setMobileDataEnabled(boolean enabled);
+    }
+
+    public interface EmergencyListener {
+        void setEmergencyCallsOnly(boolean emergencyOnly);
     }
 
     public static class IconState {
