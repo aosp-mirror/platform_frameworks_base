@@ -41,6 +41,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -68,6 +69,7 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.Selection;
 import android.text.SpannableStringBuilder;
@@ -110,6 +112,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.AdapterView;
+import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.android.internal.app.IVoiceInteractor;
@@ -831,6 +834,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mHasCurrentPermissionsRequest;
     private boolean mEatKeyUpEvent;
+
+    private static native String getDlWarning();
 
     /** Return the intent that started this activity. */
     public Intent getIntent() {
@@ -6626,6 +6631,31 @@ public class Activity extends ContextThemeWrapper
         }
         mFragments.dispatchStart();
         mFragments.reportLoaderStart();
+
+        // This property is set for all builds except final release
+        boolean isDlwarningEnabled = SystemProperties.getInt("ro.bionic.ld.warning", 0) == 1;
+        boolean isAppDebuggable =
+                (mApplication.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+
+        if (isAppDebuggable || isDlwarningEnabled) {
+            String dlwarning = getDlWarning();
+            if (dlwarning != null) {
+                String appName = getString(mApplication.getApplicationInfo().labelRes);
+                String warning = "Detected problems with app native libraries\n" +
+                                 "(please consult log for detail):\n" + dlwarning;
+                if (isAppDebuggable) {
+                      new AlertDialog.Builder(this).
+                          setTitle(appName).
+                          setMessage(warning).
+                          setPositiveButton(android.R.string.ok, null).
+                          setCancelable(false).
+                          show();
+                } else {
+                    Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+
         mActivityTransitionState.enterReady(this);
     }
 
