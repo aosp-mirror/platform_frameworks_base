@@ -258,6 +258,20 @@ public class Environment {
         return buildPath(getDataDirectory(), "misc_de", String.valueOf(userId));
     }
 
+    private static File getDataProfilesDeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "misc", "profiles", "cur", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataProfilesDePackageDirectory(int userId, String packageName) {
+        return buildPath(getDataProfilesDeDirectory(userId), packageName);
+    }
+
+    /** {@hide} */
+    public static File getDataProfilesDeForeignDexDirectory(int userId) {
+        return buildPath(getDataProfilesDeDirectory(userId), "foreign-dex");
+    }
+
     /** {@hide} */
     public static File getDataAppDirectory(String volumeUuid) {
         return new File(getDataDirectory(volumeUuid), "app");
