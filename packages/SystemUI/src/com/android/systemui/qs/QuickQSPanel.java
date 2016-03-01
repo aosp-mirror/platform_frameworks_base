@@ -24,6 +24,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Space;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSTile.SignalState;
+import com.android.systemui.qs.QSTile.State;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +59,19 @@ public class QuickQSPanel extends QSPanel {
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
         mFullPanel = fullPanel;
         mHeader = header;
+    }
+
+    @Override
+    protected void drawTile(TileRecord r, State state) {
+        if (state instanceof SignalState) {
+            State copy = r.tile.newTileState();
+            state.copyTo(copy);
+            // No activity shown in the quick panel.
+            ((SignalState) copy).activityIn = false;
+            ((SignalState) copy).activityOut = false;
+            state = copy;
+        }
+        super.drawTile(r, state);
     }
 
     @Override
