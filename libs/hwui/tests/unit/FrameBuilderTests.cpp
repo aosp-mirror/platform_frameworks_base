@@ -990,21 +990,26 @@ TEST(FrameBuilder, projectionReorder) {
                 EXPECT_EQ(Rect(100, 100), op.unmappedBounds);
                 EXPECT_EQ(SK_ColorWHITE, op.paint->getColor());
                 expectedMatrix.loadIdentity();
+                EXPECT_EQ(nullptr, state.computedState.localProjectionPathMask);
                 break;
             case 1:
                 EXPECT_EQ(Rect(-10, -10, 60, 60), op.unmappedBounds);
                 EXPECT_EQ(SK_ColorDKGRAY, op.paint->getColor());
-                expectedMatrix.loadTranslate(50, 50, 0); // TODO: should scroll be respected here?
+                expectedMatrix.loadTranslate(50 - scrollX, 50 - scrollY, 0);
+                ASSERT_NE(nullptr, state.computedState.localProjectionPathMask);
+                EXPECT_EQ(Rect(-35, -30, 45, 50),
+                        Rect(state.computedState.localProjectionPathMask->getBounds()));
                 break;
             case 2:
                 EXPECT_EQ(Rect(100, 50), op.unmappedBounds);
                 EXPECT_EQ(SK_ColorBLUE, op.paint->getColor());
                 expectedMatrix.loadTranslate(-scrollX, 50 - scrollY, 0);
+                EXPECT_EQ(nullptr, state.computedState.localProjectionPathMask);
                 break;
             default:
                 ADD_FAILURE();
             }
-            EXPECT_MATRIX_APPROX_EQ(expectedMatrix, state.computedState.transform);
+            EXPECT_EQ(expectedMatrix, state.computedState.transform);
         }
     };
 
@@ -1045,6 +1050,9 @@ TEST(FrameBuilder, projectionReorder) {
     });
     auto parent = TestUtils::createNode(0, 0, 100, 100,
             [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
+        // Set a rect outline for the projecting ripple to be masked against.
+        properties.mutableOutline().setRoundRect(10, 10, 90, 90, 5, 1.0f);
+
         canvas.save(SaveFlags::MatrixClip);
         canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
         canvas.drawRenderNode(receiverBackground.get());
@@ -1057,6 +1065,92 @@ TEST(FrameBuilder, projectionReorder) {
     ProjectionReorderTestRenderer renderer;
     frameBuilder.replayBakedOps<TestDispatcher>(renderer);
     EXPECT_EQ(3, renderer.getIndex());
+}
+
+RENDERTHREAD_TEST(FrameBuilder, projectionHwLayer) {
+    static const int scrollX = 5;
+    static const int scrollY = 10;
+    class ProjectionHwLayerTestRenderer : public TestRendererBase {
+    public:
+        void startRepaintLayer(OffscreenBuffer* offscreenBuffer, const Rect& repaintRect) override {
+            EXPECT_EQ(0, mIndex++);
+        }
+        void onArcOp(const ArcOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            ASSERT_EQ(nullptr, state.computedState.localProjectionPathMask);
+        }
+        void endLayer() override {
+            EXPECT_EQ(2, mIndex++);
+        }
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(3, mIndex++);
+            ASSERT_EQ(nullptr, state.computedState.localProjectionPathMask);
+        }
+        void onOvalOp(const OvalOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(4, mIndex++);
+            ASSERT_NE(nullptr, state.computedState.localProjectionPathMask);
+            Matrix4 expected;
+            expected.loadTranslate(100 - scrollX, 100 - scrollY, 0);
+            EXPECT_EQ(expected, state.computedState.transform);
+            EXPECT_EQ(Rect(-85, -80, 295, 300),
+                    Rect(state.computedState.localProjectionPathMask->getBounds()));
+        }
+        void onLayerOp(const LayerOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(5, mIndex++);
+            ASSERT_EQ(nullptr, state.computedState.localProjectionPathMask);
+        }
+    };
+    auto receiverBackground = TestUtils::createNode(0, 0, 400, 400,
+            [](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setProjectionReceiver(true);
+        // scroll doesn't apply to background, so undone via translationX/Y
+        // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
+        properties.setTranslationX(scrollX);
+        properties.setTranslationY(scrollY);
+
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+    });
+    auto projectingRipple = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setProjectBackwards(true);
+        properties.setClipToBounds(false);
+        canvas.drawOval(100, 100, 300, 300, SkPaint()); // drawn mostly out of layer bounds
+    });
+    auto child = TestUtils::createNode(100, 100, 300, 300,
+            [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.mutateLayerProperties().setType(LayerType::RenderLayer);
+        canvas.drawRenderNode(projectingRipple.get());
+        canvas.drawArc(0, 0, 200, 200, 0.0f, 280.0f, true, SkPaint());
+    });
+    auto parent = TestUtils::createNode(0, 0, 400, 400,
+            [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
+        // Set a rect outline for the projecting ripple to be masked against.
+        properties.mutableOutline().setRoundRect(10, 10, 390, 390, 0, 1.0f);
+        canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
+        canvas.drawRenderNode(receiverBackground.get());
+        canvas.drawRenderNode(child.get());
+    });
+
+    OffscreenBuffer** layerHandle = child->getLayerHandle();
+
+    // create RenderNode's layer here in same way prepareTree would, setting windowTransform
+    OffscreenBuffer layer(renderThread.renderState(), Caches::getInstance(), 200, 200);
+    Matrix4 windowTransform;
+    windowTransform.loadTranslate(100, 100, 0); // total transform of layer's origin
+    layer.setWindowTransform(windowTransform);
+    *layerHandle = &layer;
+
+    auto syncedList = TestUtils::createSyncedNodeList(parent);
+    LayerUpdateQueue layerUpdateQueue; // Note: enqueue damage post-sync, so bounds are valid
+    layerUpdateQueue.enqueueLayerWithDamage(child.get(), Rect(200, 200));
+    FrameBuilder frameBuilder(layerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
+            syncedList, sLightGeometry, nullptr);
+    ProjectionHwLayerTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(6, renderer.getIndex());
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    *layerHandle = nullptr;
 }
 
 // creates a 100x100 shadow casting node with provided translationZ

@@ -389,34 +389,31 @@ void FrameBuilder::deferShadow(const RenderNodeOp& casterNodeOp) {
 }
 
 void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
-    const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
     int count = mCanvasState.save(SaveFlags::MatrixClip);
+    const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
 
-    // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
-    const DisplayList& displayList = *(renderNode.getDisplayList());
+    SkPath transformedMaskPath; // on stack, since BakedOpState makes a deep copy
+    if (projectionReceiverOutline) {
+        // transform the mask for this projector into render target space
+        // TODO: consider combining both transforms by stashing transform instead of applying
+        SkMatrix skCurrentTransform;
+        mCanvasState.currentTransform()->copyTo(skCurrentTransform);
+        projectionReceiverOutline->transform(
+                skCurrentTransform,
+                &transformedMaskPath);
+        mCanvasState.setProjectionPathMask(mAllocator, &transformedMaskPath);
+    }
 
-    const RecordedOp* op = (displayList.getOps()[displayList.projectionReceiveIndex]);
-    const RenderNodeOp* backgroundOp = static_cast<const RenderNodeOp*>(op);
-    const RenderProperties& backgroundProps = backgroundOp->renderNode->properties();
-
-    // Transform renderer to match background we're projecting onto
-    // (by offsetting canvas by translationX/Y of background rendernode, since only those are set)
-    mCanvasState.translate(backgroundProps.getTranslationX(), backgroundProps.getTranslationY());
-
-    // If the projection receiver has an outline, we mask projected content to it
-    // (which we know, apriori, are all tessellated paths)
-    mCanvasState.setProjectionPathMask(mAllocator, projectionReceiverOutline);
-
-    // draw projected nodes
     for (size_t i = 0; i < renderNode.mProjectedNodes.size(); i++) {
         RenderNodeOp* childOp = renderNode.mProjectedNodes[i];
-
         int restoreTo = mCanvasState.save(SaveFlags::Matrix);
+
+        // Apply transform between ancestor and projected descendant
         mCanvasState.concatMatrix(childOp->transformFromCompositingAncestor);
+
         deferRenderNodeOpImpl(*childOp);
         mCanvasState.restoreToCount(restoreTo);
     }
-
     mCanvasState.restoreToCount(count);
 }
 
