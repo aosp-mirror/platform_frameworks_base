@@ -750,7 +750,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_STOPPING);
         intentFilter.addAction(Intent.ACTION_USER_ADDED);
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
-        intentFilter.addAction(Intent.ACTION_USER_PRESENT);
+        intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
 
@@ -3633,7 +3633,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void onUserPresent(int userId) {
+    private void onUserUnlocked(int userId) {
         // User present may be sent because of an unlock, which might mean an unlocked keystore.
         if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
             updateLockdownVpn();
@@ -3657,8 +3657,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 onUserAdded(userId);
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 onUserRemoved(userId);
-            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                onUserPresent(userId);
+            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
+                onUserUnlocked(userId);
             }
         }
     };
