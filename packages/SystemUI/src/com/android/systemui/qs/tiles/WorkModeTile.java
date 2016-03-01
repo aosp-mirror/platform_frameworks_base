@@ -28,9 +28,11 @@ import com.android.systemui.statusbar.phone.ManagedProfileController;
 public class WorkModeTile extends QSTile<QSTile.BooleanState> implements
         ManagedProfileController.Callback {
     private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_workmode_enable_animation);
+            new AnimationIcon(R.drawable.ic_signal_workmode_enable_animation,
+                    R.drawable.ic_signal_workmode_disable);
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_workmode_disable_animation);
+            new AnimationIcon(R.drawable.ic_signal_workmode_disable_animation,
+                    R.drawable.ic_signal_workmode_enable);
 
     private final ManagedProfileController mProfileController;
 

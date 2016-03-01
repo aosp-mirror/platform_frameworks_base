@@ -30,9 +30,11 @@ import com.android.systemui.qs.SecureSetting;
 public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
     private final AnimationIcon mEnable
-            = new AnimationIcon(R.drawable.ic_invert_colors_enable_animation);
+            = new AnimationIcon(R.drawable.ic_invert_colors_enable_animation,
+            R.drawable.ic_invert_colors_disable);
     private final AnimationIcon mDisable
-            = new AnimationIcon(R.drawable.ic_invert_colors_disable_animation);
+            = new AnimationIcon(R.drawable.ic_invert_colors_disable_animation,
+            R.drawable.ic_invert_colors_enable);
     private final SecureSetting mSetting;
 
     private boolean mListening;

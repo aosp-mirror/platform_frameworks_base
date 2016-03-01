@@ -23,7 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import android.widget.ImageView.ScaleType;
 import com.android.systemui.R;
 
@@ -34,6 +33,7 @@ public class QSIconView extends ViewGroup {
     private final View mIcon;
     private final int mIconSizePx;
     private final int mTilePaddingBelowIconPx;
+    private boolean mAnimationEnabled = true;
 
     public QSIconView(Context context) {
         super(context);
@@ -44,6 +44,10 @@ public class QSIconView extends ViewGroup {
 
         mIcon = createIcon();
         addView(mIcon);
+    }
+
+    public void disableAnimation() {
+        mAnimationEnabled = false;
     }
 
     @Override
@@ -69,7 +73,9 @@ public class QSIconView extends ViewGroup {
 
     protected void setIcon(ImageView iv, QSTile.State state) {
         if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
-            Drawable d = state.icon != null ? state.icon.getDrawable(mContext) : null;
+            Drawable d = state.icon != null
+                    ? iv.isShown() && mAnimationEnabled ? state.icon.getDrawable(mContext)
+                    : state.icon.getInvisibleDrawable(mContext) : null;
             int padding = state.icon != null ? state.icon.getPadding() : null;
             if (d != null && state.autoMirrorDrawable) {
                 d.setAutoMirrored(true);
@@ -77,7 +83,7 @@ public class QSIconView extends ViewGroup {
             iv.setImageDrawable(d);
             iv.setTag(R.id.qs_icon_tag, state.icon);
             iv.setPadding(0, padding, 0, padding);
-            if (d instanceof Animatable) {
+            if (d instanceof Animatable && iv.isShown()) {
                 Animatable a = (Animatable) d;
                 a.start();
                 if (!iv.isShown()) {
