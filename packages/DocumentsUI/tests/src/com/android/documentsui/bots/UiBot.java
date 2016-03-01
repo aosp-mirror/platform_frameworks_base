@@ -212,16 +212,6 @@ public class UiBot extends BaseBot {
         return mDevice.findObject(selector);
     }
 
-    public void revealLauncher() {
-        mDevice.pressHome();
-        mDevice.wait(Until.hasObject(By.pkg(LAUNCHER_PKG).depth(0)), mTimeout);
-    }
-
-    public void revealApp() {
-        mDevice.wait(Until.hasObject(By.pkg(TARGET_PKG).depth(0)), mTimeout);
-        mDevice.waitForIdle();
-    }
-
     public void pressKey(int keyCode) {
         mDevice.pressKeyCode(keyCode);
     }
