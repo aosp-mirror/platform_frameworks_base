@@ -849,6 +849,7 @@ public class AudioService extends IAudioService.Stub {
             AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
                     mDockAudioMediaEnabled ?
                             AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
+            readEncodedSurroundMode(mContentResolver);
         }
         if (mHdmiManager != null) {
             synchronized (mHdmiManager) {
@@ -1011,6 +1012,7 @@ public class AudioService extends IAudioService.Stub {
                 0);
     }
 
+
     private void updateMasterMono(ContentResolver cr)
     {
         final boolean masterMono = System.getIntForUser(
@@ -1019,6 +1021,44 @@ public class AudioService extends IAudioService.Stub {
             Log.d(TAG, String.format("Master mono %b", masterMono));
         }
         AudioSystem.setMasterMono(masterMono);
+    }
+
+    private void readEncodedSurroundMode(ContentResolver cr)
+    {
+        int encodedSurroundMode = Settings.Global.getInt(
+                cr, Settings.Global.ENCODED_SURROUND_OUTPUT,
+                Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
+        sendEncodedSurroundMode(encodedSurroundMode);
+    }
+
+    private void sendEncodedSurroundMode(int encodedSurroundMode)
+    {
+        // initialize to guaranteed bad value
+        int forceSetting = AudioSystem.NUM_FORCE_CONFIG;
+        switch (encodedSurroundMode) {
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO:
+                forceSetting = AudioSystem.FORCE_NONE;
+                break;
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_NEVER:
+                forceSetting = AudioSystem.FORCE_ENCODED_SURROUND_NEVER;
+                break;
+            case Settings.Global.ENCODED_SURROUND_OUTPUT_ALWAYS:
+                forceSetting = AudioSystem.FORCE_ENCODED_SURROUND_ALWAYS;
+                break;
+            default:
+                Log.e(TAG, "updateSurroundSoundSettings: illegal value "
+                        + encodedSurroundMode);
+                break;
+        }
+        if (forceSetting != AudioSystem.NUM_FORCE_CONFIG) {
+            sendMsg(mAudioHandler,
+                    MSG_SET_FORCE_USE,
+                    SENDMSG_QUEUE,
+                    AudioSystem.FOR_ENCODED_SURROUND,
+                    forceSetting,
+                    null,
+                    0);
+        }
     }
 
     private void readPersistedSettings() {
@@ -1062,6 +1102,7 @@ public class AudioService extends IAudioService.Stub {
 
             updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
+            readEncodedSurroundMode(cr);
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -4628,6 +4669,7 @@ public class AudioService extends IAudioService.Stub {
                 }
                 readDockAudioSettings(mContentResolver);
                 updateMasterMono(mContentResolver);
+                readEncodedSurroundMode(mContentResolver);
             }
         }
     }

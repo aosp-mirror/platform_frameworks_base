@@ -638,7 +638,7 @@ public class AudioSystem
     public static final int PHONE_STATE_RINGING = 1;
     public static final int PHONE_STATE_INCALL = 2;
 
-    // device categories config for setForceUse, must match AudioSystem::forced_config
+    // device categories config for setForceUse, must match audio_policy_forced_cfg_t
     public static final int FORCE_NONE = 0;
     public static final int FORCE_SPEAKER = 1;
     public static final int FORCE_HEADPHONES = 2;
@@ -652,17 +652,20 @@ public class AudioSystem
     public static final int FORCE_NO_BT_A2DP = 10;
     public static final int FORCE_SYSTEM_ENFORCED = 11;
     public static final int FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
-    private static final int NUM_FORCE_CONFIG = 13;
+    public static final int FORCE_ENCODED_SURROUND_NEVER = 13;
+    public static final int FORCE_ENCODED_SURROUND_ALWAYS = 14;
+    public static final int NUM_FORCE_CONFIG = 15;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
-    // usage for setForceUse, must match AudioSystem::force_use
+    // usage for setForceUse, must match audio_policy_force_use_t
     public static final int FOR_COMMUNICATION = 0;
     public static final int FOR_MEDIA = 1;
     public static final int FOR_RECORD = 2;
     public static final int FOR_DOCK = 3;
     public static final int FOR_SYSTEM = 4;
     public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
-    private static final int NUM_FORCE_USE = 6;
+    public static final int FOR_ENCODED_SURROUND = 6;
+    private static final int NUM_FORCE_USE = 7;
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;
