@@ -10270,6 +10270,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Like {@link #getWindowVisibleDisplayFrame}, but returns the "full" display frame this window
+     * is currently in without any insets.
+     *
+     * @hide
+     */
+    public void getWindowDisplayFrame(Rect outRect) {
+        if (mAttachInfo != null) {
+            try {
+                mAttachInfo.mSession.getDisplayFrame(mAttachInfo.mWindow, outRect);
+            } catch (RemoteException e) {
+                return;
+            }
+            return;
+        }
+        // The view is not attached to a display so we don't have a context.
+        // Make a best guess about the display size.
+        Display d = DisplayManagerGlobal.getInstance().getRealDisplay(Display.DEFAULT_DISPLAY);
+        d.getRectSize(outRect);
+    }
+
+    /**
      * Dispatch a notification about a resource configuration change down
      * the view hierarchy.
      * ViewGroups should override to route to their children.

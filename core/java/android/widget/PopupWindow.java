@@ -23,7 +23,6 @@ import com.android.internal.R;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -1587,18 +1586,16 @@ public class PopupWindow {
     public int getMaxAvailableHeight(
             @NonNull View anchor, int yOffset, boolean ignoreBottomDecorations) {
         final Rect displayFrame = new Rect();
-        anchor.getWindowVisibleDisplayFrame(displayFrame);
+        if (ignoreBottomDecorations) {
+            anchor.getWindowDisplayFrame(displayFrame);
+        } else {
+            anchor.getWindowVisibleDisplayFrame(displayFrame);
+        }
 
         final int[] anchorPos = mDrawingLocation;
         anchor.getLocationOnScreen(anchorPos);
 
-        final int bottomEdge;
-        if (ignoreBottomDecorations) {
-            final Resources res = anchor.getContext().getResources();
-            bottomEdge = res.getDisplayMetrics().heightPixels;
-        } else {
-            bottomEdge = displayFrame.bottom;
-        }
+        final int bottomEdge = displayFrame.bottom;
 
         final int distanceToBottom;
         if (mOverlapAnchor) {
