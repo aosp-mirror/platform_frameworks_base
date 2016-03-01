@@ -16,12 +16,16 @@
 
 package android.content.pm;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.res.XmlResourceParser;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.text.BidiFormatter;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Printer;
 
@@ -38,6 +42,8 @@ import java.util.Comparator;
  * in the implementation of Parcelable in subclasses.
  */
 public class PackageItemInfo {
+    private static final float MAX_LABEL_SIZE_PX = 500f;
+
     /**
      * Public name of this item. From the "android:name" attribute.
      */
@@ -137,6 +143,56 @@ public class PackageItemInfo {
             return name;
         }
         return packageName;
+    }
+
+    /**
+     * Same as {@link #loadLabel(PackageManager)} with the addition that
+     * the returned label is safe for being presented in the UI since it
+     * will not contain new lines and the length will be limited to a
+     * reasonable amount. This prevents a malicious party to influence UI
+     * layout via the app label misleading the user into performing a
+     * detrimental for them action. If the label is too long it will be
+     * truncated and ellipsized at the end.
+     *
+     * @param pm A PackageManager from which the label can be loaded; usually
+     * the PackageManager from which you originally retrieved this item
+     * @return Returns a CharSequence containing the item's label. If the
+     * item does not have a label, its name is returned.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm) {
+        // loadLabel() always returns non-null
+        CharSequence label = loadLabel(pm);
+
+        // If the label contains new line characters it may push the UI
+        // down to hide a part of it. Labels shouldn't have new line
+        // characters, so just truncate at the first time one is seen.
+        String labelStr = label.toString();
+        final int labelLength = labelStr.length();
+        int offset = 0;
+        while (offset < labelLength) {
+            final int codePoint = labelStr.codePointAt(offset);
+            final int type = Character.getType(codePoint);
+            if (type == Character.LINE_SEPARATOR
+                    || type == Character.CONTROL
+                    || type == Character.PARAGRAPH_SEPARATOR) {
+                labelStr = labelStr.substring(0, offset);
+                break;
+            }
+            offset += Character.charCount(codePoint);
+        }
+
+        if (labelStr.isEmpty()) {
+            return labelStr;
+        }
+
+        TextPaint paint = new TextPaint();
+        paint.setTextSize(42);
+
+        return TextUtils.ellipsize(labelStr, paint, MAX_LABEL_SIZE_PX,
+                TextUtils.TruncateAt.END);
     }
 
     /**
