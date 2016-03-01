@@ -3495,9 +3495,8 @@ public class BackupManagerService {
             // The agent was running with a stub Application object, so shut it down.
             // !!! We hardcode the confirmation UI's package name here rather than use a
             //     manifest flag!  TODO something less direct.
-            if (app.uid != Process.SYSTEM_UID
-                    && !app.packageName.equals("com.android.backupconfirm")
-                    && app.uid != Process.PHONE_UID) {
+            if (app.uid >= Process.FIRST_APPLICATION_UID
+                    && !app.packageName.equals("com.android.backupconfirm")) {
                 if (MORE_DEBUG) Slog.d(TAG, "Killing agent host process");
                 mActivityManager.killApplicationProcess(app.processName, app.uid);
             } else {
@@ -6881,7 +6880,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // The agent was running with a stub Application object, so shut it down.
                     // !!! We hardcode the confirmation UI's package name here rather than use a
                     //     manifest flag!  TODO something less direct.
-                    if (app.uid != Process.SYSTEM_UID
+                    if (app.uid >= Process.FIRST_APPLICATION_UID
                             && !app.packageName.equals("com.android.backupconfirm")) {
                         if (DEBUG) Slog.d(TAG, "Killing host process");
                         mActivityManager.killApplicationProcess(app.processName, app.uid);
@@ -8625,13 +8624,15 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                     // it is explicitly not killed following that operation.
                     //
                     // We execute this kill when these conditions hold:
-                    //    1. the app did not request its own restore (mTargetPackage == null), and either
-                    //    2a. the app is a full-data target (TYPE_FULL_STREAM) or
+                    //    1. it's not a system-uid process,
+                    //    2. the app did not request its own restore (mTargetPackage == null), and either
+                    //    3a. the app is a full-data target (TYPE_FULL_STREAM) or
                     //     b. the app does not state android:killAfterRestore="false" in its manifest
                     final int appFlags = mCurrentPackage.applicationInfo.flags;
                     final boolean killAfterRestore =
-                            (mRestoreDescription.getDataType() == RestoreDescription.TYPE_FULL_STREAM)
-                            || ((appFlags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0);
+                            (mCurrentPackage.applicationInfo.uid >= Process.FIRST_APPLICATION_UID)
+                            && ((mRestoreDescription.getDataType() == RestoreDescription.TYPE_FULL_STREAM)
+                                    || ((appFlags & ApplicationInfo.FLAG_KILL_AFTER_RESTORE) != 0));
 
                     if (mTargetPackage == null && killAfterRestore) {
                         if (DEBUG) Slog.d(TAG, "Restore complete, killing host process of "
