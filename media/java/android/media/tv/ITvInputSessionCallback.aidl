@@ -42,7 +42,7 @@ oneway interface ITvInputSessionCallback {
     void onTimeShiftCurrentPositionChanged(long timeMs);
 
     // For the recording session
-    void onTuned();
+    void onTuned(in Uri channelUri);
     void onRecordingStopped(in Uri recordedProgramUri);
     void onError(int error);
 }

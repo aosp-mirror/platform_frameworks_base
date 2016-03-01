@@ -45,7 +45,7 @@ oneway interface ITvInputClient {
     void onTimeShiftCurrentPositionChanged(long timeMs, int seq);
 
     // For the recording session
-    void onTuned(int seq);
+    void onTuned(int seq, in Uri channelUri);
     void onRecordingStopped(in Uri recordedProgramUri, int seq);
     void onError(int error, int seq);
 }
