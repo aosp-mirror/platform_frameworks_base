@@ -1425,6 +1425,7 @@ public class TelecomManager {
      * <p> This method displays the UI to manage blocked numbers only if
      * {@link android.provider.BlockedNumberContract#canCurrentUserBlockNumbers(Context)} returns
      * {@code true} for the current user.
+     * @deprecated Use {@link #createManageBlockedNumbersIntent()} instead.
      */
     // TODO: Delete this.
     public void launchManageBlockedNumbersActivity() {
