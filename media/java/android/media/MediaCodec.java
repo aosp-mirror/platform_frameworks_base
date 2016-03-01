@@ -3339,14 +3339,6 @@ final public class MediaCodec {
         }
 
 
-        private int readInt(@NonNull ByteBuffer buffer, boolean asLong) {
-            if (asLong) {
-                return (int)buffer.getLong();
-            } else {
-                return buffer.getInt();
-            }
-        }
-
         public MediaImage(
                 @NonNull ByteBuffer buffer, @NonNull ByteBuffer info, boolean readOnly,
                 long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
@@ -3361,38 +3353,45 @@ final public class MediaCodec {
             mYOffset = yOffset;
             mInfo = info;
 
-            // read media-info.  the size of media info can be 80 or 156/160 depending on
-            // whether it was created on a 32- or 64-bit process.  See MediaImage
-            if (info.remaining() == 80 || info.remaining() == 156 || info.remaining() == 160) {
-                boolean sizeIsLong = info.remaining() != 80;
-                int type = readInt(info, info.remaining() == 160);
+            // read media-info.  See MediaImage2
+            if (info.remaining() == 104) {
+                int type = info.getInt();
                 if (type != TYPE_YUV) {
                     throw new UnsupportedOperationException("unsupported type: " + type);
                 }
-                int numPlanes = readInt(info, sizeIsLong);
+                int numPlanes = info.getInt();
                 if (numPlanes != 3) {
                     throw new RuntimeException("unexpected number of planes: " + numPlanes);
                 }
-                mWidth = readInt(info, sizeIsLong);
-                mHeight = readInt(info, sizeIsLong);
+                mWidth = info.getInt();
+                mHeight = info.getInt();
                 if (mWidth < 1 || mHeight < 1) {
                     throw new UnsupportedOperationException(
                             "unsupported size: " + mWidth + "x" + mHeight);
                 }
-                int bitDepth = readInt(info, sizeIsLong);
+                int bitDepth = info.getInt();
                 if (bitDepth != 8) {
                     throw new UnsupportedOperationException("unsupported bit depth: " + bitDepth);
                 }
+                int bitDepthAllocated = info.getInt();
+                if (bitDepthAllocated != 8) {
+                    throw new UnsupportedOperationException(
+                            "unsupported allocated bit depth: " + bitDepthAllocated);
+                }
                 mPlanes = new MediaPlane[numPlanes];
                 for (int ix = 0; ix < numPlanes; ix++) {
-                    int planeOffset = readInt(info, sizeIsLong);
-                    int colInc = readInt(info, sizeIsLong);
-                    int rowInc = readInt(info, sizeIsLong);
-                    int horiz = readInt(info, sizeIsLong);
-                    int vert = readInt(info, sizeIsLong);
+                    int planeOffset = info.getInt();
+                    int colInc = info.getInt();
+                    int rowInc = info.getInt();
+                    int horiz = info.getInt();
+                    int vert = info.getInt();
                     if (horiz != vert || horiz != (ix == 0 ? 1 : 2)) {
                         throw new UnsupportedOperationException("unexpected subsampling: "
                                 + horiz + "x" + vert + " on plane " + ix);
+                    }
+                    if (colInc < 1 || rowInc < 1) {
+                        throw new UnsupportedOperationException("unexpected strides: "
+                                + colInc + " pixel, " + rowInc + " row on plane " + ix);
                     }
 
                     buffer.clear();
