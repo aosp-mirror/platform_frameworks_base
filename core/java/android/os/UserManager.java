@@ -36,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -677,6 +678,22 @@ public class UserManager {
      */
     public static boolean isSplitSystemUser() {
         return SystemProperties.getBoolean("ro.fw.system_user_split", false);
+    }
+
+    /**
+     * Returns whether switching users is currently allowed.
+     * <p>For instance switching users is not allowed if the current user is in a phone call,
+     * or system user hasn't been unlocked yet
+     * @hide
+     */
+    public boolean canSwitchUsers() {
+        boolean allowUserSwitchingWhenSystemUserLocked = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED, 0) != 0;
+        boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
+        boolean inCall = TelephonyManager.getDefault().getCallState()
+                != TelephonyManager.CALL_STATE_IDLE;
+        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall;
     }
 
     /**
