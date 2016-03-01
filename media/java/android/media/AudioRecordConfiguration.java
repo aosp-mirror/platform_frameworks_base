@@ -29,7 +29,7 @@ import java.util.Objects;
  * {@link AudioManager#getActiveRecordConfigurations()} method.
  *
  */
-public class AudioRecordConfiguration implements Parcelable {
+public final class AudioRecordConfiguration implements Parcelable {
     private final static String TAG = new String("AudioRecordConfiguration");
 
     private final int mSessionId;
