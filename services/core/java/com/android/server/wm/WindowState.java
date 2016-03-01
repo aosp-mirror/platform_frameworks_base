@@ -1902,6 +1902,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mWinAnimator.hide("saved surface");
             mWinAnimator.mDrawState = WindowStateAnimator.NO_SURFACE;
             setHasSurface(false);
+            // The client should have disconnected at this point, but if it doesn't,
+            // we need to make sure it's disconnected. Otherwise when we reuse the surface
+            // the client can't reconnect to the buffer queue, and rendering will fail.
+            if (mWinAnimator.mSurfaceController != null) {
+                mWinAnimator.mSurfaceController.disconnectInTransaction();
+            }
         } else {
             mWinAnimator.destroySurfaceLocked();
         }
