@@ -905,13 +905,15 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
 
             // Group ID is arbitrarily set to parent profile user ID. It just represents
             // the default fingerprints for the user.
-            final int effectiveGroupId = getEffectiveUserId(groupId);
+            if (!isCurrentUserOrProfile(groupId)) {
+                return;
+            }
 
             final boolean restricted = isRestricted();
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    startEnrollment(token, cryptoClone, effectiveGroupId, receiver, flags, restricted);
+                    startEnrollment(token, cryptoClone, groupId, receiver, flags, restricted);
                 }
             });
         }
@@ -1011,15 +1013,14 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
         @Override // Binder call
         public void rename(final int fingerId, final int groupId, final String name) {
             checkPermission(MANAGE_FINGERPRINT);
-
-            // Group ID is arbitrarily set to parent profile user ID. It just represents
-            // the default fingerprints for the user.
-            final int effectiveGroupId = getEffectiveUserId(groupId);
+            if (!isCurrentUserOrProfile(groupId)) {
+                return;
+            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     mFingerprintUtils.renameFingerprintForUser(mContext, fingerId,
-                            effectiveGroupId, name);
+                            groupId, name);
                 }
             });
         }
@@ -1029,9 +1030,11 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
             if (!canUseFingerprint(opPackageName, false /* foregroundOnly */)) {
                 return Collections.emptyList();
             }
-            int effectiveUserId = getEffectiveUserId(userId);
+            if (!isCurrentUserOrProfile(userId)) {
+                return Collections.emptyList();
+            }
 
-            return FingerprintService.this.getEnrolledFingerprints(effectiveUserId);
+            return FingerprintService.this.getEnrolledFingerprints(userId);
         }
 
         @Override // Binder call
@@ -1040,8 +1043,10 @@ public class FingerprintService extends SystemService implements IBinder.DeathRe
                 return false;
             }
 
-            int effectiveUserId  = getEffectiveUserId(userId);
-            return FingerprintService.this.hasEnrolledFingerprints(effectiveUserId);
+            if (!isCurrentUserOrProfile(userId)) {
+                return false;
+            }
+            return FingerprintService.this.hasEnrolledFingerprints(userId);
         }
 
         @Override // Binder call
