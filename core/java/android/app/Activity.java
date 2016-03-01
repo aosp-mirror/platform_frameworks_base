@@ -1119,34 +1119,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Attempts to extract the color from a given drawable.
-     *
-     * @return the extracted color or 0 if no color could be extracted.
-     */
-    private int tryExtractColorFromDrawable(Drawable drawable) {
-        if (drawable instanceof ColorDrawable) {
-            return ((ColorDrawable) drawable).getColor();
-        } else if (drawable instanceof InsetDrawable) {
-            return tryExtractColorFromDrawable(((InsetDrawable) drawable).getDrawable());
-        } else if (drawable instanceof ShapeDrawable) {
-            Paint p = ((ShapeDrawable) drawable).getPaint();
-            if (p != null) {
-                return p.getColor();
-            }
-        } else if (drawable instanceof LayerDrawable) {
-            LayerDrawable ld = (LayerDrawable) drawable;
-            int numLayers = ld.getNumberOfLayers();
-            for (int i = 0; i < numLayers; i++) {
-                int color = tryExtractColorFromDrawable(ld.getDrawable(i));
-                if (color != 0) {
-                    return color;
-                }
-            }
-        }
-        return 0;
-    }
-
-    /**
      * Called when activity start-up is complete (after {@link #onStart}
      * and {@link #onRestoreInstanceState} have been called).  Applications will
      * generally not implement this method; it is intended for system
@@ -1166,35 +1138,6 @@ public class Activity extends ContextThemeWrapper
         if (!isChild()) {
             mTitleReady = true;
             onTitleChanged(getTitle(), getTitleColor());
-        }
-
-        Resources.Theme theme = getTheme();
-        if (theme != null) {
-            // Get the primary color and update the TaskDescription for this activity
-            TypedArray a = theme.obtainStyledAttributes(
-                    com.android.internal.R.styleable.ActivityTaskDescription);
-            if (mTaskDescription.getPrimaryColor() == 0) {
-                int colorPrimary = a.getColor(
-                        com.android.internal.R.styleable.ActivityTaskDescription_colorPrimary, 0);
-                if (colorPrimary != 0 && Color.alpha(colorPrimary) == 0xFF) {
-                    mTaskDescription.setPrimaryColor(colorPrimary);
-                }
-            }
-            if (mTaskDescription.getBackgroundColor() == 0) {
-                int windowBgResourceId = a.getResourceId(
-                        com.android.internal.R.styleable.ActivityTaskDescription_windowBackground,
-                        0);
-                int windowBgFallbackResourceId = a.getResourceId(
-                        com.android.internal.R.styleable.ActivityTaskDescription_windowBackgroundFallback,
-                        0);
-                int colorBg = tryExtractColorFromDrawable(DecorView.getResizingBackgroundDrawable(
-                        this, windowBgResourceId, windowBgFallbackResourceId));
-                if (colorBg != 0 && Color.alpha(colorBg) == 0xFF) {
-                    mTaskDescription.setBackgroundColor(colorBg);
-                }
-            }
-            a.recycle();
-            setTaskDescription(mTaskDescription);
         }
 
         mCalled = true;
@@ -4036,6 +3979,27 @@ public class Activity extends ContextThemeWrapper
             }
             theme.applyStyle(resid, false);
         }
+
+        // Get the primary color and update the TaskDescription for this activity
+        TypedArray a = theme.obtainStyledAttributes(
+                com.android.internal.R.styleable.ActivityTaskDescription);
+        if (mTaskDescription.getPrimaryColor() == 0) {
+            int colorPrimary = a.getColor(
+                    com.android.internal.R.styleable.ActivityTaskDescription_colorPrimary, 0);
+            if (colorPrimary != 0 && Color.alpha(colorPrimary) == 0xFF) {
+                mTaskDescription.setPrimaryColor(colorPrimary);
+            }
+        }
+        // For dev-preview only.
+        if (mTaskDescription.getBackgroundColor() == 0) {
+            int colorBackground = a.getColor(
+                    com.android.internal.R.styleable.ActivityTaskDescription_colorBackground, 0);
+            if (colorBackground != 0 && Color.alpha(colorBackground) == 0xFF) {
+                mTaskDescription.setBackgroundColor(colorBackground);
+            }
+        }
+        a.recycle();
+        setTaskDescription(mTaskDescription);
     }
 
     /**
