@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import android.app.ActivityManager.StackId;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.Region.Op;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
@@ -425,6 +426,10 @@ class DisplayContent {
             WindowState win = mTapExcludedWindows.get(i);
             win.getTouchableRegion(mTmpRegion);
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
+        }
+        if (getDockedStackVisibleForUserLocked() != null) {
+            mDividerControllerLocked.getTouchRegion(mTmpRect);
+            mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
         }
         if (mTapDetector != null) {
             mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion, mNonResizeableRegion);

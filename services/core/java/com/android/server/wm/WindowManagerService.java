@@ -10411,6 +10411,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void setDockedStackDividerTouchRegion(Rect touchRegion) {
+        synchronized (mWindowMap) {
+            getDefaultDisplayContentLocked().getDockedDividerController()
+                    .setTouchRegion(touchRegion);
+            setFocusTaskRegionLocked();
+        }
+    }
+
+    @Override
     public void setResizeDimLayer(boolean visible, int targetStackId, float alpha) {
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getDockedDividerController().setResizeDimLayer(

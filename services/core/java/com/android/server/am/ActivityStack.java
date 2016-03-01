@@ -1783,6 +1783,12 @@ final class ActivityStack {
             r.app.pendingUiClean = true;
             r.app.thread.scheduleWindowVisibility(r.appToken, true);
             r.stopFreezingScreenLocked(false);
+
+            // The activity may be waiting for stop, but that is no longer
+            // appropriate for it.
+            mStackSupervisor.mStoppingActivities.remove(r);
+            mStackSupervisor.mGoingToSleepActivities.remove(r);
+            mStackSupervisor.mWaitingVisibleActivities.remove(r);
         } catch (Exception e) {
             // Just skip on any failure; we'll make it
             // visible when it next restarts.
