@@ -507,7 +507,7 @@ public class Environment {
      * </ul>
      * @hide
      */
-    private static final String[] STANDARD_DIRECTORIES = {
+    public static final String[] STANDARD_DIRECTORIES = {
             DIRECTORY_MUSIC,
             DIRECTORY_PODCASTS,
             DIRECTORY_RINGTONES,
