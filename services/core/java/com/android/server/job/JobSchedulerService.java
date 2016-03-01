@@ -92,7 +92,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     /** The maximum number of concurrent jobs we run at one time. */
     private static final int MAX_JOB_CONTEXTS_COUNT = 8;
     /** Enforce a per-app limit on scheduled jobs? */
-    private static final boolean ENFORCE_MAX_JOBS = false;
+    private static final boolean ENFORCE_MAX_JOBS = true;
     /** The maximum number of jobs that we allow an unprivileged app to schedule */
     private static final int MAX_JOBS_PER_APP = 100;
 
