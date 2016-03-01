@@ -131,7 +131,7 @@ public class ZenFooter extends LinearLayout {
 
         final boolean isForever = mConfig != null && mConfig.manualRule != null
                 && mConfig.manualRule.conditionId == null;
-        final String line2 =
+        final CharSequence line2 =
                 isForever ? mContext.getString(com.android.internal.R.string.zen_mode_forever_dnd)
                 : ZenModeConfig.getConditionSummary(mContext, mConfig, mController.getCurrentUser(),
                         true /*shortVersion*/);
