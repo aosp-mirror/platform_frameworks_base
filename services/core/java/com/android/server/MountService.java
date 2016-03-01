@@ -1945,11 +1945,16 @@ class MountService extends IMountService.Stub
                         "Emulation not available on device with native FBE");
             }
 
-            final boolean emulateFbe = (flags & StorageManager.DEBUG_EMULATE_FBE) != 0;
-            SystemProperties.set(StorageManager.PROP_EMULATE_FBE, Boolean.toString(emulateFbe));
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final boolean emulateFbe = (flags & StorageManager.DEBUG_EMULATE_FBE) != 0;
+                SystemProperties.set(StorageManager.PROP_EMULATE_FBE, Boolean.toString(emulateFbe));
 
-            // Perform hard reboot to kick policy into place
-            mContext.getSystemService(PowerManager.class).reboot(null);
+                // Perform hard reboot to kick policy into place
+                mContext.getSystemService(PowerManager.class).reboot(null);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
