@@ -271,8 +271,11 @@ public class ZenModeHelper {
                 throw new IllegalArgumentException("Owner is not a condition provider service");
             }
 
-            final int ruleInstanceLimit = owner.metaData.getInt(
-                    ConditionProviderService.META_DATA_RULE_INSTANCE_LIMIT, -1);
+            int ruleInstanceLimit = -1;
+            if (owner.metaData != null) {
+                ruleInstanceLimit = owner.metaData.getInt(
+                        ConditionProviderService.META_DATA_RULE_INSTANCE_LIMIT, -1);
+            }
             if (ruleInstanceLimit > 0 && ruleInstanceLimit
                     < (getCurrentInstanceCount(automaticZenRule.getOwner()) + 1)) {
                 throw new IllegalArgumentException("Rule instance limit exceeded");
