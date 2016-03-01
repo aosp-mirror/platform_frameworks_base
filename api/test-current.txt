@@ -20668,6 +20668,7 @@ package android.media {
     field public static final int HEVCMainTierLevel62 = 16777216; // 0x1000000
     field public static final int HEVCProfileMain = 1; // 0x1
     field public static final int HEVCProfileMain10 = 2; // 0x2
+    field public static final int HEVCProfileMain10HDR10 = 4096; // 0x1000
     field public static final int MPEG2LevelH14 = 2; // 0x2
     field public static final int MPEG2LevelHL = 3; // 0x3
     field public static final int MPEG2LevelLL = 0; // 0x0
