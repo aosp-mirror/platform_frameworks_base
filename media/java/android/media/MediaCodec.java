@@ -2221,7 +2221,10 @@ final public class MediaCodec {
         public int mode;
 
         /**
-         * Metadata describing encryption pattern for the protected bytes in a subsample.
+         * Metadata describing an encryption pattern for the protected bytes in
+         * a subsample.  An encryption pattern consists of a repeating sequence
+         * of crypto blocks comprised of a number of encrypted blocks followed
+         * by a number of unencrypted, or skipped, blocks.
          */
         public final static class Pattern {
             /**
@@ -2273,6 +2276,10 @@ final public class MediaCodec {
          */
         private Pattern pattern;
 
+        /**
+         * Set the subsample count, clear/encrypted sizes, key, IV and mode fields of
+         * a {@link MediaCodec.CryptoInfo} instance.
+         */
         public void set(
                 int newNumSubSamples,
                 @NonNull int[] newNumBytesOfClearData,
@@ -2289,6 +2296,10 @@ final public class MediaCodec {
             pattern = new Pattern(0, 0);
         }
 
+        /**
+         * Set the encryption pattern on a {@link MediaCodec.CryptoInfo} instance.
+         * See {@link MediaCodec.CryptoInfo.Pattern}.
+         */
         public void setPattern(Pattern newPattern) {
             pattern = newPattern;
         }
