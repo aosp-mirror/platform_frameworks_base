@@ -788,7 +788,7 @@ final class DefaultPermissionGrantPolicy {
     }
 
     private void grantRuntimePermissionsLPw(PackageParser.Package pkg, Set<String> permissions,
-            boolean systemFixed, boolean overrideUserChoice,  int userId) {
+            boolean systemFixed, boolean isDefaultPhoneOrSms, int userId) {
         if (pkg.requestedPermissions.isEmpty()) {
             return;
         }
@@ -796,7 +796,13 @@ final class DefaultPermissionGrantPolicy {
         List<String> requestedPermissions = pkg.requestedPermissions;
         Set<String> grantablePermissions = null;
 
-        if (pkg.isUpdatedSystemApp()) {
+        // If this is the default Phone or SMS app we grant permissions regardless
+        // whether the version on the system image declares the permission as used since
+        // selecting the app as the default Phone or SMS the user makes a deliberate
+        // choice to grant this app the permissions needed to function. For all other
+        // apps, (default grants on first boot and user creation) we don't grant default
+        // permissions if the version on the system image does not declare them.
+        if (!isDefaultPhoneOrSms && pkg.isUpdatedSystemApp()) {
             PackageSetting sysPs = mService.mSettings.getDisabledSystemPkgLPr(pkg.packageName);
             if (sysPs != null) {
                 if (sysPs.pkg.requestedPermissions.isEmpty()) {
@@ -828,7 +834,7 @@ final class DefaultPermissionGrantPolicy {
                 // Unless the caller wants to override user choices. The override is
                 // to make sure we can grant the needed permission to the default
                 // sms and phone apps after the user chooses this in the UI.
-                if (flags == 0 || overrideUserChoice) {
+                if (flags == 0 || isDefaultPhoneOrSms) {
                     // Never clobber policy or system.
                     final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
                             | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
