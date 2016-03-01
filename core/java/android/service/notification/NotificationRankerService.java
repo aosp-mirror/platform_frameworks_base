@@ -37,7 +37,7 @@ import com.android.internal.os.SomeArgs;
  */
 @SystemApi
 public abstract class NotificationRankerService extends NotificationListenerService {
-    private static final String TAG = "NotificationRanker";
+    private static final String TAG = "NotificationRankers";
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -118,9 +118,8 @@ public abstract class NotificationRankerService extends NotificationListenerServ
     /** @hide */
     @Override
     public void registerAsSystemService(Context context, ComponentName componentName,
-            int currentUser) throws RemoteException {
-        registerAsSystemServiceImpl(context, componentName, currentUser, true /* as Ranker */);
-        mHandler = new MyHandler(getContext().getMainLooper());
+            int currentUser)  {
+        throw new IllegalStateException("the ranker may not start itself.");
     }
 
     @Override

@@ -161,6 +161,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /** {@hide} */
@@ -213,6 +214,7 @@ public class NotificationManagerService extends SystemService {
 
     /** notification_enqueue status value for an ignored notification. */
     private static final int EVENTLOG_ENQUEUE_STATUS_IGNORED = 2;
+    private String mRankerServicePackageName;
 
     private IActivityManager mAm;
     AudioManager mAudioManager;
@@ -291,7 +293,7 @@ public class NotificationManagerService extends SystemService {
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
-    private NotificationRanker mRankerServices;
+    private NotificationRankers mRankerServices;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
 
@@ -897,6 +899,10 @@ public class NotificationManagerService extends SystemService {
         mVibrator = (Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
         mAppUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
 
+        // This is the package that contains the AOSP framework update.
+        mRankerServicePackageName = getContext().getPackageManager()
+                .getServicesSystemSharedLibraryPackageName();
+
         mHandler = new WorkerHandler();
         mRankingThread.start();
         String[] extractorNames;
@@ -941,8 +947,26 @@ public class NotificationManagerService extends SystemService {
 
         importOldBlockDb();
 
+        // This is a MangedServices object that keeps track of the listeners.
         mListeners = new NotificationListeners();
-        mRankerServices = new NotificationRanker();
+
+        // This is a MangedServices object that keeps track of the ranker.
+        mRankerServices = new NotificationRankers();
+        // Find the updatable ranker and register it.
+        Set<ComponentName> rankerComponents = mRankerServices.queryPackageForServices(
+                mRankerServicePackageName, UserHandle.USER_SYSTEM, null);
+        Iterator<ComponentName> iterator = rankerComponents.iterator();
+        if (iterator.hasNext()) {
+            ComponentName rankerComponent = iterator.next();
+            if (iterator.hasNext()) {
+                Slog.e(TAG, "found multiple ranker services:" + rankerComponents);
+            } else {
+                mRankerServices.registerSystemService(rankerComponent, UserHandle.USER_SYSTEM);
+            }
+        } else {
+            Slog.w(TAG, "could not start ranker service: none found");
+        }
+
         mStatusBar = getLocalService(StatusBarManagerInternal.class);
         mStatusBar.setNotificationDelegate(mNotificationDelegate);
 
@@ -1421,13 +1445,9 @@ public class NotificationManagerService extends SystemService {
          */
         @Override
         public void registerListener(final INotificationListener listener,
-                final ComponentName component, final int userid, boolean asRanker) {
+                final ComponentName component, final int userid) {
             enforceSystemOrSystemUI("INotificationManager.registerListener");
-            if (asRanker) {
-                mRankerServices.registerService(listener, component, userid);
-            } else {
-                mListeners.registerService(listener, component, userid);
-            }
+            mListeners.registerService(listener, component, userid);
         }
 
         /**
@@ -2149,6 +2169,7 @@ public class NotificationManagerService extends SystemService {
                     pw.print(listener.component);
                 }
                 pw.println(')');
+                pw.println("\n  mRankerServicePackageName: " + mRankerServicePackageName);
                 pw.println("\n  Notification ranker services:");
                 mRankerServices.dump(pw, filter);
             }
@@ -3496,9 +3517,9 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    public class NotificationRanker extends ManagedServices {
+    public class NotificationRankers extends ManagedServices {
 
-        public NotificationRanker() {
+        public NotificationRankers() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
         }
 
@@ -3541,7 +3562,7 @@ public class NotificationManagerService extends SystemService {
             // mServices is the list inside ManagedServices of all the rankers,
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
-            for (final ManagedServiceInfo info : NotificationRanker.this.mServices) {
+            for (final ManagedServiceInfo info : NotificationRankers.this.mServices) {
                 boolean sbnVisible = isVisibleToListener(sbn, info);
                 if (!sbnVisible) {
                     continue;
