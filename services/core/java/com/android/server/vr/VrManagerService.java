@@ -15,9 +15,12 @@
  */
 package com.android.server.vr;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -40,6 +43,9 @@ public class VrManagerService extends SystemService {
     private static native void setVrModeNative(boolean enabled);
 
     private final Object mLock = new Object();
+
+    private final IBinder mOverlayToken = new Binder();
+
     private boolean mVrModeEnabled = false;
     private ArraySet<VrStateListener> mListeners = new ArraySet<>();
 
@@ -97,8 +103,22 @@ public class VrManagerService extends SystemService {
                 // Log mode change event.
                 Slog.i(TAG, "VR mode " + ((mVrModeEnabled) ? "enabled" : "disabled"));
                 setVrModeNative(mVrModeEnabled);
+                updateOverlayStateLocked();
                 onVrModeChangedLocked();
             }
+        }
+    }
+
+    private void updateOverlayStateLocked() {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
+            if (appOpsManager != null) {
+                appOpsManager.setUserRestriction(AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+                        mVrModeEnabled, mOverlayToken);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
