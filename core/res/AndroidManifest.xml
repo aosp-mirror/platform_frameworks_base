@@ -1451,6 +1451,11 @@
     <permission android:name="android.permission.GET_PACKAGE_IMPORTANCE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows use of PendingIntent.getIntent().
+         @hide -->
+    <permission android:name="android.permission.GET_INTENT_SENDER_INTENT"
+        android:protectionLevel="signature" />
+
     <!-- ================================== -->
     <!-- Permissions affecting the display of other applications  -->
     <!-- ================================== -->

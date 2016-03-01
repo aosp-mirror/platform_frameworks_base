@@ -6819,6 +6819,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public Intent getIntentForIntentSender(IIntentSender pendingResult) {
+        enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
+                "getIntentForIntentSender()");
         if (!(pendingResult instanceof PendingIntentRecord)) {
             return null;
         }
