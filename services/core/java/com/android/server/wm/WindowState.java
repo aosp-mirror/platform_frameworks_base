@@ -184,6 +184,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     private Configuration mConfiguration = Configuration.EMPTY;
     private Configuration mOverrideConfig = Configuration.EMPTY;
+    // Represents the changes from our override configuration applied
+    // to the global configuration. This is the only form of configuration
+    // which is suitable for delivery to the client.
+    private Configuration mMergedConfiguration = new Configuration();
     // Sticky answer to isConfigChanged(), remains true until new Configuration is assigned.
     // Used only on {@link #TYPE_KEYGUARD}.
     private boolean mConfigHasChanged;
@@ -1355,6 +1359,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mConfiguration = newConfig;
         mOverrideConfig = newOverrideConfig;
         mConfigHasChanged = false;
+
+        mMergedConfiguration.setTo(newConfig);
+        if (newOverrideConfig != null && newOverrideConfig != Configuration.EMPTY) {
+            mMergedConfiguration.updateFrom(newOverrideConfig);
+        }
     }
 
     void setHasSurface(boolean hasSurface) {
@@ -1616,9 +1625,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mTurnOnScreen = true;
         }
         if (isConfigChanged()) {
+            final Configuration newConfig = updateConfiguration();
             if (DEBUG_CONFIGURATION) Slog.i(TAG, "Window " + this + " visible with new config: "
-                    + mService.mCurConfiguration);
-            outConfig.setTo(mService.mCurConfiguration);
+                    + newConfig);
+            outConfig.setTo(newConfig);
         }
     }
 
@@ -2055,21 +2065,30 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    /**
+     * Update our current configurations, based on task configuration.
+     *
+     * @return A configuration suitable for sending to the client.
+     */
+    private Configuration updateConfiguration() {
+        final Task task = getTask();
+        final Configuration overrideConfig =
+            (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
+        final boolean configChanged = isConfigChanged();
+        if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
+            Slog.i(TAG, "Sending new config to window " + this + ": " +
+                    " / config=" + mService.mCurConfiguration + " overrideConfig=" + overrideConfig);
+        }
+        setConfiguration(mService.mCurConfiguration, overrideConfig);
+        return mMergedConfiguration;
+    }
+
     void reportResized() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wm.reportResized_" + getWindowTag());
         try {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
-            final boolean configChanged = isConfigChanged();
-            final Task task = getTask();
-            final Configuration overrideConfig =
-                    (task != null) ? task.mOverrideConfig : Configuration.EMPTY;
-            if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
-                Slog.i(TAG, "Sending new config to window " + this + ": "
-                        + " / config="
-                        + mService.mCurConfiguration + " overrideConfig=" + overrideConfig);
-            }
-            setConfiguration(mService.mCurConfiguration, overrideConfig);
+            final Configuration newConfig = isConfigChanged() ? updateConfiguration() : null;
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 
@@ -2080,7 +2099,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             final Rect stableInsets = mLastStableInsets;
             final Rect outsets = mLastOutsets;
             final boolean reportDraw = mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING;
-            final Configuration newConfig = configChanged ? mConfiguration : null;
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
