@@ -154,7 +154,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     private static final boolean DBG_ANIMATION_VECTOR_DRAWABLE = false;
 
     /** Local, mutable animator set. */
-    private VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimatorRT(this);
+    private VectorDrawableAnimator mAnimatorSet = new VectorDrawableAnimatorUI(this);
 
     /**
      * The resources against which this drawable was created. Used to attempt
