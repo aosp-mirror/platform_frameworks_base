@@ -33,9 +33,11 @@ import com.android.systemui.qs.QSTile;
 /** Quick settings tile: Airplane mode **/
 public class AirplaneModeTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_airplane_enable_animation);
+            new AnimationIcon(R.drawable.ic_signal_airplane_enable_animation,
+                    R.drawable.ic_signal_airplane_disable);
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_airplane_disable_animation);
+            new AnimationIcon(R.drawable.ic_signal_airplane_disable_animation,
+                    R.drawable.ic_signal_airplane_enable);
     private final GlobalSetting mSetting;
 
     private boolean mListening;

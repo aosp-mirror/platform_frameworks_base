@@ -31,14 +31,18 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mPortraitToAuto
-            = new AnimationIcon(R.drawable.ic_portrait_to_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_portrait_to_auto_rotate_animation,
+            R.drawable.ic_portrait_from_auto_rotate);
     private final AnimationIcon mAutoToPortrait
-            = new AnimationIcon(R.drawable.ic_portrait_from_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_portrait_from_auto_rotate_animation,
+            R.drawable.ic_portrait_to_auto_rotate);
 
     private final AnimationIcon mLandscapeToAuto
-            = new AnimationIcon(R.drawable.ic_landscape_to_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_landscape_to_auto_rotate_animation,
+            R.drawable.ic_landscape_from_auto_rotate);
     private final AnimationIcon mAutoToLandscape
-            = new AnimationIcon(R.drawable.ic_landscape_from_auto_rotate_animation);
+            = new AnimationIcon(R.drawable.ic_landscape_from_auto_rotate_animation,
+            R.drawable.ic_landscape_to_auto_rotate);
 
     private final RotationLockController mController;
 

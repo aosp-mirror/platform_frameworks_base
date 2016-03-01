@@ -416,6 +416,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
     public static abstract class Icon {
         abstract public Drawable getDrawable(Context context);
 
+        public Drawable getInvisibleDrawable(Context context) {
+            return getDrawable(context);
+        }
+
         @Override
         public int hashCode() {
             return Icon.class.hashCode();
@@ -435,6 +439,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
 
         @Override
         public Drawable getDrawable(Context context) {
+            return mDrawable;
+        }
+
+        @Override
+        public Drawable getInvisibleDrawable(Context context) {
             return mDrawable;
         }
     }
@@ -463,6 +472,11 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
 
         @Override
+        public Drawable getInvisibleDrawable(Context context) {
+            return context.getDrawable(mResId);
+        }
+
+        @Override
         public boolean equals(Object o) {
             return o instanceof ResourceIcon && ((ResourceIcon) o).mResId == mResId;
         }
@@ -474,14 +488,17 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected class AnimationIcon extends ResourceIcon {
-        public AnimationIcon(int resId) {
-            super(resId);
+        private final int mAnimatedResId;
+
+        public AnimationIcon(int resId, int staticResId) {
+            super(staticResId);
+            mAnimatedResId = resId;
         }
 
         @Override
         public Drawable getDrawable(Context context) {
             // workaround: get a clean state for every new AVD
-            return context.getDrawable(mResId).getConstantState().newDrawable();
+            return context.getDrawable(mAnimatedResId).getConstantState().newDrawable();
         }
     }
 
