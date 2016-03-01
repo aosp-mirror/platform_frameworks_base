@@ -412,7 +412,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public ExpandableNotificationRow getViewAtPosition(float y) {
-        if (!mIsSummaryWithChildren || !mChildrenExpanded) {
+        if (!mIsSummaryWithChildren || !mChildrenExpanded
+                || (getNotificationChildren().size() == 1 && isClearable())) {
             return this;
         } else {
             ExpandableNotificationRow view = mChildrenContainer.getViewAtPosition(y);
