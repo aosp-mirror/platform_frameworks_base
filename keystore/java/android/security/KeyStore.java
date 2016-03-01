@@ -183,7 +183,8 @@ public class KeyStore {
 
     public boolean delete(String key, int uid) {
         try {
-            return mBinder.del(key, uid) == NO_ERROR;
+            int ret = mBinder.del(key, uid);
+            return (ret == NO_ERROR || ret == KEY_NOT_FOUND);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
