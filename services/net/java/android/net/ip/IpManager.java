@@ -241,15 +241,22 @@ public class IpManager extends StateMachine {
 
     public IpManager(Context context, String ifName, Callback callback)
                 throws IllegalArgumentException {
+        this(context, ifName, callback, INetworkManagementService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE)));
+    }
+
+    /**
+     * An expanded constructor, useful for dependency injection.
+     */
+    public IpManager(Context context, String ifName, Callback callback,
+            INetworkManagementService nwService) throws IllegalArgumentException {
         super(IpManager.class.getSimpleName() + "." + ifName);
         mTag = getName();
 
         mContext = context;
         mInterfaceName = ifName;
         mCallback = callback;
-
-        mNwService = INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
+        mNwService = nwService;
 
         mNetlinkTracker = new NetlinkTracker(
                 mInterfaceName,
@@ -275,25 +282,6 @@ public class IpManager extends StateMachine {
         setInitialState(mStoppedState);
         setLogRecSize(MAX_LOG_RECORDS);
         super.start();
-    }
-
-    /**
-     * A special constructor for use in testing that bypasses some of the more
-     * complicated setup bits.
-     *
-     * TODO: Figure out how to delete this yet preserve testability.
-     */
-    @VisibleForTesting
-    protected IpManager(String ifName, Callback callback) {
-        super(IpManager.class.getSimpleName() + ".test-" + ifName);
-        mTag = getName();
-
-        mInterfaceName = ifName;
-        mCallback = callback;
-
-        mContext = null;
-        mNwService = null;
-        mNetlinkTracker = null;
     }
 
     @Override
