@@ -305,7 +305,7 @@ public interface IActivityManager extends IInterface {
         String packageName, boolean waitForDebugger, boolean persistent)
         throws RemoteException;
     public void setAlwaysFinish(boolean enabled) throws RemoteException;
-    public void setActivityController(IActivityController watcher)
+    public void setActivityController(IActivityController watcher, boolean imAMonkey)
         throws RemoteException;
     public void setLenientBackgroundCheck(boolean enabled) throws RemoteException;
     public int getMemoryTrimLevel() throws RemoteException;
