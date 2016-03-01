@@ -50697,6 +50697,7 @@ package java.lang {
   }
 
   public abstract interface Iterable {
+    method public default void forEach(java.util.function.Consumer<? super T>);
     method public abstract java.util.Iterator<T> iterator();
   }
 
@@ -54172,6 +54173,7 @@ package java.security {
 
   public abstract class Provider extends java.util.Properties {
     ctor protected Provider(java.lang.String, double, java.lang.String);
+    method public synchronized void forEach(java.util.function.BiConsumer<? super java.lang.Object, ? super java.lang.Object>);
     method public java.lang.String getInfo();
     method public java.lang.String getName();
     method public synchronized java.security.Provider.Service getService(java.lang.String, java.lang.String);
@@ -57121,6 +57123,7 @@ package java.util {
     ctor public ArrayList(java.util.Collection<? extends E>);
     method public java.lang.Object clone();
     method public void ensureCapacity(int);
+    method public void forEach(java.util.function.Consumer<? super E>);
     method public E get(int);
     method public int size();
     method public void trimToSize();
@@ -57684,6 +57687,7 @@ package java.util {
     ctor public HashMap(java.util.Map<? extends K, ? extends V>);
     method public java.lang.Object clone();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
+    method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
   }
 
   public class HashSet extends java.util.AbstractSet implements java.lang.Cloneable java.io.Serializable java.util.Set {
@@ -57708,6 +57712,7 @@ package java.util {
     method public boolean containsValue(java.lang.Object);
     method public synchronized java.util.Enumeration<V> elements();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
+    method public synchronized void forEach(java.util.function.BiConsumer<? super K, ? super V>);
     method public synchronized V get(java.lang.Object);
     method public synchronized boolean isEmpty();
     method public java.util.Set<K> keySet();
@@ -57726,6 +57731,7 @@ package java.util {
     ctor public IdentityHashMap(java.util.Map<? extends K, ? extends V>);
     method public java.lang.Object clone();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
+    method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
   }
 
   public class IllegalFormatCodePointException extends java.util.IllegalFormatException {
@@ -57965,6 +57971,7 @@ package java.util {
     method public abstract boolean containsValue(java.lang.Object);
     method public abstract java.util.Set<java.util.Map.Entry<K, V>> entrySet();
     method public abstract boolean equals(java.lang.Object);
+    method public default void forEach(java.util.function.BiConsumer<? super K, ? super V>);
     method public abstract V get(java.lang.Object);
     method public abstract int hashCode();
     method public abstract boolean isEmpty();
@@ -58426,6 +58433,7 @@ package java.util {
     method public K firstKey();
     method public java.util.Map.Entry<K, V> floorEntry(K);
     method public K floorKey(K);
+    method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
     method public java.util.NavigableMap<K, V> headMap(K, boolean);
     method public java.util.SortedMap<K, V> headMap(K);
     method public java.util.Map.Entry<K, V> higherEntry(K);
@@ -58508,6 +58516,7 @@ package java.util {
     method public java.util.Enumeration<E> elements();
     method public synchronized void ensureCapacity(int);
     method public synchronized E firstElement();
+    method public synchronized void forEach(java.util.function.Consumer<? super E>);
     method public synchronized E get(int);
     method public synchronized int indexOf(java.lang.Object, int);
     method public synchronized void insertElementAt(E, int);
@@ -58531,6 +58540,7 @@ package java.util {
     ctor public WeakHashMap();
     ctor public WeakHashMap(java.util.Map<? extends K, ? extends V>);
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
+    method public void forEach(java.util.function.BiConsumer<? super K, ? super V>);
   }
 
 }
