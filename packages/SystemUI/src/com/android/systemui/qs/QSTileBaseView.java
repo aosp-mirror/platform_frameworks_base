@@ -48,7 +48,7 @@ public class QSTileBaseView extends LinearLayout {
 
         // Default to Quick Tile padding, and QSTileView will specify its own padding.
         int padding = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_padding);
-        setPadding(padding, padding, padding, padding);
+        setPadding(0, padding, 0, padding);
         setClipChildren(false);
         setClipToPadding(false);
     }

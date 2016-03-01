@@ -272,7 +272,7 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
-    private void drawTile(TileRecord r, QSTile.State state) {
+    protected void drawTile(TileRecord r, QSTile.State state) {
         r.tileView.onStateChanged(state);
     }
 
