@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -45,7 +44,6 @@ import com.android.internal.widget.NumericTextView;
 import com.android.internal.widget.NumericTextView.OnValueChangedListener;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 /**
  * A delegate implementing the radial clock-based TimePicker.
@@ -501,9 +499,11 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        final SavedState ss = (SavedState) state;
-        initialize(ss.getHour(), ss.getMinute(), ss.is24HourMode(), ss.getCurrentItemShowing());
-        mRadialTimePickerView.invalidate();
+        if (state instanceof SavedState) {
+            final SavedState ss = (SavedState) state;
+            initialize(ss.getHour(), ss.getMinute(), ss.is24HourMode(), ss.getCurrentItemShowing());
+            mRadialTimePickerView.invalidate();
+        }
     }
 
     @Override
@@ -542,70 +542,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         if (mOnTimeChangedListener != null) {
             mOnTimeChangedListener.onTimeChanged(mDelegator, getHour(), getMinute());
         }
-    }
-
-    /**
-     * Used to save / restore state of time picker
-     */
-    private static class SavedState extends View.BaseSavedState {
-
-        private final int mHour;
-        private final int mMinute;
-        private final boolean mIs24HourMode;
-        private final int mCurrentItemShowing;
-
-        private SavedState(Parcelable superState, int hour, int minute, boolean is24HourMode,
-                int currentItemShowing) {
-            super(superState);
-            mHour = hour;
-            mMinute = minute;
-            mIs24HourMode = is24HourMode;
-            mCurrentItemShowing = currentItemShowing;
-        }
-
-        private SavedState(Parcel in) {
-            super(in);
-            mHour = in.readInt();
-            mMinute = in.readInt();
-            mIs24HourMode = (in.readInt() == 1);
-            mCurrentItemShowing = in.readInt();
-        }
-
-        public int getHour() {
-            return mHour;
-        }
-
-        public int getMinute() {
-            return mMinute;
-        }
-
-        public boolean is24HourMode() {
-            return mIs24HourMode;
-        }
-
-        public int getCurrentItemShowing() {
-            return mCurrentItemShowing;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeInt(mHour);
-            dest.writeInt(mMinute);
-            dest.writeInt(mIs24HourMode ? 1 : 0);
-            dest.writeInt(mCurrentItemShowing);
-        }
-
-        @SuppressWarnings({"unused", "hiding"})
-        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
     }
 
     private void tryVibrate() {

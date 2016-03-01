@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
@@ -32,7 +31,6 @@ import android.view.inputmethod.InputMethodManager;
 import com.android.internal.R;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 import libcore.icu.LocaleData;
 
@@ -387,14 +385,16 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
 
     @Override
     public Parcelable onSaveInstanceState(Parcelable superState) {
-        return new SavedState(superState, getHour(), getMinute());
+        return new SavedState(superState, getHour(), getMinute(), is24Hour());
     }
 
     @Override
     public void onRestoreInstanceState(Parcelable state) {
-        SavedState ss = (SavedState) state;
-        setHour(ss.getHour());
-        setMinute(ss.getMinute());
+        if (state instanceof SavedState) {
+            final SavedState ss = (SavedState) state;
+            setHour(ss.getHour());
+            setMinute(ss.getMinute());
+        }
     }
 
     @Override
@@ -523,52 +523,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         if (target != null) {
             target.setContentDescription(mContext.getString(contDescResId));
         }
-    }
-
-    /**
-     * Used to save / restore state of time picker
-     */
-    private static class SavedState extends View.BaseSavedState {
-        private final int mHour;
-        private final int mMinute;
-
-        private SavedState(Parcelable superState, int hour, int minute) {
-            super(superState);
-            mHour = hour;
-            mMinute = minute;
-        }
-
-        private SavedState(Parcel in) {
-            super(in);
-            mHour = in.readInt();
-            mMinute = in.readInt();
-        }
-
-        public int getHour() {
-            return mHour;
-        }
-
-        public int getMinute() {
-            return mMinute;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            super.writeToParcel(dest, flags);
-            dest.writeInt(mHour);
-            dest.writeInt(mMinute);
-        }
-
-        @SuppressWarnings({"unused", "hiding"})
-        public static final Parcelable.Creator<SavedState> CREATOR = new Creator<SavedState>() {
-            public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-            }
-
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        };
     }
 
     public static String[] getAmPmStrings(Context context) {

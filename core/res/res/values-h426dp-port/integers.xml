@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-** Copyright 2012, The Android Open Source Project
+** Copyright 2016, The Android Open Source Project
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -17,13 +17,6 @@
 */
 -->
 <resources>
-    <integer name="kg_carousel_angle">75</integer>
-    <integer name="kg_glowpad_rotation_offset">0</integer>
-    <integer name="button_pressed_animation_duration">100</integer>
-    <integer name="button_pressed_animation_delay">100</integer>
-    <integer name="disabled_alpha_animation_duration">100</integer>
-    <integer name="dock_enter_exit_duration">250</integer>
-
-    <integer name="date_picker_mode">1</integer>
-    <integer name="time_picker_mode">1</integer>
+    <integer name="date_picker_mode">2</integer>
+    <integer name="time_picker_mode">2</integer>
 </resources>
