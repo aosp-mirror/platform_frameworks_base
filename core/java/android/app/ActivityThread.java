@@ -3690,8 +3690,8 @@ public final class ActivityThread {
                     activity.token, state, persistentState, description);
             } catch (RemoteException ex) {
                 if (ex instanceof TransactionTooLargeException
-                        && "com.google.android.gms".equals(activity.packageInfo.getPackageName())) {
-                    Log.d(TAG, "STAHP SENDING SO MUCH DATA KTHX: " + ex);
+                        && activity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
+                    Log.e(TAG, "App tried sending too much data in instance state", ex);
                     return;
                 }
 
