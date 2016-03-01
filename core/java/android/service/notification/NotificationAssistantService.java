@@ -18,18 +18,17 @@ package android.service.notification;
 
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
-import android.app.INotificationManager;
-import android.app.Notification;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
+import com.android.internal.os.SomeArgs;
 
 /**
  * A service that helps the user manage notifications by modifying the
@@ -125,8 +124,24 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
     }
 
+    private Handler mHandler;
+
+    /** @hide */
     @Override
-    public IBinder onBind(Intent intent) {
+    public void registerAsSystemService(Context context, ComponentName componentName,
+            int currentUser) throws RemoteException {
+        super.registerAsSystemService(context, componentName, currentUser);
+        mHandler = new MyHandler(getContext().getMainLooper());
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        mHandler = new MyHandler(getContext().getMainLooper());
+    }
+
+    @Override
+    public final IBinder onBind(Intent intent) {
         if (mWrapper == null) {
             mWrapper = new NotificationAssistantWrapper();
         }
@@ -198,8 +213,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * @param key the notification key
      * @param adjustment the new importance with an explanation
      */
-    public final void adjustImportance(String key, Adjustment adjustment)
-    {
+    public final void adjustImportance(String key, Adjustment adjustment) {
         if (!isBound()) return;
         try {
             getNotificationInterface().setImportanceFromAssistant(mWrapper, key,
@@ -212,7 +226,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     private class NotificationAssistantWrapper extends NotificationListenerWrapper {
         @Override
         public void onNotificationEnqueued(IStatusBarNotificationHolder sbnHolder,
-                                           int importance, boolean user) throws RemoteException {
+                int importance, boolean user) {
             StatusBarNotification sbn;
             try {
                 sbn = sbnHolder.get();
@@ -221,54 +235,114 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 return;
             }
 
-            try {
-                Adjustment adjustment =
-                    NotificationAssistantService.this.onNotificationEnqueued(sbn, importance, user);
-                if (adjustment != null) {
-                    adjustImportance(sbn.getKey(), adjustment);
-                }
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationEnqueued", t);
-            }
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = sbn;
+            args.argi1 = importance;
+            args.argi2 = user ? 1 : 0;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ENQUEUED,
+                    args).sendToTarget();
         }
 
         @Override
-        public void onNotificationVisibilityChanged(String key, long time, boolean visible)
-                throws RemoteException {
-            try {
-                NotificationAssistantService.this.onNotificationVisibilityChanged(key, time,
-                        visible);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationVisibilityChanged", t);
-            }
+        public void onNotificationVisibilityChanged(String key, long time, boolean visible) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = time;
+            args.argi1 = visible ? 1 : 0;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_VISIBILITY_CHANGED,
+                    args).sendToTarget();
         }
 
         @Override
-        public void onNotificationClick(String key, long time) throws RemoteException {
-            try {
-                NotificationAssistantService.this.onNotificationClick(key, time);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationClick", t);
-            }
+        public void onNotificationClick(String key, long time) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = time;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_CLICK,
+                    args).sendToTarget();
         }
 
         @Override
-        public void onNotificationActionClick(String key, long time, int actionIndex)
-                throws RemoteException {
-            try {
-                NotificationAssistantService.this.onNotificationActionClick(key, time, actionIndex);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationActionClick", t);
-            }
+        public void onNotificationActionClick(String key, long time, int actionIndex) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = time;
+            args.argi1 = actionIndex;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ACTION_CLICK,
+                    args).sendToTarget();
         }
 
         @Override
-        public void onNotificationRemovedReason(String key, long time, int reason)
-                throws RemoteException {
-            try {
-                NotificationAssistantService.this.onNotificationRemoved(key, time, reason);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onNotificationRemoved", t);
+        public void onNotificationRemovedReason(String key, long time, int reason) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = key;
+            args.arg2 = time;
+            args.argi1 = reason;
+            mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_REMOVED_REASON,
+                    args).sendToTarget();
+        }
+    }
+
+    private final class MyHandler extends Handler {
+        public static final int MSG_ON_NOTIFICATION_ENQUEUED = 1;
+        public static final int MSG_ON_NOTIFICATION_VISIBILITY_CHANGED = 2;
+        public static final int MSG_ON_NOTIFICATION_CLICK = 3;
+        public static final int MSG_ON_NOTIFICATION_ACTION_CLICK = 4;
+        public static final int MSG_ON_NOTIFICATION_REMOVED_REASON = 5;
+
+        public MyHandler(Looper looper) {
+            super(looper, null, false);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ON_NOTIFICATION_ENQUEUED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    StatusBarNotification sbn = (StatusBarNotification) args.arg1;
+                    final int importance = args.argi1;
+                    final boolean user = args.argi2 == 1;
+                    args.recycle();
+                    Adjustment adjustment = onNotificationEnqueued(sbn, importance, user);
+                    if (adjustment != null) {
+                        adjustImportance(sbn.getKey(), adjustment);
+                    }
+                } break;
+
+                case MSG_ON_NOTIFICATION_VISIBILITY_CHANGED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    final String key = (String) args.arg1;
+                    final long time = (long) args.arg2;
+                    final boolean visible = args.argi1 == 1;
+                    args.recycle();
+                    onNotificationVisibilityChanged(key, time, visible);
+                } break;
+
+                case MSG_ON_NOTIFICATION_CLICK: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    final String key = (String) args.arg1;
+                    final long time = (long) args.arg2;
+                    args.recycle();
+                    onNotificationClick(key, time);
+                } break;
+
+                case MSG_ON_NOTIFICATION_ACTION_CLICK: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    final String key = (String) args.arg1;
+                    final long time = (long) args.arg2;
+                    final int actionIndex = args.argi1;
+                    args.recycle();
+                    onNotificationActionClick(key, time, actionIndex);
+                } break;
+
+                case MSG_ON_NOTIFICATION_REMOVED_REASON: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    final String key = (String) args.arg1;
+                    final long time = (long) args.arg2;
+                    final int reason = args.argi1;
+                    args.recycle();
+                    onNotificationRemoved(key, time, reason);
+                } break;
             }
         }
     }
