@@ -73,28 +73,6 @@ public class ModelBackedDocumentsAdapterTest extends AndroidTestCase {
         assertEquals(mModel.getItemCount() - 2, mAdapter.getItemCount());
     }
 
-    // Tests that the items can be hidden and unhidden.
-    public void testUnhide_ItemCount() {
-        List<String> ids = mModel.getModelIds();
-        SparseArray<String> hidden = mAdapter.hide(ids.toArray(new String[ids.size()]));
-        mAdapter.unhide(hidden);
-        assertEquals(mModel.getItemCount(), mAdapter.getItemCount());
-    }
-
-    // Tests that the items can be hidden and unhidden.
-    public void testUnhide_PreservesOrder() {
-        List<String> ids = mModel.getModelIds();
-        SparseArray<String> hidden = mAdapter.hide(
-                ids.get(0), ids.get(1), ids.get(5), ids.get(9));
-        mAdapter.unhide(hidden);
-
-        // Finally ensure the restored items are in the original order
-        // by checking them against the model.
-        for (int i = 0; i < mAdapter.getItemCount(); i++) {
-            assertEquals(mModel.idForPosition(i), mAdapter.getModelId(i));
-        }
-    }
-
     private final class TestEnvironment implements DocumentsAdapter.Environment {
         private final Context testContext;
 
