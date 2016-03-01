@@ -97,12 +97,12 @@ public class NotificationSettingsIconRow extends FrameLayout implements View.OnC
     private void setGearAlpha(float alpha) {
         if (alpha == 0) {
             mSettingsFadedIn = false; // Can fade in again once it's gone.
-            mGearIcon.setVisibility(View.INVISIBLE);
+            setVisibility(View.INVISIBLE);
         } else {
             if (alpha == 1) {
                 mSettingsFadedIn = true;
             }
-            mGearIcon.setVisibility(View.VISIBLE);
+            setVisibility(View.VISIBLE);
         }
         mGearIcon.setAlpha(alpha);
     }
