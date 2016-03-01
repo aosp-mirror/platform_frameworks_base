@@ -438,9 +438,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // If not null, the window that will be used to replace the old one. This is being set when
     // the window is added and unset when this window reports its first draw.
     WindowState mReplacingWindow = null;
-
     // Whether this window is being moved via the resize API
     boolean mMovedByResize;
+
     /**
      * Wake lock for drawing.
      * Even though it's slightly more expensive to do so, we will use a separate wake lock

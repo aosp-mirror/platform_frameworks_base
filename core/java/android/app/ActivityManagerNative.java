@@ -822,7 +822,21 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
-
+        case RESIZE_PINNED_STACK_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final boolean hasBounds = data.readInt() != 0;
+            Rect bounds = null;
+            if (hasBounds) {
+                bounds = Rect.CREATOR.createFromParcel(data);
+            }
+            final boolean hasTempPinnedTaskBounds = data.readInt() != 0;
+            Rect tempPinnedTaskBounds = null;
+            if (hasTempPinnedTaskBounds) {
+                tempPinnedTaskBounds = Rect.CREATOR.createFromParcel(data);
+            }
+            resizePinnedStack(bounds, tempPinnedTaskBounds);
+            return true;
+        }
         case RESIZE_DOCKED_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             final boolean hasBounds = data.readInt() != 0;
@@ -3910,6 +3924,31 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
+
+    @Override
+    public void resizePinnedStack(Rect pinnedBounds, Rect tempPinnedTaskBounds) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        if (pinnedBounds != null) {
+            data.writeInt(1);
+            pinnedBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        if (tempPinnedTaskBounds != null) {
+            data.writeInt(1);
+            tempPinnedTaskBounds.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
+        mRemote.transact(RESIZE_PINNED_STACK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
     @Override
     public void positionTaskInStack(int taskId, int stackId, int position) throws RemoteException
     {
