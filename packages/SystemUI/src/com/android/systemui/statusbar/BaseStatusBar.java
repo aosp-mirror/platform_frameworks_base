@@ -983,7 +983,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             pkgicon = pmUser.getDefaultActivityIcon();
         }
 
-        ((ImageView) row.findViewById(android.R.id.icon)).setImageDrawable(pkgicon);
+        ((ImageView) row.findViewById(R.id.app_icon)).setImageDrawable(pkgicon);
         ((TextView) row.findViewById(R.id.pkgname)).setText(appname);
 
         final View settingsButton = guts.findViewById(R.id.more_settings);
