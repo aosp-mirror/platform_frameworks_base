@@ -227,6 +227,10 @@ public class Paint_Delegate {
         mColorFilter = ColorFilter_Delegate.getDelegate(colorFilterPtr);
     }
 
+    public void setShader(long shaderPtr) {
+        mShader = Shader_Delegate.getDelegate(shaderPtr);
+    }
+
     /**
      * Returns the {@link Shader} delegate or null if none have been set
      *
