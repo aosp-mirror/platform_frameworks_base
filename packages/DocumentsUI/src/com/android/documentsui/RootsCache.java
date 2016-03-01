@@ -115,7 +115,13 @@ public class RootsCache {
      * Gather roots from all known storage providers.
      */
     public void updateAsync() {
-        // Verifying an assumption about the recents root being immutable.
+
+        // NOTE: This method is called when the UI language changes.
+        // For that reason we upadte our RecentsRoot to reflect
+        // the current language.
+        mRecentsRoot.title = mContext.getString(R.string.root_recent);
+
+        // Nothing else about the root should ever change.
         assert(mRecentsRoot.authority == null);
         assert(mRecentsRoot.rootId == null);
         assert(mRecentsRoot.derivedIcon == R.drawable.ic_root_recent);
@@ -123,7 +129,6 @@ public class RootsCache {
         assert(mRecentsRoot.flags == (Root.FLAG_LOCAL_ONLY
                 | Root.FLAG_SUPPORTS_IS_CHILD
                 | Root.FLAG_SUPPORTS_CREATE));
-        assert(mRecentsRoot.title == mContext.getString(R.string.root_recent));
         assert(mRecentsRoot.availableBytes == -1);
 
         new UpdateTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
