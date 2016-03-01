@@ -56,9 +56,11 @@ public class DndTile extends QSTile<QSTile.BooleanState> {
             ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
 
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_dnd_disable_animation);
+            new AnimationIcon(R.drawable.ic_dnd_disable_animation,
+                    R.drawable.ic_qs_dnd_off);
     private final AnimationIcon mDisableTotalSilence =
-            new AnimationIcon(R.drawable.ic_dnd_total_silence_disable_animation);
+            new AnimationIcon(R.drawable.ic_dnd_total_silence_disable_animation,
+                    R.drawable.ic_qs_dnd_off);
 
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;

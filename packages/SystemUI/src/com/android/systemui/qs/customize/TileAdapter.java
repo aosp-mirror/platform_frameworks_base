@@ -172,6 +172,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (itemView instanceof FrameLayout) {
                 mTileView = (QSTileView) ((FrameLayout) itemView).getChildAt(0);
                 mTileView.setBackground(null);
+                mTileView.getIcon().disableAnimation();
             }
         }
 

@@ -32,9 +32,11 @@ import com.android.systemui.statusbar.policy.LocationController.LocationSettings
 public class LocationTile extends QSTile<QSTile.BooleanState> {
 
     private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_signal_location_enable_animation);
+            new AnimationIcon(R.drawable.ic_signal_location_enable_animation,
+                    R.drawable.ic_signal_location_disable);
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_signal_location_disable_animation);
+            new AnimationIcon(R.drawable.ic_signal_location_disable_animation,
+                    R.drawable.ic_signal_location_enable);
 
     private final LocationController mController;
     private final KeyguardMonitor mKeyguard;

@@ -29,9 +29,11 @@ import com.android.systemui.statusbar.policy.HotspotController;
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTile<QSTile.BooleanState> {
     private final AnimationIcon mEnable =
-            new AnimationIcon(R.drawable.ic_hotspot_enable_animation);
+            new AnimationIcon(R.drawable.ic_hotspot_enable_animation,
+                    R.drawable.ic_hotspot_disable);
     private final AnimationIcon mDisable =
-            new AnimationIcon(R.drawable.ic_hotspot_disable_animation);
+            new AnimationIcon(R.drawable.ic_hotspot_disable_animation,
+                    R.drawable.ic_hotspot_enable);
     private final HotspotController mController;
     private final Callback mCallback = new Callback();
 

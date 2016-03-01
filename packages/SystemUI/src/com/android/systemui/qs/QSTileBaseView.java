@@ -113,7 +113,7 @@ public class QSTileBaseView extends LinearLayout {
         setContentDescription(state.contentDescription);
     }
 
-    View getIcon() {
+    public QSIconView getIcon() {
         return mIcon;
     }
 
