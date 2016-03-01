@@ -22965,7 +22965,7 @@ package android.media.tv {
   }
 
   public static final class TvInputInfo.Builder {
-    ctor public TvInputInfo.Builder(android.content.Context, java.lang.Class<?>);
+    ctor public TvInputInfo.Builder(android.content.Context, android.content.ComponentName);
     method public android.media.tv.TvInputInfo build() throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public android.media.tv.TvInputInfo.Builder setCanRecord(boolean);
     method public android.media.tv.TvInputInfo.Builder setTunerCount(int);
@@ -23033,7 +23033,7 @@ package android.media.tv {
     ctor public TvInputService.RecordingSession(android.content.Context);
     method public void notifyError(int);
     method public void notifyRecordingStopped(android.net.Uri);
-    method public void notifyTuned();
+    method public void notifyTuned(android.net.Uri);
     method public abstract void onRelease();
     method public abstract void onStartRecording(android.net.Uri);
     method public abstract void onStopRecording();
@@ -23092,7 +23092,7 @@ package android.media.tv {
     method public void onDisconnected(java.lang.String);
     method public void onError(int);
     method public void onRecordingStopped(android.net.Uri);
-    method public void onTuned();
+    method public void onTuned(android.net.Uri);
   }
 
   public final class TvTrackInfo implements android.os.Parcelable {
