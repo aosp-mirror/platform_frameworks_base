@@ -36,6 +36,7 @@ import android.text.Hyphenator;
 import android.util.EventLog;
 import android.util.Log;
 import android.webkit.WebViewFactory;
+import android.widget.TextView;
 
 import com.android.internal.os.InstallerConnection.InstallerException;
 
@@ -214,6 +215,7 @@ public class ZygoteInit {
 
     private static void preloadTextResources() {
         Hyphenator.init();
+        TextView.preloadFontCache();
     }
 
     /**
