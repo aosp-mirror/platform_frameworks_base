@@ -1903,5 +1903,9 @@ message MetricsEvent {
     // App requested access to a directory it has already been granted
     // access before; action pass package name of calling package.
     ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE = 331;
+
+    // Add new aosp constants above this line.
+    // END OF AOSP CONSTANTS
+
   }
 }
