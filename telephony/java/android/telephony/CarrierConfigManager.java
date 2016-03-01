@@ -577,6 +577,15 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_CONFERENCE_CALL_BOOL = "support_conference_call_bool";
 
     /**
+     * Determines whether High Definition audio property is displayed in the dialer UI.
+     * If {@code false}, remove the HD audio property from the connection so that HD audio related
+     * UI is not displayed. If {@code true}, keep HD audio property as it is configured.
+     * @hide
+     */
+    public static final String KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL =
+            "display_hd_audio_property_bool";
+
+    /**
      * Determines whether video conference calls are supported by a carrier.  When {@code true},
      * video calls can be merged into conference calls, {@code false} otherwiwse.
      * <p>
@@ -1057,6 +1066,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_CDMA_DTMF_TONE_DELAY_INT, 100);
         sDefaults.putBoolean(KEY_SUPPORT_CONFERENCE_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_VIDEO_CONFERENCE_CALL_BOOL, false);
+        sDefaults.putBoolean(KEY_DISPLAY_HD_AUDIO_PROPERTY_BOOL, true);
         sDefaults.putBoolean(KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_IMS_APN_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_PREFERRED_NETWORK_TYPE_BOOL, false);
