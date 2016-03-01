@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1015,6 +1016,8 @@ public final class BluetoothAdapter {
         try {
             if (mService != null) {
                 return mService.factoryReset();
+            } else {
+                SystemProperties.set("persist.bluetooth.factoryreset", "true");
             }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         return false;
