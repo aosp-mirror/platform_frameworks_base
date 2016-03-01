@@ -167,6 +167,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         int newIndex = childIndex < 0 ? mChildren.size() : childIndex;
         mChildren.add(newIndex, row);
         addView(row);
+        row.setUserLocked(mUserLocked);
 
         View divider = inflateDivider();
         addView(divider);
@@ -191,6 +192,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         });
 
         row.setSystemChildExpanded(false);
+        row.setUserLocked(false);
         updateGroupOverflow();
     }
 
