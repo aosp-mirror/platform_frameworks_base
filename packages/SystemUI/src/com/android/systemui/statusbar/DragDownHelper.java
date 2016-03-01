@@ -169,21 +169,23 @@ public class DragDownHelper implements Gefingerpoken {
                 ? RUBBERBAND_FACTOR_EXPANDABLE
                 : RUBBERBAND_FACTOR_STATIC;
         float rubberband = heightDelta * rubberbandFactor;
-        if (expandable && (rubberband + child.getMinHeight()) > child.getMaxContentHeight()) {
-            float overshoot = (rubberband + child.getMinHeight()) - child.getMaxContentHeight();
+        if (expandable
+                && (rubberband + child.getMinExpandHeight()) > child.getMaxContentHeight()) {
+            float overshoot =
+                    (rubberband + child.getMinExpandHeight()) - child.getMaxContentHeight();
             overshoot *= (1 - RUBBERBAND_FACTOR_STATIC);
             rubberband -= overshoot;
         }
-        child.setActualHeight((int) (child.getMinHeight() + rubberband));
+        child.setActualHeight((int) (child.getMinExpandHeight() + rubberband));
     }
 
     private void cancelExpansion(final ExpandableView child) {
-        if (child.getActualHeight() == child.getMinHeight()) {
+        if (child.getActualHeight() == child.getMinExpandHeight()) {
             mCallback.setUserLockedChild(child, false);
             return;
         }
         ObjectAnimator anim = ObjectAnimator.ofInt(child, "actualHeight",
-                child.getActualHeight(), child.getMinHeight());
+                child.getActualHeight(), child.getMinExpandHeight());
         anim.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
         anim.setDuration(SPRING_BACK_ANIMATION_LENGTH_MS);
         anim.addListener(new AnimatorListenerAdapter() {

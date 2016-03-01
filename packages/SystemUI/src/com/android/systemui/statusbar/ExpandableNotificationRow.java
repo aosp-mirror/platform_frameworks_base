@@ -1221,8 +1221,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public int getMinExpandHeight() {
-        if (mIsSummaryWithChildren && !mOnKeyguard) {
-            return mChildrenContainer.getMinExpandHeight();
+        if (mIsSummaryWithChildren && !mShowingPublic) {
+            return mChildrenContainer.getMinExpandHeight(mOnKeyguard);
         }
         return getMinHeight();
     }

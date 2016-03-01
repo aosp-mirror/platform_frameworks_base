@@ -566,8 +566,28 @@ public class NotificationChildrenContainer extends ViewGroup {
         return getIntrinsicHeight(NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
     }
 
-    public int getMinExpandHeight() {
-        return getIntrinsicHeight(getMaxAllowedVisibleChildren(true /* forceCollapsed */));
+    public int getMinExpandHeight(boolean onKeyguard) {
+        int maxAllowedVisibleChildren = onKeyguard ? NUMBER_OF_CHILDREN_WHEN_COLLAPSED
+                : getMaxAllowedVisibleChildren(true /* forceCollapsed */);
+        int minExpandHeight = mNotificationHeaderHeight;
+        int visibleChildren = 0;
+        boolean firstChild = true;
+        int childCount = mChildren.size();
+        for (int i = 0; i < childCount; i++) {
+            if (visibleChildren >= maxAllowedVisibleChildren) {
+                break;
+            }
+            if (!firstChild) {
+                minExpandHeight += mChildPadding;
+            } else {
+                firstChild = false;
+            }
+            ExpandableNotificationRow child = mChildren.get(i);
+            minExpandHeight += child.getMinHeight();
+            visibleChildren++;
+        }
+        minExpandHeight += mCollapsedBottompadding;
+        return minExpandHeight;
     }
 
     public void setDark(boolean dark, boolean fade, long delay) {
