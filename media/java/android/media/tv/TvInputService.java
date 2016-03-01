@@ -1567,8 +1567,10 @@ public abstract class TvInputService extends Service {
          * passed channel and call this method to indicate that it is now available for immediate
          * recording. When {@link #onStartRecording(Uri)} is called, recording must start with
          * minimal delay.
+         *
+         * @param channelUri The URI of a channel.
          */
-        public void notifyTuned() {
+        public void notifyTuned(Uri channelUri) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1576,7 +1578,7 @@ public abstract class TvInputService extends Service {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTuned");
                         if (mSessionCallback != null) {
-                            mSessionCallback.onTuned();
+                            mSessionCallback.onTuned(channelUri);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTuned", e);
@@ -1679,7 +1681,7 @@ public abstract class TvInputService extends Service {
          * <p>The application may call this method before starting or after stopping recording, but
          * not during recording.
          *
-         * <p>The session must call {@link #notifyTuned()} if the tune request was fulfilled, or
+         * <p>The session must call {@link #notifyTuned(Uri)} if the tune request was fulfilled, or
          * {@link #notifyError(int)} otherwise.
          *
          * @param channelUri The URI of a channel.
@@ -1708,8 +1710,8 @@ public abstract class TvInputService extends Service {
          * Called when the application requests to start TV program recording. Recording must start
          * immediately when this method is called.
          *
-         * <p>The application may supply the URI for a TV program as a hint for filling in program
-         * specific data fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
+         * <p>The application may supply the URI for a TV program for filling in program specific
+         * data fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
          * A non-null {@code programHint} implies the started recording should be of that specific
          * program, whereas null {@code programHint} does not impose such a requirement and the
          * recording can span across multiple TV programs. In either case, the application must call
@@ -1718,10 +1720,10 @@ public abstract class TvInputService extends Service {
          * <p>The session must call {@link #notifyError(int)} if the start request cannot be
          * fulfilled.
          *
-         * @param programHint The URI for the TV program to record as a hint, built by
+         * @param programUri The URI for the TV program to record, built by
          *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
          */
-        public abstract void onStartRecording(@Nullable Uri programHint);
+        public abstract void onStartRecording(@Nullable Uri programUri);
 
         /**
          * Called when the application requests to stop TV program recording. Recording must stop

@@ -478,8 +478,10 @@ public final class TvInputManager {
         /**
          * This is called when the recording session has been tuned to the given channel and is
          * ready to start recording.
+         *
+         * @param channelUri The URI of a channel.
          */
-        void onTuned(Session session) {
+        void onTuned(Session session, Uri channelUri) {
         }
 
         // For the recording session only
@@ -653,11 +655,11 @@ public final class TvInputManager {
         }
 
         // For the recording session only
-        void postTuned() {
+        void postTuned(final Uri channelUri) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSessionCallback.onTuned(mSession);
+                    mSessionCallback.onTuned(mSession, channelUri);
                 }
             });
         }
@@ -1013,14 +1015,14 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTuned(int seq) {
+            public void onTuned(int seq, Uri channelUri) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postTuned();
+                    record.postTuned(channelUri);
                 }
             }
 
