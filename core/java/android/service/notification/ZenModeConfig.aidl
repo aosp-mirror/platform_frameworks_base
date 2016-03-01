@@ -17,4 +17,5 @@
 package android.service.notification;
 
 parcelable ZenModeConfig;
+parcelable ZenModeConfig.ZenRule;
 

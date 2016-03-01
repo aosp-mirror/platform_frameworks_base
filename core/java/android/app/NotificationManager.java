@@ -48,8 +48,12 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to notify the user of events that happen.  This is how you tell
@@ -413,13 +417,20 @@ public class NotificationManager
      * Returns AutomaticZenRules owned by the caller.
      *
      * <p>
-     * Only available if policy access is granted to this package.
+     * Throws a SecurityException if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      */
-    public List<AutomaticZenRule> getAutomaticZenRules() {
+    public Map<String, AutomaticZenRule> getAutomaticZenRules() {
         INotificationManager service = getService();
         try {
-            return service.getAutomaticZenRules();
+            List<ZenModeConfig.ZenRule> rules = service.getZenRules();
+            Map<String, AutomaticZenRule> ruleMap = new HashMap<>();
+            for (ZenModeConfig.ZenRule rule : rules) {
+                ruleMap.put(rule.id, new AutomaticZenRule(rule.name, rule.component,
+                        rule.conditionId, zenModeToInterruptionFilter(rule.zenMode), rule.enabled,
+                        rule.creationTime));
+            }
+            return ruleMap;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -429,7 +440,7 @@ public class NotificationManager
      * Returns the AutomaticZenRule with the given id, if it exists and the caller has access.
      *
      * <p>
-     * Only available if policy access is granted to this package.
+     * Throws a SecurityException if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>
@@ -449,14 +460,13 @@ public class NotificationManager
      * Creates the given zen rule.
      *
      * <p>
-     * Only available if policy access is granted to this package.
+     * Throws a SecurityException if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * @param automaticZenRule the rule to create.
-     * @return A fully populated {@link AutomaticZenRule} if the rule was persisted successfully,
-     * null otherwise.
+     * @return The id of the newly created rule; null if the rule could not be created.
      */
-    public AutomaticZenRule addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
+    public String addAutomaticZenRule(AutomaticZenRule automaticZenRule) {
         INotificationManager service = getService();
         try {
             return service.addAutomaticZenRule(automaticZenRule);
@@ -469,18 +479,19 @@ public class NotificationManager
      * Updates the given zen rule.
      *
      * <p>
-     * Only available if policy access is granted to this package.
+     * Throws a SecurityException if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>
      * Callers can only update rules that they own. See {@link AutomaticZenRule#getOwner}.
+     * @param id The id of the rule to update
      * @param automaticZenRule the rule to update. 
      * @return Whether the rule was successfully updated.
      */
-    public boolean updateAutomaticZenRule(AutomaticZenRule automaticZenRule) {
+    public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule) {
         INotificationManager service = getService();
         try {
-            return service.updateAutomaticZenRule(automaticZenRule);
+            return service.updateAutomaticZenRule(id, automaticZenRule);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -490,7 +501,7 @@ public class NotificationManager
      * Deletes the automatic zen rule with the given id.
      *
      * <p>
-     * Only available if policy access is granted to this package.
+     * Throws a SecurityException if policy access is granted to this package.
      * See {@link #isNotificationPolicyAccessGranted}.
      *
      * <p>

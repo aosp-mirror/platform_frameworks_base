@@ -1017,7 +1017,7 @@ public class ZenModeConfig implements Parcelable {
     public static class ZenRule implements Parcelable {
         public boolean enabled;
         public boolean snoozing;         // user manually disabled this instance
-        public String name;              // required for automatic (unique)
+        public String name;              // required for automatic
         public int zenMode;
         public Uri conditionId;          // required for automatic
         public Condition condition;      // optional

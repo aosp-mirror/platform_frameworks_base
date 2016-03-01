@@ -4132,7 +4132,6 @@ package android.app {
     method public int describeContents();
     method public android.net.Uri getConditionId();
     method public long getCreationTime();
-    method public java.lang.String getId();
     method public int getInterruptionFilter();
     method public java.lang.String getName();
     method public android.content.ComponentName getOwner();
@@ -5228,14 +5227,14 @@ package android.app {
   }
 
   public class NotificationManager {
-    method public android.app.AutomaticZenRule addAutomaticZenRule(android.app.AutomaticZenRule);
+    method public java.lang.String addAutomaticZenRule(android.app.AutomaticZenRule);
     method public boolean areNotificationsEnabled();
     method public void cancel(int);
     method public void cancel(java.lang.String, int);
     method public void cancelAll();
     method public android.service.notification.StatusBarNotification[] getActiveNotifications();
     method public android.app.AutomaticZenRule getAutomaticZenRule(java.lang.String);
-    method public java.util.List<android.app.AutomaticZenRule> getAutomaticZenRules();
+    method public java.util.Map<java.lang.String, android.app.AutomaticZenRule> getAutomaticZenRules();
     method public final int getCurrentInterruptionFilter();
     method public int getImportance();
     method public android.app.NotificationManager.Policy getNotificationPolicy();
@@ -5245,7 +5244,7 @@ package android.app {
     method public boolean removeAutomaticZenRule(java.lang.String);
     method public final void setInterruptionFilter(int);
     method public void setNotificationPolicy(android.app.NotificationManager.Policy);
-    method public boolean updateAutomaticZenRule(android.app.AutomaticZenRule);
+    method public boolean updateAutomaticZenRule(java.lang.String, android.app.AutomaticZenRule);
     field public static final java.lang.String ACTION_INTERRUPTION_FILTER_CHANGED = "android.app.action.INTERRUPTION_FILTER_CHANGED";
     field public static final java.lang.String ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED = "android.app.action.NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED";
     field public static final java.lang.String ACTION_NOTIFICATION_POLICY_CHANGED = "android.app.action.NOTIFICATION_POLICY_CHANGED";
