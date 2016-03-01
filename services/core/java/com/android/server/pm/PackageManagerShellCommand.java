@@ -233,11 +233,15 @@ class PackageManagerShellCommand extends ShellCommand {
         boolean useJitProfiles = false;
         boolean extractOnly = false;
         boolean forceCompilation = false;
+        boolean allPackages = false;
         String compilationMode = "default";
 
         String opt;
         while ((opt = getNextOption()) != null) {
             switch (opt) {
+                case "-a":
+                    allPackages = true;
+                    break;
                 case "-m":
                     compilationMode = getNextArgRequired();
                     break;
@@ -272,19 +276,46 @@ class PackageManagerShellCommand extends ShellCommand {
                 return 1;
         }
 
-        String packageName = getNextArg();
-        if (packageName == null) {
-            pw.println("Error: package name not specified");
-            return 1;
+        List<String> packageNames = null;
+        if (allPackages) {
+            packageNames = mInterface.getAllPackages();
+        } else {
+            String packageName = getNextArg();
+            if (packageName == null) {
+                pw.println("Error: package name not specified");
+                return 1;
+            }
+            packageNames = Collections.singletonList(packageName);
         }
 
-        boolean success = mInterface.performDexOpt(packageName, null /* instructionSet */,
-                useJitProfiles, extractOnly, forceCompilation);
-        if (success) {
+        List<String> failedPackages = new ArrayList<>();
+        for (String packageName : packageNames) {
+            pw.println(packageName);
+            boolean result = mInterface.performDexOpt(packageName, null /* instructionSet */,
+                        useJitProfiles, extractOnly, forceCompilation);
+            if (!result) {
+                failedPackages.add(packageName);
+            }
+        }
+
+        if (failedPackages.isEmpty()) {
             pw.println("Success");
             return 0;
+        } else if (failedPackages.size() == 1) {
+            pw.println("Failure: package " + failedPackages.get(0) + " could not be compiled");
+            return 1;
         } else {
-            pw.println("Failure: package " + packageName + " could not be compiled");
+            pw.print("Failure: the following packages could not be compiled: ");
+            boolean is_first = true;
+            for (String packageName : failedPackages) {
+                if (is_first) {
+                    is_first = false;
+                } else {
+                    pw.print(", ");
+                }
+                pw.print(packageName);
+            }
+            pw.println();
             return 1;
         }
     }
@@ -1135,9 +1166,10 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.println("");
-        pw.println("  compile [-m MODE] [-f] TARGET-PACKAGE");
-        pw.println("    Trigger compilation of TARGET-PACKAGE.");
+        pw.println("  compile [-m MODE] [-f] (-a | TARGET-PACKAGE)");
+        pw.println("    Trigger compilation of TARGET-PACKAGE or all packages if \"-a\".");
         pw.println("    Options:");
+        pw.println("      -a: compile all packages");
         pw.println("      -m: select compilation mode");
         pw.println("          MODE can be one of \"default\", \"all\", \"profile\", and \"extract\"");
         pw.println("      -f: force compilation even if not needed");
