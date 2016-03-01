@@ -16,8 +16,6 @@
 
 package android.app;
 
-import com.android.internal.util.FastPrintWriter;
-
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +30,8 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -717,10 +717,12 @@ final class BackStackRecord extends FragmentTransaction implements
 
         bumpBackStackNesting(1);
 
-        SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
-        SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
-        calculateFragments(firstOutFragments, lastInFragments);
-        beginTransition(firstOutFragments, lastInFragments, false);
+        if (mManager.mCurState >= Fragment.CREATED) {
+            SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
+            SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
+            calculateFragments(firstOutFragments, lastInFragments);
+            beginTransition(firstOutFragments, lastInFragments, false);
+        }
 
         Op op = mHead;
         while (op != null) {
@@ -841,6 +843,14 @@ final class BackStackRecord extends FragmentTransaction implements
                 if (firstOutFragments.get(containerId) == fragment) {
                     firstOutFragments.remove(containerId);
                 }
+            }
+            /**
+             * Ensure that fragments that are entering are at least at the CREATED state
+             * so that they may load Transitions using TransitionInflater.
+             */
+            if (fragment.mState < Fragment.CREATED && mManager.mCurState >= Fragment.CREATED) {
+                mManager.makeActive(fragment);
+                mManager.moveToState(fragment, Fragment.CREATED, 0, 0, false);
             }
         }
     }
@@ -986,7 +996,6 @@ final class BackStackRecord extends FragmentTransaction implements
      */
     private TransitionState beginTransition(SparseArray<Fragment> firstOutFragments,
             SparseArray<Fragment> lastInFragments, boolean isBack) {
-        ensureFragmentsAreInitialized(lastInFragments);
         TransitionState state = new TransitionState();
 
         // Adding a non-existent target view makes sure that the transitions don't target
@@ -1010,21 +1019,6 @@ final class BackStackRecord extends FragmentTransaction implements
             }
         }
         return state;
-    }
-
-    /**
-     * Ensure that fragments that are entering are at least at the CREATED state
-     * so that they may load Transitions using TransitionInflater.
-     */
-    private void ensureFragmentsAreInitialized(SparseArray<Fragment> lastInFragments) {
-        final int count = lastInFragments.size();
-        for (int i = 0; i < count; i++) {
-            final Fragment fragment = lastInFragments.valueAt(i);
-            if (fragment.mState < Fragment.CREATED) {
-                mManager.makeActive(fragment);
-                mManager.moveToState(fragment, Fragment.CREATED, 0, 0, false);
-            }
-        }
     }
 
     private static Transition cloneTransition(Transition transition) {
@@ -1663,12 +1657,14 @@ final class BackStackRecord extends FragmentTransaction implements
             pw.flush();
         }
 
-        if (state == null) {
-            if (firstOutFragments.size() != 0 || lastInFragments.size() != 0) {
-                state = beginTransition(firstOutFragments, lastInFragments, true);
+        if (mManager.mCurState >= Fragment.CREATED) {
+            if (state == null) {
+                if (firstOutFragments.size() != 0 || lastInFragments.size() != 0) {
+                    state = beginTransition(firstOutFragments, lastInFragments, true);
+                }
+            } else if (!doStateMove) {
+                setNameOverrides(state, mSharedElementTargetNames, mSharedElementSourceNames);
             }
-        } else if (!doStateMove) {
-            setNameOverrides(state, mSharedElementTargetNames, mSharedElementSourceNames);
         }
 
         bumpBackStackNesting(-1);
