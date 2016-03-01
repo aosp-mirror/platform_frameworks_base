@@ -792,8 +792,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (hasBounds) {
                 bounds = Rect.CREATOR.createFromParcel(data);
             }
-            moveTaskToDockedStack(taskId, createMode, toTop, animate, bounds);
+            boolean res = moveTaskToDockedStack(taskId, createMode, toTop, animate, bounds);
             reply.writeNoException();
+            reply.writeInt(res ? 1 : 0);
             return true;
         }
 
@@ -3808,7 +3809,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
     @Override
-    public void moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
+    public boolean moveTaskToDockedStack(int taskId, int createMode, boolean toTop, boolean animate,
             Rect initialBounds) throws RemoteException
     {
         Parcel data = Parcel.obtain();
@@ -3826,8 +3827,10 @@ class ActivityManagerProxy implements IActivityManager
         }
         mRemote.transact(MOVE_TASK_TO_DOCKED_STACK_TRANSACTION, data, reply, 0);
         reply.readException();
+        boolean res = reply.readInt() > 0;
         data.recycle();
         reply.recycle();
+        return res;
     }
     @Override
     public boolean moveTopActivityToPinnedStack(int stackId, Rect r)
