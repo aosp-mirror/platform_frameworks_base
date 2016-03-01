@@ -430,8 +430,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             int[] ops) {
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return Collections.emptyList();
+        }
         synchronized (this) {
-            Ops pkgOps = getOpsLocked(uid, packageName, false);
+            Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false);
             if (pkgOps == null) {
                 return null;
             }
@@ -449,7 +453,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private void pruneOp(Op op, int uid, String packageName) {
         if (op.time == 0 && op.rejectTime == 0) {
-            Ops ops = getOpsLocked(uid, packageName, false);
+            Ops ops = getOpsRawLocked(uid, packageName, false);
             if (ops != null) {
                 ops.remove(op.op);
                 if (ops.size() <= 0) {
@@ -863,8 +867,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
         synchronized (this) {
-            if (isOpRestricted(uid, code, packageName)) {
+            if (isOpRestricted(uid, code, resolvedPackageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             code = AppOpsManager.opToSwitch(code);
@@ -875,7 +883,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return uidMode;
                 }
             }
-            Op op = getOpLocked(code, uid, packageName, false);
+            Op op = getOpLocked(code, uid, resolvedPackageName, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -951,6 +959,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkPackage(int uid, String packageName) {
+        Preconditions.checkNotNull(packageName);
         synchronized (this) {
             if (getOpsRawLocked(uid, packageName, true) != null) {
                 return AppOpsManager.MODE_ALLOWED;
@@ -964,26 +973,39 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int noteProxyOperation(int code, String proxyPackageName,
             int proxiedUid, String proxiedPackageName) {
         verifyIncomingOp(code);
-        final int proxyMode = noteOperationUnchecked(code, Binder.getCallingUid(),
-                proxyPackageName, -1, null);
+        final int proxyUid = Binder.getCallingUid();
+        String resolveProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
+        if (resolveProxyPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+        final int proxyMode = noteOperationUnchecked(code, proxyUid,
+                resolveProxyPackageName, -1, null);
         if (proxyMode != AppOpsManager.MODE_ALLOWED || Binder.getCallingUid() == proxiedUid) {
             return proxyMode;
         }
-        return noteOperationUnchecked(code, proxiedUid, proxiedPackageName,
-                Binder.getCallingUid(), proxyPackageName);
+        String resolveProxiedPackageName = resolvePackageName(proxiedUid, proxiedPackageName);
+        if (resolveProxiedPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+        return noteOperationUnchecked(code, proxiedUid, resolveProxiedPackageName,
+                proxyMode, resolveProxyPackageName);
     }
 
     @Override
     public int noteOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        return noteOperationUnchecked(code, uid, packageName, 0, null);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+        return noteOperationUnchecked(code, uid, resolvedPackageName, 0, null);
     }
 
     private int noteOperationUnchecked(int code, int uid, String packageName,
             int proxyUid, String proxyPackageName) {
         synchronized (this) {
-            Ops ops = getOpsLocked(uid, packageName, true);
+            Ops ops = getOpsRawLocked(uid, packageName, true);
             if (ops == null) {
                 if (DEBUG) Log.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
@@ -1031,16 +1053,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int startOperation(IBinder token, int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return  AppOpsManager.MODE_IGNORED;
+        }
         ClientState client = (ClientState)token;
         synchronized (this) {
-            Ops ops = getOpsLocked(uid, packageName, true);
+            Ops ops = getOpsRawLocked(uid, resolvedPackageName, true);
             if (ops == null) {
                 if (DEBUG) Log.d(TAG, "startOperation: no op for code " + code + " uid " + uid
-                        + " package " + packageName);
+                        + " package " + resolvedPackageName);
                 return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
-            if (isOpRestricted(uid, code, packageName)) {
+            if (isOpRestricted(uid, code, resolvedPackageName)) {
                 return AppOpsManager.MODE_IGNORED;
             }
             final int switchCode = AppOpsManager.opToSwitch(code);
@@ -1050,7 +1076,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (uidMode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Log.d(TAG, "noteOperation: reject #" + op.mode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
-                            + packageName);
+                            + resolvedPackageName);
                     op.rejectTime = System.currentTimeMillis();
                     return uidMode;
                 }
@@ -1058,12 +1084,13 @@ public class AppOpsService extends IAppOpsService.Stub {
             final Op switchOp = switchCode != code ? getOpLocked(ops, switchCode, true) : op;
             if (switchOp.mode != AppOpsManager.MODE_ALLOWED) {
                 if (DEBUG) Log.d(TAG, "startOperation: reject #" + op.mode + " for code "
-                        + switchCode + " (" + code + ") uid " + uid + " package " + packageName);
+                        + switchCode + " (" + code + ") uid " + uid + " package "
+                        + resolvedPackageName);
                 op.rejectTime = System.currentTimeMillis();
                 return switchOp.mode;
             }
             if (DEBUG) Log.d(TAG, "startOperation: allowing code " + code + " uid " + uid
-                    + " package " + packageName);
+                    + " package " + resolvedPackageName);
             if (op.nesting == 0) {
                 op.time = System.currentTimeMillis();
                 op.rejectTime = 0;
@@ -1081,9 +1108,16 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void finishOperation(IBinder token, int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
-        ClientState client = (ClientState)token;
+        String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return;
+        }
+        if (!(token instanceof ClientState)) {
+            return;
+        }
+        ClientState client = (ClientState) token;
         synchronized (this) {
-            Op op = getOpLocked(code, uid, packageName, true);
+            Op op = getOpLocked(code, uid, resolvedPackageName, true);
             if (op == null) {
                 return;
             }
@@ -1099,6 +1133,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int permissionToOpCode(String permission) {
+        if (permission == null) {
+            return AppOpsManager.OP_NONE;
+        }
         return AppOpsManager.permissionToOpCode(permission);
     }
 
@@ -1146,15 +1183,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             mUidStates.put(uid, uidState);
         }
         return uidState;
-    }
-
-    private Ops getOpsLocked(int uid, String packageName, boolean edit) {
-        if (uid == 0) {
-            packageName = "root";
-        } else if (uid == Process.SHELL_UID) {
-            packageName = "com.android.shell";
-        }
-        return getOpsRawLocked(uid, packageName, edit);
     }
 
     private Ops getOpsRawLocked(int uid, String packageName, boolean edit) {
@@ -1242,7 +1270,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private Op getOpLocked(int code, int uid, String packageName, boolean edit) {
-        Ops ops = getOpsLocked(uid, packageName, edit);
+        Ops ops = getOpsRawLocked(uid, packageName, edit);
         if (ops == null) {
             return null;
         }
@@ -1273,7 +1301,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (opRestrictions != null && opRestrictions[code]) {
                 if (AppOpsManager.opAllowSystemBypassRestriction(code)) {
                     synchronized (this) {
-                        Ops ops = getOpsLocked(uid, packageName, true);
+                        Ops ops = getOpsRawLocked(uid, packageName, true);
                         if ((ops != null) && ops.isPrivileged) {
                             return false;
                         }
@@ -1537,7 +1565,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                         out.startTag(null, "uid");
                         out.attribute(null, "n", Integer.toString(pkg.getUid()));
                         synchronized (this) {
-                            Ops ops = getOpsLocked(pkg.getUid(), pkg.getPackageName(), false);
+                            Ops ops = getOpsRawLocked(pkg.getUid(), pkg.getPackageName(), false);
                             // Should always be present as the list of PackageOps is generated
                             // from Ops.
                             if (ops != null) {
@@ -2058,6 +2086,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setUserRestrictions(Bundle restrictions, IBinder token, int userHandle) {
         checkSystemUid("setUserRestrictions");
+        Preconditions.checkNotNull(restrictions);
         Preconditions.checkNotNull(token);
         final boolean[] opRestrictions = getOrCreateUserRestrictionsForToken(token, userHandle);
         for (int i = 0; i < opRestrictions.length; ++i) {
@@ -2180,6 +2209,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (uid != Process.SYSTEM_UID) {
             throw new SecurityException(function + " must by called by the system");
         }
+    }
+
+    private static String resolvePackageName(int uid, String packageName)  {
+        if (uid == 0) {
+            return "root";
+        } else if (uid == Process.SHELL_UID) {
+            return "com.android.shell";
+        }
+        return packageName;
     }
 
     private static String[] getPackagesForUid(int uid) {
