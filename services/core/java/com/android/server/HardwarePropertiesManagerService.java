@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.CpuUsageInfo;
 import android.os.IHardwarePropertiesManager;
+import android.os.Process;
 
 import java.util.Arrays;
 
@@ -33,7 +34,7 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
     private static native void nativeInit();
 
     private static native float[] nativeGetFanSpeeds();
-    private static native float[] nativeGetDeviceTemperatures(int type);
+    private static native float[] nativeGetDeviceTemperatures(int type, int source);
     private static native CpuUsageInfo[] nativeGetCpuUsages();
 
     private final Context mContext;
@@ -47,10 +48,11 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
     }
 
     @Override
-    public float[] getDeviceTemperatures(String callingPackage, int type) throws SecurityException {
+    public float[] getDeviceTemperatures(String callingPackage, int type, int source)
+            throws SecurityException {
         enforceHardwarePropertiesRetrievalAllowed(callingPackage);
         synchronized (mLock) {
-            return nativeGetDeviceTemperatures(type);
+            return nativeGetDeviceTemperatures(type, source);
         }
     }
 
@@ -76,8 +78,8 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
      *
      * @param callingPackage The calling package name.
      *
-     * @throws SecurityException if a non profile or device owner tries to retrieve information
-     * provided by the service.
+     * @throws SecurityException if a non profile or device owner or system tries to retrieve
+     * information provided by the service.
      */
     private void enforceHardwarePropertiesRetrievalAllowed(String callingPackage)
             throws SecurityException {
@@ -92,8 +94,9 @@ public class HardwarePropertiesManagerService extends IHardwarePropertiesManager
         }
 
         final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        if (!dpm.isDeviceOwnerApp(callingPackage) && !dpm.isProfileOwnerApp(callingPackage)) {
-            throw new SecurityException("The caller is not a device or profile owner.");
+        if (!dpm.isDeviceOwnerApp(callingPackage) && !dpm.isProfileOwnerApp(callingPackage)
+                && Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("The caller is not a device or profile owner or system.");
         }
     }
 }

@@ -33,11 +33,24 @@ public class HardwarePropertiesManager {
 
     private final IHardwarePropertiesManager mService;
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
-        DEVICE_TEMPERATURE_CPU, DEVICE_TEMPERATURE_GPU, DEVICE_TEMPERATURE_BATTERY
+        DEVICE_TEMPERATURE_CPU, DEVICE_TEMPERATURE_GPU, DEVICE_TEMPERATURE_BATTERY,
+                DEVICE_TEMPERATURE_SKIN
     })
     public @interface DeviceTemperatureType {}
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        TEMPERATURE_CURRENT, TEMPERATURE_THROTTLING, TEMPERATURE_SHUTDOWN
+    })
+    public @interface TemperatureSource {}
 
     /**
      * Device temperature types. These must match the values in
@@ -52,6 +65,21 @@ public class HardwarePropertiesManager {
     /** Temperature of battery in Celsius. */
     public static final int DEVICE_TEMPERATURE_BATTERY = 2;
 
+    /** Temperature of device skin in Celsius. */
+    public static final int DEVICE_TEMPERATURE_SKIN = 3;
+
+    /** Get current temperature. */
+    public static final int TEMPERATURE_CURRENT = 0;
+
+    /** Get throttling temperature threshold. */
+    public static final int TEMPERATURE_THROTTLING = 1;
+
+    /** Get shutdown temperature threshold. */
+    public static final int TEMPERATURE_SHUTDOWN = 2;
+
+    /** Undefined temperature constant. */
+    public static final float UNDEFINED_TEMPERATURE = -Float.MAX_VALUE;
+
     /** Calling app context. */
     private final Context mContext;
 
@@ -65,32 +93,48 @@ public class HardwarePropertiesManager {
      * Return an array of device temperatures in Celsius.
      *
      * @param type type of requested device temperature, one of {@link #DEVICE_TEMPERATURE_CPU},
-     * {@link #DEVICE_TEMPERATURE_GPU} or {@link #DEVICE_TEMPERATURE_BATTERY}.
-     * @return an array of requested float device temperatures.
+     * {@link #DEVICE_TEMPERATURE_GPU}, {@link #DEVICE_TEMPERATURE_BATTERY} or {@link
+     * #DEVICE_TEMPERATURE_SKIN}.
+     * @param source source of requested device temperature, one of {@link #TEMPERATURE_CURRENT},
+     * {@link #TEMPERATURE_THROTTLING} or {@link #TEMPERATURE_SHUTDOWN}.
+     * @return an array of requested float device temperatures. Temperature equals to
+     *         {@link #UNDEFINED_TEMPERATURE} if undefined.
      *         Empty if platform doesn't provide the queried temperature.
      *
      * @throws SecurityException if a non profile or device owner tries to call this method.
     */
-    public @NonNull float[] getDeviceTemperatures(@DeviceTemperatureType int type) {
+    public @NonNull float[] getDeviceTemperatures(@DeviceTemperatureType int type,
+            @TemperatureSource int source) {
         switch (type) {
-        case DEVICE_TEMPERATURE_CPU:
-        case DEVICE_TEMPERATURE_GPU:
-        case DEVICE_TEMPERATURE_BATTERY:
-            try {
-                return mService.getDeviceTemperatures(mContext.getOpPackageName(), type);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        default:
-            Log.w(TAG, "Unknown device temperature type.");
-            return new float[0];
+            case DEVICE_TEMPERATURE_CPU:
+            case DEVICE_TEMPERATURE_GPU:
+            case DEVICE_TEMPERATURE_BATTERY:
+            case DEVICE_TEMPERATURE_SKIN:
+                switch (source) {
+                    case TEMPERATURE_CURRENT:
+                    case TEMPERATURE_THROTTLING:
+                    case TEMPERATURE_SHUTDOWN:
+                        try {
+                            return mService.getDeviceTemperatures(mContext.getOpPackageName(), type,
+                                    source);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    default:
+                        Log.w(TAG, "Unknown device temperature source.");
+                        return new float[0];
+                }
+            default:
+                Log.w(TAG, "Unknown device temperature type.");
+                return new float[0];
         }
     }
 
     /**
      * Return an array of CPU usage info for each core.
      *
-     * @return an array of {@link android.os.CpuUsageInfo} for each core.
+     * @return an array of {@link android.os.CpuUsageInfo} for each core. Return {@code null} for
+     *         each unplugged core.
      *         Empty if CPU usage is not supported on this system.
      *
      * @throws SecurityException if a non profile or device owner tries to call this method.
