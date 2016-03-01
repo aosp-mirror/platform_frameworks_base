@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -266,7 +267,9 @@ public class UiModeManager {
     /**
      * @return If UI mode is locked or not. When UI mode is locked, calls to change UI mode
      *         like {@link #enableCarMode(int)} will silently fail.
+     * @hide
      */
+    @TestApi
     public boolean isUiModeLocked() {
         if (mService != null) {
             try {
@@ -286,7 +289,9 @@ public class UiModeManager {
      * mode will fail silently.
      *
      * @return {@code true} if night mode is locked or {@code false} otherwise
+     * @hide
      */
+    @TestApi
     public boolean isNightModeLocked() {
         if (mService != null) {
             try {
