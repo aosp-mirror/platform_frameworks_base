@@ -262,10 +262,14 @@ public class NotificationChildrenContainer extends ViewGroup {
     }
 
     private void updateExpansionStates() {
-        // Let's make the first child expanded if the parent is
-        for (int i = 0; i < mChildren.size(); i++) {
+        if (mChildrenExpanded || mUserLocked) {
+            // we don't modify it the group is expanded or if we are expanding it
+            return;
+        }
+        int size = mChildren.size();
+        for (int i = 0; i < size; i++) {
             ExpandableNotificationRow child = mChildren.get(i);
-            child.setSystemChildExpanded(false);
+            child.setSystemChildExpanded(i == 0 && size == 1);
         }
     }
 
@@ -489,6 +493,7 @@ public class NotificationChildrenContainer extends ViewGroup {
 
     public void setChildrenExpanded(boolean childrenExpanded) {
         mChildrenExpanded = childrenExpanded;
+        updateExpansionStates();
     }
 
     public void setNotificationParent(ExpandableNotificationRow parent) {
