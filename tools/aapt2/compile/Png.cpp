@@ -1175,7 +1175,7 @@ getout:
     if (errorMsg) {
         std::stringstream err;
         err << "9-patch malformed: " << errorMsg;
-        if (!errorEdge) {
+        if (errorEdge) {
             err << "." << std::endl;
             if (errorPixel >= 0) {
                 err << "Found at pixel #" << errorPixel << " along " << errorEdge << " edge";
