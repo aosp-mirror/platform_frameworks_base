@@ -3160,6 +3160,7 @@ public class Editor {
                 mTextView.getContext(), mTextView.mTextEditSuggestionHighlightStyle);
         private TextView mAddToDictionaryButton;
         private TextView mDeleteButton;
+        private ListView mSuggestionListView;
         private SuggestionSpan mMisspelledSpan;
         private int mContainerMarginWidth;
         private int mContainerMarginTop;
@@ -3213,12 +3214,12 @@ public class Editor {
             mClippingLimitLeft = lp.leftMargin;
             mClippingLimitRight = lp.rightMargin;
 
-            final ListView suggestionListView = (ListView) relativeLayout.findViewById(
+            mSuggestionListView = (ListView) relativeLayout.findViewById(
                     com.android.internal.R.id.suggestionContainer);
 
             mSuggestionsAdapter = new SuggestionAdapter();
-            suggestionListView.setAdapter(mSuggestionsAdapter);
-            suggestionListView.setOnItemClickListener(this);
+            mSuggestionListView.setAdapter(mSuggestionsAdapter);
+            mSuggestionListView.setOnItemClickListener(this);
 
             // Inflate the suggestion items once and for all.
             mSuggestionInfos = new SuggestionInfo[MAX_NUMBER_SUGGESTIONS];
@@ -3374,6 +3375,7 @@ public class Editor {
                 popupBackground.getPadding(mTempRect);
                 width += mTempRect.left + mTempRect.right;
             }
+            mSuggestionListView.getLayoutParams().width = width;
             mPopupWindow.setWidth(width);
         }
 
