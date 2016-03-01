@@ -23,29 +23,19 @@ package android.content.res;
  * @hide For internal use only.
  */
 public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<ConstantState<T>> {
-    private final Resources mResources;
-
-    /**
-     * Creates a cache for the given Resources instance.
-     *
-     * @param resources the resources to use when creating new instances
-     */
-    public ConfigurationBoundResourceCache(Resources resources) {
-        mResources = resources;
-    }
-
     /**
      * If the resource is cached, creates and returns a new instance of it.
      *
      * @param key a key that uniquely identifies the drawable resource
+     * @param resources a Resources object from which to create new instances.
      * @param theme the theme where the resource will be used
      * @return a new instance of the resource, or {@code null} if not in
      *         the cache
      */
-    public T getInstance(long key, Resources.Theme theme) {
+    public T getInstance(long key, Resources resources, Resources.Theme theme) {
         final ConstantState<T> entry = get(key, theme);
         if (entry != null) {
-            return entry.newInstance(mResources, theme);
+            return entry.newInstance(resources, theme);
         }
 
         return null;

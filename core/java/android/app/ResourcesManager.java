@@ -23,6 +23,7 @@ import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.ResourcesImpl;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.ArrayMap;
@@ -250,7 +251,8 @@ public class ResourcesManager {
         } else {
             config = getConfiguration();
         }
-        r = new Resources(assets, dm, config, compatInfo, classLoader);
+        r = new Resources(classLoader);
+        r.setImpl(new ResourcesImpl(assets, dm, config, compatInfo));
         if (DEBUG) Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                 + r.getConfiguration() + " appScale=" + r.getCompatibilityInfo().applicationScale);
 
