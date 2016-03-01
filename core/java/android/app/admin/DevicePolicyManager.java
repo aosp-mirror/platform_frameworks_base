@@ -2921,7 +2921,7 @@ public class DevicePolicyManager {
      * Called by a device owner to request a bugreport.
      *
      * <p>There must be only one user on the device, managed by the device owner.
-     * Otherwise a security exception will be thrown.
+     * Otherwise a {@link SecurityException} will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return {@code true} if the bugreport collection started successfully, or {@code false}
@@ -5686,6 +5686,9 @@ public class DevicePolicyManager {
      * <p> Device logs contain various information intended for security auditing purposes.
      * See {@link SecurityEvent} for details.
      *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
+     *
      * @param admin Which device owner this request is associated with.
      * @param enabled whether device logging should be enabled or not.
      * @see #retrieveDeviceLogs
@@ -5700,6 +5703,9 @@ public class DevicePolicyManager {
 
     /**
      * Return whether device logging is enabled or not by the device owner.
+     *
+     * <p>Can only be called by the device owner, otherwise a {@link SecurityException} will be
+     * thrown.
      *
      * @param admin Which device owner this request is associated with.
      * @return {@code true} if device logging is enabled by device owner, {@code false} otherwise.
@@ -5719,6 +5725,9 @@ public class DevicePolicyManager {
      *
      * <p> Access to the logs is rate limited and it will only return new logs after the device
      * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
+     *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
      * @return the new batch of device logs which is a list of {@link SecurityEvent},
@@ -5763,6 +5772,9 @@ public class DevicePolicyManager {
      * corruption-free during power cycles, due to hardware variations and limitations. As a
      * result, this API is provided as best-effort and the returned logs may contain corrupted data.
      * </strong>
+     *
+     * <p>There must be only one user on the device, managed by the device owner.
+     * Otherwise a {@link SecurityException} will be thrown.
      *
      * @param admin Which device owner this request is associated with.
      * @return Device logs from before the latest reboot of the system.
