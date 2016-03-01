@@ -472,6 +472,22 @@ $ adb shell am get-inactive &lt;packageName&gt;</pre>
     <td></td>
  </tr>
 
+  <tr>
+    <td rowspan="2">Peripheral device companion app</td>
+    <td>App's core function is maintaining a persistent connection with the peripheral
+    device for the purpose of providing the peripheral device internet access.</td>
+    <td >If applicable.</td>
+    <td style="color:green">Acceptable</td>
+    <td rowspan="2"></td>
+  </tr>
+
+  <tr>
+    <td>App only needs to connect to a peripheral device periodically to sync, or only
+    needs to connect to devices, such as wireless headphones, connected via standard
+    Bluetooth profiles.</td>
+    <td >If applicable.</td>
+    <td style="color:red">Not Acceptable</td>
+  </tr>
 </table>
 
 
