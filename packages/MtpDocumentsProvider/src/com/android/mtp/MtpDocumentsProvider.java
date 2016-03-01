@@ -404,6 +404,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
                 for (final int id : keySet) {
                     closeDeviceInternal(id);
                 }
+                mRootScanner.pause();
             } catch (InterruptedException|IOException e) {
                 // It should fail unit tests by throwing runtime exception.
                 throw new RuntimeException(e);
