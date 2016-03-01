@@ -439,39 +439,27 @@ public class RootsCache {
                 continue;
             }
 
-            if (!state.showAdvanced && root.isAdvanced()) {
-                if (DEBUG) Log.d(TAG, "Excluding root because: unwanted advanced device.");
-                continue;
-            }
-
-            // Exclude non-local devices when local only
             if (state.localOnly && !root.isLocalOnly()) {
                 if (DEBUG) Log.d(TAG, "Excluding root because: unwanted non-local device.");
                 continue;
             }
 
-            // Exclude downloads roots as it doesn't support directory creation (actually
-            // we just don't show them).
-            // TODO: Add flag to check the root supports directory creation.
             if (state.directoryCopy && root.isDownloads()) {
                 if (DEBUG) Log.d(
                         TAG, "Excluding downloads root because: unsupported directory copy.");
                 continue;
             }
 
-            // Only show empty roots when creating, or in browse mode.
             if (state.action == State.ACTION_OPEN && root.isEmpty()) {
                 if (DEBUG) Log.d(TAG, "Excluding empty root because: ACTION_OPEN.");
                 continue;
             }
 
-            // Only show empty roots when creating, or in browse mode.
             if (state.action == State.ACTION_GET_CONTENT && root.isEmpty()) {
                 if (DEBUG) Log.d(TAG, "Excluding empty root because: ACTION_GET_CONTENT.");
                 continue;
             }
 
-            // Only include roots that serve requested content
             final boolean overlap =
                     MimePredicate.mimeMatches(root.derivedMimeTypes, state.acceptMimes) ||
                     MimePredicate.mimeMatches(state.acceptMimes, root.derivedMimeTypes);
@@ -482,9 +470,8 @@ public class RootsCache {
                 continue;
             }
 
-            // Exclude roots from the calling package.
             if (state.excludedAuthorities.contains(root.authority)) {
-                if (DEBUG) Log.d(TAG, "Excluding root because: calling package.");
+                if (DEBUG) Log.d(TAG, "Excluding root because: owned by calling package.");
                 continue;
             }
 

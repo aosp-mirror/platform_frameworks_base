@@ -149,7 +149,6 @@ public abstract class BaseActivity extends Activity
         final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
         final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
-        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
         // Search uses backend ranking; no sorting, recents doesn't support sort.
@@ -161,9 +160,6 @@ public abstract class BaseActivity extends Activity
         grid.setVisible(mState.derivedMode != State.MODE_GRID);
         list.setVisible(mState.derivedMode != State.MODE_LIST);
 
-        advanced.setVisible(!mState.forceAdvanced);
-        advanced.setTitle(LocalPreferences.getDisplayAdvancedDevices(this)
-                ? R.string.menu_advanced_hide : R.string.menu_advanced_show);
         fileSize.setTitle(LocalPreferences.getDisplayFileSize(this)
                 ? R.string.menu_file_size_hide : R.string.menu_file_size_show);
 
@@ -198,10 +194,6 @@ public abstract class BaseActivity extends Activity
 
         state.forceSize = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_FILESIZE, false);
         state.showSize = state.forceSize || LocalPreferences.getDisplayFileSize(this);
-
-        state.forceAdvanced = intent.getBooleanExtra(DocumentsContract.EXTRA_SHOW_ADVANCED, false);
-        state.showAdvanced = state.forceAdvanced
-                || LocalPreferences.getDisplayAdvancedDevices(this);
 
         state.initAcceptMimes(intent);
         state.excludedAuthorities = getExcludedAuthorities();
@@ -276,10 +268,6 @@ public abstract class BaseActivity extends Activity
                 if (dir != null) {
                     dir.pasteFromClipboard();
                 }
-                return true;
-
-            case R.id.menu_advanced:
-                setDisplayAdvancedDevices(!LocalPreferences.getDisplayAdvancedDevices(this));
                 return true;
 
             case R.id.menu_file_size:
@@ -429,13 +417,6 @@ public abstract class BaseActivity extends Activity
 
     public State getDisplayState() {
         return mState;
-    }
-
-    void setDisplayAdvancedDevices(boolean display) {
-        LocalPreferences.setDisplayAdvancedDevices(this, display);
-        mState.showAdvanced = mState.forceAdvanced | display;
-        RootsFragment.get(getFragmentManager()).onDisplayStateChanged();
-        invalidateOptionsMenu();
     }
 
     void setDisplayFileSize(boolean display) {
