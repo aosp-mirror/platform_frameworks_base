@@ -31,6 +31,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.DetailAdapter;
+import com.android.systemui.qs.QSTile.Host.Callback;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.settings.BrightnessController;
@@ -44,7 +45,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /** View that represents the quick settings tile panel. **/
-public class QSPanel extends LinearLayout implements Tunable {
+public class QSPanel extends LinearLayout implements Tunable, Callback {
 
     public static final String QS_SHOW_BRIGHTNESS = "qs_show_brightness";
 
@@ -123,7 +124,13 @@ public class QSPanel extends LinearLayout implements Tunable {
     @Override
     protected void onDetachedFromWindow() {
         TunerService.get(mContext).removeTunable(this);
+        mHost.removeCallback(this);
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onTilesChanged() {
+        setTiles(mHost.getTiles());
     }
 
     @Override
@@ -168,6 +175,8 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     public void setHost(QSTileHost host) {
         mHost = host;
+        mHost.addCallback(this);
+        setTiles(mHost.getTiles());
         mFooter.setHost(host);
         createCustomizePanel();
     }

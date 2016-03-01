@@ -252,6 +252,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mCallbackHandler.setEmergencyCallsOnly(isEmergencyOnly());
     }
 
+    public void removeEmergencyListener(EmergencyListener listener) {
+        mCallbackHandler.setListening(listener, false);
+    }
+
     public boolean hasMobileDataFeature() {
         return mHasMobileDataFeature;
     }
@@ -811,10 +815,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             registerListeners();
         }
     };
-
-    public interface EmergencyListener {
-        void setEmergencyCallsOnly(boolean emergencyOnly);
-    }
 
     public static class SubscriptionDefaults {
         public int getDefaultVoiceSubId() {

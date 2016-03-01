@@ -42,6 +42,8 @@ import android.widget.TextView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.DensityContainer;
+import com.android.systemui.DensityContainer.InflateListener;
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.Interpolators;
@@ -215,8 +217,14 @@ public class NotificationPanelView extends PanelView implements
         super.onFinishInflate();
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
-        mQsContainer = (QSContainer) findViewById(R.id.quick_settings_container);
-        mQsContainer.getHeader().setOnClickListener(this);
+        DensityContainer container = (DensityContainer) findViewById(R.id.qs_density_container);
+        container.addInflateListener(new InflateListener() {
+            @Override
+            public void onInflated(View v) {
+                mQsContainer = (QSContainer) v.findViewById(R.id.quick_settings_container);
+                mQsContainer.getHeader().setOnClickListener(NotificationPanelView.this);
+            }
+        });
         mClockView = (TextView) findViewById(R.id.clock_view);
         mNotificationContainerParent = (NotificationsQuickSettingsContainer)
                 findViewById(R.id.notification_container_parent);

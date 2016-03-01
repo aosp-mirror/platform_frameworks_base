@@ -19,11 +19,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.SubscriptionInfo;
-
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.statusbar.policy.NetworkController.EmergencyListener;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
-import com.android.systemui.statusbar.policy.NetworkControllerImpl.EmergencyListener;
 
 import java.util.ArrayList;
 import java.util.List;

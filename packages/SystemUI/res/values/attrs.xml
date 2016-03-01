@@ -93,5 +93,9 @@
         <attr name="defValue" format="boolean" />
         <attr name="metricsAction" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="DensityContainer">
+        <attr name="android:layout" />
+    </declare-styleable>
 </resources>
 
