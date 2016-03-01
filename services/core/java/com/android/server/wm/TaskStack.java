@@ -585,7 +585,8 @@ public class TaskStack implements DimLayer.DimLayerUser,
         }
 
         mDisplayContent = displayContent;
-        mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId());
+        mAnimationBackgroundSurface = new DimLayer(mService, this, mDisplayContent.getDisplayId(),
+                "animation background stackId=" + mStackId);
 
         Rect bounds = null;
         final TaskStack dockedStack = mService.mStackIdToStack.get(DOCKED_STACK_ID);
