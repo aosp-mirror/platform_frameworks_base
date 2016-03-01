@@ -16,6 +16,10 @@
 
 package android.service.notification;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
@@ -43,7 +47,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.widget.RemoteViews;
-
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.SomeArgs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -163,8 +168,14 @@ public abstract class NotificationListenerService extends Service {
     @SystemApi
     public static final int TRIM_LIGHT = 1;
 
+    private final Object mLock = new Object();
+
+    private Handler mHandler;
+
     /** @hide */
     protected NotificationListenerWrapper mWrapper = null;
+
+    @GuardedBy("mLock")
     private RankingMap mRankingMap;
 
     private INotificationManager mNoMan;
@@ -194,6 +205,12 @@ public abstract class NotificationListenerService extends Service {
     @SdkConstant(SdkConstant.SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_VR_NOTIFICATIONS =
         "android.intent.category.vr.notifications";
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        mHandler = new MyHandler(getMainLooper());
+    }
 
     /**
      * Implement this method to learn about new notifications as they are posted by apps.
@@ -642,7 +659,9 @@ public abstract class NotificationListenerService extends Service {
      * @return A {@link RankingMap} object providing access to ranking information
      */
     public RankingMap getCurrentRanking() {
-        return mRankingMap;
+        synchronized (mLock) {
+            return mRankingMap;
+        }
     }
 
     @Override
@@ -684,6 +703,7 @@ public abstract class NotificationListenerService extends Service {
         INotificationManager noMan = getNotificationInterface();
         noMan.registerListener(mWrapper, componentName, currentUser);
         mCurrentUser = currentUser;
+        mHandler = new MyHandler(context.getMainLooper());
     }
 
     /**
@@ -710,7 +730,7 @@ public abstract class NotificationListenerService extends Service {
      * <P>The service should wait for the {@link #onListenerConnected()} event
      * before performing any operations.
      */
-    public static final void requestRebind(ComponentName componentName)
+    public static void requestRebind(ComponentName componentName)
             throws RemoteException {
         INotificationManager noMan = INotificationManager.Stub.asInterface(
                 ServiceManager.getService(Context.NOTIFICATION_SERVICE));
@@ -782,7 +802,6 @@ public abstract class NotificationListenerService extends Service {
             }
 
             try {
-                Notification notification = sbn.getNotification();
                 // convert icon metadata to legacy format for older clients
                 createLegacyIconExtras(sbn.getNotification());
                 maybePopulateRemoteViews(sbn.getNotification());
@@ -794,20 +813,23 @@ public abstract class NotificationListenerService extends Service {
             }
 
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-            synchronized (mWrapper) {
-                applyUpdate(update);
-                try {
-                    if (sbn != null) {
-                        NotificationListenerService.this.onNotificationPosted(sbn, mRankingMap);
-                    } else {
-                        // still pass along the ranking map, it may contain other information
-                        NotificationListenerService.this.onNotificationRankingUpdate(mRankingMap);
-                    }
-                } catch (Throwable t) {
-                    Log.w(TAG, "Error running onNotificationPosted", t);
+            synchronized (mLock) {
+                applyUpdateLocked(update);
+                if (sbn != null) {
+                    SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = sbn;
+                    args.arg2 = mRankingMap;
+                    mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_POSTED,
+                            args).sendToTarget();
+                } else {
+                    // still pass along the ranking map, it may contain other information
+                    mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_RANKING_UPDATE,
+                            mRankingMap).sendToTarget();
                 }
             }
+
         }
+
         @Override
         public void onNotificationRemoved(IStatusBarNotificationHolder sbnHolder,
                 NotificationRankingUpdate update) {
@@ -819,56 +841,48 @@ public abstract class NotificationListenerService extends Service {
                 return;
             }
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-            synchronized (mWrapper) {
-                applyUpdate(update);
-                try {
-                    NotificationListenerService.this.onNotificationRemoved(sbn, mRankingMap);
-                } catch (Throwable t) {
-                    Log.w(TAG, "Error running onNotificationRemoved", t);
-                }
+            synchronized (mLock) {
+                applyUpdateLocked(update);
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = sbn;
+                args.arg2 = mRankingMap;
+                mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_REMOVED,
+                        args).sendToTarget();
             }
+
         }
+
         @Override
         public void onListenerConnected(NotificationRankingUpdate update) {
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-            synchronized (mWrapper) {
-                applyUpdate(update);
-                try {
-                    NotificationListenerService.this.onListenerConnected();
-                } catch (Throwable t) {
-                    Log.w(TAG, "Error running onListenerConnected", t);
-                }
+            synchronized (mLock) {
+                applyUpdateLocked(update);
             }
+            mHandler.obtainMessage(MyHandler.MSG_ON_LISTENER_CONNECTED).sendToTarget();
         }
+
         @Override
         public void onNotificationRankingUpdate(NotificationRankingUpdate update)
                 throws RemoteException {
             // protect subclass from concurrent modifications of (@link mNotificationKeys}.
-            synchronized (mWrapper) {
-                applyUpdate(update);
-                try {
-                    NotificationListenerService.this.onNotificationRankingUpdate(mRankingMap);
-                } catch (Throwable t) {
-                    Log.w(TAG, "Error running onNotificationRankingUpdate", t);
-                }
+            synchronized (mLock) {
+                applyUpdateLocked(update);
+                mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_RANKING_UPDATE,
+                        mRankingMap).sendToTarget();
             }
+
         }
+
         @Override
         public void onListenerHintsChanged(int hints) throws RemoteException {
-            try {
-                NotificationListenerService.this.onListenerHintsChanged(hints);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onListenerHintsChanged", t);
-            }
+            mHandler.obtainMessage(MyHandler.MSG_ON_LISTENER_HINTS_CHANGED,
+                    hints, 0).sendToTarget();
         }
 
         @Override
         public void onInterruptionFilterChanged(int interruptionFilter) throws RemoteException {
-            try {
-                NotificationListenerService.this.onInterruptionFilterChanged(interruptionFilter);
-            } catch (Throwable t) {
-                Log.w(TAG, "Error running onInterruptionFilterChanged", t);
-            }
+            mHandler.obtainMessage(MyHandler.MSG_ON_INTERRUPTION_FILTER_CHANGED,
+                    interruptionFilter, 0).sendToTarget();
         }
 
         @Override
@@ -901,11 +915,12 @@ public abstract class NotificationListenerService extends Service {
         }
     }
 
-    private void applyUpdate(NotificationRankingUpdate update) {
+    private void applyUpdateLocked(NotificationRankingUpdate update) {
         mRankingMap = new RankingMap(update);
     }
 
-    private Context getContext() {
+    /** @hide */
+    protected Context getContext() {
         if (mSystemContext != null) {
             return mSystemContext;
         }
@@ -1288,5 +1303,58 @@ public abstract class NotificationListenerService extends Service {
                 return new RankingMap[size];
             }
         };
+    }
+
+    private final class MyHandler extends Handler {
+        public static final int MSG_ON_NOTIFICATION_POSTED = 1;
+        public static final int MSG_ON_NOTIFICATION_REMOVED = 2;
+        public static final int MSG_ON_LISTENER_CONNECTED = 3;
+        public static final int MSG_ON_NOTIFICATION_RANKING_UPDATE = 4;
+        public static final int MSG_ON_LISTENER_HINTS_CHANGED = 5;
+        public static final int MSG_ON_INTERRUPTION_FILTER_CHANGED = 6;
+
+        public MyHandler(Looper looper) {
+            super(looper, null, false);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ON_NOTIFICATION_POSTED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    StatusBarNotification sbn = (StatusBarNotification) args.arg1;
+                    RankingMap rankingMap = (RankingMap) args.arg2;
+                    args.recycle();
+                    onNotificationPosted(sbn, rankingMap);
+                } break;
+
+                case MSG_ON_NOTIFICATION_REMOVED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    StatusBarNotification sbn = (StatusBarNotification) args.arg1;
+                    RankingMap rankingMap = (RankingMap) args.arg2;
+                    args.recycle();
+                    onNotificationRemoved(sbn, rankingMap);
+                } break;
+
+                case MSG_ON_LISTENER_CONNECTED: {
+                    onListenerConnected();
+                } break;
+
+                case MSG_ON_NOTIFICATION_RANKING_UPDATE: {
+                    RankingMap rankingMap = (RankingMap) msg.obj;
+                    onNotificationRankingUpdate(rankingMap);
+                } break;
+
+                case MSG_ON_LISTENER_HINTS_CHANGED: {
+                    final int hints = msg.arg1;
+                    onListenerHintsChanged(hints);
+                } break;
+
+                case MSG_ON_INTERRUPTION_FILTER_CHANGED: {
+                    final int interruptionFilter = msg.arg1;
+                    onInterruptionFilterChanged(interruptionFilter);
+                } break;
+            }
+        }
     }
 }
