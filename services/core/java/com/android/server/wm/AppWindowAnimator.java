@@ -190,7 +190,8 @@ public class AppWindowAnimator {
 
     public void clearThumbnail() {
         if (thumbnail != null) {
-            thumbnail.destroy();
+            thumbnail.hide();
+            mService.mWindowPlacerLocked.destroyAfterTransaction(thumbnail);
             thumbnail = null;
         }
         deferThumbnailDestruction = false;
