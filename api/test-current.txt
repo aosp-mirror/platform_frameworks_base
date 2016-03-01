@@ -34557,7 +34557,7 @@ package android.service.notification {
     method public void onNotificationRemoved(android.service.notification.StatusBarNotification, android.service.notification.NotificationListenerService.RankingMap);
     method public final void requestInterruptionFilter(int);
     method public final void requestListenerHints(int);
-    method public static final void requestRebind(android.content.ComponentName) throws android.os.RemoteException;
+    method public static void requestRebind(android.content.ComponentName) throws android.os.RemoteException;
     method public final void requestUnbind() throws android.os.RemoteException;
     method public final void setNotificationsShown(java.lang.String[]);
     field public static final java.lang.String CATEGORY_VR_NOTIFICATIONS = "android.intent.category.vr.notifications";
