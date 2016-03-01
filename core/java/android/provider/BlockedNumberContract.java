@@ -29,8 +29,11 @@ import android.os.Bundle;
  * <p>
  * The content provider exposes a table containing blocked numbers. The columns and URIs for
  * accessing this table are defined by the {@link BlockedNumbers} class. Messages, and calls from
- * blocked numbers are discarded by the platform. Notifications upon provider changes can be
- * received using a {@link android.database.ContentObserver}.
+ * blocked numbers are discarded by the platform. If the user contacts emergency
+ * services, number blocking is disabled by the platform for a duration defined by
+ * {@link android.telephony.CarrierConfigManager#KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT}.
+ * Notifications upon provider changes can be received using a
+ * {@link android.database.ContentObserver}.
  * </p>
  *
  * <h3> Permissions </h3>
@@ -141,25 +144,26 @@ public class BlockedNumberContract {
 
         /**
          * Content URI for the blocked numbers.
-         *
-         * Supported operations
-         * blocked
-         * - query
-         * - delete
-         * - insert
-         *
-         * blocked/ID
-         * - query (selection is not supported)
-         * - delete (selection is not supported)
+         * <h3> Supported operations </h3>
+         * <p> blocked
+         * <ul>
+         * <li> query
+         * <li> delete
+         * <li> insert
+         * </ul>
+         * <p> blocked/ID
+         * <ul>
+         * <li> query (selection is not supported)
+         * <li> delete (selection is not supported)
+         * </ul>
          */
-        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
-                "blocked");
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "blocked");
 
         /**
          * The MIME type of {@link #CONTENT_URI} itself providing a directory of blocked phone
          * numbers.
          */
-        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/blocked_numbers";
+        public static final String CONTENT_TYPE = "vnd.android.cursor.dir/blocked_number";
 
         /**
          * The MIME type of a blocked phone number under {@link #CONTENT_URI}.
@@ -215,7 +219,7 @@ public class BlockedNumberContract {
 
     /**
      * Returns {@code true} if blocking numbers is supported for the current user.
-     * <p> Typically, blocking numbers is only supported for the primary user.
+     * <p> Typically, blocking numbers is only supported for one user at a time.
      */
     public static boolean canCurrentUserBlockNumbers(Context context) {
         final Bundle res = context.getContentResolver().call(
@@ -292,6 +296,9 @@ public class BlockedNumberContract {
             return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
         }
 
+        /**
+         * Returns the current status of block suppression.
+         */
         public static BlockSuppressionStatus getBlockSuppressionStatus(Context context) {
             final Bundle res = context.getContentResolver().call(
                     AUTHORITY_URI, METHOD_GET_BLOCK_SUPPRESSION_STATUS, null, null);

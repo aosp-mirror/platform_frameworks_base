@@ -30257,7 +30257,7 @@ package android.provider {
     field public static final java.lang.String COLUMN_ID = "_id";
     field public static final java.lang.String COLUMN_ORIGINAL_NUMBER = "original_number";
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/blocked_number";
-    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/blocked_numbers";
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/blocked_number";
     field public static final android.net.Uri CONTENT_URI;
   }
 
