@@ -896,8 +896,7 @@ public class LockPatternUtils {
      * @return true if device is file encrypted
      */
     public static boolean isFileEncryptionEnabled() {
-        final String status = SystemProperties.get("ro.crypto.type", "");
-        return "file".equalsIgnoreCase(status);
+        return StorageManager.isFileBasedEncryptionEnabled();
     }
 
     /**
