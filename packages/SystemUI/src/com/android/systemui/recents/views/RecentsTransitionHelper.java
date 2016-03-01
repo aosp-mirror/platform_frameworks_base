@@ -105,9 +105,6 @@ public class RecentsTransitionHelper {
             animStartedListener = new ActivityOptions.OnAnimationStartedListener() {
                 @Override
                 public void onAnimationStarted() {
-                    // If we are launching into another task, cancel the previous task's
-                    // window transition
-                    EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
 
                     if (screenPinningRequested) {
@@ -149,6 +146,10 @@ public class RecentsTransitionHelper {
                         animStartedListener);
             }
         }
+
+        // If we are launching into another task, cancel the previous task's
+        // window transition
+        EventBus.getDefault().send(new CancelEnterRecentsWindowAnimationEvent(task));
     }
 
     /**

@@ -16,6 +16,8 @@
 
 package com.android.systemui.recents;
 
+import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
+
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ITaskStackListener;
@@ -66,6 +68,7 @@ import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackLayoutAlgorithm;
 import com.android.systemui.recents.views.TaskStackView;
+import com.android.systemui.recents.views.TaskStackViewScroller;
 import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -73,8 +76,6 @@ import com.android.systemui.statusbar.phone.NavigationBarGestureHelper;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.util.ArrayList;
-
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
 
 /**
  * An implementation of the Recents component for the current user.  For secondary users, this can
@@ -98,6 +99,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     //Used to store tv or non-tv activty for use in creating intents.
     private final String mRecentsIntentActivityName;
+
     /**
      * An implementation of ITaskStackListener, that allows us to listen for changes to the system
      * task stacks and update recents accordingly.
@@ -276,28 +278,24 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
         mLaunchedWhileDocking = launchedWhileDockingTask;
-        if (mFastAltTabTrigger.hasTriggered()) {
-            // We are calling this from the doze trigger, so just fall through to show Recents
-            mFastAltTabTrigger.resetTrigger();
+        if (mFastAltTabTrigger.isAsleep()) {
+            // Fast alt-tab duration has elapsed, fall through to showing Recents and reset
+            mFastAltTabTrigger.stopDozing();
         } else if (mFastAltTabTrigger.isDozing()) {
-            // We are dozing but haven't yet triggered, ignore this if this is not another alt-tab,
-            // otherwise, this is an additional tab (alt-tab*), which means that we should trigger
-            // immediately (fall through and disable the pending trigger)
-            // TODO: This is tricky, we need to handle the tab key, but Recents has not yet started
-            //       so we may actually additional signal to handle multiple quick tab cases.  The
-            //       severity of this is inversely proportional to the FAST_ALT_TAB_DELAY_MS
-            //       duration though
+            // Fast alt-tab duration has not elapsed.  If this is triggered by a different
+            // showRecents() call, then ignore that call for now.
+            // TODO: We can not handle quick tabs that happen between the initial showRecents() call
+            //       that started the activity and the activity starting up.  The severity of this
+            //       is inversely proportional to the FAST_ALT_TAB_DELAY_MS duration though.
             if (!triggeredFromAltTab) {
                 return;
             }
             mFastAltTabTrigger.stopDozing();
-        } else {
-            // Otherwise, the doze trigger is not running, and if this is an alt tab, we should
-            // start the trigger and then wait for the hide (or for it to elapse)
-            if (triggeredFromAltTab) {
-                mFastAltTabTrigger.startDozing();
-                return;
-            }
+        } else if (triggeredFromAltTab) {
+            // The fast alt-tab detector is not yet running, so start the trigger and wait for the
+            // hideRecents() call, or for the fast alt-tab duration to elapse
+            mFastAltTabTrigger.startDozing();
+            return;
         }
 
         try {
@@ -321,7 +319,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
             // Cancel the fast alt-tab trigger
             mFastAltTabTrigger.stopDozing();
-            mFastAltTabTrigger.resetTrigger();
             return;
         }
 
@@ -348,12 +345,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             long elapsedTime = SystemClock.elapsedRealtime() - mLastToggleTime;
 
             if (topTask != null && ssp.isRecentsTopMost(topTask, isTopTaskHome)) {
+                RecentsDebugFlags debugFlags = Recents.getDebugFlags();
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (!launchState.launchedWithAltTab) {
                     // If the user taps quickly
-                    if (ViewConfiguration.getDoubleTapMinTime() < elapsedTime &&
-                            elapsedTime < ViewConfiguration.getDoubleTapTimeout()) {
+                    if (!debugFlags.isPagingEnabled() ||
+                            (ViewConfiguration.getDoubleTapMinTime() < elapsedTime &&
+                                    elapsedTime < ViewConfiguration.getDoubleTapTimeout())) {
                         // Launch the next focused task
                         EventBus.getDefault().post(new LaunchNextTaskRequestEvent());
                     } else {
@@ -574,7 +573,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     false /* triggeredFromAltTab */,
                     dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS,
                     false /* animate */,
-                    true /* reloadTasks*/);
+                    true /* launchedWhileDockingTask*/);
         }
     }
 
@@ -707,8 +706,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Update the destination rect
         mDummyStackView.updateLayoutForStack(stack);
         final Task toTask = new Task();
-        final TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
-                toTask);
+        final TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask);
         ForegroundThread.getHandler().postAtFrontOfQueue(new Runnable() {
             @Override
             public void run() {
@@ -754,17 +752,20 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Creates the activity options for an app->recents transition.
      */
     private ActivityOptions getThumbnailTransitionActivityOptions(
-            ActivityManager.RunningTaskInfo topTask, TaskStack stack, TaskStackView stackView) {
+            ActivityManager.RunningTaskInfo topTask, TaskStackView stackView) {
         if (topTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
-            stackView.getScroller().setStackScrollToInitialState();
-            ArrayList<Task> tasks = stack.getStackTasks();
+            ArrayList<Task> tasks = stackView.getStack().getStackTasks();
+            TaskStackLayoutAlgorithm stackLayout = stackView.getStackAlgorithm();
+            TaskStackViewScroller stackScroller = stackView.getScroller();
+
+            stackView.updateToInitialState();
+
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 Task task = tasks.get(i);
                 if (task.isFreeformTask()) {
-                    mTmpTransform = stackView.getStackAlgorithm()
-                            .getStackTransformScreenCoordinates(task,
-                                    stackView.getScroller().getStackScroll(), mTmpTransform, null);
+                    mTmpTransform = stackLayout.getStackTransformScreenCoordinates(task,
+                                    stackScroller.getStackScroll(), mTmpTransform, null);
                     Rect toTaskRect = new Rect();
                     mTmpTransform.rect.round(toTaskRect);
                     Bitmap thumbnail = getThumbnailBitmap(topTask, task, mTmpTransform);
@@ -778,8 +779,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         } else {
             // Update the destination rect
             Task toTask = new Task();
-            TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
-                    toTask);
+            TaskViewTransform toTransform = getThumbnailTransitionTransform(stackView, toTask);
             RectF toTaskRect = toTransform.rect;
             Bitmap thumbnail = getThumbnailBitmap(topTask, toTask, toTransform);
             if (thumbnail != null) {
@@ -811,9 +811,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     /**
      * Returns the transition rect for the given task id.
      */
-    private TaskViewTransform getThumbnailTransitionTransform(TaskStack stack,
-            TaskStackView stackView, Task runningTaskOut) {
+    private TaskViewTransform getThumbnailTransitionTransform(TaskStackView stackView,
+            Task runningTaskOut) {
         // Find the running task in the TaskStack
+        TaskStack stack = stackView.getStack();
         Task launchTask = stack.getLaunchTarget();
         if (launchTask != null) {
             runningTaskOut.copyFrom(launchTask);
@@ -824,7 +825,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
 
         // Get the transform for the running task
-        stackView.getScroller().setStackScrollToInitialState();
+        stackView.updateToInitialState();
         mTmpTransform = stackView.getStackAlgorithm().getStackTransformScreenCoordinates(launchTask,
                 stackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;
@@ -852,6 +853,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                     c.scale(toTransform.scale, toTransform.scale);
                     mHeaderBar.rebindToTask(toTask, false /* touchExplorationEnabled */,
                             disabledInSafeMode);
+                    mHeaderBar.setDimAlpha(toTransform.dimAlpha);
                     mHeaderBar.draw(c);
                     c.setBitmap(null);
                 }
@@ -900,8 +902,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         if (useThumbnailTransition) {
             // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, stack,
-                    mDummyStackView);
+            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, mDummyStackView);
             if (opts != null) {
                 startRecentsActivity(topTask, opts, false /* fromHome */,
                         false /* fromSearchHome */, true /* fromThumbnail */, stackVr);
@@ -948,14 +949,15 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * Starts the recents activity.
      */
     private void startRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-              ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
-              TaskStackLayoutAlgorithm.VisibilityReport vr) {
+                ActivityOptions opts, boolean fromHome, boolean fromSearchHome,
+                boolean fromThumbnail, TaskStackLayoutAlgorithm.VisibilityReport vr) {
         // Update the configuration based on the launch options
         RecentsConfiguration config = Recents.getConfiguration();
         RecentsActivityLaunchState launchState = config.getLaunchState();
         launchState.launchedFromHome = fromSearchHome || fromHome;
         launchState.launchedFromSearchHome = fromSearchHome;
-        launchState.launchedFromAppWithThumbnail = fromThumbnail;
+        launchState.launchedFromApp = fromThumbnail || mLaunchedWhileDocking;
+        launchState.launchedFromAppDocked = mLaunchedWhileDocking;
         launchState.launchedToTaskId = (topTask != null) ? topTask.id : -1;
         launchState.launchedWithAltTab = mTriggeredFromAltTab;
         launchState.launchedReuseTaskStackViews = mCanReuseTaskStackViews;

@@ -347,9 +347,11 @@ public class TaskViewHeader extends FrameLayout
      * Sets the dim alpha, only used when we are not using hardware layers.
      * (see RecentsConfiguration.useHardwareLayers)
      */
-    void setDimAlpha(float dimAlpha) {
-        mDimAlpha = dimAlpha;
-        updateBackgroundColor(mBackground.getColor(), dimAlpha);
+    public void setDimAlpha(float dimAlpha) {
+        if (Float.compare(mDimAlpha, dimAlpha) != 0) {
+            mDimAlpha = dimAlpha;
+            updateBackgroundColor(mBackground.getColor(), dimAlpha);
+        }
     }
 
     /**
@@ -377,7 +379,9 @@ public class TaskViewHeader extends FrameLayout
         int primaryColor = disabledInSafeMode
                 ? mDisabledTaskBarBackgroundColor
                 : t.colorPrimary;
-        updateBackgroundColor(primaryColor, mDimAlpha);
+        if (mBackground.getColor() != primaryColor) {
+            updateBackgroundColor(primaryColor, mDimAlpha);
+        }
         if (t.icon != null) {
             mIconView.setImageDrawable(t.icon);
         }

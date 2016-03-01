@@ -56,8 +56,8 @@ public class TaskStackAnimationHelper {
         /**
          * Callback to start the animation for the launch target {@link TaskView}.
          */
-        void onStartLaunchTargetEnterAnimation(int duration, boolean screenPinningEnabled,
-                ReferenceCountedTrigger postAnimationTrigger);
+        void onStartLaunchTargetEnterAnimation(TaskViewTransform transform, int duration,
+                boolean screenPinningEnabled, ReferenceCountedTrigger postAnimationTrigger);
 
         /**
          * Callback to start the animation for the launch target {@link TaskView} when it is
@@ -141,7 +141,7 @@ public class TaskStackAnimationHelper {
                 tv.setVisibility(View.INVISIBLE);
             } else if (launchState.launchedHasConfigurationChanged) {
                 // Just load the views as-is
-            } else if (launchState.launchedFromAppWithThumbnail) {
+            } else if (launchState.launchedFromApp) {
                 if (task.isLaunchTarget) {
                     tv.onPrepareLaunchTargetForEnterAnimation();
                 } else if (currentTaskOccludesLaunchTarget) {
@@ -205,10 +205,11 @@ public class TaskStackAnimationHelper {
             stackLayout.getStackTransform(task, stackScroller.getStackScroll(), mTmpTransform,
                     null);
 
-            if (launchState.launchedFromAppWithThumbnail) {
+            if (launchState.launchedFromApp) {
                 if (task.isLaunchTarget) {
-                    tv.onStartLaunchTargetEnterAnimation(taskViewEnterFromAppDuration,
-                            mStackView.mScreenPinningEnabled, postAnimationTrigger);
+                    tv.onStartLaunchTargetEnterAnimation(mTmpTransform,
+                            taskViewEnterFromAppDuration, mStackView.mScreenPinningEnabled,
+                            postAnimationTrigger);
                 } else {
                     // Animate the task up if it was occluding the launch target
                     if (currentTaskOccludesLaunchTarget) {
