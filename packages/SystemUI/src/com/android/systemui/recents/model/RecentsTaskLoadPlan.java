@@ -133,7 +133,6 @@ public class RecentsTaskLoadPlan {
         SparseIntArray affiliatedTaskCounts = new SparseIntArray();
         String dismissDescFormat = mContext.getString(
                 R.string.accessibility_recents_item_will_be_dismissed);
-        Formatter dismissDescFormatter = new Formatter();
         long lastStackActiveTime = Prefs.getLong(mContext,
                 Prefs.Key.OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME, 0);
         if (RecentsDebugFlags.Static.EnableMockTasks) {
@@ -184,8 +183,7 @@ public class RecentsTaskLoadPlan {
             ActivityInfo info = loader.getAndUpdateActivityInfo(taskKey);
             String title = loader.getAndUpdateActivityTitle(taskKey, t.taskDescription);
             String contentDescription = loader.getAndUpdateContentDescription(taskKey, res);
-            String dismissDescription = dismissDescFormatter.format(dismissDescFormat,
-                    contentDescription).toString();
+            String dismissDescription = String.format(dismissDescFormat, contentDescription);
             Drawable icon = isStackTask
                     ? loader.getAndUpdateActivityIcon(taskKey, t.taskDescription, res, false)
                     : null;
