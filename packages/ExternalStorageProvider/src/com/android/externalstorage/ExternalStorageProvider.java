@@ -391,6 +391,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
             if (mArchiveHelper.isArchivedDocument(docId)) {
                 return mArchiveHelper.isChildDocument(parentDocId, docId);
             }
+            // Archives do not contain regular files.
+            if (mArchiveHelper.isArchivedDocument(parentDocId)) {
+                return false;
+            }
 
             final File parent = getFileForDocId(parentDocId).getCanonicalFile();
             final File doc = getFileForDocId(docId).getCanonicalFile();
