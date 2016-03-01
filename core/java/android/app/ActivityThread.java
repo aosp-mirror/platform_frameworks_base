@@ -175,6 +175,7 @@ public final class ActivityThread {
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
     private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
     private static final int LOG_AM_ON_RESUME_CALLED = 30022;
+    private static final int LOG_AM_ON_STOP_CALLED = 30049;
 
     /** Type for IActivityManager.serviceDoneExecuting: anonymous operation */
     public static final int SERVICE_DONE_EXECUTING_ANON = 0;
@@ -1407,7 +1408,7 @@ public final class ActivityThread {
 
                     r.packageInfo = getPackageInfoNoCheck(
                             r.activityInfo.applicationInfo, r.compatInfo);
-                    handleLaunchActivity(r, null);
+                    handleLaunchActivity(r, null, "LAUNCH_ACTIVITY");
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 } break;
                 case RELAUNCH_ACTIVITY: {
@@ -1458,7 +1459,7 @@ public final class ActivityThread {
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleResumeActivity((IBinder) args.arg1, true, args.argi1 != 0, true,
-                            args.argi3);
+                            args.argi3, "RESUME_ACTIVITY");
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case SEND_RESULT:
@@ -2631,7 +2632,7 @@ public final class ActivityThread {
         return baseContext;
     }
 
-    private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
+    private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent, String reason) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -2658,7 +2659,7 @@ public final class ActivityThread {
             reportSizeConfigurations(r);
             Bundle oldState = r.state;
             handleResumeActivity(r.token, false, r.isForward,
-                    !r.activity.mFinished && !r.startsNotResumed, r.lastProcessedSeq);
+                    !r.activity.mFinished && !r.startsNotResumed, r.lastProcessedSeq, reason);
 
             if (!r.activity.mFinished && r.startsNotResumed) {
                 // The activity manager actually wants this one to start out
@@ -2673,6 +2674,8 @@ public final class ActivityThread {
                 try {
                     r.activity.mCalled = false;
                     mInstrumentation.callActivityOnPause(r.activity);
+                    EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
+                            r.activity.getComponentName().getClassName(), reason);
                     // We need to keep around the original state, in case
                     // we need to be created again.  But we only do this
                     // for pre-Honeycomb apps, which always save their state
@@ -3320,7 +3323,7 @@ public final class ActivityThread {
     }
 
     public final ActivityClientRecord performResumeActivity(IBinder token,
-            boolean clearHide) {
+            boolean clearHide, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (localLOGV) Slog.v(TAG, "Performing resume of " + r
                 + " finished=" + r.activity.mFinished);
@@ -3342,8 +3345,8 @@ public final class ActivityThread {
                 }
                 r.activity.performResume();
 
-                EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED,
-                        UserHandle.myUserId(), r.activity.getComponentName().getClassName());
+                EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED, UserHandle.myUserId(),
+                        r.activity.getComponentName().getClassName(), reason);
 
                 r.paused = false;
                 r.stopped = false;
@@ -3379,7 +3382,7 @@ public final class ActivityThread {
     }
 
     final void handleResumeActivity(IBinder token,
-            boolean clearHide, boolean isForward, boolean reallyResume, int seq) {
+            boolean clearHide, boolean isForward, boolean reallyResume, int seq, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (!checkAndUpdateLifecycleSeq(seq, r, "resumeActivity")) {
             return;
@@ -3391,7 +3394,7 @@ public final class ActivityThread {
         mSomeActivitiesChanged = true;
 
         // TODO Push resumeArgs into the activity for consideration
-        r = performResumeActivity(token, clearHide);
+        r = performResumeActivity(token, clearHide, reason);
 
         if (r != null) {
             final Activity a = r.activity;
@@ -3583,7 +3586,7 @@ public final class ActivityThread {
             }
 
             r.activity.mConfigChangeFlags |= configChanges;
-            performPauseActivity(token, finished, r.isPreHoneycomb());
+            performPauseActivity(token, finished, r.isPreHoneycomb(), "handlePauseActivity");
 
             // Make sure any pending writes are now committed.
             if (r.isPreHoneycomb()) {
@@ -3607,13 +3610,13 @@ public final class ActivityThread {
     }
 
     final Bundle performPauseActivity(IBinder token, boolean finished,
-            boolean saveState) {
+            boolean saveState, String reason) {
         ActivityClientRecord r = mActivities.get(token);
-        return r != null ? performPauseActivity(r, finished, saveState) : null;
+        return r != null ? performPauseActivity(r, finished, saveState, reason) : null;
     }
 
     final Bundle performPauseActivity(ActivityClientRecord r, boolean finished,
-            boolean saveState) {
+            boolean saveState, String reason) {
         if (r.paused) {
             if (r.activity.mFinished) {
                 // If we are finishing, we won't call onResume() in certain cases.
@@ -3638,7 +3641,7 @@ public final class ActivityThread {
             r.activity.mCalled = false;
             mInstrumentation.callActivityOnPause(r.activity);
             EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
-                    r.activity.getComponentName().getClassName());
+                    r.activity.getComponentName().getClassName(), reason);
             if (!r.activity.mCalled) {
                 throw new SuperNotCalledException(
                     "Activity " + r.intent.getComponent().toShortString() +
@@ -3671,9 +3674,9 @@ public final class ActivityThread {
         return !r.activity.mFinished && saveState ? r.state : null;
     }
 
-    final void performStopActivity(IBinder token, boolean saveState) {
+    final void performStopActivity(IBinder token, boolean saveState, String reason) {
         ActivityClientRecord r = mActivities.get(token);
-        performStopActivityInner(r, null, false, saveState);
+        performStopActivityInner(r, null, false, saveState, reason);
     }
 
     private static class StopInfo implements Runnable {
@@ -3731,7 +3734,7 @@ public final class ActivityThread {
      * the activity's UI visibillity changes.
      */
     private void performStopActivityInner(ActivityClientRecord r,
-            StopInfo info, boolean keepShown, boolean saveState) {
+            StopInfo info, boolean keepShown, boolean saveState, String reason) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
         if (r != null) {
             if (!keepShown && r.stopped) {
@@ -3783,6 +3786,8 @@ public final class ActivityThread {
                     }
                 }
                 r.stopped = true;
+                EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
+                        r.activity.getComponentName().getClassName(), reason);
             }
 
             r.paused = true;
@@ -3829,7 +3834,7 @@ public final class ActivityThread {
         r.activity.mConfigChangeFlags |= configChanges;
 
         StopInfo info = new StopInfo();
-        performStopActivityInner(r, info, show, true);
+        performStopActivityInner(r, info, show, true, "handleStopActivity");
 
         if (localLOGV) Slog.v(
             TAG, "Finishing stop of " + r + ": show=" + show
@@ -3885,7 +3890,7 @@ public final class ActivityThread {
         }
 
         if (!show && !r.stopped) {
-            performStopActivityInner(r, null, show, false);
+            performStopActivityInner(r, null, show, false, "handleWindowVisibility");
         } else if (show && r.stopped) {
             // If we are getting ready to gc after going to the background, well
             // we are back active so skip it.
@@ -3924,6 +3929,8 @@ public final class ActivityThread {
                     }
                 }
                 r.stopped = true;
+                EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
+                        r.activity.getComponentName().getClassName(), "sleeping");
             }
 
             // Make sure any pending writes are now committed.
@@ -4065,7 +4072,7 @@ public final class ActivityThread {
                     r.activity.mCalled = false;
                     mInstrumentation.callActivityOnPause(r.activity);
                     EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
-                            r.activity.getComponentName().getClassName());
+                            r.activity.getComponentName().getClassName(), "destroy");
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(
                             "Activity " + safeToComponentShortString(r.intent)
@@ -4097,6 +4104,8 @@ public final class ActivityThread {
                     }
                 }
                 r.stopped = true;
+                EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
+                        r.activity.getComponentName().getClassName(), "destroy");
             }
             if (getNonConfigInstance) {
                 try {
@@ -4396,7 +4405,7 @@ public final class ActivityThread {
 
         // Need to ensure state is saved.
         if (!r.paused) {
-            performPauseActivity(r.token, false, r.isPreHoneycomb());
+            performPauseActivity(r.token, false, r.isPreHoneycomb(), "handleRelaunchActivity");
         }
         if (r.state == null && !r.stopped && !r.isPreHoneycomb()) {
             callCallActivityOnSaveInstanceState(r);
@@ -4426,7 +4435,7 @@ public final class ActivityThread {
         r.startsNotResumed = tmp.startsNotResumed;
         r.overrideConfig = tmp.overrideConfig;
 
-        handleLaunchActivity(r, currentIntent);
+        handleLaunchActivity(r, currentIntent, "handleRelaunchActivity");
 
         if (!tmp.onlyLocalRequest) {
             try {
