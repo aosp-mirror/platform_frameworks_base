@@ -212,7 +212,7 @@ import java.util.Objects;
  * AudioTrack.getPlaybackHeadPosition()}),
  * depending on the context where audio frame is used.
  */
-public class AudioFormat implements Parcelable {
+public final class AudioFormat implements Parcelable {
 
     //---------------------------------------------------------
     // Constants

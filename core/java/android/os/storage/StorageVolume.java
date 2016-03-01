@@ -76,7 +76,7 @@ import java.io.File;
  */
 // NOTE: This is a legacy specialization of VolumeInfo which describes the volume for a specific
 // user, but is now part of the public API.
-public class StorageVolume implements Parcelable {
+public final class StorageVolume implements Parcelable {
 
     private final String mId;
     private final int mStorageId;

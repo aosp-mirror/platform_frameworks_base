@@ -4126,7 +4126,7 @@ package android.app {
     field public java.lang.String serviceDetails;
   }
 
-  public class AutomaticZenRule implements android.os.Parcelable {
+  public final class AutomaticZenRule implements android.os.Parcelable {
     ctor public AutomaticZenRule(java.lang.String, android.content.ComponentName, android.net.Uri, int, boolean);
     ctor public AutomaticZenRule(android.os.Parcel);
     method public int describeContents();
@@ -6597,7 +6597,7 @@ package android.auditing {
     field public static final int TAG_SYNC_SEND_FILE = 210004; // 0x33454
   }
 
-  public static class SecurityLog.SecurityEvent implements android.os.Parcelable {
+  public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
     method public int describeContents();
     method public java.lang.Object getData();
     method public int getTag();
@@ -7341,7 +7341,7 @@ package android.bluetooth {
     field public static final int TYPE_SCO = 2; // 0x2
   }
 
-  public class OobData implements android.os.Parcelable {
+  public final class OobData implements android.os.Parcelable {
     ctor public OobData();
     method public int describeContents();
     method public byte[] getSecurityManagerTk();
@@ -19721,7 +19721,7 @@ package android.media {
     field public static final int TYPE_WIRED_HEADSET = 3; // 0x3
   }
 
-  public class AudioFormat implements android.os.Parcelable {
+  public final class AudioFormat implements android.os.Parcelable {
     method public int describeContents();
     method public int getChannelCount();
     method public int getChannelIndexMask();
@@ -20021,7 +20021,7 @@ package android.media {
     method public abstract void onRoutingChanged(android.media.AudioRecord);
   }
 
-  public class AudioRecordConfiguration implements android.os.Parcelable {
+  public final class AudioRecordConfiguration implements android.os.Parcelable {
     method public int describeContents();
     method public android.media.AudioDeviceInfo getAudioDevice();
     method public int getClientAudioSessionId();
@@ -23536,17 +23536,6 @@ package android.net {
     method public abstract void onNetworkActive();
   }
 
-  public class ConnectivityMetricsEvent implements android.os.Parcelable {
-    ctor public ConnectivityMetricsEvent(long, int, int, android.os.Parcelable);
-    method public int describeContents();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.ConnectivityMetricsEvent> CREATOR;
-    field public final int componentTag;
-    field public final android.os.Parcelable data;
-    field public final int eventTag;
-    field public final long timestamp;
-  }
-
   public class Credentials {
     ctor public Credentials(int, int, int);
     method public int getGid();
@@ -23554,7 +23543,7 @@ package android.net {
     method public int getUid();
   }
 
-  public class DataUsageRequest implements android.os.Parcelable {
+  public final class DataUsageRequest implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.DataUsageRequest> CREATOR;
@@ -29445,7 +29434,7 @@ package android.os.storage {
     method public boolean unmountObb(java.lang.String, boolean, android.os.storage.OnObbStateChangeListener);
   }
 
-  public class StorageVolume implements android.os.Parcelable {
+  public final class StorageVolume implements android.os.Parcelable {
     method public android.content.Intent createAccessIntent(java.lang.String);
     method public int describeContents();
     method public java.lang.String getDescription(android.content.Context);

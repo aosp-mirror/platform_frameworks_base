@@ -29,7 +29,7 @@ import java.util.Objects;
  * If no {@code uid}s are set, callbacks are restricted to device-owners,
  * carrier-privileged apps, or system apps.
  */
-public class DataUsageRequest implements Parcelable {
+public final class DataUsageRequest implements Parcelable {
 
     /**
      * @hide
