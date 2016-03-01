@@ -2186,7 +2186,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         final int resizeMode = task.mResizeMode;
 
-        if (stackId == DOCKED_STACK_ID && resizeMode == RESIZE_MODE_UNRESIZEABLE) {
+        if (stackId == DOCKED_STACK_ID && !task.isResizeable()) {
             // We don't allow moving a unresizeable task to the docked stack since the docked
             // stack is used for split-screen mode and will cause things like the docked divider to
             // show up. We instead leave the task in its current stack or move it to the fullscreen
