@@ -713,8 +713,7 @@ public class MtpDatabase implements AutoCloseable {
         };
     }
 
-
-    private MtpPropertyList getObjectPropertyList(long handle, int format, long property,
+    private MtpPropertyList getObjectPropertyList(int handle, int format, int property,
                         int groupCode, int depth) {
         // FIXME - implement group support
         if (groupCode != 0) {
@@ -722,29 +721,29 @@ public class MtpDatabase implements AutoCloseable {
         }
 
         MtpPropertyGroup propertyGroup;
-        if (property == 0xFFFFFFFFL) {
-            if (format == 0 && handle > 0) {
+        if (property == 0xffffffff) {
+            if (format == 0 && handle != 0 && handle != 0xffffffff) {
                 // return properties based on the object's format
-                format = getObjectFormat((int)handle);
+                format = getObjectFormat(handle);
             }
-             propertyGroup = mPropertyGroupsByFormat.get(format);
-             if (propertyGroup == null) {
+            propertyGroup = mPropertyGroupsByFormat.get(format);
+            if (propertyGroup == null) {
                 int[] propertyList = getSupportedObjectProperties(format);
                 propertyGroup = new MtpPropertyGroup(this, mMediaProvider,
                         mVolumeName, propertyList);
-                mPropertyGroupsByFormat.put(new Integer(format), propertyGroup);
+                mPropertyGroupsByFormat.put(format, propertyGroup);
             }
         } else {
-              propertyGroup = mPropertyGroupsByProperty.get(property);
-             if (propertyGroup == null) {
-                int[] propertyList = new int[] { (int)property };
-                propertyGroup = new MtpPropertyGroup(this, mMediaProvider,
-                        mVolumeName, propertyList);
-                mPropertyGroupsByProperty.put(new Integer((int)property), propertyGroup);
+            propertyGroup = mPropertyGroupsByProperty.get(property);
+            if (propertyGroup == null) {
+                final int[] propertyList = new int[] { property };
+                propertyGroup = new MtpPropertyGroup(
+                        this, mMediaProvider, mVolumeName, propertyList);
+                mPropertyGroupsByProperty.put(property, propertyGroup);
             }
         }
 
-        return propertyGroup.getPropertyList((int)handle, format, depth);
+        return propertyGroup.getPropertyList(handle, format, depth);
     }
 
     private int renameFile(int handle, String newName) {
@@ -970,7 +969,7 @@ public class MtpDatabase implements AutoCloseable {
         Cursor c = null;
         try {
             c = mMediaProvider.query(mObjectsUri, FORMAT_PROJECTION,
-                            ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
+                            ID_WHERE, new String[] { Integer.toString(handle) }, null, null);
             if (c != null && c.moveToNext()) {
                 return c.getInt(1);
             } else {
