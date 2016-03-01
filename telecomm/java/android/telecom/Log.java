@@ -16,7 +16,10 @@
 
 package android.telecom;
 
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.telephony.PhoneNumberUtils;
+import android.text.TextUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -152,8 +155,35 @@ final public class Log {
     public static String pii(Object pii) {
         if (pii == null || VERBOSE) {
             return String.valueOf(pii);
+        } if (pii instanceof Uri) {
+            return piiUri((Uri) pii);
         }
         return "[" + secureHash(String.valueOf(pii).getBytes()) + "]";
+    }
+
+    private static String piiUri(Uri handle) {
+        StringBuilder sb = new StringBuilder();
+        String scheme = handle.getScheme();
+        if (!TextUtils.isEmpty(scheme)) {
+            sb.append(scheme).append(":");
+        }
+        String value = handle.getSchemeSpecificPart();
+        if (!TextUtils.isEmpty(value)) {
+            for (int i = 0; i < value.length(); i++) {
+                char c = value.charAt(i);
+                if (PhoneNumberUtils.isStartsPostDial(c)) {
+                    sb.append(c);
+                } else if (PhoneNumberUtils.isDialable(c)) {
+                    sb.append("*");
+                } else if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')) {
+                    sb.append("*");
+                } else {
+                    sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
+
     }
 
     private static String secureHash(byte[] input) {
