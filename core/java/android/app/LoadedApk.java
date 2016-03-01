@@ -382,7 +382,7 @@ public final class LoadedApk {
             String libraryPermittedPath = mDataDir;
             boolean isBundledApp = false;
 
-            if (mApplicationInfo.isSystemApp()) {
+            if (mApplicationInfo.isSystemApp() && !mApplicationInfo.isUpdatedSystemApp()) {
                 isBundledApp = true;
                 // Add path to system libraries to libPaths;
                 // Access to system libs should be limited
