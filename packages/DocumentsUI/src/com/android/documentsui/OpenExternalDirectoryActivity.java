@@ -17,9 +17,18 @@
 package com.android.documentsui;
 
 import static android.os.Environment.isStandardDirectory;
+import static android.os.Environment.STANDARD_DIRECTORIES;
 import static android.os.storage.StorageVolume.EXTRA_DIRECTORY_NAME;
 import static android.os.storage.StorageVolume.EXTRA_STORAGE_VOLUME;
 import static com.android.documentsui.Shared.DEBUG;
+import static com.android.documentsui.Metrics.logInvalidScopedAccessRequest;
+import static com.android.documentsui.Metrics.logValidScopedAccessRequest;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_DENIED;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_ERROR;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_GRANTED;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS;
+import static com.android.documentsui.Metrics.SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -73,6 +82,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         final Intent intent = getIntent();
         if (intent == null) {
             if (DEBUG) Log.d(TAG, "missing intent");
+            logInvalidScopedAccessRequest(this, SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS);
             setResult(RESULT_CANCELED);
             finish();
             return;
@@ -82,12 +92,14 @@ public class OpenExternalDirectoryActivity extends Activity {
             if (DEBUG)
                 Log.d(TAG, "extra " + EXTRA_STORAGE_VOLUME + " is not a StorageVolume: "
                         + storageVolume);
+            logInvalidScopedAccessRequest(this, SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS);
             setResult(RESULT_CANCELED);
             finish();
             return;
         }
         final String directoryName = intent.getStringExtra(EXTRA_DIRECTORY_NAME);
         if (directoryName == null) {
+            logInvalidScopedAccessRequest(this, SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS);
             if (DEBUG) Log.d(TAG, "missing extra " + EXTRA_DIRECTORY_NAME + " on " + intent);
             setResult(RESULT_CANCELED);
             finish();
@@ -125,6 +137,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         } catch (IOException e) {
             Log.e(TAG, "Could not get canonical file for volume " + storageVolume.dump()
                     + " and directory " + directoryName);
+            logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_ERROR);
             return false;
         }
         final StorageManager sm =
@@ -138,6 +151,7 @@ public class OpenExternalDirectoryActivity extends Activity {
             if (DEBUG)
                 Log.d(TAG, "Directory '" + directory + "' is not standard (full path: '"
                         + file.getAbsolutePath() + "')");
+            logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY);
             return false;
         }
 
@@ -159,6 +173,8 @@ public class OpenExternalDirectoryActivity extends Activity {
         // Checks if the user has granted the permission already.
         final Intent intent = getIntentForExistingPermission(activity, file);
         if (intent != null) {
+            logValidScopedAccessRequest(activity, directory,
+                    SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED);
             activity.setResult(RESULT_OK, intent);
             activity.finish();
             return true;
@@ -166,12 +182,14 @@ public class OpenExternalDirectoryActivity extends Activity {
 
         if (volumeLabel == null) {
             Log.e(TAG, "Could not get volume for " + file);
+            logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_ERROR);
             return false;
         }
 
         // Gets the package label.
         final String appLabel = getAppLabel(activity);
         if (appLabel == null) {
+            // Error already logged.
             return false;
         }
 
@@ -198,6 +216,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         try {
             return pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
         } catch (NameNotFoundException e) {
+            logInvalidScopedAccessRequest(activity, SCOPED_DIRECTORY_ACCESS_ERROR);
             Log.w(TAG, "Could not get label for package " + packageName);
             return null;
         }
@@ -217,18 +236,21 @@ public class OpenExternalDirectoryActivity extends Activity {
         return volume.isVisibleForWrite(userId) && root.equals(path);
     }
 
-    private static Uri getGrantedUriPermission(ContentProviderClient provider, File file) {
+    private static Uri getGrantedUriPermission(Context context, ContentProviderClient provider,
+            File file) {
         // Calls ExternalStorageProvider to get the doc id for the file
         final Bundle bundle;
         try {
             bundle = provider.call("getDocIdForFileCreateNewDir", file.getPath(), null);
         } catch (RemoteException e) {
             Log.e(TAG, "Did not get doc id from External Storage provider for " + file, e);
+            logInvalidScopedAccessRequest(context, SCOPED_DIRECTORY_ACCESS_ERROR);
             return null;
         }
         final String docId = bundle == null ? null : bundle.getString("DOC_ID");
         if (docId == null) {
             Log.e(TAG, "Did not get doc id from External Storage provider for " + file);
+            logInvalidScopedAccessRequest(context, SCOPED_DIRECTORY_ACCESS_ERROR);
             return null;
         }
         Log.d(TAG, "doc id for " + file + ": " + docId);
@@ -242,9 +264,9 @@ public class OpenExternalDirectoryActivity extends Activity {
         return uri;
     }
 
-    private static Intent createGrantedUriPermissionsIntent(ContentProviderClient provider,
-            File file) {
-        final Uri uri = getGrantedUriPermission(provider, file);
+    private static Intent createGrantedUriPermissionsIntent(Context context,
+            ContentProviderClient provider, File file) {
+        final Uri uri = getGrantedUriPermission(context, provider, file);
         return createGrantedUriPermissionsIntent(uri);
     }
 
@@ -261,7 +283,8 @@ public class OpenExternalDirectoryActivity extends Activity {
     private static Intent getIntentForExistingPermission(OpenExternalDirectoryActivity activity,
             File file) {
         final String packageName = activity.getCallingPackage();
-        final Uri grantedUri = getGrantedUriPermission(activity.getExternalStorageClient(), file);
+        final Uri grantedUri =
+                getGrantedUriPermission(activity, activity.getExternalStorageClient(), file);
         if (DEBUG)
             Log.d(TAG, "checking if " + packageName + " already has permission for " + grantedUri);
         final ActivityManager am =
@@ -298,7 +321,7 @@ public class OpenExternalDirectoryActivity extends Activity {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final String folder = mFile.getName();
+            final String directory = mFile.getName();
             final Activity activity = getActivity();
             final OnClickListener listener = new OnClickListener() {
 
@@ -306,12 +329,16 @@ public class OpenExternalDirectoryActivity extends Activity {
                 public void onClick(DialogInterface dialog, int which) {
                     Intent intent = null;
                     if (which == DialogInterface.BUTTON_POSITIVE) {
-                        intent = createGrantedUriPermissionsIntent(
+                        intent = createGrantedUriPermissionsIntent(mActivity,
                                 mActivity.getExternalStorageClient(), mFile);
                     }
                     if (which == DialogInterface.BUTTON_NEGATIVE || intent == null) {
+                        logValidScopedAccessRequest(activity, directory,
+                                SCOPED_DIRECTORY_ACCESS_DENIED);
                         activity.setResult(RESULT_CANCELED);
                     } else {
+                        logValidScopedAccessRequest(activity, directory,
+                                SCOPED_DIRECTORY_ACCESS_GRANTED);
                         activity.setResult(RESULT_OK, intent);
                     }
                     activity.finish();
@@ -320,7 +347,7 @@ public class OpenExternalDirectoryActivity extends Activity {
 
             final CharSequence message = TextUtils
                     .expandTemplate(
-                            getText(R.string.open_external_dialog_request), mAppLabel, folder,
+                            getText(R.string.open_external_dialog_request), mAppLabel, directory,
                             mVolumeLabel);
             return new AlertDialog.Builder(activity, R.style.AlertDialogTheme)
                     .setMessage(message)
@@ -333,6 +360,7 @@ public class OpenExternalDirectoryActivity extends Activity {
         public void onCancel(DialogInterface dialog) {
             super.onCancel(dialog);
             final Activity activity = getActivity();
+            logValidScopedAccessRequest(activity, mFile.getName(), SCOPED_DIRECTORY_ACCESS_DENIED);
             activity.setResult(RESULT_CANCELED);
             activity.finish();
         }

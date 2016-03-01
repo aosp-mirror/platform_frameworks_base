@@ -1878,5 +1878,30 @@ message MetricsEvent {
     // Logged when we execute an app transition. This indicates the device uptime in seconds when
     // the transition was executed.
     APP_TRANSITION_DEVICE_UPTIME_SECONDS = 325;
+
+    // User granted access to the request folder; action takes an integer
+    // representing the folder's index on Environment.STANDARD_DIRECTORIES
+    ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_FOLDER = 326;
+
+    // User denied access to the request folder; action takes an integer
+    // representing the folder's index on Environment.STANDARD_DIRECTORIES
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_FOLDER = 327;
+
+    // User granted access to the request folder; action pass package name
+    // of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_PACKAGE = 328;
+
+    // User denied access to the request folder; action pass package name
+    // of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_PACKAGE = 329;
+
+    // App requested access to a directory it has already been granted
+    // access before; action takes an integer representing the folder's
+    // index on Environment.STANDARD_DIRECTORIES
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_FOLDER = 330;
+
+    // App requested access to a directory it has already been granted
+    // access before; action pass package name of calling package.
+    ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE = 331;
   }
 }
