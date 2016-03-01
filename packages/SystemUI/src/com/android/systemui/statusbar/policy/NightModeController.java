@@ -14,17 +14,13 @@
 
 package com.android.systemui.statusbar.policy;
 
-import libcore.util.Objects;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.opengl.Matrix;
-import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.MathUtils;
-
 import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
@@ -189,8 +185,8 @@ public class NightModeController implements TunerService.Tunable {
     }
 
     private void updateNightMode(Intent intent) {
-        mIsNight = intent.getBooleanExtra(EXTRA_IS_NIGHT, false);
-        mAmount = intent.getFloatExtra(EXTRA_AMOUNT, 0);
+        mIsNight = intent != null && intent.getBooleanExtra(EXTRA_IS_NIGHT, false);
+        mAmount = intent != null ? intent.getFloatExtra(EXTRA_AMOUNT, 0) : 0;
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
