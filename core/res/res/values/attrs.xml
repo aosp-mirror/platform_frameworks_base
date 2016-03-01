@@ -8189,11 +8189,8 @@ i
         <!-- @hide From Theme.colorPrimary, used for the TaskDescription primary 
                    color. -->
         <attr name="colorPrimary" />
-        <!-- @hide From Theme.windowBackground, used for calculating the 
-                   TaskDescription background color. -->
-        <attr name="windowBackground" />
-        <!-- @hide From Theme.windowBackgroundFallback, used for calculating the 
-                   TaskDescription background color. -->
-        <attr name="windowBackgroundFallback" />
+        <!-- @hide From Theme.colorBackground, used for the TaskDescription background 
+                   color. -->
+        <attr name="colorBackground" />
     </declare-styleable>
 </resources>
