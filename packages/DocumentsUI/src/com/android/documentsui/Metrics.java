@@ -16,10 +16,12 @@
 
 package com.android.documentsui;
 
+import static android.os.Environment.STANDARD_DIRECTORIES;
 import static com.android.documentsui.Shared.DEBUG;
-
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -32,6 +34,7 @@ import com.android.documentsui.model.RootInfo;
 import com.android.documentsui.services.FileOperationService;
 import com.android.documentsui.services.FileOperationService.OpType;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.MetricsProto.MetricsEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -374,6 +377,84 @@ public final class Metrics {
         // Find the right histogram to log to, then log the operation.
         String histogram = isSystemProvider(authority) ? COUNT_FILEOP_SYSTEM : COUNT_FILEOP_EXTERNAL;
         logHistogram(context, histogram, getOpCode(operationType, PROVIDER_INTRA));
+    }
+
+    // Types for logInvalidScopedAccessRequest
+    public static final String SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS =
+            "scoped_directory_access_invalid_args";
+    public static final String SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY =
+            "scoped_directory_access_invalid_dir";
+    public static final String SCOPED_DIRECTORY_ACCESS_ERROR =
+            "scoped_directory_access_error";
+
+    @StringDef(value = {
+            SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS,
+            SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY,
+            SCOPED_DIRECTORY_ACCESS_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InvalidScopedAccess{}
+
+    public static void logInvalidScopedAccessRequest(Context context,
+            @InvalidScopedAccess String type) {
+        MetricsLogger.count(context, type, 1);
+        switch (type) {
+            case SCOPED_DIRECTORY_ACCESS_INVALID_ARGUMENTS:
+            case SCOPED_DIRECTORY_ACCESS_INVALID_DIRECTORY:
+            case SCOPED_DIRECTORY_ACCESS_ERROR:
+                MetricsLogger.count(context, type, 1);
+                break;
+            default:
+                Log.wtf(TAG, "invalid InvalidScopedAccess: " + type);
+        }
+    }
+
+    // Types for logValidScopedAccessRequest
+    public static final int SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED = 0;
+    public static final int SCOPED_DIRECTORY_ACCESS_GRANTED = 1;
+    public static final int SCOPED_DIRECTORY_ACCESS_DENIED = 2;
+
+    @IntDef(flag = true, value = {
+            SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED,
+            SCOPED_DIRECTORY_ACCESS_GRANTED,
+            SCOPED_DIRECTORY_ACCESS_DENIED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScopedAccessGrant {}
+
+    public static void logValidScopedAccessRequest(Activity activity, String directory,
+            @ScopedAccessGrant int type) {
+        int index = -1;
+        for (int i = 0; i < STANDARD_DIRECTORIES.length; i++) {
+            if (STANDARD_DIRECTORIES[i].equals(directory)) {
+                index = i;
+                break;
+            }
+        }
+        final String packageName = activity.getCallingPackage();
+        switch (type) {
+            case SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED:
+                MetricsLogger.action(activity,
+                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_PACKAGE,
+                        packageName);
+                MetricsLogger.action(activity,
+                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_ALREADY_GRANTED_BY_FOLDER, index);
+                break;
+            case SCOPED_DIRECTORY_ACCESS_GRANTED:
+                MetricsLogger.action(activity,
+                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity,
+                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_GRANTED_BY_FOLDER, index);
+                break;
+            case SCOPED_DIRECTORY_ACCESS_DENIED:
+                MetricsLogger.action(activity,
+                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_PACKAGE, packageName);
+                MetricsLogger.action(activity,
+                        MetricsEvent.ACTION_SCOPED_DIRECTORY_ACCESS_DENIED_BY_FOLDER, index);
+                break;
+            default:
+                Log.wtf(TAG, "invalid ScopedAccessGrant: " + type);
+        }
     }
 
     /**
