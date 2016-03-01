@@ -4804,8 +4804,9 @@ public final class ActivityThread {
 
     // Keep in sync with installd (frameworks/native/cmds/installd/commands.cpp).
     private static File getPrimaryProfileFile(String packageName) {
-         return new File("/data/misc/profiles/cur/" + UserHandle.myUserId() +
-              "/" + packageName + "/primary.prof");
+        File profileDir = Environment.getDataProfilesDePackageDirectory(
+                UserHandle.myUserId(), packageName);
+        return new File(profileDir, "primary.prof");
     }
 
     private static void setupJitProfileSupport(LoadedApk loadedApk, File cacheDir) {
@@ -4848,8 +4849,17 @@ public final class ActivityThread {
             }
         }
 
+        final File foreignDexProfilesFile =
+                Environment.getDataProfilesDeForeignDexDirectory(UserHandle.myUserId());
+        String foreignDexProfilesPath = null;
+        if (!foreignDexProfilesFile.exists()) {
+            Log.v(TAG, "ForeignDexProfilesPath does not exists:" +
+                    foreignDexProfilesFile.getPath());
+        } else {
+            foreignDexProfilesPath = foreignDexProfilesFile.getAbsolutePath();
+        }
         VMRuntime.registerAppInfo(profileFile.getAbsolutePath(), appInfo.dataDir,
-                codePaths.toArray(new String[codePaths.size()]));
+                codePaths.toArray(new String[codePaths.size()]), foreignDexProfilesPath);
     }
 
     private void updateDefaultDensity() {
