@@ -543,7 +543,7 @@ public class JobStore {
                 return null;
             }
 
-            final String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
+            String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
 
             final String sourceTag = parser.getAttributeValue(null, "sourceTag");
 
@@ -660,6 +660,18 @@ public class JobStore {
             jobBuilder.setExtras(extras);
             parser.nextTag(); // Consume </extras>
 
+            // Migrate sync jobs forward from earlier, incomplete representation
+            if ("android".equals(sourcePackageName)
+                    && extras != null
+                    && extras.getBoolean("SyncManagerJob", false)) {
+                sourcePackageName = extras.getString("owningPackage", sourcePackageName);
+                if (DEBUG) {
+                    Slog.i(TAG, "Fixing up sync job source package name from 'android' to '"
+                            + sourcePackageName + "'");
+                }
+            }
+
+            // And now we're done
             JobStatus js = new JobStatus(
                     jobBuilder.build(), uid, sourcePackageName, sourceUserId, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second);
