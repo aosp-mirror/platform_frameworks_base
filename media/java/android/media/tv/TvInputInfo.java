@@ -677,11 +677,12 @@ public final class TvInputInfo implements Parcelable {
          * Constructs a new builder for {@link TvInputInfo}.
          *
          * @param context A Context of the application package implementing this class.
-         * @param cls The component class that is to be used for the {@link TvInputService}.
+         * @param component The name of the application component to be used for the
+         *            {@link TvInputService}.
          */
-        public Builder(Context context, Class<?> cls) {
+        public Builder(Context context, ComponentName component) {
             mContext = context;
-            Intent intent = new Intent(TvInputService.SERVICE_INTERFACE).setClass(context, cls);
+            Intent intent = new Intent(TvInputService.SERVICE_INTERFACE).setComponent(component);
             mResolveInfo = context.getPackageManager().resolveService(intent,
                     PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
         }

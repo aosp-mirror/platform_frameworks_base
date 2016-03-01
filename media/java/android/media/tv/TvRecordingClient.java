@@ -76,11 +76,12 @@ public class TvRecordingClient {
      * during recording.
      *
      * <p>The recording session will respond by calling
-     * {@link RecordingCallback#onTuned()} if the tune request was fulfilled, or
+     * {@link RecordingCallback#onTuned(Uri)} if the tune request was fulfilled, or
      * {@link RecordingCallback#onError(int)} otherwise.
      *
      * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
+     * @throws IllegalStateException If recording is already started.
      */
     public void tune(String inputId, Uri channelUri) {
         tune(inputId, channelUri, null);
@@ -102,6 +103,7 @@ public class TvRecordingClient {
      * @param inputId The ID of the TV input for the given channel.
      * @param channelUri The URI of a channel.
      * @param params Extra parameters.
+     * @throws IllegalStateException If recording is already started.
      * @hide
      */
     @SystemApi
@@ -152,8 +154,8 @@ public class TvRecordingClient {
      * immediately when this method is called. If the current recording session has not yet tuned to
      * any channel, this method throws an exception.
      *
-     * <p>The application may supply the URI for a TV program as a hint for filling in program
-     * specific data fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
+     * <p>The application may supply the URI for a TV program for filling in program specific data
+     * fields in the {@link android.media.tv.TvContract.RecordedPrograms} table.
      * A non-null {@code programHint} implies the started recording should be of that specific
      * program, whereas null {@code programHint} does not impose such a requirement and the
      * recording can span across multiple TV programs. In either case, the application must call
@@ -162,15 +164,16 @@ public class TvRecordingClient {
      * <p>The recording session will respond by calling {@link RecordingCallback#onError(int)} if
      * the start request cannot be fulfilled.
      *
-     * @param programHint The URI for the TV program to record as a hint, built by
+     * @param programUri The URI for the TV program to record, built by
      *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
+     * @throws IllegalStateException If {@link #tune} request hasn't been handled yet.
      */
-    public void startRecording(@Nullable Uri programHint) {
+    public void startRecording(@Nullable Uri programUri) {
         if (!mIsTuned) {
             throw new IllegalStateException("startRecording failed - not yet tuned");
         }
         if (mSession != null) {
-            mSession.startRecording(programHint);
+            mSession.startRecording(programUri);
             mIsRecordingStarted = true;
         }
     }
@@ -245,8 +248,10 @@ public class TvRecordingClient {
         /**
          * This is called when the recording session has been tuned to the given channel and is
          * ready to start recording.
+         *
+         * @param channelUri The URI of a channel.
          */
-        public void onTuned() {
+        public void onTuned(Uri channelUri) {
         }
 
         /**
@@ -327,7 +332,7 @@ public class TvRecordingClient {
         }
 
         @Override
-        void onTuned(TvInputManager.Session session) {
+        void onTuned(TvInputManager.Session session, Uri channelUri) {
             if (DEBUG) {
                 Log.d(TAG, "onTuned()");
             }
@@ -336,7 +341,7 @@ public class TvRecordingClient {
                 return;
             }
             mIsTuned = true;
-            mCallback.onTuned();
+            mCallback.onTuned(channelUri);
         }
 
         @Override
