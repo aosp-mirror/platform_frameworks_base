@@ -545,9 +545,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
         final KeyStore ks = KeyStore.getInstance();
 
-        final List<UserInfo> profiles = um.getProfiles(userHandle);
-        for (UserInfo pi : profiles) {
-            ks.onUserPasswordChanged(pi.id, password);
+        if (um.getUserInfo(userHandle).isManagedProfile()) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)) {
+                ks.onUserPasswordChanged(userHandle, password);
+            } else {
+                throw new RuntimeException("Can't set keystore password on a profile that "
+                        + "doesn't have a profile challenge.");
+            }
+        } else {
+            final List<UserInfo> profiles = um.getProfiles(userHandle);
+            for (UserInfo pi : profiles) {
+                // Change password on the given user and all its profiles that don't have
+                // their own profile challenge enabled.
+                if (pi.id == userHandle || (pi.isManagedProfile()
+                        && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id))) {
+                    ks.onUserPasswordChanged(pi.id, password);
+                }
+            }
         }
     }
 
@@ -555,9 +569,23 @@ public class LockSettingsService extends ILockSettings.Stub {
         final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
         final KeyStore ks = KeyStore.getInstance();
 
-        final List<UserInfo> profiles = um.getProfiles(userHandle);
-        for (UserInfo pi : profiles) {
-            ks.unlock(pi.id, password);
+        if (um.getUserInfo(userHandle).isManagedProfile()) {
+            if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userHandle)) {
+                ks.unlock(userHandle, password);
+            } else {
+                throw new RuntimeException("Can't unlock a profile explicitly if it "
+                        + "doesn't have a profile challenge.");
+            }
+        } else {
+            final List<UserInfo> profiles = um.getProfiles(userHandle);
+            for (UserInfo pi : profiles) {
+                // Unlock the given user and all its profiles that don't have
+                // their own profile challenge enabled.
+                if (pi.id == userHandle || (pi.isManagedProfile()
+                        && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id))) {
+                    ks.unlock(pi.id, password);
+                }
+            }
         }
     }
 
