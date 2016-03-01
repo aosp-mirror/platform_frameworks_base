@@ -93,7 +93,6 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         bots = new Bots(device, context, TIMEOUT);
 
         Configurator.getInstance().setToolType(MotionEvent.TOOL_TYPE_MOUSE);
-        bots.main.revealLauncher();
 
         mResolver = context.getContentResolver();
         mClient = mResolver.acquireUnstableContentProviderClient(DEFAULT_AUTHORITY);
@@ -103,8 +102,6 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         rootDir1 = mDocsHelper.getRoot(ROOT_1_ID);
 
         launchActivity();
-
-        bots.main.revealApp();
         resetStorage();
     }
 
