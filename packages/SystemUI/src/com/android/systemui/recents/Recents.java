@@ -35,9 +35,11 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.widget.Toast;
 
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
@@ -393,28 +395,35 @@ public class Recents extends SystemUI
         boolean screenPinningActive = ssp.isScreenPinningActive();
         boolean isTopTaskHome = topTask != null && SystemServicesProxy.isHomeStack(topTask.stackId);
         if (topTask != null && !isTopTaskHome && !screenPinningActive) {
-            if (sSystemServicesProxy.isSystemUser(currentUser)) {
-                mImpl.dockTopTask(topTask.id, dragMode, stackCreateMode, initialBounds);
-            } else {
-                if (mSystemToUserCallbacks != null) {
-                    IRecentsNonSystemUserCallbacks callbacks =
-                            mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
-                    if (callbacks != null) {
-                        try {
-                            callbacks.dockTopTask(topTask.id, dragMode, stackCreateMode,
-                                    initialBounds);
-                        } catch (RemoteException e) {
-                            Log.e(TAG, "Callback failed", e);
+            if (topTask.isDockable) {
+                if (sSystemServicesProxy.isSystemUser(currentUser)) {
+                    mImpl.dockTopTask(topTask.id, dragMode, stackCreateMode, initialBounds);
+                } else {
+                    if (mSystemToUserCallbacks != null) {
+                        IRecentsNonSystemUserCallbacks callbacks =
+                                mSystemToUserCallbacks.getNonSystemUserRecentsForUser(currentUser);
+                        if (callbacks != null) {
+                            try {
+                                callbacks.dockTopTask(topTask.id, dragMode, stackCreateMode,
+                                        initialBounds);
+                            } catch (RemoteException e) {
+                                Log.e(TAG, "Callback failed", e);
+                            }
+                        } else {
+                            Log.e(TAG, "No SystemUI callbacks found for user: " + currentUser);
                         }
-                    } else {
-                        Log.e(TAG, "No SystemUI callbacks found for user: " + currentUser);
                     }
                 }
+                mDraggingInRecentsCurrentUser = currentUser;
+                return true;
+            } else {
+                Toast.makeText(mContext, R.string.recents_drag_non_dockable_task_message,
+                        Toast.LENGTH_SHORT).show();
+                return false;
             }
-            mDraggingInRecentsCurrentUser = currentUser;
-            return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     @Override
