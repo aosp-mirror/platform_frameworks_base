@@ -21,11 +21,11 @@ import android.annotation.SystemApi;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import static com.android.internal.util.Preconditions.*;
 

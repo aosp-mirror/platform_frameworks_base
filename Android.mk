@@ -150,14 +150,14 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/content/pm/IOnPermissionsChangeListener.aidl \
 	core/java/android/database/IContentObserver.aidl \
-	core/java/android/hardware/ICameraService.aidl \
-	core/java/android/hardware/ICameraServiceListener.aidl \
-	core/java/android/hardware/ICameraServiceProxy.aidl \
-	core/java/android/hardware/ICamera.aidl \
-	core/java/android/hardware/ICameraClient.aidl \
+	../av/camera/aidl/android/hardware/ICameraService.aidl \
+	../av/camera/aidl/android/hardware/ICameraServiceListener.aidl \
+	../av/camera/aidl/android/hardware/ICameraServiceProxy.aidl \
+	../av/camera/aidl/android/hardware/ICamera.aidl \
+	../av/camera/aidl/android/hardware/ICameraClient.aidl \
+	../av/camera/aidl/android/hardware/camera2/ICameraDeviceUser.aidl \
+	../av/camera/aidl/android/hardware/camera2/ICameraDeviceCallbacks.aidl \
 	core/java/android/hardware/IConsumerIrService.aidl \
-	core/java/android/hardware/camera2/ICameraDeviceUser.aidl \
-	core/java/android/hardware/camera2/ICameraDeviceCallbacks.aidl \
 	core/java/android/hardware/ISerialManager.aidl \
 	core/java/android/hardware/display/IDisplayManager.aidl \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
@@ -455,6 +455,10 @@ LOCAL_AIDL_INCLUDES += \
       $(FRAMEWORKS_BASE_JAVA_SRC_DIRS) \
       frameworks/native/aidl/binder
 
+LOCAL_AIDL_INCLUDES += \
+	frameworks/av/camera/aidl \
+	frameworks/native/aidl/gui
+
 LOCAL_INTERMEDIATE_SOURCES := \
 			$(framework_res_source_path)/android/R.java \
 			$(framework_res_source_path)/android/Manifest.java \
@@ -575,7 +579,7 @@ aidl_files := \
 	frameworks/base/core/java/android/view/Display.aidl \
 	frameworks/base/core/java/android/view/InputDevice.aidl \
 	frameworks/base/core/java/android/view/InputEvent.aidl \
-	frameworks/base/core/java/android/view/Surface.aidl \
+	frameworks/native/aidl/gui/android/view/Surface.aidl \
 	frameworks/base/core/java/android/view/WindowContentFrameStats.aidl \
 	frameworks/base/core/java/android/view/inputmethod/InputMethodSubtype.aidl \
 	frameworks/base/core/java/android/view/inputmethod/CursorAnchorInfo.aidl \

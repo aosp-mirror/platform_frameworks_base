@@ -26,7 +26,6 @@
 #include <utils/Log.h>
 
 #include <gui/Surface.h>
-#include <camera/ICameraService.h>
 #include <camera/Camera.h>
 #include <media/mediarecorder.h>
 #include <media/stagefright/PersistentSurface.h>
