@@ -3049,7 +3049,7 @@ final class Settings {
             tmpPa.dump(new LogPrinter(Log.DEBUG, TAG), "  ");
         }
         Intent intent = new Intent();
-        int flags = 0;
+        int flags = PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
         intent.setAction(tmpPa.getAction(0));
         for (int i=0; i<tmpPa.countCategories(); i++) {
             String cat = tmpPa.getCategory(i);
