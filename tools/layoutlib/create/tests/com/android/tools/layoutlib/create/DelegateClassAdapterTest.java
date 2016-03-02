@@ -53,12 +53,10 @@ public class DelegateClassAdapterTest {
 
     private MockLog mLog;
 
-    private static final String NATIVE_CLASS_NAME = ClassWithNative.class.getCanonicalName();
-    private static final String OUTER_CLASS_NAME = OuterClass.class.getCanonicalName();
-    private static final String INNER_CLASS_NAME = OuterClass.class.getCanonicalName() + "$" +
-                                                   InnerClass.class.getSimpleName();
-    private static final String STATIC_INNER_CLASS_NAME =
-            OuterClass.class.getCanonicalName() + "$" + StaticInnerClass.class.getSimpleName();
+    private static final String NATIVE_CLASS_NAME = ClassWithNative.class.getName();
+    private static final String OUTER_CLASS_NAME = OuterClass.class.getName();
+    private static final String INNER_CLASS_NAME = InnerClass.class.getName();
+    private static final String STATIC_INNER_CLASS_NAME = StaticInnerClass.class.getName();
 
     @Before
     public void setUp() throws Exception {
@@ -69,12 +67,12 @@ public class DelegateClassAdapterTest {
     /**
      * Tests that a class not being modified still works.
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void testNoOp() throws Throwable {
         // create an instance of the class that will be modified
         // (load the class in a distinct class loader so that we can trash its definition later)
         ClassLoader cl1 = new ClassLoader(this.getClass().getClassLoader()) { };
+        @SuppressWarnings("unchecked")
         Class<ClassWithNative> clazz1 = (Class<ClassWithNative>) cl1.loadClass(NATIVE_CLASS_NAME);
         ClassWithNative instance1 = clazz1.newInstance();
         assertEquals(42, instance1.add(20, 22));
