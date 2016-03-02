@@ -84,6 +84,6 @@
         </SOURCES>
       </library>
     </orderEntry>
-    <orderEntry type="library" scope="TEST" name="JUnit4" level="application" />
+    <orderEntry type="library" scope="TEST" name="junit" level="project" />
   </component>
 </module>
