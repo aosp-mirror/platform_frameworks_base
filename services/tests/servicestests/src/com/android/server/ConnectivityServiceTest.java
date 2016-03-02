@@ -67,6 +67,7 @@ import android.util.LogPrinter;
 
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.net.NetworkPinner;
 
 import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
@@ -87,9 +88,29 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
     private BroadcastInterceptingContext mServiceContext;
     private WrappedConnectivityService mService;
-    private ConnectivityManager mCm;
+    private WrappedConnectivityManager mCm;
     private MockNetworkAgent mWiFiNetworkAgent;
     private MockNetworkAgent mCellNetworkAgent;
+
+    // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
+    // do not go through ConnectivityService but talk to netd directly, so they don't automatically
+    // reflect the state of our test ConnectivityService.
+    private class WrappedConnectivityManager extends ConnectivityManager {
+        private Network mFakeBoundNetwork;
+
+        public synchronized boolean bindProcessToNetwork(Network network) {
+            mFakeBoundNetwork = network;
+            return true;
+        }
+
+        public synchronized Network getBoundNetworkForProcess() {
+            return mFakeBoundNetwork;
+        }
+
+        public WrappedConnectivityManager(Context context, ConnectivityService service) {
+            super(context, service);
+        }
+    }
 
     private class MockContext extends BroadcastInterceptingContext {
         MockContext(Context base) {
@@ -607,7 +628,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 mock(INetworkPolicyManager.class));
 
         mService.systemReady();
-        mCm = new ConnectivityManager(getContext(), mService);
+        mCm = new WrappedConnectivityManager(getContext(), mService);
+        mCm.bindProcessToNetwork(null);
     }
 
     private int transportToLegacyType(int transport) {
@@ -1542,5 +1564,104 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     public void testGetCaptivePortalServerUrl() throws Exception {
         String url = mCm.getCaptivePortalServerUrl();
         assertEquals("http://connectivitycheck.gstatic.com/generate_204", url);
+    }
+
+    private static class TestNetworkPinner extends NetworkPinner {
+        public static boolean awaitPin(int timeoutMs) {
+            synchronized(sLock) {
+                if (sNetwork == null) {
+                    try {
+                        sLock.wait(timeoutMs);
+                    } catch (InterruptedException e) {}
+                }
+                return sNetwork != null;
+            }
+        }
+
+        public static boolean awaitUnpin(int timeoutMs) {
+            synchronized(sLock) {
+                if (sNetwork != null) {
+                    try {
+                        sLock.wait(timeoutMs);
+                    } catch (InterruptedException e) {}
+                }
+                return sNetwork == null;
+            }
+        }
+    }
+
+    private void assertPinnedToWifiWithCellDefault() {
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getBoundNetworkForProcess());
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+    }
+
+    private void assertPinnedToWifiWithWifiDefault() {
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getBoundNetworkForProcess());
+        assertEquals(mWiFiNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+    }
+
+    private void assertNotPinnedToWifi() {
+        assertNull(mCm.getBoundNetworkForProcess());
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+    }
+
+    @SmallTest
+    public void testNetworkPinner() {
+        NetworkRequest wifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI)
+                .build();
+        assertNull(mCm.getBoundNetworkForProcess());
+
+        TestNetworkPinner.pin(mServiceContext, wifiRequest);
+        assertNull(mCm.getBoundNetworkForProcess());
+
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+
+        // When wi-fi connects, expect to be pinned.
+        assertTrue(TestNetworkPinner.awaitPin(100));
+        assertPinnedToWifiWithCellDefault();
+
+        // Disconnect and expect the pin to drop.
+        mWiFiNetworkAgent.disconnect();
+        assertTrue(TestNetworkPinner.awaitUnpin(100));
+        assertNotPinnedToWifi();
+
+        // Reconnecting does not cause the pin to come back.
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        assertFalse(TestNetworkPinner.awaitPin(100));
+        assertNotPinnedToWifi();
+
+        // Pinning while connected causes the pin to take effect immediately.
+        TestNetworkPinner.pin(mServiceContext, wifiRequest);
+        assertTrue(TestNetworkPinner.awaitPin(100));
+        assertPinnedToWifiWithCellDefault();
+
+        // Explicitly unpin and expect to use the default network again.
+        TestNetworkPinner.unpin();
+        assertNotPinnedToWifi();
+
+        // Disconnect cell and wifi.
+        ConditionVariable cv = waitForConnectivityBroadcasts(3);  // cell down, wifi up, wifi down.
+        mCellNetworkAgent.disconnect();
+        mWiFiNetworkAgent.disconnect();
+        waitFor(cv);
+
+        // Pinning takes effect even if the pinned network is the default when the pin is set...
+        TestNetworkPinner.pin(mServiceContext, wifiRequest);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+        assertTrue(TestNetworkPinner.awaitPin(100));
+        assertPinnedToWifiWithWifiDefault();
+
+        // ... and is maintained even when that network is no longer the default.
+        cv = waitForConnectivityBroadcasts(1);
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mCellNetworkAgent.connect(true);
+        waitFor(cv);
+        assertPinnedToWifiWithCellDefault();
     }
 }
