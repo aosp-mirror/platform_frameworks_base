@@ -98,12 +98,10 @@ public class DownloadsActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        final MenuItem advanced = menu.findItem(R.id.menu_advanced);
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem pasteFromCb = menu.findItem(R.id.menu_paste_from_clipboard);
         final MenuItem fileSize = menu.findItem(R.id.menu_file_size);
 
-        advanced.setVisible(false);
         createDir.setVisible(false);
         pasteFromCb.setEnabled(false);
         fileSize.setVisible(false);
