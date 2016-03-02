@@ -638,7 +638,6 @@ public final class MediaBrowser {
                     return;
                 }
 
-                List<MediaItem> data = list == null ? null : list.getList();
                 if (DBG) {
                     Log.d(TAG, "onLoadChildren for " + mServiceComponent + " id=" + parentId);
                 }
@@ -649,10 +648,19 @@ public final class MediaBrowser {
                     // Tell the app.
                     SubscriptionCallback subscriptionCallback = subscription.getCallback(options);
                     if (subscriptionCallback != null) {
+                        List<MediaItem> data = list == null ? null : list.getList();
                         if (options == null) {
-                            subscriptionCallback.onChildrenLoaded(parentId, data);
+                            if (data == null) {
+                                subscriptionCallback.onError(parentId);
+                            } else {
+                                subscriptionCallback.onChildrenLoaded(parentId, data);
+                            }
                         } else {
-                            subscriptionCallback.onChildrenLoaded(parentId, data, options);
+                            if (data == null) {
+                                subscriptionCallback.onError(parentId, options);
+                            } else {
+                                subscriptionCallback.onChildrenLoaded(parentId, data, options);
+                            }
                         }
                         return;
                     }
@@ -853,21 +861,21 @@ public final class MediaBrowser {
          * Called when the list of children is loaded or updated.
          *
          * @param parentId The media id of the parent media item.
-         * @param children The children which were loaded, or null if the id is invalid.
+         * @param children The children which were loaded.
          */
-        public void onChildrenLoaded(@NonNull String parentId, List<MediaItem> children) {
+        public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaItem> children) {
         }
 
         /**
          * Called when the list of children is loaded or updated.
          *
          * @param parentId The media id of the parent media item.
-         * @param children The children which were loaded, or null if the id is invalid.
+         * @param children The children which were loaded.
          * @param options A bundle of service-specific arguments sent to the media
          *            browse service. The contents of this bundle may affect the
          *            information returned when browsing.
          */
-        public void onChildrenLoaded(@NonNull String parentId, List<MediaItem> children,
+        public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaItem> children,
                 @NonNull Bundle options) {
         }
 
