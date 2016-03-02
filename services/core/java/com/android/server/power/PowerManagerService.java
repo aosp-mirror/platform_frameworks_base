@@ -60,6 +60,7 @@ import android.view.WindowManagerPolicy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
@@ -253,6 +254,9 @@ public final class PowerManagerService extends SystemService
 
     // True if boot completed occurred.  We keep the screen on until this happens.
     private boolean mBootCompleted;
+
+    // Runnables that should be triggered on boot completed
+    private Runnable[] mBootCompletedRunnables;
 
     // True if auto-suspend mode is enabled.
     // Refer to autosuspend.h.
@@ -525,6 +529,14 @@ public final class PowerManagerService extends SystemService
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
                 updatePowerStateLocked();
+
+                if (!ArrayUtils.isEmpty(mBootCompletedRunnables)) {
+                    Slog.d(TAG, "Posting " + mBootCompletedRunnables.length + " delayed runnables");
+                    for (Runnable r : mBootCompletedRunnables) {
+                        BackgroundThread.getHandler().post(r);
+                    }
+                }
+                mBootCompletedRunnables = null;
             }
         }
     }
@@ -750,6 +762,16 @@ public final class PowerManagerService extends SystemService
         mDirty |= DIRTY_SETTINGS;
     }
 
+    private void postAfterBootCompleted(Runnable r) {
+        if (mBootCompleted) {
+            BackgroundThread.getHandler().post(r);
+        } else {
+            Slog.d(TAG, "Delaying runnable until system is booted");
+            mBootCompletedRunnables = ArrayUtils.appendElement(Runnable.class,
+                    mBootCompletedRunnables, r);
+        }
+    }
+
     void updateLowPowerModeLocked() {
         if (mIsPowered && mLowPowerModeSetting) {
             if (DEBUG_SPEW) {
@@ -767,7 +789,7 @@ public final class PowerManagerService extends SystemService
         if (mLowPowerModeEnabled != lowPowerModeEnabled) {
             mLowPowerModeEnabled = lowPowerModeEnabled;
             powerHintInternal(POWER_HINT_LOW_POWER, lowPowerModeEnabled ? 1 : 0);
-            BackgroundThread.getHandler().post(new Runnable() {
+            postAfterBootCompleted(new Runnable() {
                 @Override
                 public void run() {
                     Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
