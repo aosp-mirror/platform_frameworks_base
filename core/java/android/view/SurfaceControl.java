@@ -36,6 +36,7 @@ public class SurfaceControl {
             throws OutOfResourcesException;
     private static native void nativeRelease(long nativeObject);
     private static native void nativeDestroy(long nativeObject);
+    private static native void nativeDisconnect(long nativeObject);
 
     private static native Bitmap nativeScreenshot(IBinder displayToken,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
@@ -339,6 +340,15 @@ public class SurfaceControl {
             mNativeObject = 0;
         }
         mCloseGuard.close();
+    }
+
+    /**
+     * Disconnect any client still connected to the surface.
+     */
+    public void disconnect() {
+        if (mNativeObject != 0) {
+            nativeDisconnect(mNativeObject);
+        }
     }
 
     private void checkNotReleased() {

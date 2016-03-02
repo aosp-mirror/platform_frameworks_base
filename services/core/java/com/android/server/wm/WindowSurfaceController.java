@@ -152,6 +152,20 @@ class WindowSurfaceController {
         }
     }
 
+    void disconnectInTransaction() {
+        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
+            Slog.i(TAG, "Disconnecting client: " + this);
+        }
+
+        try {
+            if (mSurfaceControl != null) {
+                mSurfaceControl.disconnect();
+            }
+        } catch (RuntimeException e) {
+            Slog.w(TAG, "Error disconnecting surface in: " + this, e);
+        }
+    }
+
     void setCropInTransaction(Rect clipRect, boolean recoveringMemory) {
         if (SHOW_TRANSACTIONS) logSurface(
                 "CROP " + clipRect.toShortString(), null);
