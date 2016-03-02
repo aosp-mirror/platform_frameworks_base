@@ -67,8 +67,7 @@
     <string name="share_via" msgid="8966594246261344259">"分享方式"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"正在复制文件"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"正在移动文件"</string>
-    <!-- no translation found for delete_notification_title (3329403967712437496) -->
-    <skip />
+    <string name="delete_notification_title" msgid="3329403967712437496">"正在删除文件"</string>
     <string name="copy_remaining" msgid="6283790937387975095">"剩余时间：<xliff:g id="DURATION">%s</xliff:g>"</string>
     <plurals name="copy_begin" formatted="false" msgid="9071199452634086365">
       <item quantity="other">正在复制 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件。</item>
@@ -113,7 +112,9 @@
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"部分文件已转换成其他格式"</string>
     <string name="allow" msgid="7225948811296386551">"允许"</string>
     <string name="deny" msgid="2081879885755434506">"拒绝"</string>
-    <!-- no translation found for delete_confirmation_title (1958369150786342998) -->
-    <skip />
-    <!-- no translation found for delete_confirmation_message (6608317554854868128) -->
+    <string name="delete_confirmation_title" msgid="1958369150786342998">"要删除文件吗？"</string>
+    <plurals name="delete_confirmation_message" formatted="false" msgid="6608317554854868128">
+      <item quantity="other">您确定要删除 <xliff:g id="COUNT_1">%1$d</xliff:g> 个文件吗？</item>
+      <item quantity="one">您确定要删除 <xliff:g id="COUNT_0">%1$d</xliff:g> 个文件吗？</item>
+    </plurals>
 </resources>
