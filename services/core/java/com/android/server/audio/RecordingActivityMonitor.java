@@ -18,7 +18,7 @@ package com.android.server.audio;
 
 import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioRecordConfiguration;
+import android.media.AudioRecordingConfiguration;
 import android.media.AudioSystem;
 import android.media.IRecordingConfigDispatcher;
 import android.media.MediaRecorder;
@@ -39,8 +39,8 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
 
     private ArrayList<RecMonitorClient> mClients = new ArrayList<RecMonitorClient>();
 
-    private HashMap<Integer, AudioRecordConfiguration> mRecordConfigs =
-            new HashMap<Integer, AudioRecordConfiguration>();
+    private HashMap<Integer, AudioRecordingConfiguration> mRecordConfigs =
+            new HashMap<Integer, AudioRecordingConfiguration>();
 
     RecordingActivityMonitor() {
         RecMonitorClient.sMonitor = this;
@@ -54,7 +54,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         if (MediaRecorder.isSystemOnlyAudioSource(source)) {
             return;
         }
-        final AudioRecordConfiguration[] configs =
+        final AudioRecordingConfiguration[] configs =
                 updateSnapshot(event, session, source, recordingInfo);
         if (configs != null){
             synchronized(mClients) {
@@ -104,9 +104,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
         }
     }
 
-    AudioRecordConfiguration[] getActiveRecordConfigurations() {
+    AudioRecordingConfiguration[] getActiveRecordConfigurations() {
         synchronized(mRecordConfigs) {
-            return mRecordConfigs.values().toArray(new AudioRecordConfiguration[0]);
+            return mRecordConfigs.values().toArray(new AudioRecordingConfiguration[0]);
         }
     }
 
@@ -121,10 +121,10 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
      * @return null if the list of active recording sessions has not been modified, an array
      *     with the current active configurations otherwise.
      */
-    private AudioRecordConfiguration[] updateSnapshot(int event, int session, int source,
+    private AudioRecordingConfiguration[] updateSnapshot(int event, int session, int source,
             int[] recordingInfo) {
         final boolean configChanged;
-        final AudioRecordConfiguration[] configs;
+        final AudioRecordingConfiguration[] configs;
         synchronized(mRecordConfigs) {
             switch (event) {
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
@@ -147,8 +147,8 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 final int patchHandle = recordingInfo[6];
                 final Integer sessionKey = new Integer(session);
                 if (mRecordConfigs.containsKey(sessionKey)) {
-                    final AudioRecordConfiguration updatedConfig =
-                            new AudioRecordConfiguration(session, source,
+                    final AudioRecordingConfiguration updatedConfig =
+                            new AudioRecordingConfiguration(session, source,
                                     clientFormat, deviceFormat, patchHandle);
                     if (updatedConfig.equals(mRecordConfigs.get(sessionKey))) {
                         configChanged = false;
@@ -160,7 +160,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     }
                 } else {
                     mRecordConfigs.put(sessionKey,
-                            new AudioRecordConfiguration(session, source,
+                            new AudioRecordingConfiguration(session, source,
                                     clientFormat, deviceFormat, patchHandle));
                     configChanged = true;
                 }
@@ -171,7 +171,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 configChanged = false;
             }
             if (configChanged) {
-                configs = mRecordConfigs.values().toArray(new AudioRecordConfiguration[0]);
+                configs = mRecordConfigs.values().toArray(new AudioRecordingConfiguration[0]);
             } else {
                 configs = null;
             }
