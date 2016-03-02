@@ -804,7 +804,11 @@ abstract class DhcpPacket {
             // server-to-server packets, e.g. for relays.
             if (!isPacketToOrFromClient(udpSrcPort, udpDstPort) &&
                 !isPacketServerToServer(udpSrcPort, udpDstPort)) {
-                return null;
+                // This should almost never happen because we use SO_ATTACH_FILTER on the packet
+                // socket to drop packets that don't have the right source ports. However, it's
+                // possible that a packet arrives between when the socket is bound and when the
+                // filter is set. http://b/26696823 .
+                throw new ParseException("Unexpected UDP ports %d->%d", udpSrcPort, udpDstPort);
             }
         }
 

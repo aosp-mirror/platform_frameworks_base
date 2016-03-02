@@ -552,6 +552,39 @@ public class DhcpPacketTest extends TestCase {
     }
 
     @SmallTest
+    public void testUdpInvalidDstPort() throws Exception {
+        final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
+            // Ethernet header.
+            "9cd917000000001c2e0000000800" +
+            // IP header.
+            "45a00148000040003d115087d18194fb0a0f7af2" +
+            // UDP header. TODO: fix invalid checksum (due to MAC address obfuscation).
+            // NOTE: The destination port is a non-DHCP port.
+            "0043aaaa01341268" +
+            // BOOTP header.
+            "02010600d628ba8200000000000000000a0f7af2000000000a0fc818" +
+            // MAC address.
+            "9cd91700000000000000000000000000" +
+            // Server name.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // File.
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            "0000000000000000000000000000000000000000000000000000000000000000" +
+            // Options.
+            "6382536335010236040a0169fc3304000151800104ffff000003040a0fc817060cd1818003d1819403" +
+            "d18180060f0777766d2e6564751c040a0fffffff000000"
+        ).toCharArray(), false));
+
+        try {
+            DhcpPacket.decodeFullPacket(packet, ENCAP_L2);
+            fail("Packet with invalid dst port did not throw ParseException");
+        } catch (ParseException expected) {}
+    }
+
+    @SmallTest
     public void testMultipleRouters() throws Exception {
         final ByteBuffer packet = ByteBuffer.wrap(HexEncoding.decode((
             // Ethernet header.
