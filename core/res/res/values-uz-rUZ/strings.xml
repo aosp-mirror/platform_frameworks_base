@@ -895,7 +895,7 @@
     <string name="whichApplication" msgid="4533185947064773386">"Ilovani tanlang"</string>
     <string name="whichApplicationNamed" msgid="8260158865936942783">"“%1$s” bilan ochish"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"Ochish…"</string>
-    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"“%1$s” yordamida ochish"</string>
+    <string name="whichViewApplicationNamed" msgid="2286418824011249620">"%1$s bilan ochish"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Tahrirlash…"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"“%1$s” yordamida tahrirlash"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Ulashish…"</string>
