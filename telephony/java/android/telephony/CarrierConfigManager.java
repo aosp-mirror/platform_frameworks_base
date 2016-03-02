@@ -1390,6 +1390,14 @@ public class CarrierConfigManager {
     public static final String IMSI_KEY_EXPIRATION_DAYS_TIME_INT =
             "imsi_key_expiration_days_time_int";
 
+    /**
+     * Flag specifying whether IMS registration state menu is shown in Status Info setting,
+     * default to false.
+     * @hide
+     */
+    public static final String KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL =
+            "show_ims_registration_status_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1630,6 +1638,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putInt(IMSI_KEY_EXPIRATION_DAYS_TIME_INT, IMSI_ENCRYPTION_DAYS_TIME_DISABLED);
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
+        sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
     }
 
     /**

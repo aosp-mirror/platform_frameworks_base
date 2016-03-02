@@ -1081,6 +1081,15 @@ interface ITelephony {
     boolean isImsRegistered();
 
     /**
+     * Get IMS Registration Status on a particular subid.
+     *
+     * @param subId user preferred subId.
+     *
+     * @return {@code true} if the IMS status is registered.
+     */
+    boolean isImsRegisteredForSubscriber(int subId);
+
+    /**
      * Returns the Status of Wi-Fi Calling
      */
     boolean isWifiCallingAvailable();
