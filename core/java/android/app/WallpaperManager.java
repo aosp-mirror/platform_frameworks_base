@@ -1433,6 +1433,25 @@ public class WallpaperManager {
     }
 
     /**
+     * Remove one or more currently set wallpapers, reverting to the system default
+     * display for each one.  If {@link #FLAG_SET_SYSTEM} is set in the {@code which}
+     * parameter, the intent {@link Intent#ACTION_WALLPAPER_CHANGED} will be broadcast
+     * upon success.
+     *
+     * @param which A bitwise combination of {@link #FLAG_SET_SYSTEM} or
+     *   {@link #FLAG_SET_LOCK}
+     * @throws IOException If an error occurs reverting to the built-in wallpaper.
+     */
+    public void clear(int which) throws IOException {
+        if ((which & FLAG_SET_SYSTEM) != 0) {
+            clear();
+        }
+        if ((which & FLAG_SET_LOCK) != 0) {
+            clearWallpaper(FLAG_SET_LOCK, mContext.getUserId());
+        }
+    }
+
+    /**
      * Open stream representing the default static image wallpaper.
      *
      * @hide
