@@ -1569,13 +1569,13 @@ message MetricsEvent {
     //   SUBTYPE: 0 is off, 1 is on
     // CATEGORY: QUICK_SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_WORKMODE = 257;
 
     // OPEN: Settings > Developer Options > Background Check
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     BACKGROUND_CHECK_SUMMARY = 258;
 
     // OPEN: QS Lock tile shown
@@ -1583,52 +1583,52 @@ message MetricsEvent {
     //   SUBTYPE: 0 is off, 1 is on
     // CATEGORY: QUICK_SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_LOCK_TILE = 259;
 
     // OPEN: QS User Tile shown
     // CATEGORY: QUICK_SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_USER_TILE = 260;
 
     // OPEN: QS Battery tile shown
     // CATEGORY: QUICK_SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_BATTERY_TILE = 261;
 
     // OPEN: Settings > Sound > Do not disturb > Visual interruptions
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     NOTIFICATION_ZEN_MODE_VISUAL_INTERRUPTIONS = 262;
 
     // ACTION: Visual interruptions > No screen interuptions toggle
     //   SUBTYPE: 0 is off, 1 is on
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_ZEN_ALLOW_WHEN_SCREEN_OFF = 263;
 
     // ACTION: Visual interruptions > No notification light toggle
     //   SUBTYPE: 0 is off, 1 is on
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_ZEN_ALLOW_LIGHTS = 264;
 
     // OPEN: Settings > Notifications > [App] > Topic Notifications
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     NOTIFICATION_TOPIC_NOTIFICATION = 265;
 
     // ACTION: Settings > Apps > Default Apps > Select different SMS app
     //   PACKAGE: Selected SMS app
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_DEFAULT_SMS_APP_CHANGED = 266;
 
     // OPEN: QS Color modification tile shown
@@ -1636,105 +1636,105 @@ message MetricsEvent {
     //   SUBTYPE: 0 is off, 1 is on
     // CATEGORY: QUICK_SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_COLOR_MATRIX = 267;
 
     // OPEN: QS Custom tile shown
     // ACTION: QS Work Mode tile tapped
     // CATEGORY: QUICK_SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_CUSTOM = 268;
 
     // ACTION: Visual interruptions > Never turn off the screen toggle
     //   SUBTYPE: 0 is off, 1 is on
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_ZEN_ALLOW_WHEN_SCREEN_ON = 269;
 
     // ACTION: Overview > Long-press task, drag to enter split-screen
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_WINDOW_DOCK_DRAG_DROP = 270;
 
     // ACTION: In App > Long-press Overview button to enter split-screen
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_WINDOW_DOCK_LONGPRESS = 271;
 
     // ACTION: In App > Swipe Overview button to enter split-screen
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_WINDOW_DOCK_SWIPE = 272;
 
     // ACTION: Launch profile-specific app > Confirm credentials
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     PROFILE_CHALLENGE = 273;
 
     // OPEN: QS Battery detail panel
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     QS_BATTERY_DETAIL = 274;
 
     // OPEN: Overview > History
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     OVERVIEW_HISTORY = 275;
 
     // ACTION: Overview > Page by tapping Overview button
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
-    OVERVIEW_PAGE = 276;
+    // GMS: 7.8.99
+    ACTION_OVERVIEW_PAGE = 276;
 
     // ACTION: Overview > Select app
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
-    OVERVIEW_SELECT = 277;
+    // GMS: 7.8.99
+    ACTION_OVERVIEW_SELECT = 277;
 
     // ACTION: View emergency info
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_VIEW_EMERGENCY_INFO = 278;
 
     // ACTION: Edit emergency info activity
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_EDIT_EMERGENCY_INFO = 279;
 
     // ACTION: Edit emergency info field
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_EDIT_EMERGENCY_INFO_FIELD = 280;
 
     // ACTION: Add emergency contact
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_ADD_EMERGENCY_CONTACT = 281;
 
     // ACTION: Delete emergency contact
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_DELETE_EMERGENCY_CONTACT = 282;
 
     // ACTION: Call emergency contact
     // CATEGORY: SETTINGS
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_CALL_EMERGENCY_CONTACT = 283;
 
     // OPEN: QS Data Saver tile shown
@@ -1744,14 +1744,14 @@ message MetricsEvent {
 
     // OPEN: Settings > Security > User credentials
     // CATEGORY: Settings
-    // OS: 6.1
+    // OS: N
     // GMS: 7.8.99
     USER_CREDENTIALS = 285;
 
-    // ACTION: In App (splitscreen) > Long-press Overview button to exit split-screen
+    // ACTION: In App (splitscreen) > Long-press Overview to exit split-screen
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: N
-    // GMS: TBD
+    // GMS: 7.8.99
     ACTION_WINDOW_UNDOCK_LONGPRESS = 286;
 
     // Logged when the user scrolls through overview manually
@@ -1770,43 +1770,66 @@ message MetricsEvent {
     // indicate the user lowered the importance; positive means they increased it.
     ACTION_SAVE_IMPORTANCE = 291;
 
-    // Interactive bug report initiated from power menu.
+    // ACTION: Long-press power button, then tap "Take bug report" option.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_FROM_POWER_MENU_INTERACTIVE = 292;
 
-    // Full bug report initiated from power menu.
+    // ACTION: Long-press power button, then long-press "Take bug report" option.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: N
+    // GMS: 7.8.99
     ACTION_BUGREPORT_FROM_POWER_MENU_FULL = 293;
 
+    // ACTION: Settings -> Developer Options -> Take bug report -> Interactive report
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
     // Interactive bug report initiated from Settings.
     ACTION_BUGREPORT_FROM_SETTINGS_INTERACTIVE = 294;
 
-    // Full bug report initiated from Settings.
+    // ACTION: Settings -> Developer Options -> Take bug report -> Full report
+    // CATEGORY: SETTINGS
+    // OS: N
+    // GMS: 7.8.99
+    // Interactive bug report initiated from Settings.
     ACTION_BUGREPORT_FROM_SETTINGS_FULL = 295;
 
-    // Bug report canceled using system notification.
+    // ACTION: User tapped notification action to cancel a bug report
+    // CATEGORY: NOTIFICATION
     ACTION_BUGREPORT_NOTIFICATION_ACTION_CANCEL = 296;
 
-    // Bug report details screen open using system notification.
+    // ACTION: User tapped notification action to launch bug report details screen
+    // CATEGORY: NOTIFICATION
     ACTION_BUGREPORT_NOTIFICATION_ACTION_DETAILS = 297;
 
-    // Additional Bug report screen shot taken using system notification.
+    // ACTION: User tapped notification action to take adition screenshot on bug report
+    // CATEGORY: NOTIFICATION
     ACTION_BUGREPORT_NOTIFICATION_ACTION_SCREENSHOT = 298;
 
-    // Bug report shared by user using system notification.
+    // ACTION: User tapped notification to share bug report
+    // CATEGORY: NOTIFICATION
     ACTION_BUGREPORT_NOTIFICATION_ACTION_SHARE = 299;
 
-    // User changed bug report name using the details screen.
+    // ACTION: User changed bug report name using the details screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
     ACTION_BUGREPORT_DETAILS_NAME_CHANGED = 300;
 
-    // User changed bug report title using the details screen.
+    // ACTION: User changed bug report title using the details screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
     ACTION_BUGREPORT_DETAILS_TITLE_CHANGED = 301;
 
-    // User changed bug report description using the details screen.
+    // ACTION: User changed bug report description using the details screen
+    // CATEGORY: GLOBAL_SYSTEM_UI
     ACTION_BUGREPORT_DETAILS_DESCRIPTION_CHANGED = 302;
 
-    // Changes made on bug report details screen were saved by user.
+    // ACTION: User tapped Save in the bug report details screen.
+    // CATEGORY: GLOBAL_SYSTEM_UI
     ACTION_BUGREPORT_DETAILS_SAVED = 303;
 
-    // Changes made on bug report details screen were canceled by user.
+    // ACTION: User tapped Cancel in the bug report details screen.
+    // CATEGORY: GLOBAL_SYSTEM_UI
     ACTION_BUGREPORT_DETAILS_CANCELED = 304;
 
     // Tuner: Open/close calibrate dialog.

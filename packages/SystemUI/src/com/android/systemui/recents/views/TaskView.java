@@ -603,7 +603,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         EventBus.getDefault().send(new LaunchTaskEvent(this, mTask, null, INVALID_STACK_ID,
                 screenPinningRequested));
 
-        MetricsLogger.action(v.getContext(), MetricsEvent.OVERVIEW_SELECT,
+        MetricsLogger.action(v.getContext(), MetricsEvent.ACTION_OVERVIEW_SELECT,
                 mTask.key.getComponent().toString());
     }
 

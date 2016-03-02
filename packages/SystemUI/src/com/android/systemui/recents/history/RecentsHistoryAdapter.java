@@ -161,7 +161,7 @@ public class RecentsHistoryAdapter extends RecyclerView.Adapter<RecentsHistoryAd
             ssp.startActivityFromRecents(v.getContext(), task.key.id, task.title,
                     ActivityOptions.makeBasic());
 
-            MetricsLogger.action(v.getContext(), MetricsEvent.OVERVIEW_SELECT,
+            MetricsLogger.action(v.getContext(), MetricsEvent.ACTION_OVERVIEW_SELECT,
                     task.key.getComponent().toString());
         }
 
