@@ -25,7 +25,6 @@ import android.support.v7.widget.RecyclerView.State;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -276,9 +275,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                 if (from >= mDividerIndex) {
                     return false;
                 }
-            }
-            if (target.getItemViewType() == TYPE_EDIT && from < mDividerIndex) {
-                to++;
             }
             move(from, to, mTiles);
             mDividerIndex = mTiles.indexOf(null);
