@@ -110,6 +110,13 @@ static void nativeDestroy(JNIEnv* env, jclass clazz, jlong nativeObject) {
     ctrl->decStrong((void *)nativeCreate);
 }
 
+static void nativeDisconnect(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    if (ctrl != NULL) {
+        ctrl->disconnect();
+    }
+}
+
 static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         jobject displayTokenObj, jobject sourceCropObj, jint width, jint height,
         jint minLayer, jint maxLayer, bool allLayers, bool useIdentityTransform,
@@ -595,6 +602,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeRelease },
     {"nativeDestroy", "(J)V",
             (void*)nativeDestroy },
+    {"nativeDisconnect", "(J)V",
+            (void*)nativeDisconnect },
     {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/graphics/Rect;IIIIZZI)Landroid/graphics/Bitmap;",
             (void*)nativeScreenshotBitmap },
     {"nativeScreenshot", "(Landroid/os/IBinder;Landroid/view/Surface;Landroid/graphics/Rect;IIIIZZ)V",
