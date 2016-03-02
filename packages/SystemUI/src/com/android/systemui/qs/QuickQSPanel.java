@@ -67,11 +67,6 @@ public class QuickQSPanel extends QSPanel {
         TunerService.get(mContext).removeTunable(mNumTiles);
     }
 
-    @Override
-    protected void createCustomizePanel() {
-        // No customizing from the header.
-    }
-
     public void setQSPanelAndHeader(QSPanel fullPanel, View header) {
         mFullPanel = fullPanel;
         mHeader = header;

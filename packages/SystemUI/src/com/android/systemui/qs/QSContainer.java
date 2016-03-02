@@ -19,6 +19,7 @@ package com.android.systemui.qs;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +27,9 @@ import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.phone.BaseStatusBarHeader;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -38,6 +41,8 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 public class QSContainer extends FrameLayout {
     private static final String TAG = "QSContainer";
     private static final boolean DEBUG = false;
+
+    private final Point mSizePoint = new Point();
 
     private int mHeightOverride = -1;
     private QSPanel mQSPanel;
@@ -51,6 +56,8 @@ public class QSContainer extends FrameLayout {
 
     private long mDelay;
     private QSAnimator mQSAnimator;
+    private QSCustomizer mQSCustomizer;
+    private NotificationPanelView mPanelView;
 
     public QSContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -65,13 +72,19 @@ public class QSContainer extends FrameLayout {
         mHeader = (BaseStatusBarHeader) findViewById(R.id.header);
         mQSAnimator = new QSAnimator(this, (QuickQSPanel) mHeader.findViewById(R.id.quick_qs_panel),
                 mQSPanel);
+        mQSCustomizer = (QSCustomizer) findViewById(R.id.qs_customize);
+        mQSCustomizer.setQsContainer(this);
     }
 
     public void setHost(QSTileHost qsh) {
-        mQSPanel.setHost(qsh);
+        mQSPanel.setHost(qsh, mQSCustomizer);
         mHeader.setQSPanel(mQSPanel);
         mQSDetail.setHost(qsh);
         mQSAnimator.setHost(qsh);
+    }
+
+    public void setPanelView(NotificationPanelView panelView) {
+        mPanelView = panelView;
     }
 
     @Override
@@ -80,12 +93,22 @@ public class QSContainer extends FrameLayout {
         // Otherwise the QSPanel ends up with 0 height when the window is only the
         // size of the status bar.
         super.onMeasure(widthMeasureSpec, MeasureSpec.UNSPECIFIED);
+
+        // QSCustomizer is always be the height of the screen, but do this after
+        // other measuring to avoid changing the height of the QSContainer.
+        getDisplay().getRealSize(mSizePoint);
+        mQSCustomizer.measure(widthMeasureSpec,
+                MeasureSpec.makeMeasureSpec(mSizePoint.y, MeasureSpec.EXACTLY));
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateBottom();
+    }
+
+    public boolean isCustomizing() {
+        return mQSCustomizer.isCustomizing();
     }
 
     /**
@@ -104,6 +127,9 @@ public class QSContainer extends FrameLayout {
      * during closing the detail panel, this already returns the smaller height.
      */
     public int getDesiredHeight() {
+        if (isCustomizing()) {
+            return getHeight();
+        }
         if (mQSDetail.isClosingDetail()) {
             return mQSPanel.getGridHeight() + mHeader.getCollapsedHeight() + getPaddingBottom();
         } else {
@@ -111,9 +137,18 @@ public class QSContainer extends FrameLayout {
         }
     }
 
+    public void notifyCustomizeChanged() {
+        // The customize state changed, so our height changed.
+        updateBottom();
+        // Let the panel know the position changed and it needs to update where notifications
+        // and whatnot are.
+        mPanelView.onQsHeightChanged();
+    }
+
     private void updateBottom() {
         int heightOverride = mHeightOverride != -1 ? mHeightOverride : getMeasuredHeight();
-        int height = (int) (mQsExpansion * (heightOverride - mHeader.getCollapsedHeight()))
+        int height = mQSCustomizer.isCustomizing() ? mQSCustomizer.getHeight()
+                : (int) (mQsExpansion * (heightOverride - mHeader.getCollapsedHeight()))
                 + mHeader.getCollapsedHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
@@ -136,6 +171,10 @@ public class QSContainer extends FrameLayout {
 
     public QSPanel getQsPanel() {
         return mQSPanel;
+    }
+
+    public QSCustomizer getCustomizer() {
+        return mQSCustomizer;
     }
 
     public boolean isShowingDetail() {
