@@ -8763,6 +8763,15 @@ public final class ContactsContract {
          * <li><em>Note: Some apps may choose to use phone number as the unique contact ID in DATA1.
          * If this applies to you and you’d like phone number to be shown below the Contact Name by
          * the Voice Assistant, then you may choose to leave DATA3 empty.</em></li>
+         * <li><em>Note: If your app also uses DATA3 to display contact details in the Contacts App,
+         * make sure it does not include prefix text such as "Message +<phone>" or "Free Message
+         * +<phone>", etc. If you must show the prefix text in the Contacts App, please use a
+         * different DATA# column, and update your contacts.xml to point to this new column. </em>
+         * </li>
+         * <li>Everytime the user sends a message to a contact, your app may choose to update the
+         * {@link ContactOptionsColumns#TIMES_CONTACTED} entry through DataUsageFeedback class.
+         * Doing this will allow Voice Assistant to bias speech recognition to contacts frequently
+         * contacted, this is particularly useful for contact names that are hard to pronounce.</li>
          * </ul>
          * <p>
          * Input: {@link android.content.Intent#getType} is the MIME type of the data being sent.
