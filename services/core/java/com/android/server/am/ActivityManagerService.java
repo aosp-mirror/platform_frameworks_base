@@ -45,6 +45,7 @@ import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.LocalServices;
+import com.android.server.LockGuard;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -13585,6 +13586,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 synchronized (this) {
                     mServices.dumpServicesLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
                 }
+            } else if ("locks".equals(cmd)) {
+                LockGuard.dump(fd, pw, args);
             } else {
                 // Dumping a single activity?
                 if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
