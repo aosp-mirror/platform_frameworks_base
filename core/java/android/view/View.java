@@ -10940,7 +10940,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Like {@link #getMeasuredHeightAndState()}, but only returns the
-     * raw width component (that is the result is masked by
+     * raw height component (that is the result is masked by
      * {@link #MEASURED_SIZE_MASK}).
      *
      * @return The raw measured height of this view.
@@ -10956,7 +10956,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * This should be used during measurement and layout calculations only. Use
      * {@link #getHeight()} to see how wide a view is after layout.
      *
-     * @return The measured width of this view as a bit mask.
+     * @return The measured height of this view as a bit mask.
      */
     @ViewDebug.ExportedProperty(category = "measurement", flagMapping = {
             @ViewDebug.FlagToString(mask = MEASURED_STATE_MASK, equals = MEASURED_STATE_TOO_SMALL,
