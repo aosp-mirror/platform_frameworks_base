@@ -181,6 +181,9 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         }
 
         private void bindView() {
+            if (mCurrentView == null) {
+                return;
+            }
             mDrawable.onBatteryLevelChanged(100, false, false);
             mDrawable.onPowerSaveChanged(true);
             mDrawable.disableShowPercent();
