@@ -5609,6 +5609,8 @@ package android.app {
     method public void enableCarMode(int);
     method public int getCurrentModeType();
     method public int getNightMode();
+    method public boolean isNightModeLocked();
+    method public boolean isUiModeLocked();
     method public void setNightMode(int);
     field public static java.lang.String ACTION_ENTER_CAR_MODE;
     field public static java.lang.String ACTION_ENTER_DESK_MODE;
