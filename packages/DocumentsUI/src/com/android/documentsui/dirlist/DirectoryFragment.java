@@ -168,6 +168,7 @@ public class DirectoryFragment extends Fragment
     private GridLayoutManager mLayout;
     private int mColumnCount = 1;  // This will get updated when layout changes.
 
+    private LayoutInflater mInflater;
     private MessageBar mMessageBar;
     private View mProgressBar;
 
@@ -182,13 +183,12 @@ public class DirectoryFragment extends Fragment
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mInflater = inflater;
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mMessageBar = MessageBar.create(getChildFragmentManager());
         mProgressBar = view.findViewById(R.id.progressbar);
-
         mEmptyView = view.findViewById(android.R.id.empty);
-
         mRecView = (RecyclerView) view.findViewById(R.id.dir_list);
         mRecView.setRecyclerListener(
                 new RecyclerListener() {
@@ -708,13 +708,27 @@ public class DirectoryFragment extends Fragment
         new GetDocumentsTask() {
             @Override
             void onDocumentsReady(final List<DocumentInfo> docs) {
+
+                TextView message =
+                        (TextView) mInflater.inflate(R.layout.dialog_delete_confirmation, null);
+                message.setText(
+                        Shared.getQuantityString(
+                                getActivity(),
+                                R.plurals.delete_confirmation_message,
+                                docs.size()));
+
+                // This "insta-hides" files that are being deleted, because
+                // the delete operation may be not execute immediately (it
+                // may be queued up on the FileOperationService.)
+                // To hide the files locally, we call the hide method on the adapter
+                // ...which a live object...cannot be parceled.
+                // For that reason, for now, we implement this dialog NOT
+                // as a fragment (which can survive rotation and have its own state),
+                // but as a simple runtime dialog. So rotating a device with an
+                // active delete dialog...results in that dialog disappearing.
+                // We can do better, but don't have cycles for it now.
                 new AlertDialog.Builder(getActivity())
-                    .setTitle(R.string.delete_confirmation_title)
-                    .setMessage(
-                            Shared.getQuantityString(
-                                    getActivity(),
-                                    R.plurals.delete_confirmation_message,
-                                    docs.size()))
+                    .setView(message)
                     .setPositiveButton(
                          android.R.string.yes,
                          new DialogInterface.OnClickListener() {

@@ -74,13 +74,6 @@ abstract class DocumentsAdapter
     abstract public SparseArray<String> hide(String... ids);
 
     /**
-     * Unhides a set of previously hidden items.
-     *
-     * @param ids A sparse array of IDs from a previous call to {@link #hide}.
-     */
-    abstract void unhide(SparseArray<String> ids);
-
-    /**
      * Returns a class that yields the span size for a particular element. This is
      * primarily useful in {@link SectionBreakDocumentsAdapterWrapper} where
      * we adjust sizes.

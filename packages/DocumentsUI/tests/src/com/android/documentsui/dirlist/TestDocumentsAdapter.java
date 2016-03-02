@@ -61,11 +61,6 @@ public class TestDocumentsAdapter extends DocumentsAdapter {
     }
 
     @Override
-    void unhide(SparseArray<String> ids) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public DocumentHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         throw new UnsupportedOperationException();
     }

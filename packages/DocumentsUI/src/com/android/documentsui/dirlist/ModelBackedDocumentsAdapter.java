@@ -24,12 +24,12 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
-import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.ViewGroup;
 
 import com.android.documentsui.State;
+
 import com.google.common.collect.Sets;
 
 import java.util.ArrayList;
@@ -179,29 +179,6 @@ final class ModelBackedDocumentsAdapter extends DocumentsAdapter {
         }
 
         return hiddenItems;
-    }
-
-    @VisibleForTesting
-    @Override
-    public void unhide(SparseArray<String> ids) {
-        if (DEBUG) Log.d(TAG, "Unhiding ids: " + ids);
-
-        // An ArrayList can shrink at runtime...and in fact
-        // it does when we clear it completely.
-        // This means we can't call add(pos, id) without
-        // first checking the list size.
-        List<String> oldIds = mModelIds;
-        mModelIds = new ArrayList<>(oldIds.size() + ids.size());
-        mModelIds.addAll(oldIds);
-
-        // Finally insert the unhidden items.
-        for (int i = 0; i < ids.size(); i++) {
-            int pos = ids.keyAt(i);
-            String id = ids.get(pos);
-            mHiddenIds.remove(id);
-            mModelIds.add(pos, id);
-            notifyItemInserted(pos);
-        }
     }
 
     @Override
