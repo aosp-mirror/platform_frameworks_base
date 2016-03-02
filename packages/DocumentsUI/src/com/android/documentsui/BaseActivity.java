@@ -39,6 +39,7 @@ import android.provider.DocumentsContract.Root;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -67,6 +68,7 @@ public abstract class BaseActivity extends Activity
     SearchViewManager mSearchManager;
     DrawerController mDrawer;
     NavigationView mNavigator;
+    List<EventListener> mEventListeners = new ArrayList<>();
 
     private final String mTag;
 
@@ -328,6 +330,8 @@ public abstract class BaseActivity extends Activity
 
     void openContainerDocument(DocumentInfo doc) {
         assert(doc.isContainer());
+
+        notifyDirectoryNavigated(doc.derivedUri);
 
         mState.pushDocument(doc);
         // Show an opening animation only if pressing "back" would get us back to the
@@ -592,6 +596,28 @@ public abstract class BaseActivity extends Activity
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @VisibleForTesting
+    public void addEventListener(EventListener listener) {
+        mEventListeners.add(listener);
+    }
+
+    @VisibleForTesting
+    public void removeEventListener(EventListener listener) {
+        mEventListeners.remove(listener);
+    }
+
+    public void notifyDirectoryLoaded(Uri uri) {
+        for (EventListener listener : mEventListeners) {
+            listener.onDirectoryLoaded(uri);
+        }
+    }
+
+    void notifyDirectoryNavigated(Uri uri) {
+        for (EventListener listener : mEventListeners) {
+            listener.onDirectoryNavigated(uri);
+        }
     }
 
     /**

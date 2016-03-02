@@ -59,7 +59,6 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
-
     public DirectoryLoader(Context context, int type, RootInfo root, DocumentInfo doc, Uri uri,
             int userSortOrder, boolean inSearchMode) {
         super(context, ProviderExecutor.forAuthority(root.authority));
@@ -84,6 +83,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         final String authority = mUri.getAuthority();
 
         final DirectoryResult result = new DirectoryResult();
+        result.doc = mDoc;
 
         // Use default document when searching
         if (mSearchMode) {
