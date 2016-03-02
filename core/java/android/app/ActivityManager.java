@@ -647,6 +647,16 @@ public class ActivityManager {
             return stackId != PINNED_STACK_ID && stackId != FREEFORM_WORKSPACE_STACK_ID
                     && stackId != DOCKED_STACK_ID;
         }
+
+        /**
+         * Returns true if the input stack id should only be present on a device that supports
+         * multi-window mode.
+         * @see android.app.ActivityManager#supportsMultiWindow
+         */
+        public static boolean isMultiWindowStack(int stackId) {
+            return isStaticStack(stackId) || stackId == PINNED_STACK_ID
+                    || stackId == FREEFORM_WORKSPACE_STACK_ID || stackId == DOCKED_STACK_ID;
+        }
     }
 
     /**
@@ -865,6 +875,17 @@ public class ActivityManager {
      */
     static public int getMaxAppRecentsLimitStatic() {
         return getMaxRecentTasksStatic() / 2;
+    }
+
+    /**
+     * Returns true if the system supports at least one form of multi-window.
+     * E.g. freeform, split-screen, picture-in-picture.
+     * @hide
+     */
+    static public boolean supportsMultiWindow() {
+        return !isLowRamDeviceStatic()
+                && Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_supportsMultiWindow);
     }
 
     /**
