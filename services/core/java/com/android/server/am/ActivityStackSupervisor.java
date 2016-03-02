@@ -2174,6 +2174,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
      */
     ActivityStack moveTaskToStackUncheckedLocked(
             TaskRecord task, int stackId, boolean toTop, boolean forceFocus, String reason) {
+
+        if (StackId.isMultiWindowStack(stackId) && !mService.mSupportsMultiWindow) {
+            throw new IllegalStateException("moveTaskToStackUncheckedLocked: Device doesn't "
+                    + "support multi-window task=" + task + " to stackId=" + stackId);
+        }
+
         final ActivityRecord r = task.getTopActivity();
         final ActivityStack prevStack = task.stack;
         final boolean wasFocused = isFocusedStack(prevStack) && (topRunningActivityLocked() == r);
@@ -2183,8 +2189,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         // the stack to the front.
         final boolean wasFront = isFrontStack(prevStack)
                 && (prevStack.topRunningActivityLocked() == r);
-
-        final int resizeMode = task.mResizeMode;
 
         if (stackId == DOCKED_STACK_ID && !task.isResizeable()) {
             // We don't allow moving a unresizeable task to the docked stack since the docked

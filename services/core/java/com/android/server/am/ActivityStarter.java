@@ -1772,12 +1772,13 @@ class ActivityStarter {
             return false;
         }
 
-        if (stackId == DOCKED_STACK_ID && r.canGoInDockedStack()) {
-            return true;
+        if (stackId != FULLSCREEN_WORKSPACE_STACK_ID
+                && (!mService.mSupportsMultiWindow || !r.isResizeableOrForced())) {
+            return false;
         }
 
-        if (stackId != FULLSCREEN_WORKSPACE_STACK_ID && !r.isResizeableOrForced()) {
-            return false;
+        if (stackId == DOCKED_STACK_ID && r.canGoInDockedStack()) {
+            return true;
         }
 
         if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
