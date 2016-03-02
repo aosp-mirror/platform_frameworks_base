@@ -765,11 +765,6 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
 
     @Override
     public void engineDeleteEntry(String alias) throws KeyStoreException {
-        if (!engineContainsAlias(alias)) {
-            return;
-        }
-        // At least one entry corresponding to this alias exists in keystore
-
         if (!Credentials.deleteAllTypesForAlias(mKeyStore, alias, mUid)) {
             throw new KeyStoreException("Failed to delete entry: " + alias);
         }
