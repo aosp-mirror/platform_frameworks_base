@@ -278,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"Ejecuta procesadores de WebView en un proceso aislado."</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Implementación de WebView"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"Establecer implementación de WebView"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"La implementación de WebView seleccionada no es válida porque la lista de opciones de implementación no estaba activada. Esta ya debería estar actualizada."</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"La implementación de WebView seleccionada no es válida porque la lista de opciones de implementación estaba inactiva. Esta ya debería estar actualizada."</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"Convertir a cifrado de archivo"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Convertir…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Ya está cifrado"</string>
