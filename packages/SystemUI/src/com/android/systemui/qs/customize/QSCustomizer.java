@@ -87,6 +87,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mToolbar.setOnMenuItemClickListener(this);
         mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
                 mContext.getString(com.android.internal.R.string.reset));
+        mToolbar.setTitle(R.string.qs_edit);
 
         mRecyclerView = (RecyclerView) findViewById(android.R.id.list);
         mTileAdapter = new TileAdapter(getContext());
