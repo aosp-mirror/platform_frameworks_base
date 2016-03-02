@@ -25,6 +25,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Xml;
+import android.provider.Settings;
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.ContentValues;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.view.InflateException;
 import com.android.settingslib.drawer.Tile;
 import com.android.settingslib.drawer.TileUtils;
@@ -41,6 +47,12 @@ public class SuggestionParser {
 
     // If defined, only returns this suggestion if the feature is supported.
     public static final String META_DATA_REQUIRE_FEATURE = "com.android.settings.require_feature";
+
+    // If defined, only display this optional step if an account of that type exists.
+    private static final String META_DATA_REQUIRE_ACCOUNT = "com.android.settings.require_account";
+
+    // If defined and not true, do not should optional step.
+    private static final String META_DATA_IS_SUPPORTED = "com.android.settings.is_supported";
 
     /**
      * Allows suggestions to appear after a certain number of days, and to re-appear if dismissed.
@@ -110,7 +122,10 @@ public class SuggestionParser {
         TileUtils.getTilesForIntent(mContext, new UserHandle(UserHandle.myUserId()), intent,
                 addCache, null, suggestions, true, false);
         for (int i = countBefore; i < suggestions.size(); i++) {
-            if (!isAvailable(suggestions.get(i)) || isDismissed(suggestions.get(i))) {
+            if (!isAvailable(suggestions.get(i)) ||
+                    !isSupported(suggestions.get(i)) ||
+                    !satisfiesRequiredAccount(suggestions.get(i)) ||
+                    isDismissed(suggestions.get(i))) {
                 suggestions.remove(i--);
             }
         }
@@ -124,7 +139,10 @@ public class SuggestionParser {
                     item = last;
                 }
             }
-            suggestions.add(item);
+            // If category is marked as done, do not add any item.
+            if (!isCategoryDone(category.category)) {
+                suggestions.add(item);
+            }
         }
     }
 
@@ -134,6 +152,41 @@ public class SuggestionParser {
             return mContext.getPackageManager().hasSystemFeature(featureRequired);
         }
         return true;
+    }
+
+    public boolean satisfiesRequiredAccount(Tile suggestion) {
+        String requiredAccountType = suggestion.metaData.getString(META_DATA_REQUIRE_ACCOUNT);
+        if (requiredAccountType == null) {
+            return true;
+        }
+        AccountManager accountManager = AccountManager.get(mContext);
+        Account[] accounts = accountManager.getAccountsByType(requiredAccountType);
+        return accounts.length > 0;
+    }
+
+    public boolean isSupported(Tile suggestion) {
+        int isSupportedResource = suggestion.metaData.getInt(META_DATA_IS_SUPPORTED);
+        try {
+            if (suggestion.intent == null) {
+                return false;
+            }
+            final Resources res = mContext.getPackageManager().getResourcesForActivity(
+                    suggestion.intent.getComponent());
+            return isSupportedResource != 0 ? res.getBoolean(isSupportedResource) : true;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Cannot find resources for " + suggestion.intent.getComponent());
+            return false;
+        }
+    }
+
+    public boolean isCategoryDone(String category) {
+        String name = Settings.Secure.COMPLETED_CATEGORY_PREFIX + category;
+        return Settings.Secure.getInt(mContext.getContentResolver(), name, 0) != 0;
+    }
+
+    public void markCategoryDone(String category) {
+        String name = Settings.Secure.COMPLETED_CATEGORY_PREFIX + category;
+        Settings.Secure.putInt(mContext.getContentResolver(), name, 1);
     }
 
     private boolean isDismissed(Tile suggestion) {
