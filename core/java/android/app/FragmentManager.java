@@ -1625,7 +1625,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             final BackStackRecord bss = mBackStack.remove(last);
             SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
             SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
-            bss.calculateBackFragments(firstOutFragments, lastInFragments);
+            if (mCurState >= Fragment.CREATED) {
+                bss.calculateBackFragments(firstOutFragments, lastInFragments);
+            }
             bss.popFromBackStack(true, null, firstOutFragments, lastInFragments);
             reportBackStackChanged();
         } else {
@@ -1672,8 +1674,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
             final int LAST = states.size()-1;
             SparseArray<Fragment> firstOutFragments = new SparseArray<Fragment>();
             SparseArray<Fragment> lastInFragments = new SparseArray<Fragment>();
-            for (int i=0; i<=LAST; i++) {
-                states.get(i).calculateBackFragments(firstOutFragments, lastInFragments);
+            if (mCurState >= Fragment.CREATED) {
+                for (int i = 0; i <= LAST; i++) {
+                    states.get(i).calculateBackFragments(firstOutFragments, lastInFragments);
+                }
             }
             BackStackRecord.TransitionState state = null;
             for (int i=0; i<=LAST; i++) {
