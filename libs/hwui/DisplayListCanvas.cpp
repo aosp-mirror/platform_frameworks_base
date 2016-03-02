@@ -415,7 +415,8 @@ void DisplayListCanvas::drawPoints(const float* points, int count, const SkPaint
 
 void DisplayListCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
     mDisplayList->ref(tree);
-    addDrawOp(new (alloc()) DrawVectorDrawableOp(tree));
+    mDisplayList->pushStagingFunctors.push_back(tree->getFunctor());
+    addDrawOp(new (alloc()) DrawVectorDrawableOp(tree, tree->stagingProperties()->getBounds()));
 }
 
 void DisplayListCanvas::drawGlyphsOnPath(const uint16_t* glyphs, int count,
