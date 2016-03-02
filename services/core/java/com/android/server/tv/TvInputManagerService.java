@@ -2512,7 +2512,7 @@ public final class TvInputManagerService extends SystemService {
 
         // For the recording session only
         @Override
-        public void onTuned() {
+        public void onTuned(Uri channelUri) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "onTuned()");
@@ -2521,7 +2521,7 @@ public final class TvInputManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.client.onTuned(mSessionState.seq);
+                    mSessionState.client.onTuned(mSessionState.seq, channelUri);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onTuned", e);
                 }
