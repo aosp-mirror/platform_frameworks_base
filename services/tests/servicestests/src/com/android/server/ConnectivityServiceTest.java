@@ -161,9 +161,11 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 assertNull("BUG: only one idle handler allowed", mIdleHandler);
                 mIdleHandler = new IdleHandler() {
                     public boolean queueIdle() {
-                        cv.open();
-                        mIdleHandler = null;
-                        return false;  // Remove the handler.
+                        synchronized (queue) {
+                            cv.open();
+                            mIdleHandler = null;
+                            return false;  // Remove the handler.
+                        }
                     }
                 };
                 queue.addIdleHandler(mIdleHandler);
