@@ -50453,6 +50453,7 @@ package java.lang {
     method public static long doubleToRawLongBits(double);
     method public double doubleValue();
     method public float floatValue();
+    method public static int hashCode(double);
     method public int intValue();
     method public static boolean isInfinite(double);
     method public boolean isInfinite();
@@ -50460,11 +50461,15 @@ package java.lang {
     method public boolean isNaN();
     method public static double longBitsToDouble(long);
     method public long longValue();
+    method public static double max(double, double);
+    method public static double min(double, double);
     method public static double parseDouble(java.lang.String) throws java.lang.NumberFormatException;
+    method public static double sum(double, double);
     method public static java.lang.String toHexString(double);
     method public static java.lang.String toString(double);
     method public static java.lang.Double valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Double valueOf(double);
+    field public static final int BYTES = 8; // 0x8
     field public static final int MAX_EXPONENT = 1023; // 0x3ff
     field public static final double MAX_VALUE = 1.7976931348623157E308;
     field public static final int MIN_EXPONENT = -1022; // 0xfffffc02
@@ -50627,10 +50632,13 @@ package java.lang {
     method public static java.lang.Integer getInteger(java.lang.String);
     method public static java.lang.Integer getInteger(java.lang.String, int);
     method public static java.lang.Integer getInteger(java.lang.String, java.lang.Integer);
+    method public static int hashCode(int);
     method public static int highestOneBit(int);
     method public int intValue();
     method public long longValue();
     method public static int lowestOneBit(int);
+    method public static int max(int, int);
+    method public static int min(int, int);
     method public static int numberOfLeadingZeros(int);
     method public static int numberOfTrailingZeros(int);
     method public static int parseInt(java.lang.String, int) throws java.lang.NumberFormatException;
@@ -50640,6 +50648,7 @@ package java.lang {
     method public static int rotateLeft(int, int);
     method public static int rotateRight(int, int);
     method public static int signum(int);
+    method public static int sum(int, int);
     method public static java.lang.String toBinaryString(int);
     method public static java.lang.String toHexString(int);
     method public static java.lang.String toOctalString(int);
@@ -50648,6 +50657,7 @@ package java.lang {
     method public static java.lang.Integer valueOf(java.lang.String, int) throws java.lang.NumberFormatException;
     method public static java.lang.Integer valueOf(java.lang.String) throws java.lang.NumberFormatException;
     method public static java.lang.Integer valueOf(int);
+    field public static final int BYTES = 4; // 0x4
     field public static final int MAX_VALUE = 2147483647; // 0x7fffffff
     field public static final int MIN_VALUE = -2147483648; // 0x80000000
     field public static final int SIZE = 32; // 0x20
@@ -50689,10 +50699,13 @@ package java.lang {
     method public static java.lang.Long getLong(java.lang.String);
     method public static java.lang.Long getLong(java.lang.String, long);
     method public static java.lang.Long getLong(java.lang.String, java.lang.Long);
+    method public static int hashCode(long);
     method public static long highestOneBit(long);
     method public int intValue();
     method public long longValue();
     method public static long lowestOneBit(long);
+    method public static long max(long, long);
+    method public static long min(long, long);
     method public static int numberOfLeadingZeros(long);
     method public static int numberOfTrailingZeros(long);
     method public static long parseLong(java.lang.String, int) throws java.lang.NumberFormatException;
@@ -50702,6 +50715,7 @@ package java.lang {
     method public static long rotateLeft(long, int);
     method public static long rotateRight(long, int);
     method public static int signum(long);
+    method public static long sum(long, long);
     method public static java.lang.String toBinaryString(long);
     method public static java.lang.String toHexString(long);
     method public static java.lang.String toOctalString(long);
