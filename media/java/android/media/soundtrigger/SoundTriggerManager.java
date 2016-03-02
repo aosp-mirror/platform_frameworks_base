@@ -69,6 +69,7 @@ public final class SoundTriggerManager {
         try {
             mSoundTriggerService.updateSoundModel(model.getGenericSoundModel());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -81,7 +82,7 @@ public final class SoundTriggerManager {
             return new Model(mSoundTriggerService.getSoundModel(
                     new ParcelUuid(soundModelId)));
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -92,6 +93,7 @@ public final class SoundTriggerManager {
         try {
             mSoundTriggerService.deleteSoundModel(new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -201,6 +201,7 @@ public class AlarmManager {
             try {
                 mService.remove(null, this);
             } catch (RemoteException ex) {
+                throw ex.rethrowFromSystemServer();
             }
 
             synchronized (AlarmManager.class) {
@@ -656,6 +657,7 @@ public class AlarmManager {
             mService.set(mPackageName, type, triggerAtMillis, windowMillis, intervalMillis, flags,
                     operation, recipientWrapper, listenerTag, workSource, alarmClock);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -886,6 +888,7 @@ public class AlarmManager {
         try {
             mService.remove(operation, null);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -926,6 +929,7 @@ public class AlarmManager {
         try {
             mService.setTime(millis);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -965,6 +969,7 @@ public class AlarmManager {
         try {
             mService.setTimeZone(timeZone);
         } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -973,7 +978,7 @@ public class AlarmManager {
         try {
             return mService.getNextWakeFromIdleTime();
         } catch (RemoteException ex) {
-            return Long.MAX_VALUE;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -1005,7 +1010,7 @@ public class AlarmManager {
         try {
             return mService.getNextAlarmClock(userId);
         } catch (RemoteException ex) {
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 

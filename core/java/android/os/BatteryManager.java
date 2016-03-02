@@ -221,7 +221,7 @@ public class BatteryManager {
         try {
             return mBatteryStats.isCharging();
         } catch (RemoteException e) {
-            return true;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -246,7 +246,7 @@ public class BatteryManager {
             else
                 ret = Long.MIN_VALUE;
         } catch (RemoteException e) {
-            ret = Long.MIN_VALUE;
+            throw e.rethrowFromSystemServer();
         }
 
         return ret;

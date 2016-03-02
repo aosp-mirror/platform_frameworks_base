@@ -267,7 +267,7 @@ public final class HdmiControlManager {
             try {
                 types = mService.getSupportedTypes();
             } catch (RemoteException e) {
-                // Do nothing.
+                throw e.rethrowFromSystemServer();
             }
         }
         mHasTvDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_TV);
@@ -403,7 +403,7 @@ public final class HdmiControlManager {
         try {
             mService.addHotplugEventListener(wrappedListener);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to add hotplug event listener: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -425,7 +425,7 @@ public final class HdmiControlManager {
         try {
             mService.removeHotplugEventListener(wrappedListener);
         } catch (RemoteException e) {
-            Log.e(TAG, "failed to remove hotplug event listener: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 

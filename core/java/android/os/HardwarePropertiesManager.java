@@ -79,8 +79,7 @@ public class HardwarePropertiesManager {
             try {
                 return mService.getDeviceTemperatures(mContext.getOpPackageName(), type);
             } catch (RemoteException e) {
-                Log.w(TAG, "Could not get device temperatures", e);
-                return new float[0];
+                throw e.rethrowFromSystemServer();
             }
         default:
             Log.w(TAG, "Unknown device temperature type.");
@@ -100,8 +99,7 @@ public class HardwarePropertiesManager {
         try {
             return mService.getCpuUsages(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not get CPU usages", e);
-            return new CpuUsageInfo[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -117,8 +115,7 @@ public class HardwarePropertiesManager {
         try {
             return mService.getFanSpeeds(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not get fan speeds", e);
-            return new float[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 }

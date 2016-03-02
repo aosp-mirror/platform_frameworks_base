@@ -75,7 +75,7 @@ public class WifiNanManager {
             }
             mService.connect(mBinder, listener.callback, events);
         } catch (RemoteException e) {
-            Log.w(TAG, "connect RemoteException (FYI - ignoring): " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -94,7 +94,7 @@ public class WifiNanManager {
             mService.disconnect(mBinder);
             mBinder = null;
         } catch (RemoteException e) {
-            Log.w(TAG, "disconnect RemoteException (FYI - ignoring): " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -116,7 +116,7 @@ public class WifiNanManager {
         try {
             mService.requestConfig(configRequest);
         } catch (RemoteException e) {
-            Log.w(TAG, "requestConfig RemoteException (FYI - ignoring): " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -173,8 +173,7 @@ public class WifiNanManager {
             if (DBG) Log.d(TAG, "publish: session created - sessionId=" + sessionId);
             mService.publish(sessionId, publishData, publishSettings);
         } catch (RemoteException e) {
-            Log.w(TAG, "createSession/publish RemoteException: " + e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
 
         return new WifiNanPublishSession(this, sessionId);
@@ -200,7 +199,7 @@ public class WifiNanManager {
         try {
             mService.publish(sessionId, publishData, publishSettings);
         } catch (RemoteException e) {
-            Log.w(TAG, "publish RemoteException: " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
     /**
@@ -256,8 +255,7 @@ public class WifiNanManager {
             if (DBG) Log.d(TAG, "subscribe: session created - sessionId=" + sessionId);
             mService.subscribe(sessionId, subscribeData, subscribeSettings);
         } catch (RemoteException e) {
-            Log.w(TAG, "createSession/subscribe RemoteException: " + e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
 
         return new WifiNanSubscribeSession(this, sessionId);
@@ -286,7 +284,7 @@ public class WifiNanManager {
         try {
             mService.subscribe(sessionId, subscribeData, subscribeSettings);
         } catch (RemoteException e) {
-            Log.w(TAG, "subscribe RemoteException: " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -299,7 +297,7 @@ public class WifiNanManager {
         try {
             mService.stopSession(sessionId);
         } catch (RemoteException e) {
-            Log.w(TAG, "stopSession RemoteException (FYI - ignoring): " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -312,7 +310,7 @@ public class WifiNanManager {
         try {
             mService.destroySession(sessionId);
         } catch (RemoteException e) {
-            Log.w(TAG, "destroySession RemoteException (FYI - ignoring): " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -328,7 +326,7 @@ public class WifiNanManager {
             }
             mService.sendMessage(sessionId, peerId, message, messageLength, messageId);
         } catch (RemoteException e) {
-            Log.w(TAG, "subscribe RemoteException (FYI - ignoring): " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 }

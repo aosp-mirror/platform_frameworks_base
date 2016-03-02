@@ -723,8 +723,7 @@ public class WifiManager {
         try {
             return mService.getConfiguredNetworks();
         } catch (RemoteException e) {
-            Log.w(TAG, "Caught RemoteException trying to get configured networks: " + e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -734,7 +733,7 @@ public class WifiManager {
         try {
             return mService.getPrivilegedConfiguredNetworks();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -744,7 +743,7 @@ public class WifiManager {
         try {
             return mService.getConnectionStatistics();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -758,7 +757,7 @@ public class WifiManager {
         try {
             return mService.getMatchingWifiConfig(scanResult);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -818,7 +817,7 @@ public class WifiManager {
         try {
             return mService.addOrUpdateNetwork(config);
         } catch (RemoteException e) {
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -832,7 +831,7 @@ public class WifiManager {
         try {
             return mService.addPasspointManagementObject(mo);
         } catch (RemoteException e) {
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -848,7 +847,7 @@ public class WifiManager {
         try {
             return mService.modifyPasspointManagementObject(fqdn, mos);
         } catch (RemoteException e) {
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -862,6 +861,7 @@ public class WifiManager {
         try {
             mService.queryPasspointIcon(bssid, fileName);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -875,7 +875,7 @@ public class WifiManager {
         try {
             return mService.matchProviderWithCurrentNetwork(fqdn);
         } catch (RemoteException e) {
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -889,6 +889,7 @@ public class WifiManager {
         try {
             mService.deauthenticateNetwork(holdoff, ess);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -922,7 +923,7 @@ public class WifiManager {
         try {
             return mService.removeNetwork(netId);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -962,7 +963,7 @@ public class WifiManager {
         try {
             success = mService.enableNetwork(netId, disableOthers);
         } catch (RemoteException e) {
-            success = false;
+            throw e.rethrowFromSystemServer();
         }
 
         if (pin && !success) {
@@ -983,7 +984,7 @@ public class WifiManager {
         try {
             return mService.disableNetwork(netId);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -997,7 +998,7 @@ public class WifiManager {
             mService.disconnect();
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1012,7 +1013,7 @@ public class WifiManager {
             mService.reconnect();
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1027,7 +1028,7 @@ public class WifiManager {
             mService.reassociate();
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1042,7 +1043,7 @@ public class WifiManager {
         try {
             return mService.pingSupplicant();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1090,7 +1091,7 @@ public class WifiManager {
         try {
             return mService.getSupportedFeatures();
         } catch (RemoteException e) {
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1216,9 +1217,8 @@ public class WifiManager {
                 return mService.reportActivityInfo();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "getControllerActivityEnergyInfo: " + e);
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -1232,7 +1232,7 @@ public class WifiManager {
             mService.startScan(null, null);
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1243,7 +1243,7 @@ public class WifiManager {
             mService.startScan(null, workSource);
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1299,7 +1299,7 @@ public class WifiManager {
         try {
             return mService.getWpsNfcConfigurationToken(netId);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1311,7 +1311,7 @@ public class WifiManager {
         try {
             return mService.getConnectionInfo();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1328,7 +1328,7 @@ public class WifiManager {
         try {
             return mService.getScanResults(mContext.getOpPackageName());
         } catch (RemoteException e) {
-            return new ArrayList<ScanResult>();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1344,7 +1344,7 @@ public class WifiManager {
         try {
             return mService.isScanAlwaysAvailable();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1361,7 +1361,7 @@ public class WifiManager {
         try {
             return mService.saveConfiguration();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1375,7 +1375,9 @@ public class WifiManager {
     public void setCountryCode(String country, boolean persist) {
         try {
             mService.setCountryCode(country, persist);
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1387,9 +1389,9 @@ public class WifiManager {
     public String getCountryCode() {
        try {
            String country = mService.getCountryCode();
-           return(country);
+           return country;
        } catch (RemoteException e) {
-           return null;
+           throw e.rethrowFromSystemServer();
        }
     }
 
@@ -1405,7 +1407,9 @@ public class WifiManager {
     public void setFrequencyBand(int band, boolean persist) {
         try {
             mService.setFrequencyBand(band, persist);
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1421,7 +1425,7 @@ public class WifiManager {
         try {
             return mService.getFrequencyBand();
         } catch (RemoteException e) {
-            return -1;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1434,7 +1438,7 @@ public class WifiManager {
         try {
             return mService.isDualBandSupported();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1447,7 +1451,7 @@ public class WifiManager {
         try {
             return mService.getDhcpInfo();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1461,7 +1465,7 @@ public class WifiManager {
         try {
             return mService.setWifiEnabled(enabled);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1476,7 +1480,7 @@ public class WifiManager {
         try {
             return mService.getWifiEnabledState();
         } catch (RemoteException e) {
-            return WIFI_STATE_UNKNOWN;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1553,7 +1557,7 @@ public class WifiManager {
             mService.setWifiApEnabled(wifiConfig, enabled);
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1571,7 +1575,7 @@ public class WifiManager {
         try {
             return mService.getWifiApEnabledState();
         } catch (RemoteException e) {
-            return WIFI_AP_STATE_FAILED;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1598,7 +1602,7 @@ public class WifiManager {
         try {
             return mService.getWifiApConfiguration();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1612,8 +1616,7 @@ public class WifiManager {
         try {
             return mService.buildWifiConfig(uriString, mimeType, data);
         } catch (RemoteException e) {
-            Log.w(TAG, "Caught RemoteException trying to build wifi config: " + e);
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1629,7 +1632,7 @@ public class WifiManager {
             mService.setWifiApConfiguration(wifiConfig);
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1646,7 +1649,7 @@ public class WifiManager {
             mService.addToBlacklist(bssid);
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1663,7 +1666,7 @@ public class WifiManager {
             mService.clearBlacklist();
             return true;
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1692,7 +1695,7 @@ public class WifiManager {
         try {
             mService.enableTdls(remoteIPAddress.getHostAddress(), enable);
         } catch (RemoteException e) {
-            // Just ignore the exception
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1706,7 +1709,7 @@ public class WifiManager {
         try {
             mService.enableTdlsWithMacAddress(remoteMacAddress, enable);
         } catch (RemoteException e) {
-            // Just ignore the exception
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2219,6 +2222,7 @@ public class WifiManager {
         try {
             mService.disableEphemeralNetwork(SSID);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2259,7 +2263,7 @@ public class WifiManager {
         try {
             return mService.getWifiServiceMessenger();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         } catch (SecurityException e) {
             return null;
         }
@@ -2274,7 +2278,7 @@ public class WifiManager {
         try {
             return mService.getConfigFile();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2340,7 +2344,8 @@ public class WifiManager {
                             }
                             mActiveLockCount++;
                         }
-                    } catch (RemoteException ignore) {
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                     mHeld = true;
                 }
@@ -2367,7 +2372,8 @@ public class WifiManager {
                         synchronized (WifiManager.this) {
                             mActiveLockCount--;
                         }
-                    } catch (RemoteException ignore) {
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                     mHeld = false;
                 }
@@ -2427,6 +2433,7 @@ public class WifiManager {
                     try {
                         mService.updateWifiLockWorkSource(mBinder, mWorkSource);
                     } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
@@ -2456,7 +2463,8 @@ public class WifiManager {
                         synchronized (WifiManager.this) {
                             mActiveLockCount--;
                         }
-                    } catch (RemoteException ignore) {
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
@@ -2572,7 +2580,8 @@ public class WifiManager {
                             }
                             mActiveLockCount++;
                         }
-                    } catch (RemoteException ignore) {
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                     mHeld = true;
                 }
@@ -2611,7 +2620,8 @@ public class WifiManager {
                         synchronized (WifiManager.this) {
                             mActiveLockCount--;
                         }
-                    } catch (RemoteException ignore) {
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                     mHeld = false;
                 }
@@ -2685,7 +2695,7 @@ public class WifiManager {
         try {
             return mService.isMulticastEnabled();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2698,7 +2708,7 @@ public class WifiManager {
             mService.initializeMulticastFiltering();
             return true;
         } catch (RemoteException e) {
-             return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2736,7 +2746,7 @@ public class WifiManager {
         try {
             return mService.getVerboseLoggingLevel();
         } catch (RemoteException e) {
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2748,7 +2758,7 @@ public class WifiManager {
         try {
             mService.enableAggressiveHandover(enabled);
         } catch (RemoteException e) {
-
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2761,7 +2771,7 @@ public class WifiManager {
         try {
             return mService.getAggressiveHandover();
         } catch (RemoteException e) {
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2773,7 +2783,7 @@ public class WifiManager {
         try {
             mService.setAllowScansWithTraffic(enabled);
         } catch (RemoteException e) {
-
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2785,7 +2795,7 @@ public class WifiManager {
         try {
             return mService.getAllowScansWithTraffic();
         } catch (RemoteException e) {
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2798,6 +2808,7 @@ public class WifiManager {
         try {
             mService.factoryReset();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2810,7 +2821,7 @@ public class WifiManager {
         try {
             return mService.getCurrentNetwork();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2824,7 +2835,7 @@ public class WifiManager {
         try {
             return mService.enableAutoJoinWhenAssociated(enabled);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2836,7 +2847,7 @@ public class WifiManager {
         try {
             return mService.getEnableAutoJoinWhenAssociated();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
     /**
@@ -2847,7 +2858,7 @@ public class WifiManager {
         try {
             mService.setHalBasedAutojoinOffload(enabled);
         } catch (RemoteException e) {
-
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2859,7 +2870,7 @@ public class WifiManager {
         try {
             return mService.getHalBasedAutojoinOffload();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return 0;
     }
 }

@@ -158,7 +158,7 @@ public class UiModeManager {
             try {
                 mService.enableCarMode(flags);
             } catch (RemoteException e) {
-                Log.e(TAG, "disableCarMode: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -181,7 +181,7 @@ public class UiModeManager {
             try {
                 mService.disableCarMode(flags);
             } catch (RemoteException e) {
-                Log.e(TAG, "disableCarMode: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -200,7 +200,7 @@ public class UiModeManager {
             try {
                 return mService.getCurrentModeType();
             } catch (RemoteException e) {
-                Log.e(TAG, "getCurrentModeType: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return Configuration.UI_MODE_TYPE_NORMAL;
@@ -233,7 +233,7 @@ public class UiModeManager {
             try {
                 mService.setNightMode(mode);
             } catch (RemoteException e) {
-                Log.e(TAG, "setNightMode: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -257,7 +257,7 @@ public class UiModeManager {
             try {
                 return mService.getNightMode();
             } catch (RemoteException e) {
-                Log.e(TAG, "getNightMode: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return -1;
@@ -272,7 +272,7 @@ public class UiModeManager {
             try {
                 return mService.isUiModeLocked();
             } catch (RemoteException e) {
-                Log.e(TAG, "isUiModeLocked: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return true;
@@ -292,7 +292,7 @@ public class UiModeManager {
             try {
                 return mService.isNightModeLocked();
             } catch (RemoteException e) {
-                Log.e(TAG, "isNightModeLocked: RemoteException", e);
+                throw e.rethrowFromSystemServer();
             }
         }
         return true;
