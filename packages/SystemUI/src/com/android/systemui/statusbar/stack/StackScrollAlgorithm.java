@@ -52,13 +52,8 @@ public class StackScrollAlgorithm {
     private StackIndentationFunctor mBottomStackIndentationFunctor;
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
-    private boolean mIsExpansionChanging;
-    private int mFirstChildMaxHeight;
     private boolean mIsExpanded;
-    private ExpandableView mFirstChildWhileExpanding;
-    private boolean mExpandedOnStart;
     private int mBottomStackSlowDownLength;
-    private int mCollapseSecondCardPadding;
 
     public StackScrollAlgorithm(Context context) {
         initView(context);
@@ -86,8 +81,6 @@ public class StackScrollAlgorithm {
         mZBasicHeight = (MAX_ITEMS_IN_BOTTOM_STACK + 1) * mZDistanceBetweenElements;
         mBottomStackSlowDownLength = context.getResources()
                 .getDimensionPixelSize(R.dimen.bottom_stack_slow_down_length);
-        mCollapseSecondCardPadding = context.getResources().getDimensionPixelSize(
-                R.dimen.notification_collapse_second_card_padding);
         mBottomStackIndentationFunctor = new PiecewiseLinearIndentationFunctor(
                 MAX_ITEMS_IN_BOTTOM_STACK,
                 mBottomStackPeekSize,
@@ -508,7 +501,7 @@ public class StackScrollAlgorithm {
             int childHeight, int minHeight, AmbientState ambientState) {
 
         int bottomStackStart = ambientState.getInnerHeight()
-                - mBottomStackPeekSize - mCollapseSecondCardPadding;
+                - mBottomStackPeekSize - mBottomStackSlowDownLength;
         int childStart = bottomStackStart - childHeight;
         if (childStart < childViewState.yTranslation) {
             float newHeight = bottomStackStart - childViewState.yTranslation;
@@ -595,12 +588,9 @@ public class StackScrollAlgorithm {
 
             // The starting position of the bottom stack peek
             int bottomPeekStart = ambientState.getInnerHeight() - mBottomStackPeekSize -
-                    mCollapseSecondCardPadding + ambientState.getScrollY();
+                    mBottomStackSlowDownLength + ambientState.getScrollY();
             // Collapse and expand the first child while the shade is being expanded
-            float maxHeight = mIsExpansionChanging && child == mFirstChildWhileExpanding
-                    ? mFirstChildMaxHeight
-                    : childHeight;
-            childViewState.height = (int) Math.max(Math.min(bottomPeekStart, maxHeight),
+        childViewState.height = (int) Math.max(Math.min(bottomPeekStart, (float) childHeight),
                     child.getMinHeight());
     }
 
@@ -656,55 +646,6 @@ public class StackScrollAlgorithm {
         }
     }
 
-    public void onExpansionStarted(StackScrollState currentState) {
-        mIsExpansionChanging = true;
-        mExpandedOnStart = mIsExpanded;
-        ViewGroup hostView = currentState.getHostView();
-        updateFirstChildHeightWhileExpanding(hostView);
-    }
-
-    private void updateFirstChildHeightWhileExpanding(ViewGroup hostView) {
-        mFirstChildWhileExpanding = (ExpandableView) findFirstVisibleChild(hostView);
-        if (mFirstChildWhileExpanding != null) {
-            if (mExpandedOnStart) {
-
-                // We are collapsing the shade, so the first child can get as most as high as the
-                // current height or the end value of the animation.
-                mFirstChildMaxHeight = StackStateAnimator.getFinalActualHeight(
-                        mFirstChildWhileExpanding);
-            } else {
-                updateFirstChildMaxSizeToMaxHeight();
-            }
-        } else {
-            mFirstChildMaxHeight = 0;
-        }
-    }
-
-    private void updateFirstChildMaxSizeToMaxHeight() {
-        // We are expanding the shade, expand it to its full height.
-        if (!isMaxSizeInitialized(mFirstChildWhileExpanding)) {
-
-            // This child was not layouted yet, wait for a layout pass
-            mFirstChildWhileExpanding
-                    .addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                        @Override
-                        public void onLayoutChange(View v, int left, int top, int right,
-                                int bottom, int oldLeft, int oldTop, int oldRight,
-                                int oldBottom) {
-                            if (mFirstChildWhileExpanding != null) {
-                                mFirstChildMaxHeight = getMaxAllowedChildHeight(
-                                        mFirstChildWhileExpanding);
-                            } else {
-                                mFirstChildMaxHeight = 0;
-                            }
-                            v.removeOnLayoutChangeListener(this);
-                        }
-                    });
-        } else {
-            mFirstChildMaxHeight = getMaxAllowedChildHeight(mFirstChildWhileExpanding);
-        }
-    }
-
     private boolean isMaxSizeInitialized(ExpandableView child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
@@ -724,30 +665,8 @@ public class StackScrollAlgorithm {
         return null;
     }
 
-    public void onExpansionStopped() {
-        mIsExpansionChanging = false;
-        mFirstChildWhileExpanding = null;
-    }
-
     public void setIsExpanded(boolean isExpanded) {
         this.mIsExpanded = isExpanded;
-    }
-
-    public void notifyChildrenChanged(final NotificationStackScrollLayout hostView) {
-        if (mIsExpansionChanging) {
-            hostView.post(new Runnable() {
-                @Override
-                public void run() {
-                    updateFirstChildHeightWhileExpanding(hostView);
-                }
-            });
-        }
-    }
-
-    public void onReset(ExpandableView view) {
-        if (view.equals(mFirstChildWhileExpanding)) {
-            updateFirstChildMaxSizeToMaxHeight();
-        }
     }
 
     class StackScrollAlgorithmState {
