@@ -252,7 +252,7 @@ public final class InputManager {
                 try {
                     inputDevice = mIm.getInputDevice(id);
                 } catch (RemoteException ex) {
-                    throw new RuntimeException("Could not get input device information.", ex);
+                    throw ex.rethrowFromSystemServer();
                 }
                 if (inputDevice != null) {
                     mInputDevices.setValueAt(index, inputDevice);
@@ -284,7 +284,7 @@ public final class InputManager {
                     try {
                         inputDevice = mIm.getInputDevice(id);
                     } catch (RemoteException ex) {
-                        // Ignore the problem for the purposes of this method.
+                        throw ex.rethrowFromSystemServer();
                     }
                     if (inputDevice == null) {
                         continue;
@@ -384,8 +384,7 @@ public final class InputManager {
         try {
             return mIm.isInTabletMode();
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get tablet mode state", ex);
-            return SWITCH_STATE_UNKNOWN;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -439,7 +438,7 @@ public final class InputManager {
         try {
             mIm.registerTabletModeChangedListener(listener);
         } catch (RemoteException ex) {
-            throw new RuntimeException("Could not register tablet mode changed listener", ex);
+            throw ex.rethrowFromSystemServer();
         }
         mTabletModeChangedListener = listener;
         mOnTabletModeChangedListeners = new ArrayList<>();
@@ -471,8 +470,7 @@ public final class InputManager {
         try {
             return mIm.getKeyboardLayouts();
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get list of keyboard layout informations.", ex);
-            return new KeyboardLayout[0];
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -494,8 +492,7 @@ public final class InputManager {
         try {
             return mIm.getKeyboardLayoutsForInputDevice(identifier);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get list of keyboard layouts for input device.", ex);
-            return new KeyboardLayout[0];
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -516,8 +513,7 @@ public final class InputManager {
         try {
             return mIm.getKeyboardLayout(keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get keyboard layout information.", ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -534,8 +530,7 @@ public final class InputManager {
         try {
             return mIm.getCurrentKeyboardLayoutForInputDevice(identifier);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get current keyboard layout for input device.", ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -565,7 +560,7 @@ public final class InputManager {
             mIm.setCurrentKeyboardLayoutForInputDevice(identifier,
                     keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not set current keyboard layout for input device.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -585,8 +580,7 @@ public final class InputManager {
         try {
             return mIm.getEnabledKeyboardLayoutsForInputDevice(identifier);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get keyboard layouts for input device.", ex);
-            return ArrayUtils.emptyArray(String.class);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -614,7 +608,7 @@ public final class InputManager {
         try {
             mIm.addKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not add keyboard layout for input device.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -642,7 +636,7 @@ public final class InputManager {
         try {
             mIm.removeKeyboardLayoutForInputDevice(identifier, keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not remove keyboard layout for input device.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -664,8 +658,7 @@ public final class InputManager {
             return mIm.getKeyboardLayoutForInputDevice(
                     identifier, inputMethodInfo, inputMethodSubtype);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not set keyboard layout.", ex);
-            return null;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -687,7 +680,7 @@ public final class InputManager {
             mIm.setKeyboardLayoutForInputDevice(identifier, inputMethodInfo,
                     inputMethodSubtype, keyboardLayoutDescriptor);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not set keyboard layout.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -704,8 +697,7 @@ public final class InputManager {
         try {
             return mIm.getTouchCalibrationForInputDevice(inputDeviceDescriptor, surfaceRotation);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not get calibration matrix for input device.", ex);
-            return TouchCalibration.IDENTITY;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -726,7 +718,7 @@ public final class InputManager {
         try {
             mIm.setTouchCalibrationForInputDevice(inputDeviceDescriptor, surfaceRotation, calibration);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not set calibration matrix for input device.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -793,7 +785,7 @@ public final class InputManager {
         try {
             mIm.tryPointerSpeed(speed);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Could not set temporary pointer speed.", ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -831,7 +823,7 @@ public final class InputManager {
         try {
             mIm.hasKeys(id, InputDevice.SOURCE_ANY, keyCodes, ret);
         } catch (RemoteException e) {
-            // no fallback; just return the empty array
+            throw e.rethrowFromSystemServer();
         }
         return ret;
     }
@@ -871,7 +863,7 @@ public final class InputManager {
         try {
             return mIm.injectInputEvent(event, mode);
         } catch (RemoteException ex) {
-            return false;
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -887,7 +879,7 @@ public final class InputManager {
         try {
             mIm.setPointerIconShape(iconId);
         } catch (RemoteException ex) {
-            // Do nothing.
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -896,7 +888,7 @@ public final class InputManager {
         try {
             mIm.setCustomPointerIcon(icon);
         } catch (RemoteException ex) {
-            // Do nothing.
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -914,7 +906,7 @@ public final class InputManager {
         try {
             mIm.setPointerIconDetached(detached);
         } catch (RemoteException ex) {
-            // Do nothing.
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -924,8 +916,7 @@ public final class InputManager {
             try {
                 mIm.registerInputDevicesChangedListener(listener);
             } catch (RemoteException ex) {
-                throw new RuntimeException(
-                        "Could not get register input device changed listener", ex);
+                throw ex.rethrowFromSystemServer();
             }
             mInputDevicesChangedListener = listener;
         }
@@ -935,7 +926,7 @@ public final class InputManager {
             try {
                 ids = mIm.getInputDeviceIds();
             } catch (RemoteException ex) {
-                throw new RuntimeException("Could not get input device ids.", ex);
+                throw ex.rethrowFromSystemServer();
             }
 
             mInputDevices = new SparseArray<InputDevice>();
@@ -1175,7 +1166,7 @@ public final class InputManager {
             try {
                 mIm.vibrate(mDeviceId, pattern, repeat, mToken);
             } catch (RemoteException ex) {
-                Log.w(TAG, "Failed to vibrate.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
 
@@ -1184,7 +1175,7 @@ public final class InputManager {
             try {
                 mIm.cancelVibrate(mDeviceId, mToken);
             } catch (RemoteException ex) {
-                Log.w(TAG, "Failed to cancel vibration.", ex);
+                throw ex.rethrowFromSystemServer();
             }
         }
     }

@@ -664,7 +664,7 @@ public final class InputMethodManager {
         try {
             return mService.getInputMethodList();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -672,7 +672,7 @@ public final class InputMethodManager {
         try {
             return mService.getEnabledInputMethodList();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -689,7 +689,7 @@ public final class InputMethodManager {
             return mService.getEnabledInputMethodSubtypeList(
                     imi == null ? null : imi.getId(), allowsImplicitlySelectedSubtypes);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -697,7 +697,7 @@ public final class InputMethodManager {
         try {
             mService.updateStatusIcon(imeToken, packageName, iconId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -705,7 +705,7 @@ public final class InputMethodManager {
         try {
             mService.updateStatusIcon(imeToken, null, 0);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -714,7 +714,7 @@ public final class InputMethodManager {
         try {
             mService.setImeWindowStatus(imeToken, vis, backDisposition);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -728,7 +728,7 @@ public final class InputMethodManager {
         try {
             mService.registerSuggestionSpansForNotification(spans);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -737,7 +737,7 @@ public final class InputMethodManager {
         try {
             mService.notifySuggestionPicked(span, originalString, index);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -833,6 +833,7 @@ public final class InputMethodManager {
                 try {
                     mService.finishInput(mClient);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
             }
             notifyInputConnectionFinished();
@@ -996,9 +997,8 @@ public final class InputMethodManager {
             try {
                 return mService.showSoftInput(mClient, flags, resultReceiver);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            
-            return false;
         }
     }
     
@@ -1007,6 +1007,7 @@ public final class InputMethodManager {
         try {
             mService.showSoftInput(mClient, flags, resultReceiver);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
     
@@ -1065,8 +1066,8 @@ public final class InputMethodManager {
             try {
                 return mService.hideSoftInput(mClient, flags, resultReceiver);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            return false;
         }
     }
     
@@ -1421,6 +1422,7 @@ public final class InputMethodManager {
         try {
             mService.hideSoftInput(mClient, HIDE_NOT_ALWAYS, null);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1476,6 +1478,7 @@ public final class InputMethodManager {
                         rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
                         null);
             } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1716,7 +1719,7 @@ public final class InputMethodManager {
         try {
             mService.setInputMethod(token, id);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1733,7 +1736,7 @@ public final class InputMethodManager {
         try {
             mService.setInputMethodAndSubtype(token, id, subtype);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1753,7 +1756,7 @@ public final class InputMethodManager {
         try {
             mService.hideMySoftInput(token, flags);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
     
@@ -1774,7 +1777,7 @@ public final class InputMethodManager {
         try {
             mService.showMySoftInput(token, flags);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1980,7 +1983,7 @@ public final class InputMethodManager {
                         SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
                 mService.showInputMethodPickerFromClient(mClient, mode);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1989,7 +1992,7 @@ public final class InputMethodManager {
         try {
             mService.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
         } catch (RemoteException e) {
-            Log.w(TAG, "IME died: " + mCurId, e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2003,7 +2006,7 @@ public final class InputMethodManager {
             try {
                 mService.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2018,8 +2021,7 @@ public final class InputMethodManager {
             try {
                 return mService.getCurrentInputMethodSubtype();
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return null;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2036,8 +2038,7 @@ public final class InputMethodManager {
             try {
                 return mService.setCurrentInputMethodSubtype(subtype);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return false;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2071,7 +2072,7 @@ public final class InputMethodManager {
                 mLastSentUserActionNotificationSequenceNumber =
                         mNextUserActionNotificationSequenceNumber;
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2104,7 +2105,7 @@ public final class InputMethodManager {
                     }
                 }
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
             }
             return ret;
         }
@@ -2119,8 +2120,7 @@ public final class InputMethodManager {
             try {
                 return mService.getInputMethodWindowVisibleHeight();
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return 0;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2139,8 +2139,7 @@ public final class InputMethodManager {
             try {
                 return mService.switchToLastInputMethod(imeToken);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return false;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2160,8 +2159,7 @@ public final class InputMethodManager {
             try {
                 return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return false;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2182,8 +2180,7 @@ public final class InputMethodManager {
             try {
                 return mService.shouldOfferSwitchingToNextInputMethod(imeToken);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return false;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2218,7 +2215,7 @@ public final class InputMethodManager {
             try {
                 mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -2228,8 +2225,7 @@ public final class InputMethodManager {
             try {
                 return mService.getLastInputMethodSubtype();
             } catch (RemoteException e) {
-                Log.w(TAG, "IME died: " + mCurId, e);
-                return null;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
