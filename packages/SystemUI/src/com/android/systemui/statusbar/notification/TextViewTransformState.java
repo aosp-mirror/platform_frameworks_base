@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.text.Layout;
 import android.text.TextUtils;
 import android.util.Pools;
 import android.view.View;
@@ -28,14 +29,13 @@ public class TextViewTransformState extends TransformState {
 
     private static Pools.SimplePool<TextViewTransformState> sInstancePool
             = new Pools.SimplePool<>(40);
-    private CharSequence mText;
+    private TextView mText;
 
     @Override
     public void initFrom(View view) {
         super.initFrom(view);
         if (view instanceof TextView) {
-            TextView txt = (TextView) view;
-            mText = txt.getText();
+            mText = (TextView) view;
         }
     }
 
@@ -43,9 +43,25 @@ public class TextViewTransformState extends TransformState {
     protected boolean sameAs(TransformState otherState) {
         if (otherState instanceof TextViewTransformState) {
             TextViewTransformState otherTvs = (TextViewTransformState) otherState;
-            return TextUtils.equals(otherTvs.mText, mText);
+            if(TextUtils.equals(otherTvs.mText.getText(), mText.getText())) {
+                int ownEllipsized = getEllipsisCount();
+                int otherEllipsized = otherTvs.getEllipsisCount();
+                return ownEllipsized == otherEllipsized;
+            }
         }
         return super.sameAs(otherState);
+    }
+
+    private int getEllipsisCount() {
+        Layout l = mText.getLayout();
+        if (l != null) {
+            int lines = l.getLineCount();
+            if (lines > 0) {
+                // we only care about the first line
+                return l.getEllipsisCount(0);
+            }
+        }
+        return 0;
     }
 
     public static TextViewTransformState obtain() {
