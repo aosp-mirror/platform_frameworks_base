@@ -396,9 +396,11 @@ class ContextImpl extends Context {
 
     /**
      * Try our best to migrate all files from source to target that match
-     * requested prefix. Return false if we have any trouble migrating.
+     * requested prefix.
+     *
+     * @return the number of files moved, or -1 if there was trouble.
      */
-    private static boolean migrateFiles(File sourceDir, File targetDir, final String prefix) {
+    private static int migrateFiles(File sourceDir, File targetDir, final String prefix) {
         final File[] sourceFiles = FileUtils.listFilesOrEmpty(sourceDir, new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -406,7 +408,7 @@ class ContextImpl extends Context {
             }
         });
 
-        boolean res = true;
+        int res = 0;
         for (File sourceFile : sourceFiles) {
             final File targetFile = new File(targetDir, sourceFile.getName());
             Log.d(TAG, "Migrating " + sourceFile + " to " + targetFile);
@@ -416,9 +418,12 @@ class ContextImpl extends Context {
                 if (!sourceFile.delete()) {
                     throw new IOException("Failed to clean up " + sourceFile);
                 }
+                if (res != -1) {
+                    res++;
+                }
             } catch (IOException e) {
                 Log.w(TAG, "Failed to migrate " + sourceFile + ": " + e);
-                res = false;
+                res = -1;
             }
         }
         return res;
@@ -430,12 +435,17 @@ class ContextImpl extends Context {
             final File source = sourceContext.getSharedPreferencesPath(name);
             final File target = getSharedPreferencesPath(name);
 
-            // Evict any in-memory caches for either location
-            final ArrayMap<File, SharedPreferencesImpl> cache = getSharedPreferencesCacheLocked();
-            cache.remove(source);
-            cache.remove(target);
-
-            return migrateFiles(source.getParentFile(), target.getParentFile(), source.getName());
+            final int res = migrateFiles(source.getParentFile(), target.getParentFile(),
+                    source.getName());
+            if (res > 0) {
+                // We moved at least one file, so evict any in-memory caches for
+                // either location
+                final ArrayMap<File, SharedPreferencesImpl> cache =
+                        getSharedPreferencesCacheLocked();
+                cache.remove(source);
+                cache.remove(target);
+            }
+            return res != -1;
         }
     }
 
@@ -675,7 +685,8 @@ class ContextImpl extends Context {
         synchronized (ContextImpl.class) {
             final File source = sourceContext.getDatabasePath(name);
             final File target = getDatabasePath(name);
-            return migrateFiles(source.getParentFile(), target.getParentFile(), source.getName());
+            return migrateFiles(source.getParentFile(), target.getParentFile(),
+                    source.getName()) != -1;
         }
     }
 
