@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include <limits>
+#include <memory>
 #include <type_traits>
 
 #include <androidfw/ByteBucketArray.h>
@@ -3146,6 +3147,9 @@ struct ResTable::Entry {
     StringPoolRef keyStr;
 };
 
+template <typename T>
+using SharedVector = std::shared_ptr<Vector<T>>;
+
 struct ResTable::Type
 {
     Type(const Header* _header, const Package* _package, size_t count)
@@ -3158,6 +3162,10 @@ struct ResTable::Type
     const uint32_t*                 typeSpecFlags;
     IdmapEntries                    idmapEntries;
     Vector<const ResTable_type*>    configs;
+
+    // The set of configurations that match the current parameters.
+    // This will be swapped with a new set when the parameters change.
+    SharedVector<const ResTable_type*> filteredConfigs;
 };
 
 struct ResTable::Package
@@ -4430,18 +4438,44 @@ ssize_t ResTable::getBagLocked(uint32_t resID, const bag_entry** outBag,
 
 void ResTable::setParameters(const ResTable_config* params)
 {
-    mLock.lock();
+    AutoMutex _lock(mLock);
+    AutoMutex _lock2(mFilteredConfigLock);
+
     if (kDebugTableGetEntry) {
         ALOGI("Setting parameters: %s\n", params->toString().string());
     }
     mParams = *params;
-    for (size_t i=0; i<mPackageGroups.size(); i++) {
+    for (size_t p = 0; p < mPackageGroups.size(); p++) {
+        PackageGroup* packageGroup = mPackageGroups.editItemAt(p);
         if (kDebugTableNoisy) {
-            ALOGI("CLEARING BAGS FOR GROUP %zu!", i);
+            ALOGI("CLEARING BAGS FOR GROUP %zu!", p);
         }
-        mPackageGroups[i]->clearBagCache();
+        packageGroup->clearBagCache();
+
+        for (size_t t = 0; t < packageGroup->types.size(); t++) {
+            TypeList& typeList = packageGroup->types.editItemAt(t);
+            for (size_t ts = 0; ts < typeList.size(); ts++) {
+                Type* type = typeList.editItemAt(ts);
+
+                SharedVector<const ResTable_type*> newFilteredConfigs =
+                        std::make_shared<Vector<const ResTable_type*>>();
+                for (size_t ti = 0; ti < type->configs.size(); ti++) {
+                    ResTable_config config;
+                    config.copyFromDtoH(type->configs[ti]->config);
+
+                    if (config.match(mParams)) {
+                        newFilteredConfigs->add(type->configs[ti]);
+                    }
+                }
+
+                if (kDebugTableNoisy) {
+                    ALOGD("Updating pkg=%zu type=%zu with %zu filtered configs",
+                          p, t, newFilteredConfigs->size());
+                }
+                type->filteredConfigs = newFilteredConfigs;
+            }
+        }
     }
-    mLock.unlock();
 }
 
 void ResTable::getParameters(ResTable_config* params) const
@@ -5974,9 +6008,29 @@ status_t ResTable::getEntry(
             specFlags = -1;
         }
 
-        const size_t numConfigs = typeSpec->configs.size();
+        const Vector<const ResTable_type*>* candidateConfigs = &typeSpec->configs;
+
+        SharedVector<const ResTable_type*> filteredConfigs;
+        if (config && memcmp(&mParams, config, sizeof(mParams)) == 0) {
+            // Grab the lock first so we can safely get the current filtered list.
+            AutoMutex _lock(mFilteredConfigLock);
+
+            // This configuration is equal to the one we have previously cached for,
+            // so use the filtered configs.
+
+            if (typeSpec->filteredConfigs) {
+                // Grab a reference to the shared_ptr so it doesn't get destroyed while
+                // going through this list.
+                filteredConfigs = typeSpec->filteredConfigs;
+
+                // Use this filtered list.
+                candidateConfigs = filteredConfigs.get();
+            }
+        }
+
+        const size_t numConfigs = candidateConfigs->size();
         for (size_t c = 0; c < numConfigs; c++) {
-            const ResTable_type* const thisType = typeSpec->configs[c];
+            const ResTable_type* const thisType = candidateConfigs->itemAt(c);
             if (thisType == NULL) {
                 continue;
             }
