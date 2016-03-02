@@ -169,13 +169,6 @@ final class SectionBreakDocumentsAdapterWrapper extends DocumentsAdapter {
     }
 
     @Override
-    void unhide(SparseArray<String> ids) {
-        // NOTE: We hear about these changes and adjust break position
-        // in our AdapterDataObserver.
-        mDelegate.unhide(ids);
-    }
-
-    @Override
     List<String> getModelIds() {
         return mDelegate.getModelIds();
     }
