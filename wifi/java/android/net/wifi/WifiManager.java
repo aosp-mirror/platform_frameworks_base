@@ -39,9 +39,9 @@ import android.os.WorkSource;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
+import com.android.server.net.NetworkPinner;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -678,11 +678,6 @@ public class WifiManager {
     private static int sThreadRefCount;
     private static HandlerThread sHandlerThread;
 
-    @GuardedBy("sCM")
-    // TODO: Introduce refcounting and make this a per-process static callback, instead of a
-    // per-WifiManager callback.
-    private PinningNetworkCallback mNetworkCallback;
-
     /**
      * Create a new WifiManager instance.
      * Applications will almost always want to use
@@ -956,7 +951,11 @@ public class WifiManager {
     public boolean enableNetwork(int netId, boolean disableOthers) {
         final boolean pin = disableOthers && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
         if (pin) {
-            registerPinningNetworkCallback();
+            NetworkRequest request = new NetworkRequest.Builder()
+                    .clearCapabilities()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .build();
+            NetworkPinner.pin(mContext, request);
         }
 
         boolean success;
@@ -967,7 +966,7 @@ public class WifiManager {
         }
 
         if (pin && !success) {
-            unregisterPinningNetworkCallback();
+            NetworkPinner.unpin();
         }
 
         return success;
@@ -2013,100 +2012,6 @@ public class WifiManager {
     private void validateChannel() {
         if (sAsyncChannel == null) throw new IllegalStateException(
                 "No permission to access and change wifi or a bad initialization");
-    }
-
-    private void initConnectivityManager() {
-        // TODO: what happens if an app calls a WifiManager API before ConnectivityManager is
-        // registered? Can we fix this by starting ConnectivityService before WifiService?
-        if (sCM == null) {
-            sCM = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (sCM == null) {
-                throw new IllegalStateException("Bad luck, ConnectivityService not started.");
-            }
-        }
-    }
-
-    /**
-     * A NetworkCallback that pins the process to the first wifi network to connect.
-     *
-     * We use this to maintain compatibility with pre-M apps that call WifiManager.enableNetwork()
-     * to connect to a Wi-Fi network that has no Internet access, and then assume that they will be
-     * able to use that network because it's the system default.
-     *
-     * In order to maintain compatibility with apps that call setProcessDefaultNetwork themselves,
-     * we try not to set the default network unless they have already done so, and we try not to
-     * clear the default network unless we set it ourselves.
-     *
-     * This should maintain behaviour that's compatible with L, which would pin the whole system to
-     * any wifi network that was created via enableNetwork(..., true) until that network
-     * disconnected.
-     *
-     * Note that while this hack allows network traffic to flow, it is quite limited. For example:
-     *
-     * 1. setProcessDefaultNetwork only affects this process, so:
-     *    - Any subprocesses spawned by this process will not be pinned to Wi-Fi.
-     *    - If this app relies on any other apps on the device also being on Wi-Fi, that won't work
-     *      either, because other apps on the device will not be pinned.
-     * 2. The behaviour of other APIs is not modified. For example:
-     *    - getActiveNetworkInfo will return the system default network, not Wi-Fi.
-     *    - There will be no CONNECTIVITY_ACTION broadcasts about TYPE_WIFI.
-     *    - getProcessDefaultNetwork will not return null, so if any apps are relying on that, they
-     *      will be surprised as well.
-     */
-    private class PinningNetworkCallback extends NetworkCallback {
-        private Network mPinnedNetwork;
-
-        @Override
-        public void onPreCheck(Network network) {
-            if (sCM.getProcessDefaultNetwork() == null && mPinnedNetwork == null) {
-                sCM.setProcessDefaultNetwork(network);
-                mPinnedNetwork = network;
-                Log.d(TAG, "Wifi alternate reality enabled on network " + network);
-            }
-        }
-
-        @Override
-        public void onLost(Network network) {
-            if (network.equals(mPinnedNetwork) && network.equals(sCM.getProcessDefaultNetwork())) {
-                sCM.setProcessDefaultNetwork(null);
-                Log.d(TAG, "Wifi alternate reality disabled on network " + network);
-                mPinnedNetwork = null;
-                unregisterPinningNetworkCallback();
-            }
-        }
-    }
-
-    private void registerPinningNetworkCallback() {
-        initConnectivityManager();
-        synchronized (sCM) {
-            if (mNetworkCallback == null) {
-                // TODO: clear all capabilities.
-                NetworkRequest request = new NetworkRequest.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                        .build();
-                mNetworkCallback = new PinningNetworkCallback();
-                try {
-                    sCM.registerNetworkCallback(request, mNetworkCallback);
-                } catch (SecurityException e) {
-                    Log.d(TAG, "Failed to register network callback", e);
-                }
-            }
-        }
-    }
-
-    private void unregisterPinningNetworkCallback() {
-        initConnectivityManager();
-        synchronized (sCM) {
-            if (mNetworkCallback != null) {
-                try {
-                    sCM.unregisterNetworkCallback(mNetworkCallback);
-                } catch (SecurityException e) {
-                    Log.d(TAG, "Failed to unregister network callback", e);
-                }
-                mNetworkCallback = null;
-            }
-        }
     }
 
     /**
