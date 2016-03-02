@@ -45,6 +45,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -120,8 +121,8 @@ public abstract class MediaBrowserService extends Service {
      * they are done. If more than one of those methods is called, an exception will
      * be thrown.
      *
-     * @see MediaBrowserService#onLoadChildren
-     * @see MediaBrowserService#onLoadItem
+     * @see #onLoadChildren
+     * @see #onLoadItem
      */
     public class Result<T> {
         private Object mDebug;
@@ -367,10 +368,16 @@ public abstract class MediaBrowserService extends Service {
      * {@link Result#detach result.detach} may be called before returning from
      * this function, and then {@link Result#sendResult result.sendResult}
      * called when the loading is complete.
+     * </p><p>
+     * In case the media item does not have any children, call {@link Result#sendResult}
+     * with an empty list which is not {@code null}. If {@code null} is sent that means
+     * the given {@code parentId} is invalid and {@link MediaBrowser.SubscriptionCallback#onError}
+     * will be called.
+     * </p>
      *
      * @param parentId The id of the parent media item whose children are to be
      *            queried.
-     * @param result The Result to send the list of children to, or null if the
+     * @param result The Result to send the list of children to. Send null if the
      *            id is invalid.
      */
     public abstract void onLoadChildren(@NonNull String parentId,
@@ -385,10 +392,16 @@ public abstract class MediaBrowserService extends Service {
      * {@link Result#detach result.detach} may be called before returning from
      * this function, and then {@link Result#sendResult result.sendResult}
      * called when the loading is complete.
+     * </p><p>
+     * In case the media item does not have any children, call {@link Result#sendResult}
+     * with an empty list which is not {@code null}. If {@code null} is sent that means
+     * the given {@code parentId} is invalid and {@link MediaBrowser.SubscriptionCallback#onError}
+     * will be called.
+     * </p>
      *
      * @param parentId The id of the parent media item whose children are to be
      *            queried.
-     * @param result The Result to send the list of children to, or null if the
+     * @param result The Result to send the list of children to. Send null if the
      *            id is invalid.
      * @param options A bundle of service-specific arguments sent from the media
      *            browse. The information returned through the result should be
@@ -416,7 +429,7 @@ public abstract class MediaBrowserService extends Service {
      *
      * @param itemId The id for the specific
      *            {@link android.media.browse.MediaBrowser.MediaItem}.
-     * @param result The Result to send the item to, or null if the id is
+     * @param result The Result to send the item to. Send null if the id is
      *            invalid.
      */
     public void onLoadItem(String itemId, Result<MediaBrowser.MediaItem> result) {
@@ -630,6 +643,9 @@ public abstract class MediaBrowserService extends Service {
 
     private List<MediaBrowser.MediaItem> applyOptions(List<MediaBrowser.MediaItem> list,
             final Bundle options) {
+        if (list == null) {
+            return null;
+        }
         int page = options.getInt(MediaBrowser.EXTRA_PAGE, -1);
         int pageSize = options.getInt(MediaBrowser.EXTRA_PAGE_SIZE, -1);
         if (page == -1 && pageSize == -1) {
@@ -638,7 +654,7 @@ public abstract class MediaBrowserService extends Service {
         int fromIndex = pageSize * (page - 1);
         int toIndex = fromIndex + pageSize;
         if (page < 1 || pageSize < 1 || fromIndex >= list.size()) {
-            return null;
+            return Collections.EMPTY_LIST;
         }
         if (toIndex > list.size()) {
             toIndex = list.size();
