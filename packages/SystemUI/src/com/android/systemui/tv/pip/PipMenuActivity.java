@@ -25,6 +25,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.SystemUI;
+import com.android.systemui.SystemUIApplication;
+import com.android.systemui.recents.Recents;
 
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
@@ -213,5 +216,19 @@ public class PipMenuActivity extends Activity implements PipManager.Listener {
         finish();
         mPipManager.suspendPipResizing(
                 PipManager.SUSPEND_PIP_RESIZE_REASON_WAITING_FOR_MENU_ACTIVITY_FINISH);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        if (mPipManager.isRecentsShown()) {
+            SystemUI[] services = ((SystemUIApplication) getApplication()).getServices();
+            for (int i = services.length - 1; i >= 0; i--) {
+                if (services[i] instanceof Recents) {
+                    ((Recents) services[i]).showRecents(false, null);
+                    break;
+                }
+            }
+        }
     }
 }
