@@ -3014,7 +3014,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private void onUserStopped(int userId) {
         synchronized (mLock) {
-            boolean providersChanged = false;
             boolean crossProfileWidgetsChanged = false;
 
             // Remove widgets that have both host and provider in the user.
@@ -3050,16 +3049,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
 
-            // Remove the providers and notify hosts in other profiles.
-            final int providerCount = mProviders.size();
-            for (int i = providerCount - 1; i >= 0; i--) {
-                Provider provider = mProviders.get(i);
-                if (provider.getUserId() == userId) {
-                    crossProfileWidgetsChanged |= !provider.widgets.isEmpty();
-                    providersChanged = true;
-                    deleteProviderLocked(provider);
-                }
-            }
+            // Leave the providers present as hosts will show the widgets
+            // masked while the user is stopped.
 
             // Remove grants for this user.
             final int grantCount = mPackagesWithBindWidgetPermission.size();
@@ -3080,11 +3071,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final int nextIdIndex = mNextAppWidgetIds.indexOfKey(userId);
             if (nextIdIndex >= 0) {
                 mNextAppWidgetIds.removeAt(nextIdIndex);
-            }
-
-            // Announce removed provider changes to all hosts in the group.
-            if (providersChanged) {
-                scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
             }
 
             // Save state if removing a profile changed the group state.
