@@ -1128,10 +1128,15 @@ public class SettingsProvider extends ContentProvider {
 
     private PackageInfo getCallingPackageInfoOrThrow(int userId) {
         try {
-            return mPackageManager.getPackageInfo(getCallingPackage(), 0, userId);
+            PackageInfo packageInfo = mPackageManager.getPackageInfo(
+                    getCallingPackage(), 0, userId);
+            if (packageInfo != null) {
+                return packageInfo;
+            }
         } catch (RemoteException e) {
-            throw new IllegalStateException("Calling package doesn't exist");
+            /* ignore */
         }
+        throw new IllegalStateException("Calling package doesn't exist");
     }
 
     private int getGroupParentLocked(int userId) {
