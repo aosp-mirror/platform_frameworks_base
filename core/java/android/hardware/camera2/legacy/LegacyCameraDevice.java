@@ -615,14 +615,16 @@ public class LegacyCameraDevice implements AutoCloseable {
         return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceDataspace(surface));
     }
 
-    static void configureSurface(Surface surface, int width, int height,
-                                 int pixelFormat) throws BufferQueueAbandonedException {
+    static void connectSurface(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
-        checkArgumentPositive(width, "width must be positive.");
-        checkArgumentPositive(height, "height must be positive.");
 
-        LegacyExceptionUtils.throwOnError(nativeConfigureSurface(surface, width, height,
-                pixelFormat));
+        LegacyExceptionUtils.throwOnError(nativeConnectSurface(surface));
+    }
+
+    static void disconnectSurface(Surface surface) throws BufferQueueAbandonedException {
+        if (surface == null) return;
+
+        LegacyExceptionUtils.throwOnError(nativeDisconnectSurface(surface));
     }
 
     static void produceFrame(Surface surface, byte[] pixelBuffer, int width,
@@ -717,8 +719,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static native int nativeDetectSurfaceDimens(Surface surface,
             /*out*/int[/*2*/] dimens);
 
-    private static native int nativeConfigureSurface(Surface surface, int width, int height,
-                                                        int pixelFormat);
+    private static native int nativeConnectSurface(Surface surface);
 
     private static native int nativeProduceFrame(Surface surface, byte[] pixelBuffer, int width,
                                                     int height, int pixelFormat);
@@ -740,6 +741,8 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static native int nativeDetectSurfaceUsageFlags(Surface surface);
 
     private static native int nativeSetScalingMode(Surface surface, int scalingMode);
+
+    private static native int nativeDisconnectSurface(Surface surface);
 
     static native int nativeGetJpegFooterSize();
 }
