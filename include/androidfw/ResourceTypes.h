@@ -1896,6 +1896,13 @@ private:
 
     mutable Mutex               mLock;
 
+    // Mutex that controls access to the list of pre-filtered configurations
+    // to check when looking up entries.
+    // When iterating over a bag, the mLock mutex is locked. While mLock is locked,
+    // we do resource lookups.
+    // Mutex is not reentrant, so we must use a different lock than mLock.
+    mutable Mutex               mFilteredConfigLock;
+
     status_t                    mError;
 
     ResTable_config             mParams;
