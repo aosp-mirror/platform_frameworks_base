@@ -383,13 +383,7 @@ public abstract class AccessibilityService extends Service {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SHOW_MODE_AUTO, SHOW_MODE_HIDDEN})
     public @interface SoftKeyboardShowMode {};
-    /**
-     * @hide
-     */
     public static final int SHOW_MODE_AUTO = 0;
-    /**
-     * @hide
-     */
     public static final int SHOW_MODE_HIDDEN = 1;
 
     private int mConnectionId;
@@ -1137,7 +1131,7 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
-         * Removes all instances of the specified change listener from teh list of magnification
+         * Removes all instances of the specified change listener from the list of magnification
          * change listeners.
          *
          * @param listener the listener to remove, must be non-null
@@ -1216,14 +1210,11 @@ public abstract class AccessibilityService extends Service {
 
         /**
          * Returns the show mode of the soft keyboard. The default show mode is
-         * {@code Settings.Secure.SHOW_MODE_AUTO}, where the soft keyboard is shown when a text
-         * input field is focused. An AccessibilityService can also request the show mode
-         * {@code Settings.Secure.SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
+         * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
+         * focused. An AccessibilityService can also request the show mode
+         * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
          *
          * @return the current soft keyboard show mode
-         *
-         * @see Settings#Secure#SHOW_MODE_AUTO
-         * @see Settings#Secure#SHOW_MODE_HIDDEN
          */
         @SoftKeyboardShowMode
         public int getShowMode() {
@@ -1239,9 +1230,9 @@ public abstract class AccessibilityService extends Service {
 
         /**
          * Sets the soft keyboard show mode. The default show mode is
-         * {@code Settings.Secure.SHOW_MODE_AUTO}, where the soft keyboard is shown when a text
-         * input field is focused. An AccessibilityService can also request the show mode
-         * {@code Settings.Secure.SHOW_MODE_HIDDEN}, where the soft keyboard is never shown. The
+         * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
+         * focused. An AccessibilityService can also request the show mode
+         * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown. The
          * The lastto this method will be honored, regardless of any previous calls (including those
          * made by other AccessibilityServices).
          * <p>
@@ -1251,9 +1242,6 @@ public abstract class AccessibilityService extends Service {
          *
          * @param showMode the new show mode for the soft keyboard
          * @return {@code true} on success
-         *
-         * @see Settings#Secure#SHOW_MODE_AUTO
-         * @see Settings#Secure#SHOW_MODE_HIDDEN
          */
         public boolean setShowMode(@SoftKeyboardShowMode int showMode) {
            final IAccessibilityServiceConnection connection =
@@ -1263,9 +1251,13 @@ public abstract class AccessibilityService extends Service {
                try {
                    return connection.setSoftKeyboardShowMode(showMode);
                } catch (RemoteException re) {
-                   Log.w(LOG_TAG, "Falied to set soft keyboard behavior", re);
+                   Log.w(LOG_TAG, "Failed to set soft keyboard behavior", re);
+                   re.rethrowFromSystemServer();
                }
+           } else {
+               throw new RuntimeException("AccessibilityServiceConnection is null");
            }
+
            return false;
         }
 
@@ -1275,9 +1267,9 @@ public abstract class AccessibilityService extends Service {
         public interface OnShowModeChangedListener {
            /**
             * Called when the soft keyboard behavior changes. The default show mode is
-            * {@code Settings.Secure.SHOW_MODE_AUTO}, where the soft keyboard is shown when a text
-            * input field is focused. An AccessibilityService can also request the show mode
-            * {@code Settings.Secure.SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
+            * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
+            * focused. An AccessibilityService can also request the show mode
+            * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
             *
             * @param controller the soft keyboard controller
             * @param showMode the current soft keyboard show mode
