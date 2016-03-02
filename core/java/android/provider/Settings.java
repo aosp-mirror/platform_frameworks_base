@@ -4522,6 +4522,13 @@ public final class Settings {
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
+         * Prefix for category name that marks whether a suggested action from that category was
+         * completed.
+         * @hide
+         */
+        public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
+
+        /**
          * List of input methods that are currently enabled.  This is a string
          * containing the IDs of all enabled input methods, each ID separated
          * by ':'.
