@@ -849,7 +849,7 @@ public class AudioService extends IAudioService.Stub {
             AudioSystem.setForceUse(AudioSystem.FOR_DOCK,
                     mDockAudioMediaEnabled ?
                             AudioSystem.FORCE_ANALOG_DOCK : AudioSystem.FORCE_NONE);
-            readEncodedSurroundMode(mContentResolver);
+            sendEncodedSurroundMode(mContentResolver);
         }
         if (mHdmiManager != null) {
             synchronized (mHdmiManager) {
@@ -1023,7 +1023,7 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.setMasterMono(masterMono);
     }
 
-    private void readEncodedSurroundMode(ContentResolver cr)
+    private void sendEncodedSurroundMode(ContentResolver cr)
     {
         int encodedSurroundMode = Settings.Global.getInt(
                 cr, Settings.Global.ENCODED_SURROUND_OUTPUT,
@@ -1102,7 +1102,7 @@ public class AudioService extends IAudioService.Stub {
 
             updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
-            readEncodedSurroundMode(cr);
+            sendEncodedSurroundMode(cr);
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -4642,6 +4642,8 @@ public class AudioService extends IAudioService.Stub {
 
     private class SettingsObserver extends ContentObserver {
 
+        private int mEncodedSurroundMode;
+
         SettingsObserver() {
             super(new Handler());
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
@@ -4650,6 +4652,12 @@ public class AudioService extends IAudioService.Stub {
                 Settings.Global.DOCK_AUDIO_MEDIA_ENABLED), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.MASTER_MONO), false, this);
+
+            mEncodedSurroundMode = Settings.Global.getInt(
+                    mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT,
+                    Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
+            mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
         }
 
         @Override
@@ -4669,7 +4677,33 @@ public class AudioService extends IAudioService.Stub {
                 }
                 readDockAudioSettings(mContentResolver);
                 updateMasterMono(mContentResolver);
-                readEncodedSurroundMode(mContentResolver);
+                updateEncodedSurroundOutput();
+            }
+        }
+
+        private void updateEncodedSurroundOutput() {
+            int newSurroundMode = Settings.Global.getInt(
+                mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT,
+                Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
+            // Did it change?
+            if (mEncodedSurroundMode != newSurroundMode) {
+                // Send to AudioPolicyManager
+                sendEncodedSurroundMode(newSurroundMode);
+                synchronized(mConnectedDevices) {
+                    // Is HDMI connected?
+                    String key = makeDeviceListKey(AudioSystem.DEVICE_OUT_HDMI, "");
+                    DeviceListSpec deviceSpec = mConnectedDevices.get(key);
+                    if (deviceSpec != null) {
+                        // Toggle HDMI to retrigger broadcast with proper formats.
+                        setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
+                                AudioSystem.DEVICE_STATE_UNAVAILABLE, "", "",
+                                "android"); // disconnect
+                        setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_HDMI,
+                                AudioSystem.DEVICE_STATE_AVAILABLE, "", "",
+                                "android"); // reconnect
+                    }
+                }
+                mEncodedSurroundMode = newSurroundMode;
             }
         }
     }
