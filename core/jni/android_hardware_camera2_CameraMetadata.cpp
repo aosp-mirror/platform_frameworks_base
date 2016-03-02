@@ -33,9 +33,9 @@
 #include "core_jni_helpers.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
+#include <android/hardware/ICameraService.h>
 #include <binder/IServiceManager.h>
 #include <camera/CameraMetadata.h>
-#include <camera/ICameraService.h>
 #include <camera/VendorTagDescriptor.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
@@ -906,32 +906,36 @@ static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag) {
 
 static jint CameraMetadata_setupGlobalVendorTagDescriptor(JNIEnv *env, jobject thiz) {
     const String16 NAME("media.camera");
-    sp<ICameraService> cameraService;
+    sp<hardware::ICameraService> cameraService;
     status_t err = getService(NAME, /*out*/&cameraService);
 
     if (err != OK) {
         ALOGE("%s: Failed to get camera service, received error %s (%d)", __FUNCTION__,
                 strerror(-err), err);
-        return err;
+        return hardware::ICameraService::ERROR_DISCONNECTED;
     }
 
-    sp<VendorTagDescriptor> desc;
-    err = cameraService->getCameraVendorTagDescriptor(/*out*/desc);
+    sp<VendorTagDescriptor> desc = new VendorTagDescriptor();
+    binder::Status res = cameraService->getCameraVendorTagDescriptor(/*out*/desc.get());
 
-    if (err == -EOPNOTSUPP) {
+    if (res.serviceSpecificErrorCode() == hardware::ICameraService::ERROR_DEPRECATED_HAL) {
         ALOGW("%s: Camera HAL too old; does not support vendor tags", __FUNCTION__);
         VendorTagDescriptor::clearGlobalVendorTagDescriptor();
 
         return OK;
-    } else if (err != OK) {
-        ALOGE("%s: Failed to setup vendor tag descriptors, received error %s (%d)",
-                __FUNCTION__, strerror(-err), err);
-        return err;
+    } else if (!res.isOk()) {
+        ALOGE("%s: Failed to setup vendor tag descriptors: %s: %s",
+                __FUNCTION__, res.serviceSpecificErrorCode(),
+                res.toString8().string());
+        return res.serviceSpecificErrorCode();
     }
 
     err = VendorTagDescriptor::setAsGlobalVendorTagDescriptor(desc);
 
-    return err;
+    if (err != OK) {
+        return hardware::ICameraService::ERROR_INVALID_OPERATION;
+    }
+    return OK;
 }
 
 } // extern "C"

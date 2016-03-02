@@ -21,7 +21,7 @@ import android.hardware.Camera;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraDeviceImpl;
-import android.hardware.camera2.utils.LongParcelable;
+import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.utils.SizeAreaComparator;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.os.ConditionVariable;
@@ -1008,21 +1008,19 @@ public class RequestThreadManager {
      *
      * @param requests the burst of requests to add to the queue.
      * @param repeating true if the burst is repeating.
-     * @param frameNumber an output argument that contains either the frame number of the last frame
-     *                    that will be returned for this request, or the frame number of the last
-     *                    frame that will be returned for the current repeating request if this
-     *                    burst is set to be repeating.
-     * @return the request id.
+     * @return the submission info, including the new request id, and the last frame number, which
+     *   contains either the frame number of the last frame that will be returned for this request,
+     *   or the frame number of the last frame that will be returned for the current repeating
+     *   request if this burst is set to be repeating.
      */
-    public int submitCaptureRequests(List<CaptureRequest> requests, boolean repeating,
-            /*out*/LongParcelable frameNumber) {
+    public SubmitInfo submitCaptureRequests(CaptureRequest[] requests, boolean repeating) {
         Handler handler = mRequestThread.waitAndGetHandler();
-        int ret;
+        SubmitInfo info;
         synchronized (mIdleLock) {
-            ret = mRequestQueue.submit(requests, repeating, frameNumber);
+            info = mRequestQueue.submit(requests, repeating);
             handler.sendEmptyMessage(MSG_SUBMIT_CAPTURE_REQUEST);
         }
-        return ret;
+        return info;
     }
 
     /**
