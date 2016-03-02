@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"스크린샷을 찍을 수 없습니다."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"버그 신고 <xliff:g id="ID">#%d</xliff:g> 세부정보"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"파일 이름"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"제목"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"자세한 설명"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"버그 제목"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"버그 요약"</string>
+    <string name="save" msgid="4781509040564835759">"저장"</string>
 </resources>

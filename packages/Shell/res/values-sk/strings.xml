@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Snímku obrazovky sa nepodarilo zaznamenať."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Podrobnosti hlásenia chyby <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Názov súboru"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Názov"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Podrobný popis"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Názov chyby"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Súhrn chyby"</string>
+    <string name="save" msgid="4781509040564835759">"Uložiť"</string>
 </resources>

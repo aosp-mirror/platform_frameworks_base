@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Nepavyko padaryti ekrano kopijos."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Išsami informacija apie pranešimą apie riktą (<xliff:g id="ID">#%d</xliff:g>)"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Failo pavadinimas"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Pavadinimas"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Išsamus aprašas"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Rikto pavadinimas"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Rikto suvestinė"</string>
+    <string name="save" msgid="4781509040564835759">"Išsaugoti"</string>
 </resources>

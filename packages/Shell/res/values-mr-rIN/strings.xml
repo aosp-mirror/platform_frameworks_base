@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रीनशॉट घेणे शक्य झाले नाही."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"दोष अहवाल <xliff:g id="ID">#%d</xliff:g> तपशील"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फाईलनाव"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"शीर्षक"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"तपशीलवार वर्णन"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"दोष शीर्षक"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"दोष सारांश"</string>
+    <string name="save" msgid="4781509040564835759">"जतन करा"</string>
 </resources>
