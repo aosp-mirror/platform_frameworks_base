@@ -34,6 +34,8 @@ import android.view.accessibility.AccessibilityEvent;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import java.util.HashMap;
+
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
     private static final boolean DEBUG = false;
@@ -70,6 +72,7 @@ public class SwipeHelper implements Gefingerpoken {
     private float mInitialTouchPos;
     private float mPerpendicularInitialTouchPos;
     private boolean mDragging;
+    private boolean mSnappingChild;
     private View mCurrView;
     private boolean mCanCurrViewBeDimissed;
     private float mDensityScale;
@@ -84,6 +87,8 @@ public class SwipeHelper implements Gefingerpoken {
     private int mFalsingThreshold;
     private boolean mTouchAboveFalsingThreshold;
     private boolean mDisableHwLayers;
+
+    private HashMap<View, Animator> mDismissPendingMap = new HashMap<>();
 
     public SwipeHelper(int swipeDirection, Callback callback, Context context) {
         mCallback = callback;
@@ -252,6 +257,7 @@ public class SwipeHelper implements Gefingerpoken {
             case MotionEvent.ACTION_DOWN:
                 mTouchAboveFalsingThreshold = false;
                 mDragging = false;
+                mSnappingChild = false;
                 mLongPressSent = false;
                 mVelocityTracker.clear();
                 mCurrView = mCallback.getChildAtPosition(ev);
@@ -391,9 +397,18 @@ public class SwipeHelper implements Gefingerpoken {
             anim.setStartDelay(delay);
         }
         anim.addListener(new AnimatorListenerAdapter() {
+            private boolean mCancelled;
+
+            public void onAnimationCancel(Animator animation) {
+                mCancelled = true;
+            }
+
             public void onAnimationEnd(Animator animation) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
-                mCallback.onChildDismissed(animView);
+                mDismissPendingMap.remove(animView);
+                if (!mCancelled) {
+                    mCallback.onChildDismissed(animView);
+                }
                 if (endAction != null) {
                     endAction.run();
                 }
@@ -402,7 +417,9 @@ public class SwipeHelper implements Gefingerpoken {
                 }
             }
         });
+
         prepareDismissAnimation(animView, anim);
+        mDismissPendingMap.put(animView, anim);
         anim.start();
     }
 
@@ -429,11 +446,13 @@ public class SwipeHelper implements Gefingerpoken {
         anim.setDuration(duration);
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animator) {
+                mSnappingChild = false;
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
                 mCallback.onChildSnappedBack(animView, targetLeft);
             }
         });
         prepareSnapBackAnimation(animView, anim);
+        mSnappingChild = true;
         anim.start();
     }
 
@@ -464,6 +483,33 @@ public class SwipeHelper implements Gefingerpoken {
      */
     public void onTranslationUpdate(View animView, float value, boolean canBeDismissed) {
         updateSwipeProgressFromOffset(animView, canBeDismissed);
+    }
+
+    private void snapChildInstantly(final View view) {
+        final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
+        setTranslation(view, 0);
+        updateSwipeProgressFromOffset(view, canAnimViewBeDismissed);
+    }
+
+    public void snapChildIfNeeded(final View view, boolean animate) {
+        if ((mDragging && mCurrView == view) || mSnappingChild) {
+            return;
+        }
+        boolean needToSnap = false;
+        Animator dismissPendingAnim = mDismissPendingMap.get(view);
+        if (dismissPendingAnim != null) {
+            needToSnap = true;
+            dismissPendingAnim.cancel();
+        } else if (getTranslation(view) != 0) {
+            needToSnap = true;
+        }
+        if (needToSnap) {
+            if (animate) {
+                snapChild(view, 0 /* targetLeft */, 0.0f /* velocity */);
+            } else {
+                snapChildInstantly(view);
+            }
+        }
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
@@ -532,7 +578,9 @@ public class SwipeHelper implements Gefingerpoken {
                         mCallback.onDragCancelled(mCurrView);
                         snapChild(mCurrView, 0 /* leftTarget */, velocity);
                     }
+                    mCurrView = null;
                 }
+                mDragging = false;
                 break;
         }
         return true;

@@ -2160,6 +2160,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         // swipe-dismissable)
         bindVetoButtonClickListener(entry.row, notification);
 
+        if (!notification.isClearable()) {
+            // The user may have performed a dismiss action on the notification, since it's
+            // not clearable we should snap it back.
+            mStackScroller.snapViewIfNeeded(entry.row);
+        }
+
         if (DEBUG) {
             // Is this for you?
             boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);

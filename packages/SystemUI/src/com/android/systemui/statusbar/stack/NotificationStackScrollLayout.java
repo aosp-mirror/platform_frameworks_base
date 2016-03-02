@@ -943,6 +943,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         mSwipeHelper.dismissChild(child, 0, endRunnable, delay, true, duration);
     }
 
+    public void snapViewIfNeeded(View child) {
+        boolean animate = mIsExpanded || isPinnedHeadsUp(child);
+        mSwipeHelper.snapChildIfNeeded(child, animate);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
