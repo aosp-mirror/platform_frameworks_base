@@ -620,6 +620,7 @@ public final class PowerManager {
         try {
             mService.userActivity(when, event, flags);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -671,6 +672,7 @@ public final class PowerManager {
         try {
             mService.goToSleep(time, reason, flags);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -697,6 +699,7 @@ public final class PowerManager {
         try {
             mService.wakeUp(time, "wakeUp", mContext.getOpPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -707,6 +710,7 @@ public final class PowerManager {
         try {
             mService.wakeUp(time, reason, mContext.getOpPackageName());
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -735,6 +739,7 @@ public final class PowerManager {
         try {
             mService.nap(time);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -757,6 +762,7 @@ public final class PowerManager {
         try {
             mService.boostScreenBrightness(time);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -772,7 +778,7 @@ public final class PowerManager {
         try {
             return mService.isScreenBrightnessBoosted();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -790,6 +796,7 @@ public final class PowerManager {
         try {
             mService.setTemporaryScreenBrightnessSettingOverride(brightness);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -803,7 +810,7 @@ public final class PowerManager {
         try {
             return mService.isWakeLockLevelSupported(level);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -867,7 +874,7 @@ public final class PowerManager {
         try {
             return mService.isInteractive();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -884,6 +891,7 @@ public final class PowerManager {
         try {
             mService.reboot(false, reason, true);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -899,7 +907,7 @@ public final class PowerManager {
         try {
             return mService.isPowerSaveMode();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -916,7 +924,7 @@ public final class PowerManager {
         try {
             return mService.setPowerSaveMode(mode);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -936,7 +944,7 @@ public final class PowerManager {
         try {
             return mService.isDeviceIdleMode();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -956,7 +964,7 @@ public final class PowerManager {
         try {
             return mService.isLightDeviceIdleMode();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -975,7 +983,7 @@ public final class PowerManager {
         try {
             return mIDeviceIdleController.isPowerSaveWhitelistApp(packageName);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -992,6 +1000,7 @@ public final class PowerManager {
         try {
             mService.shutdown(confirm, reason, wait);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1118,6 +1127,7 @@ public final class PowerManager {
                     try {
                         mService.releaseWakeLock(mToken, 0);
                     } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }
@@ -1186,6 +1196,7 @@ public final class PowerManager {
                     mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
                             mHistoryTag);
                 } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
                 }
                 mHeld = true;
             }
@@ -1224,6 +1235,7 @@ public final class PowerManager {
                         try {
                             mService.releaseWakeLock(mToken, flags);
                         } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
                         }
                         mHeld = false;
                     }
@@ -1280,6 +1292,7 @@ public final class PowerManager {
                     try {
                         mService.updateWakeLockWorkSource(mToken, mWorkSource, mHistoryTag);
                     } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
                     }
                 }
             }

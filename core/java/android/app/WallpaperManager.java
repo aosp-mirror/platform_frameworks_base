@@ -293,7 +293,7 @@ public class WallpaperManager {
                             return null;
                         }
                     } catch (RemoteException e) {
-                        // Ignore
+                        throw e.rethrowFromSystemServer();
                     }
                 }
                 if (mWallpaper != null) {
@@ -349,7 +349,7 @@ public class WallpaperManager {
                     }
                 }
             } catch (RemoteException e) {
-                // Ignore
+                throw e.rethrowFromSystemServer();
             }
             return null;
         }
@@ -691,7 +691,7 @@ public class WallpaperManager {
                 Bundle outParams = new Bundle();
                 return sGlobals.mService.getWallpaper(null, which, outParams, userId);
             } catch (RemoteException e) {
-                return null;
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -720,7 +720,7 @@ public class WallpaperManager {
                 return sGlobals.mService.getWallpaperInfo();
             }
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -844,7 +844,7 @@ public class WallpaperManager {
                 }
             }
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
@@ -950,7 +950,7 @@ public class WallpaperManager {
                 }
             }
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
     }
@@ -1067,7 +1067,7 @@ public class WallpaperManager {
                 }
             }
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
 
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
@@ -1088,7 +1088,7 @@ public class WallpaperManager {
             String name = "res:" + resources.getResourceName(resid);
             return sGlobals.mService.hasNamedWallpaper(name);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1114,8 +1114,7 @@ public class WallpaperManager {
         try {
             return sGlobals.mService.getWidthHint();
         } catch (RemoteException e) {
-            // Shouldn't happen!
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1141,8 +1140,7 @@ public class WallpaperManager {
         try {
             return sGlobals.mService.getHeightHint();
         } catch (RemoteException e) {
-            // Shouldn't happen!
-            return 0;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1203,7 +1201,7 @@ public class WallpaperManager {
                         mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1224,7 +1222,7 @@ public class WallpaperManager {
                 sGlobals.mService.setDisplayPadding(padding, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1245,7 +1243,7 @@ public class WallpaperManager {
                     windowToken, x, y);
             //Log.v(TAG, "...app returning after sending display offset!");
         } catch (RemoteException e) {
-            // Ignore.
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1274,7 +1272,7 @@ public class WallpaperManager {
         try {
             sGlobals.mService.clearWallpaper(mContext.getOpPackageName(), which, userId);
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1296,9 +1294,8 @@ public class WallpaperManager {
             sGlobals.mService.setWallpaperComponentChecked(name, mContext.getOpPackageName());
             return true;
         } catch (RemoteException e) {
-            // Ignore
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -1321,7 +1318,7 @@ public class WallpaperManager {
                     windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
-            // Ignore.
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1359,7 +1356,7 @@ public class WallpaperManager {
                     windowToken, action, x, y, z, extras, false);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
-            // Ignore.
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1375,7 +1372,7 @@ public class WallpaperManager {
             try {
                 return sGlobals.mService.isWallpaperSupported(mContext.getOpPackageName());
             } catch (RemoteException e) {
-                // Ignore
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1395,7 +1392,7 @@ public class WallpaperManager {
             try {
                 return sGlobals.mService.isWallpaperSettingAllowed(mContext.getOpPackageName());
             } catch (RemoteException e) {
-                // Ignore
+                throw e.rethrowFromSystemServer();
             }
         }
         return false;
@@ -1416,7 +1413,7 @@ public class WallpaperManager {
             WindowManagerGlobal.getWindowSession().setWallpaperPosition(
                     windowToken, -1, -1, -1, -1);
         } catch (RemoteException e) {
-            // Ignore.
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1497,9 +1494,8 @@ public class WallpaperManager {
         try {
             return sGlobals.mService.setLockWallpaperCallback(callback);
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to contact wallpaper service");
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     // Private completion callback for setWallpaper() synchronization

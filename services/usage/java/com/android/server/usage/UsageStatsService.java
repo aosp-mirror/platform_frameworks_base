@@ -437,7 +437,7 @@ public class UsageStatsService extends SystemService implements
                 return false;
             }
         } catch (RemoteException re) {
-            return false;
+            throw re.rethrowFromSystemServer();
         }
 
         final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -805,6 +805,7 @@ public class UsageStatsService extends SystemService implements
                 return false;
             }
         } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
         }
 
         if (isActiveDeviceAdmin(packageName, userId)) {
@@ -849,7 +850,7 @@ public class UsageStatsService extends SystemService implements
             }
             apps = slice.getList();
         } catch (RemoteException e) {
-            return new int[0];
+            throw e.rethrowFromSystemServer();
         }
 
         // State of each uid.  Key is the uid.  Value lower 16 bits is the number of apps
@@ -1258,7 +1259,7 @@ public class UsageStatsService extends SystemService implements
                 userId = ActivityManagerNative.getDefault().handleIncomingUser(Binder.getCallingPid(),
                         Binder.getCallingUid(), userId, false, true, "isAppInactive", null);
             } catch (RemoteException re) {
-                return false;
+                throw re.rethrowFromSystemServer();
             }
             final long token = Binder.clearCallingIdentity();
             try {
@@ -1277,7 +1278,7 @@ public class UsageStatsService extends SystemService implements
                         Binder.getCallingPid(), callingUid, userId, false, true,
                         "setAppIdle", null);
             } catch (RemoteException re) {
-                return;
+                throw re.rethrowFromSystemServer();
             }
             getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
                     "No permission to change app idle state");

@@ -123,8 +123,7 @@ public class StatusBarManager {
                 svc.disable(what, mToken, mContext.getPackageName());
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -141,8 +140,7 @@ public class StatusBarManager {
                 svc.disable2(what, mToken, mContext.getPackageName());
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -156,8 +154,7 @@ public class StatusBarManager {
                 svc.expandNotificationsPanel();
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
     
@@ -171,8 +168,7 @@ public class StatusBarManager {
                 svc.collapsePanels();
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -193,8 +189,7 @@ public class StatusBarManager {
                 svc.expandSettingsPanel(subPanel);
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -206,8 +201,7 @@ public class StatusBarManager {
                     contentDescription);
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -218,8 +212,7 @@ public class StatusBarManager {
                 svc.removeIcon(slot);
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
@@ -230,8 +223,7 @@ public class StatusBarManager {
                 svc.setIconVisibility(slot, visible);
             }
         } catch (RemoteException ex) {
-            // system process is dead anyway.
-            throw new RuntimeException(ex);
+            throw ex.rethrowFromSystemServer();
         }
     }
 
