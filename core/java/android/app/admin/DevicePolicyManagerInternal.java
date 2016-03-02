@@ -69,4 +69,13 @@ public abstract class DevicePolicyManagerInternal {
      * @return true if the uid is an active admin with the given policy.
      */
     public abstract boolean isActiveAdminWithPolicy(int uid, int reqPolicy);
+
+    /**
+     * Checks if a given package has a device or a profile owner for the given user
+     *
+     * @param packageName The package to check
+     * @param userId the userId to check for.
+     * @return true if package has a device or profile owner, false otherwise.
+     */
+    public abstract boolean hasDeviceOwnerOrProfileOwner(String packageName, int userId);
 }

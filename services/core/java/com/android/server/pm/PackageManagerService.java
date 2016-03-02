@@ -103,6 +103,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
@@ -15110,8 +15111,15 @@ public class PackageManagerService extends IPackageManager.Stub {
             final IPackageDataObserver observer, final int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CLEAR_APP_USER_DATA, null);
+
         enforceCrossUserPermission(Binder.getCallingUid(), userId,
                 true /* requireFullPermission */, false /* checkShell */, "clear application data");
+
+        final DevicePolicyManagerInternal dpmi = LocalServices
+                .getService(DevicePolicyManagerInternal.class);
+        if (dpmi != null && dpmi.hasDeviceOwnerOrProfileOwner(packageName, userId)) {
+            throw new SecurityException("Cannot clear data for a device owner or a profile owner");
+        }
         // Queue up an async operation since the package deletion may take a little while.
         mHandler.post(new Runnable() {
             public void run() {
@@ -15123,8 +15131,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 clearExternalStorageDataSync(packageName, userId, true);
                 if (succeeded) {
                     // invoke DeviceStorageMonitor's update method to clear any notifications
-                    DeviceStorageMonitorInternal
-                            dsm = LocalServices.getService(DeviceStorageMonitorInternal.class);
+                    DeviceStorageMonitorInternal dsm = LocalServices
+                            .getService(DeviceStorageMonitorInternal.class);
                     if (dsm != null) {
                         dsm.checkMemory();
                     }

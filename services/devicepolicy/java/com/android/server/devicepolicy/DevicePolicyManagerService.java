@@ -32,7 +32,6 @@ import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.AccountManager;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -308,7 +307,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Whether or not device admin feature is supported. If it isn't return defaults for all
      * public methods.
      */
-    private boolean mHasFeature;
+    boolean mHasFeature;
 
     private final SecurityLogMonitor mSecurityLogMonitor;
 
@@ -7809,6 +7808,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 OnCrossProfileWidgetProvidersChangeListener listener = listeners.get(i);
                 listener.onCrossProfileWidgetProvidersChanged(userId, packages);
             }
+        }
+
+        @Override
+        public boolean hasDeviceOwnerOrProfileOwner(String packageName, int userId) {
+            if (!mHasFeature || packageName == null) {
+                return false;
+            }
+            if (userId < 0) {
+                throw new UnsupportedOperationException("userId should be >= 0");
+            }
+            synchronized (DevicePolicyManagerService.this) {
+                if (packageName.equals(mOwners.getProfileOwnerPackage(userId))) {
+                    return true;
+                }
+                if (userId == mOwners.getDeviceOwnerUserId()
+                        && packageName.equals(mOwners.getDeviceOwnerPackageName())) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
