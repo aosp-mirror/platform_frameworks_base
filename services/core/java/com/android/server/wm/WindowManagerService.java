@@ -8777,10 +8777,10 @@ public class WindowManagerService extends IWindowManager.Stub
         i -= lastBelow;
         if (i != numRemoved) {
             displayContent.layoutNeeded = true;
-            Slog.w(TAG_WM, "On display=" + displayContent.getDisplayId() + " Rebuild removed " +
-                    numRemoved + " windows but added " + i,
-                    new RuntimeException("here").fillInStackTrace());
-            for (i=0; i<numRemoved; i++) {
+            Slog.w(TAG_WM, "On display=" + displayContent.getDisplayId() + " Rebuild removed "
+                    + numRemoved + " windows but added " + i + " rebuildAppWindowListLocked() "
+                    + " callers=" + Debug.getCallers(10));
+            for (i = 0; i < numRemoved; i++) {
                 WindowState ws = mRebuildTmp[i];
                 if (ws.mRebuilding) {
                     StringWriter sw = new StringWriter();
