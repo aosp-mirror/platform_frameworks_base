@@ -469,7 +469,7 @@ public final class MediaSession {
      * <li>{@link Rating#RATING_THUMB_UP_DOWN}</li>
      * </ul>
      */
-    public void setRatingType(int type) {
+    public void setRatingType(@Rating.Style int type) {
         try {
             mBinder.setRatingType(type);
         } catch (RemoteException e) {
