@@ -17,7 +17,6 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.Shared.DEBUG;
-import static com.android.documentsui.Shared.TAG;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -61,6 +60,8 @@ import java.util.concurrent.TimeUnit;
 public class RootsCache {
     public static final Uri sNotificationUri = Uri.parse(
             "content://com.android.documentsui.roots/");
+
+    private static final String TAG = "RootsCache";
 
     private final Context mContext;
     private final ContentObserver mObserver;
@@ -417,25 +418,56 @@ public class RootsCache {
     static List<RootInfo> getMatchingRoots(Collection<RootInfo> roots, State state) {
         final List<RootInfo> matching = new ArrayList<>();
         for (RootInfo root : roots) {
-            // Exclude read-only devices when creating
-            if (state.action == State.ACTION_CREATE && !root.supportsCreate()) continue;
+
+            if (DEBUG) Log.d(TAG, "Evaluating " + root);
+
+            if (state.action == State.ACTION_CREATE && !root.supportsCreate()) {
+                if (DEBUG) Log.d(TAG, "Excluding read-only root because: ACTION_CREATE.");
+                continue;
+            }
+
             if (state.action == State.ACTION_PICK_COPY_DESTINATION
-                    && !root.supportsCreate()) continue;
-            // Exclude roots that don't support directory picking
-            if (state.action == State.ACTION_OPEN_TREE && !root.supportsChildren()) continue;
-            // Exclude advanced devices when not requested
-            if (!state.showAdvanced && root.isAdvanced()) continue;
+                    && !root.supportsCreate()) {
+                if (DEBUG) Log.d(
+                        TAG, "Excluding read-only root because: ACTION_PICK_COPY_DESTINATION.");
+                continue;
+            }
+
+            if (state.action == State.ACTION_OPEN_TREE && !root.supportsChildren()) {
+                if (DEBUG) Log.d(
+                        TAG, "Excluding root !supportsChildren because: ACTION_OPEN_TREE.");
+                continue;
+            }
+
+            if (!state.showAdvanced && root.isAdvanced()) {
+                if (DEBUG) Log.d(TAG, "Excluding root because: unwanted advanced device.");
+                continue;
+            }
+
             // Exclude non-local devices when local only
-            if (state.localOnly && !root.isLocalOnly()) continue;
+            if (state.localOnly && !root.isLocalOnly()) {
+                if (DEBUG) Log.d(TAG, "Excluding root because: unwanted non-local device.");
+                continue;
+            }
+
             // Exclude downloads roots as it doesn't support directory creation (actually
             // we just don't show them).
             // TODO: Add flag to check the root supports directory creation.
-            if (state.directoryCopy && !root.isDownloads()) continue;
+            if (state.directoryCopy && root.isDownloads()) {
+                if (DEBUG) Log.d(
+                        TAG, "Excluding downloads root because: unsupported directory copy.");
+                continue;
+            }
 
             // Only show empty roots when creating, or in browse mode.
-            if (root.isEmpty() && (state.action == State.ACTION_OPEN
-                    || state.action == State.ACTION_GET_CONTENT)) {
-                if (DEBUG) Log.i(TAG, "Skipping empty root: " + root);
+            if (state.action == State.ACTION_OPEN && root.isEmpty()) {
+                if (DEBUG) Log.d(TAG, "Excluding empty root because: ACTION_OPEN.");
+                continue;
+            }
+
+            // Only show empty roots when creating, or in browse mode.
+            if (state.action == State.ACTION_GET_CONTENT && root.isEmpty()) {
+                if (DEBUG) Log.d(TAG, "Excluding empty root because: ACTION_GET_CONTENT.");
                 continue;
             }
 
@@ -444,18 +476,19 @@ public class RootsCache {
                     MimePredicate.mimeMatches(root.derivedMimeTypes, state.acceptMimes) ||
                     MimePredicate.mimeMatches(state.acceptMimes, root.derivedMimeTypes);
             if (!overlap) {
+                if (DEBUG) Log.d(
+                        TAG, "Excluding root because: unsupported content types > "
+                        + state.acceptMimes);
                 continue;
             }
 
             // Exclude roots from the calling package.
             if (state.excludedAuthorities.contains(root.authority)) {
-                if (DEBUG) Log.d(
-                        TAG, "Excluding root " + root.authority + " from calling package.");
+                if (DEBUG) Log.d(TAG, "Excluding root because: calling package.");
                 continue;
             }
 
-            if (DEBUG) Log.d(
-                    TAG, "Including root " + root + " in roots list.");
+            if (DEBUG) Log.d(TAG, "Including " + root);
             matching.add(root);
         }
         return matching;
