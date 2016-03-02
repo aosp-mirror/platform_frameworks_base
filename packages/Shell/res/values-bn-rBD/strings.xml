@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"স্ক্রীনশট নেওয়া যায়নি৷"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ত্রুটির প্রতিবেদন <xliff:g id="ID">#%d</xliff:g> এর বিশদ বিবরণ"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"ফাইলের নাম"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"শীর্ষক"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"বিস্তারিত বিবরণ"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"ত্রুটির শীর্ষক"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"ত্রুটির সারাংশ"</string>
+    <string name="save" msgid="4781509040564835759">"সংরক্ষণ করুন"</string>
 </resources>

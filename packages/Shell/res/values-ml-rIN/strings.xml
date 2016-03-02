@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"സ്ക്രീൻഷോട്ട് എടുക്കാൻ കഴിഞ്ഞില്ല."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ബഗ് റിപ്പോർട്ട് <xliff:g id="ID">#%d</xliff:g> വിശദാംശങ്ങൾ"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"ഫയല്‍നാമം"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"പേര്"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"വിശദമായ വിവരണം"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"ബഗിന്റെ പേര്"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"ബഗ് സംഗ്രഹം"</string>
+    <string name="save" msgid="4781509040564835759">"സംരക്ഷിക്കുക"</string>
 </resources>
