@@ -1148,7 +1148,9 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
 
     // always store/restore, since these are just pointers
     state.mRoundRectClipState = currentSnapshot()->roundRectClipState;
+#if !HWUI_NEW_OPS
     state.mProjectionPathMask = currentSnapshot()->projectionPathMask;
+#endif
     return false;
 }
 
@@ -1156,7 +1158,9 @@ void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool
     setGlobalMatrix(state.mMatrix);
     writableSnapshot()->alpha = state.mAlpha;
     writableSnapshot()->roundRectClipState = state.mRoundRectClipState;
+#if !HWUI_NEW_OPS
     writableSnapshot()->projectionPathMask = state.mProjectionPathMask;
+#endif
 
     if (state.mClipValid && !skipClipRestore) {
         writableSnapshot()->setClip(state.mClip.left, state.mClip.top,
@@ -1833,6 +1837,7 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p
         path.addCircle(x, y, radius);
     }
 
+#if !HWUI_NEW_OPS
     if (CC_UNLIKELY(currentSnapshot()->projectionPathMask != nullptr)) {
         // mask ripples with projection mask
         SkPath maskPath = *(currentSnapshot()->projectionPathMask->projectionMask);
@@ -1852,6 +1857,7 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p
         // in local space. Note that this can create CCW paths.
         Op(path, maskPath, kIntersect_SkPathOp, &path);
     }
+#endif
     drawConvexPath(path, p);
 }
 
