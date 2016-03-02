@@ -345,9 +345,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                     final int userId = users.get(user).id;
                     final String OWNER_INFO = Secure.LOCK_SCREEN_OWNER_INFO;
                     String ownerInfo = Settings.Secure.getStringForUser(cr, OWNER_INFO, userId);
-                    if (ownerInfo != null) {
+                    if (!TextUtils.isEmpty(ownerInfo)) {
                         setString(OWNER_INFO, ownerInfo, userId);
-                        Settings.Secure.putStringForUser(cr, ownerInfo, "", userId);
+                        Settings.Secure.putStringForUser(cr, OWNER_INFO, "", userId);
                     }
 
                     // Migrate owner info enabled.  Note there was a bug where older platforms only
