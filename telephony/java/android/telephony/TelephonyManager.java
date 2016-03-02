@@ -5850,6 +5850,25 @@ public class TelephonyManager {
    }
 
     /**
+     * Returns the IMS Registration Status for a particular Subscription ID
+     *
+     * @param subId Subscription ID
+     * @return true if IMS status is registered, false if the IMS status is not registered or a
+     * RemoteException occurred.
+     *
+     * @hide
+     */
+    public boolean isImsRegistered(int subId) {
+       try {
+           return getITelephony().isImsRegisteredForSubscriber(subId);
+       } catch (RemoteException ex) {
+           return false;
+       } catch (NullPointerException ex) {
+           return false;
+       }
+    }
+
+    /**
      * Returns the Status of Volte
      * @hide
      */
