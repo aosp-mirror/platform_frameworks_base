@@ -2753,7 +2753,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
      * @param alias The private key alias under which the certificate is installed.
-     * @return {@code true} if the keys were both removed, {@code false} otherwise.
+     * @return {@code true} if the certificate alias no longer exists, {@code false} otherwise.
      */
     public boolean removeKeyPair(@Nullable ComponentName admin, @NonNull String alias) {
         try {
