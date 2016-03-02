@@ -137,6 +137,11 @@ public final class DngCreator implements AutoCloseable {
             throw new IllegalArgumentException("Orientation " + orientation +
                     " is not a valid EXIF orientation value");
         }
+        // ExifInterface and TIFF/EP spec differ on definition of
+        // "Unknown" orientation; other values map directly
+        if (orientation == ExifInterface.ORIENTATION_UNDEFINED) {
+            orientation = TAG_ORIENTATION_UNKNOWN;
+        }
         nativeSetOrientation(orientation);
         return this;
     }
@@ -443,7 +448,7 @@ public final class DngCreator implements AutoCloseable {
     private static final String GPS_LONG_REF_WEST = "W";
 
     private static final String GPS_DATE_FORMAT_STR = "yyyy:MM:dd";
-    private static final String TIFF_DATETIME_FORMAT = "yyyy:MM:dd kk:mm:ss";
+    private static final String TIFF_DATETIME_FORMAT = "yyyy:MM:dd HH:mm:ss";
     private static final DateFormat sExifGPSDateStamp = new SimpleDateFormat(GPS_DATE_FORMAT_STR);
     private static final DateFormat sDateTimeStampFormat =
             new SimpleDateFormat(TIFF_DATETIME_FORMAT);
@@ -457,6 +462,9 @@ public final class DngCreator implements AutoCloseable {
 
     private static final int DEFAULT_PIXEL_STRIDE = 2; // bytes per sample
     private static final int BYTES_PER_RGB_PIX = 3; // byts per pixel
+
+    // TIFF tag values needed to map between public API and TIFF spec
+    private static final int TAG_ORIENTATION_UNKNOWN = 9;
 
     /**
      * Offset, rowStride, and pixelStride are given in bytes.  Height and width are given in pixels.
