@@ -66,9 +66,6 @@ public class IpManager extends StateMachine {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
-    private static final boolean NO_CALLBACKS = false;
-    private static final boolean SEND_CALLBACKS = true;
-
     // For message logging.
     private static final Class[] sMessageClasses = { IpManager.class, DhcpClient.class };
     private static final SparseArray<String> sWhatToString =
@@ -97,6 +94,10 @@ public class IpManager extends StateMachine {
 
         public void onProvisioningSuccess(LinkProperties newLp) {}
         public void onProvisioningFailure(LinkProperties newLp) {}
+
+        // This is called whenever 464xlat is being enabled or disabled (i.e.
+        // started or stopped).
+        public void on464XlatChange(boolean enabled) {}
 
         // Invoked on LinkProperties changes.
         public void onLinkPropertiesChange(LinkProperties newLp) {}
@@ -207,6 +208,13 @@ public class IpManager extends StateMachine {
 
     private static final int MAX_LOG_RECORDS = 1000;
 
+    private static final boolean NO_CALLBACKS = false;
+    private static final boolean SEND_CALLBACKS = true;
+
+    // This must match the interface prefix in clatd.c.
+    // TODO: Revert this hack once IpManager and Nat464Xlat work in concert.
+    private static final String CLAT_PREFIX = "v4-";
+
     private final Object mLock = new Object();
     private final State mStoppedState = new StoppedState();
     private final State mStoppingState = new StoppingState();
@@ -215,6 +223,7 @@ public class IpManager extends StateMachine {
     private final String mTag;
     private final Context mContext;
     private final String mInterfaceName;
+    private final String mClatInterfaceName;
     @VisibleForTesting
     protected final Callback mCallback;
     private final INetworkManagementService mNwService;
@@ -255,6 +264,7 @@ public class IpManager extends StateMachine {
 
         mContext = context;
         mInterfaceName = ifName;
+        mClatInterfaceName = CLAT_PREFIX + ifName;
         mCallback = callback;
         mNwService = nwService;
 
@@ -265,7 +275,22 @@ public class IpManager extends StateMachine {
                     public void update() {
                         sendMessage(EVENT_NETLINK_LINKPROPERTIES_CHANGED);
                     }
-                });
+                }) {
+            @Override
+            public void interfaceAdded(String iface) {
+                if (mClatInterfaceName.equals(iface)) {
+                    mCallback.on464XlatChange(true);
+                }
+            }
+
+            @Override
+            public void interfaceRemoved(String iface) {
+                if (mClatInterfaceName.equals(iface)) {
+                    mCallback.on464XlatChange(false);
+                }
+            }
+        };
+
         try {
             mNwService.registerObserver(mNetlinkTracker);
         } catch (RemoteException e) {
