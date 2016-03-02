@@ -1896,6 +1896,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final int userId = msg.arg1;
                 mSystemServiceManager.unlockUser(userId);
                 mRecentTasks.loadUserRecentsLocked(userId);
+                if (userId == UserHandle.USER_SYSTEM) {
+                    startPersistentApps(PackageManager.MATCH_ENCRYPTION_UNAWARE);
+                }
                 installEncryptionUnawareProviders(userId);
                 break;
             }
@@ -10779,6 +10782,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         //mUsageStatsService.monitorPackages();
     }
 
+    private void startPersistentApps(int matchFlags) {
+        if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) return;
+
+        synchronized (this) {
+            try {
+                final List<ApplicationInfo> apps = AppGlobals.getPackageManager()
+                        .getPersistentApplications(STOCK_PM_FLAGS | matchFlags);
+                for (ApplicationInfo app : apps) {
+                    if (!"android".equals(app.packageName)) {
+                        addAppLocked(app, false, null /* ABI override */);
+                    }
+                }
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     /**
      * When a user is unlocked, we need to install encryption-unaware providers
      * belonging to any running apps.
@@ -10795,8 +10815,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // We're only interested in providers that are encryption unaware, and
         // we don't care about uninstalled apps, since there's no way they're
         // running at this point.
-        final int matchFlags = GET_PROVIDERS | MATCH_ENCRYPTION_UNAWARE
-                | MATCH_DEBUG_TRIAGED_MISSING;
+        final int matchFlags = GET_PROVIDERS | MATCH_ENCRYPTION_UNAWARE;
 
         synchronized (this) {
             final int NP = mProcessNames.getMap().size();
@@ -12682,26 +12701,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mSystemServiceManager.startUser(currentUserId);
 
         synchronized (this) {
-            if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-                try {
-                    List apps = AppGlobals.getPackageManager().
-                        getPersistentApplications(STOCK_PM_FLAGS);
-                    if (apps != null) {
-                        int N = apps.size();
-                        int i;
-                        for (i=0; i<N; i++) {
-                            ApplicationInfo info
-                                = (ApplicationInfo)apps.get(i);
-                            if (info != null &&
-                                    !info.packageName.equals("android")) {
-                                addAppLocked(info, false, null /* ABI override */);
-                            }
-                        }
-                    }
-                } catch (RemoteException ex) {
-                    // pm is in same process, this will never happen.
-                }
-            }
+            // Only start up encryption-aware persistent apps; once user is
+            // unlocked we'll come back around and start unaware apps
+            startPersistentApps(PackageManager.MATCH_ENCRYPTION_AWARE);
 
             // Start up initial activity.
             mBooting = true;
