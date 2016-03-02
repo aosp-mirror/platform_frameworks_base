@@ -62,7 +62,9 @@ import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATIO
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
+import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE;
 import static android.content.pm.PackageManager.MATCH_ENCRYPTION_AWARE_AND_UNAWARE;
+import static android.content.pm.PackageManager.MATCH_ENCRYPTION_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.MOVE_FAILED_DEVICE_ADMIN;
@@ -6072,9 +6074,16 @@ public class PackageManagerService extends IPackageManager.Stub {
             final int userId = UserHandle.getCallingUserId();
             while (i.hasNext()) {
                 final PackageParser.Package p = i.next();
-                if (p.applicationInfo != null
-                        && (p.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) != 0
-                        && (!mSafeMode || isSystemApp(p))) {
+                if (p.applicationInfo == null) continue;
+
+                final boolean matchesUnaware = ((flags & MATCH_ENCRYPTION_UNAWARE) != 0)
+                        && !p.applicationInfo.isEncryptionAware();
+                final boolean matchesAware = ((flags & MATCH_ENCRYPTION_AWARE) != 0)
+                        && p.applicationInfo.isEncryptionAware();
+
+                if ((p.applicationInfo.flags & ApplicationInfo.FLAG_PERSISTENT) != 0
+                        && (!mSafeMode || isSystemApp(p))
+                        && (matchesUnaware || matchesAware)) {
                     PackageSetting ps = mSettings.mPackages.get(p.packageName);
                     if (ps != null) {
                         ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags,
