@@ -216,8 +216,7 @@ TEST(FrameBuilder, simpleBatching) {
             << "Expect number of ops = 2 * loop count";
 }
 
-// TODO: Disabled due to b/26793764
-TEST(FrameBuilder, DISABLED_clippedMerging) {
+TEST(FrameBuilder, clippedMerging) {
     class ClippedMergingTestRenderer : public TestRendererBase {
     public:
         void onMergedBitmapOps(const MergedBakedOpList& opList) override {
