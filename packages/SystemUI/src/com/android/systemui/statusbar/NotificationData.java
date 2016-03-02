@@ -353,8 +353,10 @@ public class NotificationData {
             return true;
         }
 
-        if (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET &&
-                mEnvironment.shouldHideSensitiveContents(sbn.getUserId())) {
+        if (mEnvironment.onSecureLockScreen() &&
+                (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET
+                        || mEnvironment.shouldHideNotifications(sbn.getUserId())
+                        || mEnvironment.shouldHideNotifications(sbn.getKey()))) {
             return true;
         }
 
@@ -433,7 +435,9 @@ public class NotificationData {
      * Provides access to keyguard state and user settings dependent data.
      */
     public interface Environment {
-        public boolean shouldHideSensitiveContents(int userid);
+        public boolean onSecureLockScreen();
+        public boolean shouldHideNotifications(int userid);
+        public boolean shouldHideNotifications(String key);
         public boolean isDeviceProvisioned();
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();
