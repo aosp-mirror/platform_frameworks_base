@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.UserHandle;
+import android.os.storage.DiskInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.provider.DocumentsContract;
@@ -183,6 +184,14 @@ public class ExternalStorageProvider extends DocumentsProvider {
             root.rootId = rootId;
             root.flags = Root.FLAG_LOCAL_ONLY
                     | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_SUPPORTS_IS_CHILD;
+
+            final DiskInfo disk = volume.getDisk();
+            if (DEBUG) Log.d(TAG, "Disk for root " + rootId + " is " + disk);
+            if (disk != null && disk.isSd()) {
+                root.flags |= Root.FLAG_REMOVABLE_SD;
+            } else if (disk != null && disk.isUsb()) {
+                root.flags |= Root.FLAG_REMOVABLE_USB;
+            }
 
             if (volume.isPrimary()) {
                 // save off the primary volume for subsequent "Home" dir initialization.
