@@ -568,11 +568,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         // Make sure we inform DividerView before we actually start the activity so we can change
         // the resize mode already.
-        EventBus.getDefault().send(new DockingTopTaskEvent(dragMode));
-        ssp.moveTaskToDockedStack(topTaskId, stackCreateMode, initialBounds);
-        showRecents(false /* triggeredFromAltTab */,
-                dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS, false /* animate */,
-                true /* reloadTasks*/);
+        if (ssp.moveTaskToDockedStack(topTaskId, stackCreateMode, initialBounds)) {
+            EventBus.getDefault().send(new DockingTopTaskEvent(dragMode));
+            showRecents(
+                    false /* triggeredFromAltTab */,
+                    dragMode == NavigationBarGestureHelper.DRAG_MODE_RECENTS,
+                    false /* animate */,
+                    true /* reloadTasks*/);
+        }
     }
 
     /**
