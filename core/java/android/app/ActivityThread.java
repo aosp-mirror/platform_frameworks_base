@@ -4865,11 +4865,15 @@ public final class ActivityThread {
                 Os.fchmod(fd, permissions);
                 Os.fchown(fd, appInfo.uid, appInfo.uid);
             } catch (ErrnoException e) {
-                Log.v(TAG, "Unable to create jit profile file " + profileFile, e);
+                Log.v(TAG, "Unable to create jit profile file "
+                        + profileFile + ": " + e.getMessage());
                 try {
                     Os.unlink(profileFile.getAbsolutePath());
                 } catch (ErrnoException unlinkErr) {
-                    Log.v(TAG, "Unable to unlink jit profile file " + profileFile, unlinkErr);
+                    if (unlinkErr.errno != OsConstants.ENOENT) {
+                        Log.v(TAG, "Unable to unlink jit profile file "
+                                + profileFile + ": " + unlinkErr.getMessage());
+                    }
                 }
                 return;
             } finally {
