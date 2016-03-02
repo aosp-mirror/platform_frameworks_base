@@ -406,13 +406,20 @@ void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
 
     for (size_t i = 0; i < renderNode.mProjectedNodes.size(); i++) {
         RenderNodeOp* childOp = renderNode.mProjectedNodes[i];
-        int restoreTo = mCanvasState.save(SaveFlags::Matrix);
+        RenderNode& childNode = *childOp->renderNode;
 
-        // Apply transform between ancestor and projected descendant
-        mCanvasState.concatMatrix(childOp->transformFromCompositingAncestor);
+        // Draw child if it has content, but ignore state in childOp - matrix already applied to
+        // transformFromCompositingAncestor, and record-time clip is ignored when projecting
+        if (!childNode.nothingToDraw()) {
+            int restoreTo = mCanvasState.save(SaveFlags::MatrixClip);
 
-        deferRenderNodeOpImpl(*childOp);
-        mCanvasState.restoreToCount(restoreTo);
+            // Apply transform between ancestor and projected descendant
+            mCanvasState.concatMatrix(childOp->transformFromCompositingAncestor);
+
+            deferNodePropsAndOps(childNode);
+
+            mCanvasState.restoreToCount(restoreTo);
+        }
     }
     mCanvasState.restoreToCount(count);
 }

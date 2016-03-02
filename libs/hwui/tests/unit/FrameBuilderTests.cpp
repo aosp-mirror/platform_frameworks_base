@@ -1153,6 +1153,59 @@ RENDERTHREAD_TEST(FrameBuilder, projectionHwLayer) {
     *layerHandle = nullptr;
 }
 
+RENDERTHREAD_TEST(FrameBuilder, projectionChildScroll) {
+    static const int scrollX = 500000;
+    static const int scrollY = 0;
+    class ProjectionChildScrollTestRenderer : public TestRendererBase {
+    public:
+        void onRectOp(const RectOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(0, mIndex++);
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+        void onOvalOp(const OvalOp& op, const BakedOpState& state) override {
+            EXPECT_EQ(1, mIndex++);
+            ASSERT_NE(nullptr, state.computedState.clipState);
+            ASSERT_EQ(ClipMode::Rectangle, state.computedState.clipState->mode);
+            ASSERT_EQ(Rect(400, 400), state.computedState.clipState->rect);
+            EXPECT_TRUE(state.computedState.transform.isIdentity());
+        }
+    };
+    auto receiverBackground = TestUtils::createNode(0, 0, 400, 400,
+            [](RenderProperties& properties, RecordingCanvas& canvas) {
+        properties.setProjectionReceiver(true);
+        canvas.drawRect(0, 0, 400, 400, SkPaint());
+    });
+    auto projectingRipple = TestUtils::createNode(0, 0, 200, 200,
+            [](RenderProperties& properties, RecordingCanvas& canvas) {
+        // scroll doesn't apply to background, so undone via translationX/Y
+        // NOTE: translationX/Y only! no other transform properties may be set for a proj receiver!
+        properties.setTranslationX(scrollX);
+        properties.setTranslationY(scrollY);
+        properties.setProjectBackwards(true);
+        properties.setClipToBounds(false);
+        canvas.drawOval(0, 0, 200, 200, SkPaint());
+    });
+    auto child = TestUtils::createNode(0, 0, 400, 400,
+            [&projectingRipple](RenderProperties& properties, RecordingCanvas& canvas) {
+        // Record time clip will be ignored by projectee
+        canvas.clipRect(100, 100, 300, 300, SkRegion::kIntersect_Op);
+
+        canvas.translate(-scrollX, -scrollY); // Apply scroll (note: bg undoes this internally)
+        canvas.drawRenderNode(projectingRipple.get());
+    });
+    auto parent = TestUtils::createNode(0, 0, 400, 400,
+            [&receiverBackground, &child](RenderProperties& properties, RecordingCanvas& canvas) {
+        canvas.drawRenderNode(receiverBackground.get());
+        canvas.drawRenderNode(child.get());
+    });
+
+    FrameBuilder frameBuilder(sEmptyLayerUpdateQueue, SkRect::MakeWH(400, 400), 400, 400,
+            TestUtils::createSyncedNodeList(parent), sLightGeometry, nullptr);
+    ProjectionChildScrollTestRenderer renderer;
+    frameBuilder.replayBakedOps<TestDispatcher>(renderer);
+    EXPECT_EQ(2, renderer.getIndex());
+}
+
 // creates a 100x100 shadow casting node with provided translationZ
 static sp<RenderNode> createWhiteRectShadowCaster(float translationZ) {
     return TestUtils::createNode(0, 0, 100, 100,
