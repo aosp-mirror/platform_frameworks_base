@@ -3078,7 +3078,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             final int motionPosition = mClickMotionPosition;
             if (adapter != null && mItemCount > 0 &&
                     motionPosition != INVALID_POSITION &&
-                    motionPosition < adapter.getCount() && sameWindow()) {
+                    motionPosition < adapter.getCount() && sameWindow() &&
+                    adapter.isEnabled(motionPosition)) {
                 final View view = getChildAt(motionPosition - mFirstPosition);
                 // If there is no view, something bad happened (the view scrolled off the
                 // screen, etc.) and we should cancel the click
