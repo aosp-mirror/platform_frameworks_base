@@ -429,7 +429,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
                 packet.putInt128(longValue);
                 break;
             case MTP_TYPE_UINT128:
-                packet.putInt128(longValue);
+                packet.putUInt128(longValue);
                 break;
             case MTP_TYPE_STR:
             {
