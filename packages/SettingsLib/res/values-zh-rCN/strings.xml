@@ -278,7 +278,7 @@
     <string name="enable_webview_multiprocess_desc" msgid="852226124223847283">"在独立进程中运行 WebView 渲染程序。"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 实现"</string>
     <string name="select_webview_provider_dialog_title" msgid="4370551378720004872">"设置 WebView 实现"</string>
-    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"所选的 WebView 实现无效，因为相关的实现选项列表已过时。请立即更新这份列表。"</string>
+    <string name="select_webview_provider_toast_text" msgid="8168796505966635684">"所选的 WebView 实现无效，因为实现选项列表已过时。请立即更新列表。"</string>
     <string name="convert_to_file_encryption" msgid="3060156730651061223">"转换为文件加密"</string>
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"转换…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"文件已加密"</string>

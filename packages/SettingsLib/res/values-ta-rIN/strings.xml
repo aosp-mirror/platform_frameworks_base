@@ -102,7 +102,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"பேச்சு வீதம்"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"பேசப்படும் உரையின் வேகம்"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"ஒலித்திறன்"</string>
-    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"தொகுக்கப்பட்ட உரையின் டோன் பாதிக்கப்படும்"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"உருவாக்கப்படும் பேச்சின் டோன் பாதிக்கப்படும்"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"மொழி"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"முறைமையின் மொழியைப் பயன்படுத்து"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"மொழி தேர்ந்தெடுக்கப்படவில்லை"</string>
