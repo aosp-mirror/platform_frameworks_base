@@ -81,10 +81,9 @@ public class FilesActivityPerfTest extends ActivityTest<FilesActivity> {
         final BaseActivity activity = getActivity();
 
         final List<Long> measurements = new ArrayList<Long>();
-        CountDownLatch signal;
         EventListener listener;
         for (int i = 0; i < 10; i++) {
-            signal = new CountDownLatch(1);
+            final CountDownLatch signal = new CountDownLatch(1);
             listener = new EventListener() {
                 @Override
                 public void onDirectoryNavigated(Uri uri) {
