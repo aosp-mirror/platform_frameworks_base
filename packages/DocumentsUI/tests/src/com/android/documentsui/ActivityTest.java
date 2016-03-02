@@ -117,6 +117,8 @@ public abstract class ActivityTest<T extends Activity> extends ActivityInstrumen
         mClient = mResolver.acquireUnstableContentProviderClient(getTestingProviderAuthority());
         mDocsHelper = new DocumentsProviderHelper(getTestingProviderAuthority(), mClient);
 
+        setupTestingRoots();
+
         launchActivity();
         resetStorage();
     }
