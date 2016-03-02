@@ -64,6 +64,7 @@ public class Model {
 
     @Nullable String info;
     @Nullable String error;
+    @Nullable DocumentInfo doc;
 
     /**
      * Generates a Model ID for a cursor entry that refers to a document. The Model ID is a unique
@@ -111,6 +112,7 @@ public class Model {
             mPositions.clear();
             info = null;
             error = null;
+            doc = null;
             mIsLoading = false;
             notifyUpdateListeners();
             return;
@@ -125,6 +127,7 @@ public class Model {
         mCursor = result.cursor;
         mCursorCount = mCursor.getCount();
         mSortOrder = result.sortOrder;
+        doc = result.doc;
 
         updateModelData();
 

@@ -22,12 +22,15 @@ import static com.android.documentsui.State.SORT_ORDER_UNKNOWN;
 import android.content.ContentProviderClient;
 import android.database.Cursor;
 
+import com.android.documentsui.model.DocumentInfo;
+
 import libcore.io.IoUtils;
 
 public class DirectoryResult implements AutoCloseable {
     ContentProviderClient client;
     public Cursor cursor;
     public Exception exception;
+    public DocumentInfo doc;
 
     public int sortOrder = SORT_ORDER_UNKNOWN;
 
