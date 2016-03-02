@@ -22,8 +22,11 @@ import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Parcelable.Creator;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import com.android.internal.R;
 
@@ -300,6 +303,70 @@ public class TimePicker extends FrameLayout {
             mDelegator = delegator;
             mContext = context;
             mLocale = context.getResources().getConfiguration().locale;
+        }
+
+        protected static class SavedState extends View.BaseSavedState {
+            private final int mHour;
+            private final int mMinute;
+            private final boolean mIs24HourMode;
+            private final int mCurrentItemShowing;
+
+            public SavedState(Parcelable superState, int hour, int minute, boolean is24HourMode) {
+                this(superState, hour, minute, is24HourMode, 0);
+            }
+
+            public SavedState(Parcelable superState, int hour, int minute, boolean is24HourMode,
+                    int currentItemShowing) {
+                super(superState);
+                mHour = hour;
+                mMinute = minute;
+                mIs24HourMode = is24HourMode;
+                mCurrentItemShowing = currentItemShowing;
+            }
+
+            private SavedState(Parcel in) {
+                super(in);
+                mHour = in.readInt();
+                mMinute = in.readInt();
+                mIs24HourMode = (in.readInt() == 1);
+                mCurrentItemShowing = in.readInt();
+            }
+
+            public int getHour() {
+                return mHour;
+            }
+
+            public int getMinute() {
+                return mMinute;
+            }
+
+            public boolean is24HourMode() {
+                return mIs24HourMode;
+            }
+
+            public int getCurrentItemShowing() {
+                return mCurrentItemShowing;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                super.writeToParcel(dest, flags);
+                dest.writeInt(mHour);
+                dest.writeInt(mMinute);
+                dest.writeInt(mIs24HourMode ? 1 : 0);
+                dest.writeInt(mCurrentItemShowing);
+            }
+
+            @SuppressWarnings({"unused", "hiding"})
+            public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+                public SavedState createFromParcel(Parcel in) {
+                    return new SavedState(in);
+                }
+
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
         }
     }
 }
