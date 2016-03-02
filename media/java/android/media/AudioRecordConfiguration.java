@@ -16,10 +16,13 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -29,7 +32,7 @@ import java.util.Objects;
  * {@link AudioManager#getActiveRecordConfigurations()} method.
  *
  */
-public class AudioRecordConfiguration implements Parcelable {
+public final class AudioRecordConfiguration implements Parcelable {
     private final static String TAG = new String("AudioRecordConfiguration");
 
     private final int mSessionId;
@@ -53,6 +56,19 @@ public class AudioRecordConfiguration implements Parcelable {
         mPatchHandle = patchHandle;
     }
 
+    /** @hide */
+    @IntDef({
+        MediaRecorder.AudioSource.DEFAULT,
+        MediaRecorder.AudioSource.VOICE_UPLINK,
+        MediaRecorder.AudioSource.VOICE_DOWNLINK,
+        MediaRecorder.AudioSource.VOICE_CALL,
+        MediaRecorder.AudioSource.CAMCORDER,
+        MediaRecorder.AudioSource.VOICE_RECOGNITION,
+        MediaRecorder.AudioSource.VOICE_COMMUNICATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioSource {}
+
     /**
      * Returns the audio source being used for the recording.
      * @return one of {@link MediaRecorder.AudioSource#MIC},
@@ -63,7 +79,7 @@ public class AudioRecordConfiguration implements Parcelable {
      *       {@link MediaRecorder.AudioSource#VOICE_RECOGNITION},
      *       {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}.
      */
-    public int getClientAudioSource() { return mClientSource; }
+    public @AudioSource int getClientAudioSource() { return mClientSource; }
 
     /**
      * Returns the session number of the recording, see {@link AudioRecord#getAudioSessionId()}.
