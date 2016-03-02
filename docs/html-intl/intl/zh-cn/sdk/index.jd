@@ -60,133 +60,134 @@ page.metaDescription=下载官方 Android IDE 和开发者工具，构建适用�
 <h2 class="norule">条款和条件</h2>
 本协议是 Android 软件开发工具包许可协议
 
-<h3>1.简介</h3>
-1.1 Android 软件开发工具包（在本许可协议中称为“SDK”，具体包括 Android 系统文件、封装 API 以及 Google API 加载项）依据本许可协议的条款授权您使用。本许可协议在您与 Google 之间就您对 SDK 的使用形成具有法律约束力的合约。
+<h3>1. Introduction</h3>
+1.1 The Android Software Development Kit (referred to in the License Agreement as the "SDK" and specifically including the Android system files, packaged APIs, and Google APIs add-ons) is licensed to you subject to the terms of the License Agreement. The License Agreement forms a legally binding contract between you and Google in relation to your use of the SDK.
 
-1.2 “Android”是指面向设备的 Android 软件栈，以 Android 开源项目名义提供，项目网址为 http://source.android.com/，其内容会不时更新。
+1.2 "Android" means the Android software stack for devices, as made available under the Android Open Source Project, which is located at the following URL: http://source.android.com/, as updated from time to time.
 
-1.3 “Google”是指 Google Inc.，是一家特拉华州公司，主要营业地位于：1600 Amphitheatre Parkway, Mountain View, CA 94043, United States。
+1.3 A "compatible implementation" means any Android device that (i) complies with the Android Compatibility Definition document, which can be found at the Android compatibility website (http://source.android.com/compatibility) and which may be updated from time to time; and (ii) successfully passes the Android Compatibility Test Suite (CTS).
 
-
-<h3>2.接受本许可协议</h3>
-2.1 要使用 SDK，您必须先同意本许可协议。如果您不接受本许可协议，则不得使用 SDK。
-
-2.2 点击接受，即表示您特此同意本许可协议的条款。
-
-2.3 如果您在美国或其他国家/地区（包括您的居住国或您使用 SDK 时所在的国家/地区）的法律下被禁止获取 SDK，则您不得使用 SDK，也不得接受本许可协议。
-
-2.4 如果您代表您的雇主或其他实体同意受本许可协议的约束，即表示并保证您拥有完全的合法权力令您的雇主或上述实体受本许可协议的约束。如果您不拥有所需权力，则不得代表您的雇主或其他实体接受本许可协议或使用 SDK。
+1.4 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
 
 
-<h3>3.Google 的 SDK 许可</h3>
-3.1 Google 依据本许可协议的条款授予您有限的、全球性、免版税、不可转让且非独占性 SDK 使用许可，其用途仅限开发在 Android 平台上运行的应用。
+<h3>2. Accepting this License Agreement</h3>
+2.1 In order to use the SDK, you must first agree to the License Agreement. You may not use the SDK if you do not accept the License Agreement.
 
-3.2 您同意 Google 或第三方拥有 SDK 中存在或与其有关联的全部合法权利、所有权和利益，包括 SDK 中存在的任何知识产权。“知识产权”是指根据专利法、版权法、商业机密法、商标法享有的任何及全部权利，以及其他任何及全部专有权利。Google 保留未明确授予您的所有权利。
+2.2 By clicking to accept, you hereby agree to the terms of the License Agreement.
 
-3.3 您不得将 SDK 用于本许可协议未明确允许的任何用途。您不得：(a) 对 SDK 或 SDK 的任何部分进行复制（备份用途除外）、修改、改编、再分发、反编译、逆向工程、反汇编或创建其衍生品；或 (b) 将 SDK 的任何部分加载到个人计算机之外的移动手持终端或任何其他硬件设备上，将 SDK 的任何部分与其他软件合并，或者发行任何融入 SDK 某一部分的软件或设备。但适用第三方许可要求范围之内的上述活动不受此限制。
+2.3 You may not use the SDK and may not accept the License Agreement if you are a person barred from receiving the SDK under the laws of the United States or other countries, including the country in which you are resident or from which you use the SDK.
 
-3.4 您同意您将不引起或导致 Android 碎片化的任何行动，包括但不限于分发、参与创建或以任何方式推广从 SDK 衍生的软件开发工具包。
-
-3.5 对于依据开源软件许可授权的 SDK 组件，其使用、复制和分发仅受该开源软件许可条款的制约，不受本许可协议的约束。
-
-3.6 您同意 Google 所提供 SDK 的形式和性质可在未事先通知您的情况下变更，并且未来 SDK 版本可与在以前 SDK 版本上开发的应用不兼容。您同意 Google 可单方面决定在未事先通知您的情况下全面停止（永久性或暂时性）向您或用户提供 SDK（或 SDK 内的任何功能）。
-
-3.7 本许可协议内没有任何条款授予您使用 Google 的任何商品名、商标、服务标志、徽标、域名或其他独特品牌特征的权利。
-
-3.8 您同意您不会移除、遮盖或篡改 SDK 上可能贴有或 SDK 内可能包含的任何专有权利声明（包括版权声明和商标声明）。
+2.4 If you are agreeing to be bound by the License Agreement on behalf of your employer or other entity, you represent and warrant that you have full legal authority to bind your employer or such entity to the License Agreement. If you do not have the requisite authority, you may not accept the License Agreement or use the SDK on behalf of your employer or other entity.
 
 
-<h3>4.您对 SDK 的使用</h3>
-4.1 Google 同意不会依照本许可协议从您（或您的许可方）处获取您使用 SDK 开发的任何软件应用的权利、所有权或利益，包括这些应用中存在的任何知识产权。
+<h3>3. SDK License from Google</h3>
+3.1 Subject to the terms of the License Agreement, Google grants you a limited, worldwide, royalty-free, non-assignable, non-exclusive, and non-sublicensable license to use the SDK solely to develop applications for compatible implementations of Android.
 
-4.2 您同意只出于 (a) 本许可协议和 (b) 相关管辖区域内任何适用法律、法规或公认的惯例或准则（包括有关向美国或其他相关国家出口数据或软件或从美国或其他相关国家进口数据或软件的任何法律）所允许的目的使用 SDK 和编写应用。
+3.2 You may not use this SDK to develop applications for other platforms (including non-compatible implementations of Android) or to develop another SDK. You are of course free to develop applications for other platforms, including non-compatible implementations of Android, provided that this SDK is not used for that purpose.
 
-4.3 您同意，如果您使用 SDK 开发面向公众用户的应用，您将会保护这些用户的隐私权和法定权利。如果用户向您提供用户名、密码或其他登录信息或个人信息，您必须确保用户知晓这些信息将供您的应用使用，并且您必须为这些用户提供足以满足法律要求的隐私声明和保护。如果您的应用存储由用户提供的个人信息或敏感信息，其存储方式必须安全。如果用户向您的应用提供 Google 帐户信息，您的应用只能在用户允许时出于用户所许可的有限目的使用该信息访问用户的 Google 帐户。
+3.3 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
 
-4.4 您同意您不会利用 SDK 从事任何干扰、破坏、损坏或以未经授权方式访问任何第三方（包括但不限于 Google 或任何移动通信运营商）的服务器、网络或其他财产或服务的活动（包括应用的开发或分发）。
+3.4 You may not use the SDK for any purpose not expressly permitted by the License Agreement.  Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
 
-4.5 您同意您为通过 Android 和/或 Android 应用创建、传输或显示的任何数据、内容或资源以及您的行为所导致的后果（包括 Google 可能遭受的任何损失或损害）负全责（Google 在上述方面对您或任何第三方不承担任何责任）。
+3.5 Use, reproduction and distribution of components of the SDK licensed under an open source software license are governed solely by the terms of that open source software license and not the License Agreement.
 
-4.6 您同意您为违反本许可协议、任何适用的第三方合约或服务条款或任何适用法律或法规下的义务以及任何上述违反所导致的后果（包括 Google 或任何第三方可能遭受的任何损失或损害）负全责（Google 在上述方面对您或任何第三方不承担任何责任）。
+3.6 You agree that the form and nature of the SDK that Google provides may change without prior notice to you and that future versions of the SDK may be incompatible with applications developed on previous versions of the SDK. You agree that Google may stop (permanently or temporarily) providing the SDK (or any features within the SDK) to you or to users generally at Google's sole discretion, without prior notice to you.
 
+3.7 Nothing in the License Agreement gives you a right to use any of Google's trade names, trademarks, service marks, logos, domain names, or other distinctive brand features.
 
-<h3>5.您的开发者凭据</h3>
-5.1 您同意，对于 Google 可能向您发放或可能由您自行选择的任何开发者凭据，您有责任保持其机密性，并且您对以您的开发者凭据名义开发的所有应用负全责。
-
-
-<h3>6.隐私权和信息</h3>
-6.1 为持续创新和改进 SDK，Google 可能会从软件收集某些使用统计数据，包括但不限于唯一标识符、关联的 IP 地址、软件的版本号以及有关 SDK 内哪些工具和/或服务被使用和使用方式的信息。在收集任何上述信息之前，SDK 都会通知您并征求您的同意。如果您拒绝，我们将不会收集这些信息。
-
-6.2 我们会对收集的数据做总体研究以改进 SDK，并会按照 Google 的隐私政策进行维护。
+3.8 You agree that you will not remove, obscure, or alter any proprietary rights notices (including copyright and trademark notices) that may be affixed to or contained within the SDK.
 
 
-<h3>7.第三方应用</h3>
-7.1 如果您使用 SDK 运行由第三方开发或访问由第三方提供的数据、内容或资源的应用，您同意 Google 对这些应用、数据、内容或资源不承担任何责任。您理解，您通过上述第三方应用可能访问到的所有数据、内容或资源由其提供者负全责，Google 对您因使用或访问其中任何第三方应用、数据、内容或资源而遭受的任何损失或损害不承担任何责任。
+<h3>4. Use of the SDK by You</h3>
+4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under the License Agreement in or to any software applications that you develop using the SDK, including any intellectual property rights that subsist in those applications.
 
-7.2 您应知晓，通过此类第三方应用提供给您的数据、内容和资源可能受提供商（或代表他们的其他人员或公司）拥有的知识产权的保护。除非相关所有者明确给予许可，否则您不得修改、出租、租赁、借出、出售、分发这些数据、内容或资源（全部或部分），或以其为基础创建衍生品。
+4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a) the License Agreement and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions (including any laws regarding the export of data or software to and from the United States or other relevant countries).
 
-7.3 您确认您对上述第三方应用、数据、内容或资源的使用可能受到您与相关第三方之间单独订立的条款的制约。在这种情况下，本许可协议不会影响您与这些第三方之间的法律关系。
+4.3 You agree that if you use the SDK to develop applications for general public users, you will protect the privacy and legal rights of those users. If the users provide you with user names, passwords, or other login information or personal information, you must make the users aware that the information will be available to your application, and you must provide legally adequate privacy notice and protection for those users. If your application stores personal or sensitive information provided by users, it must do so securely. If the user provides your application with Google Account information, your application may only use that information to access the user's Google Account when, and for the limited purposes for which, the user has given you permission to do so.
 
+4.4 You agree that you will not engage in any activity with the SDK, including the development or distribution of an application, that interferes with, disrupts, damages, or accesses in an unauthorized manner the servers, networks, or other properties or services of any third party including, but not limited to, Google or any mobile communications carrier.
 
-<h3>8.使用 Android API</h3>
-8.1 Google Data API
+4.5 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any data, content, or resources that you create, transmit or display through Android and/or applications for Android, and for the consequences of your actions (including any loss or damage which Google may suffer) by doing so.
 
-8.1.1 如果您使用任何 API 从 Google 检索数据，即表示您承认这些数据可能受到 Google 或这些数据提供方（或代表他们的其他人员或公司）拥有的知识产权的保护。您对任何上述 API 的使用可能受到附加服务条款的制约。除非相关服务条款允许，否则您不得修改、出租、租赁、借出、出售、分发这些数据（全部或部分），或以其为基础创建衍生品。
-
-8.1.2 如果您使用任何 API 从 Google 检索用户数据，即表示您承认并同意您只有在征得用户明确同意时才会检索数据，并且只能在用户允许时出于用户许可的有限目的检索数据。
+4.6 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any breach of your obligations under the License Agreement, any applicable third party contract or Terms of Service, or any applicable law or regulation, and for the consequences (including any loss or damage which Google or any third party may suffer) of any such breach.
 
 
-<h3>9.本许可协议的终止</h3>
-9.1 本许可协议将持续有效，直至您或 Google 按以下规定终止本协议。
-
-9.2 如果您想终止本许可协议，可通过停止使用 SDK 以及任何相关开发者凭据实现。
-
-9.3 在下列情况下，Google 有权随时终止与您订立的这份许可协议：
-(A)您违反了本许可协议的任何条款；或
-(B) Google 按照法律要求将其终止；或
-(C) 向您提供 SDK 的某些部分（例如 API）的 Google 伙伴与 Google 终止了伙伴关系或停止向您提供 SDK 的某些部分；或
-(D) Google 决定不再向您的居住国家/地区或您使用该服务的所在国家/地区的用户提供 SDK 或 SDK 的某些部分，或 Google 单方面认为向您提供 SDK 或某些 SDK 服务在商业上已不可行。
-
-9.4 当本许可协议终止时，您与 Google 受益于、受制于（或在本许可协议有效期内随时间累积）或明示将无限期延续的所有法定权利、义务和责任将不受此终止的影响，并且第 14.7 段的规定将继续无限期地适用于上述权利、义务和责任。
+<h3>5. Your Developer Credentials</h3>
+5.1 You agree that you are responsible for maintaining the confidentiality of any developer credentials that may be issued to you by Google or which you may choose yourself and that you will be solely responsible for all applications that are developed under your developer credentials.
 
 
-<h3>10.免责条款</h3>
-10.1 您明确理解并同意，您使用 SDK 的风险将由您自行承担，并且 SDK 是“按原样”和“现状”提供，Google 不提供任何类型的担保。
+<h3>6. Privacy and Information</h3>
+6.1 In order to continually innovate and improve the SDK, Google may collect certain usage statistics from the software including but not limited to a unique identifier, associated IP address, version number of the software, and information on which tools and/or services in the SDK are being used and how they are being used. Before any of this information is collected, the SDK will notify you and seek your consent. If you withhold consent, the information will not be collected.
 
-10.2 您对 SDK 的使用以及通过使用 SDK 下载或以其他方式获得的任何材料由您自行决定，风险自负，并且对于因上述使用而对您的计算机系统或其他设备造成的任何损害或数据损失由您单方面负责。
-
-10.3 Google 进一步明确否认任何类型的所有担保和条件，无论明示或暗示，包括但不限于有关适销性、特定用途适用性以及非侵权的暗示担保和条件。
+6.2 The data collected is examined in the aggregate to improve the SDK and is maintained in accordance with Google's Privacy Policy.
 
 
-<h3>11.有限责任</h3>
-11.1 您明确理解并同意，Google、其子公司和附属公司以及其许可方在任何责任理论下对您可能招致的任何直接、间接、附带、特殊、继发或惩罚性损害（包括任何数据损失）不承担任何责任，无论 Google 或其代表是否已被告知，亦无论是否本应知晓发生任何上述损失的可能性。
+<h3>7. Third Party Applications</h3>
+7.1 If you use the SDK to run applications developed by a third party or that access data, content or resources provided by a third party, you agree that Google is not responsible for those applications, data, content, or resources. You understand that all data, content or resources which you may access through such third party applications are the sole responsibility of the person from which they originated and that Google is not liable for any loss or damage that you may experience as a result of the use or access of any of those third party applications, data, content, or resources.
+
+7.2 You should be aware the data, content, and resources presented to you through such a third party application may be protected by intellectual property rights which are owned by the providers (or by other persons or companies on their behalf). You may not modify, rent, lease, loan, sell, distribute or create derivative works based on these data, content, or resources (either in whole or in part) unless you have been specifically given permission to do so by the relevant owners.
+
+7.3 You acknowledge that your use of such third party applications, data, content, or resources may be subject to separate terms between you and the relevant third party. In that case, the License Agreement does not affect your legal relationship with these third parties.
 
 
-<h3>12.赔偿</h3>
-12.1 您同意在法律所允许的最大限度内保护 Google、其附属公司及其各自的董事、高管、员工和代理商，确保其不会因由下列情况引起或产生的任何及所有索赔、诉讼、起诉或诉讼程序，以及任何及所有损失、债务、损害、成本和费用（包括合理的律师费用）而遭受损失或伤害：(a) 您对 SDK 的使用；(b) 您在 SDK 上开发的任何侵犯任何人的任何版权、商标、商业机密、商业外观、专利或其他知识产权或诽谤任何人或侵犯其公开权或隐私权的应用；以及 (c) 您的任何不遵守本许可协议的行为。
+<h3>8. Using Android APIs</h3>
+8.1 Google Data APIs
+
+8.1.1 If you use any API to retrieve data from Google, you acknowledge that the data may be protected by intellectual property rights which are owned by Google or those parties that provide the data (or by other persons or companies on their behalf). Your use of any such API may be subject to additional Terms of Service. You may not modify, rent, lease, loan, sell, distribute or create derivative works based on this data (either in whole or in part) unless allowed by the relevant Terms of Service.
+
+8.1.2 If you use any API to retrieve a user's data from Google, you acknowledge and agree that you shall retrieve data only with the user's explicit consent and only when, and for the limited purposes for which, the user has given you permission to do so.
 
 
-<h3>13.许可协议的更改</h3>
-13.1 Google 可能会在分发新版本 SDK 时对许可协议作出更改。做出这些更改后，Google 将在提供 SDK 的网站上公布新版本的许可协议。
+<h3>9. Terminating this License Agreement</h3>
+9.1 The License Agreement will continue to apply until terminated by either you or Google as set out below.
+
+9.2 If you want to terminate the License Agreement, you may do so by ceasing your use of the SDK and any relevant developer credentials.
+
+9.3 Google may at any time, terminate the License Agreement with you if:
+(A) you have breached any provision of the License Agreement; or
+(B) Google is required to do so by law; or
+(C) the partner with whom Google offered certain parts of SDK (such as APIs) to you has terminated its relationship with Google or ceased to offer certain parts of the SDK to you; or
+(D) Google decides to no longer provide the SDK or certain parts of the SDK to users in the country in which you are resident or from which you use the service, or the provision of the SDK or certain SDK services to you by Google is, in Google's sole discretion, no longer commercially viable.
+
+9.4 When the License Agreement comes to an end, all of the legal rights, obligations and liabilities that you and Google have benefited from, been subject to (or which have accrued over time whilst the License Agreement has been in force) or which are expressed to continue indefinitely, shall be unaffected by this cessation, and the provisions of paragraph 14.7 shall continue to apply to such rights, obligations and liabilities indefinitely.
 
 
-<h3>14.一般法律条款</h3>
-14.1 本许可协议构成您与 Google 之间的完整法律协议，管辖您对 SDK 的使用（不包括 Google 可能依据另外的书面协议向您提供的任何服务），并完全取代您之前与 Google 之间涉及 SDK 的任何协议。
+<h3>10. DISCLAIMER OF WARRANTIES</h3>
+10.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SDK IS AT YOUR SOLE RISK AND THAT THE SDK IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND FROM GOOGLE.
 
-14.2 您同意，如果 Google 不行使或强制执行本许可协议包含（或 Google 在任何适用法律下享有）的任何法定权利或救济，不得视为 Google 正式放弃这些权利，Google 仍可获得这些权利或救济。
+10.2 YOUR USE OF THE SDK AND ANY MATERIAL DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE SDK IS AT YOUR OWN DISCRETION AND RISK AND YOU ARE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR OTHER DEVICE OR LOSS OF DATA THAT RESULTS FROM SUCH USE.
 
-14.3 如果任何拥有管辖权的法院将本许可协议的任何条款裁定为无效，则该条款将从本许可协议中删除，而不会影响本许可协议的其余部分。本许可协议的其余条款将继续有效且可强制执行。
-
-14.4 您承认并同意，Google 集团旗下的每一个成员都将成为本许可协议的第三方受益人，并且上述其他公司将有权直接强制执行和依赖本许可协议中任何授予其利益（或支持其权利）的条款。除此之外，任何其他人员或公司均不得成为本许可协议的第三方受益人。
-
-14.5 出口限制。SDK 受美国出口法律和法规的制约。您必须遵守适用于 SDK 的所有国内和国际出口法律和法规。这些法律包括目的地、最终用户和最终用途方面的限制。
-
-14.6 本许可协议中授予的权利不得在未事先获得另一方书面批准的情况下由您或 Google 进行转让或转移。未经另一方事先书面批准，您或 Google 均不得将其在本许可协议下的责任或义务委托给他人。
-
-14.7 本许可协议以及您与 Google 在本许可协议下的关系受加利福尼亚州法律管辖，不考虑与其他法律条款是否冲突。您与 Google 同意服从位于加利福尼亚州圣克拉拉县内法院的专属管辖权，以解决本许可协议引起的任何法律事务。尽管有上述规定，您同意仍允许 Google 在任何管辖区域申请禁令救济（或同等类型的紧急法律救济）。
+10.3 GOOGLE FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
 
 
-<em>2012 年 11 月 13 日</em>
+<h3>11. LIMITATION OF LIABILITY</h3>
+11.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT GOOGLE, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS SHALL NOT BE LIABLE TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES THAT MAY BE INCURRED BY YOU, INCLUDING ANY LOSS OF DATA, WHETHER OR NOT GOOGLE OR ITS REPRESENTATIVES HAVE BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING.
+
+
+<h3>12. Indemnification</h3>
+12.1 To the maximum extent permitted by law, you agree to defend, indemnify and hold harmless Google, its affiliates and their respective directors, officers, employees and agents from and against any and all claims, actions, suits or proceedings, as well as any and all losses, liabilities, damages, costs and expenses (including reasonable attorneys fees) arising out of or accruing from (a) your use of the SDK, (b) any application you develop on the SDK that infringes any copyright, trademark, trade secret, trade dress, patent or other intellectual property right of any person or defames any person or violates their rights of publicity or privacy, and (c) any non-compliance by you with the License Agreement.
+
+
+<h3>13. Changes to the License Agreement</h3>
+13.1 Google may make changes to the License Agreement as it distributes new versions of the SDK. When these changes are made, Google will make a new version of the License Agreement available on the website where the SDK is made available.
+
+
+<h3>14. General Legal Terms</h3>
+14.1 The License Agreement constitutes the whole legal agreement between you and Google and governs your use of the SDK (excluding any services which Google may provide to you under a separate written agreement), and completely replaces any prior agreements between you and Google in relation to the SDK.
+
+14.2 You agree that if Google does not exercise or enforce any legal right or remedy which is contained in the License Agreement (or which Google has the benefit of under any applicable law), this will not be taken to be a formal waiver of Google's rights and that those rights or remedies will still be available to Google.
+
+14.3 If any court of law, having the jurisdiction to decide on this matter, rules that any provision of the License Agreement is invalid, then that provision will be removed from the License Agreement without affecting the rest of the License Agreement. The remaining provisions of the License Agreement will continue to be valid and enforceable.
+
+14.4 You acknowledge and agree that each member of the group of companies of which Google is the parent shall be third party beneficiaries to the License Agreement and that such other companies shall be entitled to directly enforce, and rely upon, any provision of the License Agreement that confers a benefit on (or rights in favor of) them. Other than this, no other person or company shall be third party beneficiaries to the License Agreement.
+
+14.5 EXPORT RESTRICTIONS. THE SDK IS SUBJECT TO UNITED STATES EXPORT LAWS AND REGULATIONS. YOU MUST COMPLY WITH ALL DOMESTIC AND INTERNATIONAL EXPORT LAWS AND REGULATIONS THAT APPLY TO THE SDK. THESE LAWS INCLUDE RESTRICTIONS ON DESTINATIONS, END USERS AND END USE.
+
+14.6 The rights granted in the License Agreement may not be assigned or transferred by either you or Google without the prior written approval of the other party. Neither you nor Google shall be permitted to delegate their responsibilities or obligations under the License Agreement without the prior written approval of the other party.
+
+14.7 The License Agreement, and your relationship with Google under the License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from the License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
+
+<em>November 20, 2015</em>
 </div>
 
 

@@ -61,133 +61,134 @@ Anda harus menyetujui ketentuan dan persyaratan berikut.</p>
 <h2 class="norule">Ketentuan dan Persyaratan</h2>
 Ini adalah Perjanjian Lisensi Kit Pengembangan Perangkat Lunak Android
 
-<h3>1. Pengantar</h3>
-1.1 Kit Pengembangan Perangkat Lunak Android (dalam Perjanjian Lisensi ini disebut "SDK" dan secara spesifik termasuk file sistem Android, API paket, dan add-on API Google) diberikan lisensinya kepada Anda sesuai dengan ketentuan Perjanjian Lisensi ini. Perjanjian Lisensi ini merupakan kontrak yang mengikat secara hukum antara Anda dan Google dalam kaitannya dengan penggunaan SDK oleh Anda.
+<h3>1. Introduction</h3>
+1.1 The Android Software Development Kit (referred to in the License Agreement as the "SDK" and specifically including the Android system files, packaged APIs, and Google APIs add-ons) is licensed to you subject to the terms of the License Agreement. The License Agreement forms a legally binding contract between you and Google in relation to your use of the SDK.
 
-1.2 "Android" berarti sekumpulan perangkat lunak Android untuk perangkat, seperti yang tersedia di Android Open Source Project, yang ada di URL berikut: http://source.android.com/, yang selalu diperbarui.
+1.2 "Android" means the Android software stack for devices, as made available under the Android Open Source Project, which is located at the following URL: http://source.android.com/, as updated from time to time.
 
-1.3 "Google" berarti Google Inc., perusahaan asal Delaware dengan kantor bisnis utama di 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
+1.3 A "compatible implementation" means any Android device that (i) complies with the Android Compatibility Definition document, which can be found at the Android compatibility website (http://source.android.com/compatibility) and which may be updated from time to time; and (ii) successfully passes the Android Compatibility Test Suite (CTS).
 
-
-<h3>2. Menerima Perjanjian Lisensi ini</h3>
-2.1 Agar bisa menggunakan SDK, Anda terlebih dahulu harus menyetujui Perjanjian Lisensi ini. Anda tidak boleh menggunakan SDK jika tidak menerima Perjanjian Lisensi ini.
-
-2.2 Dengan mengklik untuk menerima, berarti Anda menyetujui ketentuan Perjanjian Lisensi ini.
-
-2.3 Anda tidak boleh menggunakan SDK dan tidak boleh menerima Perjanjian Lisensi jika Anda adalah orang yang dilarang menerima SDK berdasarkan hukum Amerika Serikat atau negara lainnya termasuk negara di mana Anda tinggal atau dari mana Anda menggunakan SDK.
-
-2.4 Jika Anda setuju untuk terikat dengan Perjanjian Lisensi ini atas nama perusahaan Anda atau entitas lainnya, berarti Anda mewakili dan menjamin bahwa Anda memiliki kewenangan hukum penuh untuk mengikat perusahaan Anda atau entitas tesebut pada Perjanjian Lisensi ini. Jika Anda tidak memiliki kewenangan yang disyaratkan, Anda tidak boleh menerima Perjanjian Lisensi atau menggunakan SDK atas nama perusahaan Anda atau entitas lainnya.
+1.4 "Google" means Google Inc., a Delaware corporation with principal place of business at 1600 Amphitheatre Parkway, Mountain View, CA 94043, United States.
 
 
-<h3>3. Lisensi SDK dari Google</h3>
-3.1 Sesuai dengan ketentuan Perjanjian Lisensi ini, Google memberi Anda lisensi non-eksklusif yang tidak bisa dialihkan, bebas royalti, bersifat global dan terbatas dalam menggunakan SDK hanya untuk keperluan pengembangan aplikasi yang berjalan di platform Android.
+<h3>2. Accepting this License Agreement</h3>
+2.1 In order to use the SDK, you must first agree to the License Agreement. You may not use the SDK if you do not accept the License Agreement.
 
-3.2 Anda setuju bahwa Google atau pihak ketiga lainnya memiliki semua hak, kuasa dan kepentingan hukum dalam dan pada SDK, termasuk Hak Kekayaan Intelektual yang terdapat dalam SDK. "Hak Kekayaan Intelektual" berarti setiap dan semua hak yang berdasarkan pada hukum paten, hukum hak cipta, hukum rahasia dagang, hukum merek dagang, dan setiap dan semua hak kepemilikan lainnya. Google memiliki semua hak yang tidak secara tersurat diberikan kepada Anda.
+2.2 By clicking to accept, you hereby agree to the terms of the License Agreement.
 
-3.3 Anda tidak boleh menggunakan SDK untuk tujuan apa pun yang tidak secara tersurat diizinkan dalam Perjanjian Lisensi ini.  Kecuali sejauh yang diperlukan oleh lisensi pihak ketiga yang berlaku, Anda tidak boleh: (a) menyalin (kecuali untuk keperluan pencadangan), memodifikasi, mengadaptasi, mendistribusikan kembali, mendekompilasi, merekayasa balik, membongkar atau membuat karya turunan dari SDK atau bagian apa pun dari SDK; atau (b) memuat bagian apa pun dari SDK ke sebuah handset ponsel atau perangkat keras selain komputer pribadi, menggabungkan suatu bagian dari SDK dengan perangkat lunak lain, atau mendistribusikan perangkat lunak atau perangkat yang menggabungkan suatu bagian dari SDK.
+2.3 You may not use the SDK and may not accept the License Agreement if you are a person barred from receiving the SDK under the laws of the United States or other countries, including the country in which you are resident or from which you use the SDK.
 
-3.4 Anda setuju tidak akan mengambil tindakan apa pun yang dapat menyebabkan atau mengakibatkan fragmentasi Android, termasuk namun tidak terbatas pada distribusi, berpartisipasi dalam pembuatan, atau mempromosikan dengan cara apa pun alat bantu pengembangan perangkat lunak yang berasal dari SDK.
-
-3.5 Penggunaan, reproduksi dan distribusi komponen SDK yang berlisensi perangkat lunak sumber terbuka diatur semata-mata oleh ketentuan lisensi perangkat lunak sumber terbuka tersebut dan bukan Perjanjian Lisensi ini.
-
-3.6 Anda setuju bahwa bentuk dan sifat SDK yang disediakan oleh Google dapat berubah tanpa pemberitahuan sebelumnya kepada Anda dan bahwa versi SDK mendatang mungkin tidak kompatibel dengan aplikasi yang dikembangkan di versi SDK sebelumnya. Anda setuju bahwa Google boleh menghentikan (secara permanen atau sementara) penyediaan SDK (atau fitur apa pun dalam SDK) kepada Anda atau pengguna pada umumnya atas kebijakan Google, tanpa pemberitahuan sebelumnya kepada Anda.
-
-3.7 Perjanjian Lisensi ini tidak memberi Anda hak untuk menggunakan nama dagang, merek dagang, merek layanan, logo, nama domain, atau fitur merek khas Google lainnya.
-
-3.8 Anda setuju bahwa Anda tidak akan menghapus, mengaburkan, atau mengubah pernyataan hak kepemilikan apa pun (termasuk pemberitahuan hak cipta dan merek dagang) yang terlampir atau termuat dalam SDK.
+2.4 If you are agreeing to be bound by the License Agreement on behalf of your employer or other entity, you represent and warrant that you have full legal authority to bind your employer or such entity to the License Agreement. If you do not have the requisite authority, you may not accept the License Agreement or use the SDK on behalf of your employer or other entity.
 
 
-<h3>4. Penggunaan SDK oleh Anda</h3>
-4.1 Google setuju bahwa ia tidak memiliki hak, kuasa atau kepentingan dari Anda (atau pemberi lisensi Anda) berdasarkan Perjanjian Lisensi ini dalam atau pada aplikasi perangkat lunak apa pun yang Anda kembangkan menggunakan SDK, termasuk hak kekayaan intelektual yang terdapat dalam aplikasi tersebut.
+<h3>3. SDK License from Google</h3>
+3.1 Subject to the terms of the License Agreement, Google grants you a limited, worldwide, royalty-free, non-assignable, non-exclusive, and non-sublicensable license to use the SDK solely to develop applications for compatible implementations of Android.
 
-4.2 Anda setuju untuk menggunakan SDK dan mengembangkan aplikasi hanya untuk tujuan yang diizinkan oleh (a) Perjanjian Lisensi ini dan (b) hukum yang berlaku, peraturan atau praktik atau panduan yang diterima secara umum di yurisdiksi yang terkait (termasuk hukum mengenai ekspor data atau perangkat lunak ke dan dari Amerika Serikat atau negara lain yang relevan).
+3.2 You may not use this SDK to develop applications for other platforms (including non-compatible implementations of Android) or to develop another SDK. You are of course free to develop applications for other platforms, including non-compatible implementations of Android, provided that this SDK is not used for that purpose.
 
-4.3 Anda setuju jika Anda menggunakan SDK untuk mengembangkan aplikasi untuk pengguna umum, Anda akan melindungi privasi dan hak hukum pengguna tersebut. Jika pengguna memberikan nama, kata sandi, atau informasi login atau informasi pribadinya, Anda harus membuat pengguna tersebut menyadari bahwa informasi yang diberikannya akan bisa digunakan oleh aplikasi Anda, dan Anda harus memberikan perlindungan dan pemberitahuan privasi yang memadai secara hukum bagi pengguna tersebut. Jika aplikasi Anda menyimpan informasi pribadi atau sensitif yang diberikan oleh pengguna, aplikasi Anda harus melakukannya dengan aman. Jika pengguna menggunakan aplikasi Anda dengan memberikan informasi Akun Google, aplikasi Anda hanya boleh menggunakan informasi tersebut untuk mengakses Akun Google pengguna saat, dan untuk tujuan terbatas di mana, pengguna tersebut telah memberikan izin kepada Anda untuk melakukannya.
+3.3 You agree that Google or third parties own all legal right, title and interest in and to the SDK, including any Intellectual Property Rights that subsist in the SDK. "Intellectual Property Rights" means any and all rights under patent law, copyright law, trade secret law, trademark law, and any and all other proprietary rights. Google reserves all rights not expressly granted to you.
 
-4.4 Anda setuju bahwa Anda tidak akan terlibat dalam aktivitas apa pun dengan SDK, termasuk pengembangan atau distribusi aplikasi yang mengganggu, mengacaukan, merusak, atau mengakses secara tidak sah server, jaringan atau properti atau layanan pihak ketiga lainnya, termasuk namun tidak terbatas pada, Google atau operator komunikasi seluler lainnya.
+3.4 You may not use the SDK for any purpose not expressly permitted by the License Agreement.  Except to the extent required by applicable third party licenses, you may not: (a) copy (except for backup purposes), modify, adapt, redistribute, decompile, reverse engineer, disassemble, or create derivative works of the SDK or any part of the SDK; or (b) load any part of the SDK onto a mobile handset or any other hardware device except a personal computer, combine any part of the SDK with other software, or distribute any software or device incorporating a part of the SDK.
 
-4.5 Anda setuju bertanggung jawab penuh untuk (dan bahwa Google tidak bertanggung jawab tehadap Anda atau pihak ketiga lainnya untuk) data, konten, atau sumber daya apa pun yang Anda buat, kirimkan atau tampilkan melalui Android dan/atau aplikasi untuk Android, dan terhadap konsekuensi tindakan Anda (termasuk kerugian atau kerusakan apa pun yang mungkin dialami Google).
+3.5 Use, reproduction and distribution of components of the SDK licensed under an open source software license are governed solely by the terms of that open source software license and not the License Agreement.
 
-4.6 Anda setuju bertanggung jawab penuh terhadap (dan bahwa Google tidak bertanggung jawab terhadap Anda atau pihak ketiga lainnya untuk) pelanggaran kewajiban Anda berdasarkan Perjanjian Lisensi ini, kontrak pihak ketiga yang berlaku atau Ketentuan Layanan, atau hukum atau peraturan yang berlaku, dan terhadap konsekuensi (termasuk kerugian atau kerusakan yang mungkin dialami Google atau pihak ketiga lainnya) akibat pelanggaran tersebut.
+3.6 You agree that the form and nature of the SDK that Google provides may change without prior notice to you and that future versions of the SDK may be incompatible with applications developed on previous versions of the SDK. You agree that Google may stop (permanently or temporarily) providing the SDK (or any features within the SDK) to you or to users generally at Google's sole discretion, without prior notice to you.
 
+3.7 Nothing in the License Agreement gives you a right to use any of Google's trade names, trademarks, service marks, logos, domain names, or other distinctive brand features.
 
-<h3>5. Kredensial Pengembang Anda</h3>
-5.1 Anda setuju bertanggung jawab untuk menjaga kerahasiaan semua kredensial pengembang yang mungkin diberikan Google kepada Anda atau yang mungkin Anda pilih sendiri dan bahwa Anda akan bertanggung jawab penuh terhadap semua aplikasi yang dikembangkan dengan kredensial pengembang Anda.
-
-
-<h3>6. Privasi dan Informasi</h3>
-6.1 Untuk terus berinovasi dan meningkatkan SDK, Google boleh mengumpulkan statistik penggunaan tertentu dari perangkat lunak termasuk namun tidak terbatas pada identifier unik, alamat IP terkait, nomor versi perangkat lunak, dan informasi yang menjadi tempat penggunaan alat dan/atau layanan dalam SDK dan cara penggunaannya. Sebelum informasi ini dikumpulkan, SDK akan memberi tahu dan meminta persetujuan Anda. Jika Anda tidak memberikan persetujuan, informasi tersebut tidak akan dikumpulkan.
-
-6.2 Data yang dikumpulkan akan diperiksa secara agregat untuk meningkatkan SDK dan dikelola sesuai dengan Kebijakan Privasi Google.
+3.8 You agree that you will not remove, obscure, or alter any proprietary rights notices (including copyright and trademark notices) that may be affixed to or contained within the SDK.
 
 
-<h3>7. Aplikasi Pihak Ketiga</h3>
-7.1 Jika Anda menggunakan SDK untuk menjalankan aplikasi yang dikembangkan oleh pihak ketiga atau yang mengakses data, konten atau sumber daya yang disediakan oleh pihak ketiga, Anda setuju bahwa Google tidak bertanggung jawab terhadap aplikasi, data, konten atau sumber daya tersebut. Anda memahami bahwa semua data, konten atau sumber daya yang mungkin Anda akses melalui aplikasi pihak ketiga merupakan tanggung jawab penuh dari pihak yang menjadi asal data tersebut dan Google tidak bertanggung jawab terhadap kerugian atau kerusakan apa pun yang mungkin Anda alami sebagai akibat menggunakan atau mengakses aplikasi, data, konten, atau sumber daya pihak ketiga tersebut.
+<h3>4. Use of the SDK by You</h3>
+4.1 Google agrees that it obtains no right, title or interest from you (or your licensors) under the License Agreement in or to any software applications that you develop using the SDK, including any intellectual property rights that subsist in those applications.
 
-7.2 Anda harus menyadari bahwa data, konten dan sumber daya yang diberikan kepada Anda melalui aplikasi pihak ketiga mungkin dilindungi oleh hak kekayaan intelektual yang dimiliki oleh penyedia (atau oleh orang lain atau perusahaan atas nama mereka). Anda tidak boleh memodifikasi, menyewakan, menyewabelikan, meminjamkan, menjual, mendistribusikan atau membuat karya turunan berdasarkan data, konten, atau sumber daya ini (baik secara keseluruhan atau sebagian) kecuali Anda secara khusus diberikan izin untuk melakukannya oleh pemilik yang bersangkutan.
+4.2 You agree to use the SDK and write applications only for purposes that are permitted by (a) the License Agreement and (b) any applicable law, regulation or generally accepted practices or guidelines in the relevant jurisdictions (including any laws regarding the export of data or software to and from the United States or other relevant countries).
 
-7.3 Anda mengakui bahwa penggunaan Anda atas aplikasi, data, konten, atau sumber daya pihak ketiga semacam itu tunduk pada ketentuan terpisah antara Anda dan pihak ketiga yang bersangkutan. Dalam hal ini, Perjanjian Lisensi ini tidak memengaruhi hubungan hukum dengan pihak ketiga tersebut.
+4.3 You agree that if you use the SDK to develop applications for general public users, you will protect the privacy and legal rights of those users. If the users provide you with user names, passwords, or other login information or personal information, you must make the users aware that the information will be available to your application, and you must provide legally adequate privacy notice and protection for those users. If your application stores personal or sensitive information provided by users, it must do so securely. If the user provides your application with Google Account information, your application may only use that information to access the user's Google Account when, and for the limited purposes for which, the user has given you permission to do so.
 
+4.4 You agree that you will not engage in any activity with the SDK, including the development or distribution of an application, that interferes with, disrupts, damages, or accesses in an unauthorized manner the servers, networks, or other properties or services of any third party including, but not limited to, Google or any mobile communications carrier.
 
-<h3>8. Menggunakan API Android</h3>
-8.1 API Data Google
+4.5 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any data, content, or resources that you create, transmit or display through Android and/or applications for Android, and for the consequences of your actions (including any loss or damage which Google may suffer) by doing so.
 
-8.1.1 Jika Anda menggunakan API (Antarmuka Pemrograman Aplikasi) untuk mengambil data dari Google, Anda mengakui bahwa data tersebut dilindungi hak kekayaan intelektual yang dimiliki Google atau pihak-pihak yang menyediakan data (atau oleh orang lain atau perusahaan atas nama mereka). Penggunaan API oleh Anda tunduk pada Ketentuan Layanan tambahan. Anda tidak boleh memodifikasi, menyewakan, menyewabelikan, meminjamkan, menjual, mendistribusikan atau membuat karya turunan berdasarkan data ini (baik secara keseluruhan atau sebagian) kecuali diizinkan oleh Ketentuan Layanan yang bersangkutan.
-
-8.1.2 Jika Anda menggunakan API dalam bentuk apa pun untuk mengambil data pengguna dari Google, Anda mengakui dan menyetujui bahwa Anda akan mengambil data hanya dengan persetujuan yang jelas dari pengguna dan hanya bila, dan sebatas keperluan yang diizinkan oleh pengguna tersebut untuk Anda lakukan.
+4.6 You agree that you are solely responsible for (and that Google has no responsibility to you or to any third party for) any breach of your obligations under the License Agreement, any applicable third party contract or Terms of Service, or any applicable law or regulation, and for the consequences (including any loss or damage which Google or any third party may suffer) of any such breach.
 
 
-<h3>9. Pengakhiran Perjanjian Lisensi ini</h3>
-9.1 Perjanjian Lisensi ini akan terus berlaku hingga diakhiri oleh Anda atau Google sebagaimana diatur di bawah ini.
-
-9.2 Jika Anda ingin mengakhiri Perjanjian Lisensi ini, Anda boleh melakukannya dengan menghentikan penggunaan SDK dan kredensial pengembang yang bersangkutan.
-
-9.3 Google boleh mengakhiri Perjanjian Lisensi ini dengan Anda kapan saja jika:
-(A) Anda telah melanggar suatu ketetapan Perjanjian Lisensi ini; atau
-(B) Google diharuskan melakukannya oleh hukum; atau
-(C) mitra Google dalam menawarkan bagian SDK (seperti API) tertentu kepada Anda telah mengakhiri hubungannya dengan Google atau tidak lagi menawarkan bagian SDK tertentu kepada Anda; atau
-(D) Google memutuskan untuk tidak lagi menyediakan SDK atau bagian SDK tertentu kepada pengguna di negara tempat Anda tinggal atau negara tempat asal Anda menggunakan layanan, atau ketetapan SDK atau layanan SDK tertentu kepada Anda oleh Google yang, menurut kebijakan Google, tidak lagi layak secara komersial.
-
-9.4 Saat Perjanjian Lisensi ini berakhir, semua hak, kewajiban dan tanggung jawab hukum di mana Anda dan Google telah memperoleh manfaat, tunduk pada (atau yang terkumpul selama berlakunya Perjanjian Lisensi ini) atau yang dinyatakan terus berlaku tanpa batas, tidak akan dipengaruhi oleh penghentian ini, dan ketetapan ayat 14.7 akan terus berlaku terhadap hak, kewajiban dan tanggung jawab tanpa batas.
+<h3>5. Your Developer Credentials</h3>
+5.1 You agree that you are responsible for maintaining the confidentiality of any developer credentials that may be issued to you by Google or which you may choose yourself and that you will be solely responsible for all applications that are developed under your developer credentials.
 
 
-<h3>10. SANGGAHAN JAMINAN</h3>
-10.1 ANDA SEPENUHNYA MEMAHAMI DAN MENYETUJUI BAHWA PENGGUNAAN SDK OLEH ANDA MERUPAKAN RISIKO ANDA SENDIRI DAN BAHWA SDK INI DISEDIAKAN "APA ADANYA" DAN "SEBAGAIMANA TERSEDIA" TANPA JAMINAN DALAM BENTUK APA PUN DARI GOOGLE.
+<h3>6. Privacy and Information</h3>
+6.1 In order to continually innovate and improve the SDK, Google may collect certain usage statistics from the software including but not limited to a unique identifier, associated IP address, version number of the software, and information on which tools and/or services in the SDK are being used and how they are being used. Before any of this information is collected, the SDK will notify you and seek your consent. If you withhold consent, the information will not be collected.
 
-10.2 PENGGUNAAN SDK DAN MATERI APA PUN YANG DIUNDUH ATAU DIPEROLEH MELALUI PENGGUNAAN SDK OLEH ANDA ADALAH ATAS KEHENDAK DAN RISIKO ANDA SENDIRI DAN ANDA BERTANGGUNG JAWAB PENUH TERHADAP KERUSAKAN PADA SISTEM KOMPUTER ATAU PERANGKAT LAIN ATAU HILANGNYA DATA AKIBAT PENGGUNAAN SDK OLEH ANDA.
-
-10.3 GOOGLE LEBIH LANJUT MENYANGGAH SEMUA JAMINAN DAN PERSYARATAN APA PUN, BAIK TERSURAT MAUPUN TERSIRAT, TERMASUK NAMUN TIDAK TERBATAS PADA JAMINAN TERSIRAT DAN PERSYARATAN MENGENAI DAYA JUAL, KESESUAIAN DENGAN TUJUAN TERTENTU, DAN NON-PELANGGARAN.
+6.2 The data collected is examined in the aggregate to improve the SDK and is maintained in accordance with Google's Privacy Policy.
 
 
-<h3>11. PEMBATASAN KEWAJIBAN</h3>
-11.1 ANDA SEPENUHNYA MEMAHAMI DAN MENYETUJUI BAHWA GOOGLE, ANAK PERUSAHAAN DAN AFILIASINYA, DAN PEMBERI LISENSINYA TIDAK AKAN BERTANGGUNG JAWAB KEPADA ANDA BERDASARKAN TEORI KEWAJIBAN TERHADAP SEGALA KERUGIAN LANGSUNG, TIDAK LANGSUNG, INSIDENTAL, KHUSUS, JANGKA PANJANG ATAU GANTI RUGI YANG DIAKIBATKAN OLEH ANDA, TERMASUK HILANGNYA DATA, WALAUPUN GOOGLE ATAU PERWAKILANNYA TELAH DIBERI TAHU ATAU SEHARUSNYA MENGETAHUI KEMUNGKINAN TIMBULNYA KEHILANGAN TERSEBUT.
+<h3>7. Third Party Applications</h3>
+7.1 If you use the SDK to run applications developed by a third party or that access data, content or resources provided by a third party, you agree that Google is not responsible for those applications, data, content, or resources. You understand that all data, content or resources which you may access through such third party applications are the sole responsibility of the person from which they originated and that Google is not liable for any loss or damage that you may experience as a result of the use or access of any of those third party applications, data, content, or resources.
+
+7.2 You should be aware the data, content, and resources presented to you through such a third party application may be protected by intellectual property rights which are owned by the providers (or by other persons or companies on their behalf). You may not modify, rent, lease, loan, sell, distribute or create derivative works based on these data, content, or resources (either in whole or in part) unless you have been specifically given permission to do so by the relevant owners.
+
+7.3 You acknowledge that your use of such third party applications, data, content, or resources may be subject to separate terms between you and the relevant third party. In that case, the License Agreement does not affect your legal relationship with these third parties.
 
 
-<h3>12. Penggantian Kerugian</h3>
-12.1 Sejauh maksimal yang diizinkan oleh hukum, Anda setuju untuk membela, mengganti kerugian dan melepaskan tanggung jawab Google, afiliasinya beserta direksi, petugas, karyawan dan agennya dari dan terhadap setiap dan semua klaim, tindakan, gugatan, proses hukum, serta setiap dan semua kehilangan, kewajiban, kerusakan, biaya dan pengeluaran (termasuk biaya pengacara yang sewajarnya) yang timbul atau diakibatkan dari (a) penggunaan SDK oleh Anda, (b) aplikasi apa pun yang Anda kembangkan dari SDK yang melanggar hak cipta, merek dagang, rahasia dagang, desain produk, paten atau hak kekayaan intelektual lainnya dari seseorang atau mencemarkan nama baik seseorang atau melanggar hak mereka berkaitan dengan publisitas atau privasi, dan (c) ketidakpatuhan Anda terhadap Perjanjian Lisensi ini.
+<h3>8. Using Android APIs</h3>
+8.1 Google Data APIs
+
+8.1.1 If you use any API to retrieve data from Google, you acknowledge that the data may be protected by intellectual property rights which are owned by Google or those parties that provide the data (or by other persons or companies on their behalf). Your use of any such API may be subject to additional Terms of Service. You may not modify, rent, lease, loan, sell, distribute or create derivative works based on this data (either in whole or in part) unless allowed by the relevant Terms of Service.
+
+8.1.2 If you use any API to retrieve a user's data from Google, you acknowledge and agree that you shall retrieve data only with the user's explicit consent and only when, and for the limited purposes for which, the user has given you permission to do so.
 
 
-<h3>13. Perubahan Perjanjian Lisensi</h3>
-13.1 Google boleh membuat perubahan pada Perjanjian Lisensi saat mendistribusikan versi baru SDK. Saat perubahan tersebut dibuat, Google akan menyediakan versi baru Perjanjian Lisensi di situs web penyediaan SDK.
+<h3>9. Terminating this License Agreement</h3>
+9.1 The License Agreement will continue to apply until terminated by either you or Google as set out below.
+
+9.2 If you want to terminate the License Agreement, you may do so by ceasing your use of the SDK and any relevant developer credentials.
+
+9.3 Google may at any time, terminate the License Agreement with you if:
+(A) you have breached any provision of the License Agreement; or
+(B) Google is required to do so by law; or
+(C) the partner with whom Google offered certain parts of SDK (such as APIs) to you has terminated its relationship with Google or ceased to offer certain parts of the SDK to you; or
+(D) Google decides to no longer provide the SDK or certain parts of the SDK to users in the country in which you are resident or from which you use the service, or the provision of the SDK or certain SDK services to you by Google is, in Google's sole discretion, no longer commercially viable.
+
+9.4 When the License Agreement comes to an end, all of the legal rights, obligations and liabilities that you and Google have benefited from, been subject to (or which have accrued over time whilst the License Agreement has been in force) or which are expressed to continue indefinitely, shall be unaffected by this cessation, and the provisions of paragraph 14.7 shall continue to apply to such rights, obligations and liabilities indefinitely.
 
 
-<h3>14. Ketentuan Hukum Umum</h3>
-14.1 Perjanjian Lisensi ini merupakan perjanjian hukum antara Anda dan Google dan mengatur penggunaan SDK oleh Anda (tidak termasuk layanan apa pun yang mungkin disediakan Google untuk Anda dalam perjanjian tertulis terpisah), dan sepenuhnya menggantikan perjanjian sebelumnya antara Anda dan Google dalam kaitannya dengan SDK.
+<h3>10. DISCLAIMER OF WARRANTIES</h3>
+10.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE SDK IS AT YOUR SOLE RISK AND THAT THE SDK IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND FROM GOOGLE.
 
-14.2 Anda setuju bahwa jika Google tidak menjalankan atau menerapkan hak atau upaya hukum yang terkandung dalam Perjanjian Lisensi ini (atau bila Google memiliki kewenangan berdasarkan hukum yang berlaku), tindakan ini tidak akan dianggap sebagai pelepasan hak secara resmi oleh Google dan bahwa hak atau upaya hukum tesebut akan tetap bisa digunakan oleh Google.
+10.2 YOUR USE OF THE SDK AND ANY MATERIAL DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE SDK IS AT YOUR OWN DISCRETION AND RISK AND YOU ARE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR OTHER DEVICE OR LOSS OF DATA THAT RESULTS FROM SUCH USE.
 
-14.3 Jika persidangan hukum yang berwenang untuk memutuskan perkara ini menetapkan bahwa ada ketetapan Perjanjian Lisensi ini yang tidak berlaku, maka ketetapan tersebut akan dihapus dari Perjanjian Lisensi tanpa memengaruhi bagian selebihnya dari Perjanjian Lisensi ini. Ketetapan selebihnya dari Perjanjian Lisensi ini akan tetap sah dan berlaku.
-
-14.4 Anda mengakui dan menyetujui bahwa setiap anggota dari kelompok perusahaan yang diinduki oleh Google akan menjadi pihak ketiga penerima manfaat dari Perjanjian Lisensi ini dan bahwa perusahaan tersebut berhak untuk secara langsung memberlakukan, dan bergantung pada, ketetapan yang dimuat dalam Perjanjian Lisensi ini yang memberikan manfaat (atau hak yang mendukung) kepada mereka. Selain yang telah disebutkan di atas, tidak ada orang atau perusahaan lain yang akan menjadi pihak ketiga penerima manfaat dari Perjanjian Lisensi ini
-
-14.5 PEMBATASAN EKSPOR. SDK TUNDUK PADA HUKUM DAN PERATURAN EKSPOR AMERIKA SERIKAT. ANDA HARUS MEMATUHI SEMUA HUKUM DAN PERATURAN NASIONAL DAN INTERNASIONAL YANG BERLAKU PADA SDK. HUKUM INI MENYERTAKAN PEMBATASAN ATAS TUJUAN, PENGGUNA AKHIR DAN PENGGUNAAN AKHIR.
-
-14.6 Hak yang diberikan dalam Perjanjian Lisensi ini tidak boleh diberikan atau dialihkan baik oleh Anda maupun Google tanpa persetujuan tertulis sebelumnya dari pihak lain. Baik Anda maupun Google tidak diizinkan untuk mendelegasikan tanggung jawab atau kewajiban berdasarkan Perjanjian Lisensi ini tanpa persetujuan tertulis sebelumnya dari pihak lain.
-
-14.7 Perjanjian Lisensi ini, dan hubungan Anda dengan Google berdasarkan Perjanjian Lisensi ini, akan diatur oleh hukum Negara Bagian California tanpa mengindahkan pertentangan ketetapan hukumnya. Anda dan Google setuju untuk tunduk pada yurisdiksi eksklusif pengadilan yang berlokasi di county Santa Clara, California untuk menyelesaikan segala masalah hukum yang timbul dari Perjanjian Lisensi ini. Meski demikian, Anda setuju bahwa Google akan tetap diizinkan untuk mengajukan upaya hukum (atau tipe keringanan hukum setara yang mendesak) dalam yurisdiksi apa pun.
+10.3 GOOGLE FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
 
 
-<em>13 November 2012</em>
+<h3>11. LIMITATION OF LIABILITY</h3>
+11.1 YOU EXPRESSLY UNDERSTAND AND AGREE THAT GOOGLE, ITS SUBSIDIARIES AND AFFILIATES, AND ITS LICENSORS SHALL NOT BE LIABLE TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY DAMAGES THAT MAY BE INCURRED BY YOU, INCLUDING ANY LOSS OF DATA, WHETHER OR NOT GOOGLE OR ITS REPRESENTATIVES HAVE BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING.
+
+
+<h3>12. Indemnification</h3>
+12.1 To the maximum extent permitted by law, you agree to defend, indemnify and hold harmless Google, its affiliates and their respective directors, officers, employees and agents from and against any and all claims, actions, suits or proceedings, as well as any and all losses, liabilities, damages, costs and expenses (including reasonable attorneys fees) arising out of or accruing from (a) your use of the SDK, (b) any application you develop on the SDK that infringes any copyright, trademark, trade secret, trade dress, patent or other intellectual property right of any person or defames any person or violates their rights of publicity or privacy, and (c) any non-compliance by you with the License Agreement.
+
+
+<h3>13. Changes to the License Agreement</h3>
+13.1 Google may make changes to the License Agreement as it distributes new versions of the SDK. When these changes are made, Google will make a new version of the License Agreement available on the website where the SDK is made available.
+
+
+<h3>14. General Legal Terms</h3>
+14.1 The License Agreement constitutes the whole legal agreement between you and Google and governs your use of the SDK (excluding any services which Google may provide to you under a separate written agreement), and completely replaces any prior agreements between you and Google in relation to the SDK.
+
+14.2 You agree that if Google does not exercise or enforce any legal right or remedy which is contained in the License Agreement (or which Google has the benefit of under any applicable law), this will not be taken to be a formal waiver of Google's rights and that those rights or remedies will still be available to Google.
+
+14.3 If any court of law, having the jurisdiction to decide on this matter, rules that any provision of the License Agreement is invalid, then that provision will be removed from the License Agreement without affecting the rest of the License Agreement. The remaining provisions of the License Agreement will continue to be valid and enforceable.
+
+14.4 You acknowledge and agree that each member of the group of companies of which Google is the parent shall be third party beneficiaries to the License Agreement and that such other companies shall be entitled to directly enforce, and rely upon, any provision of the License Agreement that confers a benefit on (or rights in favor of) them. Other than this, no other person or company shall be third party beneficiaries to the License Agreement.
+
+14.5 EXPORT RESTRICTIONS. THE SDK IS SUBJECT TO UNITED STATES EXPORT LAWS AND REGULATIONS. YOU MUST COMPLY WITH ALL DOMESTIC AND INTERNATIONAL EXPORT LAWS AND REGULATIONS THAT APPLY TO THE SDK. THESE LAWS INCLUDE RESTRICTIONS ON DESTINATIONS, END USERS AND END USE.
+
+14.6 The rights granted in the License Agreement may not be assigned or transferred by either you or Google without the prior written approval of the other party. Neither you nor Google shall be permitted to delegate their responsibilities or obligations under the License Agreement without the prior written approval of the other party.
+
+14.7 The License Agreement, and your relationship with Google under the License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from the License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
+
+<em>November 20, 2015</em>
 </div>
 
 
