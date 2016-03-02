@@ -418,12 +418,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 .getDimensionPixelSize(R.dimen.notification_divider_height));
         mIncreasedPaddingBetweenElements = context.getResources()
                 .getDimensionPixelSize(R.dimen.notification_divider_height_increased);
-
         mBottomStackSlowDownHeight = mStackScrollAlgorithm.getBottomStackSlowDownLength();
         mMinTopOverScrollToEscape = getResources().getDimensionPixelSize(
                 R.dimen.min_top_overscroll_to_qs);
-        mCollapseSecondCardPadding = getResources().getDimensionPixelSize(
-                R.dimen.notification_collapse_second_card_padding);
     }
 
     private void notifyHeightChangeListener(ExpandableView view) {
@@ -509,14 +506,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
-     * @return whether the height of the layout needs to be adapted, in order to ensure that the
-     *         last child is not in the bottom stack.
-     */
-    private boolean needsHeightAdaption() {
-        return getNotGoneChildCount() > 1;
-    }
-
-    /**
      * Updates the children views according to the stack scroll algorithm. Call this whenever
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
@@ -599,7 +588,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mLastSetStackHeight = height;
         setIsExpanded(height > 0.0f);
         int newStackHeight = (int) height;
-        int minStackHeight = getMinStackHeight();
+        int minStackHeight = getLayoutMinHeight();
         int stackHeight;
         float paddingOffset;
         boolean trackingHeadsUp = mTrackingHeadsUp || mHeadsUpManager.hasPinnedHeadsUp();
@@ -612,20 +601,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             stackHeight = newStackHeight;
         } else {
             int translationY;
-            if (!trackingHeadsUp) {
-                // We did not reach the position yet where we actually start growing,
-                // so we translate the stack upwards.
-                translationY = (newStackHeight - minStackHeight);
-                // A slight parallax effect is introduced in order for the stack to catch up with
-                // the top card.
-                float partiallyThere = (newStackHeight - mTopPadding - mTopPaddingOverflow)
-                        / minStackHeight;
-                partiallyThere = Math.max(0, partiallyThere);
-                translationY += (1 - partiallyThere) * (mBottomStackPeekSize +
-                        mCollapseSecondCardPadding);
-            } else {
-                translationY = (int) (height - normalUnfoldPositionStart);
-            }
+            translationY = newStackHeight - normalUnfoldPositionStart;
             paddingOffset = translationY - mTopPadding;
             stackHeight = (int) (height - (translationY - mTopPadding));
         }
@@ -668,8 +644,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mBottomStackPeekSize;
     }
 
-    public int getCollapseSecondCardPadding() {
-        return mCollapseSecondCardPadding;
+    public int getBottomStackSlowDownHeight() {
+        return mBottomStackSlowDownHeight;
     }
 
     public void setLongPressListener(SwipeHelper.LongPressListener listener) {
@@ -1850,7 +1826,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             boolean ignoreIntrinsicPadding) {
         float start = qsHeight;
         float stackHeight = getHeight() - start;
-        int minStackHeight = getMinStackHeight();
+        int minStackHeight = getLayoutMinHeight();
         if (stackHeight <= minStackHeight) {
             float overflow = minStackHeight - stackHeight;
             stackHeight = minStackHeight;
@@ -1864,11 +1840,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         setStackHeight(mLastSetStackHeight);
     }
 
-    public int getMinStackHeight() {
+    public int getLayoutMinHeight() {
         final ExpandableView firstChild = getFirstChildNotGone();
-        final int firstChildMinHeight = firstChild != null ? firstChild.getMinHeight()
+        int firstChildMinHeight = firstChild != null
+                ? firstChild.getIntrinsicHeight()
                 : mCollapsedSize;
-        return firstChildMinHeight + mBottomStackPeekSize + mCollapseSecondCardPadding;
+        if (mOwnScrollY > 0) {
+            firstChildMinHeight = Math.max(firstChildMinHeight - mOwnScrollY, mCollapsedSize);
+        }
+        return Math.min(firstChildMinHeight + mBottomStackPeekSize + mBottomStackSlowDownHeight,
+                mMaxLayoutHeight - mTopPadding);
     }
 
     public float getTopPaddingOverflow() {
@@ -1880,7 +1861,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int firstChildMinHeight = firstChild != null ? (int) firstChild.getMinHeight()
                 : mCollapsedSize;
         return mIntrinsicPadding + firstChildMinHeight + mBottomStackPeekSize
-                + mCollapseSecondCardPadding;
+                + mBottomStackSlowDownHeight;
     }
 
     private int clampPadding(int desiredPadding) {
@@ -1994,7 +1975,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void onViewRemovedInternal(View child) {
-        mStackScrollAlgorithm.notifyChildrenChanged(this);
         if (mChangePositionInProgress) {
             // This is only a position change, don't do anything special
             return;
@@ -2175,7 +2155,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void onViewAddedInternal(View child) {
         updateHideSensitiveForChild(child);
-        mStackScrollAlgorithm.notifyChildrenChanged(this);
         ((ExpandableView) child).setOnHeightChangedListener(this);
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
@@ -2643,12 +2622,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getEmptyBottomMargin() {
-        int emptyMargin = mMaxLayoutHeight - mContentHeight - mBottomStackPeekSize;
-        if (needsHeightAdaption()) {
-            emptyMargin -= mBottomStackSlowDownHeight;
-        } else {
-            emptyMargin -= mCollapseSecondCardPadding;
-        }
+        int emptyMargin = mMaxLayoutHeight - mContentHeight - mBottomStackPeekSize
+                - mBottomStackSlowDownHeight;
         return Math.max(emptyMargin, 0);
     }
 
@@ -2659,12 +2634,10 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void onExpansionStarted() {
         mIsExpansionChanging = true;
-        mStackScrollAlgorithm.onExpansionStarted(mCurrentStackScrollState);
     }
 
     public void onExpansionStopped() {
         mIsExpansionChanging = false;
-        mStackScrollAlgorithm.onExpansionStopped();
         if (!mIsExpanded) {
             mOwnScrollY = 0;
 
@@ -2732,7 +2705,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mIsExpanded && mAnimationsEnabled) {
             mRequestViewResizeAnimationOnLayout = true;
         }
-        mStackScrollAlgorithm.onReset(view);
         updateAnimationState(view);
         updateChronometerForChild(view);
     }
@@ -3163,15 +3135,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     public int getDismissViewHeight() {
-        int height = mDismissView.getHeight() + mPaddingBetweenElements;
-
-        // Hack: Accommodate for additional distance when we only have one notification and the
-        // dismiss all button.
-        if (getNotGoneChildCount() == 2 && getLastChildNotGone() == mDismissView
-                && getFirstChildNotGone() instanceof ActivatableNotificationView) {
-            height += mCollapseSecondCardPadding;
-        }
-        return height;
+        return mDismissView.getHeight() + mPaddingBetweenElements;
     }
 
     public int getEmptyShadeViewHeight() {

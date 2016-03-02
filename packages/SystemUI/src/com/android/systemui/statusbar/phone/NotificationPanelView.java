@@ -1397,7 +1397,7 @@ public class NotificationPanelView extends PanelView implements
                 // In Shade, interpolate linearly such that QS is closed whenever panel height is
                 // minimum QS expansion + minStackHeight
                 float panelHeightQsCollapsed = mNotificationStackScroller.getIntrinsicPadding()
-                        + mNotificationStackScroller.getMinStackHeight();
+                        + mNotificationStackScroller.getLayoutMinHeight();
                 float panelHeightQsExpanded = calculatePanelHeightQsExpanded();
                 t = (expandedHeight - panelHeightQsCollapsed)
                         / (panelHeightQsExpanded - panelHeightQsCollapsed);
@@ -1453,7 +1453,7 @@ public class NotificationPanelView extends PanelView implements
                 && mShadeEmpty) {
             notificationHeight = mNotificationStackScroller.getEmptyShadeViewHeight()
                     + mNotificationStackScroller.getBottomStackPeekSize()
-                    + mNotificationStackScroller.getCollapseSecondCardPadding();
+                    + mNotificationStackScroller.getBottomStackSlowDownHeight();
         }
         int maxQsHeight = mQsMaxExpansionHeight;
 
@@ -1468,7 +1468,7 @@ public class NotificationPanelView extends PanelView implements
                 + notificationHeight;
         if (totalHeight > mNotificationStackScroller.getHeight()) {
             float fullyCollapsedHeight = maxQsHeight
-                    + mNotificationStackScroller.getMinStackHeight();
+                    + mNotificationStackScroller.getLayoutMinHeight();
             totalHeight = Math.max(fullyCollapsedHeight, mNotificationStackScroller.getHeight());
         }
         return (int) totalHeight;
@@ -1485,7 +1485,7 @@ public class NotificationPanelView extends PanelView implements
     private float getFadeoutAlpha() {
         float alpha = (getNotificationsTopY() + mNotificationStackScroller.getFirstItemMinHeight())
                 / (mQsMinExpansionHeight + mNotificationStackScroller.getBottomStackPeekSize()
-                - mNotificationStackScroller.getCollapseSecondCardPadding());
+                - mNotificationStackScroller.getBottomStackSlowDownHeight());
         alpha = Math.max(0, Math.min(alpha, 1));
         alpha = (float) Math.pow(alpha, 0.75);
         return alpha;

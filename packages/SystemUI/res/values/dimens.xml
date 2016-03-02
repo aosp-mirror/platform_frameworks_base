@@ -326,9 +326,6 @@
     <!-- The minimum amount of top overscroll to go to the quick settings. -->
     <dimen name="min_top_overscroll_to_qs">36dp</dimen>
 
-    <!-- The padding to the second card when the notifications collapse. -->
-    <dimen name="notification_collapse_second_card_padding">8dp</dimen>
-
     <!-- The height of the speed bump view. -->
     <dimen name="speed_bump_height">16dp</dimen>
 
