@@ -106,13 +106,15 @@ public class DocumentsProviderHelper {
         return createDocument(root.documentId, mimeType, name);
     }
 
-    public Uri createDocumentWithFlags(String documentId, String mimeType, String name, int flags)
+    public Uri createDocumentWithFlags(String documentId, String mimeType, String name, int flags,
+            String... streamTypes)
             throws RemoteException {
         Bundle in = new Bundle();
         in.putInt(StubProvider.EXTRA_FLAGS, flags);
         in.putString(StubProvider.EXTRA_PARENT_ID, documentId);
         in.putString(Document.COLUMN_MIME_TYPE, mimeType);
         in.putString(Document.COLUMN_DISPLAY_NAME, name);
+        in.putStringArrayList(StubProvider.EXTRA_STREAM_TYPES, Lists.newArrayList(streamTypes));
 
         Bundle out = mClient.call("createDocumentWithFlags", null, in);
         Uri uri = out.getParcelable(DocumentsContract.EXTRA_URI);
