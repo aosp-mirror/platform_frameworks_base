@@ -16,6 +16,8 @@
 
 package com.android.server.net;
 
+import static android.net.NetworkPolicyManager.POLICY_NONE;
+import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.wifi.WifiInfo.removeDoubleQuotes;
 import static com.android.server.net.NetworkPolicyManagerService.newWifiPolicy;
 import static com.android.server.net.NetworkPolicyManagerService.TAG;
@@ -83,6 +85,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  add restrict-background-whitelist UID");
         pw.println("    Adds a UID to the whitelist for restrict background usage.");
+        pw.println("  add restrict-background-blacklist UID");
+        pw.println("    Adds a UID to the blacklist for restrict background usage.");
         pw.println("  get metered-network ID");
         pw.println("    Checks whether the given non-mobile network is metered or not.");
         pw.println("  get restrict-background");
@@ -93,8 +97,12 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("    networks.");
         pw.println("  list restrict-background-whitelist");
         pw.println("    Lists UIDs that are whitelisted for restrict background usage.");
+        pw.println("  list restrict-background-blacklist");
+        pw.println("    Lists UIDs that are blacklisted for restrict background usage.");
         pw.println("  remove restrict-background-whitelist UID");
         pw.println("    Removes a UID from the whitelist for restrict background usage.");
+        pw.println("  remove restrict-background-blacklist UID");
+        pw.println("    Removes a UID from the blacklist for restrict background usage.");
         pw.println("  set metered-network ID BOOLEAN");
         pw.println("    Toggles whether the given non-mobile network is metered.");
         pw.println("  set restrict-background BOOLEAN");
@@ -147,6 +155,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
                 return listMeteredWifiNetworks();
             case "restrict-background-whitelist":
                 return listRestrictBackgroundWhitelist();
+            case "restrict-background-blacklist":
+                return listRestrictBackgroundBlacklist();
         }
         pw.println("Error: unknown list type '" + type + "'");
         return -1;
@@ -162,6 +172,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         switch(type) {
             case "restrict-background-whitelist":
                 return addRestrictBackgroundWhitelist();
+            case "restrict-background-blacklist":
+                return addRestrictBackgroundBlacklist();
         }
         pw.println("Error: unknown add type '" + type + "'");
         return -1;
@@ -177,6 +189,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         switch(type) {
             case "restrict-background-whitelist":
                 return removeRestrictBackgroundWhitelist();
+            case "restrict-background-blacklist":
+                return removeRestrictBackgroundBlacklist();
         }
         pw.println("Error: unknown remove type '" + type + "'");
         return -1;
@@ -186,6 +200,24 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         final int[] uids = mInterface.getRestrictBackgroundWhitelistedUids();
         pw.print("Restrict background whitelisted UIDs: ");
+        if (uids.length == 0) {
+            pw.println("none");
+        } else {
+            for (int i = 0; i < uids.length; i++) {
+                int uid = uids[i];
+                pw.print(uid);
+                pw.print(' ');
+            }
+        }
+        pw.println();
+        return 0;
+    }
+
+    private int listRestrictBackgroundBlacklist() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+
+        final int[] uids = mInterface.getUidsWithPolicy(POLICY_REJECT_METERED_BACKGROUND);
+        pw.print("Restrict background blacklisted UIDs: ");
         if (uids.length == 0) {
             pw.println("none");
         } else {
@@ -230,6 +262,24 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
             return uid;
         }
         mInterface.removeRestrictBackgroundWhitelistedUid(uid);
+        return 0;
+    }
+
+    private int addRestrictBackgroundBlacklist() throws RemoteException {
+        final int uid = getUidFromNextArg();
+        if (uid < 0) {
+            return uid;
+        }
+        mInterface.setUidPolicy(uid, POLICY_REJECT_METERED_BACKGROUND);
+        return 0;
+    }
+
+    private int removeRestrictBackgroundBlacklist() throws RemoteException {
+        final int uid = getUidFromNextArg();
+        if (uid < 0) {
+            return uid;
+        }
+        mInterface.setUidPolicy(uid, POLICY_NONE);
         return 0;
     }
 
