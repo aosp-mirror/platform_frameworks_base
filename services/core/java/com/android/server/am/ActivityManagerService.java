@@ -5359,17 +5359,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void killAllBackgroundProcesses() {
-        killAllBackgroundProcesses(-1);
-    }
-
-    /**
-     * Kills all background processes with targetSdkVersion below the specified
-     * target SDK version.
-     *
-     * @param targetSdkVersion the target SDK version below which to kill
-     *                         processes, or {@code -1} to kill all processes
-     */
-    private void killAllBackgroundProcesses(int targetSdkVersion) {
         if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED) {
             final String msg = "Permission Denial: killAllBackgroundProcesses() from pid="
@@ -5393,10 +5382,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                             // We don't kill persistent processes.
                             continue;
                         }
-                        if (targetSdkVersion > 0
-                                && app.info.targetSdkVersion >= targetSdkVersion) {
-                            continue;
-                        }
                         if (app.removed) {
                             procs.add(app);
                         } else if (app.setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
@@ -5415,6 +5400,55 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 updateOomAdjLocked();
                 doLowMemReportIfNeededLocked(null);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    /**
+     * Kills all background processes, except those matching any of the
+     * specified properties.
+     *
+     * @param minTargetSdk the target SDK version at or above which to preserve
+     *                     processes, or {@code -1} to ignore the target SDK
+     * @param maxProcState the process state at or below which to preserve
+     *                     processes, or {@code -1} to ignore the process state
+     */
+    private void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState) {
+        if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
+                != PackageManager.PERMISSION_GRANTED) {
+            final String msg = "Permission Denial: killAllBackgroundProcessesExcept() from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " requires " + android.Manifest.permission.KILL_BACKGROUND_PROCESSES;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ArrayList<ProcessRecord> procs = new ArrayList<>();
+                final int NP = mProcessNames.getMap().size();
+                for (int ip = 0; ip < NP; ip++) {
+                    final SparseArray<ProcessRecord> apps = mProcessNames.getMap().valueAt(ip);
+                    final int NA = apps.size();
+                    for (int ia = 0; ia < NA; ia++) {
+                        final ProcessRecord app = apps.valueAt(ia);
+                        if (app.removed) {
+                            procs.add(app);
+                        } else if ((minTargetSdk < 0 || app.info.targetSdkVersion < minTargetSdk)
+                                && (maxProcState < 0 || app.setProcState > maxProcState)) {
+                            app.removed = true;
+                            procs.add(app);
+                        }
+                    }
+                }
+
+                final int N = procs.size();
+                for (int i = 0; i < N; i++) {
+                    removeProcessLocked(procs.get(i), false, true, "kill all background except");
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -18056,7 +18090,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
                 if (isDensityChange) {
-                    killAllBackgroundProcesses(Build.VERSION_CODES.N);
+                    killAllBackgroundProcessesExcept(Build.VERSION_CODES.N,
+                            ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
                 }
 
                 for (int i=mLruProcesses.size()-1; i>=0; i--) {
