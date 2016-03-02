@@ -172,6 +172,7 @@ public class BatteryTile extends QSTile<QSTile.State> implements BatteryControll
         }
 
         private void postBindView() {
+            if (mCurrentView == null) return;
             mCurrentView.post(new Runnable() {
                 @Override
                 public void run() {
