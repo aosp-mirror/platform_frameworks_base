@@ -2213,18 +2213,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return stack;
     }
 
-    void moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
+    boolean moveTaskToStackLocked(int taskId, int stackId, boolean toTop, boolean forceFocus,
             String reason, boolean animate) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
             Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
-            return;
+            return false;
         }
 
         if (task.stack != null && task.stack.mStackId == stackId) {
             // You are already in the right stack silly...
             Slog.i(TAG, "moveTaskToStack: taskId=" + taskId + " already in stackId=" + stackId);
-            return;
+            return true;
         }
 
         if (stackId == FREEFORM_WORKSPACE_STACK_ID && !mService.mSupportsFreeformWindowManagement) {
@@ -2293,6 +2293,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         resumeFocusedStackTopActivityLocked();
 
         showNonResizeableDockToastIfNeeded(task, preferredLaunchStackId, stackId);
+
+        return (preferredLaunchStackId == stackId);
     }
 
     boolean moveTopStackActivityToPinnedStackLocked(int stackId, Rect bounds) {
