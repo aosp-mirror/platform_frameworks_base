@@ -1468,7 +1468,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Eskatu pasahitza aingura kendu aurretik"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"Baliteke aplikazioak ez funtzionatzea pantaila zatituan."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikazioak ez du onartzen pantaila banatua"</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Aplikazioak ez du onartzen pantaila zatitua"</string>
     <string name="package_installed_device_owner" msgid="8420696545959087545">"Administratzaileak instalatu du"</string>
     <string name="package_updated_device_owner" msgid="8856631322440187071">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="7650577387493101353">"Administratzaileak ezabatu du"</string>
@@ -1541,7 +1541,7 @@
     <string name="importance_from_person" msgid="9160133597262938296">"Garrantzitsua da eragiten dien pertsonengatik."</string>
     <string name="user_creation_account_exists" msgid="1942606193570143289">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzea baimendu nahi diozu?"</string>
     <string name="user_creation_adding" msgid="4482658054622099197">"<xliff:g id="APP">%1$s</xliff:g> aplikazioari <xliff:g id="ACCOUNT">%2$s</xliff:g> kontua duen erabiltzailea sortzea baimendu nahi diozu? (Badago kontu hori duen erabiltzaile bat)"</string>
-    <string name="language_selection_title" msgid="2680677278159281088">"Gehitu hizkuntza bat"</string>
+    <string name="language_selection_title" msgid="2680677278159281088">"Gehitu hizkuntza"</string>
     <string name="country_selection_title" msgid="2954859441620215513">"Lurralde-hobespena"</string>
     <string name="search_language_hint" msgid="7042102592055108574">"Adierazi hizkuntza"</string>
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Iradokitakoak"</string>
