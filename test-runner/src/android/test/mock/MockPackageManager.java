@@ -518,14 +518,6 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
-    /** @hide */
-    @Override
-    public Drawable getManagedUserBadgedDrawableForDensity(Drawable drawable, Rect badgeLocation,
-            int badgeDensity) {
-        throw new UnsupportedOperationException();
-    }
-
-
     @Override
     public Drawable getUserBadgedIcon(Drawable icon, UserHandle user) {
         throw new UnsupportedOperationException();
