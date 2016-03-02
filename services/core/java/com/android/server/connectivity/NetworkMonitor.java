@@ -566,7 +566,7 @@ public class NetworkMonitor extends StateMachine {
         @Override
         public void enter() {
             final String cmdName = ACTION_LINGER_EXPIRED + "." + mNetworkAgentInfo.network.netId;
-            mWakeupMessage = new WakeupMessage(mContext, getHandler(), cmdName, CMD_LINGER_EXPIRED);
+            mWakeupMessage = makeWakeupMessage(mContext, getHandler(), cmdName, CMD_LINGER_EXPIRED);
             long wakeupTime = SystemClock.elapsedRealtime() + mLingerDelayMs;
             mWakeupMessage.schedule(wakeupTime);
         }
@@ -822,5 +822,10 @@ public class NetworkMonitor extends StateMachine {
             throw new SecurityException("SetDefaultLingerTime only for internal testing.");
         }
         DEFAULT_LINGER_DELAY_MS = time_ms;
+    }
+
+    @VisibleForTesting
+    protected WakeupMessage makeWakeupMessage(Context c, Handler h, String s, int i) {
+        return new WakeupMessage(c, h, s, i);
     }
 }

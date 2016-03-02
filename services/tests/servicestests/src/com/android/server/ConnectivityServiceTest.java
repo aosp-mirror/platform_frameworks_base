@@ -59,12 +59,14 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Messenger;
 import android.os.MessageQueue.IdleHandler;
+import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.util.LogPrinter;
 
+import com.android.internal.util.WakeupMessage;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.net.NetworkPinner;
@@ -505,6 +507,35 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         }
     }
 
+    private class FakeWakeupMessage extends WakeupMessage {
+        private static final int UNREASONABLY_LONG_WAIT = 1000;
+
+        public FakeWakeupMessage(Context context, Handler handler, String cmdName, int cmd) {
+            super(context, handler, cmdName, cmd);
+        }
+
+        @Override
+        public void schedule(long when) {
+            long delayMs = when - SystemClock.elapsedRealtime();
+            if (delayMs < 0) delayMs = 0;
+            if (delayMs > UNREASONABLY_LONG_WAIT) {
+                fail("Attempting to send msg more than " + UNREASONABLY_LONG_WAIT +
+                        "ms into the future: " + delayMs);
+            }
+            mHandler.sendEmptyMessageDelayed(mCmd, delayMs);
+        }
+
+        @Override
+        public void cancel() {
+            mHandler.removeMessages(mCmd);
+        }
+
+        @Override
+        public void onAlarm() {
+            throw new AssertionError("Should never happen. Update this fake.");
+        }
+    }
+
     // NetworkMonitor implementation allowing overriding of Internet connectivity probe result.
     private class WrappedNetworkMonitor extends NetworkMonitor {
         // HTTP response code fed back to NetworkMonitor for Internet connectivity probe.
@@ -518,6 +549,12 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         @Override
         protected int isCaptivePortal() {
             return gen204ProbeResult;
+        }
+
+        @Override
+        protected WakeupMessage makeWakeupMessage(
+                Context context, Handler handler, String cmdName, int cmd) {
+            return new FakeWakeupMessage(context, handler, cmdName, cmd);
         }
     }
 
@@ -596,10 +633,10 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         int delays = 0;
         while (!criteria.get()) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
             }
-            if (++delays == 5) fail();
+            if (++delays == 10) fail();
         }
     }
 
@@ -614,6 +651,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+
+        NetworkMonitor.SetDefaultLingerTime(120);
 
         // InstrumentationTestRunner prepares a looper, but AndroidJUnitRunner does not.
         // http://b/25897652 .
@@ -696,8 +735,6 @@ public class ConnectivityServiceTest extends AndroidTestCase {
 
     @LargeTest
     public void testLingering() throws Exception {
-        // Decrease linger timeout to the minimum allowed by AlarmManagerService.
-        NetworkMonitor.SetDefaultLingerTime(5000);
         verifyNoNetwork();
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
@@ -724,10 +761,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
         assertTrue(mCm.getAllNetworks()[0].equals(mCellNetworkAgent.getNetwork()) ||
                 mCm.getAllNetworks()[1].equals(mCellNetworkAgent.getNetwork()));
         // Test cellular linger timeout.
-        try {
-            Thread.sleep(6000);
-        } catch (InterruptedException e) {
-        }
+        waitFor(new Criteria() {
+                public boolean get() { return mCm.getAllNetworks().length == 1; } });
         verifyActiveNetwork(TRANSPORT_WIFI);
         assertEquals(1, mCm.getAllNetworks().length);
         assertEquals(mCm.getAllNetworks()[0], mCm.getActiveNetwork());
