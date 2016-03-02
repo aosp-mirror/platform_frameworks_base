@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"स्क्रिनशट लिन सकिएन।"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"बग रिपोर्ट <xliff:g id="ID">#%d</xliff:g>का विवरणहरू"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"फाइलको नाम"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"शीर्षक"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"विस्तृत विवरण"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"बगको शीर्षक"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"बगको सारांश"</string>
+    <string name="save" msgid="4781509040564835759">"सुरक्षित गर्नुहोस्"</string>
 </resources>

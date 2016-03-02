@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Det gick inte att ta skrämdump."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Information för felrapporten <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Filnamn"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Namn"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Detaljerad beskrivning"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Felets titel"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Sammanfattning av felet"</string>
+    <string name="save" msgid="4781509040564835759">"Spara"</string>
 </resources>

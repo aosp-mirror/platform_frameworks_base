@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Nevarēja veikt ekrānuzņēmumu."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Kļūdas pārskats <xliff:g id="ID">#%d</xliff:g>: detalizēta informācija"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Faila nosaukums"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Nosaukums"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Detalizēts apraksts"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Kļūdas nosaukums"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Kļūdas kopsavilkums"</string>
+    <string name="save" msgid="4781509040564835759">"Saglabāt"</string>
 </resources>
