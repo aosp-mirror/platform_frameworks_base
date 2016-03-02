@@ -123,20 +123,20 @@ final class ListDocumentHolder extends DocumentHolder {
                 mSummary.setVisibility(View.INVISIBLE);
             }
 
-            if (docLastModified == -1) {
+            if (docLastModified > 0) {
                 hasDetails = true;
-                mDate.setText(null);
-            } else {
                 mDate.setText(Shared.formatTime(mContext, docLastModified));
+            } else {
+                mDate.setText(null);
             }
 
-            if (!state.showSize || docSize == -1) {
+            if (state.showSize && docSize > -1) {
                 hasDetails = true;
-                mSize.setVisibility(View.GONE);
-                mDetails.setVisibility(View.GONE);
-            } else {
                 mSize.setVisibility(View.VISIBLE);
                 mSize.setText(Formatter.formatFileSize(mContext, docSize));
+            } else {
+                mSize.setVisibility(View.GONE);
+                mDetails.setVisibility(View.GONE);
             }
             mDetails.setVisibility(hasDetails ? View.VISIBLE : View.GONE);
         }
