@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Δεν ήταν δυνατή η λήψη του στιγμιότυπου οθόνης."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Λεπτομέρειες της αναφοράς σφάλματος <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Όνομα αρχείου"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Τίτλος"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Αναλυτική περιγραφή"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Τίτλος σφάλματος"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Περίληψη σφάλματος"</string>
+    <string name="save" msgid="4781509040564835759">"Αποθήκευση"</string>
 </resources>

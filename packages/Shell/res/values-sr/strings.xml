@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Снимање екрана није успело."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Детаљи извештаја о грешци <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Назив датотеке"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Наслов"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Детаљни опис"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Наслов грешке"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Резиме грешке"</string>
+    <string name="save" msgid="4781509040564835759">"Сачувај"</string>
 </resources>

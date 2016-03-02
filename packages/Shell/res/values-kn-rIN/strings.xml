@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ತೆಗೆದುಕೊಳ್ಳಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ದೋಷ ವರದಿಯ <xliff:g id="ID">#%d</xliff:g> ವಿವರಗಳು"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"ಫೈಲ್‌ಹೆಸರು"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"ಶೀರ್ಷಿಕೆ"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"ವಿವರವಾದ ವಿವರಣೆ"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"ಬಗ್ ಶೀರ್ಷಿಕೆ"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"ಬಗ್ ಸಾರಾಂಶ"</string>
+    <string name="save" msgid="4781509040564835759">"ಉಳಿಸು"</string>
 </resources>

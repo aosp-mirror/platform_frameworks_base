@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"Impossibile acquisire lo screenshot."</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"Dettagli sulla segnalazione di bug <xliff:g id="ID">#%d</xliff:g>"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"Nome file"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"Titolo"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"Descrizione dettagliata"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"Titolo bug"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"Riepilogo bug"</string>
+    <string name="save" msgid="4781509040564835759">"Salva"</string>
 </resources>

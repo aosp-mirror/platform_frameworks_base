@@ -34,6 +34,7 @@
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"無法擷取螢幕畫面。"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"錯誤報告 <xliff:g id="ID">#%d</xliff:g> 的詳情"</string>
     <string name="bugreport_info_name" msgid="4414036021935139527">"檔案名稱"</string>
-    <string name="bugreport_info_title" msgid="5599558206004371052">"標題"</string>
-    <string name="bugreport_info_description" msgid="4117088998733546784">"詳細說明"</string>
+    <string name="bugreport_info_title" msgid="2306030793918239804">"錯誤標題"</string>
+    <string name="bugreport_info_description" msgid="5072835127481627722">"錯誤摘要"</string>
+    <string name="save" msgid="4781509040564835759">"儲存"</string>
 </resources>
