@@ -63,6 +63,7 @@ public:
     float radius;
 };
 
+// TODO: remove for HWUI_NEW_OPS
 class ProjectionPathMask {
 public:
     static void* operator new(size_t size) = delete;
@@ -219,6 +220,7 @@ public:
      * Fills outTransform with the current, total transform to screen space,
      * across layer boundaries.
      */
+    // TODO: remove for HWUI_NEW_OPS
     void buildScreenSpaceTransform(Matrix4* outTransform) const;
 
     /**
@@ -294,9 +296,13 @@ public:
     const RoundRectClipState* roundRectClipState;
 
     /**
-     * Current projection masking path - used exclusively to mask tessellated circles.
+     * Current projection masking path - used exclusively to mask projected, tessellated circles.
      */
+#if HWUI_NEW_OPS
+    const SkPath* projectionPathMask;
+#else
     const ProjectionPathMask* projectionPathMask;
+#endif
 
     void dump() const;
 

@@ -3,24 +3,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <FrameLayout
+    <ScrollView
+        android:orientation="vertical"
         android:translationX="50dp"
         android:translationY="50dp"
         android:elevation="30dp"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:background="@drawable/round_rect_background">
-        <View
-            android:id="@+id/clickable1"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"/>
-        <View
-            android:id="@+id/clickable2"
-            android:translationX="50dp"
-            android:translationY="10dp"
-            android:layout_width="150dp"
-            android:layout_height="100dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"/>
-    </FrameLayout>
+        <FrameLayout
+            android:layout_width="200dp"
+            android:layout_height="wrap_content">
+            <View
+                android:layout_width="200dp"
+                android:layout_height="2000dp"/>
+            <View
+                android:id="@+id/clickable1"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"/>
+            <View
+                android:id="@+id/clickable2"
+                android:translationX="50dp"
+                android:translationY="10dp"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"/>
+       </FrameLayout>
+    </ScrollView>
 </LinearLayout>

@@ -88,6 +88,7 @@ public:
     const ClipBase* clipState = nullptr;
     Rect clippedBounds;
     int clipSideFlags = 0;
+    const SkPath* localProjectionPathMask = nullptr;
 };
 
 /**
@@ -154,7 +155,6 @@ public:
     // simple state (straight pointer/value storage):
     const float alpha;
     const RoundRectClipState* roundRectClipState;
-    const ProjectionPathMask* projectionPathMask;
     const RecordedOp* op;
 
 private:
@@ -165,21 +165,18 @@ private:
             : computedState(allocator, snapshot, recordedOp, expandForStroke)
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
-            , projectionPathMask(snapshot.projectionPathMask)
             , op(&recordedOp) {}
 
     BakedOpState(LinearAllocator& allocator, Snapshot& snapshot, const ShadowOp* shadowOpPtr)
             : computedState(allocator, snapshot)
             , alpha(snapshot.alpha)
             , roundRectClipState(snapshot.roundRectClipState)
-            , projectionPathMask(snapshot.projectionPathMask)
             , op(shadowOpPtr) {}
 
     BakedOpState(const ClipRect* clipRect, const Rect& dstRect, const RecordedOp& recordedOp)
             : computedState(clipRect, dstRect)
             , alpha(1.0f)
             , roundRectClipState(nullptr)
-            , projectionPathMask(nullptr)
             , op(&recordedOp) {}
 };
 
