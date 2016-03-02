@@ -166,7 +166,7 @@ public class NetworkScoreManager {
         try {
             return mService.updateScores(networks);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -186,7 +186,7 @@ public class NetworkScoreManager {
         try {
             return mService.clearScores();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -206,7 +206,7 @@ public class NetworkScoreManager {
         try {
             return mService.setActiveScorer(packageName);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -221,6 +221,7 @@ public class NetworkScoreManager {
         try {
             mService.disableScoring();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -265,6 +266,7 @@ public class NetworkScoreManager {
         try {
             mService.registerNetworkScoreCache(networkType, scoreCache);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

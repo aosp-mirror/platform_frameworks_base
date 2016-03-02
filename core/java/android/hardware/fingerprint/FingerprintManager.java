@@ -540,7 +540,7 @@ public class FingerprintManager {
         if (mService != null) try {
             result = mService.preEnroll(mToken);
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception in enroll: ", e);
+            throw e.rethrowFromSystemServer();
         }
         return result;
     }
@@ -555,7 +555,7 @@ public class FingerprintManager {
         if (mService != null) try {
             result = mService.postEnroll(mToken);
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception in post enroll: ", e);
+            throw e.rethrowFromSystemServer();
         }
         return result;
     }
@@ -571,7 +571,7 @@ public class FingerprintManager {
         if (mService != null) try {
             mService.setActiveUser(userId);
         } catch (RemoteException e) {
-            Log.w(TAG, "Remote exception in setActiveUser: ", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -614,7 +614,7 @@ public class FingerprintManager {
             try {
                 mService.rename(fpId, userId, newName);
             } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in rename(): ", e);
+                throw e.rethrowFromSystemServer();
             }
         } else {
             Log.w(TAG, "rename(): Service not connected!");
@@ -632,7 +632,7 @@ public class FingerprintManager {
         if (mService != null) try {
             return mService.getEnrolledFingerprints(userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
+            throw e.rethrowFromSystemServer();
         }
         return null;
     }
@@ -659,7 +659,7 @@ public class FingerprintManager {
             return mService.hasEnrolledFingerprints(
                     UserHandle.myUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
+            throw e.rethrowFromSystemServer();
         }
         return false;
     }
@@ -674,7 +674,7 @@ public class FingerprintManager {
         if (mService != null) try {
             return mService.hasEnrolledFingerprints(userId, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            Log.v(TAG, "Remote exception in getEnrolledFingerprints: ", e);
+            throw e.rethrowFromSystemServer();
         }
         return false;
     }
@@ -691,7 +691,7 @@ public class FingerprintManager {
                 long deviceId = 0; /* TODO: plumb hardware id to FPMS */
                 return mService.isHardwareDetected(deviceId, mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in isFingerprintHardwareDetected(): ", e);
+                throw e.rethrowFromSystemServer();
             }
         } else {
             Log.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
@@ -710,7 +710,7 @@ public class FingerprintManager {
             try {
                 return mService.getAuthenticatorId(mContext.getOpPackageName());
             } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in getAuthenticatorId(): ", e);
+                throw e.rethrowFromSystemServer();
             }
         } else {
             Log.w(TAG, "getAuthenticatorId(): Service not connected!");
@@ -730,7 +730,7 @@ public class FingerprintManager {
             try {
                 mService.resetTimeout(token);
             } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in resetTimeout(): ", e);
+                throw e.rethrowFromSystemServer();
             }
         } else {
             Log.w(TAG, "resetTimeout(): Service not connected!");
@@ -765,7 +765,7 @@ public class FingerprintManager {
                     }
                 });
             } catch (RemoteException e) {
-                Log.v(TAG, "Remote exception in addLockoutResetCallback(): ", e);
+                throw e.rethrowFromSystemServer();
             }
         } else {
             Log.w(TAG, "addLockoutResetCallback(): Service not connected!");
@@ -881,8 +881,7 @@ public class FingerprintManager {
         try {
             return ActivityManagerNative.getDefault().getCurrentUser().id;
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get current user id\n");
-            return UserHandle.USER_NULL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -890,7 +889,7 @@ public class FingerprintManager {
         if (mService != null) try {
             mService.cancelEnrollment(mToken);
         } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Remote exception while canceling enrollment");
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -898,7 +897,7 @@ public class FingerprintManager {
         if (mService != null) try {
             mService.cancelAuthentication(mToken, mContext.getOpPackageName());
         } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Remote exception while canceling enrollment");
+            throw e.rethrowFromSystemServer();
         }
     }
 

@@ -733,7 +733,7 @@ public class ConnectivityManager {
         try {
             return mService.getActiveNetworkInfo();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -753,7 +753,7 @@ public class ConnectivityManager {
         try {
             return mService.getActiveNetwork();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -777,7 +777,7 @@ public class ConnectivityManager {
         try {
             return mService.setAlwaysOnVpnPackage(userId, vpnPackage);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -794,7 +794,7 @@ public class ConnectivityManager {
         try {
             return mService.getAlwaysOnVpnPackage(userId);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -815,7 +815,7 @@ public class ConnectivityManager {
         try {
             return mService.getActiveNetworkInfoForUid(uid);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -839,7 +839,7 @@ public class ConnectivityManager {
         try {
             return mService.getNetworkInfo(networkType);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -859,7 +859,7 @@ public class ConnectivityManager {
         try {
             return mService.getNetworkInfoForNetwork(network);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -880,7 +880,7 @@ public class ConnectivityManager {
         try {
             return mService.getAllNetworkInfo();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -900,7 +900,7 @@ public class ConnectivityManager {
         try {
             return mService.getNetworkForType(networkType);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -916,7 +916,7 @@ public class ConnectivityManager {
         try {
             return mService.getAllNetworks();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -929,7 +929,7 @@ public class ConnectivityManager {
         try {
             return mService.getDefaultNetworkCapabilitiesForUser(userId);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -948,7 +948,7 @@ public class ConnectivityManager {
         try {
             return mService.getActiveLinkProperties();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -972,7 +972,7 @@ public class ConnectivityManager {
         try {
             return mService.getLinkPropertiesForType(networkType);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -989,7 +989,7 @@ public class ConnectivityManager {
         try {
             return mService.getLinkProperties(network);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1006,7 +1006,7 @@ public class ConnectivityManager {
         try {
             return mService.getNetworkCapabilities(network);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1024,7 +1024,7 @@ public class ConnectivityManager {
         try {
             return mService.getCaptivePortalServerUrl();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1324,7 +1324,9 @@ public class ConnectivityManager {
         int type = legacyTypeForNetworkCapabilities(netCap);
         try {
             delay = mService.getRestoreDefaultNetworkDelay(type);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
         LegacyRequest l = new LegacyRequest();
         l.networkCapabilities = netCap;
         l.delay = delay;
@@ -1542,7 +1544,7 @@ public class ConnectivityManager {
         try {
             return mService.requestRouteToHostAddress(networkType, hostAddress.getAddress());
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1598,7 +1600,7 @@ public class ConnectivityManager {
         try {
             return mService.getActiveNetworkQuotaInfo();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1617,7 +1619,9 @@ public class ConnectivityManager {
                 Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
                         + " retVal=" + retVal);
                 return retVal;
-            } catch (RemoteException e) { }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
         Log.d("ConnectivityManager", "getMobileDataEnabled()- remote exception retVal=false");
         return false;
@@ -1678,6 +1682,7 @@ public class ConnectivityManager {
             getNetworkManagementService().registerNetworkActivityListener(rl);
             mNetworkActivityListeners.put(l, rl);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1695,6 +1700,7 @@ public class ConnectivityManager {
         try {
             getNetworkManagementService().unregisterNetworkActivityListener(rl);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1710,8 +1716,8 @@ public class ConnectivityManager {
         try {
             return getNetworkManagementService().isNetworkActive();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return false;
     }
 
     /**
@@ -1785,7 +1791,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetherableIfaces();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1802,7 +1808,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetheredIfaces();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1825,7 +1831,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetheringErroredIfaces();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1839,7 +1845,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetheredDhcpRanges();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1871,7 +1877,7 @@ public class ConnectivityManager {
         try {
             return mService.tether(iface);
         } catch (RemoteException e) {
-            return TETHER_ERROR_SERVICE_UNAVAIL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1897,7 +1903,7 @@ public class ConnectivityManager {
         try {
             return mService.untether(iface);
         } catch (RemoteException e) {
-            return TETHER_ERROR_SERVICE_UNAVAIL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1917,7 +1923,7 @@ public class ConnectivityManager {
         try {
             return mService.isTetheringSupported();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2005,7 +2011,7 @@ public class ConnectivityManager {
         try {
             mService.stopTethering(type);
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception trying to stop tethering.", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2025,7 +2031,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetherableUsbRegexs();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2045,7 +2051,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetherableWifiRegexs();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2065,7 +2071,7 @@ public class ConnectivityManager {
         try {
             return mService.getTetherableBluetoothRegexs();
         } catch (RemoteException e) {
-            return new String[0];
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2090,7 +2096,7 @@ public class ConnectivityManager {
         try {
             return mService.setUsbTethering(enable);
         } catch (RemoteException e) {
-            return TETHER_ERROR_SERVICE_UNAVAIL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2135,7 +2141,7 @@ public class ConnectivityManager {
         try {
             return mService.getLastTetherError(iface);
         } catch (RemoteException e) {
-            return TETHER_ERROR_SERVICE_UNAVAIL;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2153,6 +2159,7 @@ public class ConnectivityManager {
         try {
             mService.reportInetCondition(networkType, percentage);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2174,6 +2181,7 @@ public class ConnectivityManager {
             mService.reportNetworkConnectivity(network, true);
             mService.reportNetworkConnectivity(network, false);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2192,6 +2200,7 @@ public class ConnectivityManager {
         try {
             mService.reportNetworkConnectivity(network, hasConnectivity);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2211,6 +2220,7 @@ public class ConnectivityManager {
         try {
             mService.setGlobalProxy(p);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2225,7 +2235,7 @@ public class ConnectivityManager {
         try {
             return mService.getGlobalProxy();
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2247,7 +2257,7 @@ public class ConnectivityManager {
         try {
             return mService.getProxyForNetwork(network);
         } catch (RemoteException e) {
-            return null;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2282,8 +2292,9 @@ public class ConnectivityManager {
     public boolean isNetworkSupported(int networkType) {
         try {
             return mService.isNetworkSupported(networkType);
-        } catch (RemoteException e) {}
-        return false;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2303,7 +2314,7 @@ public class ConnectivityManager {
         try {
             return mService.isActiveNetworkMetered();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2320,7 +2331,7 @@ public class ConnectivityManager {
         try {
             return mService.updateLockdownVpn();
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2339,6 +2350,7 @@ public class ConnectivityManager {
         try {
             timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
         return timeOutMs;
     }
@@ -2351,8 +2363,8 @@ public class ConnectivityManager {
         try {
             return mService.getMobileProvisioningUrl();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return null;
     }
 
     /**
@@ -2369,6 +2381,7 @@ public class ConnectivityManager {
         try {
             mService.setProvisioningNotificationVisible(visible, networkType, action);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2385,6 +2398,7 @@ public class ConnectivityManager {
         try {
             mService.setAirplaneMode(enable);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2392,14 +2406,18 @@ public class ConnectivityManager {
     public void registerNetworkFactory(Messenger messenger, String name) {
         try {
             mService.registerNetworkFactory(messenger, name);
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /** {@hide} */
     public void unregisterNetworkFactory(Messenger messenger) {
         try {
             mService.unregisterNetworkFactory(messenger);
-        } catch (RemoteException e) { }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2412,7 +2430,7 @@ public class ConnectivityManager {
         try {
             return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
         } catch (RemoteException e) {
-            return NETID_UNSET;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2730,7 +2748,9 @@ public class ConnectivityManager {
                     sNetworkCallback.put(networkCallback.networkRequest, networkCallback);
                 }
             }
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
         if (networkCallback.networkRequest == null) decCallbackHandlerRefCount();
         return networkCallback.networkRequest;
     }
@@ -2893,7 +2913,9 @@ public class ConnectivityManager {
         checkPendingIntent(operation);
         try {
             mService.pendingRequestForNetwork(request.networkCapabilities, operation);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2911,7 +2933,9 @@ public class ConnectivityManager {
         checkPendingIntent(operation);
         try {
             mService.releasePendingNetworkRequest(operation);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private void checkPendingIntent(PendingIntent intent) {
@@ -2970,7 +2994,9 @@ public class ConnectivityManager {
         checkPendingIntent(operation);
         try {
             mService.pendingListenForNetwork(request.networkCapabilities, operation);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2988,7 +3014,7 @@ public class ConnectivityManager {
         try {
             return mService.requestBandwidthUpdate(network);
         } catch (RemoteException e) {
-            return false;
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3008,7 +3034,9 @@ public class ConnectivityManager {
         }
         try {
             mService.releaseNetworkRequest(networkCallback.networkRequest);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -3044,7 +3072,9 @@ public class ConnectivityManager {
     public void setAcceptUnvalidated(Network network, boolean accept, boolean always) {
         try {
             mService.setAcceptUnvalidated(network, accept, always);
-        } catch (RemoteException e) {}
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -3055,6 +3085,7 @@ public class ConnectivityManager {
         try {
             mService.factoryReset();
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3262,7 +3293,7 @@ public class ConnectivityManager {
         try {
             return getNetworkPolicyManager().getRestrictBackgroundByCaller();
         } catch (RemoteException e) {
-            return RESTRICT_BACKGROUND_STATUS_DISABLED;
+            throw e.rethrowFromSystemServer();
         }
     }
 }

@@ -300,7 +300,7 @@ public class RttManager {
                 try {
                     mRttCapabilities = mService.getRttCapabilities();
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Can not get RTT Capabilities");
+                    throw e.rethrowFromSystemServer();
                 }
             }
             return mRttCapabilities;
@@ -1132,7 +1132,7 @@ public class RttManager {
                     Log.d(TAG, "Get the messenger from " + mService);
                     messenger = mService.getMessenger();
                 } catch (RemoteException e) {
-                    /* do nothing */
+                    throw e.rethrowFromSystemServer();
                 } catch (SecurityException e) {
                     /* do nothing */
                 }

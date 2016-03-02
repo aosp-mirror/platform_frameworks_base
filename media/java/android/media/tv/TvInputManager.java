@@ -1111,7 +1111,7 @@ public final class TvInputManager {
                 }
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "TvInputManager initialization failed", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1124,7 +1124,7 @@ public final class TvInputManager {
         try {
             return mService.getTvInputList(mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1140,7 +1140,7 @@ public final class TvInputManager {
         try {
             return mService.getTvInputInfo(inputId, mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1157,7 +1157,7 @@ public final class TvInputManager {
         try {
             mService.updateTvInputInfo(inputInfo, mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException("Error trying to update " + inputInfo, e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1228,7 +1228,7 @@ public final class TvInputManager {
         try {
             return mService.isParentalControlsEnabled(mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1245,7 +1245,7 @@ public final class TvInputManager {
         try {
             mService.setParentalControlsEnabled(enabled, mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1260,7 +1260,7 @@ public final class TvInputManager {
         try {
             return mService.isRatingBlocked(rating.flattenToString(), mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1279,7 +1279,7 @@ public final class TvInputManager {
             }
             return ratings;
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1297,7 +1297,7 @@ public final class TvInputManager {
         try {
             mService.addBlockedRating(rating.flattenToString(), mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1315,7 +1315,7 @@ public final class TvInputManager {
         try {
             mService.removeBlockedRating(rating.flattenToString(), mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1328,7 +1328,7 @@ public final class TvInputManager {
         try {
             return mService.getTvContentRatingSystemList(mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1378,7 +1378,7 @@ public final class TvInputManager {
             try {
                 mService.createSession(mClient, inputId, isRecordingSession, seq, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }
@@ -1402,7 +1402,7 @@ public final class TvInputManager {
         try {
             return mService.getAvailableTvStreamConfigList(inputId, mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1420,7 +1420,7 @@ public final class TvInputManager {
         try {
             return mService.captureFrame(inputId, surface, config, mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1434,7 +1434,7 @@ public final class TvInputManager {
         try {
             return mService.isSingleSessionActive(mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1448,7 +1448,7 @@ public final class TvInputManager {
         try {
             return mService.getHardwareList();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1478,7 +1478,7 @@ public final class TvInputManager {
                 }
             }, info, mUserId));
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1492,7 +1492,7 @@ public final class TvInputManager {
         try {
             mService.releaseTvInputHardware(deviceId, hardware.getInterface(), mUserId);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1506,7 +1506,7 @@ public final class TvInputManager {
         try {
             return mService.getDvbDeviceList();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1529,7 +1529,7 @@ public final class TvInputManager {
             }
             return mService.openDvbDevice(info, device);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1600,7 +1600,7 @@ public final class TvInputManager {
             try {
                 mService.releaseSession(mToken, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
 
             releaseInternal();
@@ -1620,7 +1620,7 @@ public final class TvInputManager {
             try {
                 mService.setMainSession(mToken, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1638,7 +1638,7 @@ public final class TvInputManager {
             try {
                 mService.setSurface(mToken, surface, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1660,7 +1660,7 @@ public final class TvInputManager {
             try {
                 mService.dispatchSurfaceChanged(mToken, format, width, height, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1681,7 +1681,7 @@ public final class TvInputManager {
                 }
                 mService.setVolume(mToken, volume, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1721,7 +1721,7 @@ public final class TvInputManager {
             try {
                 mService.tune(mToken, channelUri, params, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1738,7 +1738,7 @@ public final class TvInputManager {
             try {
                 mService.setCaptionEnabled(mToken, enabled, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1780,7 +1780,7 @@ public final class TvInputManager {
             try {
                 mService.selectTrack(mToken, type, trackId, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1928,7 +1928,7 @@ public final class TvInputManager {
             try {
                 mService.timeShiftPlay(mToken, recordedProgramUri, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1943,7 +1943,7 @@ public final class TvInputManager {
             try {
                 mService.timeShiftPause(mToken, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1958,7 +1958,7 @@ public final class TvInputManager {
             try {
                 mService.timeShiftResume(mToken, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1979,7 +1979,7 @@ public final class TvInputManager {
             try {
                 mService.timeShiftSeekTo(mToken, timeMs, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -1996,7 +1996,7 @@ public final class TvInputManager {
             try {
                 mService.timeShiftSetPlaybackParams(mToken, params, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2013,7 +2013,7 @@ public final class TvInputManager {
             try {
                 mService.timeShiftEnablePositionTracking(mToken, enable, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2031,7 +2031,7 @@ public final class TvInputManager {
             try {
                 mService.startRecording(mToken, programHint, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2046,7 +2046,7 @@ public final class TvInputManager {
             try {
                 mService.stopRecording(mToken, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2069,7 +2069,7 @@ public final class TvInputManager {
             try {
                 mService.sendAppPrivateCommand(mToken, action, data, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2097,7 +2097,7 @@ public final class TvInputManager {
             try {
                 mService.createOverlayView(mToken, view.getWindowToken(), frame, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2115,7 +2115,7 @@ public final class TvInputManager {
             try {
                 mService.relayoutOverlayView(mToken, frame, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2130,7 +2130,7 @@ public final class TvInputManager {
             try {
                 mService.removeOverlayView(mToken, mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 
@@ -2146,7 +2146,7 @@ public final class TvInputManager {
             try {
                 mService.unblockContent(mToken, unblockedRating.flattenToString(), mUserId);
             } catch (RemoteException e) {
-                throw new RuntimeException(e);
+                throw e.rethrowFromSystemServer();
             }
         }
 

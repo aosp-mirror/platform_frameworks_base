@@ -890,9 +890,8 @@ public class NotificationManager
             final List<StatusBarNotification> list = parceledList.getList();
             return list.toArray(new StatusBarNotification[list.size()]);
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
+            throw e.rethrowFromSystemServer();
         }
-        return new StatusBarNotification[0];
     }
 
     /**
@@ -913,9 +912,8 @@ public class NotificationManager
         try {
             return zenModeToInterruptionFilter(service.getZenMode());
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
+            throw e.rethrowFromSystemServer();
         }
-        return INTERRUPTION_FILTER_UNKNOWN;
     }
 
     /**
@@ -936,7 +934,7 @@ public class NotificationManager
         try {
             service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter);
         } catch (RemoteException e) {
-            Log.e(TAG, "Unable to talk to notification manager. Woe!", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
