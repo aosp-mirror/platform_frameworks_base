@@ -214,7 +214,7 @@
 
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
-        <item name="android:background">@drawable/btn_borderless_rect</item>
+        <item name="android:background">@drawable/qs_btn_borderless_rect</item>
         <item name="android:gravity">center</item>
     </style>
 
