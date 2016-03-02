@@ -209,8 +209,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Увеличить время."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Уменьшить время."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Фонарик отключен."</string>
-    <!-- no translation found for accessibility_quick_settings_flashlight_unavailable (8012811023312280810) -->
-    <skip />
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Фонарик недоступен."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Фонарик включен."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Фонарик отключен."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Фонарик включен."</string>
@@ -458,34 +457,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Подключение по Bluetooth"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Чтобы подключить клавиатуру к планшету, включите Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Включить"</string>
-    <!-- no translation found for show_silently (6841966539811264192) -->
-    <skip />
-    <!-- no translation found for block (2734508760962682611) -->
-    <skip />
-    <!-- no translation found for do_not_silence (6878060322594892441) -->
-    <skip />
-    <!-- no translation found for do_not_silence_block (4070647971382232311) -->
-    <skip />
-    <!-- no translation found for tuner_full_importance_settings (8103289238676424226) -->
-    <skip />
+    <string name="show_silently" msgid="6841966539811264192">"Показывать без звука"</string>
+    <string name="block" msgid="2734508760962682611">"Блокировать все уведомления"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Показывать со звуком"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Не блокировать, показывать со звуком"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Показывать все настройки важности"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Блокировка"</string>
-    <!-- no translation found for min_importance (1901894910809414782) -->
-    <skip />
+    <string name="min_importance" msgid="1901894910809414782">"Наименьшая важность"</string>
     <string name="low_importance" msgid="4109929986107147930">"Низкая важность"</string>
     <string name="default_importance" msgid="8192107689995742653">"Средняя важность"</string>
     <string name="high_importance" msgid="1527066195614050263">"Высокая важность"</string>
     <string name="max_importance" msgid="5089005872719563894">"Крайняя важность"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Не показывать эти уведомления."</string>
-    <!-- no translation found for notification_importance_min (1938190340516905748) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (3657252049508213048) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (4466466472622442175) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (2135428926525093825) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (5806278962376556491) -->
-    <skip />
+    <string name="notification_importance_min" msgid="1938190340516905748">"Показывать без звука в конце списка уведомлений"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Показывать без звука"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Показывать со звуком"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Показывать со звуком поверх всех окон"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Показывать со звуком в начале списка уведомлений и поверх всех окон"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Другие настройки"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Цвета и стиль"</string>
@@ -558,8 +546,7 @@
     <item msgid="2139628951880142927">"Показывать процент во время зарядки (по умолчанию)"</item>
     <item msgid="3327323682209964956">"Не показывать этот значок"</item>
   </string-array>
-    <!-- no translation found for other (4060683095962566764) -->
-    <skip />
+    <string name="other" msgid="4060683095962566764">"Другое"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Разделитель экрана"</string>
     <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Опустить"</string>
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Поднять"</string>

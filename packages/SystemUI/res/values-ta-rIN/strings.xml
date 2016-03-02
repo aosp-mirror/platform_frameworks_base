@@ -73,8 +73,8 @@
     <string name="screenshot_saved_title" msgid="6461865960961414961">"ஸ்கிரீன் ஷாட் எடுக்கப்பட்டது."</string>
     <string name="screenshot_saved_text" msgid="1152839647677558815">"உங்கள் ஸ்க்ரீன் ஷாட்டைப் பார்க்க தொடவும்."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"ஸ்க்ரீன் ஷாட்டை எடுக்க முடியவில்லை."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"போதுமான சேமிப்பிடம் இல்லாததால் ஸ்கிரீன் ஷாட்டைச் சேமிக்க முடியவில்லை."</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"பயன்பாடு அல்லது உங்கள் நிறுவனம் ஸ்கிரீன் ஷாட்டுகளை எடுக்க அனுமதிக்கவில்லை."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"போதுமான சேமிப்பிடம் இல்லாததால் ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை."</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"பயன்பாடு அல்லது உங்கள் நிறுவனம் ஸ்கிரீன்ஷாட்டுகளை எடுக்க அனுமதிக்கவில்லை."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB கோப்பு இடமாற்ற விருப்பங்கள்"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"(MTP) மீடியா பிளேயராக ஏற்று"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"(PTP) கேமராவாக ஏற்று"</string>
@@ -306,7 +306,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"பாதுகாப்புப் பயன்முறையில் <xliff:g id="APP">%s</xliff:g> முடக்கப்பட்டது."</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"வரலாறு"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"அழி"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"பயன்பாடு பல சாளர அம்சத்தை ஆதரிக்காது"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"இந்தப் பயன்பாடு பல சாளர அம்சத்தை ஆதரிக்கவில்லை"</string>
     <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"பயன்பாடு பல சாளர அம்சத்தை ஆதரிக்காது"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"கிடைமட்டமாகப் பிரி"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"செங்குத்தாகப் பிரி"</string>

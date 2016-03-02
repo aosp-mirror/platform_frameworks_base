@@ -548,6 +548,6 @@
     <string name="accessibility_divider" msgid="5903423481953635044">"বিভক্ত-স্ক্রীন বিভাজক"</string>
     <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"নীচে সরান"</string>
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"উপরে সরান"</string>
-    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"বামে সরান"</string>
+    <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"বাঁয়ে সরান"</string>
     <string name="accessibility_action_divider_move_right" msgid="4671522715182567972">"ডানে সরান"</string>
 </resources>
