@@ -1329,6 +1329,59 @@
     <!-- Summary of switch for battery saver [CHAR LIMIT=NONE] -->
     <string name="battery_detail_switch_summary">Reduces performance and background data</string>
 
+    <!-- Name used for certain Keyboard keys on gamepads, e.g. "Button L1". -->
+    <string name="keyboard_key_button_template">Button <xliff:g id="name">%1$s</xliff:g></string>
+    <!-- Name used to refer to the "Home" key on the keyboard. -->
+    <string name="keyboard_key_home">Home</string>
+    <!-- Name used to refer to the "Back" key on the keyboard. -->
+    <string name="keyboard_key_back">Back</string>
+    <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
+    <string name="keyboard_key_dpad_up">Up</string>
+    <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
+    <string name="keyboard_key_dpad_down">Down</string>
+    <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
+    <string name="keyboard_key_dpad_left">Left</string>
+    <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
+    <string name="keyboard_key_dpad_right">Right</string>
+    <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
+    <string name="keyboard_key_dpad_center">Center</string>
+    <!-- Name used to refer to the "Tab" key on the keyboard. -->
+    <string name="keyboard_key_tab">Tab</string>
+    <!-- Name used to refer to the "Space" key on the keyboard. -->
+    <string name="keyboard_key_space">Space</string>
+    <!-- Name used to refer to the "Enter" key on the keyboard. -->
+    <string name="keyboard_key_enter">Enter</string>
+    <!-- Name used to refer to the "Backspace" key on the keyboard. -->
+    <string name="keyboard_key_backspace">Backspace</string>
+    <!-- Name used to refer to the "Play/Pause" media key on the keyboard. -->
+    <string name="keyboard_key_media_play_pause">Play/Pause</string>
+    <!-- Name used to refer to the "Stop" media key on the keyboard. -->
+    <string name="keyboard_key_media_stop">Stop</string>
+    <!-- Name used to refer to the "Next" media key on the keyboard. -->
+    <string name="keyboard_key_media_next">Next</string>
+    <!-- Name used to refer to the "Previous" media key on the keyboard. -->
+    <string name="keyboard_key_media_previous">Previous</string>
+    <!-- Name used to refer to the "Rewind" media key on the keyboard. -->
+    <string name="keyboard_key_media_rewind">Rewind</string>
+    <!-- Name used to refer to the "Fast Forward" media key on the keyboard. -->
+    <string name="keyboard_key_media_fast_forward">Fast Forward</string>
+    <!-- Name used to refer to the "Page Up" key on the keyboard. -->
+    <string name="keyboard_key_page_up">Page Up</string>
+    <!-- Name used to refer to the "Page Down" key on the keyboard. -->
+    <string name="keyboard_key_page_down">Page Down</string>
+    <!-- Name used to refer to the "Delete" key on the keyboard. -->
+    <string name="keyboard_key_forward_del">Delete</string>
+    <!-- Name used to refer to the "Home" move key on the keyboard. -->
+    <string name="keyboard_key_move_home">Home</string>
+    <!-- Name used to refer to the "End" move key on the keyboard. -->
+    <string name="keyboard_key_move_end">End</string>
+    <!-- Name used to refer to the "Insert" key on the keyboard. -->
+    <string name="keyboard_key_insert">Insert</string>
+    <!-- Name used to refer to the "Num Lock" key on the keyboard. -->
+    <string name="keyboard_key_num_lock">Num Lock</string>
+    <!-- Name used to refer to keys on the numeric pad of the keyboard, e.g. "Numpad 9". -->
+    <string name="keyboard_key_numpad_template">Numpad <xliff:g id="name">%1$s</xliff:g></string>
+
     <!-- User visible title for the system-wide keyboard shortcuts list. -->
     <string name="keyboard_shortcut_group_system">System</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the home screen. -->

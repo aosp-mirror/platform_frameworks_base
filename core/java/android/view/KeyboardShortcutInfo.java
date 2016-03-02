@@ -30,31 +30,46 @@ public final class KeyboardShortcutInfo implements Parcelable {
     private final CharSequence mLabel;
     private final Icon mIcon;
     private final char mBaseCharacter;
+    private final int mKeycode;
     private final int mModifiers;
 
     /**
      * @param label The label that identifies the action performed by this shortcut.
      * @param icon An icon that identifies the action performed by this shortcut.
-     * @param baseCharacter The character that triggers the shortcut.
+     * @param keycode The keycode that triggers the shortcut. This should be a valid constant
+     *     defined in {@link KeyEvent}.
      * @param modifiers The set of modifiers that, combined with the key, trigger the shortcut.
      *     These should be a combination of {@link KeyEvent#META_CTRL_ON},
-     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON} and
-     *     {@link KeyEvent#META_ALT_ON}.
+     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON},
+     *     {@link KeyEvent#META_ALT_ON}, {@link KeyEvent#META_FUNCTION_ON} and
+     *     {@link KeyEvent#META_SYM_ON}.
      *
      * @hide
      */
     public KeyboardShortcutInfo(
-            @Nullable CharSequence label, @Nullable Icon icon, char baseCharacter, int modifiers) {
+            @Nullable CharSequence label, @Nullable Icon icon, int keycode, int modifiers) {
         mLabel = label;
         mIcon = icon;
-        checkArgument(baseCharacter != MIN_VALUE);
-        mBaseCharacter = baseCharacter;
+        mBaseCharacter = MIN_VALUE;
+        checkArgument(keycode > KeyEvent.KEYCODE_UNKNOWN && keycode <= KeyEvent.getMaxKeyCode());
+        mKeycode = keycode;
         mModifiers = modifiers;
     }
 
     /**
-     * Convenience constructor for shortcuts with a label and no icon.
-     *
+     * @param label The label that identifies the action performed by this shortcut.
+     * @param keycode The keycode that triggers the shortcut. This should be a valid constant
+     *     defined in {@link KeyEvent}.
+     * @param modifiers The set of modifiers that, combined with the key, trigger the shortcut.
+     *     These should be a combination of {@link KeyEvent#META_CTRL_ON},
+     *     {@link KeyEvent#META_SHIFT_ON}, {@link KeyEvent#META_META_ON} and
+     *     {@link KeyEvent#META_ALT_ON}.
+     */
+    public KeyboardShortcutInfo(CharSequence label, int keycode, int modifiers) {
+        this(label, null, keycode, modifiers);
+    }
+
+    /**
      * @param label The label that identifies the action performed by this shortcut.
      * @param baseCharacter The character that triggers the shortcut.
      * @param modifiers The set of modifiers that, combined with the key, trigger the shortcut.
@@ -66,14 +81,16 @@ public final class KeyboardShortcutInfo implements Parcelable {
         mLabel = label;
         checkArgument(baseCharacter != MIN_VALUE);
         mBaseCharacter = baseCharacter;
+        mKeycode = KeyEvent.KEYCODE_UNKNOWN;
         mModifiers = modifiers;
         mIcon = null;
     }
 
     private KeyboardShortcutInfo(Parcel source) {
         mLabel = source.readCharSequence();
-        mIcon = (Icon) source.readParcelable(null);
+        mIcon = source.readParcelable(null);
         mBaseCharacter = (char) source.readInt();
+        mKeycode = source.readInt();
         mModifiers = source.readInt();
     }
 
@@ -96,7 +113,16 @@ public final class KeyboardShortcutInfo implements Parcelable {
     }
 
     /**
-     * Returns the base character that, combined with the modifiers, triggers this shortcut.
+     * Returns the base keycode that, combined with the modifiers, triggers this shortcut. If the
+     * base character was set instead, returns {@link KeyEvent#KEYCODE_UNKNOWN}.
+     */
+    public int getKeycode() {
+        return mKeycode;
+    }
+
+    /**
+     * Returns the base character that, combined with the modifiers, triggers this shortcut. If the
+     * keycode was set instead, returns {@link Character#MIN_VALUE}.
      */
     public char getBaseCharacter() {
         return mBaseCharacter;
@@ -119,6 +145,7 @@ public final class KeyboardShortcutInfo implements Parcelable {
         dest.writeCharSequence(mLabel);
         dest.writeParcelable(mIcon, 0);
         dest.writeInt(mBaseCharacter);
+        dest.writeInt(mKeycode);
         dest.writeInt(mModifiers);
     }
 
