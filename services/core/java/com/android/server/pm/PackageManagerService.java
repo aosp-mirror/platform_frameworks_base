@@ -153,7 +153,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
-import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.res.Resources;
@@ -173,6 +172,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -10401,17 +10401,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
-    public void installPackage(String originPath, IPackageInstallObserver2 observer,
-            int installFlags, String installerPackageName, VerificationParams verificationParams,
-            String packageAbiOverride) {
-        installPackageAsUser(originPath, observer, installFlags, installerPackageName,
-                verificationParams, packageAbiOverride, UserHandle.getCallingUserId());
-    }
-
-    @Override
     public void installPackageAsUser(String originPath, IPackageInstallObserver2 observer,
-            int installFlags, String installerPackageName, VerificationParams verificationParams,
-            String packageAbiOverride, int userId) {
+            int installFlags, String installerPackageName, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
 
         final int callingUid = Binder.getCallingUid();
@@ -10455,14 +10446,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
         }
 
-        verificationParams.setInstallerUid(callingUid);
-
         final File originFile = new File(originPath);
         final OriginInfo origin = OriginInfo.fromUntrustedFile(originFile);
 
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        final InstallParams params = new InstallParams(origin, null, observer, installFlags,
-                installerPackageName, null, verificationParams, user, packageAbiOverride, null);
+        final VerificationInfo verificationInfo = new VerificationInfo(
+                null /*originatingUri*/, null /*referrer*/, -1 /*originatingUid*/, callingUid);
+        final InstallParams params = new InstallParams(origin, null /*moveInfo*/, observer,
+                installFlags, installerPackageName, null /*volumeUuid*/, verificationInfo, user,
+                null /*packageAbiOverride*/, null /*grantedPermissions*/);
         params.setTraceMethod("installAsUser").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -10482,10 +10474,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.d(TAG, "Ephemeral install of " + packageName);
             }
         }
-        final VerificationParams verifParams = new VerificationParams(
-                null, sessionParams.originatingUri, sessionParams.referrerUri,
-                sessionParams.originatingUid);
-        verifParams.setInstallerUid(installerUid);
+        final VerificationInfo verificationInfo = new VerificationInfo(
+                sessionParams.originatingUri, sessionParams.referrerUri,
+                sessionParams.originatingUid, installerUid);
 
         final OriginInfo origin;
         if (stagedDir != null) {
@@ -10497,7 +10488,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final InstallParams params = new InstallParams(origin, null, observer,
                 sessionParams.installFlags, installerPackageName, sessionParams.volumeUuid,
-                verifParams, user, sessionParams.abiOverride,
+                verificationInfo, user, sessionParams.abiOverride,
                 sessionParams.grantedRuntimePermissions);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
@@ -11537,6 +11528,30 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    static class VerificationInfo {
+        /** A constant used to indicate that a uid value is not present. */
+        public static final int NO_UID = -1;
+
+        /** URI referencing where the package was downloaded from. */
+        final Uri originatingUri;
+
+        /** HTTP referrer URI associated with the originatingURI. */
+        final Uri referrer;
+
+        /** UID of the application that the install request originated from. */
+        final int originatingUid;
+
+        /** UID of application requesting the install */
+        final int installerUid;
+
+        VerificationInfo(Uri originatingUri, Uri referrer, int originatingUid, int installerUid) {
+            this.originatingUri = originatingUri;
+            this.referrer = referrer;
+            this.originatingUid = originatingUid;
+            this.installerUid = installerUid;
+        }
+    }
+
     class InstallParams extends HandlerParams {
         final OriginInfo origin;
         final MoveInfo move;
@@ -11544,15 +11559,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         int installFlags;
         final String installerPackageName;
         final String volumeUuid;
-        final VerificationParams verificationParams;
         private InstallArgs mArgs;
         private int mRet;
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
+        final VerificationInfo verificationInfo;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
-                VerificationParams verificationParams, UserHandle user, String packageAbiOverride,
+                VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions) {
             super(user);
             this.origin = origin;
@@ -11561,7 +11576,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             this.installFlags = installFlags;
             this.installerPackageName = installerPackageName;
             this.volumeUuid = volumeUuid;
-            this.verificationParams = verificationParams;
+            this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
             this.grantedRuntimePermissions = grantedPermissions;
         }
@@ -11825,26 +11840,22 @@ public class PackageManagerService extends IPackageManager.Stub {
                     verification.putExtra(PackageManager.EXTRA_VERIFICATION_VERSION_CODE,
                             pkgLite.versionCode);
 
-                    if (verificationParams != null) {
-                        if (verificationParams.getVerificationURI() != null) {
-                           verification.putExtra(PackageManager.EXTRA_VERIFICATION_URI,
-                                 verificationParams.getVerificationURI());
-                        }
-                        if (verificationParams.getOriginatingURI() != null) {
+                    if (verificationInfo != null) {
+                        if (verificationInfo.originatingUri != null) {
                             verification.putExtra(Intent.EXTRA_ORIGINATING_URI,
-                                  verificationParams.getOriginatingURI());
+                                    verificationInfo.originatingUri);
                         }
-                        if (verificationParams.getReferrer() != null) {
+                        if (verificationInfo.referrer != null) {
                             verification.putExtra(Intent.EXTRA_REFERRER,
-                                  verificationParams.getReferrer());
+                                    verificationInfo.referrer);
                         }
-                        if (verificationParams.getOriginatingUid() >= 0) {
+                        if (verificationInfo.originatingUid >= 0) {
                             verification.putExtra(Intent.EXTRA_ORIGINATING_UID,
-                                  verificationParams.getOriginatingUid());
+                                    verificationInfo.originatingUid);
                         }
-                        if (verificationParams.getInstallerUid() >= 0) {
+                        if (verificationInfo.installerUid >= 0) {
                             verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_UID,
-                                  verificationParams.getInstallerUid());
+                                    verificationInfo.installerUid);
                         }
                     }
 
@@ -18456,7 +18467,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installerPackageName, volumeUuid, null, user, packageAbiOverride, null);
+                installerPackageName, volumeUuid, null /*verificationInfo*/, user,
+                packageAbiOverride, null);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
