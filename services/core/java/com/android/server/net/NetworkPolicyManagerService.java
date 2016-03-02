@@ -1631,7 +1631,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
                 if (oldPolicy != policy) {
-                    setUidPolicyUncheckedLocked(uid, policy, true);
+                    setUidPolicyUncheckedLocked(uid, oldPolicy, policy, true);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -1651,7 +1651,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
             policy |= oldPolicy;
             if (oldPolicy != policy) {
-                setUidPolicyUncheckedLocked(uid, policy, true);
+                setUidPolicyUncheckedLocked(uid, oldPolicy, policy, true);
             }
         }
     }
@@ -1668,8 +1668,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final int oldPolicy = mUidPolicy.get(uid, POLICY_NONE);
             policy = oldPolicy & ~policy;
             if (oldPolicy != policy) {
-                setUidPolicyUncheckedLocked(uid, policy, true);
+                setUidPolicyUncheckedLocked(uid, oldPolicy, policy, true);
             }
+        }
+    }
+
+    private void setUidPolicyUncheckedLocked(int uid, int oldPolicy, int policy, boolean persist) {
+        setUidPolicyUncheckedLocked(uid, policy, persist);
+
+        // Checks if app was added or removed to the blacklist.
+        if ((oldPolicy == POLICY_NONE && policy == POLICY_REJECT_METERED_BACKGROUND)
+                || (oldPolicy == POLICY_REJECT_METERED_BACKGROUND && policy == POLICY_NONE)) {
+            mHandler.obtainMessage(MSG_RESTRICT_BACKGROUND_WHITELIST_CHANGED, uid, 0)
+                    .sendToTarget();
         }
     }
 
@@ -2000,7 +2011,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public int getRestrictBackgroundByCaller() {
         mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
         final int uid = Binder.getCallingUid();
+
         synchronized (mRulesLock) {
+            // Must clear identity because getUidPolicy() is restricted to system.
+            final long token = Binder.clearCallingIdentity();
+            final int policy;
+            try {
+                policy = getUidPolicy(uid);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            if (policy == POLICY_REJECT_METERED_BACKGROUND) {
+                // App is blacklisted.
+                return RESTRICT_BACKGROUND_STATUS_ENABLED;
+            }
             if (!mRestrictBackground) {
                 return RESTRICT_BACKGROUND_STATUS_DISABLED;
             }
