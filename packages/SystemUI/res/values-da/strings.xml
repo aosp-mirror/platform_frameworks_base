@@ -207,8 +207,7 @@
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Mere tid."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Mindre tid."</string>
     <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Lommelygten er slået fra."</string>
-    <!-- no translation found for accessibility_quick_settings_flashlight_unavailable (8012811023312280810) -->
-    <skip />
+    <string name="accessibility_quick_settings_flashlight_unavailable" msgid="8012811023312280810">"Lommelygten er ikke tilgængelig."</string>
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Lommelygten er slået til."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Lommelygten er slået fra."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Lommelygten er slået til."</string>
@@ -456,34 +455,23 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"Vil du slå Bluetooth til?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"Bluetooth skal være slået til, før du kan knytte dit tastatur til din tablet."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"Slå til"</string>
-    <!-- no translation found for show_silently (6841966539811264192) -->
-    <skip />
-    <!-- no translation found for block (2734508760962682611) -->
-    <skip />
-    <!-- no translation found for do_not_silence (6878060322594892441) -->
-    <skip />
-    <!-- no translation found for do_not_silence_block (4070647971382232311) -->
-    <skip />
-    <!-- no translation found for tuner_full_importance_settings (8103289238676424226) -->
-    <skip />
+    <string name="show_silently" msgid="6841966539811264192">"Vis underretninger lydløst"</string>
+    <string name="block" msgid="2734508760962682611">"Bloker alle underretninger"</string>
+    <string name="do_not_silence" msgid="6878060322594892441">"Skal ikke sættes på lydløs"</string>
+    <string name="do_not_silence_block" msgid="4070647971382232311">"Skal ikke sættes på lydløs eller blokeres"</string>
+    <string name="tuner_full_importance_settings" msgid="8103289238676424226">"Vis alle indstillinger for vigtighed"</string>
     <string name="blocked_importance" msgid="5198578988978234161">"Blokeret"</string>
-    <!-- no translation found for min_importance (1901894910809414782) -->
-    <skip />
+    <string name="min_importance" msgid="1901894910809414782">"Min vigtighed"</string>
     <string name="low_importance" msgid="4109929986107147930">"Lille vigtighed"</string>
     <string name="default_importance" msgid="8192107689995742653">"Normal vigtighed"</string>
     <string name="high_importance" msgid="1527066195614050263">"Stor vigtighed"</string>
     <string name="max_importance" msgid="5089005872719563894">"Presserende vigtighed"</string>
     <string name="notification_importance_blocked" msgid="2397192642657872872">"Vis aldrig disse underretninger"</string>
-    <!-- no translation found for notification_importance_min (1938190340516905748) -->
-    <skip />
-    <!-- no translation found for notification_importance_low (3657252049508213048) -->
-    <skip />
-    <!-- no translation found for notification_importance_default (4466466472622442175) -->
-    <skip />
-    <!-- no translation found for notification_importance_high (2135428926525093825) -->
-    <skip />
-    <!-- no translation found for notification_importance_max (5806278962376556491) -->
-    <skip />
+    <string name="notification_importance_min" msgid="1938190340516905748">"Vis lydløst nederst på listen over underretninger"</string>
+    <string name="notification_importance_low" msgid="3657252049508213048">"Vis disse underretninger lydløst"</string>
+    <string name="notification_importance_default" msgid="4466466472622442175">"Giv disse underretninger tilladelse til at give lyd"</string>
+    <string name="notification_importance_high" msgid="2135428926525093825">"Vis på skærmen, og tillad lyd"</string>
+    <string name="notification_importance_max" msgid="5806278962376556491">"Vis øverst på listen over underretninger, vis på skærmen, og tillad lyd"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere indstillinger"</string>
     <string name="notification_done" msgid="5279426047273930175">"Færdig"</string>
     <string name="color_and_appearance" msgid="1254323855964993144">"Farve og udseende"</string>
@@ -556,8 +544,7 @@
     <item msgid="2139628951880142927">"Vis procent ved opladning (standard)"</item>
     <item msgid="3327323682209964956">"Vis ikke dette ikon"</item>
   </string-array>
-    <!-- no translation found for other (4060683095962566764) -->
-    <skip />
+    <string name="other" msgid="4060683095962566764">"Andet"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Adskiller til delt skærm"</string>
     <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"Flyt ned"</string>
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"Flyt op"</string>

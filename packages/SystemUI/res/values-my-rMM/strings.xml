@@ -306,8 +306,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> ကို ဘေးကင်းလုံခြုံသည့်မုဒ်တွင် ပိတ်ထားပါသည်။"</string>
     <string name="recents_history_button_label" msgid="5153358867807604821">"မှတ်တမ်း"</string>
     <string name="recents_history_clear_all_button_label" msgid="5905258334958006953">"ရှင်းလင်းပါ"</string>
-    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"ဤအက်ပ်သည် ဝင်းဒိုးများစွာတွင်ဖွင့်ရန် မပံ့ပိုးထားပါ"</string>
-    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"အက်ပ်သည် ဝင်းဒိုးများစွာတွင်ဖွင့်ရန် မပံ့ပိုးထားပါ"</string>
+    <string name="recents_drag_non_dockable_task_message" msgid="2935843902795166158">"ဤအက်ပ်သည် ဝင်းဒိုးများစွာဖွင့်ခြင်းကို ပံ့ပိုးမထားပါ"</string>
+    <string name="recents_launch_non_dockable_task_label" msgid="7862379814938391888">"အက်ပ်သည် ဝင်းဒိုးများစွာဖွင့်ခြင်းကို ပံ့ပိုးမထားပါ"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"ရေပြင်ညီ ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ဒေါင်လိုက်ပိုင်းမည်"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"စိတ်ကြိုက် ပိုင်းမည်"</string>
@@ -545,7 +545,7 @@
     <item msgid="3327323682209964956">"ဤသင်္ကေတပုံကို မပြပါနှင့်"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"အခြား"</string>
-    <string name="accessibility_divider" msgid="5903423481953635044">"မျက်နှာပြင်ခွဲခြမ်းခြင်း ပိုင်းခြားပေးသည့်စနစ်"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"မျက်နှာပြင်ခွဲခြမ်း ပိုင်းခြားပေးသည့်စနစ်"</string>
     <string name="accessibility_action_divider_move_down" msgid="704893304141890042">"အောက်သို့ရွှေ့ပါ"</string>
     <string name="accessibility_action_divider_move_up" msgid="4580103171609248006">"အပေါ်သို့ရွှေ့ပါ"</string>
     <string name="accessibility_action_divider_move_left" msgid="9218189832115847253">"ဘယ်ဘက်သို့ရွှေ့ပါ"</string>
