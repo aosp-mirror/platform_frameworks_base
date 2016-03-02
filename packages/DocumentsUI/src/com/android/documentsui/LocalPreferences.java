@@ -25,16 +25,8 @@ import com.android.documentsui.State.ViewMode;
 import com.android.documentsui.model.RootInfo;
 
 public class LocalPreferences {
-    private static final String KEY_ADVANCED_DEVICES = "advancedDevices";
     private static final String KEY_FILE_SIZE = "fileSize";
     private static final String ROOT_VIEW_MODE_PREFIX = "rootViewMode-";
-
-    public static boolean getDisplayAdvancedDevices(Context context) {
-        boolean defaultAdvanced = context.getResources()
-                .getBoolean(R.bool.config_defaultAdvancedDevices);
-        return PreferenceManager.getDefaultSharedPreferences(context)
-                .getBoolean(KEY_ADVANCED_DEVICES, defaultAdvanced);
-    }
 
     public static boolean getDisplayFileSize(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context)
@@ -45,11 +37,6 @@ public class LocalPreferences {
             Context context, RootInfo root, @ViewMode int fallback) {
         return PreferenceManager.getDefaultSharedPreferences(context)
                 .getInt(createKey(root), fallback);
-    }
-
-    public static void setDisplayAdvancedDevices(Context context, boolean display) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putBoolean(KEY_ADVANCED_DEVICES, display).apply();
     }
 
     public static void setDisplayFileSize(Context context, boolean display) {

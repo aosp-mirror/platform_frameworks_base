@@ -82,8 +82,6 @@ public class State implements android.os.Parcelable {
     public boolean forceSize;
     public boolean showSize;
     public boolean localOnly;
-    public boolean forceAdvanced;
-    public boolean showAdvanced;
     public boolean restored;
 
     // Indicates that a copy operation (or move) includes a directory.
@@ -181,8 +179,6 @@ public class State implements android.os.Parcelable {
         out.writeInt(forceSize ? 1 : 0);
         out.writeInt(showSize ? 1 : 0);
         out.writeInt(localOnly ? 1 : 0);
-        out.writeInt(forceAdvanced ? 1 : 0);
-        out.writeInt(showAdvanced ? 1 : 0);
         out.writeInt(restored ? 1 : 0);
         DurableUtils.writeToParcel(out, stack);
         out.writeMap(dirState);
@@ -211,8 +207,6 @@ public class State implements android.os.Parcelable {
             state.forceSize = in.readInt() != 0;
             state.showSize = in.readInt() != 0;
             state.localOnly = in.readInt() != 0;
-            state.forceAdvanced = in.readInt() != 0;
-            state.showAdvanced = in.readInt() != 0;
             state.restored = in.readInt() != 0;
             DurableUtils.readFromParcel(in, state.stack);
             in.readMap(state.dirState, loader);

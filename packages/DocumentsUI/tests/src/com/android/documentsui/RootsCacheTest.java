@@ -55,7 +55,6 @@ public class RootsCacheTest extends AndroidTestCase {
 
         mState = new State();
         mState.action = State.ACTION_OPEN;
-        mState.showAdvanced = true;
         mState.localOnly = false;
     }
 
