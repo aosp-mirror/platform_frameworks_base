@@ -170,7 +170,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
             if (volume.isPrimary()) {
                 // save off the primary volume for subsequent "Home" dir initialization.
                 primaryVolume = volume;
-                root.flags |= Root.FLAG_ADVANCED;
             }
             // Dunno when this would NOT be the case, but never hurts to be correct.
             if (volume.isMountedWritable()) {

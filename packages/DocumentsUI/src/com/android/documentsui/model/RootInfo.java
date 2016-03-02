@@ -283,10 +283,6 @@ public class RootInfo implements Durable, Parcelable, Comparable<RootInfo> {
         return (flags & Root.FLAG_SUPPORTS_SEARCH) != 0;
     }
 
-    public boolean isAdvanced() {
-        return (flags & Root.FLAG_ADVANCED) != 0;
-    }
-
     public boolean isLocalOnly() {
         return (flags & Root.FLAG_LOCAL_ONLY) != 0;
     }
