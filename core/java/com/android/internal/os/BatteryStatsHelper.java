@@ -754,8 +754,7 @@ public final class BatteryStatsHelper {
         try {
             ParcelFileDescriptor pfd = service.getStatisticsStream();
             if (pfd != null) {
-                FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
-                try {
+                try (FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
                     byte[] data = readFully(fis, MemoryFile.getSize(pfd.getFileDescriptor()));
                     Parcel parcel = Parcel.obtain();
                     parcel.unmarshall(data, 0, data.length);
